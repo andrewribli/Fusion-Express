@@ -1,0 +1,21 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-east1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    },
+    "authorizedDomains": [
+      "localhost",
+      "fusion-express-6a438.firebaseapp.com",
+      "fusion-express-blush.vercel.app"
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
