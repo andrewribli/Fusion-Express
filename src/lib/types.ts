@@ -53,6 +53,8 @@ export interface MenuItem {
   priceType: PriceType;
   priceRange?: string;
   runnerInputsPrice: boolean;
+  /** Shown to customer + runner (substitutions, size, discount logic) */
+  itemNote?: string;
   inStock: boolean;
   sortOrder: number;
 }

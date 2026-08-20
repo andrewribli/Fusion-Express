@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
+import { HomeLanding } from "@/components/HomeLanding";
 import { useUser } from "@/context/UserContext";
 import { validatePassword, validateUsername } from "@/lib/auth";
 import { isFirebaseConfigured } from "@/lib/firebase";
@@ -30,12 +31,6 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isReady && user) {
-      router.replace("/home");
-    }
-  }, [isReady, user, router]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -129,12 +124,16 @@ export default function LoginPage() {
     }
   }
 
-  if (!isReady || user) {
+  if (!isReady) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white text-sm text-gray-500">
         Loading…
       </div>
     );
+  }
+
+  if (user) {
+    return <HomeLanding />;
   }
 
   return (

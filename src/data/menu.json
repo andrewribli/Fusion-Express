@@ -1,7 +1,7 @@
 {
   "items": [
     { "id": "indomie-goreng", "name": "Indomie Mi Goreng", "category": "instant-noodles", "price": 8, "unit": "pack", "image": "" },
-    { "id": "shin-ramen-bowl", "name": "Shin Ramen – Bowl Noodle", "category": "instant-noodles", "price": 12, "salePrice": 10, "bulkDealQty": 4, "bulkDealPrice": 36, "unit": "bowl", "image": "" },
+    { "id": "shin-ramen-bowl", "name": "Shin Ramyun – Bowl Noodle", "category": "instant-noodles", "price": 12, "salePrice": 10, "bulkDealQty": 4, "bulkDealPrice": 36, "unit": "bowl", "image": "", "itemNote": "Buy 3 or 4 depending on discount. If no discount, pick 3 cup noodles in different on-sale flavors, total under $40. Runner will use best judgment for substitutions and discounts" },
     { "id": "nissin-cup-seafood", "name": "Nissin Cup Noodles Seafood", "category": "instant-noodles", "price": 9, "salePrice": 8, "unit": "cup", "image": "" },
     { "id": "nissin-cup-curry", "name": "Nissin Cup Noodles Curry", "category": "instant-noodles", "price": 9, "salePrice": 8, "unit": "cup", "image": "" },
     { "id": "nissin-cup-chicken", "name": "Nissin Cup Noodles Chicken", "category": "instant-noodles", "price": 9, "salePrice": 8, "unit": "cup", "image": "" },
@@ -19,6 +19,11 @@
     { "id": "coke-zero-can", "name": "Coca-Cola Zero Can", "category": "drinks", "price": 6, "unit": "can", "image": "" },
     { "id": "sprite-can", "name": "Sprite Can", "category": "drinks", "price": 6, "unit": "can", "image": "" },
     { "id": "fanta-orange", "name": "Fanta Orange Can", "category": "drinks", "price": 6, "unit": "can", "image": "" },
+    { "id": "fanta-mini-6pack-orange", "name": "Fanta Mini 6×200ml (Orange)", "category": "drinks", "price": 22, "unit": "pack", "image": "", "runnerInputsPrice": true, "itemNote": "Runner will use best judgment for substitutions and discounts" },
+    { "id": "pocari-sweat-largest", "name": "Pocari Sweat (biggest size in store)", "category": "drinks", "price": 18, "unit": "bottle", "image": "", "runnerInputsPrice": true, "itemNote": "1 biggest Pocari Sweat available. Runner will use best judgment for substitutions and discounts" },
+    { "id": "pagoda-kumquat-lemon-bundle", "name": "百果園金桔檸檬 (bundle)", "category": "drinks", "price": 28, "unit": "bundle", "image": "", "runnerInputsPrice": true, "itemNote": "If bundle is not available, get 3 individual ones. Runner will use best judgment for substitutions and discounts" },
+    { "id": "pagoda-kumquat-lemon", "name": "百果園金桔檸檬 (individual)", "category": "drinks", "price": 10, "unit": "bottle", "image": "", "runnerInputsPrice": true, "itemNote": "Fallback if bundle is unavailable. Runner will use best judgment for substitutions and discounts" },
+    { "id": "tao-ti-mandarin-lemon", "name": "Tao Ti Mandarin Lemon Juice Drink", "category": "drinks", "price": 12, "unit": "bottle", "image": "", "runnerInputsPrice": true, "itemNote": "Runner will use best judgment for substitutions and discounts" },
     { "id": "pocari-sweat", "name": "Pocari Sweat 500ml", "category": "drinks", "price": 10, "unit": "bottle", "image": "" },
     { "id": "vitasoy-original", "name": "Vitasoy Original", "category": "drinks", "price": 7, "unit": "pack", "image": "" },
     { "id": "vitasoy-chocolate", "name": "Vitasoy Chocolate", "category": "drinks", "price": 7, "unit": "pack", "image": "" },

@@ -25,6 +25,7 @@ function parseFirestoreItem(data: Record<string, unknown>): MenuItem {
     priceType: (data.priceType as MenuItem["priceType"]) ?? "fixed",
     priceRange: data.priceRange ? String(data.priceRange) : undefined,
     runnerInputsPrice: Boolean(data.runnerInputsPrice),
+    itemNote: data.itemNote ? String(data.itemNote) : undefined,
     inStock: data.inStock !== false,
     sortOrder: Number(data.sortOrder ?? 0),
   };

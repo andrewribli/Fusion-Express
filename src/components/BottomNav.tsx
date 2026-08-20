@@ -41,7 +41,9 @@ export function BottomNav() {
         {tabs.map((tab) => {
           const active =
             pathname === tab.href ||
-            (tab.href === "/home" && pathname.startsWith("/browse")) ||
+            (pathname === "/" && tab.href === "/home") ||
+            (tab.href === "/home" &&
+              (pathname.startsWith("/browse") || pathname.startsWith("/menu"))) ||
             (tab.href === "/runner/dashboard" && pathname.startsWith("/runner"));
           return (
             <Link

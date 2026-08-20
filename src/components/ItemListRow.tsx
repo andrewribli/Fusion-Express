@@ -35,6 +35,7 @@ export function ItemListRow({ item }: ItemListRowProps) {
           <p className="mt-0.5 text-xs text-gray-400">per {item.unit}</p>
           <p className="mt-2 text-base font-bold text-fusion-red">
             {formatMenuPrice(item)}
+            <span className="ml-1 text-xs font-normal text-gray-400">est.</span>
             {hasSale(item) && (
               <span className="ml-2 text-xs font-normal text-gray-400 line-through">
                 ${item.price}
@@ -48,8 +49,11 @@ export function ItemListRow({ item }: ItemListRowProps) {
           )}
           {item.runnerInputsPrice && (
             <p className="mt-1 text-xs text-amber-700">
-              Price varies by weight. Runner will confirm exact price.
+              Price varies. Runner will confirm exact price.
             </p>
+          )}
+          {item.itemNote && (
+            <p className="mt-1 text-xs text-amber-700">{item.itemNote}</p>
           )}
         </div>
       </div>

@@ -22,3 +22,10 @@ export function isChatActive(status: string): boolean {
 }
 
 export const TIP_PRESETS = [0, 2, 5, 10] as const;
+
+export const RUNNER_JUDGMENT_NOTE =
+  "Runner will use best judgment for substitutions and discounts";
+
+export const PRICES_DISCLAIMER =
+  "Prices are estimates only — they are not accurate yet. Final amount is confirmed at pickup.";
+

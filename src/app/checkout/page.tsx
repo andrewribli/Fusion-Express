@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { ConfirmOrderModal } from "@/components/ConfirmOrderModal";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
+import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
@@ -71,7 +72,16 @@ export default function CheckoutPage() {
         hall,
         roomNumber: roomNumber.trim() || undefined,
         lobbyPoint: getLobbyForHall(hall),
-        customerNote: customerNote.trim() || undefined,
+        customerNote: [
+          customerNote.trim(),
+          ...new Set(
+            items
+              .map(({ item }) => item.itemNote)
+              .filter((note): note is string => Boolean(note)),
+          ),
+        ]
+          .filter(Boolean)
+          .join("\n") || undefined,
         subtotal: orderSubtotal,
         deliveryFee: DELIVERY_FEE,
         tip: tipAmount || undefined,
@@ -119,6 +129,7 @@ export default function CheckoutPage() {
           <AppHeader showBack backHref="/cart" title="Checkout" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
+            <PriceDisclaimer className="mb-4" />
             <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-fusion-red">
               Est. delivery by {formatEta(estimatedDeliveryAt)} (~
               {ESTIMATED_DELIVERY_MINUTES} min after order)
@@ -130,7 +141,7 @@ export default function CheckoutPage() {
                 {items.map(({ item, quantity }) => (
                   <li key={item.id} className="flex justify-between text-sm">
                     <span>{quantity}× {item.name}</span>
-                    <span>${item.price * quantity}</span>
+                    <span>${lineTotal(item, quantity)}</span>
                   </li>
                 ))}
               </ul>
@@ -144,7 +155,7 @@ export default function CheckoutPage() {
               )}
               <div className="mt-4 space-y-1 border-t pt-3 text-sm">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
+                  <span>Subtotal (est.)</span>
                   <span>${subtotal}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">

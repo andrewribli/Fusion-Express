@@ -16,6 +16,11 @@ export interface Aisle {
 /** Drinks typically sold from fridges at Fusion */
 export const CHILLED_DRINK_IDS = [
   "pocari-sweat",
+  "pocari-sweat-largest",
+  "pagoda-kumquat-lemon-bundle",
+  "pagoda-kumquat-lemon",
+  "tao-ti-mandarin-lemon",
+  "fanta-mini-6pack-orange",
   "vitasoy-original",
   "vitasoy-chocolate",
   "minute-maid-orange",

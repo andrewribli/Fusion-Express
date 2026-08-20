@@ -14,6 +14,7 @@ interface RawMenuItem {
   priceType?: PriceType;
   priceRange?: string;
   runnerInputsPrice?: boolean;
+  itemNote?: string;
 }
 
 const categorySortCounters: Record<string, number> = {};
@@ -35,6 +36,7 @@ function normalizeItem(raw: RawMenuItem): MenuItem {
     priceType: raw.priceType ?? "fixed",
     priceRange: raw.priceRange,
     runnerInputsPrice: raw.runnerInputsPrice ?? false,
+    itemNote: raw.itemNote,
     inStock: true,
     sortOrder: categorySortCounters[category],
   };
@@ -68,6 +70,7 @@ export function toFirestoreMenuDoc(item: MenuItem) {
     priceType: item.priceType,
     priceRange: item.priceRange ?? "",
     runnerInputsPrice: item.runnerInputsPrice,
+    itemNote: item.itemNote ?? "",
     inStock: item.inStock,
     sortOrder: item.sortOrder,
   };

@@ -31,13 +31,14 @@ export function FelixOrderCard() {
       <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
         Popular order
       </p>
-      <h2 className="mt-1 text-base font-bold text-gray-900">Shin Ramen run</h2>
+      <h2 className="mt-1 text-base font-bold text-gray-900">Shin Ramyun run</h2>
       <p className="mt-1 text-sm text-gray-600">{description}</p>
       {saleLabel && (
         <p className="mt-1 text-xs font-medium text-fusion-red">Deal: {saleLabel}</p>
       )}
       <p className="mt-2 text-sm text-gray-500">
-        + ${DELIVERY_FEE} delivery · est. total ${subtotal + DELIVERY_FEE}
+        + ${DELIVERY_FEE} delivery · est. total ${subtotal + DELIVERY_FEE} (prices
+        not accurate yet)
       </p>
       <button
         type="button"
