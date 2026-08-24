@@ -1,7 +1,7 @@
 "use client";
 
+import { CollegeSelect } from "@/components/CollegeSelect";
 import {
-  CUHK_COLLEGES,
   getHallsForCollege,
   type CuhkCollege,
 } from "@/data/cuhk-locations";
@@ -37,28 +37,14 @@ export function DeliveryAddressFields({
 
   return (
     <div className="space-y-3">
-      <div>
-        <label htmlFor="college" className="block text-xs font-medium text-gray-600">
-          College
-        </label>
-        <select
-          id="college"
-          required={required}
-          value={college}
-          onChange={(e) => {
-            onCollegeChange(e.target.value);
-            onHallChange("");
-          }}
-          className={selectClassName}
-        >
-          <option value="">Select college</option>
-          {CUHK_COLLEGES.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CollegeSelect
+        value={college}
+        onChange={(next) => {
+          onCollegeChange(next);
+          onHallChange("");
+        }}
+        required={required}
+      />
 
       <div>
         <label htmlFor="hall" className="block text-xs font-medium text-gray-600">

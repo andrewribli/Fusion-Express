@@ -15,6 +15,7 @@ interface RawMenuItem {
   priceRange?: string;
   runnerInputsPrice?: boolean;
   itemNote?: string;
+  weightKg?: number;
 }
 
 const categorySortCounters: Record<string, number> = {};
@@ -39,6 +40,7 @@ function normalizeItem(raw: RawMenuItem): MenuItem {
     itemNote: raw.itemNote,
     inStock: true,
     sortOrder: categorySortCounters[category],
+    weightKg: raw.weightKg ?? 0.2,
   };
 }
 
@@ -73,5 +75,6 @@ export function toFirestoreMenuDoc(item: MenuItem) {
     itemNote: item.itemNote ?? "",
     inStock: item.inStock,
     sortOrder: item.sortOrder,
+    weightKg: item.weightKg,
   };
 }

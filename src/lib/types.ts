@@ -57,6 +57,8 @@ export interface MenuItem {
   itemNote?: string;
   inStock: boolean;
   sortOrder: number;
+  /** Approximate packed weight in kg (for delivery fee) */
+  weightKg: number;
 }
 
 export interface CartItem {
@@ -79,6 +81,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
+  weightKg?: number;
 }
 
 export interface Order {
@@ -93,6 +96,9 @@ export interface Order {
   hall: string;
   roomNumber?: string;
   lobbyPoint: string;
+  /** Distance zone from Fusion (BFC): 1 nearby, 2 medium, 3 far */
+  zone?: 1 | 2 | 3;
+  totalWeight?: number;
   customerNote?: string;
   runnerNote?: string;
   subtotal: number;
@@ -114,6 +120,7 @@ export interface Order {
 
 export interface Runner {
   id: string;
+  uid?: string;
   fullName: string;
   studentId: string;
   phone: string;
@@ -144,6 +151,7 @@ export interface ChatMessage {
 }
 
 export interface RunnerRegistrationInput {
+  uid?: string;
   fullName: string;
   studentId: string;
   phone: string;
@@ -153,7 +161,7 @@ export interface RunnerRegistrationInput {
   paymentId: string;
 }
 
-export const DELIVERY_FEE = 10;
+export { BASE_DELIVERY_FEE as DELIVERY_FEE } from "@/lib/delivery";
 
 export function formatMenuPrice(item: MenuItem): string {
   if (item.priceType !== "fixed" && item.priceRange) {

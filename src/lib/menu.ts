@@ -28,6 +28,7 @@ function parseFirestoreItem(data: Record<string, unknown>): MenuItem {
     itemNote: data.itemNote ? String(data.itemNote) : undefined,
     inStock: data.inStock !== false,
     sortOrder: Number(data.sortOrder ?? 0),
+    weightKg: data.weightKg != null ? Number(data.weightKg) : 0.2,
   };
 }
 
