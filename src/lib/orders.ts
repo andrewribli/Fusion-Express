@@ -45,6 +45,11 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     hall: String(data.hall ?? ""),
     roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
     lobbyPoint: String(data.lobbyPoint ?? ""),
+    zone: (() => {
+      const z = Number(data.zone);
+      return z === 1 || z === 2 || z === 3 ? z : undefined;
+    })(),
+    totalWeight: data.totalWeight != null ? Number(data.totalWeight) : undefined,
     customerNote: data.customerNote ? String(data.customerNote) : undefined,
     runnerNote: data.runnerNote ? String(data.runnerNote) : undefined,
     subtotal: Number(data.subtotal ?? 0),

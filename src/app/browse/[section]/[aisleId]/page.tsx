@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { ItemListRow } from "@/components/ItemListRow";
+import { ManualItemForm } from "@/components/ManualItemForm";
 import { MenuSearch } from "@/components/MenuSearch";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
@@ -58,6 +59,7 @@ export default function AisleItemsPage({
                 onChange={setSearch}
               />
             </div>
+            <ManualItemForm className="mb-4" />
 
             {items.length === 0 ? (
               <div className="rounded-2xl border border-gray-100 bg-white/90 px-6 py-12 text-center shadow-sm">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
@@ -14,12 +15,22 @@ import {
   getEstimatedDeliveryTime,
 } from "@/lib/constants";
 import { lineTotal } from "@/lib/pricing";
-import { DELIVERY_FEE, formatMenuPrice } from "@/lib/types";
+import { formatMenuPrice } from "@/lib/types";
+import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import { getItemImage } from "@/data/aisle-images";
+import { useUser } from "@/context/UserContext";
 
 export default function CartPage() {
   const router = useRouter();
+  const { user } = useUser();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const total = subtotal + DELIVERY_FEE;
+  const weightKg = cartTotalWeightKg(items);
+  const fee = calculateDeliveryFee({
+    weightKg,
+    college: user?.college ?? "",
+  });
+  const total = subtotal + fee.deliveryFee;
   const eta = getEstimatedDeliveryTime();
 
   function handleCancelOrder() {
@@ -56,18 +67,29 @@ export default function CartPage() {
                       className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                     >
                       <div className="flex justify-between gap-2">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {formatMenuPrice(item)} · per {item.unit} · est.
-                          </p>
+                        <div className="flex min-w-0 gap-3">
+                          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                            <Image
+                              src={getItemImage(item)}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="56px"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {item.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatMenuPrice(item)} · ~{item.weightKg ?? 0.2} kg · est.
+                            </p>
                           {item.itemNote && (
                             <p className="mt-1 text-xs text-amber-700">
                               {item.itemNote}
                             </p>
                           )}
+                          </div>
                         </div>
                         <button
                           type="button"
@@ -107,10 +129,12 @@ export default function CartPage() {
                       <span>Subtotal (est.)</span>
                       <span>${subtotal}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Delivery fee</span>
-                      <span>${DELIVERY_FEE}</span>
-                    </div>
+                    <DeliveryFeeBreakdown breakdown={fee} />
+                    {!user?.college && (
+                      <p className="text-xs text-gray-500">
+                        Distance uses your profile college. Change it at checkout.
+                      </p>
+                    )}
                     <div className="flex justify-between pt-2 text-base font-bold text-gray-900">
                       <span>Estimated total</span>
                       <span>${total}</span>

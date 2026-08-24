@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { DELIVERY_FEE } from "@/lib/types";
+import { useUser } from "@/context/UserContext";
+import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 
 export function OrderActionBar() {
-  const { itemCount, subtotal } = useCart();
+  const { itemCount, subtotal, items } = useCart();
+  const { user } = useUser();
+  const fee = calculateDeliveryFee({
+    weightKg: cartTotalWeightKg(items),
+    college: user?.college ?? "",
+  });
 
   return (
     <div className="fixed inset-x-0 bottom-16 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:bottom-0">
@@ -22,7 +28,7 @@ export function OrderActionBar() {
           className="flex-1 rounded-xl bg-fusion-red py-3 text-center text-sm font-semibold text-white"
         >
           Complete your order
-          {itemCount > 0 ? ` · $${subtotal + DELIVERY_FEE}` : ""}
+          {itemCount > 0 ? ` · $${subtotal + fee.deliveryFee}` : ""}
         </Link>
       </div>
     </div>

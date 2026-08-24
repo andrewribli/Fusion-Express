@@ -2,7 +2,8 @@
 
 import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
 import { formatEta } from "@/lib/constants";
-import { DELIVERY_FEE } from "@/lib/types";
+import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import type { DeliveryFeeBreakdown as FeeBreakdown } from "@/lib/delivery";
 
 interface ConfirmOrderModalProps {
   open: boolean;
@@ -17,6 +18,8 @@ interface ConfirmOrderModalProps {
   roomNumber?: string;
   customerNote?: string;
   estimatedDeliveryAt: Date;
+  deliveryFee: number;
+  feeBreakdown: FeeBreakdown;
 }
 
 export function ConfirmOrderModal({
@@ -32,10 +35,12 @@ export function ConfirmOrderModal({
   roomNumber,
   customerNote,
   estimatedDeliveryAt,
+  deliveryFee,
+  feeBreakdown,
 }: ConfirmOrderModalProps) {
   if (!open) return null;
 
-  const total = subtotal + DELIVERY_FEE + tip;
+  const total = subtotal + deliveryFee + tip;
   const address = formatDeliveryAddress(college, hall, roomNumber);
 
   return (
@@ -77,10 +82,7 @@ export function ConfirmOrderModal({
             <span>Subtotal</span>
             <span>${subtotal}</span>
           </div>
-          <div className="flex justify-between text-gray-600">
-            <span>Delivery fee</span>
-            <span>${DELIVERY_FEE}</span>
-          </div>
+          <DeliveryFeeBreakdown breakdown={feeBreakdown} />
           {tip > 0 && (
             <div className="flex justify-between text-gray-600">
               <span>Tip</span>

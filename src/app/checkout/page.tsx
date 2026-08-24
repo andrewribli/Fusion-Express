@@ -22,7 +22,8 @@ import {
 } from "@/lib/constants";
 import { createOrder } from "@/lib/orders";
 import { requestNotificationPermission } from "@/lib/notifications";
-import { DELIVERY_FEE } from "@/lib/types";
+import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -41,7 +42,12 @@ export default function CheckoutPage() {
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = customTip ? Number(customTip) || 0 : tip;
-  const total = subtotal + DELIVERY_FEE + tipAmount;
+  const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
+  const fee = useMemo(
+    () => calculateDeliveryFee({ weightKg, college: college || user?.college || "" }),
+    [weightKg, college, user?.college],
+  );
+  const total = subtotal + fee.deliveryFee + tipAmount;
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall, roomNumber || undefined)
@@ -58,6 +64,7 @@ export default function CheckoutPage() {
       name: item.name,
       price: getUnitPrice(item),
       quantity,
+      weightKg: item.weightKg,
     }));
     const orderSubtotal = items.reduce(
       (sum, c) => sum + lineTotal(c.item, c.quantity),
@@ -75,6 +82,8 @@ export default function CheckoutPage() {
         hall,
         roomNumber: roomNumber.trim() || undefined,
         lobbyPoint: getLobbyForHall(hall),
+        zone: fee.zone,
+        totalWeight: fee.weightKg,
         customerNote: [
           customerNote.trim(),
           ...new Set(
@@ -86,7 +95,7 @@ export default function CheckoutPage() {
           .filter(Boolean)
           .join("\n") || undefined,
         subtotal: orderSubtotal,
-        deliveryFee: DELIVERY_FEE,
+        deliveryFee: fee.deliveryFee,
         tip: tipAmount || undefined,
         total,
         paymentReceived: false,
@@ -171,10 +180,7 @@ export default function CheckoutPage() {
                   <span>Subtotal (est.)</span>
                   <span>${subtotal}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Delivery fee</span>
-                  <span>${DELIVERY_FEE}</span>
-                </div>
+                <DeliveryFeeBreakdown breakdown={fee} />
                 {tipAmount > 0 && (
                   <div className="flex justify-between text-gray-600">
                     <span>Tip</span>
@@ -280,6 +286,8 @@ export default function CheckoutPage() {
             roomNumber={roomNumber.trim() || undefined}
             customerNote={customerNote.trim() || undefined}
             estimatedDeliveryAt={estimatedDeliveryAt}
+            deliveryFee={fee.deliveryFee}
+            feeBreakdown={fee}
           />
         </LakersWallpaper>
       </AppShell>

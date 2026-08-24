@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { FelixOrderCard } from "@/components/FelixOrderCard";
+import { ManualItemForm } from "@/components/ManualItemForm";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { SECTION_META } from "@/data/aisles";
+import { getItemImage } from "@/data/aisle-images";
 import { useCart } from "@/context/CartContext";
 import { RUNNER_JUDGMENT_NOTE } from "@/lib/constants";
-import { createCustomMenuItem } from "@/lib/custom-item";
 import { getMenuItemById } from "@/lib/menu";
 import { formatMenuPrice } from "@/lib/types";
 
@@ -26,18 +27,9 @@ const FEATURED_IDS = [
 
 export default function MenuPage() {
   const { addItem } = useCart();
-  const [manualName, setManualName] = useState("");
   const featured = FEATURED_IDS.map((id) => getMenuItemById(id)).filter(
     (item): item is NonNullable<typeof item> => Boolean(item),
   );
-
-  function handleManualAdd(e: React.FormEvent) {
-    e.preventDefault();
-    const name = manualName.trim();
-    if (!name) return;
-    addItem(createCustomMenuItem(name));
-    setManualName("");
-  }
 
   const dry = SECTION_META.dry;
   const cold = SECTION_META.refrigerated;
@@ -75,34 +67,7 @@ export default function MenuPage() {
               />
             </div>
 
-            <form
-              onSubmit={handleManualAdd}
-              className="mt-4 rounded-2xl border border-dashed border-orange-300 bg-white p-4 shadow-sm"
-            >
-              <label
-                htmlFor="manual-item"
-                className="block text-sm font-semibold text-gray-900"
-              >
-                Did we miss something? Add your item manually:
-              </label>
-              <div className="mt-2 flex gap-2">
-                <input
-                  id="manual-item"
-                  value={manualName}
-                  onChange={(e) => setManualName(e.target.value)}
-                  placeholder="e.g. 1 biggest Pocari Sweat"
-                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!manualName.trim()}
-                  className="rounded-xl bg-fusion-red px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  Add
-                </button>
-              </div>
-              <p className="mt-2 text-xs text-gray-500">{RUNNER_JUDGMENT_NOTE}</p>
-            </form>
+            <ManualItemForm className="mt-4" />
 
             <div className="mt-6">
               <FelixOrderCard />
@@ -115,9 +80,20 @@ export default function MenuPage() {
                 {featured.map((item) => (
                   <li
                     key={item.id}
-                    className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                    className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
                   >
+                    <div className="relative h-24 w-full">
+                      <Image
+                        src={getItemImage(item)}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="50vw"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col p-4">
                     <p className="text-sm font-semibold text-gray-900">{item.name}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">~{item.weightKg} kg</p>
                     <p className="mt-0.5 text-base font-bold text-fusion-red">
                       {formatMenuPrice(item)}
                       <span className="ml-1 text-xs font-normal text-gray-400">
@@ -134,6 +110,7 @@ export default function MenuPage() {
                     >
                       Add to Cart
                     </button>
+                    </div>
                   </li>
                 ))}
               </ul>

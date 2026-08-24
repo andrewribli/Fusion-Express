@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { MenuItem } from "@/lib/types";
 import { formatMenuPrice } from "@/lib/types";
 import { useCart } from "@/context/CartContext";
-import { getCategoryImage } from "@/data/aisle-images";
+import { getItemImage } from "@/data/aisle-images";
 
 interface MenuItemCardProps {
   item: MenuItem;
@@ -19,8 +19,8 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
     <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="relative h-28 w-full">
         <Image
-          src={getCategoryImage(item.category)}
-          alt=""
+          src={getItemImage(item)}
+          alt={item.name}
           fill
           className="object-cover"
           sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"

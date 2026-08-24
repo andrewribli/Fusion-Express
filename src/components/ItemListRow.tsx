@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { MenuItem } from "@/lib/types";
 import { formatMenuPrice } from "@/lib/types";
 import { useCart } from "@/context/CartContext";
-import { getCategoryImage } from "@/data/aisle-images";
+import { getItemImage } from "@/data/aisle-images";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
 import { formatSaleLabel, hasSale } from "@/lib/pricing";
 
@@ -23,8 +23,8 @@ export function ItemListRow({ item }: ItemListRowProps) {
     <li className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white/95 shadow-sm">
       <div className="relative h-28 w-full">
         <Image
-          src={getCategoryImage(item.category)}
-          alt=""
+          src={getItemImage(item)}
+          alt={item.name}
           fill
           className="object-cover"
           sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
@@ -43,7 +43,9 @@ export function ItemListRow({ item }: ItemListRowProps) {
               {fav ? "Saved" : "Save"}
             </button>
           </div>
-          <p className="mt-0.5 text-xs text-gray-400">per {item.unit}</p>
+          <p className="mt-0.5 text-xs text-gray-400">
+            per {item.unit} · ~{item.weightKg} kg
+          </p>
           <p className="mt-2 text-base font-bold text-fusion-red">
             {formatMenuPrice(item)}
             <span className="ml-1 text-xs font-normal text-gray-400">est.</span>
