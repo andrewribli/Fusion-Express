@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9fafb;
+  --background: #0c0716;
   --foreground: #111827;
-  --fusion-red: #ed1c24;
+  --fusion-red: #fdb927;
+  --lakers-gold: #fdb927;
+  --lakers-purple: #552583;
+  --lakers-navy: #1d1160;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-fusion-red: var(--fusion-red);
+  --color-lakers-gold: var(--lakers-gold);
+  --color-lakers-purple: var(--lakers-purple);
+  --color-lakers-navy: var(--lakers-navy);
   --font-sans: var(--font-geist-sans);
 }
 

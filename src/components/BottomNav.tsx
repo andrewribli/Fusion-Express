@@ -15,6 +15,7 @@ const BASE_TABS = [
 export function BottomNav() {
   const pathname = usePathname();
   const { user } = useUser();
+  const isHome = pathname === "/home" || pathname === "/";
   const [activeCount, setActiveCount] = useState(0);
 
   useEffect(() => {
@@ -36,7 +37,13 @@ export function BottomNav() {
     : [...BASE_TABS];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur md:hidden">
+    <nav
+      className={`fixed inset-x-0 bottom-0 z-50 border-t backdrop-blur md:hidden ${
+        isHome
+          ? "border-gray-200 bg-white/95"
+          : "border-lakers-gold/30 bg-lakers-navy/95"
+      }`}
+    >
       <div className="mx-auto flex max-w-[480px]">
         {tabs.map((tab) => {
           const active =
@@ -50,13 +57,19 @@ export function BottomNav() {
               key={tab.href}
               href={tab.href}
               className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium ${
-                active ? "text-fusion-red" : "text-gray-500"
+                active
+                  ? isHome
+                    ? "text-fusion-red"
+                    : "text-lakers-gold"
+                  : isHome
+                    ? "text-gray-500"
+                    : "text-white/60"
               }`}
             >
               <span className="relative text-lg">
                 {tab.icon}
                 {"badge" in tab && tab.badge > 0 && (
-                  <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-fusion-red px-1 text-[9px] font-bold text-white">
+                  <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-lakers-gold px-1 text-[9px] font-bold text-lakers-navy">
                     {tab.badge > 9 ? "9+" : tab.badge}
                   </span>
                 )}

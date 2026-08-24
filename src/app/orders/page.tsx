@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
+import { PageWallpaper } from "@/components/PageWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
+import { BG_ORDERS } from "@/data/page-backgrounds";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
@@ -66,12 +68,12 @@ export default function OrdersPage() {
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50">
+        <PageWallpaper src={BG_ORDERS} alt="" overlayClassName="bg-lakers-navy/60">
           <AppHeader title="Order History" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
             {loading ? (
-              <p className="text-sm text-gray-500">Loading orders…</p>
+              <p className="text-sm text-lakers-gold">Loading orders…</p>
             ) : orders.length === 0 ? (
               <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
                 <p className="text-sm text-gray-600">No orders yet.</p>
@@ -89,7 +91,7 @@ export default function OrdersPage() {
                     <Link href={`/track?orderId=${order.id}`}>
                       <div className="flex justify-between">
                         <p className="font-bold text-gray-900">{order.id}</p>
-                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-fusion-red">
+                        <span className="rounded-full bg-lakers-gold/20 px-2 py-0.5 text-xs font-medium text-lakers-purple">
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
                       </div>
@@ -133,7 +135,7 @@ export default function OrdersPage() {
               </ul>
             )}
           </main>
-        </div>
+        </PageWallpaper>
       </AppShell>
     </RequireAuth>
   );

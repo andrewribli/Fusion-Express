@@ -1,10 +1,12 @@
 import type { Runner, RunnerRegistrationInput } from "@/lib/types";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
+import { omitUndefined } from "@/lib/omit-undefined";
 import {
   addDoc,
   collection,
   doc,
   getDoc,
+  getDocs,
   updateDoc,
   Timestamp,
 } from "firebase/firestore";
@@ -15,6 +17,7 @@ const mockRunners = new Map<string, Runner>();
 function parseRunner(id: string, data: Record<string, unknown>): Runner {
   return {
     id,
+    uid: data.uid ? String(data.uid) : undefined,
     fullName: String(data.fullName ?? ""),
     studentId: String(data.studentId ?? ""),
     phone: String(data.phone ?? ""),
@@ -47,15 +50,11 @@ export async function registerRunner(
   };
 
   if (isFirebaseConfigured()) {
-    try {
-      const ref = await addDoc(collection(getDb(), RUNNERS_COLLECTION), {
-        ...payload,
-        termsAcceptedAt: Timestamp.fromDate(now),
-      });
-      return ref.id;
-    } catch {
-      // fallback
-    }
+    const ref = await addDoc(collection(getDb(), RUNNERS_COLLECTION), {
+      ...omitUndefined({ ...payload } as Record<string, unknown>),
+      termsAcceptedAt: Timestamp.fromDate(now),
+    });
+    return ref.id;
   }
 
   const id = `runner-${crypto.randomUUID().slice(0, 8)}`;
@@ -76,6 +75,35 @@ export async function fetchRunner(runnerId: string): Promise<Runner | null> {
   }
 
   return mockRunners.get(runnerId) ?? null;
+}
+
+export async function findRunnerForUser(opts: {
+  uid?: string;
+  studentId?: string;
+}): Promise<Runner | null> {
+  if (isFirebaseConfigured()) {
+    try {
+      const snap = await getDocs(collection(getDb(), RUNNERS_COLLECTION));
+      const runners = snap.docs.map((d) =>
+        parseRunner(d.id, d.data() as Record<string, unknown>),
+      );
+      return (
+        runners.find((r) => opts.uid && r.uid === opts.uid) ??
+        runners.find((r) => opts.studentId && r.studentId === opts.studentId) ??
+        null
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  return (
+    [...mockRunners.values()].find((r) => opts.uid && r.uid === opts.uid) ??
+    [...mockRunners.values()].find(
+      (r) => opts.studentId && r.studentId === opts.studentId,
+    ) ??
+    null
+  );
 }
 
 export async function addRunnerEarnings(

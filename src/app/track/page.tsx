@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { RatingModal } from "@/components/RatingModal";
@@ -228,12 +229,12 @@ export default function TrackPage() {
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50">
+        <LakersWallpaper>
           <AppHeader showBack backHref="/home" title="Track Order" />
-          <Suspense fallback={<p className="p-4 text-sm text-gray-500">Loading…</p>}>
+          <Suspense fallback={<p className="p-4 text-sm text-lakers-gold">Loading…</p>}>
             <TrackContent />
           </Suspense>
-        </div>
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );

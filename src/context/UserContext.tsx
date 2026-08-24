@@ -17,6 +17,7 @@ import {
   fetchUserProfile,
   updateUserProfileDoc,
 } from "@/lib/users";
+import { findRunnerForUser } from "@/lib/runners";
 
 export interface UserProfile {
   uid?: string;
@@ -86,6 +87,34 @@ function cacheProfile(profile: UserProfile | null) {
   }
 }
 
+async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> {
+  if (profile.isRunner && profile.runnerId) return profile;
+  const found = await findRunnerForUser({
+    uid: profile.uid,
+    studentId: profile.studentId,
+  });
+  if (!found) return profile;
+  const updated: UserProfile = {
+    ...profile,
+    isRunner: true,
+    runnerId: found.id,
+    runnerPaymentMethod: found.paymentMethod,
+    runnerPaymentId: found.paymentId,
+    termsAcceptedAt:
+      profile.termsAcceptedAt ?? found.termsAcceptedAt.toISOString(),
+  };
+  if (profile.uid) {
+    void updateUserProfileDoc(profile.uid, {
+      isRunner: true,
+      runnerId: found.id,
+      runnerPaymentMethod: found.paymentMethod,
+      runnerPaymentId: found.paymentId,
+      termsAcceptedAt: updated.termsAcceptedAt,
+    });
+  }
+  return updated;
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -104,17 +133,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const unsub = onAuthStateChanged(getAuthClient(), async (firebaseUser) => {
       if (firebaseUser) {
         const profile = await fetchUserProfile(firebaseUser.uid);
-        if (profile) {
-          setUser(profile);
-          cacheProfile(profile);
-          if (profile.termsAcceptedAt) {
+        const base =
+          profile ??
+          (loadUser()?.uid === firebaseUser.uid ? loadUser() : null);
+        if (base) {
+          const hydrated = await restoreRunnerProfile(base);
+          setUser(hydrated);
+          cacheProfile(hydrated);
+          if (hydrated.isRunner || hydrated.termsAcceptedAt) {
             localStorage.setItem(TERMS_ACCEPTED_KEY, "true");
             setTermsAccepted(true);
-          }
-        } else {
-          const cached = loadUser();
-          if (cached?.uid === firebaseUser.uid) {
-            setUser(cached);
           }
         }
       } else {
@@ -182,35 +210,57 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const acceptRunnerTerms = useCallback(() => {
     localStorage.setItem(TERMS_ACCEPTED_KEY, "true");
     setTermsAccepted(true);
-  }, []);
+    setUser((prev) => {
+      if (!prev) return prev;
+      const termsAcceptedAt = prev.termsAcceptedAt ?? new Date().toISOString();
+      const updated: UserProfile = { ...prev, termsAcceptedAt };
+      cacheProfile(updated);
+      if (prev.uid && firebaseEnabled) {
+        void updateUserProfileDoc(prev.uid, { termsAcceptedAt });
+      }
+      return updated;
+    });
+  }, [firebaseEnabled]);
 
   const setRunnerRegistered = useCallback(
     (runnerId: string, payment: { method: "PayMe" | "FPS"; id: string }) => {
       setUser((prev) => {
         if (!prev) return prev;
+        const termsAcceptedAt = prev.termsAcceptedAt ?? new Date().toISOString();
         const updated: UserProfile = {
           ...prev,
           isRunner: true,
           runnerId,
           runnerPaymentMethod: payment.method,
           runnerPaymentId: payment.id,
-          termsAcceptedAt: new Date().toISOString(),
+          termsAcceptedAt,
         };
         cacheProfile(updated);
         if (prev.uid && firebaseEnabled) {
-          void updateUserProfileDoc(prev.uid, updated);
+          void updateUserProfileDoc(prev.uid, {
+            isRunner: true,
+            runnerId,
+            runnerPaymentMethod: payment.method,
+            runnerPaymentId: payment.id,
+            termsAcceptedAt,
+          });
         }
         return updated;
       });
+      localStorage.setItem(TERMS_ACCEPTED_KEY, "true");
+      setTermsAccepted(true);
     },
     [firebaseEnabled],
   );
+
+  const hasAcceptedTerms =
+    termsAccepted || Boolean(user?.isRunner || user?.termsAcceptedAt);
 
   const value = useMemo(
     () => ({
       user,
       isReady,
-      termsAccepted,
+      termsAccepted: hasAcceptedTerms,
       firebaseEnabled,
       login,
       signUp,
@@ -223,7 +273,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     [
       user,
       isReady,
-      termsAccepted,
+      hasAcceptedTerms,
       firebaseEnabled,
       login,
       signUp,

@@ -1,21 +1,21 @@
 "use client";
 
 import { use } from "react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { AislePhotoButton } from "@/components/AislePhotoButton";
+import { OrderActionBar } from "@/components/OrderActionBar";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
+import { getAisleImage } from "@/data/aisle-images";
 import {
   getAislesForSection,
   isValidSection,
   SECTION_META,
   type StoreSection,
 } from "@/data/aisles";
-import {
-  getAisleItems,
-  getStaticMenuItems,
-} from "@/lib/menu";
+import { getAisleItems, getStaticMenuItems } from "@/lib/menu";
 
 export default function BrowseSectionPage({
   params,
@@ -34,38 +34,31 @@ export default function BrowseSectionPage({
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50">
-        <AppHeader
-          showBack
-          backHref="/menu"
-          title={meta.title}
-        />
+        <LakersWallpaper>
+          <AppHeader showBack backHref="/home" title={meta.title} />
 
-        <main className="mx-auto max-w-[480px] px-4 py-4">
-          <p className="mb-4 text-sm text-gray-500">{meta.subtitle}</p>
+          <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-36 md:px-6">
+            <p className="mb-4 text-sm text-lakers-gold">{meta.subtitle}</p>
 
-          <div className="grid grid-cols-2 gap-3">
-            {aisles.map((aisle) => {
-              const count = getAisleItems(allItems, section, aisle.id).length;
-              return (
-                <Link
-                  key={aisle.id}
-                  href={`/browse/${section}/${aisle.id}`}
-                  className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm transition-transform active:scale-[0.97]"
-                >
-                  <span className="text-3xl">{aisle.emoji}</span>
-                  <p className="mt-2 text-sm font-semibold leading-snug text-gray-900">
-                    {aisle.label}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-400">
-                    {count > 0 ? `${count} items` : "Coming soon"}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </main>
-        </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {aisles.map((aisle) => {
+                const count = getAisleItems(allItems, section, aisle.id).length;
+                return (
+                  <AislePhotoButton
+                    key={aisle.id}
+                    href={`/browse/${section}/${aisle.id}`}
+                    imageSrc={getAisleImage(aisle.id)}
+                    imageAlt={aisle.label}
+                    title={aisle.label}
+                    subtitle={count > 0 ? `${count} items` : "Coming soon"}
+                    compact
+                  />
+                );
+              })}
+            </div>
+          </main>
+          <OrderActionBar />
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );

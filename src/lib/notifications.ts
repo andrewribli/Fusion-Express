@@ -28,7 +28,7 @@ export function notifyOrderStatus(
 
   new Notification("Fusion Express", {
     body: `${orderId}: ${body}`,
-    icon: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Fusion_logo.svg",
+    icon: "/images/fusion-express-logo.png",
     tag: `order-${orderId}-${status}`,
   });
 }

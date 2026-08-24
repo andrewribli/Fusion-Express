@@ -22,7 +22,7 @@ export function CartBar() {
         </div>
         <Link
           href="/checkout"
-          className="rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#c91820]"
+          className="rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-lakers-navy transition-colors hover:bg-white"
         >
           Checkout
         </Link>

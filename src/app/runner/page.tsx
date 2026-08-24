@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { useUser } from "@/context/UserContext";
 
 export default function RunnerIndexPage() {
@@ -20,8 +21,10 @@ export default function RunnerIndexPage() {
   }, [isReady, user, termsAccepted, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">
-      Loading…
-    </div>
+    <LakersWallpaper>
+      <div className="flex min-h-screen items-center justify-center text-sm font-medium text-lakers-gold">
+        Loading…
+      </div>
+    </LakersWallpaper>
   );
 }

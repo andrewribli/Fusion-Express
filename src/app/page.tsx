@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
 import { HomeLanding } from "@/components/HomeLanding";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { AppLogo } from "@/components/AppLogo";
 import { useUser } from "@/context/UserContext";
 import { validatePassword, validateUsername } from "@/lib/auth";
 import { isFirebaseConfigured } from "@/lib/firebase";
@@ -126,7 +127,7 @@ export default function LoginPage() {
 
   if (!isReady) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-gray-500">
+      <div className="flex min-h-screen items-center justify-center bg-lakers-navy text-sm text-lakers-gold">
         Loading…
       </div>
     );
@@ -137,16 +138,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <LakersWallpaper>
       <main className="mx-auto max-w-[480px] px-4 py-8">
+        <div className="rounded-2xl bg-white/95 p-5 shadow-lg ring-2 ring-lakers-gold">
         <div className="mb-6 text-center">
-          <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Fusion_logo.svg"
-            alt="Fusion"
-            width={56}
-            height={56}
-            className="mx-auto h-14 w-14 object-contain"
-          />
+          <AppLogo size={72} className="mx-auto h-[72px] w-[72px]" priority />
           <h1 className="mt-4 text-2xl font-bold text-gray-900">Fusion Express</h1>
           <p className="mt-1 text-sm text-gray-500">CUHK Dorm Delivery</p>
         </div>
@@ -163,7 +159,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => setMode("signin")}
             className={`flex-1 rounded-lg py-2.5 text-sm font-semibold ${
-              mode === "signin" ? "bg-white text-fusion-red shadow-sm" : "text-gray-600"
+              mode === "signin" ? "bg-lakers-gold text-lakers-navy shadow-sm" : "text-gray-600"
             }`}
           >
             Sign In
@@ -172,7 +168,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => setMode("signup")}
             className={`flex-1 rounded-lg py-2.5 text-sm font-semibold ${
-              mode === "signup" ? "bg-white text-fusion-red shadow-sm" : "text-gray-600"
+              mode === "signup" ? "bg-lakers-gold text-lakers-navy shadow-sm" : "text-gray-600"
             }`}
           >
             Create Account
@@ -337,11 +333,12 @@ export default function LoginPage() {
         </p>
 
         <p className="mt-4 text-center">
-          <a href="/runner/terms" className="text-xs font-medium text-gray-500 underline">
-            Become a Runner →
+          <a href="/runner" className="text-xs font-medium text-lakers-purple underline">
+            Pick up an order →
           </a>
         </p>
+        </div>
       </main>
-    </div>
+    </LakersWallpaper>
   );
 }

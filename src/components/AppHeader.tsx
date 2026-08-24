@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { AccountMenu } from "@/components/AccountMenu";
+import { AppLogo } from "@/components/AppLogo";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 
@@ -17,76 +18,97 @@ export function AppHeader({ showBack, backHref = "/home", title }: AppHeaderProp
   const { user } = useUser();
   const pathname = usePathname();
 
-  const showRunnerLink = !user?.isRunner && pathname !== "/runner/terms";
+  const isHome = pathname === "/home" || (pathname === "/" && Boolean(user));
+  const onRunnerPages = pathname.startsWith("/runner");
+  const wide =
+    pathname.startsWith("/menu") ||
+    pathname.startsWith("/browse") ||
+    pathname.startsWith("/cart") ||
+    pathname.startsWith("/checkout");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
-      <div className="mx-auto flex max-w-[480px] items-center justify-between gap-2 px-4 py-3">
+    <header
+      className={`sticky top-0 z-50 overflow-visible border-b shadow-sm backdrop-blur ${
+        isHome
+          ? "border-gray-100 bg-white/95"
+          : "border-lakers-gold/40 bg-lakers-navy/95"
+      }`}
+    >
+      <div
+        className={`mx-auto flex items-center justify-between gap-2 px-4 py-3 ${
+          wide ? "max-w-7xl" : "max-w-[480px]"
+        }`}
+      >
         <div className="flex min-w-0 items-center gap-2">
-          {showBack ? (
+          {showBack && (
             <Link
               href={backHref}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-700"
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                isHome ? "bg-gray-100 text-gray-700" : "bg-white/15 text-lakers-gold"
+              }`}
               aria-label="Go back"
             >
               ←
             </Link>
-          ) : (
-            <Link href="/home" className="shrink-0">
-              <Image
-                src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Fusion_logo.svg"
-                alt="Fusion"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
-              />
-            </Link>
           )}
+          <Link href="/home" className="shrink-0" aria-label="Fusion Express home">
+            <AppLogo size={32} className="h-8 w-8" />
+          </Link>
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-gray-900">
+            <p
+              className={`truncate text-sm font-bold ${
+                isHome ? "text-gray-900" : "text-lakers-gold"
+              }`}
+            >
               {title ?? "Fusion Express"}
             </p>
           </div>
         </div>
 
         <nav className="flex shrink-0 items-center gap-1.5">
-          {showRunnerLink && (
+          {!onRunnerPages && (
             <Link
-              href="/runner/terms"
-              className="hidden rounded-full bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-fusion-red sm:inline"
+              href="/runner"
+              className={
+                isHome
+                  ? "hidden rounded-full bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-fusion-red sm:inline"
+                  : "hidden rounded-full bg-lakers-gold px-2.5 py-1.5 text-xs font-semibold text-lakers-navy sm:inline"
+              }
             >
-              Become a Runner
+              Pick up an order
             </Link>
           )}
           <Link
             href="/home"
-            className="hidden rounded-full px-2 py-1.5 text-xs font-medium text-gray-600 hover:text-fusion-red md:inline"
+            className={`hidden rounded-full px-2 py-1.5 text-xs font-medium md:inline ${
+              isHome ? "text-gray-600 hover:text-fusion-red" : "text-white/80 hover:text-lakers-gold"
+            }`}
           >
             Home
           </Link>
           {user?.isRunner && (
             <Link
               href="/runner/dashboard"
-              className="hidden rounded-full px-2 py-1.5 text-xs font-medium text-gray-600 hover:text-fusion-red md:inline"
+              className={`hidden rounded-full px-2 py-1.5 text-xs font-medium md:inline ${
+                isHome ? "text-gray-600 hover:text-fusion-red" : "text-white/80 hover:text-lakers-gold"
+              }`}
             >
               Runner
             </Link>
           )}
           <Link
             href="/orders"
-            className="hidden rounded-full px-2 py-1.5 text-xs font-medium text-gray-600 hover:text-fusion-red md:inline"
+            className={`hidden rounded-full px-2 py-1.5 text-xs font-medium md:inline ${
+              isHome ? "text-gray-600 hover:text-fusion-red" : "text-white/80 hover:text-lakers-gold"
+            }`}
           >
             Orders
           </Link>
           <Link
-            href="/profile"
-            className="hidden rounded-full px-2 py-1.5 text-xs font-medium text-gray-600 hover:text-fusion-red md:inline"
-          >
-            Profile
-          </Link>
-          <Link
             href="/cart"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-fusion-red text-white shadow-sm"
+            className={`relative flex h-10 w-10 items-center justify-center rounded-full shadow-sm ${
+              isHome ? "bg-fusion-red text-white" : "bg-lakers-gold text-lakers-navy"
+            }`}
             aria-label="Cart"
           >
             🛒
@@ -96,16 +118,23 @@ export function AppHeader({ showBack, backHref = "/home", title }: AppHeaderProp
               </span>
             )}
           </Link>
+          <AccountMenu />
         </nav>
       </div>
 
-      {showRunnerLink && (
-        <div className="border-t border-gray-50 px-4 py-2 sm:hidden">
+      {!onRunnerPages && (
+        <div
+          className={`border-t px-4 py-2 sm:hidden ${
+            isHome ? "border-gray-50" : "border-lakers-gold/30"
+          }`}
+        >
           <Link
-            href="/runner/terms"
-            className="block text-center text-xs font-semibold text-fusion-red"
+            href="/runner"
+            className={`block text-center text-xs font-semibold ${
+              isHome ? "text-fusion-red" : "text-lakers-gold"
+            }`}
           >
-            Become a Runner →
+            Pick up an order →
           </Link>
         </div>
       )}

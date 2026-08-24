@@ -1,14 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { FelixOrderCard } from "@/components/FelixOrderCard";
+import { OrderActionBar } from "@/components/OrderActionBar";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { SECTION_META } from "@/data/aisles";
 import { useCart } from "@/context/CartContext";
 import { RUNNER_JUDGMENT_NOTE } from "@/lib/constants";
+import { createCustomMenuItem } from "@/lib/custom-item";
 import { getMenuItemById } from "@/lib/menu";
 import { formatMenuPrice } from "@/lib/types";
 
@@ -22,68 +26,96 @@ const FEATURED_IDS = [
 
 export default function MenuPage() {
   const { addItem } = useCart();
+  const [manualName, setManualName] = useState("");
   const featured = FEATURED_IDS.map((id) => getMenuItemById(id)).filter(
     (item): item is NonNullable<typeof item> => Boolean(item),
   );
 
+  function handleManualAdd(e: React.FormEvent) {
+    e.preventDefault();
+    const name = manualName.trim();
+    if (!name) return;
+    addItem(createCustomMenuItem(name));
+    setManualName("");
+  }
+
+  const dry = SECTION_META.dry;
+  const cold = SECTION_META.refrigerated;
+
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-gray-50">
-          <AppHeader showBack backHref="/home" title="Menu" />
+        <LakersWallpaper>
+          <AppHeader showBack backHref="/home" title="Create an Order" />
 
-          <main className="mx-auto max-w-[480px] px-4 py-6">
-            <h1 className="text-xl font-bold text-gray-900">🏪 Shop Fusion</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Pick a section, then browse aisles.
+          <main className="mx-auto w-full max-w-7xl px-4 py-6 pb-36 md:px-6">
+            <h1 className="text-xl font-bold text-lakers-gold">Shop Fusion</h1>
+            <p className="mt-1 text-sm text-white/80">
+              Dry goods on the left · fridge on the right
             </p>
 
             <PriceDisclaimer className="mt-3" />
 
-            <div className="mt-4 space-y-4">
-              {(["refrigerated", "dry"] as const).map((section) => {
-                const meta = SECTION_META[section];
-                return (
-                  <Link
-                    key={section}
-                    href={`/browse/${section}`}
-                    className="block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md transition-transform active:scale-[0.98]"
-                  >
-                    <div
-                      className={`flex items-center gap-4 p-6 ${
-                        section === "refrigerated"
-                          ? "bg-gradient-to-r from-sky-50 to-white"
-                          : "bg-gradient-to-r from-amber-50 to-white"
-                      }`}
-                    >
-                      <span className="text-5xl">{meta.emoji}</span>
-                      <div>
-                        <h2 className="text-lg font-bold text-gray-900">
-                          {meta.title}
-                        </h2>
-                        <p className="mt-0.5 text-sm text-gray-500">{meta.subtitle}</p>
-                        <span className="mt-2 inline-block text-sm font-semibold text-fusion-red">
-                          Browse →
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+            <div className="mt-4 grid grid-cols-2 gap-3 md:gap-6">
+              <AislePhotoButton
+                href="/browse/dry"
+                imageSrc="/images/aisle-dry.png"
+                imageAlt="Dry goods aisle"
+                title="Non-Refrigerated"
+                subtitle={dry.subtitle}
+                sideLabel="Left aisle"
+              />
+              <AislePhotoButton
+                href="/browse/refrigerated"
+                imageSrc="/images/aisle-refrigerated.png"
+                imageAlt="Refrigerated meat counter"
+                title="Refrigerated"
+                subtitle={cold.subtitle}
+                sideLabel="Right aisle"
+              />
             </div>
+
+            <form
+              onSubmit={handleManualAdd}
+              className="mt-4 rounded-2xl border border-dashed border-orange-300 bg-white p-4 shadow-sm"
+            >
+              <label
+                htmlFor="manual-item"
+                className="block text-sm font-semibold text-gray-900"
+              >
+                Did we miss something? Add your item manually:
+              </label>
+              <div className="mt-2 flex gap-2">
+                <input
+                  id="manual-item"
+                  value={manualName}
+                  onChange={(e) => setManualName(e.target.value)}
+                  placeholder="e.g. 1 biggest Pocari Sweat"
+                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!manualName.trim()}
+                  className="rounded-xl bg-fusion-red px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  Add
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">{RUNNER_JUDGMENT_NOTE}</p>
+            </form>
 
             <div className="mt-6">
               <FelixOrderCard />
             </div>
 
             <section className="mt-6">
-              <h2 className="text-sm font-bold text-gray-900">Popular requests</h2>
-              <p className="mt-1 text-xs text-gray-500">{RUNNER_JUDGMENT_NOTE}</p>
-              <ul className="mt-3 space-y-3">
+              <h2 className="text-sm font-bold text-lakers-gold">Popular requests</h2>
+              <p className="mt-1 text-xs text-white/70">{RUNNER_JUDGMENT_NOTE}</p>
+              <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {featured.map((item) => (
                   <li
                     key={item.id}
-                    className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                    className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                   >
                     <p className="text-sm font-semibold text-gray-900">{item.name}</p>
                     <p className="mt-0.5 text-base font-bold text-fusion-red">
@@ -98,7 +130,7 @@ export default function MenuPage() {
                     <button
                       type="button"
                       onClick={() => addItem(item)}
-                      className="mt-3 w-full rounded-xl bg-fusion-red py-2.5 text-sm font-semibold text-white"
+                      className="mt-auto w-full rounded-xl bg-fusion-red py-2.5 text-sm font-semibold text-white"
                     >
                       Add to Cart
                     </button>
@@ -107,7 +139,8 @@ export default function MenuPage() {
               </ul>
             </section>
           </main>
-        </div>
+          <OrderActionBar />
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );

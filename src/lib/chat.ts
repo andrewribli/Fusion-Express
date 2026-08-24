@@ -50,18 +50,14 @@ export async function sendChatMessage(
   };
 
   if (isFirebaseConfigured()) {
-    try {
-      const ref = await addDoc(
-        collection(getDb(), "chats", orderId, "messages"),
-        {
-          ...payload,
-          timestamp: Timestamp.fromDate(now),
-        },
-      );
-      return { id: ref.id, ...payload };
-    } catch {
-      // fallback
-    }
+    const ref = await addDoc(
+      collection(getDb(), "chats", orderId, "messages"),
+      {
+        ...payload,
+        timestamp: Timestamp.fromDate(now),
+      },
+    );
+    return { id: ref.id, ...payload };
   }
 
   const chatMessage: ChatMessage = {
@@ -121,6 +117,20 @@ export function subscribeChatMessages(
   }, 3000);
 
   return () => clearInterval(interval);
+}
+
+export function isOwnChatMessage(
+  message: ChatMessage,
+  user: {
+    uid?: string;
+    studentId: string;
+    runnerId?: string;
+  },
+): boolean {
+  const ids = [user.uid, user.studentId, user.runnerId].filter(
+    (id): id is string => Boolean(id),
+  );
+  return ids.includes(message.senderId);
 }
 
 export function canAccessOrderChat(

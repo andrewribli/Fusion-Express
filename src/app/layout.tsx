@@ -12,6 +12,10 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "Fusion Express — CUHK Dorm Delivery",
   description: "Order groceries from Fusion supermarket delivered to your CUHK dorm lobby.",
+  icons: {
+    icon: "/images/fusion-express-logo.png",
+    apple: "/images/fusion-express-logo.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -23,13 +27,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#ED1C24",
+  themeColor: "#552583",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geist.variable} h-full`}>
-      <body className="min-h-full bg-white font-sans text-gray-900 antialiased">
+      <body className="min-h-full bg-lakers-navy font-sans text-gray-900 antialiased">
         <UserProvider>
           <CartProvider>{children}</CartProvider>
         </UserProvider>

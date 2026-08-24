@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { MenuItem } from "@/lib/types";
 import { formatMenuPrice } from "@/lib/types";
 import { useCart } from "@/context/CartContext";
+import { getCategoryImage } from "@/data/aisle-images";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
 import { formatSaleLabel, hasSale } from "@/lib/pricing";
 
@@ -18,18 +20,27 @@ export function ItemListRow({ item }: ItemListRowProps) {
   const [fav, setFav] = useState(() => isFavorite(item.id));
 
   return (
-    <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
+    <li className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white/95 shadow-sm">
+      <div className="relative h-28 w-full">
+        <Image
+          src={getCategoryImage(item.category)}
+          alt=""
+          fill
+          className="object-cover"
+          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
+        />
+      </div>
+      <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
             <button
               type="button"
               onClick={() => setFav(toggleFavorite(item.id))}
-              className="shrink-0 text-xl leading-none"
+              className="shrink-0 text-xs font-semibold text-fusion-red"
               aria-label={fav ? "Remove from favorites" : "Add to favorites"}
             >
-              {fav ? "❤️" : "🤍"}
+              {fav ? "Saved" : "Save"}
             </button>
           </div>
           <p className="mt-0.5 text-xs text-gray-400">per {item.unit}</p>
@@ -56,18 +67,17 @@ export function ItemListRow({ item }: ItemListRowProps) {
             <p className="mt-1 text-xs text-amber-700">{item.itemNote}</p>
           )}
         </div>
-      </div>
 
       {quantity === 0 ? (
         <button
           type="button"
           onClick={() => addItem(item)}
-          className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white active:scale-[0.98]"
+          className="mt-auto w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white active:scale-[0.98]"
         >
           Add to Cart
         </button>
       ) : (
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-red-50 px-3 py-2">
+        <div className="mt-auto flex items-center justify-between rounded-xl bg-red-50 px-3 py-2">
           <button
             type="button"
             onClick={() => setQuantity(item.id, quantity - 1)}
@@ -85,6 +95,7 @@ export function ItemListRow({ item }: ItemListRowProps) {
           </button>
         </div>
       )}
+      </div>
     </li>
   );
 }

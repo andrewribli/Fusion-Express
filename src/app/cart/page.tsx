@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useCart } from "@/context/CartContext";
@@ -13,25 +13,14 @@ import {
   formatEta,
   getEstimatedDeliveryTime,
 } from "@/lib/constants";
-import { createCustomMenuItem } from "@/lib/custom-item";
 import { lineTotal } from "@/lib/pricing";
 import { DELIVERY_FEE, formatMenuPrice } from "@/lib/types";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, subtotal, setQuantity, removeItem, addItem, clearCart } =
-    useCart();
-  const [manualName, setManualName] = useState("");
+  const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
   const total = subtotal + DELIVERY_FEE;
   const eta = getEstimatedDeliveryTime();
-
-  function handleManualAdd(e: React.FormEvent) {
-    e.preventDefault();
-    const name = manualName.trim();
-    if (!name) return;
-    addItem(createCustomMenuItem(name));
-    setManualName("");
-  }
 
   function handleCancelOrder() {
     clearCart();
@@ -41,7 +30,7 @@ export default function CartPage() {
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50">
+        <LakersWallpaper>
           <AppHeader showBack backHref="/menu" title="Your Cart" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
@@ -149,39 +138,8 @@ export default function CartPage() {
                 </button>
               </>
             )}
-
-            <form
-              onSubmit={handleManualAdd}
-              className="mt-6 rounded-2xl border border-dashed border-orange-200 bg-white p-4 shadow-sm"
-            >
-              <label
-                htmlFor="manual-item"
-                className="block text-sm font-semibold text-gray-900"
-              >
-                Did we miss something? Add your item manually:
-              </label>
-              <div className="mt-2 flex gap-2">
-                <input
-                  id="manual-item"
-                  value={manualName}
-                  onChange={(e) => setManualName(e.target.value)}
-                  placeholder="e.g. 1 biggest Pocari Sweat"
-                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!manualName.trim()}
-                  className="rounded-xl bg-fusion-red px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  Add
-                </button>
-              </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Runner will use best judgment for substitutions and discounts.
-              </p>
-            </form>
           </main>
-        </div>
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );

@@ -1,6 +1,7 @@
 import type { UserProfile } from "@/context/UserContext";
+import { omitUndefined } from "@/lib/omit-undefined";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 
 const USERS_COLLECTION = "users";
 
@@ -26,7 +27,11 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
     runnerPaymentMethod: data.runnerPaymentMethod as UserProfile["runnerPaymentMethod"],
     runnerPaymentId: data.runnerPaymentId ? String(data.runnerPaymentId) : undefined,
     termsAcceptedAt: data.termsAcceptedAt
-      ? String(data.termsAcceptedAt)
+      ? typeof data.termsAcceptedAt === "object" &&
+        data.termsAcceptedAt &&
+        "toDate" in data.termsAcceptedAt
+        ? (data.termsAcceptedAt as Timestamp).toDate().toISOString()
+        : String(data.termsAcceptedAt)
       : undefined,
   };
 }
@@ -47,15 +52,16 @@ export async function createUserProfile(
   profile: Omit<UserProfile, "uid"> & { username: string },
 ): Promise<UserProfile> {
   const now = new Date();
-  const docData = {
-    ...profile,
-    uid,
-    createdAt: Timestamp.fromDate(now),
-    updatedAt: Timestamp.fromDate(now),
-  };
-
   if (isFirebaseConfigured()) {
-    await setDoc(doc(getDb(), USERS_COLLECTION, uid), docData);
+    await setDoc(
+      doc(getDb(), USERS_COLLECTION, uid),
+      omitUndefined({
+        ...profile,
+        uid,
+        createdAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
+      } as Record<string, unknown>),
+    );
   }
 
   return { ...profile, uid };
@@ -66,8 +72,12 @@ export async function updateUserProfileDoc(
   partial: Partial<UserProfile>,
 ): Promise<void> {
   if (!isFirebaseConfigured()) return;
-  await updateDoc(doc(getDb(), USERS_COLLECTION, uid), {
-    ...partial,
-    updatedAt: Timestamp.fromDate(new Date()),
-  });
+  await setDoc(
+    doc(getDb(), USERS_COLLECTION, uid),
+    omitUndefined({
+      ...partial,
+      updatedAt: Timestamp.fromDate(new Date()),
+    } as Record<string, unknown>),
+    { merge: true },
+  );
 }

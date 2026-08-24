@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
 
@@ -12,7 +13,7 @@ export default function ProfilePage() {
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50">
+        <LakersWallpaper>
           <AppHeader title="Profile" />
 
           <main className="mx-auto max-w-[480px] px-4 py-6">
@@ -55,12 +56,12 @@ export default function ProfilePage() {
 
             {!user?.isRunner && (
               <Link
-                href="/runner/terms"
+                href="/runner"
                 className="mt-4 block rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm"
               >
-                <p className="font-semibold text-fusion-red">Become a Runner</p>
+                <p className="font-semibold text-fusion-red">Pick up an order</p>
                 <p className="mt-1 text-xs text-gray-500">
-                  Earn ${7} per delivery
+                  Earn $7 per delivery after a one-time registration
                 </p>
               </Link>
             )}
@@ -78,12 +79,12 @@ export default function ProfilePage() {
                 await logout();
                 window.location.href = "/";
               }}
-              className="mt-6 w-full rounded-xl border border-gray-300 py-3 text-sm font-semibold text-gray-700"
+              className="mt-6 w-full rounded-xl border border-gray-300 bg-white/90 py-3 text-sm font-semibold text-gray-700"
             >
-              Log Out
+              Log out / Sign out
             </button>
           </main>
-        </div>
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );

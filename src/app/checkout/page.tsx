@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { ConfirmOrderModal } from "@/components/ConfirmOrderModal";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useCart } from "@/context/CartContext";
@@ -36,6 +37,7 @@ export default function CheckoutPage() {
   const [customTip, setCustomTip] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [placeError, setPlaceError] = useState("");
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = customTip ? Number(customTip) || 0 : tip;
@@ -48,6 +50,7 @@ export default function CheckoutPage() {
   async function placeOrder() {
     if (!college || !hall || items.length === 0) return;
     setLoading(true);
+    setPlaceError("");
     await requestNotificationPermission();
 
     const orderItems = items.map(({ item, quantity }) => ({
@@ -93,6 +96,11 @@ export default function CheckoutPage() {
       clearCart();
       setShowConfirm(false);
       router.push(`/track?orderId=${orderId}`);
+    } catch (err) {
+      setShowConfirm(false);
+      setPlaceError(
+        err instanceof Error ? err.message : "Could not place order. Try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -108,15 +116,15 @@ export default function CheckoutPage() {
     return (
       <RequireAuth>
         <AppShell>
-          <div className="min-h-screen bg-gray-50">
+          <LakersWallpaper>
             <AppHeader showBack backHref="/cart" title="Checkout" />
             <main className="mx-auto max-w-[480px] px-4 py-8 text-center">
-              <p className="text-sm text-gray-600">Nothing to checkout.</p>
-              <Link href="/home" className="mt-4 inline-block text-fusion-red underline">
+              <p className="text-sm text-white/80">Nothing to checkout.</p>
+              <Link href="/home" className="mt-4 inline-block text-lakers-gold underline">
                 Go shopping
               </Link>
             </main>
-          </div>
+          </LakersWallpaper>
         </AppShell>
       </RequireAuth>
     );
@@ -125,12 +133,17 @@ export default function CheckoutPage() {
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50 pb-8">
+        <LakersWallpaper>
           <AppHeader showBack backHref="/cart" title="Checkout" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
             <PriceDisclaimer className="mb-4" />
-            <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-fusion-red">
+            {placeError && (
+              <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {placeError}
+              </p>
+            )}
+            <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
               Est. delivery by {formatEta(estimatedDeliveryAt)} (~
               {ESTIMATED_DELIVERY_MINUTES} min after order)
             </div>
@@ -268,7 +281,7 @@ export default function CheckoutPage() {
             customerNote={customerNote.trim() || undefined}
             estimatedDeliveryAt={estimatedDeliveryAt}
           />
-        </div>
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );

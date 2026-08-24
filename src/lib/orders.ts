@@ -7,6 +7,7 @@ import {
 } from "@/data/mock-orders";
 import type { Order, OrderStatus } from "@/lib/types";
 import { normalizeOrderStatus } from "@/lib/order-status";
+import { omitUndefined } from "@/lib/omit-undefined";
 import { getDb, getFirebaseStorage, isFirebaseConfigured } from "@/lib/firebase";
 import {
   addDoc,
@@ -18,7 +19,6 @@ import {
   updateDoc,
   where,
   Timestamp,
-  orderBy,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -99,20 +99,23 @@ export async function createOrder(
 
   if (isFirebaseConfigured()) {
     try {
-      const payload = {
+      const payload = omitUndefined({
         ...order,
         status: "pending",
         createdAt: Timestamp.fromDate(now),
         updatedAt: Timestamp.fromDate(now),
         estimatedDeliveryAt: order.estimatedDeliveryAt
           ? Timestamp.fromDate(order.estimatedDeliveryAt)
-          : null,
-      };
+          : undefined,
+      } as Record<string, unknown>);
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
       saveOrderToHistory(ref.id);
       return ref.id;
-    } catch {
-      // fallback to mock
+    } catch (err) {
+      console.error("createOrder Firestore failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not save order. Try again.");
     }
   }
 
@@ -160,38 +163,44 @@ export async function fetchPendingOrders(
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
-      const q = query(
-        collection(getDb(), ORDERS_COLLECTION),
-        where("status", "==", "pending"),
-        orderBy("createdAt", "desc"),
-      );
-      const snap = await getDocs(q);
-      const orders = snap.docs.map((d) =>
-        parseOrder(d.id, d.data() as Record<string, unknown>),
-      );
+      const snap = await getDocs(collection(getDb(), ORDERS_COLLECTION));
+      const orders = snap.docs
+        .map((d) => parseOrder(d.id, d.data() as Record<string, unknown>))
+        .filter((o) => o.status === "pending")
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       return filterOwnOrders(orders, excludeCustomerId);
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("fetchPendingOrders Firestore failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not load available orders.");
     }
   }
 
   return filterOwnOrders(getMockPendingOrders(), excludeCustomerId);
 }
 
+async function fetchAllOrdersFromFirestore(): Promise<Order[]> {
+  const snap = await getDocs(collection(getDb(), ORDERS_COLLECTION));
+  return snap.docs.map((d) =>
+    parseOrder(d.id, d.data() as Record<string, unknown>),
+  );
+}
+
 export async function fetchRunnerOrders(runnerId: string): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
-      const q = query(
-        collection(getDb(), ORDERS_COLLECTION),
-        where("runnerId", "==", runnerId),
-        where("status", "in", ["assigned", "picked"]),
+      const orders = await fetchAllOrdersFromFirestore();
+      return orders.filter(
+        (o) =>
+          o.runnerId === runnerId &&
+          (o.status === "assigned" || o.status === "picked"),
       );
-      const snap = await getDocs(q);
-      return snap.docs.map((d) =>
-        parseOrder(d.id, d.data() as Record<string, unknown>),
-      );
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("fetchRunnerOrders Firestore failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not load your active orders.");
     }
   }
 
@@ -203,17 +212,15 @@ export async function fetchDeliveredOrdersByRunner(
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
-      const q = query(
-        collection(getDb(), ORDERS_COLLECTION),
-        where("runnerId", "==", runnerId),
-        where("status", "==", "delivered"),
+      const orders = await fetchAllOrdersFromFirestore();
+      return orders.filter(
+        (o) => o.runnerId === runnerId && o.status === "delivered",
       );
-      const snap = await getDocs(q);
-      return snap.docs.map((d) =>
-        parseOrder(d.id, d.data() as Record<string, unknown>),
-      );
-    } catch {
-      // fallback
+    } catch (err) {
+      console.error("fetchDeliveredOrdersByRunner Firestore failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not load completed deliveries.");
     }
   }
 

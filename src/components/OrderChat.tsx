@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import {
   canAccessOrderChat,
+  isOwnChatMessage,
   sendChatMessage,
   subscribeChatMessages,
 } from "@/lib/chat";
@@ -91,7 +92,7 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
           </p>
         ) : (
           messages.map((msg) => {
-            const isMine = msg.senderId === senderId;
+            const isMine = isOwnChatMessage(msg, user);
             return (
               <div
                 key={msg.id}

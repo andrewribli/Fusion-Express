@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useUser, getUserAccountId } from "@/context/UserContext";
@@ -18,7 +19,7 @@ import {
   updateRunnerNote,
   uploadDeliveryPhoto,
 } from "@/lib/orders";
-import { addRunnerEarnings, fetchRunner } from "@/lib/runners";
+import { addRunnerEarnings, fetchRunner, findRunnerForUser } from "@/lib/runners";
 import {
   runnerEarningsForOrder,
   RUNNER_EARNINGS_RATE,
@@ -73,45 +74,95 @@ function OrderCard({
 
 export default function RunnerDashboardPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, setRunnerRegistered } = useUser();
   const [tab, setTab] = useState<Tab>("available");
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
   const [delivered, setDelivered] = useState<Order[]>([]);
   const [runnerProfile, setRunnerProfile] = useState<Runner | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [photoFiles, setPhotoFiles] = useState<Record<string, File>>({});
   const [runnerNotes, setRunnerNotes] = useState<Record<string, string>>({});
   const [acceptError, setAcceptError] = useState("");
+  const initialLoad = useRef(true);
 
   const refresh = useCallback(async () => {
-    if (!user?.runnerId) return;
-    setLoading(true);
-    const [p, a, d, r] = await Promise.all([
-      fetchPendingOrders(getUserAccountId(user)),
-      fetchRunnerOrders(user.runnerId),
-      fetchDeliveredOrdersByRunner(user.runnerId),
-      fetchRunner(user.runnerId),
-    ]);
-    setPending(p);
-    setActive(a);
-    setDelivered(d);
-    setRunnerProfile(r);
-    setLoading(false);
-  }, [user?.runnerId, user]);
+    if (!user) return;
+    if (initialLoad.current) setLoading(true);
+    setLoadError("");
+    try {
+      let runnerId = user.runnerId;
+      if (!runnerId) {
+        const found = await findRunnerForUser({
+          uid: user.uid,
+          studentId: user.studentId,
+        });
+        if (found) {
+          runnerId = found.id;
+          setRunnerRegistered(found.id, {
+            method: found.paymentMethod,
+            id: found.paymentId,
+          });
+        }
+      }
+
+      const [p, a, d, r] = await Promise.all([
+        fetchPendingOrders(getUserAccountId(user)),
+        runnerId ? fetchRunnerOrders(runnerId) : Promise.resolve([]),
+        runnerId ? fetchDeliveredOrdersByRunner(runnerId) : Promise.resolve([]),
+        runnerId ? fetchRunner(runnerId) : Promise.resolve(null),
+      ]);
+      setPending(p);
+      setActive(a);
+      setDelivered(d);
+      setRunnerProfile(r);
+    } catch (err) {
+      setLoadError(
+        err instanceof Error ? err.message : "Could not load orders.",
+      );
+    } finally {
+      setLoading(false);
+      initialLoad.current = false;
+    }
+  }, [user, setRunnerRegistered]);
 
   useEffect(() => {
-    if (!user?.isRunner) {
-      router.replace("/runner/terms");
-      return;
+    if (!user) return;
+
+    if (user.isRunner) {
+      void refresh();
+      const interval = setInterval(refresh, 10000);
+      return () => clearInterval(interval);
     }
-    void refresh();
-    const interval = setInterval(refresh, 10000);
-    return () => clearInterval(interval);
-  }, [user, router, refresh]);
+
+    let cancelled = false;
+    void (async () => {
+      const found = await findRunnerForUser({
+        uid: user.uid,
+        studentId: user.studentId,
+      });
+      if (cancelled) return;
+      if (found) {
+        setRunnerRegistered(found.id, {
+          method: found.paymentMethod,
+          id: found.paymentId,
+        });
+        return;
+      }
+      router.replace("/runner/terms");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, router, refresh, setRunnerRegistered]);
 
   async function handleAccept(order: Order) {
-    if (!user?.runnerId) return;
+    if (!user?.runnerId) {
+      setAcceptError("Your runner profile is missing. Open Pick up an order once to finish setup.");
+      return;
+    }
     setAcceptError("");
     try {
       await acceptOrder(
@@ -168,11 +219,11 @@ export default function RunnerDashboardPage() {
   return (
     <RequireAuth>
       <AppShell>
-        <div className="min-h-screen bg-gray-50">
+        <LakersWallpaper>
           <AppHeader title="Runner Dashboard" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
-            <div className="flex rounded-xl bg-gray-100 p-1">
+            <div className="flex rounded-xl bg-black/30 p-1 ring-1 ring-lakers-gold/40">
               {tabs.map((t) => (
                 <button
                   key={t.id}
@@ -180,8 +231,8 @@ export default function RunnerDashboardPage() {
                   onClick={() => setTab(t.id)}
                   className={`flex-1 rounded-lg py-2.5 text-xs font-semibold transition-colors ${
                     tab === t.id
-                      ? "bg-white text-fusion-red shadow-sm"
-                      : "text-gray-600"
+                      ? "bg-lakers-gold text-lakers-navy shadow-sm"
+                      : "text-white/70"
                   }`}
                 >
                   {t.label}
@@ -189,8 +240,14 @@ export default function RunnerDashboardPage() {
               ))}
             </div>
 
+            {loadError && (
+              <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {loadError}
+              </p>
+            )}
+
             {loading && (
-              <p className="mt-4 text-sm text-gray-500">Loading…</p>
+              <p className="mt-4 text-sm text-lakers-gold">Loading…</p>
             )}
 
             {!loading && tab === "available" && (
@@ -235,6 +292,7 @@ export default function RunnerDashboardPage() {
                   <ul className="space-y-3">
                     {active.map((order) => (
                       <OrderCard key={order.id} order={order}>
+                        <OrderChatPanel order={order} compact />
                         {order.status === "assigned" && (
                           <div className="mt-3 space-y-2">
                             <textarea
@@ -257,9 +315,6 @@ export default function RunnerDashboardPage() {
                               Mark as Picked Up
                             </button>
                           </div>
-                        )}
-                        {(order.status === "picked" || order.status === "delivered") && (
-                          <OrderChatPanel order={order} compact />
                         )}
                         {order.status === "picked" && (
                           <div className="mt-3 space-y-2">
@@ -299,12 +354,12 @@ export default function RunnerDashboardPage() {
 
             {!loading && tab === "earnings" && (
               <section className="mt-4 space-y-4">
-                <div className="rounded-2xl bg-gradient-to-br from-fusion-red to-[#c91820] p-5 text-white shadow-md">
-                  <p className="text-sm text-red-100">Total Earned</p>
+                <div className="rounded-2xl bg-gradient-to-br from-lakers-purple to-lakers-navy p-5 text-white shadow-md ring-2 ring-lakers-gold">
+                  <p className="text-sm text-lakers-gold">Total Earned</p>
                   <p className="mt-1 text-3xl font-bold">
                     ${runnerProfile?.totalEarned ?? totalFromDeliveries}
                   </p>
-                  <p className="mt-2 text-xs text-red-100">
+                  <p className="mt-2 text-xs text-white/80">
                     {RUNNER_EARNINGS_RATE * 100}% of ${DELIVERY_FEE} delivery fee =
                     ${earnedPerDelivery} per delivery
                   </p>
@@ -350,7 +405,7 @@ export default function RunnerDashboardPage() {
               </section>
             )}
           </main>
-        </div>
+        </LakersWallpaper>
       </AppShell>
     </RequireAuth>
   );
