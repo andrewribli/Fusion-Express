@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
 
@@ -85,7 +87,14 @@ const SECTIONS = [
 
 export default function RunnerTermsPage() {
   const router = useRouter();
-  const { acceptRunnerTerms } = useUser();
+  const { user, isReady, acceptRunnerTerms } = useUser();
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (user?.isRunner) {
+      router.replace("/runner/dashboard");
+    }
+  }, [isReady, user, router]);
 
   function handleAgree() {
     acceptRunnerTerms();
@@ -94,10 +103,11 @@ export default function RunnerTermsPage() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-white">
+      <LakersWallpaper>
         <AppHeader showBack backHref="/home" title="Runner Terms" />
 
         <main className="mx-auto max-w-[480px] px-4 py-6 pb-32">
+          <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
           <h1 className="text-xl font-bold text-gray-900">
             Runner Terms &amp; Conditions
           </h1>
@@ -119,6 +129,7 @@ export default function RunnerTermsPage() {
               </section>
             ))}
           </div>
+          </div>
 
           <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white p-4 md:static md:mt-10 md:border-0 md:p-0">
             <div className="mx-auto flex max-w-[480px] flex-col gap-3 sm:flex-row">
@@ -138,7 +149,7 @@ export default function RunnerTermsPage() {
             </div>
           </div>
         </main>
-      </div>
+      </LakersWallpaper>
     </RequireAuth>
   );
 }

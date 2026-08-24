@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
+import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
 import { registerRunner } from "@/lib/runners";
@@ -13,7 +15,7 @@ const inputClassName =
 
 export default function RunnerRegisterPage() {
   const router = useRouter();
-  const { user, termsAccepted, setRunnerRegistered } = useUser();
+  const { user, isReady, termsAccepted, setRunnerRegistered } = useUser();
 
   const [fullName, setFullName] = useState(user?.fullName ?? "");
   const [studentId, setStudentId] = useState(user?.studentId ?? "");
@@ -26,10 +28,11 @@ export default function RunnerRegisterPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!isReady) return;
     if (!termsAccepted) {
       router.replace("/runner/terms");
     }
-  }, [termsAccepted, router]);
+  }, [isReady, termsAccepted, router]);
 
   useEffect(() => {
     if (user?.isRunner) {
@@ -44,6 +47,7 @@ export default function RunnerRegisterPage() {
 
     try {
       const runnerId = await registerRunner({
+        uid: user?.uid,
         fullName: fullName.trim(),
         studentId: studentId.trim(),
         phone: phone.trim(),
@@ -67,10 +71,11 @@ export default function RunnerRegisterPage() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-gray-50">
-        <AppHeader showBack backHref="/runner/terms" title="Runner Registration" />
+      <LakersWallpaper>
+        <AppHeader showBack backHref="/home" title="Runner Registration" />
 
         <main className="mx-auto max-w-[480px] px-4 py-6">
+          <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
           <h1 className="text-xl font-bold text-gray-900">Become a Runner</h1>
           <p className="mt-1 text-sm text-gray-500">
             Complete your profile to start accepting deliveries.
@@ -173,9 +178,23 @@ export default function RunnerRegisterPage() {
             >
               {loading ? "Submitting…" : "Submit Registration"}
             </button>
+
+            <Link
+              href="/home"
+              className="block w-full rounded-xl border border-gray-300 py-3 text-center text-sm font-semibold text-gray-700"
+            >
+              Not now — back to home
+            </Link>
+            <Link
+              href="/runner/terms"
+              className="block text-center text-xs font-medium text-gray-500 underline"
+            >
+              Review terms
+            </Link>
           </form>
+          </div>
         </main>
-      </div>
+      </LakersWallpaper>
     </RequireAuth>
   );
 }
