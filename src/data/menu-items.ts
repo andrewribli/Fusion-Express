@@ -1,4 +1,5 @@
 import menuData from "./menu.json";
+import { imageForItem } from "@/data/product-images";
 import type { MenuCategory, MenuItem, PriceType } from "@/lib/types";
 
 interface RawMenuItem {
@@ -33,7 +34,7 @@ function normalizeItem(raw: RawMenuItem): MenuItem {
     bulkDealQty: raw.bulkDealQty,
     bulkDealPrice: raw.bulkDealPrice,
     unit: raw.unit,
-    image: raw.image || undefined,
+    image: imageForItem(raw.id, category),
     priceType: raw.priceType ?? "fixed",
     priceRange: raw.priceRange,
     runnerInputsPrice: raw.runnerInputsPrice ?? false,

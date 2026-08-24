@@ -1,4 +1,5 @@
 import { MENU_ITEMS } from "@/data/menu-items";
+import { imageForItem } from "@/data/product-images";
 import {
   CHILLED_DRINK_IDS,
   getAisle,
@@ -11,17 +12,19 @@ import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 let cachedItems: MenuItem[] | null = null;
 
 function parseFirestoreItem(data: Record<string, unknown>): MenuItem {
+  const id = String(data.id);
+  const category = data.category as MenuItem["category"];
   return {
-    id: String(data.id),
+    id,
     name: String(data.name),
-    category: data.category as MenuItem["category"],
+    category,
     price: Number(data.price),
     salePrice: data.salePrice != null ? Number(data.salePrice) : undefined,
     bulkDealQty: data.bulkDealQty != null ? Number(data.bulkDealQty) : undefined,
     bulkDealPrice:
       data.bulkDealPrice != null ? Number(data.bulkDealPrice) : undefined,
     unit: String(data.unit ?? "each"),
-    image: data.image ? String(data.image) : undefined,
+    image: imageForItem(id, category),
     priceType: (data.priceType as MenuItem["priceType"]) ?? "fixed",
     priceRange: data.priceRange ? String(data.priceRange) : undefined,
     runnerInputsPrice: Boolean(data.runnerInputsPrice),

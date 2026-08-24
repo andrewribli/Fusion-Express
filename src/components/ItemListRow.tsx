@@ -21,12 +21,12 @@ export function ItemListRow({ item }: ItemListRowProps) {
 
   return (
     <li className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white/95 shadow-sm">
-      <div className="relative h-28 w-full">
+      <div className="relative h-28 w-full bg-white">
         <Image
           src={getItemImage(item)}
           alt={item.name}
           fill
-          className="object-cover"
+          className="object-contain p-1"
           sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
         />
       </div>
