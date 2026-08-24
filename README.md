@@ -1,24 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a Turborepo with the Next.js site in `apps/web` and the Expo app in `apps/mobile`. Shared fee math, Firestore helpers, and product data live in `packages/shared`.
 
-## Getting Started
-
-First, run the development server:
+## Web (Vercel)
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The site still deploys with `npx --yes vercel@59.3.0 --prod --yes` from the repo root (`turbo` builds `@fusion-express/web`). Keep Firebase `NEXT_PUBLIC_*` env vars on the Vercel project.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Mobile (Expo)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev:mobile
+```
+
+Copy Firebase keys into `apps/mobile/.env` using the `EXPO_PUBLIC_FIREBASE_*` names in `apps/mobile/.env.example`. Product photos that are local files are loaded from the live website origin.
 
 ## Learn More
 

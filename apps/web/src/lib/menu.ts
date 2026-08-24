@@ -1,68 +1,20 @@
-import { MENU_ITEMS } from "@/data/menu-items";
-import { imageForItem } from "@/data/product-images";
 import {
   CHILLED_DRINK_IDS,
   getAisle,
   type StoreSection,
 } from "@/data/aisles";
 import type { MenuItem } from "@/lib/types";
-import { collection, getDocs } from "firebase/firestore";
-import { getDb, isFirebaseConfigured } from "@/lib/firebase";
+import {
+  filterItemsByQuery,
+  getMenuItemById as getStaticMenuItemById,
+  getStaticMenuItems,
+  loadMenuItems,
+} from "@fusion-express/shared/products";
 
-let cachedItems: MenuItem[] | null = null;
-
-function parseFirestoreItem(data: Record<string, unknown>): MenuItem {
-  const id = String(data.id);
-  const category = data.category as MenuItem["category"];
-  return {
-    id,
-    name: String(data.name),
-    category,
-    price: Number(data.price),
-    salePrice: data.salePrice != null ? Number(data.salePrice) : undefined,
-    bulkDealQty: data.bulkDealQty != null ? Number(data.bulkDealQty) : undefined,
-    bulkDealPrice:
-      data.bulkDealPrice != null ? Number(data.bulkDealPrice) : undefined,
-    unit: String(data.unit ?? "each"),
-    image: imageForItem(id, category),
-    priceType: (data.priceType as MenuItem["priceType"]) ?? "fixed",
-    priceRange: data.priceRange ? String(data.priceRange) : undefined,
-    runnerInputsPrice: Boolean(data.runnerInputsPrice),
-    itemNote: data.itemNote ? String(data.itemNote) : undefined,
-    inStock: data.inStock !== false,
-    sortOrder: Number(data.sortOrder ?? 0),
-    weightKg: data.weightKg != null ? Number(data.weightKg) : 0.2,
-  };
-}
-
-/** Load menu from Firestore `menu` collection, fallback to static JSON */
-export async function loadMenuItems(): Promise<MenuItem[]> {
-  if (cachedItems) return cachedItems;
-
-  if (isFirebaseConfigured()) {
-    try {
-      const snap = await getDocs(collection(getDb(), "menu"));
-      if (!snap.empty) {
-        cachedItems = snap.docs.map((doc) =>
-          parseFirestoreItem(doc.data() as Record<string, unknown>),
-        );
-        return cachedItems;
-      }
-    } catch {
-      // fall through to static menu
-    }
-  }
-
-  cachedItems = MENU_ITEMS;
-  return cachedItems;
-}
-
-export function getStaticMenuItems(): MenuItem[] {
-  return MENU_ITEMS;
-}
+export { loadMenuItems, getStaticMenuItems };
 
 export function getMenuItemById(itemId: string): MenuItem | undefined {
-  return MENU_ITEMS.find((item) => item.id === itemId);
+  return getStaticMenuItemById(itemId);
 }
 
 export function getAisleItems(
@@ -92,7 +44,5 @@ export function getAisleItems(
 }
 
 export function searchItems(items: MenuItem[], query: string): MenuItem[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return items;
-  return items.filter((item) => item.name.toLowerCase().includes(q));
+  return filterItemsByQuery(items, query);
 }

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@fusion-express/shared", "@fusion-express/ui"],
+  distDir: process.env.VERCEL ? "../../.next" : ".next",
   images: {
     remotePatterns: [
       {

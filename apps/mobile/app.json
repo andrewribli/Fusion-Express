@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Fusion Express",
+    "slug": "fusion-express",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fusionexpress",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Fusion Express uses photos for delivery proof."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
