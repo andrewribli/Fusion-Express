@@ -41,6 +41,7 @@ export const REFRIGERATED_AISLES: Aisle[] = [
 ];
 
 export const DRY_AISLES: Aisle[] = [
+  { id: "household-essentials", label: "Household Essentials", section: "dry", menuCategories: ["household-essentials"] },
   { id: "instant-noodles", label: "Instant Noodles", section: "dry", menuCategories: ["instant-noodles", "instant-meals"] },
   { id: "drinks", label: "Drinks (Shelf-stable)", section: "dry", menuCategories: ["drinks"], itemIds: [] },
   { id: "snacks", label: "Snacks & Chips", section: "dry", menuCategories: ["snacks"] },

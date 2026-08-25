@@ -40,6 +40,7 @@ export const CATEGORY_IMAGES: Record<MenuCategory, string> = {
   condiments: AISLE_IMAGES.condiments,
   "coffee-tea": AISLE_IMAGES["coffee-tea"],
   toiletries: AISLE_IMAGES.toiletries,
+  "household-essentials": AISLE_IMAGES.toiletries,
   "tofu-protein": AISLE_IMAGES["dairy-eggs"],
 };
 
@@ -51,13 +52,15 @@ export function getAisleImage(aisleId: string): string {
   return AISLE_IMAGES[aisleId] ?? SECTION_IMAGES.dry;
 }
 
-export function getCategoryImage(category: MenuCategory): string {
-  return CATEGORY_IMAGES[category];
+export function getCategoryImage(category: MenuCategory | string): string {
+  return (
+    CATEGORY_IMAGES[category as MenuCategory] ?? AISLE_IMAGES.toiletries
+  );
 }
 
 export function getItemImage(item: {
   image?: string;
-  category: MenuCategory;
+  category: string;
 }): string {
   if (item.image) return item.image;
   return getCategoryImage(item.category);

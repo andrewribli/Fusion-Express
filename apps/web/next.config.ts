@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "placehold.co",
       },
+      {
+        protocol: "https",
+        hostname: "foodpanda.dhmedia.io",
+      },
+      {
+        protocol: "https",
+        hostname: "images.deliveryhero.io",
+      },
     ],
   },
 };

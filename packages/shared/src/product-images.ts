@@ -43,6 +43,7 @@ const byCategory: Record<string, string> = {
   bread: U.bread,
   "dairy-eggs": U.eggs,
   toiletries: U.toiletry,
+  "household-essentials": U.toiletry,
   meat: U.meat,
   seafood: U.seafood,
   "tofu-protein": U.tofu,

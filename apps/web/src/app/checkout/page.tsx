@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { ConfirmOrderModal } from "@/components/ConfirmOrderModal";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
+import { ManualItemForm } from "@/components/ManualItemForm";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -127,11 +128,16 @@ export default function CheckoutPage() {
         <AppShell>
           <LakersWallpaper>
             <AppHeader showBack backHref="/cart" title="Checkout" />
-            <main className="mx-auto max-w-[480px] px-4 py-8 text-center">
-              <p className="text-sm text-white/80">Nothing to checkout.</p>
-              <Link href="/home" className="mt-4 inline-block text-lakers-gold underline">
-                Go shopping
-              </Link>
+            <main className="mx-auto max-w-[480px] px-4 py-8">
+              <p className="text-center text-sm text-white/80">
+                Nothing to checkout yet. Add a manual item below or keep shopping.
+              </p>
+              <ManualItemForm className="mt-4" />
+              <p className="mt-4 text-center">
+                <Link href="/home" className="text-lakers-gold underline">
+                  Go shopping
+                </Link>
+              </p>
             </main>
           </LakersWallpaper>
         </AppShell>
@@ -193,6 +199,8 @@ export default function CheckoutPage() {
                 </div>
               </div>
             </section>
+
+            <ManualItemForm className="mt-4" />
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">

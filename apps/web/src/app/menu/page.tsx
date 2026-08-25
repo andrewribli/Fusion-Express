@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { FelixOrderCard } from "@/components/FelixOrderCard";
 import { ManualItemForm } from "@/components/ManualItemForm";
+import { MenuGrid } from "@/components/MenuGrid";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
@@ -14,8 +16,13 @@ import { SECTION_META } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
 import { useCart } from "@/context/CartContext";
 import { RUNNER_JUDGMENT_NOTE } from "@/lib/constants";
+import { loadAllProducts } from "@/lib/firestore";
+import {
+  groupProductsByCategory,
+  splitProductsBySection,
+} from "@/lib/firestore-products";
 import { getMenuItemById } from "@/lib/menu";
-import { formatMenuPrice } from "@/lib/types";
+import { formatMenuPrice, type MenuItem } from "@/lib/types";
 
 const FEATURED_IDS = [
   "pocari-sweat-largest",
@@ -25,14 +32,53 @@ const FEATURED_IDS = [
   "fanta-mini-6pack-orange",
 ] as const;
 
+function ProductCategorySections({
+  title,
+  items,
+}: {
+  title: string;
+  items: MenuItem[];
+}) {
+  const groups = useMemo(() => groupProductsByCategory(items), [items]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <section className="mt-6">
+      <h2 className="text-sm font-bold text-lakers-gold">{title}</h2>
+      <p className="mt-1 text-xs text-white/70">{RUNNER_JUDGMENT_NOTE}</p>
+      <div className="mt-3 space-y-6">
+        {groups.map((group) => (
+            <div key={group.category}>
+              <h3 className="text-sm font-semibold text-white">{group.label}</h3>
+              <div className="mt-3">
+                <MenuGrid items={group.items} />
+              </div>
+            </div>
+          ))}
+      </div>
+    </section>
+  );
+}
+
 export default function MenuPage() {
   const { addItem } = useCart();
+  const [products, setProducts] = useState<MenuItem[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const featured = FEATURED_IDS.map((id) => getMenuItemById(id)).filter(
     (item): item is NonNullable<typeof item> => Boolean(item),
   );
 
-  const dry = SECTION_META.dry;
-  const cold = SECTION_META.refrigerated;
+  useEffect(() => {
+    void loadAllProducts()
+      .then(setProducts)
+      .catch(() => setProducts([]))
+      .finally(() => setProductsLoading(false));
+  }, []);
+
+  const { dry, refrigerated } = splitProductsBySection(products);
+  const dryMeta = SECTION_META.dry;
+  const coldMeta = SECTION_META.refrigerated;
 
   return (
     <RequireAuth>
@@ -54,7 +100,7 @@ export default function MenuPage() {
                 imageSrc="/images/aisle-dry.png"
                 imageAlt="Dry goods aisle"
                 title="Non-Refrigerated"
-                subtitle={dry.subtitle}
+                subtitle={dryMeta.subtitle}
                 sideLabel="Left aisle"
               />
               <AislePhotoButton
@@ -62,7 +108,7 @@ export default function MenuPage() {
                 imageSrc="/images/aisle-refrigerated.png"
                 imageAlt="Refrigerated meat counter"
                 title="Refrigerated"
-                subtitle={cold.subtitle}
+                subtitle={coldMeta.subtitle}
                 sideLabel="Right aisle"
               />
             </div>
@@ -72,6 +118,23 @@ export default function MenuPage() {
             <div className="mt-6">
               <FelixOrderCard />
             </div>
+
+            {productsLoading ? (
+              <p className="mt-6 py-8 text-center text-sm text-white/70">
+                Loading products…
+              </p>
+            ) : (
+              <>
+                <ProductCategorySections
+                  title="Non-Refrigerated Items"
+                  items={dry}
+                />
+                <ProductCategorySections
+                  title="Refrigerated Items"
+                  items={refrigerated}
+                />
+              </>
+            )}
 
             <section className="mt-6">
               <h2 className="text-sm font-bold text-lakers-gold">Popular requests</h2>

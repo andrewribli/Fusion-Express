@@ -1,6 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Store catalog. Public read so aisle/menu pages can load without
+    // racing Firebase Auth. Writes still require a signed-in user.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
     match /{document=**} {
       allow read, write: if request.auth != null;
     }

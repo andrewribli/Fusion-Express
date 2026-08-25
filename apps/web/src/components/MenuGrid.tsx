@@ -3,7 +3,7 @@
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { MENU_ITEMS } from "@/data/menu-items";
 import {
-  CATEGORY_LABELS,
+  categoryLabel,
   MENU_CATEGORIES,
   type MenuCategory,
   type MenuItem,
@@ -33,9 +33,15 @@ export function MenuGrid({ items, grouped = false }: MenuGridProps) {
     );
   }
 
-  const categoriesWithItems = MENU_CATEGORIES.filter((cat) =>
-    items.some((item) => item.category === cat),
-  );
+  const categoriesWithItems = [
+    ...new Set(items.map((item) => item.category)),
+  ].sort((a, b) => {
+    const ai = MENU_CATEGORIES.indexOf(a as (typeof MENU_CATEGORIES)[number]);
+    const bi = MENU_CATEGORIES.indexOf(b as (typeof MENU_CATEGORIES)[number]);
+    const av = ai === -1 ? Number.MAX_SAFE_INTEGER : ai;
+    const bv = bi === -1 ? Number.MAX_SAFE_INTEGER : bi;
+    return av - bv || a.localeCompare(b);
+  });
 
   return (
     <div className="space-y-8">
@@ -44,7 +50,7 @@ export function MenuGrid({ items, grouped = false }: MenuGridProps) {
         return (
           <section key={cat}>
             <h2 className="mb-3 text-base font-bold text-gray-900">
-              {CATEGORY_LABELS[cat]}
+              {categoryLabel(cat)}
               <span className="ml-2 text-xs font-normal text-gray-400">
                 {catItems.length}
               </span>

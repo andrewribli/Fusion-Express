@@ -16,6 +16,7 @@ export const MENU_CATEGORIES = [
   "snacks",
   "condiments",
   "toiletries",
+  "household-essentials",
 ] as const;
 
 export type MenuCategory = (typeof MENU_CATEGORIES)[number];
@@ -36,14 +37,38 @@ export const CATEGORY_LABELS: Record<MenuCategory, string> = {
   snacks: "Snacks",
   condiments: "Condiments",
   toiletries: "Toiletries",
+  "household-essentials": "Household Essentials",
 };
+
+export const REFRIGERATED_CATEGORIES = new Set<string>([
+  "meat",
+  "seafood",
+  "dairy-eggs",
+  "frozen",
+  "tofu-protein",
+]);
+
+export function isRefrigeratedCategory(category: string): boolean {
+  return REFRIGERATED_CATEGORIES.has(category);
+}
+
+export function categoryLabel(category: string): string {
+  if (category in CATEGORY_LABELS) {
+    return CATEGORY_LABELS[category as MenuCategory];
+  }
+  return category
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export type PriceType = "fixed" | "variable" | "range";
 
 export interface MenuItem {
   id: string;
   name: string;
-  category: MenuCategory;
+  category: string;
   price: number;
   salePrice?: number;
   bulkDealQty?: number;

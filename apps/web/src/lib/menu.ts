@@ -39,7 +39,7 @@ export function getAisleItems(
   if (!aisle.menuCategories?.length) return [];
 
   return allItems.filter((item) =>
-    aisle.menuCategories!.includes(item.category),
+    aisle.menuCategories!.some((cat) => cat === item.category),
   );
 }
 
