@@ -1,4 +1,5 @@
 import type { ChatMessage } from "@/lib/types";
+import { collectionName } from "@/lib/constants";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import {
   addDoc,
@@ -51,7 +52,7 @@ export async function sendChatMessage(
 
   if (isFirebaseConfigured()) {
     const ref = await addDoc(
-      collection(getDb(), "chats", orderId, "messages"),
+      collection(getDb(), collectionName("chats"), orderId, "messages"),
       {
         ...payload,
         timestamp: Timestamp.fromDate(now),
@@ -75,7 +76,7 @@ export async function fetchChatMessages(
   if (isFirebaseConfigured()) {
     try {
       const q = query(
-        collection(getDb(), "chats", orderId, "messages"),
+        collection(getDb(), collectionName("chats"), orderId, "messages"),
         orderBy("timestamp", "asc"),
       );
       const snap = await getDocs(q);
@@ -97,7 +98,7 @@ export function subscribeChatMessages(
   if (isFirebaseConfigured()) {
     try {
       const q = query(
-        collection(getDb(), "chats", orderId, "messages"),
+        collection(getDb(), collectionName("chats"), orderId, "messages"),
         orderBy("timestamp", "asc"),
       );
       return onSnapshot(q, (snap) => {

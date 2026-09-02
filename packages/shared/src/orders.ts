@@ -5,7 +5,8 @@ import {
   getMockPendingOrders,
   getMockRunnerOrders,
 } from "./mock-orders";
-import type { Order, OrderStatus } from "./types";
+import { collectionName, isStagingApp, storagePath } from "./app-env";
+import type { Order, OrderItem, OrderStatus, PriceAdjustmentStatus } from "./types";
 import { normalizeOrderStatus } from "./order-status";
 import { omitUndefined } from "./omit-undefined";
 import { getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
@@ -16,14 +17,17 @@ import {
   getDoc,
   getDocs,
   query,
+  runTransaction,
   updateDoc,
   where,
   Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const ORDERS_COLLECTION = "orders";
-const ORDER_HISTORY_KEY = "fusion_order_history";
+const ORDERS_COLLECTION = collectionName("orders");
+const ORDER_HISTORY_KEY = isStagingApp()
+  ? "fusion_order_history_test"
+  : "fusion_order_history";
 let memoryHistoryIds: string[] = [];
 
 function readHistoryIds(): string[] {
@@ -68,13 +72,33 @@ function toDate(value: unknown): Date {
   return new Date(String(value));
 }
 
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+function parseItems(raw: unknown): Order["items"] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => {
+    const row = item as Record<string, unknown>;
+    return {
+      itemId: String(row.itemId ?? ""),
+      name: String(row.name ?? ""),
+      price: Number(row.price ?? 0),
+      quantity: Number(row.quantity ?? 0),
+      weightKg: row.weightKg != null ? Number(row.weightKg) : undefined,
+      actualPrice: row.actualPrice != null ? Number(row.actualPrice) : undefined,
+    };
+  });
+}
+
 function parseOrder(id: string, data: Record<string, unknown>): Order {
+  const loc = data.runnerLocation as Record<string, unknown> | undefined;
   return {
     id,
     sessionId: String(data.sessionId ?? ""),
     customerId: String(data.customerId ?? data.sessionId ?? ""),
     customerName: data.customerName ? String(data.customerName) : undefined,
-    items: (data.items as Order["items"]) ?? [],
+    items: parseItems(data.items),
     status: normalizeOrderStatus(String(data.status ?? "pending")),
     college: String(data.college ?? ""),
     hall: String(data.hall ?? ""),
@@ -106,7 +130,50 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
     deliveredAt: data.deliveredAt ? toDate(data.deliveredAt) : undefined,
+    estimatedSubtotal:
+      data.estimatedSubtotal != null ? Number(data.estimatedSubtotal) : undefined,
+    actualSubtotal:
+      data.actualSubtotal != null ? Number(data.actualSubtotal) : undefined,
+    priceDifference:
+      data.priceDifference != null ? Number(data.priceDifference) : undefined,
+    priceAdjustmentStatus: data.priceAdjustmentStatus as
+      | PriceAdjustmentStatus
+      | undefined,
+    refundAmount: data.refundAmount != null ? Number(data.refundAmount) : undefined,
+    refundedAt: data.refundedAt ? toDate(data.refundedAt) : undefined,
+    tillPricesSubmittedAt: data.tillPricesSubmittedAt
+      ? toDate(data.tillPricesSubmittedAt)
+      : undefined,
+    customerApprovedPriceAt: data.customerApprovedPriceAt
+      ? toDate(data.customerApprovedPriceAt)
+      : undefined,
+    fusionPaidByPlatform: data.fusionPaidByPlatform !== false,
+    runnerLocation:
+      loc && typeof loc.lat === "number" && typeof loc.lng === "number"
+        ? {
+            lat: Number(loc.lat),
+            lng: Number(loc.lng),
+            updatedAt: loc.updatedAt ? toDate(loc.updatedAt) : new Date(),
+          }
+        : undefined,
   };
+}
+
+export function orderActualSubtotal(items: OrderItem[]): number {
+  return round2(
+    items.reduce(
+      (sum, item) => sum + (item.actualPrice ?? item.price) * item.quantity,
+      0,
+    ),
+  );
+}
+
+export function orderGrandTotal(
+  subtotal: number,
+  deliveryFee: number,
+  tip = 0,
+): number {
+  return round2(subtotal + deliveryFee + tip);
 }
 
 export async function createOrder(
@@ -120,6 +187,8 @@ export async function createOrder(
       const payload = omitUndefined({
         ...order,
         status: "pending",
+        fusionPaidByPlatform: true,
+        estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
         createdAt: Timestamp.fromDate(now),
         updatedAt: Timestamp.fromDate(now),
         estimatedDeliveryAt: order.estimatedDeliveryAt
@@ -141,6 +210,8 @@ export async function createOrder(
     ...order,
     id,
     status: "pending",
+    fusionPaidByPlatform: true,
+    estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
     createdAt: now,
     updatedAt: now,
   };
@@ -168,6 +239,13 @@ export class SelfPickupError extends Error {
   constructor() {
     super("You cannot pick up your own order.");
     this.name = "SelfPickupError";
+  }
+}
+
+export class OrderAlreadyTakenError extends Error {
+  constructor() {
+    super("This order was already accepted by another runner.");
+    this.name = "OrderAlreadyTakenError";
   }
 }
 
@@ -251,13 +329,39 @@ export async function acceptOrder(
   runnerName: string,
   runnerCustomerId: string,
 ): Promise<void> {
+  if (isFirebaseConfigured()) {
+    const db = getDb();
+    const orderRef = doc(db, ORDERS_COLLECTION, orderId);
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(orderRef);
+      if (!snap.exists()) throw new Error("Order not found");
+      const order = parseOrder(snap.id, snap.data() as Record<string, unknown>);
+      if (order.customerId === runnerCustomerId) {
+        throw new SelfPickupError();
+      }
+      if (order.status !== "pending") {
+        if (order.runnerId === runnerId) return;
+        throw new OrderAlreadyTakenError();
+      }
+      tx.update(orderRef, {
+        status: "assigned",
+        runnerId,
+        runnerName,
+        updatedAt: Timestamp.fromDate(new Date()),
+      });
+    });
+    return;
+  }
+
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-
   if (order.customerId === runnerCustomerId) {
     throw new SelfPickupError();
   }
-
+  if (order.status !== "pending") {
+    if (order.runnerId === runnerId) return;
+    throw new OrderAlreadyTakenError();
+  }
   await updateOrderStatus(orderId, "assigned", { runnerId, runnerName });
 }
 
@@ -319,7 +423,7 @@ export async function uploadDeliveryPhoto(
     try {
       const storageRef = ref(
         getFirebaseStorage(),
-        `delivery-proofs/${orderId}/${name}`,
+        storagePath(`delivery-proofs/${orderId}/${name}`),
       );
       await uploadBytes(storageRef, file);
       return await getDownloadURL(storageRef);
@@ -345,8 +449,12 @@ export async function cancelOrder(orderId: string, customerId: string): Promise<
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
   if (order.customerId !== customerId) throw new Error("Not authorized");
-  if (order.status !== "pending") {
-    throw new Error("Order can only be cancelled while pending");
+  const canCancelPending = order.status === "pending";
+  const canCancelPriceIncrease =
+    order.priceAdjustmentStatus === "pending_customer" &&
+    (order.status === "assigned" || order.status === "pending");
+  if (!canCancelPending && !canCancelPriceIncrease) {
+    throw new Error("Order can only be cancelled before pickup");
   }
   await updateOrderStatus(orderId, "cancelled");
 }
@@ -412,4 +520,201 @@ export async function updateRunnerNote(
 export async function countRunnerActiveOrders(runnerId: string): Promise<number> {
   const orders = await fetchRunnerOrders(runnerId);
   return orders.length;
+}
+
+async function patchOrder(
+  orderId: string,
+  updates: Record<string, unknown>,
+  applyMock: (order: Order) => void,
+): Promise<void> {
+  const now = new Date();
+  const withTime = {
+    ...updates,
+    updatedAt: Timestamp.fromDate(now),
+  };
+  if (isFirebaseConfigured()) {
+    try {
+      await updateDoc(
+        doc(getDb(), ORDERS_COLLECTION, orderId),
+        omitUndefined(withTime),
+      );
+      return;
+    } catch {
+      // fallback
+    }
+  }
+  const order = getMockOrderById(orderId);
+  if (order) {
+    applyMock(order);
+    order.updatedAt = now;
+  }
+}
+
+export async function submitTillPrices(
+  orderId: string,
+  actualUnitPrices: Record<string, number>,
+): Promise<Order | null> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "assigned") {
+    throw new Error("Till prices can only be submitted before pickup");
+  }
+
+  const items = order.items.map((item) => {
+    const actual = actualUnitPrices[item.itemId];
+    if (actual == null || Number.isNaN(actual) || actual < 0) {
+      throw new Error(`Enter the Fusion till price for ${item.name}`);
+    }
+    return { ...item, actualPrice: round2(actual) };
+  });
+
+  const estimatedSubtotal = order.estimatedSubtotal ?? order.subtotal;
+  const actualSubtotal = orderActualSubtotal(items);
+  const priceDifference = round2(actualSubtotal - estimatedSubtotal);
+  const tip = order.tip ?? 0;
+  const now = new Date();
+
+  let priceAdjustmentStatus: PriceAdjustmentStatus = "none";
+  let refundAmount: number | undefined;
+  let subtotal = order.subtotal;
+  let total = order.total;
+  let status = order.status;
+
+  if (priceDifference < 0) {
+    subtotal = actualSubtotal;
+    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    if (order.paymentReceived) {
+      priceAdjustmentStatus = "refund_pending";
+      refundAmount = round2(-priceDifference);
+    } else {
+      priceAdjustmentStatus = "none";
+      refundAmount = undefined;
+    }
+  } else if (priceDifference > 0) {
+    priceAdjustmentStatus = "pending_customer";
+  } else {
+    subtotal = actualSubtotal;
+    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+  }
+
+  const firestoreUpdates: Record<string, unknown> = {
+    items,
+    estimatedSubtotal,
+    actualSubtotal,
+    priceDifference,
+    priceAdjustmentStatus,
+    refundAmount,
+    subtotal,
+    total,
+    tillPricesSubmittedAt: Timestamp.fromDate(now),
+    status,
+  };
+
+  await patchOrder(orderId, firestoreUpdates, (mock) => {
+    mock.items = items;
+    mock.estimatedSubtotal = estimatedSubtotal;
+    mock.actualSubtotal = actualSubtotal;
+    mock.priceDifference = priceDifference;
+    mock.priceAdjustmentStatus = priceAdjustmentStatus;
+    mock.refundAmount = refundAmount;
+    mock.subtotal = subtotal;
+    mock.total = total;
+    mock.tillPricesSubmittedAt = now;
+  });
+
+  return fetchOrder(orderId);
+}
+
+export async function approvePriceIncrease(
+  orderId: string,
+  customerId: string,
+): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.customerId !== customerId) throw new Error("Not authorized");
+  if (order.priceAdjustmentStatus !== "pending_customer") {
+    throw new Error("This order is not waiting for a price approval");
+  }
+  const actualSubtotal = order.actualSubtotal ?? orderActualSubtotal(order.items);
+  const total = orderGrandTotal(actualSubtotal, order.deliveryFee, order.tip ?? 0);
+  const now = new Date();
+  await patchOrder(
+    orderId,
+    {
+      subtotal: actualSubtotal,
+      total,
+      priceAdjustmentStatus: "approved",
+      customerApprovedPriceAt: Timestamp.fromDate(now),
+    },
+    (mock) => {
+      mock.subtotal = actualSubtotal;
+      mock.total = total;
+      mock.priceAdjustmentStatus = "approved";
+      mock.customerApprovedPriceAt = now;
+    },
+  );
+}
+
+export async function updateRunnerLocation(
+  orderId: string,
+  lat: number,
+  lng: number,
+): Promise<void> {
+  const now = new Date();
+  await patchOrder(
+    orderId,
+    {
+      runnerLocation: {
+        lat,
+        lng,
+        updatedAt: Timestamp.fromDate(now),
+      },
+    },
+    (mock) => {
+      mock.runnerLocation = { lat, lng, updatedAt: now };
+    },
+  );
+}
+
+export async function markRefundComplete(orderId: string): Promise<void> {
+  const now = new Date();
+  await patchOrder(
+    orderId,
+    {
+      priceAdjustmentStatus: "refunded",
+      refundedAt: Timestamp.fromDate(now),
+    },
+    (mock) => {
+      mock.priceAdjustmentStatus = "refunded";
+      mock.refundedAt = now;
+    },
+  );
+}
+
+export async function fetchOrdersNeedingRefund(): Promise<Order[]> {
+  const orders = isFirebaseConfigured()
+    ? await fetchAllOrdersFromFirestore()
+    : [
+        ...getMockPendingOrders(),
+        ...getMockActiveOrders(),
+        ...getMockRunnerOrders("demo-runner", true),
+      ];
+  return orders
+    .filter((o) => o.priceAdjustmentStatus === "refund_pending")
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+}
+
+export function tillPricesReady(order: Order): boolean {
+  return Boolean(order.tillPricesSubmittedAt);
+}
+
+export function awaitingCustomerPriceApproval(order: Order): boolean {
+  return order.priceAdjustmentStatus === "pending_customer";
+}
+
+export function canMarkPickedUp(order: Order): boolean {
+  if (order.status !== "assigned") return false;
+  if (!tillPricesReady(order)) return false;
+  if (awaitingCustomerPriceApproval(order)) return false;
+  return true;
 }

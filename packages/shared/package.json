@@ -7,15 +7,20 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./app-env": "./src/app-env.ts",
     "./delivery": "./src/delivery.ts",
     "./orders": "./src/orders.ts",
     "./products": "./src/products.ts",
     "./product-images": "./src/product-images.ts",
+    "./resolve-image": "./src/resolve-image.ts",
     "./firebase": "./src/firebase.ts",
     "./auth": "./src/auth.ts",
+    "./cuhk-email": "./src/cuhk-email.ts",
     "./types": "./src/types.ts",
     "./locations": "./src/locations.ts",
-    "./mock-orders": "./src/mock-orders.ts"
+    "./mock-orders": "./src/mock-orders.ts",
+    "./data/foodpanda-fusion-catalog.json": "./data/foodpanda-fusion-catalog.json",
+    "./data/product-image-overrides.json": "./data/product-image-overrides.json"
   },
   "dependencies": {
     "firebase": "^12.17.1"

@@ -12,7 +12,10 @@
     "authorizedDomains": [
       "localhost",
       "fusion-express-6a438.firebaseapp.com",
-      "fusion-express-blush.vercel.app"
+      "servecart.vercel.app",
+      "gracerun.vercel.app",
+      "fusion-express-blush.vercel.app",
+      "staging-servecart.vercel.app"
     ]
   },
   "storage": {

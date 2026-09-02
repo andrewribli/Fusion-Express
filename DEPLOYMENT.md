@@ -4,7 +4,7 @@ Get a live URL Felix can open on his phone, create an account, place his Shin Ra
 
 ## What Felix will do
 
-1. Open your Vercel URL (e.g. `https://fusion-express.vercel.app`)
+1. Open your Vercel URL (e.g. `https://gracerun.vercel.app`)
 2. Tap **Create Account** → username `felix`, password of his choice
 3. Fill in name, SID, college/hall/room
 4. On Home → tap **Add to Cart & Checkout** (pre-built Shin Ramen × 4 deal — $36 subtotal)
@@ -122,6 +122,25 @@ This uploads the menu including **Shin Ramen – Bowl Noodle** (4 for $36 deal) 
 Fallback (if Shin Ramen deal removed): 3 sale cup noodles @ $8 each = $24 subtotal.
 
 One-tap on Home: **Add to Cart & Checkout**.
+
+---
+
+## Staging vs production
+
+| Git branch | Vercel | URL | Firestore |
+|------------|--------|-----|-----------|
+| `main` | Production | https://gracerun.vercel.app (https://servecart.vercel.app redirects here) | Live collections (`orders`, `users`, …) |
+| `staging` | Preview | https://staging-servecart.vercel.app | `*_test` collections (`orders_test`, `users_test`, …) |
+
+Set `NEXT_PUBLIC_APP_ENV=staging` on the **Preview** environment in Vercel (Project → Settings → Environment Variables). Leave Production unset or `production`.
+
+The staging site shows a **STAGING — not for real orders** banner. It uses the same Firebase project (`fusion-express-6a438`) but writes orders, users, runners, usernames, and chats to `*_test` collections. The product catalog still reads live `products` if `products_test` is empty.
+
+Firebase Authentication is still shared. Use a different email on staging than on production.
+
+Add `staging-servecart.vercel.app` (and the Vercel git preview host) under Firebase Authentication → Settings → Authorized domains.
+
+Assign the domain to the `staging` git branch: Vercel → Project → Settings → Domains → add `staging-servecart.vercel.app` → Git Branch `staging`.
 
 ---
 

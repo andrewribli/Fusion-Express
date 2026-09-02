@@ -1,5 +1,7 @@
 import menuData from "../data/menu.json";
 import { imageForItem } from "./product-images";
+import { resolveProductImage } from "./resolve-image";
+import { collectionName } from "./app-env";
 import { getDb, isFirebaseConfigured } from "./firebase";
 import type { MenuCategory, MenuItem, PriceType } from "./types";
 import { collection, getDocs } from "firebase/firestore";
@@ -36,7 +38,12 @@ function normalizeItem(raw: RawMenuItem): MenuItem {
     bulkDealQty: raw.bulkDealQty,
     bulkDealPrice: raw.bulkDealPrice,
     unit: raw.unit,
-    image: imageForItem(raw.id, category),
+    image:
+      resolveProductImage({
+        id: raw.id,
+        name: raw.name,
+        image: raw.image,
+      }) ?? imageForItem(raw.id, category),
     priceType: raw.priceType ?? "fixed",
     priceRange: raw.priceRange,
     runnerInputsPrice: raw.runnerInputsPrice ?? false,
@@ -80,7 +87,7 @@ export function toFirestoreMenuDoc(item: MenuItem) {
   };
 }
 
-const DEFAULT_WEB_ORIGIN = "https://fusion-express-blush.vercel.app";
+const DEFAULT_WEB_ORIGIN = "https://gracerun.vercel.app";
 
 export function webAssetOrigin(): string {
   const fromEnv =
@@ -114,7 +121,12 @@ function parseFirestoreItem(data: Record<string, unknown>): MenuItem {
     bulkDealPrice:
       data.bulkDealPrice != null ? Number(data.bulkDealPrice) : undefined,
     unit: String(data.unit ?? "each"),
-    image: imageForItem(id, category),
+    image:
+      resolveProductImage({
+        id,
+        name: String(data.name),
+        image: data.image ? String(data.image) : undefined,
+      }) ?? imageForItem(id, category),
     priceType: (data.priceType as MenuItem["priceType"]) ?? "fixed",
     priceRange: data.priceRange ? String(data.priceRange) : undefined,
     runnerInputsPrice: Boolean(data.runnerInputsPrice),
@@ -130,7 +142,7 @@ export async function loadMenuItems(): Promise<MenuItem[]> {
 
   if (isFirebaseConfigured()) {
     try {
-      const snap = await getDocs(collection(getDb(), "menu"));
+      const snap = await getDocs(collection(getDb(), collectionName("menu")));
       if (!snap.empty) {
         cachedItems = snap.docs.map((doc) =>
           parseFirestoreItem(doc.data() as Record<string, unknown>),

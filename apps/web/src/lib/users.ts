@@ -1,9 +1,10 @@
 import type { UserProfile } from "@/context/UserContext";
 import { omitUndefined } from "@/lib/omit-undefined";
+import { collectionName } from "@/lib/constants";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
-import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, setDoc, Timestamp, deleteField } from "firebase/firestore";
 
-const USERS_COLLECTION = "users";
+const USERS_COLLECTION = collectionName("users");
 
 export type UserProfileDoc = UserProfile & {
   username: string;
@@ -15,6 +16,7 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
   return {
     uid,
     username: String(data.username ?? ""),
+    email: data.email ? String(data.email) : undefined,
     fullName: String(data.fullName ?? ""),
     chineseName: String(data.chineseName ?? ""),
     studentId: String(data.studentId ?? ""),
@@ -33,6 +35,14 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         ? (data.termsAcceptedAt as Timestamp).toDate().toISOString()
         : String(data.termsAcceptedAt)
       : undefined,
+    cuhkEmail: data.cuhkEmail ? String(data.cuhkEmail) : undefined,
+    cuhkVerifiedAt: data.cuhkVerifiedAt
+      ? typeof data.cuhkVerifiedAt === "object" &&
+        data.cuhkVerifiedAt &&
+        "toDate" in data.cuhkVerifiedAt
+        ? (data.cuhkVerifiedAt as Timestamp).toDate().toISOString()
+        : String(data.cuhkVerifiedAt)
+      : undefined,
   };
 }
 
@@ -45,6 +55,17 @@ export async function fetchUserProfile(uid: string): Promise<UserProfile | null>
   } catch {
     return null;
   }
+}
+
+export async function fetchAllUsers(): Promise<UserProfile[]> {
+  if (!isFirebaseConfigured()) return [];
+  const snap = await getDocs(collection(getDb(), USERS_COLLECTION));
+  const users = snap.docs.map((d) =>
+    parseUserDoc(d.id, d.data() as Record<string, unknown>),
+  );
+  return users.sort((a, b) =>
+    a.fullName.localeCompare(b.fullName, "en", { sensitivity: "base" }),
+  );
 }
 
 export async function createUserProfile(
@@ -78,6 +99,21 @@ export async function updateUserProfileDoc(
       ...partial,
       updatedAt: Timestamp.fromDate(new Date()),
     } as Record<string, unknown>),
+    { merge: true },
+  );
+}
+
+export async function clearRunnerFromProfile(uid: string): Promise<void> {
+  if (!isFirebaseConfigured()) return;
+  await setDoc(
+    doc(getDb(), USERS_COLLECTION, uid),
+    {
+      isRunner: false,
+      runnerId: deleteField(),
+      runnerPaymentMethod: deleteField(),
+      runnerPaymentId: deleteField(),
+      updatedAt: Timestamp.fromDate(new Date()),
+    },
     { merge: true },
   );
 }

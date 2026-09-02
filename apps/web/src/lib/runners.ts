@@ -1,4 +1,5 @@
 import type { Runner, RunnerRegistrationInput } from "@/lib/types";
+import { collectionName } from "@/lib/constants";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { omitUndefined } from "@/lib/omit-undefined";
 import {
@@ -11,7 +12,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 
-const RUNNERS_COLLECTION = "runners";
+const RUNNERS_COLLECTION = collectionName("runners");
 const mockRunners = new Map<string, Runner>();
 
 function parseRunner(id: string, data: Record<string, unknown>): Runner {
@@ -36,9 +37,46 @@ function parseRunner(id: string, data: Record<string, unknown>): Runner {
   };
 }
 
+async function claimRunnerUid(runner: Runner, uid: string): Promise<Runner> {
+  if (runner.uid === uid) return runner;
+  if (isFirebaseConfigured()) {
+    try {
+      await updateDoc(doc(getDb(), RUNNERS_COLLECTION, runner.id), { uid });
+    } catch {
+      // still return claimed in memory for this session
+    }
+  } else {
+    mockRunners.set(runner.id, { ...runner, uid });
+  }
+  return { ...runner, uid };
+}
+
+function pickRunnerForUser(
+  runners: Runner[],
+  opts: { uid?: string; studentId?: string },
+): Runner | null {
+  if (opts.uid) {
+    const byUid = runners.find((r) => r.uid === opts.uid);
+    if (byUid) return byUid;
+  }
+  if (opts.uid && opts.studentId) {
+    const orphan = runners.find(
+      (r) => r.studentId === opts.studentId && !r.uid,
+    );
+    if (orphan) return orphan;
+  }
+  return null;
+}
+
 export async function registerRunner(
   input: RunnerRegistrationInput,
 ): Promise<string> {
+  const existing = await findRunnerForUser({
+    uid: input.uid,
+    studentId: input.studentId,
+  });
+  if (existing) return existing.id;
+
   const now = new Date();
   const payload = {
     ...input,
@@ -81,29 +119,25 @@ export async function findRunnerForUser(opts: {
   uid?: string;
   studentId?: string;
 }): Promise<Runner | null> {
-  if (isFirebaseConfigured()) {
-    try {
-      const snap = await getDocs(collection(getDb(), RUNNERS_COLLECTION));
-      const runners = snap.docs.map((d) =>
-        parseRunner(d.id, d.data() as Record<string, unknown>),
-      );
-      return (
-        runners.find((r) => opts.uid && r.uid === opts.uid) ??
-        runners.find((r) => opts.studentId && r.studentId === opts.studentId) ??
-        null
-      );
-    } catch {
-      return null;
-    }
-  }
+  const runners = isFirebaseConfigured()
+    ? await (async () => {
+        try {
+          const snap = await getDocs(collection(getDb(), RUNNERS_COLLECTION));
+          return snap.docs.map((d) =>
+            parseRunner(d.id, d.data() as Record<string, unknown>),
+          );
+        } catch {
+          return [] as Runner[];
+        }
+      })()
+    : [...mockRunners.values()];
 
-  return (
-    [...mockRunners.values()].find((r) => opts.uid && r.uid === opts.uid) ??
-    [...mockRunners.values()].find(
-      (r) => opts.studentId && r.studentId === opts.studentId,
-    ) ??
-    null
-  );
+  const picked = pickRunnerForUser(runners, opts);
+  if (!picked) return null;
+  if (opts.uid && !picked.uid) {
+    return claimRunnerUid(picked, opts.uid);
+  }
+  return picked;
 }
 
 export async function addRunnerEarnings(
