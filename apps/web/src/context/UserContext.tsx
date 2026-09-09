@@ -22,6 +22,7 @@ import { findRunnerForUser } from "@/lib/runners";
 export interface UserProfile {
   uid?: string;
   username?: string;
+  email?: string;
   fullName: string;
   chineseName: string;
   studentId: string;
@@ -34,6 +35,8 @@ export interface UserProfile {
   runnerPaymentMethod?: "PayMe" | "FPS";
   runnerPaymentId?: string;
   termsAcceptedAt?: string;
+  cuhkEmail?: string;
+  cuhkVerifiedAt?: string;
 }
 
 const USER_STORAGE_KEY = "fusion_user_profile";
