@@ -4,6 +4,1318 @@
       "name": "Groceries",
       "subcategories": [
         {
+          "name": "Toiletries",
+          "items": [
+            {
+              "name": "Darlie Double Action Oral Care Travel Kit",
+              "price": 12.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Darlie",
+              "weight": 0.05
+            },
+            {
+              "name": "Colgate Charcoal Travel Kit",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Colgate",
+              "weight": 0.05
+            },
+            {
+              "name": "Colgate Sensitive Pro-Relief Toothpaste",
+              "price": 49.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Colgate",
+              "weight": 0.075
+            },
+            {
+              "name": "Colgate Total Active Prevention Toothpaste",
+              "price": 54.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Colgate",
+              "weight": 0.095
+            },
+            {
+              "name": "Dettol Original Soap 3pcs",
+              "price": 36.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dettol",
+              "weight": 0.3
+            },
+            {
+              "name": "Dove Beauty Bar",
+              "price": 13.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove",
+              "weight": 0.09
+            },
+            {
+              "name": "Vidal Sasson Moisturizing Anti-Dandruff Shampoo",
+              "price": 67.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Vidal Sasson",
+              "weight": 0.75
+            },
+            {
+              "name": "Vidal Sasson Light & Soft Smooth Shampoo",
+              "price": 67.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Vidal Sasson",
+              "weight": 0.75
+            },
+            {
+              "name": "Sebamed Oily Scalp Shampoo",
+              "price": 116.8,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Sebamed",
+              "weight": 0.4
+            },
+            {
+              "name": "Tresemme Conditioner Cleanse & Replenish",
+              "price": 75.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Tresemme",
+              "weight": 0.94
+            },
+            {
+              "name": "Dove Peptide Intense Repair Shampoo",
+              "price": 59.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove",
+              "weight": 0.58,
+              "bulkDealPrice": 119.8,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Dove Elastin Long & Thick Shampoo",
+              "price": 59.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove",
+              "weight": 0.58,
+              "bulkDealPrice": 119.8,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Pantene Milky Repair Shampoo",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Pantene",
+              "weight": 0.65
+            },
+            {
+              "name": "Pantene Anti-Hair Breakage Shampoo",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Pantene",
+              "weight": 0.65
+            },
+            {
+              "name": "Pantene Silky Smooth Conditioner",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Pantene",
+              "weight": 0.65
+            },
+            {
+              "name": "WALCH Walch Hand Wash Gel Refreshing 450ml*3+hand San 20ml",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WALCH",
+              "weight": 0.45
+            },
+            {
+              "name": "KIREI KIREI Anti-bac Foaming Hand Wash (variant unclear)",
+              "price": 35.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "KIREI KIREI",
+              "weight": 0.49
+            },
+            {
+              "name": "WATSONS Green Tea + Apple Handwash",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.5
+            },
+            {
+              "name": "Bioré Zero Deodorant Roll On (Unscented)",
+              "price": 49.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "BIORE",
+              "weight": 0.04
+            },
+            {
+              "name": "REXONA deodorant aerosol (72-hour variant unclear)",
+              "price": 49.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "REXONA"
+            },
+            {
+              "name": "NIVEA Invisible Black & White Power Spray",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "NIVEA",
+              "weight": 0.15
+            },
+            {
+              "name": "NIVEA Extra Whitening Spray",
+              "price": 25.1,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "NIVEA",
+              "weight": 0.15
+            },
+            {
+              "name": "NIVEA Invisible Black & White Clear Spray",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "NIVEA",
+              "weight": 0.15
+            },
+            {
+              "name": "Unknown men's deodorant aerosol (black pack)",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown blue/white deodorant (right-edge partial)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown personal-care product (left-edge partial)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "DETTOL Dettol Hand Wash Skincare",
+              "price": 37.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.5
+            },
+            {
+              "name": "DETTOL Dettol Hand Wash Sensitive",
+              "price": 37.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.5
+            },
+            {
+              "name": "LUX Botanicals hand wash (variant unclear)",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "LUX"
+            },
+            {
+              "name": "WATSONS Paw Paw Foam Hand Wash",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.3
+            },
+            {
+              "name": "DETTOL Dettol Foam Anti-bacterial Hand Wash Aloe Vera",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.25
+            },
+            {
+              "name": "WATSONS Anti-Bacterial Hand Wash (variant unclear)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.5
+            },
+            {
+              "name": "WALCH Walch Antibacterial Foaming Hand Wash Refreshing",
+              "price": 43.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WALCH",
+              "weight": 0.29
+            },
+            {
+              "name": "Unknown lavender hand-wash product",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "DETTOL Hand Soap 500g X 3 Tripack (pine)",
+              "price": 80.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL"
+            },
+            {
+              "name": "DETTOL Dettol Antibacterial Skincare Hand Wash 500g Tripack",
+              "price": 80.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL"
+            },
+            {
+              "name": "DOVE Body Wash - Beauty Nourishing",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "Unknown Dove body wash (grey/black variant)",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Dove Body Wash 1000g - Grapefruit & Lime",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Dove Body Wash 1000g - Yuzu & Glacier",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Body Wash - Acai Berry",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Dove Body Wash 1000g - White Peach & White Tea",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DETTOL Dettol Pine Antibacterial Ph-balanced Body Wash",
+              "price": 63.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "Unknown Dettol body wash (brown variant)",
+              "price": 68.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown",
+              "weight": 0.95
+            },
+            {
+              "name": "DETTOL Profresh Peach",
+              "price": 68.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "DETTOL Original Soap 100g 3pcs",
+              "price": 36.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.1
+            },
+            {
+              "name": "DOVE Beauty Nourishing Twin Pack (random Free Gift)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "DOVE Go Fresh Body Wash - Peach Tp (random Free Gift)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "DOVE Go Fresh Body Wash - Lavender+sakura (random Free Gift)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "DOVE Dove Beauty Nourishing + Grapefruit Bp",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "OPAL Moisturising Anti-bacterial Shower Foam",
+              "price": 86.5,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "OPAL"
+            },
+            {
+              "name": "LUX Shower Gel Soft Kiss (variant/size inferred)",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "LUX"
+            },
+            {
+              "name": "Unknown white/red body-wash product",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown dark-purple body-wash product",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown black body-wash product",
+              "price": 43.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "DETTOL Dettol Proskin Aloe Vera & White Jasmine Hand Wash",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.5
+            },
+            {
+              "name": "Unknown Dettol body-wash product (orange cap)",
+              "price": 59.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown blue/white body-wash product (right-edge partial)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "WALCH Walch Hand Wash Gel Refreshing 450ml*3+hand San 20ml",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WALCH",
+              "weight": 0.45
+            },
+            {
+              "name": "KIREI KIREI Anti-bac Foaming Hw (baby Powder)",
+              "price": 35.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "KIREI KIREI",
+              "weight": 0.49,
+              "bulkDealPrice": 59.5,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "WATSONS Antibacterial Foaming Hand Wash - Wild Berry",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.3
+            },
+            {
+              "name": "Bioré Zero Deodorant Roll On (Unscented)",
+              "price": 49.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "BIORE",
+              "weight": 0.04
+            },
+            {
+              "name": "REXONA Rexona Women Aerosol 135ml - Cotton Dry",
+              "price": 29.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "REXONA",
+              "weight": 0.135
+            },
+            {
+              "name": "NIVEA Invisible Black & White Power Spray",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "NIVEA",
+              "weight": 0.15
+            },
+            {
+              "name": "NIVEA Extra Whitening Spray",
+              "price": 25.1,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "NIVEA",
+              "weight": 0.15
+            },
+            {
+              "name": "NIVEA Invisible Black & White Clear Spray",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "NIVEA",
+              "weight": 0.15
+            },
+            {
+              "name": "DOVE Men+Care Invisible Dry aerosol (variant/price unclear)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 0.15
+            },
+            {
+              "name": "Unknown Dove deodorant aerosol (right-edge partial)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "DETTOL Dettol Hand Wash Skincare",
+              "price": 37.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.5
+            },
+            {
+              "name": "DETTOL Dettol Hand Wash Sensitive",
+              "price": 37.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.5
+            },
+            {
+              "name": "LUX Botanicals hand wash (variant unclear)",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "LUX",
+              "weight": 0.4
+            },
+            {
+              "name": "WATSONS Paw Paw Foam Hand Wash (lavender variant)",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.3
+            },
+            {
+              "name": "DETTOL Dettol Foam Anti-bacterial Hand Wash Aloe Vera",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.25
+            },
+            {
+              "name": "WATSONS Antibacterial Cream Hand Wash Pine",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.5
+            },
+            {
+              "name": "WALCH Walch Antibacterial Foaming Hand Wash Refreshing",
+              "price": 43.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WALCH",
+              "weight": 0.29
+            },
+            {
+              "name": "WATSONS Lavender & Chamomile Handwash",
+              "price": 13.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "WATSONS",
+              "weight": 0.5,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "DETTOL Hand Soap 500g X 3 Tripack (pine)",
+              "price": 80.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL"
+            },
+            {
+              "name": "DETTOL Dettol Antibacterial Skincare Hand Wash 500g Tripack",
+              "price": 80.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL"
+            },
+            {
+              "name": "DOVE Body Wash - Beauty Nourishing",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Dove Body Wash 1000g - Grapefruit & Lime",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Dove Body Wash 1000g - Acai Berry",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DOVE Dove Body Wash 1000g - White Peach & White Tea",
+              "price": 47.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE",
+              "weight": 1.0
+            },
+            {
+              "name": "DETTOL Original Antibacterial pH-balanced Body Wash",
+              "price": 63.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.3
+            },
+            {
+              "name": "DETTOL Dettol Gold Classic Clean Shower Foam",
+              "price": 68.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "DETTOL Profresh Peach Burst Body Wash",
+              "price": 68.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "Imperial Leather soap pack (variant unclear)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "IMPERIAL LEATHER"
+            },
+            {
+              "name": "DOVE Beauty Nourishing Twin Pack (variant partly obscured)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "DOVE Beauty Nourishing + Peach Twin Pack (variant inferred)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "DOVE Beauty Nourishing + Lavender Twin Pack",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "DOVE Beauty Nourishing + Almond Twin Pack (variant inferred)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DOVE"
+            },
+            {
+              "name": "Unknown Dove multipack (rear/variant unclear)",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "DETTOL Profresh Green Tea & Jasmine Body Wash Twin Pack",
+              "price": 89.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "DETTOL Profresh Citrus Fresh & Orange Blossom Body Wash Twin Pack",
+              "price": 89.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.9
+            },
+            {
+              "name": "DETTOL Proskin Moisturising Aloe Vera & Milky Smooth Shower Cream Twin Pack",
+              "price": 89.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "DETTOL Profresh Refreshing Rose & White Musk Body Wash Twin Pack",
+              "price": 89.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.9
+            },
+            {
+              "name": "DETTOL Shower Foam Twin Pack (cool)",
+              "price": 89.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "DETTOL",
+              "weight": 0.95
+            },
+            {
+              "name": "JMELLA body wash 500ml (variant unclear)",
+              "price": 59.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "JMELLA",
+              "weight": 0.5
+            },
+            {
+              "name": "OPAL Moisturising Anti-bacterial Shower Foam",
+              "price": 86.5,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "OPAL"
+            },
+            {
+              "name": "Unknown white/green personal-care multipack (20-marked)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown white/green personal-care multipack (second variant)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "LUX Shower Gel Soft Kiss (size/pack inferred)",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "LUX"
+            },
+            {
+              "name": "Unknown white/red body-wash product",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown black body-wash product",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown green/white personal-care product",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown white/orange personal-care product (right-edge partial)",
+              "price": 59.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Dettol liquid hand wash, green variant",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dettol"
+            },
+            {
+              "name": "Unknown purple floral liquid hand wash",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown pink/blue sanitary product multipack",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Dove body wash/refill multipack",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove"
+            },
+            {
+              "name": "Unknown pink bottled personal-care product",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            },
+            {
+              "name": "ecostore liquid hand wash/body wash",
+              "price": 140.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "ecostore"
+            },
+            {
+              "name": "Dove pink personal-care multipack",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove"
+            },
+            {
+              "name": "Unknown assorted pump-bottle personal-care product",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
+          "name": "Instant Noodles",
+          "items": [
+            {
+              "name": "Instant Carbonara",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "NUPasta",
+              "weight": 0.092,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Mushroom Carbonara Mac",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Prego",
+              "weight": 0.071,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Mac n Cheese",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Prego",
+              "weight": 0.071,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Cheese Bokki",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Ottogi",
+              "weight": 0.055,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Buldak Carbonara Hot Chicken Flavor",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Buldak Hot Chicken Flavor",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Buldak Hot Chicken Flavor Ramen Cheese",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Shin Ramyun Rose",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "weight": 0.108,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Korean Clay Pot Ramyun Bowl",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "weight": 0.108,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Shin Ramyun",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "weight": 0.108,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Omori Kimchi Stew Cup Ramen",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "GS25",
+              "weight": 0.15
+            },
+            {
+              "name": "Saeng Saeng Bowl Udon",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "weight": 0.276
+            },
+            {
+              "name": "Knorr Q/S Macaroni Chicken Broth",
+              "price": 27.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr"
+            },
+            {
+              "name": "Knorr Q/S Macaroni Abalone & Chix",
+              "price": 27.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr"
+            },
+            {
+              "name": "Knorr Q/S Macaroni Chicken Broth",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr",
+              "weight": 0.08,
+              "bulkDealPrice": 19.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Knorr Q/S Macaroni Abalone & Chix",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr",
+              "weight": 0.08,
+              "bulkDealPrice": 19.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Knorr Q/S Macaroni Pork Bone Broth",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr",
+              "weight": 0.08,
+              "bulkDealPrice": 19.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Unknown product (backwards; second-row far left)",
+              "price": 7.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Nong Shim Shin Ramyun",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nong Shim",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "weight": 0.12,
+              "bulkDealPrice": 32.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Prima Taste Laksa LaMian",
+              "price": 30.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Prima Taste",
+              "weight": 0.144,
+              "bulkDealPrice": 54.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Nissin Demae Iccho 5-Pack Sesame Oil Flavour",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nissin",
+              "weight": 0.091
+            },
+            {
+              "name": "Fuku Thai Style Tom Yum Goong Flavour Instant Rice Vermicelli",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Fuku",
+              "weight": 0.06,
+              "bulkDealPrice": 30.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Fuku Superior Soup Instant Noodle",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Fuku",
+              "weight": 0.09,
+              "bulkDealPrice": 30.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Fuku Superior Soup Instant Rice Noodle",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Fuku",
+              "weight": 0.065,
+              "bulkDealPrice": 30.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Chewy Instant Rice Vermicelli Gold Medal Original",
+              "price": 23.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Chewy",
+              "weight": 0.065,
+              "bulkDealPrice": 38.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Nong Shim Shin Ramyun 5-Pack",
+              "price": 26.6,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nong Shim",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "bulkDealPrice": 39.9,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Nong Shim Korean Clay Pot Ramyun",
+              "price": 26.6,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nong Shim",
+              "bulkDealPrice": 39.9,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Nong Shim Potato Noodle",
+              "price": 27.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nong Shim",
+              "weight": 0.1,
+              "bulkDealPrice": 39.9,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Samyang Buldak Hot Chicken Flavor Ramen Multi",
+              "price": 44.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.14
+            },
+            {
+              "name": "Samyang Hotchicken Carbonara Flavor Ramen Multi",
+              "price": 44.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.65
+            },
+            {
+              "name": "Samyang Tangle Creamy Mushroom Instant Pasta",
+              "price": 41.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105
+            },
+            {
+              "name": "Samyang Tangle Garlic Oil Instant Pasta",
+              "price": 41.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.1
+            },
+            {
+              "name": "Youus Omori Kimchi Jjigae Ramen",
+              "price": 58.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Youus",
+              "weight": 0.16
+            },
+            {
+              "name": "Nong Shim Ansungtangmyun",
+              "price": 58.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nong Shim"
+            },
+            {
+              "name": "Youus Gonghwachun Zajang Noodle Multi Pack",
+              "price": 58.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Youus",
+              "weight": 0.195
+            },
+            {
+              "name": "Doll Stir-Fry Noodle King Special Spicy Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Doll",
+              "weight": 0.105,
+              "bulkDealPrice": 28.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kiki Dry-Stirred Noodles with Scallion Oil",
+              "price": 52.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Kiki",
+              "weight": 0.45
+            },
+            {
+              "name": "Kiki Dry-Stirred Noodles with Sichuan Spices",
+              "price": 52.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Kiki",
+              "weight": 0.45
+            },
+            {
+              "name": "Ottogi Cheese Ramen",
+              "price": 26.6,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Ottogi",
+              "weight": 0.111,
+              "bulkDealPrice": 39.9,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Ottogi Real Cheese Ramen",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Ottogi",
+              "weight": 0.135
+            },
+            {
+              "name": "Ottogi Cheddar Cheese Stir-Fry Cheesy Ramen",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Ottogi",
+              "weight": 0.11
+            },
+            {
+              "name": "Ottogi Spicy Cheese Ramen Noodle",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Ottogi",
+              "weight": 0.111
+            },
+            {
+              "name": "Nissin Demae Iccho Japan Local Ramen Series Kyushu Tonkotsu Flavour",
+              "price": 4.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nissin",
+              "weight": 0.098,
+              "bulkDealPrice": 32.0,
+              "bulkDealQty": 9
+            },
+            {
+              "name": "Nissin Demae Iccho Japan Local Ramen Series Hokkaido Miso Tonkotsu Flavour",
+              "price": 4.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nissin",
+              "weight": 0.1,
+              "bulkDealPrice": 32.0,
+              "bulkDealQty": 9
+            },
+            {
+              "name": "Nissin Demae Iccho Japan Local Ramen Series Tokyo Shoyu Tonkotsu Flavour",
+              "price": 4.9,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nissin",
+              "weight": 0.1,
+              "bulkDealPrice": 32.0,
+              "bulkDealQty": 9
+            },
+            {
+              "name": "Fuku Superior Soup Instant Noodle",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Fuku",
+              "weight": 0.09
+            },
+            {
+              "name": "Unknown instant noodle product (brown/gold pack; hot beef flavour)",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown noodle product (transparent pack; label obscured)",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
           "name": "Seasonings",
           "items": [
             {
@@ -105,6 +1417,14 @@
               "subcategory": "Seasonings",
               "brand": "Sheng Long",
               "weight": 0.838
+            },
+            {
+              "name": "Shuang Jin Chiew (M)",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "P/R Bridge",
+              "weight": 0.25
             },
             {
               "name": "Shuang JIn Chiew (Jiujiang Shuang Zheng Rice Wine)",
@@ -409,6 +1729,1133 @@
           ]
         },
         {
+          "name": "Canned Goods",
+          "items": [
+            {
+              "name": "Smedley's Tomato Sauce Baked Beans",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Smedley's",
+              "weight": 0.22,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Imperial Bird's Nest Conch with Scallop Soup",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Imperial Bird's Nest",
+              "weight": 0.32,
+              "bulkDealPrice": 72.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Imperial Bird's Nest Conch Ginkgo & Pig Lung Soup",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Imperial Bird's Nest",
+              "weight": 0.32,
+              "bulkDealPrice": 72.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Lee Kum Kee Abalone In Abalone Sauce",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Lee Kum Kee",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-411027.jpg?height=176",
+              "weight": 0.18
+            },
+            {
+              "name": "Lee Kum Kee Abalone In Red Brai Sauce with Dry Scalop",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Lee Kum Kee",
+              "weight": 0.18
+            },
+            {
+              "name": "Lee Kum Kee Abalone In Premium Oyster Sauce",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Lee Kum Kee",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-395591.jpg?height=176",
+              "weight": 0.18
+            },
+            {
+              "name": "Sardines in Tomato Sauce",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+            },
+            {
+              "name": "Ciao Chicken Cat Food",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Ciao"
+            },
+            {
+              "name": "BeF Sardines",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "BeF"
+            },
+            {
+              "name": "Campbell's Creamy Chicken Mushroom Soup",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Campbell's",
+              "weight": 0.3
+            },
+            {
+              "name": "Campbell's Cream Of Mushroom Soup",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Campbell's",
+              "weight": 0.295
+            },
+            {
+              "name": "Select Pieces & Stems Button Mushroom",
+              "price": 10.2,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Select",
+              "weight": 0.425
+            },
+            {
+              "name": "Smedley's Baked Beans In Tomato Sauce",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Smedley's",
+              "weight": 0.42
+            },
+            {
+              "name": "Heinz Baked Beans With Tomato Sauce",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Heinz",
+              "weight": 0.2
+            },
+            {
+              "name": "Del Monte Baked Beans 3-In-1 Pack",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.19
+            },
+            {
+              "name": "Pou Yen Whole Mushrooms",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Pou Yen",
+              "weight": 0.425
+            },
+            {
+              "name": "Del Monte Whole Kernel Corn 3-In-1 Pack",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.19
+            },
+            {
+              "name": "Del Monte Whole Kernel Corn",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.34,
+              "bulkDealPrice": 13.8,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte Sweet Corn Cream Style",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.34,
+              "bulkDealPrice": 13.8,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte Whole Kernel Corn",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.42,
+              "bulkDealPrice": 21.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte Sweet Corn Cream Style",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.42,
+              "bulkDealPrice": 21.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Ciao Boiled Chick Peas",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Ciao",
+              "weight": 0.4
+            },
+            {
+              "name": "S&W Kidney Beans",
+              "price": 20.5,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "S&W"
+            },
+            {
+              "name": "Golden Crown Mandarin Oranges",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Golden Crown"
+            },
+            {
+              "name": "Del Monte Fresh Cut Pear Halves",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "bulkDealPrice": 40.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte S. Africa Peach Halves",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.42,
+              "bulkDealPrice": 40.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte Sliced Pineapple In Heavy Syrup",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.234,
+              "bulkDealPrice": 22.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte Sliced Pineapple In Heavy Syrup",
+              "price": 23.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.836,
+              "bulkDealPrice": 37.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte S. Africa Peach Halves",
+              "price": 30.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "weight": 0.825,
+              "bulkDealPrice": 46.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Del Monte Fiesta Tropical Fruit Cocktail",
+              "price": 23.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Del Monte",
+              "bulkDealPrice": 37.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Carnation milk product (partial can/package)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Carnation"
+            },
+            {
+              "name": "Unknown canned seafood, variant 1",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown canned seafood, variant 2",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown sardines in tomato sauce",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+            },
+            {
+              "name": "Unknown sardines in tomato sauce, second variant",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+            },
+            {
+              "name": "Unknown yellow canned fish",
+              "price": 25.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown canned fish with fish illustration",
+              "price": 25.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown canned fish, large tin",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown canned meat/fish, yellow-red variant",
+              "price": 45.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown canned meat/fish, green variant",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Ligo Lite canned fish",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Ligo"
+            },
+            {
+              "name": "Unknown canned luncheon meat/pâté",
+              "price": 24.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown canned meat/fish, blue variant",
+              "price": 30.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
+          "name": "Condiments",
+          "items": [
+            {
+              "name": "Del Monte Tomato Ketchup",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Del Monte",
+              "weight": 0.3,
+              "bulkDealPrice": 16.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "COLAVITA Aged Balsamic Vinegar",
+              "price": 46.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "COLAVITA",
+              "weight": 0.5
+            },
+            {
+              "name": "Kraft Miracle Whip",
+              "price": 43.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Kraft",
+              "weight": 0.44
+            },
+            {
+              "name": "SELECT Thousand Island Dressing",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "SELECT",
+              "weight": 0.3
+            },
+            {
+              "name": "SELECT Roasted Sesame Sauce",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "SELECT",
+              "weight": 0.39
+            },
+            {
+              "name": "Mizkan Gold Sesame Sauce",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Mizkan",
+              "weight": 0.25,
+              "bulkDealPrice": 42.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kewpie Roasted Sesame Dressing",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Kewpie",
+              "weight": 0.25,
+              "bulkDealPrice": 48.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kewpie Japanese Dressing",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Kewpie",
+              "weight": 0.25,
+              "bulkDealPrice": 48.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Char Siu Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Lee Kum Kee",
+              "weight": 0.24
+            },
+            {
+              "name": "Tabasco Pepper Sauce",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Tabasco",
+              "weight": 0.06
+            },
+            {
+              "name": "Neri Wasabi",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "S&B",
+              "weight": 0.043
+            },
+            {
+              "name": "Select Yuzu Tea",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Centifloral Honey",
+              "price": 63.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Select",
+              "weight": 0.4
+            },
+            {
+              "name": "Select Winter Honey",
+              "price": 63.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Select",
+              "weight": 0.4
+            },
+            {
+              "name": "Skippy Peanut Butter",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy"
+            },
+            {
+              "name": "Essential Waitrose Pure Clear Honey",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Essential Waitrose",
+              "weight": 0.454
+            },
+            {
+              "name": "Langnese Golden Clear Honey",
+              "price": 69.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Langnese",
+              "weight": 0.375
+            },
+            {
+              "name": "Naturohoney Canadian Pure Honey",
+              "price": 78.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Naturohoney",
+              "weight": 0.375
+            },
+            {
+              "name": "Select Winter Honey",
+              "price": 79.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Select",
+              "weight": 1.0
+            },
+            {
+              "name": "Select Centifloral Honey",
+              "price": 66.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Select",
+              "weight": 1.0
+            },
+            {
+              "name": "Po Sang Yuen Mixed Honey",
+              "price": 100.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Po Sang Yuen",
+              "weight": 1.0
+            },
+            {
+              "name": "Po Sang Yuen Winter Honey",
+              "price": 106.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Po Sang Yuen",
+              "weight": 1.0
+            },
+            {
+              "name": "Food Nation Apple Spread",
+              "price": 34.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Food Nation",
+              "weight": 0.285
+            },
+            {
+              "name": "Food Nation Raspberry Spread",
+              "price": 34.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Food Nation",
+              "weight": 0.285
+            },
+            {
+              "name": "Food Nation Strawberry Spread",
+              "price": 34.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Food Nation",
+              "weight": 0.285
+            },
+            {
+              "name": "Food Nation Blueberry Spread",
+              "price": 34.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Food Nation",
+              "weight": 0.285
+            },
+            {
+              "name": "St. Dalfour Strawberry Spread",
+              "price": 52.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "St. Dalfour",
+              "weight": 0.284
+            },
+            {
+              "name": "Bonne Maman Strawberry Jam",
+              "price": 29.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Bonne Maman",
+              "weight": 0.225
+            },
+            {
+              "name": "Bonne Maman Wild Blueberry Preserves",
+              "price": 29.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Bonne Maman",
+              "weight": 0.225
+            },
+            {
+              "name": "Bonne Maman Strawberry Jam",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Bonne Maman",
+              "weight": 0.37
+            },
+            {
+              "name": "Bonne Maman Wild Blueberry Preserves",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Bonne Maman",
+              "weight": 0.37
+            },
+            {
+              "name": "Skippy Peanut Butter (small jar; exact variant unclear)",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy"
+            },
+            {
+              "name": "Skippy Peanut Butter Creamy",
+              "price": 36.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy",
+              "weight": 0.34
+            },
+            {
+              "name": "Skippy Peanut Butter Chunky",
+              "price": 36.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy",
+              "weight": 0.34
+            },
+            {
+              "name": "Skippy Peanut Butter W/ Choc Stripe",
+              "price": 31.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy",
+              "weight": 0.34
+            },
+            {
+              "name": "Skippy Peanut Butter Creamy",
+              "price": 44.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy",
+              "weight": 0.51
+            },
+            {
+              "name": "Skippy Peanut Butter Chunky",
+              "price": 44.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy",
+              "weight": 0.51
+            },
+            {
+              "name": "Skippy Peanut Butter Super Chunk",
+              "price": 31.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Skippy",
+              "weight": 0.462
+            },
+            {
+              "name": "KARA Coconut Cream",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "KARA",
+              "weight": 0.2
+            },
+            {
+              "name": "Nutella Hazelnut Spread With Cocoa",
+              "price": 50.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Nutella",
+              "weight": 0.35
+            }
+          ]
+        },
+        {
+          "name": "Bread & Bakery",
+          "items": [
+            {
+              "name": "Unknown Baker's Choice bakery product (far-left top shelf)",
+              "price": 19.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Baker's Choice"
+            },
+            {
+              "name": "Unknown Baker's Choice bakery product (green/yellow pack)",
+              "price": 19.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Baker's Choice"
+            },
+            {
+              "name": "Baker's Choice Royal Butter Loaf",
+              "price": 16.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Baker's Choice",
+              "weight": 0.24
+            },
+            {
+              "name": "Select Whole Wheat Bread W/ Walnut & Cranberry",
+              "price": 16.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select",
+              "weight": 0.215
+            },
+            {
+              "name": "Select Classic Hamburger Bun",
+              "price": 14.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Unknown bakery product (top shelf; label obscured)",
+              "price": 14.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown whole-wheat bread product (top shelf; label obscured)",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Select Crustless Sandwich Bread 6s",
+              "price": 10.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Crustless Wheat Sandwich Bread 6s",
+              "price": 10.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Sourdough Bagel",
+              "price": 25.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Triple Cheese Sourdough Bagel",
+              "price": 29.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Wheat Sourdough Toast",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Apricot Rye Sourdough Toast",
+              "price": 26.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Fig And Walnut Sourdough Toast",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Soft Raisin Bread",
+              "price": 18.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Whole Wheat Sandwich Bread 8s",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Select Multi-grain English Bread",
+              "price": 17.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Unknown Select 7-grain English bread variant",
+              "price": 19.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, far left)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, left)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Select Soft Japanese Style Cake Roll (flavour unclear)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Select"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, black label)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, dark red pack)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, green pack)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, yellow pack)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged bakery product (bottom shelf, pink/red pack)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Pizza SALAME",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Tomato Cheese Pizza",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Pizza SALAME",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Tomato Cheese Pizza",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
+          "name": "Hot Drinks",
+          "items": [
+            {
+              "name": "OldTown coffee product (variant unclear)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "OldTown"
+            },
+            {
+              "name": "Starbucks® House Blend By Nespresso (10 Caps)",
+              "price": 56.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS",
+              "weight": 0.052
+            },
+            {
+              "name": "Starbucks® Caffè Verona™ By Nespresso (10 Caps)",
+              "price": 56.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS",
+              "weight": 0.055
+            },
+            {
+              "name": "Starbucks® Italian Style Roast By Nespresso (10 Caps)",
+              "price": 56.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS",
+              "weight": 0.056
+            },
+            {
+              "name": "Starbucks® Espresso Roast By Nespresso (10 Caps)",
+              "price": 56.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS",
+              "weight": 0.055
+            },
+            {
+              "name": "Starbucks® Single Origin Colombia By Nespresso (10 Caps)",
+              "price": 56.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS",
+              "weight": 0.057
+            },
+            {
+              "name": "Starbucks Cappuccino Premium Mixes",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS"
+            },
+            {
+              "name": "Starbucks Caramel Latte Premium Mixes",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "STARBUCKS"
+            },
+            {
+              "name": "Unknown coffee product (middle-shelf left-edge partial)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "Unknown"
+            },
+            {
+              "name": "KEY COFFEE Drip On Variety Pack",
+              "price": 50.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "KEY COFFEE",
+              "weight": 0.08
+            },
+            {
+              "name": "KEY COFFEE Drip On Special Blend",
+              "price": 36.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "KEY COFFEE",
+              "weight": 0.008
+            },
+            {
+              "name": "UCC Shokunin Drip Mild Blend (coffee)",
+              "price": 35.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "UCC"
+            },
+            {
+              "name": "MAXWELL Coffee Mix 3 In 1",
+              "price": 38.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "MAXWELL"
+            },
+            {
+              "name": "CASINO Coffee Espresso [France]",
+              "price": 69.9,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "CASINO",
+              "weight": 0.25,
+              "bulkDealPrice": 118.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "MAXWELL 3+1 Rich Coffee",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "MAXWELL"
+            },
+            {
+              "name": "MAXWELL Coffee Mix Lite",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "MAXWELL"
+            },
+            {
+              "name": "NESCAFÉ 1+2 Rich Instant Coffee Mix",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE",
+              "weight": 0.013
+            },
+            {
+              "name": "NESCAFÉ 1+2 Smooth Milky Mix",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE",
+              "weight": 0.015
+            },
+            {
+              "name": "Unknown coffee product (lower-shelf right-edge partial)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "Unknown"
+            },
+            {
+              "name": "NESCAFE 1+2 Coffee",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE"
+            },
+            {
+              "name": "NESCAFE Nescafe 1+2 Original Stick 15gx42",
+              "price": 44.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE"
+            },
+            {
+              "name": "NESCAFE 1+2 Rich Instant Coffee Mix",
+              "price": 44.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE",
+              "weight": 0.013
+            },
+            {
+              "name": "NESCAFE Prm White Coffee Original 17+3",
+              "price": 56.5,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE",
+              "weight": 0.029
+            },
+            {
+              "name": "NESCAFE Prm White Coffee Unswt",
+              "price": 56.5,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE",
+              "weight": 0.021
+            },
+            {
+              "name": "NESCAFE Cafe Viet",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "NESCAFE"
+            },
+            {
+              "name": "OLD TOWN 3 In 1 Hazelnut White Coffee",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "OLD TOWN",
+              "bulkDealPrice": 56.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "OLD TOWN 3 In 1 Classic White Coffee",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "OLD TOWN",
+              "bulkDealPrice": 56.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "OLD TOWN 3 In 1 Classic White Coffee",
+              "price": 39.9,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "OLD TOWN"
+            }
+          ]
+        },
+        {
           "name": "Tea",
           "items": [
             {
@@ -687,355 +3134,430 @@
           ]
         },
         {
-          "name": "Toiletries",
+          "name": "Drinks",
           "items": [
             {
-              "name": "Darlie Double Action Oral Care Travel Kit",
-              "price": 12.9,
+              "name": "Unknown packaged dairy/beverage case (green/red 6 packs)",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Darlie",
-              "weight": 0.05
+              "subcategory": "Drinks",
+              "brand": "Unknown"
             },
             {
-              "name": "Colgate Charcoal Travel Kit",
-              "price": 19.9,
+              "name": "Unknown packaged dairy/beverage case (blue/red packs)",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Colgate",
-              "weight": 0.05
+              "subcategory": "Drinks",
+              "brand": "Unknown"
             },
             {
-              "name": "Colgate Sensitive Pro-Relief Toothpaste",
-              "price": 49.9,
+              "name": "OATSIDE Oatmilk Barista Blend",
+              "price": 25.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Colgate",
-              "weight": 0.075
+              "subcategory": "Drinks",
+              "brand": "OATSIDE",
+              "weight": 1.0
             },
             {
-              "name": "Colgate Total Active Prevention Toothpaste",
-              "price": 54.9,
+              "name": "GOODMATE The Original Oatmilk",
+              "price": 35.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Colgate",
-              "weight": 0.095
+              "subcategory": "Drinks",
+              "brand": "GOODMATE",
+              "weight": 0.18
             },
             {
-              "name": "Dettol Original Soap 3pcs",
-              "price": 36.9,
+              "name": "GOODMATE Chocolate Deluxe Oatmilk",
+              "price": 25.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Dettol",
-              "weight": 0.3
+              "subcategory": "Drinks",
+              "brand": "GOODMATE",
+              "weight": 0.18
             },
             {
-              "name": "Dove Beauty Bar",
-              "price": 13.9,
+              "name": "GOODMATE The Original Oatmilk",
+              "price": 35.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Dove",
-              "weight": 0.09
+              "subcategory": "Drinks",
+              "brand": "GOODMATE",
+              "weight": 1.0
             },
             {
-              "name": "Vidal Sasson Moisturizing Anti-Dandruff Shampoo",
-              "price": 67.9,
+              "name": "GOODMATE Zero Sugar Oatmilk",
+              "price": 35.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Vidal Sasson",
-              "weight": 0.75
+              "subcategory": "Drinks",
+              "brand": "GOODMATE",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 1.0
             },
             {
-              "name": "Vidal Sasson Light & Soft Smooth Shampoo",
-              "price": 67.9,
+              "name": "GOODMATE Chocolate Deluxe Oatmilk",
+              "price": 35.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Vidal Sasson",
-              "weight": 0.75
+              "subcategory": "Drinks",
+              "brand": "GOODMATE",
+              "weight": 1.0
             },
             {
-              "name": "Sebamed Oily Scalp Shampoo",
-              "price": 116.8,
+              "name": "137 DEGREES Almond Milk Original",
+              "price": 42.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Sebamed",
-              "weight": 0.4
+              "subcategory": "Drinks",
+              "brand": "137 DEGREES",
+              "weight": 1.0
             },
             {
-              "name": "Tresemme Conditioner Cleanse & Replenish",
-              "price": 75.9,
+              "name": "137 DEGREES Almond Milk Unsweetened",
+              "price": 42.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Tresemme",
-              "weight": 0.94
+              "subcategory": "Drinks",
+              "brand": "137 DEGREES",
+              "weight": 1.0
             },
             {
-              "name": "Dove Peptide Intense Repair Shampoo",
-              "price": 59.9,
+              "name": "OATLY Barista Oat Drink",
+              "price": 25.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Dove",
-              "weight": 0.58,
-              "bulkDealPrice": 119.8,
-              "bulkDealQty": 3
+              "subcategory": "Drinks",
+              "brand": "OATLY",
+              "weight": 1.0
             },
             {
-              "name": "Dove Elastin Long & Thick Shampoo",
-              "price": 59.9,
+              "name": "OATLY Deluxe High-calcium Oat Drink",
+              "price": 25.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Dove",
-              "weight": 0.58,
-              "bulkDealPrice": 119.8,
-              "bulkDealQty": 3
+              "subcategory": "Drinks",
+              "brand": "OATLY",
+              "weight": 1.0
             },
             {
-              "name": "Pantene Milky Repair Shampoo",
-              "price": 64.9,
+              "name": "OATLY Oat Drink Enriched",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Pantene",
-              "weight": 0.65
+              "subcategory": "Drinks",
+              "brand": "OATLY",
+              "weight": 1.0
             },
             {
-              "name": "Pantene Anti-Hair Breakage Shampoo",
-              "price": 64.9,
+              "name": "VITASOY Australia Soy Milk Original",
+              "price": 21.0,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Pantene",
-              "weight": 0.65
+              "subcategory": "Drinks",
+              "brand": "VITASOY",
+              "weight": 1.0
             },
             {
-              "name": "Pantene Silky Smooth Conditioner",
-              "price": 64.9,
+              "name": "BLUE DIAMOND Almond Breeze Unsweetened (original)",
+              "price": 30.9,
               "category": "Groceries",
-              "subcategory": "Toiletries",
-              "brand": "Pantene",
-              "weight": 0.65
+              "subcategory": "Drinks",
+              "brand": "BLUE DIAMOND",
+              "weight": 0.946
+            },
+            {
+              "name": "BLUE DIAMOND Almond Breeze (original)",
+              "price": 30.9,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "brand": "BLUE DIAMOND",
+              "weight": 0.946
+            },
+            {
+              "name": "VITA Chocolate Milk Beverage",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "brand": "VITA",
+              "weight": 1.0
+            },
+            {
+              "name": "Unknown packaged product (bottom-edge partial facings)",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "brand": "Unknown"
             }
           ]
         },
         {
-          "name": "Instant Noodles",
+          "name": "Ice Cream",
           "items": [
             {
-              "name": "Instant Carbonara",
-              "price": 13.0,
+              "name": "Dreyer's Family ice cream tub, flavor Unknown",
+              "price": 60.0,
               "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "NUPasta",
-              "weight": 0.092,
-              "bulkDealPrice": 26.0,
-              "bulkDealQty": 3
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
             },
             {
-              "name": "Mushroom Carbonara Mac",
-              "price": 16.0,
+              "name": "Dreyer's Family ice cream tub, chocolate/vanilla flavor Unknown",
+              "price": 60.0,
               "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Prego",
-              "weight": 0.071,
-              "bulkDealPrice": 24.0,
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
+            },
+            {
+              "name": "Dreyer's frozen novelty multipack, product Unknown",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's"
+            },
+            {
+              "name": "Oreo frozen dessert/ice cream product, variant Unknown",
+              "price": 45.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Oreo"
+            },
+            {
+              "name": "Drumstick frozen cone multipack, variant Unknown",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Drumstick"
+            },
+            {
+              "name": "Unknown frozen dessert facings, multiple variants",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Dreyer's Family ice cream tub, green flavor Unknown",
+              "price": 60.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
+            },
+            {
+              "name": "Dreyer's Family ice cream tub, cookies-and-cream/chocolate flavor Unknown",
+              "price": 60.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
+            },
+            {
+              "name": "Dreyer's Family ice cream tub, vanilla flavor Unknown",
+              "price": 60.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
+            },
+            {
+              "name": "Dreyer's Family ice cream tub, strawberry flavor Unknown",
+              "price": 60.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
+            },
+            {
+              "name": "Dreyer's Family ice cream tub, flavor Unknown",
+              "price": 60.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's",
+              "weight": 0.75
+            },
+            {
+              "name": "Dreyer's Family ice cream multipack, variant Unknown",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Ice Cream",
+              "brand": "Dreyer's"
+            }
+          ]
+        },
+        {
+          "name": "Rice & Noodles",
+          "items": [
+            {
+              "name": "DE-MA-E Iccho Bar Noodle Kyushu Tonkotsu Flavour",
+              "price": 12.6,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "DE-MA-E",
+              "weight": 0.192,
+              "bulkDealPrice": 18.9,
               "bulkDealQty": 2
             },
             {
-              "name": "Mac n Cheese",
-              "price": 16.0,
+              "name": "DE-MA-E Iccho Bar Noodle Shoyu Tonkotsu Flavour",
+              "price": 12.6,
               "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Prego",
-              "weight": 0.071,
-              "bulkDealPrice": 24.0,
+              "subcategory": "Rice & Noodles",
+              "brand": "DE-MA-E",
+              "weight": 0.192,
+              "bulkDealPrice": 18.9,
               "bulkDealQty": 2
             },
             {
-              "name": "Cheese Bokki",
-              "price": 12.0,
+              "name": "Japanese Red Bean Cooked Rice",
+              "price": 14.9,
               "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Ottogi",
-              "weight": 0.055,
-              "bulkDealPrice": 24.0,
-              "bulkDealQty": 3
-            },
-            {
-              "name": "Buldak Carbonara Hot Chicken Flavor",
-              "price": 16.0,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Samyang",
-              "weight": 0.105,
-              "bulkDealPrice": 25.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Buldak Hot Chicken Flavor",
-              "price": 16.0,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Samyang",
-              "weight": 0.105,
-              "bulkDealPrice": 25.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Buldak Hot Chicken Flavor Ramen Cheese",
-              "price": 16.0,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Samyang",
-              "weight": 0.105,
-              "bulkDealPrice": 25.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Shin Ramyun Rose",
-              "price": 14.0,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Nongshim",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
-              "weight": 0.108,
-              "bulkDealPrice": 24.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Korean Clay Pot Ramyun Bowl",
-              "price": 12.5,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Nongshim",
-              "weight": 0.108,
-              "bulkDealPrice": 25.0,
-              "bulkDealQty": 3
-            },
-            {
-              "name": "Shin Ramyun",
-              "price": 12.5,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Nongshim",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
-              "weight": 0.108,
-              "bulkDealPrice": 25.0,
-              "bulkDealQty": 3
-            },
-            {
-              "name": "Omori Kimchi Stew Cup Ramen",
-              "price": 16.0,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "GS25",
+              "subcategory": "Rice & Noodles",
+              "brand": "Taimatsu Foods",
               "weight": 0.15
             },
             {
-              "name": "Saeng Saeng Bowl Udon",
-              "price": 19.0,
+              "name": "Cooked Japanese Rice",
+              "price": 15.0,
               "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Nongshim",
-              "weight": 0.276
+              "subcategory": "Rice & Noodles",
+              "brand": "Golden Elephant",
+              "weight": 0.17
+            },
+            {
+              "name": "Cooked Jasmine Rice",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Golden Elephant",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/cs9ny-496556.jpg?height=176",
+              "weight": 0.17
+            },
+            {
+              "name": "Unknown orange/white frozen noodle facings",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Japanese-style frozen noodle facings",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown blue/white frozen noodle facings",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown green/white frozen noodle facing",
+              "price": 39.9,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Fish Noodle",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Inaniwa-style Udon",
+              "price": 39.9,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown",
+              "weight": 0.25
+            },
+            {
+              "name": "Unknown white-pack frozen noodle",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown"
             }
           ]
         },
         {
-          "name": "Condiments",
+          "name": "Confectionary",
           "items": [
             {
-              "name": "Del Monte Tomato Ketchup",
+              "name": "Select Grass Jelly",
               "price": 12.5,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Del Monte",
-              "weight": 0.3,
-              "bulkDealPrice": 16.0,
-              "bulkDealQty": 2
+              "subcategory": "Confectionary",
+              "brand": "Select",
+              "weight": 0.53
             },
             {
-              "name": "COLAVITA Aged Balsamic Vinegar",
-              "price": 46.0,
+              "name": "Robertsons Jelly Powder Pineapple Flavour",
+              "price": 10.0,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "COLAVITA",
-              "weight": 0.5
+              "subcategory": "Confectionary",
+              "brand": "Robertsons",
+              "weight": 0.08
             },
             {
-              "name": "Kraft Miracle Whip",
-              "price": 43.0,
+              "name": "Robertsons Jelly Powder Mango Flavour",
+              "price": 10.0,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Kraft",
-              "weight": 0.44
+              "subcategory": "Confectionary",
+              "brand": "Robertsons",
+              "weight": 0.08
             },
             {
-              "name": "SELECT Thousand Island Dressing",
-              "price": 20.0,
+              "name": "Robertsons Jelly Powder Strawberry Flavour",
+              "price": 10.0,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "SELECT",
-              "weight": 0.3
+              "subcategory": "Confectionary",
+              "brand": "Robertsons",
+              "weight": 0.08
             },
             {
-              "name": "SELECT Roasted Sesame Sauce",
-              "price": 33.0,
-              "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "SELECT",
-              "weight": 0.39
-            },
-            {
-              "name": "Mizkan Gold Sesame Sauce",
-              "price": 42.0,
-              "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Mizkan",
-              "weight": 0.25,
-              "bulkDealPrice": 42.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Kewpie Roasted Sesame Dressing",
-              "price": 48.0,
-              "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Kewpie",
-              "weight": 0.25,
-              "bulkDealPrice": 48.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Kewpie Japanese Dressing",
-              "price": 48.0,
-              "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Kewpie",
-              "weight": 0.25,
-              "bulkDealPrice": 48.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Char Siu Sauce",
+              "name": "Nissin Retort Pouch Red Bean W Lotus Seeds Dessert",
               "price": 18.0,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Lee Kum Kee",
-              "weight": 0.24
+              "subcategory": "Confectionary",
+              "brand": "Nissin",
+              "weight": 0.22
             },
             {
-              "name": "Tabasco Pepper Sauce",
+              "name": "Nissin Retort Pouch Cha Cha Dessert",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Nissin",
+              "weight": 0.22
+            },
+            {
+              "name": "Nissin Retort Pouch Black Sesame Dessert",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Nissin",
+              "weight": 0.22
+            },
+            {
+              "name": "Yue Zhuan Red Bean With Tangerine Peel & Lotus Seeds Dessert",
               "price": 22.0,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "Tabasco",
-              "weight": 0.06
+              "subcategory": "Confectionary",
+              "brand": "Yue Zhuan",
+              "weight": 0.22
             },
             {
-              "name": "Neri Wasabi",
-              "price": 16.0,
+              "name": "Yue Zhuan Black Glutinous Rice With Taro & Coconut Milk",
+              "price": 22.0,
               "category": "Groceries",
-              "subcategory": "Condiments",
-              "brand": "S&B",
-              "weight": 0.043
+              "subcategory": "Confectionary",
+              "brand": "Yue Zhuan",
+              "weight": 0.22
+            },
+            {
+              "name": "Yue Zhuan Ground Black Sesame Dessert",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Yue Zhuan",
+              "weight": 0.22
             }
           ]
         },
@@ -1103,67 +3625,13 @@
               "subcategory": "Household",
               "brand": "Ecostore",
               "weight": 0.9
-            }
-          ]
-        },
-        {
-          "name": "Canned Goods",
-          "items": [
-            {
-              "name": "Smedley's Tomato Sauce Baked Beans",
-              "price": 10.0,
-              "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "brand": "Smedley's",
-              "weight": 0.22,
-              "bulkDealPrice": 18.0,
-              "bulkDealQty": 2
             },
             {
-              "name": "Imperial Bird's Nest Conch with Scallop Soup",
-              "price": 48.0,
+              "name": "Walch tissue/toilet-paper multipack",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "brand": "Imperial Bird's Nest",
-              "weight": 0.32,
-              "bulkDealPrice": 72.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Imperial Bird's Nest Conch Ginkgo & Pig Lung Soup",
-              "price": 48.0,
-              "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "brand": "Imperial Bird's Nest",
-              "weight": 0.32,
-              "bulkDealPrice": 72.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Lee Kum Kee Abalone In Abalone Sauce",
-              "price": 39.0,
-              "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "brand": "Lee Kum Kee",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-411027.jpg?height=176",
-              "weight": 0.18
-            },
-            {
-              "name": "Lee Kum Kee Abalone In Red Brai Sauce with Dry Scalop",
-              "price": 39.0,
-              "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "brand": "Lee Kum Kee",
-              "weight": 0.18
-            },
-            {
-              "name": "Lee Kum Kee Abalone In Premium Oyster Sauce",
-              "price": 39.0,
-              "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "brand": "Lee Kum Kee",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-395591.jpg?height=176",
-              "weight": 0.18
+              "subcategory": "Household",
+              "brand": "Walch"
             }
           ]
         },
@@ -1225,56 +3693,48 @@
               "subcategory": "Sauces",
               "brand": "Old El Paso",
               "weight": 0.226
+            },
+            {
+              "name": "Barilla Pesto alla Genovese",
+              "price": 39.5,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Barilla",
+              "weight": 0.19
             }
           ]
         },
         {
-          "name": "Rice & Noodles",
+          "name": "Other",
           "items": [
             {
-              "name": "DE-MA-E Iccho Bar Noodle Kyushu Tonkotsu Flavour",
-              "price": 12.6,
+              "name": "Kwangtung Mijiu (M)",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Rice & Noodles",
-              "brand": "DE-MA-E",
-              "weight": 0.192,
-              "bulkDealPrice": 18.9,
-              "bulkDealQty": 2
+              "subcategory": "Other",
+              "brand": "P/R Bridge"
             },
             {
-              "name": "DE-MA-E Iccho Bar Noodle Shoyu Tonkotsu Flavour",
-              "price": 12.6,
+              "name": "Sardines in Tomato Sauce",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Rice & Noodles",
-              "brand": "DE-MA-E",
-              "weight": 0.192,
-              "bulkDealPrice": 18.9,
-              "bulkDealQty": 2
+              "subcategory": "Other",
+              "brand": "Del Monte",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             },
             {
-              "name": "Japanese Red Bean Cooked Rice",
-              "price": 14.9,
+              "name": "Unknown KERISOM frozen prepared-food facings",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Rice & Noodles",
-              "brand": "Taimatsu Foods",
-              "weight": 0.15
+              "subcategory": "Other",
+              "brand": "KERISOM"
             },
             {
-              "name": "Cooked Japanese Rice",
-              "price": 15.0,
+              "name": "Unknown canned sparkling fruit drink",
+              "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Rice & Noodles",
-              "brand": "Golden Elephant",
-              "weight": 0.17
-            },
-            {
-              "name": "Cooked Jasmine Rice",
-              "price": 13.0,
-              "category": "Groceries",
-              "subcategory": "Rice & Noodles",
-              "brand": "Golden Elephant",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/cs9ny-496556.jpg?height=176",
-              "weight": 0.17
+              "subcategory": "Other",
+              "brand": "Unknown"
             }
           ]
         },
@@ -1314,6 +3774,32 @@
           ]
         },
         {
+          "name": "Frozen Vegetables",
+          "items": [
+            {
+              "name": "Unknown Riced Cauliflower",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Frozen Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown green/white frozen vegetable facings",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Frozen Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown lower mixed frozen vegetable/processed-food facings",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Frozen Vegetables",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
           "name": "Pickles",
           "items": [
             {
@@ -1339,6 +3825,56 @@
               "subcategory": "Pickles",
               "brand": "Yummy House",
               "weight": 0.21
+            }
+          ]
+        },
+        {
+          "name": "Snacks",
+          "items": [
+            {
+              "name": "Imperial Banquet Egg Rolls",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Imperial Banquet",
+              "weight": 0.15,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Select Snackit",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Select"
+            },
+            {
+              "name": "Unknown snack/spread product",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
+          "name": "Cleaning Supplies",
+          "items": [
+            {
+              "name": "Dettol Disinfectant Spray",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Cleaning Supplies",
+              "brand": "Dettol",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/HK-DFI/2024-5-7/h21k-562884.jpg?height=176",
+              "weight": 0.45
+            },
+            {
+              "name": "Unknown household detergent/cleaner refill pouch",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Cleaning Supplies",
+              "brand": "Unknown"
             }
           ]
         },
@@ -1383,44 +3919,26 @@
           ]
         },
         {
-          "name": "Cleaning Supplies",
+          "name": "Frozen Meat",
           "items": [
             {
-              "name": "Dettol Disinfectant Spray",
-              "price": 64.9,
+              "name": "Unknown Sous Vide Confit Duck Leg",
+              "price": 29.9,
               "category": "Groceries",
-              "subcategory": "Cleaning Supplies",
-              "brand": "Dettol",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/HK-DFI/2024-5-7/h21k-562884.jpg?height=176",
-              "weight": 0.45
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
             }
           ]
         },
         {
-          "name": "Other",
+          "name": "Meat",
           "items": [
             {
-              "name": "Sardines in Tomato Sauce",
+              "name": "Unknown packaged meat product",
               "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Other",
-              "brand": "Del Monte",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
-            }
-          ]
-        },
-        {
-          "name": "Snacks",
-          "items": [
-            {
-              "name": "Imperial Banquet Egg Rolls",
-              "price": 20.0,
-              "category": "Groceries",
-              "subcategory": "Snacks",
-              "brand": "Imperial Banquet",
-              "weight": 0.15,
-              "bulkDealPrice": 26.0,
-              "bulkDealQty": 2
+              "subcategory": "Meat",
+              "brand": "Unknown"
             }
           ]
         }
@@ -1428,7 +3946,1769 @@
     },
     {
       "name": "Fresh Food",
-      "subcategories": []
+      "subcategories": [
+        {
+          "name": "Other",
+          "items": [
+            {
+              "name": "Unknown packaged white-bread sandwich",
+              "price": 15.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged sandwich, second visible variant",
+              "price": 15.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown triangle onigiri/rice snack, variant 1",
+              "price": 24.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown triangle onigiri/rice snack, variant 2",
+              "price": 24.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown triangle onigiri/rice snack, variant 3",
+              "price": 24.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown",
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown triangle onigiri/rice snack, variant 4",
+              "price": 12.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown triangle onigiri/rice snack, variant 5",
+              "price": 12.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown prepared bento/ready meal, variant 1",
+              "price": 20.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown prepared bento/ready meal, variant 2",
+              "price": 29.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown prepared bento/ready meal, variant 3",
+              "price": 29.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown bottled fruit/herbal drink, pale variant",
+              "price": 9.5,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown bottled fruit/herbal drink, pink variant",
+              "price": 9.5,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged melon pieces",
+              "price": 31.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Calypso Jumbo Blueberries",
+              "price": 26.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Calypso",
+              "weight": 0.2
+            },
+            {
+              "name": "CORE Jumbo Blueberries",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "CORE"
+            },
+            {
+              "name": "Unknown packaged red-flesh kiwifruit",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown brown round fruit pack",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown chilled salmon portion pack",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged yellow fruit",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged orange/pink fruit",
+              "price": 22.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Whole watermelon",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Whole melon",
+              "price": 24.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged melon pieces",
+              "price": 31.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Calypso Jumbo Blueberries",
+              "price": 26.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Calypso",
+              "weight": 0.2
+            },
+            {
+              "name": "CORE Jumbo Blueberries",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "CORE"
+            },
+            {
+              "name": "Unknown packaged red-flesh kiwifruit",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown brown round fruit pack",
+              "price": 25.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown chilled salmon pack",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown yellow-netted fruit pack",
+              "price": 32.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "CORE Jumbo Blueberries",
+              "price": 32.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "CORE",
+              "bulkDealPrice": 32.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown green/purple packaged grapes",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Golden peaches",
+              "price": 22.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown peach pack, second variant",
+              "price": 22.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown small green/brown fruit pack",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged mini watermelon/melon",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown netted citrus pack",
+              "price": 20.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown netted citrus pack",
+              "price": 24.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown netted citrus pack",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown netted citrus pack, second variant",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged oranges",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown chilled tofu/bean curd pack",
+              "price": 10.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown yellow tofu/bean curd pack",
+              "price": 10.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown kimchi jar/tub",
+              "price": 56.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown",
+              "bulkDealPrice": 56.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown pink egg carton",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown white egg carton",
+              "price": 30.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown brown egg carton",
+              "price": 23.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown cage-free egg carton",
+              "price": 23.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown brown egg carton",
+              "price": 32.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown white egg carton",
+              "price": 29.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown specialty egg/chilled egg pack",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown kimchi jar/tub",
+              "price": 56.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown",
+              "bulkDealPrice": 56.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown Chinese-labeled white egg carton",
+              "price": 52.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown",
+              "bulkDealPrice": 52.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown white egg carton",
+              "price": 30.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown cage-free fresh eggs",
+              "price": 23.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown cage-free egg carton",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown New Generation egg carton",
+              "price": 29.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Thai fresh eggs carton",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "President Whipping Cream",
+              "price": 80.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "President",
+              "weight": 0.5
+            },
+            {
+              "name": "President Light Cream",
+              "price": 62.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "President",
+              "weight": 0.2
+            },
+            {
+              "name": "Emmi yogurt, variant 1",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Emmi",
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Chobani Greek Yogurt, blueberry",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Chobani"
+            },
+            {
+              "name": "Chobani Greek Yogurt, plain/other variant",
+              "price": 26.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Chobani"
+            },
+            {
+              "name": "Unknown 100% Greek yogurt",
+              "price": 31.9,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Greek yogurt, second variant",
+              "price": 33.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Meiji probiotic yogurt",
+              "price": 8.5,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Meiji"
+            },
+            {
+              "name": "Pauls yogurt, blue variant",
+              "price": 7.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Pauls"
+            },
+            {
+              "name": "Pauls yogurt, pink variant",
+              "price": 7.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Pauls"
+            },
+            {
+              "name": "Bulla yogurt",
+              "price": 16.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Bulla"
+            },
+            {
+              "name": "Daisy sour cream",
+              "price": 40.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Daisy"
+            },
+            {
+              "name": "Lurpak spreadable butter",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Lurpak"
+            },
+            {
+              "name": "Flora spread, original/light variant",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Flora"
+            },
+            {
+              "name": "Philadelphia cream cheese",
+              "price": 40.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Philadelphia"
+            },
+            {
+              "name": "Crystal Farms String Cheese",
+              "price": 52.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Crystal Farms"
+            },
+            {
+              "name": "Unknown dairy tub",
+              "price": 39.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown sliced cheese pack",
+              "price": 28.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Chesdale sliced cheese",
+              "price": 39.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Chesdale"
+            },
+            {
+              "name": "Kraft Singles",
+              "price": 39.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Kraft"
+            },
+            {
+              "name": "President Cheddar",
+              "price": 39.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "President"
+            },
+            {
+              "name": "The Laughing Cow cheese",
+              "price": 29.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Laughing Cow"
+            },
+            {
+              "name": "Crystal Farms White Sharp Cheddar",
+              "price": 75.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Crystal Farms"
+            },
+            {
+              "name": "Crystal Farms Cheddar",
+              "price": 75.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Crystal Farms"
+            },
+            {
+              "name": "Crystal Farms Mozzarella",
+              "price": 75.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Crystal Farms"
+            },
+            {
+              "name": "Crystal Farms Parmesan",
+              "price": 75.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Crystal Farms"
+            },
+            {
+              "name": "President butter",
+              "price": 40.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "President"
+            },
+            {
+              "name": "Westgold butter",
+              "price": 40.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Westgold"
+            },
+            {
+              "name": "Anchor butter",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Anchor"
+            },
+            {
+              "name": "Daisy butter",
+              "price": 40.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Daisy"
+            },
+            {
+              "name": "Lurpak spreadable butter",
+              "price": 58.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Lurpak"
+            },
+            {
+              "name": "Flora Original/Light spread",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Flora"
+            },
+            {
+              "name": "Unknown packaged tofu/bean curd",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Other",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
+          "name": "Meat",
+          "items": [
+            {
+              "name": "Select pork slices/chops, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork belly/sliced pork",
+              "price": 38.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select",
+              "weight": 0.181
+            },
+            {
+              "name": "Select pork belly slices",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork belly/sliced pork",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select",
+              "weight": 0.248
+            },
+            {
+              "name": "Select pork slices, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork belly/sliced pork",
+              "price": 39.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork slices, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Chilled beef/pork tray, product Unknown",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Chilled prepared meat tray, product Unknown",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Select sliced pork/belly",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork ribs/chunks",
+              "price": 36.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork chunks",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Pork mince/ground pork",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Pork slices",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Beef steak/sliced beef, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Chopped meat/offal tray, product Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Marinated pork/steak tray, cut Unknown",
+              "price": 134.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Marinated pork tray, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Mixed marinated meat tray",
+              "price": 58.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Pork/offal pieces",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Ground pork/minced pork",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Chicken breast fillets",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Chicken thigh/drumstick pieces",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Japanese-style salad chicken, herb/seasoned variant",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown",
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Samlip Sausage Original",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Samlip Sausage Smoked",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Samlip Sausage Basil",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Packaged sliced/processed meat, variant Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Packaged burger patties/processed meat, variant Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Farmer Chinese chilled pork tray",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Farmer Chinese chilled pork tray, variant Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Marinated pork tray",
+              "price": 134.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Mixed marinated meat tray with red pepper",
+              "price": 58.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Pork mince/ground pork",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Chicken breast fillets",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Chicken thigh/drumstick pieces",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Unknown VISMARA packaged food",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "VISMARA"
+            },
+            {
+              "name": "Select Aust Chilled Minced Beef",
+              "price": 41.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select",
+              "weight": 0.177
+            },
+            {
+              "name": "Select Aust Chilled Lean Beef",
+              "price": 41.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select",
+              "weight": 0.181
+            },
+            {
+              "name": "Morliny Smoked Bacon",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Morliny"
+            },
+            {
+              "name": "Samlip Sausage Basil",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Select chicken breast fillets",
+              "price": 36.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select chicken thigh pieces (diced)",
+              "price": 36.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "Select chicken dark meat/wing pieces",
+              "price": 28.9,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Select"
+            },
+            {
+              "name": "ang Australian Striploin Steak",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "ang",
+              "weight": 0.23
+            },
+            {
+              "name": "Ho e Sik Spaghetti with Meat in Tomato Sauce",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "Ho e Sik",
+              "weight": 0.285
+            },
+            {
+              "name": "ang Australian Grain-Fed Angus Beef Patty (Southern Grain)",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Meat",
+              "brand": "ang"
+            }
+          ]
+        },
+        {
+          "name": "Dairy",
+          "items": [
+            {
+              "name": "Strawberry Flavour Drinking Yoghurt (case; brand unclear)",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Pauls Skimmed Milk",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Pauls",
+              "weight": 0.25
+            },
+            {
+              "name": "Dutch Lady Chocolate Milk Beverage",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "weight": 0.225
+            },
+            {
+              "name": "Black & White Pure Milk",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Black & White",
+              "weight": 1.0
+            },
+            {
+              "name": "Select Australia 100% Full Cream Milk",
+              "price": 15.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Select",
+              "weight": 1.0
+            },
+            {
+              "name": "Select Australia Skimmed Milk",
+              "price": 15.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Select",
+              "weight": 1.0
+            },
+            {
+              "name": "Dutch Lady Organic Pure Milk",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "weight": 1.0
+            },
+            {
+              "name": "Harvey Fresh Full Cream Milk Lactose Free",
+              "price": 23.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Harvey Fresh",
+              "weight": 1.0
+            },
+            {
+              "name": "Daioni Organic Whole Milk",
+              "price": 32.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Daioni",
+              "weight": 1.0,
+              "bulkDealPrice": 52.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown packaged dairy product (left-edge partial; koala graphic)",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Devondale Full Cream UHT Milk",
+              "price": 23.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Devondale",
+              "weight": 1.0
+            },
+            {
+              "name": "Devondale Skim UHT Milk (Extra Light)",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Devondale",
+              "weight": 1.0,
+              "bulkDealPrice": 38.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Pauls Pure Full Cream Milk",
+              "price": 28.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Pauls",
+              "weight": 1.0
+            },
+            {
+              "name": "Pauls Skimmed Milk",
+              "price": 28.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Pauls",
+              "weight": 1.0
+            },
+            {
+              "name": "Emmi Swiss Premium Whole Milk",
+              "price": 29.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Emmi",
+              "weight": 1.0,
+              "bulkDealPrice": 51.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Emmi Swiss Premium Semi-Skimmed Milk",
+              "price": 29.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Emmi",
+              "weight": 1.0,
+              "bulkDealPrice": 55.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Black & White Pure Milk",
+              "price": 23.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Black & White",
+              "weight": 1.0
+            },
+            {
+              "name": "Unknown packaged milk product (right-edge red packaging)",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Australia's Own A2 Protein Full Cream Milk",
+              "price": 20.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Australia's Own",
+              "weight": 1.0
+            },
+            {
+              "name": "Aus'Mania Full Cream UHT Milk",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Aus'Mania",
+              "weight": 1.0,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Aus'Mania Skim UHT Milk",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Aus'Mania",
+              "weight": 1.0,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Dutch Lady Original Milk Beverage",
+              "price": 21.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "weight": 0.946,
+              "bulkDealPrice": 42.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Dutch Lady High Calcium Less Fat Milk Beverage",
+              "price": 21.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "weight": 0.946,
+              "bulkDealPrice": 42.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Fred & Chloe Full Cream Milk",
+              "price": 20.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Fred & Chloe",
+              "weight": 1.0,
+              "bulkDealPrice": 35.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Unknown packaged dairy product (lower-shelf left edge)",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Unknown"
+            },
+            {
+              "name": "MENGNIU Pure Milk",
+              "price": 52.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "MENGNIU",
+              "weight": 1.0
+            },
+            {
+              "name": "Pauls Pure Milk UHT Export 4x3x1L HK",
+              "price": 45.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Pauls",
+              "weight": 1.0
+            },
+            {
+              "name": "Pauls Skimmed Milk UHT Export 4x3x1L",
+              "price": 45.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Pauls",
+              "weight": 1.0
+            },
+            {
+              "name": "Pauls High Calcium Low Fat Milk Beverage UHT Export 4x3x1L",
+              "price": 45.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Pauls",
+              "weight": 1.0
+            },
+            {
+              "name": "Milk Deluxe Pure Milk",
+              "price": 65.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "MILK DELUXE",
+              "weight": 0.25
+            },
+            {
+              "name": "VITA Pure Milk",
+              "price": 38.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "VITA",
+              "weight": 0.236,
+              "bulkDealPrice": 52.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Dutch Lady Purefarm Original Milk",
+              "price": 63.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "weight": 0.946,
+              "bulkDealPrice": 126.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Dutch Lady Purefarm Hi-cal Less Fat Milk",
+              "price": 63.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "weight": 0.946,
+              "bulkDealPrice": 126.0,
+              "bulkDealQty": 3
+            }
+          ]
+        },
+        {
+          "name": "Seafood",
+          "items": [
+            {
+              "name": "Salmon Farm Classic smoked salmon",
+              "price": 77.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Salmon Farm",
+              "weight": 0.1
+            },
+            {
+              "name": "Unknown yellow-pack frozen seafood facings",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown clear/white frozen seafood facing",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown red-pack fish-ball/fish-cake facing",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown red-pack fried fish fillet/fish strip",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown lower-shelf frozen seafood/meat facings",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown purple-pack frozen seafood facings",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Ocean Catch Alaska Black Cod Fillet",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown blue-pack frozen seafood facing",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown orange fish fillet/tray",
+              "price": 66.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown lower-shelf fish packs",
+              "price": 62.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown purple-pack frozen seafood facings",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Ocean Catch Alaska Black Cod Fillet",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown blue-pack frozen seafood facing",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown orange fish fillet/tray",
+              "price": 66.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown lower-shelf fish packs",
+              "price": 62.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown large clear fish bag",
+              "price": 62.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown orange fish-steak facings",
+              "price": 28.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown lower clear seafood pack",
+              "price": 38.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Ho e Sik Spaghetti of Clams in White Wine Sauce",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Ho e Sik",
+              "weight": 0.28
+            },
+            {
+              "name": "Frozen Peeled Whiteleg Shrimp Meat",
+              "price": 52.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Unknown",
+              "bulkDealPrice": 30.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Select Frozen Skin-On Atlantic Salmon Fillets (2pcs)",
+              "price": 62.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Select",
+              "weight": 0.26
+            }
+          ]
+        },
+        {
+          "name": "Frozen Meat",
+          "items": [
+            {
+              "name": "Unknown blue/white beef pack",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "SELECT U.S.A. Grain Fed Hot Pot Beef",
+              "price": 49.9,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "SELECT"
+            },
+            {
+              "name": "Unknown halal beef pack (left)",
+              "price": 68.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown halal beef pack (right)",
+              "price": 58.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Danish Crown beef/meat facing",
+              "price": 72.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Danish Crown"
+            },
+            {
+              "name": "Unknown packaged meat facings",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown blue/white beef pack",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "SELECT U.S.A. Grain Fed Hot Pot Beef",
+              "price": 49.9,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "SELECT"
+            },
+            {
+              "name": "Unknown halal beef facings",
+              "price": 68.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown Danish Crown beef/meat facing",
+              "price": 72.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Danish Crown"
+            },
+            {
+              "name": "Unknown packaged meat facing",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "SELECT U.S.A. Grain Fed Hot Pot Beef",
+              "price": 49.9,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "SELECT"
+            },
+            {
+              "name": "Unknown blue/white beef pack",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown halal beef facings",
+              "price": 68.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown purple-pack frozen food facings",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Select Chicken with Dried Abalone (Brazil)",
+              "price": 38.9,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Select",
+              "weight": 1.13
+            },
+            {
+              "name": "Meat Zero Plant-Based Minced Meat",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Meat Zero",
+              "weight": 0.22
+            },
+            {
+              "name": "Select Pork Patties",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Meat",
+              "brand": "Select"
+            }
+          ]
+        },
+        {
+          "name": "Vegetables",
+          "items": [
+            {
+              "name": "Red chili peppers, packaged",
+              "price": 7.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Packaged mushrooms, mixed/unknown variety",
+              "price": 23.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Zucchini/courgettes, packaged",
+              "price": 9.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "White mushrooms, packaged",
+              "price": 9.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Oyster/mixed mushrooms, packaged",
+              "price": 12.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Red vegetables, packaged",
+              "price": 17.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Cucumbers/green peppers, packaged",
+              "price": 8.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Radishes, packaged",
+              "price": 10.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Baby corn, packaged",
+              "price": 12.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Leafy vegetables/cabbage, packaged",
+              "price": 10.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Carrots, packaged",
+              "price": 14.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Eggplant, packaged",
+              "price": 7.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Bell peppers, packaged",
+              "price": 14.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Chinese cabbage/lettuce, packaged",
+              "price": 9.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "brand": "Unknown"
+            }
+          ]
+        },
+        {
+          "name": "Fruit",
+          "items": [
+            {
+              "name": "Packaged red berries/cherries",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Kiwifruit, loose",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Bananas, loose",
+              "price": 4.7,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Oranges/mandarins, loose",
+              "price": 21.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Lemons, loose",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Dragon fruit",
+              "price": 14.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Pineapple, loose",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Avocados, loose",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Kiwifruit, loose",
+              "price": 20.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Bananas, loose",
+              "price": 4.7,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "brand": "Unknown"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
