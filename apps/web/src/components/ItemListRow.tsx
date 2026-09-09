@@ -20,20 +20,22 @@ export function ItemListRow({ item }: ItemListRowProps) {
   const [fav, setFav] = useState(() => isFavorite(item.id));
 
   return (
-    <li className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white/95 shadow-sm">
-      <div className="relative h-28 w-full bg-white">
-        <Image
-          src={getItemImage(item)}
-          alt={item.name}
-          fill
-          className="object-contain p-1"
-          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
-        />
+    <li className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white/95 shadow-sm transition-shadow hover:shadow-md">
+      <div className="relative h-20 w-full bg-white sm:h-24">
+        {getItemImage(item) ? (
+          <Image
+            src={getItemImage(item)}
+            alt={item.name}
+            fill
+            className="object-contain p-1"
+            sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
+          />
+        ) : null}
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
+            <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900">{item.name}</h3>
             <button
               type="button"
               onClick={() => setFav(toggleFavorite(item.id))}
@@ -46,9 +48,8 @@ export function ItemListRow({ item }: ItemListRowProps) {
           <p className="mt-0.5 text-xs text-gray-400">
             per {item.unit} · ~{item.weightKg} kg
           </p>
-          <p className="mt-2 text-base font-bold text-fusion-red">
+          <p className="mt-1 text-sm font-bold text-fusion-red">
             {formatMenuPrice(item)}
-            <span className="ml-1 text-xs font-normal text-gray-400">est.</span>
             {hasSale(item) && (
               <span className="ml-2 text-xs font-normal text-gray-400 line-through">
                 ${item.price}
@@ -74,16 +75,16 @@ export function ItemListRow({ item }: ItemListRowProps) {
         <button
           type="button"
           onClick={() => addItem(item)}
-          className="mt-auto w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white active:scale-[0.98]"
+          className="mt-auto w-full rounded-lg bg-fusion-red py-2 text-xs font-semibold text-white active:scale-[0.98]"
         >
           Add to Cart
         </button>
       ) : (
-        <div className="mt-auto flex items-center justify-between rounded-xl bg-red-50 px-3 py-2">
+        <div className="mt-auto flex items-center justify-between rounded-lg bg-red-50 px-2 py-1.5">
           <button
             type="button"
             onClick={() => setQuantity(item.id, quantity - 1)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-xl font-bold text-fusion-red shadow-sm"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold text-fusion-red shadow-sm"
           >
             −
           </button>
@@ -91,7 +92,7 @@ export function ItemListRow({ item }: ItemListRowProps) {
           <button
             type="button"
             onClick={() => setQuantity(item.id, quantity + 1)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-fusion-red text-xl font-bold text-white shadow-sm"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-fusion-red text-lg font-bold text-white shadow-sm"
           >
             +
           </button>

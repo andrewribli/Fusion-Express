@@ -1,10 +1,25 @@
 import type { OrderStatus } from "./order-status";
 
 export const MENU_CATEGORIES = [
+  "seasonings",
+  "tea",
+  "toiletries",
   "instant-noodles",
+  "condiments",
+  "household",
+  "canned-goods",
+  "sauces",
+  "rice-noodles",
+  "chips",
+  "pickles",
+  "crackers",
+  "biscuits",
+  "cleaning-supplies",
+  "snacks",
+  "other",
+  // legacy / fresh-food placeholders kept for older Firestore docs
   "instant-meals",
   "bread",
-  "rice-noodles",
   "meat",
   "seafood",
   "tofu-protein",
@@ -13,19 +28,32 @@ export const MENU_CATEGORIES = [
   "frozen",
   "drinks",
   "coffee-tea",
-  "snacks",
-  "condiments",
-  "toiletries",
   "household-essentials",
+  "salads",
+  "chilled-drinks",
 ] as const;
 
 export type MenuCategory = (typeof MENU_CATEGORIES)[number];
 
 export const CATEGORY_LABELS: Record<MenuCategory, string> = {
+  seasonings: "Seasonings",
+  tea: "Tea",
+  toiletries: "Toiletries",
   "instant-noodles": "Instant Noodles",
+  condiments: "Condiments",
+  household: "Household",
+  "canned-goods": "Canned Goods",
+  sauces: "Sauces",
+  "rice-noodles": "Rice & Noodles",
+  chips: "Chips",
+  pickles: "Pickles",
+  crackers: "Crackers",
+  biscuits: "Biscuits",
+  "cleaning-supplies": "Cleaning Supplies",
+  snacks: "Snacks",
+  other: "Other",
   "instant-meals": "Instant Meals",
   bread: "Bread & Bakery",
-  "rice-noodles": "Rice & Noodles",
   meat: "Meat",
   seafood: "Seafood",
   "tofu-protein": "Tofu & Protein",
@@ -34,19 +62,13 @@ export const CATEGORY_LABELS: Record<MenuCategory, string> = {
   frozen: "Frozen",
   drinks: "Drinks",
   "coffee-tea": "Coffee & Tea",
-  snacks: "Snacks",
-  condiments: "Condiments",
-  toiletries: "Toiletries",
   "household-essentials": "Household Essentials",
+  salads: "Salads",
+  "chilled-drinks": "Chilled Drinks",
 };
 
-export const REFRIGERATED_CATEGORIES = new Set<string>([
-  "meat",
-  "seafood",
-  "dairy-eggs",
-  "frozen",
-  "tofu-protein",
-]);
+/** Fresh Food aisle ids. Populated when Excel includes Fresh Food Sub-Categories. */
+export const REFRIGERATED_CATEGORIES = new Set<string>([]);
 
 export function isRefrigeratedCategory(category: string): boolean {
   return REFRIGERATED_CATEGORIES.has(category);
@@ -82,6 +104,7 @@ export interface MenuItem {
   inStock: boolean;
   sortOrder: number;
   weightKg: number;
+  subcategory?: string;
 }
 
 export interface CartItem {
@@ -107,6 +130,21 @@ export interface OrderItem {
   price: number;
   quantity: number;
   weightKg?: number;
+  /** Unit price at the Fusion till. */
+  actualPrice?: number;
+}
+
+export type PriceAdjustmentStatus =
+  | "none"
+  | "pending_customer"
+  | "approved"
+  | "refund_pending"
+  | "refunded";
+
+export interface RunnerLocation {
+  lat: number;
+  lng: number;
+  updatedAt: Date;
 }
 
 export interface Order {
@@ -114,6 +152,11 @@ export interface Order {
   sessionId: string;
   customerId: string;
   customerName?: string;
+  /**
+   * Stored on the order so status emails do not need to read the customer's
+   * /users doc, which only the customer themselves may read.
+   */
+  customerEmail?: string;
   items: OrderItem[];
   status: OrderStatus;
   college: string;
@@ -130,7 +173,13 @@ export interface Order {
   total: number;
   paymentReceived: boolean;
   paymentMethod?: "PayMe" | "FPS";
+  /** Doc id in /runners. */
   runnerId?: string;
+  /**
+   * Auth uid of the runner. Security rules compare this to request.auth.uid,
+   * which runnerId cannot do, so runner queries filter on this field.
+   */
+  runnerUid?: string;
   runnerName?: string;
   runnerRating?: number;
   deliveryPhotoUrl?: string;
@@ -139,6 +188,17 @@ export interface Order {
   updatedAt: Date;
   pickedUpAt?: Date;
   deliveredAt?: Date;
+  /** Original app subtotal before till prices. */
+  estimatedSubtotal?: number;
+  actualSubtotal?: number;
+  priceDifference?: number;
+  priceAdjustmentStatus?: PriceAdjustmentStatus;
+  refundAmount?: number;
+  refundedAt?: Date;
+  tillPricesSubmittedAt?: Date;
+  customerApprovedPriceAt?: Date;
+  fusionPaidByPlatform?: boolean;
+  runnerLocation?: RunnerLocation;
 }
 
 export interface Runner {

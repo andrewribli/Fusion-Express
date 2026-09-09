@@ -12,29 +12,24 @@ import { categoryLabel, type MenuItem } from "@/lib/types";
 const PRODUCTS = collectionName("products");
 const PRODUCTS_PROD = "products";
 
-/** Aisle id → Firestore `category` field values (display labels). */
+/** Aisle id → category field values (Excel Sub-Category + legacy labels). */
 export const AISLE_FIRESTORE_CATEGORIES: Record<string, string[]> = {
-  meat: ["Meat", "Beef & Lamb", "Poultry", "Pork", "Meat & Seafood"],
-  "household-essentials": ["Household Essentials"],
-  snacks: ["Snacks"],
-  drinks: ["Drinks"],
-  "instant-noodles": [
-    "Instant Noodles",
-    "Instant Meals",
-    "Instant Noodles & Pasta",
-  ],
-  seafood: ["Seafood"],
-  "dairy-eggs": ["Dairy & Eggs", "Tofu & Protein"],
-  frozen: ["Frozen", "Frozen Foods"],
-  "chilled-drinks": ["Chilled Drinks"],
-  salads: ["Salads", "Pre-packed Salads"],
-  bread: ["Bread & Bakery", "Bread", "Bakery & Bread"],
-  "rice-noodles": ["Rice & Noodles"],
-  "canned-goods": ["Canned & Packaged Goods", "Canned Goods"],
-  condiments: ["Condiments"],
-  "coffee-tea": ["Coffee & Tea"],
-  toiletries: ["Toiletries", "Personal Care"],
-  "fruit-veg": ["Fruit & Vegetables", "Fruits & Vegetables"],
+  seasonings: ["Seasonings", "seasonings"],
+  tea: ["Tea", "tea"],
+  toiletries: ["Toiletries", "toiletries"],
+  "instant-noodles": ["Instant Noodles", "instant-noodles"],
+  condiments: ["Condiments", "condiments"],
+  household: ["Household", "household", "Household Essentials"],
+  "canned-goods": ["Canned Goods", "canned-goods"],
+  sauces: ["Sauces", "sauces"],
+  "rice-noodles": ["Rice & Noodles", "rice-noodles"],
+  chips: ["Chips", "chips"],
+  pickles: ["Pickles", "pickles"],
+  crackers: ["Crackers", "crackers"],
+  biscuits: ["Biscuits", "biscuits"],
+  "cleaning-supplies": ["Cleaning Supplies", "cleaning-supplies"],
+  snacks: ["Snacks", "snacks"],
+  other: ["Other", "other"],
 };
 
 export function getFirestoreCategoriesForAisle(aisleId: string): string[] {
@@ -58,6 +53,8 @@ export function productBelongsToAisle(
   section: StoreSection,
 ): boolean {
   const cat = categorySlug(item.category);
+  if (cat === aisleId) return true;
+
   const allowed = new Set(
     getFirestoreCategoriesForAisle(aisleId).map(categorySlug),
   );
@@ -70,65 +67,19 @@ export function productBelongsToAisle(
 
   if (allowed.has(cat)) return true;
 
-  if (aisleId === "meat") {
-    return /meat|beef|lamb|pork|poultry|chicken/.test(cat);
-  }
-  if (aisleId === "household-essentials") {
-    return cat.includes("household");
-  }
-  if (aisleId === "instant-noodles") {
-    return /instant-noodle|pasta|ramen/.test(cat);
-  }
-  if (aisleId === "canned-goods") {
-    return cat.includes("canned") || cat.includes("packaged");
-  }
-  if (aisleId === "bread") {
-    return cat.includes("bread") || cat.includes("bakery");
-  }
-  if (aisleId === "salads") {
-    return cat.includes("salad");
-  }
-  if (aisleId === "chilled-drinks") {
-    return cat.includes("chilled");
-  }
-  if (aisleId === "coffee-tea") {
-    return cat.includes("coffee") || cat.includes("tea");
-  }
-  if (aisleId === "condiments") {
-    return cat.includes("condiment") || cat.includes("sauce");
-  }
-  if (aisleId === "rice-noodles") {
-    return cat.includes("rice") && !cat.includes("instant");
-  }
-  if (aisleId === "seafood") {
-    return cat.includes("seafood");
-  }
-  if (aisleId === "frozen") {
-    return cat.includes("frozen");
-  }
-  return false;
+  const sub = item.subcategory ? categorySlug(item.subcategory) : "";
+  return sub === aisleId;
 }
 
-/** Load the full Firestore catalog. */
+/**
+ * Load the Excel-backed catalog bundled with the app.
+ * Firestore products are not merged so gracerun.fit (old deploy) stays on the
+ * previous catalog while vercel.app can test this sheet in isolation.
+ */
 export async function loadAllProducts(): Promise<MenuItem[]> {
   const catalog = getCatalogMenuItems();
-  if (!isFirebaseConfigured()) {
-    console.log("[products] Firebase is not configured — using catalog JSON");
-    return catalog;
-  }
-  const db = getDb();
-  console.log("[products] querying collection(db, \"" + PRODUCTS + "\")");
-  let snap = await getDocs(collection(db, PRODUCTS));
-  if (snap.empty && isStagingApp() && PRODUCTS !== PRODUCTS_PROD) {
-    snap = await getDocs(collection(db, PRODUCTS_PROD));
-  }
-  console.log("[products] fetched", snap.size, "docs");
-  const fromFirestore = mapDocs(snap.docs);
-  const seen = new Set(fromFirestore.map((item) => item.name.toLowerCase()));
-  const extras = catalog.filter((item) => !seen.has(item.name.toLowerCase()));
-  return [...fromFirestore, ...extras].sort(
-    (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name),
-  );
+  console.log("[products] using Excel catalog JSON,", catalog.length, "items");
+  return catalog;
 }
 
 export function filterProductsForAisle(

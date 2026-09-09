@@ -1,3 +1,4 @@
+import catalog from "@fusion-express/shared/data/foodpanda-fusion-catalog.json";
 import type { MenuCategory } from "@/lib/types";
 
 export type StoreSection = "refrigerated" | "dry";
@@ -8,63 +9,72 @@ export interface Aisle {
   section: StoreSection;
   /** Match items by Firestore/menu category */
   menuCategories?: MenuCategory[];
-  /** Match specific item IDs (e.g. split drinks aisle) */
+  /** Match specific item IDs */
   itemIds?: string[];
 }
 
-/** Drinks typically sold from fridges at Fusion */
-export const CHILLED_DRINK_IDS = [
-  "pocari-sweat",
-  "pocari-sweat-largest",
-  "pagoda-kumquat-lemon-bundle",
-  "pagoda-kumquat-lemon",
-  "tao-ti-mandarin-lemon",
-  "fanta-mini-6pack-orange",
-  "vitasoy-original",
-  "vitasoy-chocolate",
-  "minute-maid-orange",
-  "minute-maid-apple",
-  "lipton-lemon",
-  "lipton-peach",
-  "yakult",
-  "milk-kowloon",
-  "milk-meiji",
-];
+interface CatalogNode {
+  name: string;
+  items?: unknown[];
+  subcategories?: CatalogNode[];
+}
 
-export const REFRIGERATED_AISLES: Aisle[] = [
-  { id: "meat", label: "Meat & Poultry", section: "refrigerated", menuCategories: ["meat"] },
-  { id: "seafood", label: "Seafood", section: "refrigerated", menuCategories: ["seafood"] },
-  { id: "dairy-eggs", label: "Dairy & Eggs", section: "refrigerated", menuCategories: ["dairy-eggs", "tofu-protein"] },
-  { id: "frozen", label: "Frozen Food", section: "refrigerated", menuCategories: ["frozen"] },
-  { id: "chilled-drinks", label: "Chilled Drinks", section: "refrigerated", itemIds: CHILLED_DRINK_IDS },
-  { id: "salads", label: "Pre-packed Salads", section: "refrigerated", menuCategories: [] },
-];
+const FRESH_FOOD_LABELS = new Set(["fresh food", "refrigerated"]);
+const GROCERIES_LABELS = new Set(["groceries", "non-refrigerated", "dry"]);
 
-export const DRY_AISLES: Aisle[] = [
-  { id: "household-essentials", label: "Household Essentials", section: "dry", menuCategories: ["household-essentials"] },
-  { id: "instant-noodles", label: "Instant Noodles", section: "dry", menuCategories: ["instant-noodles", "instant-meals"] },
-  { id: "drinks", label: "Drinks (Shelf-stable)", section: "dry", menuCategories: ["drinks"], itemIds: [] },
-  { id: "snacks", label: "Snacks & Chips", section: "dry", menuCategories: ["snacks"] },
-  { id: "bread", label: "Bread & Bakery", section: "dry", menuCategories: ["bread"] },
-  { id: "rice-noodles", label: "Rice & Noodles", section: "dry", menuCategories: ["rice-noodles"] },
-  { id: "canned-goods", label: "Canned Goods", section: "dry", menuCategories: [] },
-  { id: "condiments", label: "Condiments & Sauces", section: "dry", menuCategories: ["condiments"] },
-  { id: "coffee-tea", label: "Coffee & Tea", section: "dry", menuCategories: ["coffee-tea"] },
-  { id: "toiletries", label: "Toiletries & Essentials", section: "dry", menuCategories: ["toiletries"] },
-  { id: "fruit-veg", label: "Fruits & Vegetables", section: "dry", menuCategories: ["fruit-veg"] },
-];
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
+}
+
+function aislesFromCatalog(section: StoreSection): Aisle[] {
+  const wantFresh = section === "refrigerated";
+  const categories =
+    (catalog as { categories: CatalogNode[] }).categories ?? [];
+  const out: Aisle[] = [];
+  const seen = new Set<string>();
+
+  for (const cat of categories) {
+    const label = cat.name.trim().toLowerCase();
+    const isFresh = FRESH_FOOD_LABELS.has(label);
+    const isGroceries = GROCERIES_LABELS.has(label) || (!isFresh && !wantFresh);
+    if (wantFresh ? !isFresh : !isGroceries && isFresh) continue;
+    if (wantFresh !== isFresh) continue;
+
+    for (const sub of cat.subcategories ?? []) {
+      const id = slugify(sub.name);
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      out.push({
+        id,
+        label: sub.name,
+        section,
+        menuCategories: [id as MenuCategory],
+      });
+    }
+  }
+
+  return out;
+}
+
+export const REFRIGERATED_AISLES: Aisle[] = aislesFromCatalog("refrigerated");
+export const DRY_AISLES: Aisle[] = aislesFromCatalog("dry");
 
 export const SECTION_META: Record<
   StoreSection,
   { title: string; subtitle: string }
 > = {
   refrigerated: {
-    title: "Refrigerated Section",
-    subtitle: "Chilled & Frozen Goods",
+    title: "Fresh Food",
+    subtitle: "Chilled & refrigerated goods",
   },
   dry: {
-    title: "Non-Refrigerated Section",
-    subtitle: "Pantry & Dry Goods",
+    title: "Groceries",
+    subtitle: "Pantry & shelf-stable goods",
   },
 };
 
@@ -78,4 +88,8 @@ export function getAisle(section: StoreSection, aisleId: string): Aisle | undefi
 
 export function isValidSection(section: string): section is StoreSection {
   return section === "refrigerated" || section === "dry";
+}
+
+export function refrigeratedAisleIds(): Set<string> {
+  return new Set(REFRIGERATED_AISLES.map((a) => a.id));
 }

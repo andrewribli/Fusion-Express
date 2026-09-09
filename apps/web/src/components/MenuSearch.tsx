@@ -25,7 +25,7 @@ export function MenuSearch({
     if (!q || q.length < 1) return [];
     return items
       .filter((item) => item.name.toLowerCase().includes(q))
-      .slice(0, 6);
+      .slice(0, 12);
   }, [items, value]);
 
   return (
@@ -37,6 +37,7 @@ export function MenuSearch({
         onFocus={() => setFocused(true)}
         onBlur={() => setTimeout(() => setFocused(false), 150)}
         placeholder={placeholder}
+        aria-label="Search items"
         className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
         autoComplete="off"
       />

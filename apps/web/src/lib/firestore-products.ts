@@ -1,9 +1,11 @@
+import { resolveProductImage } from "@fusion-express/shared/resolve-image";
 import {
   categoryLabel,
   isRefrigeratedCategory,
   MENU_CATEGORIES,
   type MenuItem,
 } from "@/lib/types";
+import { getFreshFoodAisleIds } from "@/lib/catalog-products";
 
 export function categorySlug(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, "-");
@@ -13,11 +15,11 @@ export function firestoreProductToMenuItem(
   id: string,
   data: Record<string, unknown>,
 ): MenuItem {
-  const image = String(data.image ?? "");
-  const usableImage =
-    image.startsWith("http") && !image.includes("…") && !image.includes("...")
-      ? image
-      : undefined;
+  const image = resolveProductImage({
+    id: String(data.id ?? id),
+    name: String(data.name ?? "Product"),
+    image: String(data.image ?? ""),
+  });
 
   return {
     id: String(data.id ?? id),
@@ -25,7 +27,7 @@ export function firestoreProductToMenuItem(
     category: categorySlug(String(data.category ?? "meat")),
     price: Number(data.price ?? 0),
     unit: String(data.unit ?? "each"),
-    image: usableImage,
+    image,
     priceType: "fixed",
     runnerInputsPrice: false,
     inStock: data.inStock !== false,
@@ -67,11 +69,15 @@ export function splitProductsBySection(items: MenuItem[]): {
   dry: MenuItem[];
   refrigerated: MenuItem[];
 } {
+  const freshAisles = getFreshFoodAisleIds();
   const dry: MenuItem[] = [];
   const refrigerated: MenuItem[] = [];
   for (const item of items) {
-    if (isRefrigeratedCategory(item.category)) refrigerated.push(item);
-    else dry.push(item);
+    if (freshAisles.has(item.category) || isRefrigeratedCategory(item.category)) {
+      refrigerated.push(item);
+    } else {
+      dry.push(item);
+    }
   }
   return { dry, refrigerated };
 }

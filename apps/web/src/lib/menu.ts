@@ -1,8 +1,9 @@
 import {
-  CHILLED_DRINK_IDS,
   getAisle,
+  getAislesForSection,
   type StoreSection,
 } from "@/data/aisles";
+import { productBelongsToAisle } from "@/lib/firestore";
 import type { MenuItem } from "@/lib/types";
 import {
   filterItemsByQuery,
@@ -29,18 +30,25 @@ export function getAisleItems(
     return allItems.filter((item) => aisle.itemIds!.includes(item.id));
   }
 
-  if (aisle.id === "drinks") {
-    return allItems.filter(
-      (item) =>
-        item.category === "drinks" && !CHILLED_DRINK_IDS.includes(item.id),
-    );
-  }
-
-  if (!aisle.menuCategories?.length) return [];
-
   return allItems.filter((item) =>
-    aisle.menuCategories!.some((cat) => cat === item.category),
+    productBelongsToAisle(item, aisleId, section),
   );
+}
+
+export function getSectionItems(
+  allItems: MenuItem[],
+  section: StoreSection,
+): MenuItem[] {
+  const seen = new Set<string>();
+  const out: MenuItem[] = [];
+  for (const aisle of getAislesForSection(section)) {
+    for (const item of getAisleItems(allItems, section, aisle.id)) {
+      if (seen.has(item.id)) continue;
+      seen.add(item.id);
+      out.push(item);
+    }
+  }
+  return out;
 }
 
 export function searchItems(items: MenuItem[], query: string): MenuItem[] {

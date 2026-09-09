@@ -16,22 +16,24 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
   const quantity = inCart?.quantity ?? 0;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-      <div className="relative h-28 w-full bg-white">
-        <Image
-          src={getItemImage(item)}
-          alt={item.name}
-          fill
-          className="object-contain p-1"
-          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
-        />
+    <div className="flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className="relative h-20 w-full bg-white sm:h-24">
+        {getItemImage(item) ? (
+          <Image
+            src={getItemImage(item)}
+            alt={item.name}
+            fill
+            className="object-contain p-1"
+            sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
+          />
+        ) : null}
       </div>
-      <div className="flex flex-1 flex-col p-3">
-        <h3 className="text-sm font-semibold leading-snug text-gray-900">
+      <div className="flex flex-1 flex-col p-2.5">
+        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900">
           {item.name}
         </h3>
         <p className="mt-0.5 text-xs text-gray-400">per {item.unit}</p>
-        <p className="mt-2 text-sm font-bold leading-tight text-fusion-red">
+        <p className="mt-1 text-sm font-bold leading-tight text-fusion-red">
           {formatMenuPrice(item)}
         </p>
         {item.runnerInputsPrice && (
@@ -42,16 +44,16 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
           type="button"
           onClick={() => addItem(item)}
           disabled={!item.inStock}
-          className="mt-3 w-full rounded-xl bg-fusion-red py-2 text-sm font-semibold text-lakers-navy transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+          className="mt-2 w-full rounded-lg bg-fusion-red py-1.5 text-xs font-semibold text-lakers-navy transition-colors hover:bg-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
         >
           {item.inStock ? "Add to Cart" : "Out of stock"}
         </button>
       ) : (
-        <div className="mt-3 flex items-center justify-between rounded-xl bg-red-50 px-2 py-1.5">
+        <div className="mt-2 flex items-center justify-between rounded-lg bg-red-50 px-1.5 py-1">
           <button
             type="button"
             onClick={() => setQuantity(item.id, quantity - 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold text-fusion-red shadow-sm"
+            className="flex h-7 w-7 items-center justify-center rounded-md bg-white text-base font-bold text-fusion-red shadow-sm"
             aria-label="Decrease quantity"
           >
             −
@@ -60,7 +62,7 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
           <button
             type="button"
             onClick={() => setQuantity(item.id, quantity + 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-fusion-red text-lg font-bold text-white shadow-sm"
+            className="flex h-7 w-7 items-center justify-center rounded-md bg-fusion-red text-base font-bold text-white shadow-sm"
             aria-label="Increase quantity"
           >
             +

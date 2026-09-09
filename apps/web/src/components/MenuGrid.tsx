@@ -25,7 +25,7 @@ export function MenuGrid({ items, grouped = false }: MenuGridProps) {
 
   if (!grouped) {
     return (
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {items.map((item) => (
           <MenuItemCard key={item.id} item={item} />
         ))}
@@ -55,7 +55,7 @@ export function MenuGrid({ items, grouped = false }: MenuGridProps) {
                 {catItems.length}
               </span>
             </h2>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
               {catItems.map((item) => (
                 <MenuItemCard key={item.id} item={item} />
               ))}

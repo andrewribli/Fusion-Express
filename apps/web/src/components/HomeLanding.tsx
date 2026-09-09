@@ -1,107 +1,98 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { AislePhotoButton } from "@/components/AislePhotoButton";
-import { PriceDisclaimer } from "@/components/PriceDisclaimer";
-import { RequireAuth } from "@/components/RequireAuth";
+import { CustomItemCard } from "@/components/CustomItemCard";
+import { ProductSearchPanel } from "@/components/ProductSearchPanel";
+import { QuickCategoryTabs } from "@/components/QuickCategoryTabs";
 import { useUser } from "@/context/UserContext";
+
+function firstName(fullName?: string): string | undefined {
+  return fullName?.trim().split(/\s+/)[0];
+}
 
 export function HomeLanding() {
   const { user } = useUser();
+  const name = firstName(user?.fullName);
+
+  useEffect(() => {
+    document.title = "Shop Now — GraceRun";
+  }, []);
 
   return (
-    <RequireAuth>
-      <AppShell>
-        <div
-          className="relative min-h-screen"
-          style={
-            {
-              "--fusion-red": "#ed1c24",
-              "--background": "#f9fafb",
-            } as CSSProperties
-          }
-        >
-          <div className="absolute inset-0">
-            <Image
-              src="/images/home-hero.png"
-              alt="Fusion supermarket produce section"
-              fill
-              priority
-              className="object-cover object-center"
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/75" />
-          </div>
+    <AppShell>
+      <div className="min-h-screen bg-gray-50">
+          <AppHeader />
 
-          <div className="relative z-10">
-            <AppHeader title="Fusion Express" />
-
-            <main className="mx-auto max-w-3xl px-4 py-10 md:px-6 md:py-16">
-              <h1 className="text-center text-4xl font-bold tracking-tight text-white drop-shadow-md md:text-5xl">
-                Fusion Express
-              </h1>
-              <p className="mt-3 text-center text-lg font-medium text-white/95 drop-shadow md:text-xl">
-                Shop better &amp; make cash from exercising
-              </p>
-              {user?.fullName && (
-                <p className="mt-2 text-center text-sm text-white/80">
-                  Hi, {user.fullName}
+          <main className="mx-auto w-full max-w-7xl px-4 pb-10 pt-4 md:px-6">
+            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8">
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {name ? `Hi ${name}, what do you need?` : "Groceries from Fusion to your hall lobby"}
+                </h1>
+                <p className="mt-1 text-sm text-gray-500">
+                  {name
+                    ? "Groceries from Fusion, delivered to your hall lobby."
+                    : "Browse prices now. Sign in with your CUHK email when you are ready to order."}
                 </p>
-              )}
 
-              <div className="mt-8 grid grid-cols-2 gap-3 md:gap-5">
-                <AislePhotoButton
-                  href="/browse/dry"
-                  imageSrc="/images/aisle-dry.png"
-                  imageAlt="Dry goods aisle"
-                  title="Non-Refrigerated"
-                  subtitle="Pantry & dry goods"
-                  sideLabel="Left aisle"
+                <ProductSearchPanel
+                  className="mt-4"
+                  placeholder="Search for noodles, drinks, snacks…"
                 />
-                <AislePhotoButton
-                  href="/browse/refrigerated"
-                  imageSrc="/images/aisle-refrigerated.png"
-                  imageAlt="Refrigerated meat counter"
-                  title="Refrigerated"
-                  subtitle="Chilled & frozen"
-                  sideLabel="Right aisle"
-                />
+
+                <div className="mt-4 lg:hidden">
+                  <CustomItemCard />
+                </div>
+
+                <section className="mt-6">
+                  <h2 className="text-sm font-bold text-gray-900">Categories</h2>
+                  <QuickCategoryTabs className="mt-3" />
+                </section>
+
+                <section className="mt-4">
+                  <h2 className="text-sm font-bold text-gray-900">Shop by aisle</h2>
+                  <div className="mt-3 grid grid-cols-2 gap-3 md:gap-5">
+                    <AislePhotoButton
+                      href="/browse/dry"
+                      imageSrc="/images/aisle-dry.png"
+                      imageAlt="Groceries aisle"
+                      title="Groceries"
+                      subtitle="Pantry & shelf-stable"
+                      sideLabel="Left aisle"
+                    />
+                    <AislePhotoButton
+                      href="/browse/refrigerated"
+                      imageSrc="/images/aisle-refrigerated.png"
+                      imageAlt="Fresh food counter"
+                      title="Fresh Food"
+                      subtitle="Chilled & refrigerated"
+                      sideLabel="Right aisle"
+                    />
+                  </div>
+                </section>
+
+                <Link
+                  href="/menu"
+                  className="mt-4 block rounded-2xl border border-gray-100 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm"
+                >
+                  Browse the full store
+                  <span className="mt-0.5 block text-xs font-normal text-gray-500">
+                    Popular requests and every aisle in one page
+                  </span>
+                </Link>
+
               </div>
 
-              <Link
-                href="/runner"
-                className="mt-4 flex items-center justify-center rounded-2xl bg-white/95 px-5 py-4 text-center shadow-md transition-transform active:scale-[0.98]"
-              >
-                <span>
-                  <span className="block text-lg font-bold text-gray-900">
-                    Pick Up an Order
-                  </span>
-                  <span className="mt-0.5 block text-sm text-gray-600">
-                    {user?.isRunner
-                      ? "See available deliveries"
-                      : "One-time registration, then take deliveries"}
-                  </span>
-                </span>
-              </Link>
-
-              <Link
-                href="/menu"
-                className="mt-3 block text-center text-sm font-medium text-white/90 underline underline-offset-2"
-              >
-                Popular requests &amp; custom items
-              </Link>
-
-              <div className="mt-6 rounded-xl bg-white/90 p-3">
-                <PriceDisclaimer />
-              </div>
-            </main>
-          </div>
+              <aside className="hidden lg:sticky lg:top-20 lg:block">
+                <CustomItemCard />
+              </aside>
+            </div>
+          </main>
         </div>
-      </AppShell>
-    </RequireAuth>
+    </AppShell>
   );
 }
