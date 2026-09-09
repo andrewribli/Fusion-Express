@@ -1,0 +1,10 @@
+{
+  "name": "Fusion Express",
+  "install": "npm install",
+  "terminals": [
+    {
+      "name": "web-dev",
+      "command": "npm run dev"
+    }
+  ]
+}

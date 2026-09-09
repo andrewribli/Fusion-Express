@@ -1,0 +1,1410 @@
+{
+  "items": [
+    {
+      "id": "indomie-goreng",
+      "name": "Indomie Mi Goreng",
+      "category": "instant-noodles",
+      "price": 8,
+      "unit": "pack",
+      "image": "/images/products/indomie-goreng.jpg",
+      "weightKg": 0.12
+    },
+    {
+      "id": "shin-ramen-bowl",
+      "name": "Shin Ramyun – Bowl Noodle",
+      "category": "instant-noodles",
+      "price": 12,
+      "salePrice": 10,
+      "bulkDealQty": 4,
+      "bulkDealPrice": 36,
+      "unit": "bowl",
+      "image": "/images/products/shin-ramen-bowl.jpg",
+      "itemNote": "Buy 3 or 4 depending on discount. If no discount, pick 3 cup noodles in different on-sale flavors, total under $40. Runner will use best judgment for substitutions and discounts",
+      "weightKg": 0.12
+    },
+    {
+      "id": "nissin-cup-seafood",
+      "name": "Nissin Cup Noodles Seafood",
+      "category": "instant-noodles",
+      "price": 9,
+      "salePrice": 8,
+      "unit": "cup",
+      "image": "/images/products/nissin-cup-seafood.jpg",
+      "weightKg": 0.12
+    },
+    {
+      "id": "nissin-cup-curry",
+      "name": "Nissin Cup Noodles Curry",
+      "category": "instant-noodles",
+      "price": 9,
+      "salePrice": 8,
+      "unit": "cup",
+      "image": "/images/products/nissin-cup-seafood.jpg",
+      "weightKg": 0.12
+    },
+    {
+      "id": "nissin-cup-chicken",
+      "name": "Nissin Cup Noodles Chicken",
+      "category": "instant-noodles",
+      "price": 9,
+      "salePrice": 8,
+      "unit": "cup",
+      "image": "/images/products/nissin-cup-seafood.jpg",
+      "weightKg": 0.12
+    },
+    {
+      "id": "nissin-demae-tonkotsu",
+      "name": "Nissin Demae Ramen Tonkotsu",
+      "category": "instant-noodles",
+      "price": 7,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "nissin-demae-sesame",
+      "name": "Nissin Demae Ramen Sesame Oil",
+      "category": "instant-noodles",
+      "price": 7,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "nissin-demae-xo",
+      "name": "Nissin Demae Ramen X.O. Sauce",
+      "category": "instant-noodles",
+      "price": 7,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "koka-spicy",
+      "name": "Koka Instant Noodles Spicy",
+      "category": "instant-noodles",
+      "price": 6,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "koka-tom-yum",
+      "name": "Koka Instant Noodles Tom Yum",
+      "category": "instant-noodles",
+      "price": 6,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "samyang-hot",
+      "name": "Samyang Hot Chicken Ramen",
+      "category": "instant-noodles",
+      "price": 12,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "samyang-2x",
+      "name": "Samyang 2x Spicy Ramen",
+      "category": "instant-noodles",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "mama-tom-yum",
+      "name": "Mama Instant Noodles Tom Yum",
+      "category": "instant-noodles",
+      "price": 5,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "mama-pork",
+      "name": "Mama Instant Noodles Pork",
+      "category": "instant-noodles",
+      "price": 5,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "paldo-bibim",
+      "name": "Paldo Bibim Men Cold Noodles",
+      "category": "instant-noodles",
+      "price": 10,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "coke-can",
+      "name": "Coca-Cola Can",
+      "category": "drinks",
+      "price": 6,
+      "unit": "can",
+      "image": "/images/products/coke-can.jpg",
+      "weightKg": 0.33
+    },
+    {
+      "id": "coke-zero-can",
+      "name": "Coca-Cola Zero Can",
+      "category": "drinks",
+      "price": 6,
+      "unit": "can",
+      "image": "/images/products/coke-zero-can.jpg",
+      "weightKg": 0.33
+    },
+    {
+      "id": "sprite-can",
+      "name": "Sprite Can",
+      "category": "drinks",
+      "price": 6,
+      "unit": "can",
+      "image": "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.33
+    },
+    {
+      "id": "fanta-orange",
+      "name": "Fanta Orange Can",
+      "category": "drinks",
+      "price": 6,
+      "unit": "can",
+      "image": "/images/products/fanta-orange.jpg",
+      "weightKg": 0.33
+    },
+    {
+      "id": "fanta-mini-6pack-orange",
+      "name": "Fanta Mini 6×200ml (Orange)",
+      "category": "drinks",
+      "price": 22,
+      "unit": "pack",
+      "image": "/images/products/fanta-mini.jpg",
+      "runnerInputsPrice": true,
+      "itemNote": "Runner will use best judgment for substitutions and discounts",
+      "weightKg": 1.2
+    },
+    {
+      "id": "pocari-sweat-largest",
+      "name": "Pocari Sweat (biggest size in store)",
+      "category": "drinks",
+      "price": 18,
+      "unit": "bottle",
+      "image": "/images/products/pocari-sweat-largest.jpg",
+      "runnerInputsPrice": true,
+      "itemNote": "1 biggest Pocari Sweat available. Runner will use best judgment for substitutions and discounts",
+      "weightKg": 1.5
+    },
+    {
+      "id": "pagoda-kumquat-lemon-bundle",
+      "name": "百果園金桔檸檬 (bundle)",
+      "category": "drinks",
+      "price": 28,
+      "unit": "bundle",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Pagoda%20kumquat%20lemon",
+      "runnerInputsPrice": true,
+      "itemNote": "If bundle is not available, get 3 individual ones. Runner will use best judgment for substitutions and discounts",
+      "weightKg": 1.2
+    },
+    {
+      "id": "pagoda-kumquat-lemon",
+      "name": "百果園金桔檸檬 (individual)",
+      "category": "drinks",
+      "price": 10,
+      "unit": "bottle",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Pagoda%20kumquat%20lemon",
+      "runnerInputsPrice": true,
+      "itemNote": "Fallback if bundle is unavailable. Runner will use best judgment for substitutions and discounts",
+      "weightKg": 0.2
+    },
+    {
+      "id": "tao-ti-mandarin-lemon",
+      "name": "Tao Ti Mandarin Lemon Juice Drink",
+      "category": "drinks",
+      "price": 12,
+      "unit": "bottle",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Tao%20Ti%20mandarin%20lemon",
+      "runnerInputsPrice": true,
+      "itemNote": "Runner will use best judgment for substitutions and discounts",
+      "weightKg": 0.2
+    },
+    {
+      "id": "pocari-sweat",
+      "name": "Pocari Sweat 500ml",
+      "category": "drinks",
+      "price": 10,
+      "unit": "bottle",
+      "image": "/images/products/pocari-sweat.jpg",
+      "weightKg": 0.5
+    },
+    {
+      "id": "vitasoy-original",
+      "name": "Vitasoy Original",
+      "category": "drinks",
+      "price": 7,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "vitasoy-chocolate",
+      "name": "Vitasoy Chocolate",
+      "category": "drinks",
+      "price": 7,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "minute-maid-orange",
+      "name": "Minute Maid Orange Juice",
+      "category": "drinks",
+      "price": 12,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "minute-maid-apple",
+      "name": "Minute Maid Apple Juice",
+      "category": "drinks",
+      "price": 12,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "lipton-lemon",
+      "name": "Lipton Lemon Tea",
+      "category": "drinks",
+      "price": 8,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "lipton-peach",
+      "name": "Lipton Peach Tea",
+      "category": "drinks",
+      "price": 8,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "yakult",
+      "name": "Yakult 5-pack",
+      "category": "drinks",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "milk-kowloon",
+      "name": "Kowloon Dairy Milk 1L",
+      "category": "drinks",
+      "price": 24,
+      "unit": "bottle",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Kowloon%20Dairy%20milk",
+      "weightKg": 1
+    },
+    {
+      "id": "milk-meiji",
+      "name": "Meiji Milk 1L",
+      "category": "drinks",
+      "price": 26,
+      "unit": "bottle",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Meiji%20milk",
+      "weightKg": 1
+    },
+    {
+      "id": "lays-classic",
+      "name": "Lays Classic Potato Chips",
+      "category": "snacks",
+      "price": 12,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "lays-bbq",
+      "name": "Lays BBQ Potato Chips",
+      "category": "snacks",
+      "price": 12,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "lays-sour-cream",
+      "name": "Lays Sour Cream & Onion",
+      "category": "snacks",
+      "price": 12,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "pringles-original",
+      "name": "Pringles Original",
+      "category": "snacks",
+      "price": 15,
+      "unit": "can",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.16
+    },
+    {
+      "id": "pringles-sour-cream",
+      "name": "Pringles Sour Cream & Onion",
+      "category": "snacks",
+      "price": 15,
+      "unit": "can",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.16
+    },
+    {
+      "id": "oreo-original",
+      "name": "Oreo Original",
+      "category": "snacks",
+      "price": 10,
+      "unit": "pack",
+      "image": "/images/products/oreo-original.jpg",
+      "weightKg": 0.2
+    },
+    {
+      "id": "oreo-golden",
+      "name": "Oreo Golden",
+      "category": "snacks",
+      "price": 10,
+      "unit": "pack",
+      "image": "/images/products/oreo-golden.png",
+      "weightKg": 0.2
+    },
+    {
+      "id": "kitkat-chocolate",
+      "name": "KitKat Milk Chocolate",
+      "category": "snacks",
+      "price": 8,
+      "unit": "bar",
+      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.05
+    },
+    {
+      "id": "kitkat-matcha",
+      "name": "KitKat Matcha",
+      "category": "snacks",
+      "price": 8,
+      "unit": "bar",
+      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.05
+    },
+    {
+      "id": "snickers",
+      "name": "Snickers",
+      "category": "snacks",
+      "price": 7,
+      "unit": "bar",
+      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.05
+    },
+    {
+      "id": "mars-bar",
+      "name": "Mars Bar",
+      "category": "snacks",
+      "price": 7,
+      "unit": "bar",
+      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.05
+    },
+    {
+      "id": "m-ms-peanut",
+      "name": "M&M's Peanut",
+      "category": "snacks",
+      "price": 10,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "m-ms-chocolate",
+      "name": "M&M's Milk Chocolate",
+      "category": "snacks",
+      "price": 10,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "calbee-shrimp",
+      "name": "Calbee Shrimp Chips",
+      "category": "snacks",
+      "price": 14,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "calbee-sea-salt",
+      "name": "Calbee Potato Chips Sea Salt",
+      "category": "snacks",
+      "price": 14,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "calbee-spicy",
+      "name": "Calbee Potato Chips Spicy",
+      "category": "snacks",
+      "price": 14,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "garden-white-bread",
+      "name": "Garden White Bread",
+      "category": "bread",
+      "price": 12,
+      "unit": "loaf",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "garden-whole-wheat",
+      "name": "Garden Whole Wheat Bread",
+      "category": "bread",
+      "price": 14,
+      "unit": "loaf",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "garden-butter-buns",
+      "name": "Garden Butter Buns 6-pack",
+      "category": "bread",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 1.3
+    },
+    {
+      "id": "garden-sweet-buns",
+      "name": "Garden Sweet Buns 6-pack",
+      "category": "bread",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 1.3
+    },
+    {
+      "id": "muffin-chocolate",
+      "name": "Muffin Chocolate Chip",
+      "category": "bread",
+      "price": 10,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "muffin-blueberry",
+      "name": "Muffin Blueberry",
+      "category": "bread",
+      "price": 10,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "megabowl-beef",
+      "name": "Mega Bowl Beef Fried Rice",
+      "category": "instant-meals",
+      "price": 22,
+      "unit": "bowl",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20beef",
+      "weightKg": 0.35
+    },
+    {
+      "id": "megabowl-chicken",
+      "name": "Mega Bowl Chicken Rice",
+      "category": "instant-meals",
+      "price": 22,
+      "unit": "bowl",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20chicken",
+      "weightKg": 0.35
+    },
+    {
+      "id": "megabowl-seafood",
+      "name": "Mega Bowl Seafood Rice",
+      "category": "instant-meals",
+      "price": 22,
+      "unit": "bowl",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20seafood",
+      "weightKg": 0.35
+    },
+    {
+      "id": "megabowl-tom-yum",
+      "name": "Mega Bowl Tom Yum Fried Rice",
+      "category": "instant-meals",
+      "price": 22,
+      "unit": "bowl",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20tom%20yum",
+      "weightKg": 0.35
+    },
+    {
+      "id": "megabowl-spicy-pork",
+      "name": "Mega Bowl Spicy Pork Rice",
+      "category": "instant-meals",
+      "price": 22,
+      "unit": "bowl",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20spicy%20pork",
+      "weightKg": 0.35
+    },
+    {
+      "id": "megabowl-kimchi",
+      "name": "Mega Bowl Kimchi Rice",
+      "category": "instant-meals",
+      "price": 22,
+      "unit": "bowl",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20kimchi",
+      "weightKg": 0.35
+    },
+    {
+      "id": "eggs-10",
+      "name": "Eggs 10-pack",
+      "category": "dairy-eggs",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.55
+    },
+    {
+      "id": "eggs-6",
+      "name": "Eggs 6-pack",
+      "category": "dairy-eggs",
+      "price": 9,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "butter-lurpak",
+      "name": "Lurpak Butter 200g",
+      "category": "dairy-eggs",
+      "price": 22,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "cheese-kraft",
+      "name": "Kraft Cheese Slices 12-pack",
+      "category": "dairy-eggs",
+      "price": 18,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.8
+    },
+    {
+      "id": "yogurt-meiji",
+      "name": "Meiji Yogurt 4-pack",
+      "category": "dairy-eggs",
+      "price": 20,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.55
+    },
+    {
+      "id": "toothpaste-colgate",
+      "name": "Colgate Toothpaste",
+      "category": "toiletries",
+      "price": 15,
+      "unit": "tube",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.12
+    },
+    {
+      "id": "toothbrush-colgate",
+      "name": "Colgate Toothbrush",
+      "category": "toiletries",
+      "price": 10,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "shampoo-head-shoulders",
+      "name": "Head & Shoulders Shampoo",
+      "category": "toiletries",
+      "price": 30,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "conditioner-head-shoulders",
+      "name": "Head & Shoulders Conditioner",
+      "category": "toiletries",
+      "price": 30,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "body-wash-dove",
+      "name": "Dove Body Wash",
+      "category": "toiletries",
+      "price": 25,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "soap-dove",
+      "name": "Dove Soap",
+      "category": "toiletries",
+      "price": 12,
+      "unit": "bar",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.05
+    },
+    {
+      "id": "deodorant-nivea",
+      "name": "Nivea Deodorant",
+      "category": "toiletries",
+      "price": 25,
+      "unit": "roll-on",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "toilet-paper-4",
+      "name": "Toilet Paper 4-roll",
+      "category": "toiletries",
+      "price": 12,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.55
+    },
+    {
+      "id": "tissue-box",
+      "name": "Tissue Box",
+      "category": "toiletries",
+      "price": 10,
+      "unit": "box",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "hand-sanitizer",
+      "name": "Hand Sanitizer",
+      "category": "toiletries",
+      "price": 15,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "laundry-detergent",
+      "name": "Laundry Detergent 1L",
+      "category": "toiletries",
+      "price": 20,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 1.05
+    },
+    {
+      "id": "dish-soap",
+      "name": "Dish Soap",
+      "category": "toiletries",
+      "price": 15,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "sponge",
+      "name": "Sponge",
+      "category": "toiletries",
+      "price": 8,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "ribeye-steak",
+      "name": "Ribeye Steak",
+      "category": "meat",
+      "price": 40,
+      "unit": "100g",
+      "priceType": "variable",
+      "priceRange": "$36–$45 per 100g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.1,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "sirloin-steak",
+      "name": "Sirloin Steak",
+      "category": "meat",
+      "price": 42,
+      "unit": "100g",
+      "priceType": "variable",
+      "priceRange": "$38–$45 per 100g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.1,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "tbone-steak",
+      "name": "T-Bone Steak",
+      "category": "meat",
+      "price": 45,
+      "unit": "100g",
+      "priceType": "variable",
+      "priceRange": "$40–$50 per 100g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.1,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "minced-beef",
+      "name": "Minced Beef",
+      "category": "meat",
+      "price": 30,
+      "unit": "400g",
+      "priceType": "variable",
+      "priceRange": "$25–$35 per 400g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.4,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "minced-pork",
+      "name": "Minced Pork",
+      "category": "meat",
+      "price": 24,
+      "unit": "400g",
+      "priceType": "variable",
+      "priceRange": "$20–$28 per 400g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.4,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "chicken-breast",
+      "name": "Chicken Breast (Boneless)",
+      "category": "meat",
+      "price": 22,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$18–$25 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "chicken-thigh",
+      "name": "Chicken Thigh (Boneless)",
+      "category": "meat",
+      "price": 24,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$20–$28 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "chicken-wings",
+      "name": "Chicken Wings 12-pack",
+      "category": "meat",
+      "price": 30,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$25–$35",
+      "runnerInputsPrice": false,
+      "weightKg": 0.8,
+      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "pork-chops",
+      "name": "Pork Chops",
+      "category": "meat",
+      "price": 30,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$25–$35 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "pork-belly",
+      "name": "Pork Belly Slices",
+      "category": "meat",
+      "price": 35,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$30–$40 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "bacon",
+      "name": "Bacon 200g",
+      "category": "meat",
+      "price": 28,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$25–$32",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "sausages",
+      "name": "Sausages 8-pack",
+      "category": "meat",
+      "price": 26,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$22–$30",
+      "runnerInputsPrice": false,
+      "weightKg": 0.4,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "hot-dogs",
+      "name": "Hot Dogs 10-pack",
+      "category": "meat",
+      "price": 22,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$18–$25",
+      "runnerInputsPrice": false,
+      "weightKg": 0.3,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "ham-slices",
+      "name": "Ham Slices 200g",
+      "category": "meat",
+      "price": 21,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$18–$24",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "salami",
+      "name": "Salami 200g",
+      "category": "meat",
+      "price": 24,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$20–$28",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "salmon-fillet",
+      "name": "Salmon Fillet",
+      "category": "seafood",
+      "price": 52,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$45–$60 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "salmon-belly",
+      "name": "Salmon Belly",
+      "category": "seafood",
+      "price": 48,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$40–$55 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "tuna-steak",
+      "name": "Tuna Steak",
+      "category": "seafood",
+      "price": 42,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$35–$50 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "shrimp-peeled",
+      "name": "Peeled Shrimp 200g",
+      "category": "seafood",
+      "price": 35,
+      "unit": "pack",
+      "priceType": "variable",
+      "priceRange": "$30–$40 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "shrimp-frozen",
+      "name": "Frozen Shrimp 500g",
+      "category": "seafood",
+      "price": 50,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$45–$55",
+      "runnerInputsPrice": false,
+      "weightKg": 0.5,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "fish-fillet",
+      "name": "White Fish Fillet",
+      "category": "seafood",
+      "price": 30,
+      "unit": "200g",
+      "priceType": "variable",
+      "priceRange": "$25–$35 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "squid-rings",
+      "name": "Squid Rings 200g",
+      "category": "seafood",
+      "price": 30,
+      "unit": "pack",
+      "priceType": "variable",
+      "priceRange": "$25–$35 per 200g",
+      "runnerInputsPrice": true,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "scallops",
+      "name": "Frozen Scallops 200g",
+      "category": "seafood",
+      "price": 45,
+      "unit": "pack",
+      "priceType": "range",
+      "priceRange": "$40–$50",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "crab-sticks",
+      "name": "Crab Sticks 200g",
+      "category": "seafood",
+      "price": 18,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$15–$20",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "fish-balls",
+      "name": "Fish Balls 200g",
+      "category": "seafood",
+      "price": 15,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$12–$18",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "silken-tofu",
+      "name": "Silken Tofu",
+      "category": "tofu-protein",
+      "price": 12,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$10–$15",
+      "runnerInputsPrice": false,
+      "weightKg": 0.3,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "firm-tofu",
+      "name": "Firm Tofu",
+      "category": "tofu-protein",
+      "price": 12,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$10–$15",
+      "runnerInputsPrice": false,
+      "weightKg": 0.3,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "fried-tofu",
+      "name": "Fried Tofu Puffs",
+      "category": "tofu-protein",
+      "price": 15,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$12–$18",
+      "runnerInputsPrice": false,
+      "weightKg": 0.3,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "tofu-skin",
+      "name": "Tofu Skin Rolls",
+      "category": "tofu-protein",
+      "price": 18,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$15–$20",
+      "runnerInputsPrice": false,
+      "weightKg": 0.3,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "tempeh",
+      "name": "Tempeh",
+      "category": "tofu-protein",
+      "price": 18,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$15–$20",
+      "runnerInputsPrice": false,
+      "weightKg": 0.3,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "edamame",
+      "name": "Edamame 200g",
+      "category": "tofu-protein",
+      "price": 15,
+      "unit": "pack",
+      "priceType": "fixed",
+      "priceRange": "$12–$18",
+      "runnerInputsPrice": false,
+      "weightKg": 0.2,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+    },
+    {
+      "id": "rice-5kg",
+      "name": "Rice 5kg",
+      "category": "rice-noodles",
+      "price": 55,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 5
+    },
+    {
+      "id": "rice-2kg",
+      "name": "Rice 2kg",
+      "category": "rice-noodles",
+      "price": 25,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 2
+    },
+    {
+      "id": "soba-noodles",
+      "name": "Soba Noodles",
+      "category": "rice-noodles",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "udon-noodles",
+      "name": "Udon Noodles (Dry)",
+      "category": "rice-noodles",
+      "price": 12,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "rice-vermicelli",
+      "name": "Rice Vermicelli",
+      "category": "rice-noodles",
+      "price": 10,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "soy-sauce",
+      "name": "Soy Sauce",
+      "category": "condiments",
+      "price": 12,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "oyster-sauce",
+      "name": "Oyster Sauce",
+      "category": "condiments",
+      "price": 15,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "chili-sauce",
+      "name": "Chili Sauce",
+      "category": "condiments",
+      "price": 10,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "ketchup",
+      "name": "Ketchup",
+      "category": "condiments",
+      "price": 12,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "mayonnaise",
+      "name": "Mayonnaise",
+      "category": "condiments",
+      "price": 14,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "sesame-oil",
+      "name": "Sesame Oil",
+      "category": "condiments",
+      "price": 18,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "vinegar",
+      "name": "Vinegar",
+      "category": "condiments",
+      "price": 10,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "cooking-oil",
+      "name": "Cooking Oil",
+      "category": "condiments",
+      "price": 20,
+      "unit": "bottle",
+      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.4
+    },
+    {
+      "id": "bananas",
+      "name": "Bananas",
+      "category": "fruit-veg",
+      "price": 10,
+      "unit": "bunch",
+      "image": "/images/products/bananas.jpg",
+      "weightKg": 0.8
+    },
+    {
+      "id": "apples",
+      "name": "Apples",
+      "category": "fruit-veg",
+      "price": 15,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "oranges",
+      "name": "Oranges",
+      "category": "fruit-veg",
+      "price": 15,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "carrots",
+      "name": "Carrots",
+      "category": "fruit-veg",
+      "price": 12,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "cucumber",
+      "name": "Cucumber",
+      "category": "fruit-veg",
+      "price": 8,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "tomatoes",
+      "name": "Tomatoes",
+      "category": "fruit-veg",
+      "price": 15,
+      "unit": "bag",
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "lettuce",
+      "name": "Lettuce",
+      "category": "fruit-veg",
+      "price": 10,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "cabbage",
+      "name": "Cabbage",
+      "category": "fruit-veg",
+      "price": 12,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.35
+    },
+    {
+      "id": "nescafe-3in1",
+      "name": "Nescafé 3-in-1 10-pack",
+      "category": "coffee-tea",
+      "price": 18,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "nescafe-original",
+      "name": "Nescafé Original",
+      "category": "coffee-tea",
+      "price": 12,
+      "unit": "jar",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.2
+    },
+    {
+      "id": "lipton-tea-bags",
+      "name": "Lipton Tea Bags 20-pack",
+      "category": "coffee-tea",
+      "price": 15,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "twinings-earl-grey",
+      "name": "Twinings Earl Grey 20-pack",
+      "category": "coffee-tea",
+      "price": 20,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "milo",
+      "name": "Milo Can",
+      "category": "coffee-tea",
+      "price": 10,
+      "unit": "can",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "ovaltine",
+      "name": "Ovaltine Can",
+      "category": "coffee-tea",
+      "price": 12,
+      "unit": "can",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.15
+    },
+    {
+      "id": "frozen-dumplings",
+      "name": "Frozen Dumplings Wanchai Ferry",
+      "category": "frozen",
+      "price": 25,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.45
+    },
+    {
+      "id": "frozen-pizza",
+      "name": "Frozen Pizza Dr. Oetker",
+      "category": "frozen",
+      "price": 35,
+      "unit": "each",
+      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.45
+    },
+    {
+      "id": "frozen-nuggets",
+      "name": "Frozen Chicken Nuggets",
+      "category": "frozen",
+      "price": 28,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.45
+    },
+    {
+      "id": "frozen-fries",
+      "name": "Frozen French Fries",
+      "category": "frozen",
+      "price": 20,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.45
+    },
+    {
+      "id": "ice-cream-haagen",
+      "name": "Haagen-Dazs Ice Cream 500ml",
+      "category": "frozen",
+      "price": 50,
+      "unit": "tub",
+      "image": "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.5
+    },
+    {
+      "id": "ice-cream-movenpick",
+      "name": "Movenpick Ice Cream 500ml",
+      "category": "frozen",
+      "price": 45,
+      "unit": "tub",
+      "image": "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=640&h=640&q=80",
+      "weightKg": 0.5
+    }
+  ]
+}

@@ -1,0 +1,1434 @@
+{
+  "categories": [
+    {
+      "name": "Groceries",
+      "subcategories": [
+        {
+          "name": "Seasonings",
+          "items": [
+            {
+              "name": "Black Bean With Chili Oil",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lao Gan Ma",
+              "weight": 0.28
+            },
+            {
+              "name": "Minced Garlic (213G)",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.213,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Minced Garlic (326G)",
+              "price": 26.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.326
+            },
+            {
+              "name": "Soy Bean Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.24,
+              "bulkDealPrice": 30.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Chili Garlic Sauce",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.226
+            },
+            {
+              "name": "Black Sesame Oil",
+              "price": 21.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Amoy",
+              "weight": 0.15
+            },
+            {
+              "name": "Dim Sum Soy Sauce",
+              "price": 10.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.207
+            },
+            {
+              "name": "Garlic Soy Sauce",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.25
+            },
+            {
+              "name": "Chili Soy Sauce",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.207
+            },
+            {
+              "name": "Spicy Vinegar",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Amoy",
+              "weight": 0.25
+            },
+            {
+              "name": "Grated Parmesan",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Kraft",
+              "weight": 0.04
+            },
+            {
+              "name": "Fermented Rice Wine",
+              "price": 43.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Sheng Long",
+              "weight": 0.838
+            },
+            {
+              "name": "Shuang JIn Chiew (Jiujiang Shuang Zheng Rice Wine)",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Pearl River Bridge",
+              "weight": 0.5
+            },
+            {
+              "name": "Kwantung Miju (Guangdong Cooking Wine)",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Pearl River Bridge",
+              "weight": 0.5
+            },
+            {
+              "name": "Xiang Zao Lu (Chinese Fragranced Cooking Wine)",
+              "price": 20.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Guyue Longshan",
+              "weight": 0.5
+            },
+            {
+              "name": "White Vinegar",
+              "price": 12.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.5
+            },
+            {
+              "name": "Naturally Brewed Soy Suace",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Kikkoman",
+              "weight": 0.5,
+              "bulkDealPrice": 34.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Naturally Brewed Soy Sauce",
+              "price": 36.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Kikkoman",
+              "weight": 0.6
+            },
+            {
+              "name": "Naturally Brewed Less Salt Soy Sauce",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Kikkoman",
+              "weight": 0.6
+            },
+            {
+              "name": "Premium Light Soy Sauce",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.5,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Gold Label Light Soy Sauce",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Amoy",
+              "weight": 0.5
+            },
+            {
+              "name": "Fish Fauce",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Suree",
+              "weight": 0.5
+            },
+            {
+              "name": "Hanamidori 10 Kinds of Extravagant Spices",
+              "price": 50.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Hakata",
+              "weight": 0.055
+            },
+            {
+              "name": "Garlic Salt",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lawry's",
+              "weight": 0.085
+            },
+            {
+              "name": "Garlic Powder",
+              "price": 96.5,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lawry's",
+              "weight": 0.155
+            },
+            {
+              "name": "HImalaya Salt",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Food Nation",
+              "weight": 0.1
+            },
+            {
+              "name": "Chilli Pepper & Salt",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Food Nation",
+              "weight": 0.045
+            },
+            {
+              "name": "Pepper Onion & Coriander Salt",
+              "price": 34.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Food Nation",
+              "weight": 0.06
+            },
+            {
+              "name": "Pepper Garlic & Mustard Seeds Salt",
+              "price": 34.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Food Nation",
+              "weight": 0.06
+            },
+            {
+              "name": "Rosemary",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.01
+            },
+            {
+              "name": "Thyme",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.01
+            },
+            {
+              "name": "Oregano",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.01
+            },
+            {
+              "name": "Parsley",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.01
+            },
+            {
+              "name": "Cumin Powder",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.01
+            },
+            {
+              "name": "Mushroom Powder",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Knorr",
+              "image": "https://foodpanda.dhmedia.io/image/darkstores-tw/food/0058/14050126.jpg?height=176",
+              "weight": 0.2
+            },
+            {
+              "name": "Australian Sea Salt",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "weight": 0.535
+            },
+            {
+              "name": "Concentrated Chicken Stock",
+              "price": 26.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Swanson",
+              "weight": 0.27
+            },
+            {
+              "name": "Chicken Powder",
+              "price": 25.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/871/256/647/9368/front_en.58.400.jpg",
+              "weight": 0.575
+            },
+            {
+              "name": "Chicken Powder",
+              "price": 25.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Knorr",
+              "image": "https://images.openfoodfacts.org/images/products/871/256/647/9368/front_en.58.400.jpg",
+              "weight": 0.273
+            },
+            {
+              "name": "Premium Chicken Bouilion POwder",
+              "price": 32.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Lee Kum Kee",
+              "weight": 0.175
+            },
+            {
+              "name": "Sugar",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Meadows",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.7,
+              "bulkDealPrice": 14.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Sugar",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Taikoo",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.7,
+              "bulkDealPrice": 17.5,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Red Sugar",
+              "price": 31.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Taikoo",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 1.0
+            },
+            {
+              "name": "Raw Slab Sugar",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Gold Medal",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.4
+            },
+            {
+              "name": "Rock Sugar",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Taikoo",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.35,
+              "bulkDealPrice": 20.5,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Rock Sugar",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Gold Medal",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.4
+            },
+            {
+              "name": "Golden Coffee Sugar Crystals",
+              "price": 36.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "brand": "Taikoo",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.38
+            }
+          ]
+        },
+        {
+          "name": "Tea",
+          "items": [
+            {
+              "name": "Authentic Tea House Cold Brew Taiwan Oolong Tea",
+              "price": 10.5,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Authentic Tea House Cold Brew Taiwan Honey Black Tea",
+              "price": 10.5,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Authentic Tea House Oolong Tea (No Sugar)",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.5,
+              "bulkDealPrice": 13.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Authentic Tea House Jasmine Green Tea (No Sugar)",
+              "price": 1.5,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "ITO EN Japanese Green Tea",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "ITO EN",
+              "weight": 0.5,
+              "bulkDealPrice": 17.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Tao Ti Supreme Oolong Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Tao Ti",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Tao Ti Supreme Genmaicha",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Tao Ti",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Suntory Jasmine Oolong Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Suntory",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Suntory Osmanthus Oolong Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Suntory",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kirin Rich Green Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Kirin",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Rikyu Chasaku Japanese Style Sencha Tea",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Rikyu Chasaku",
+              "weight": 0.55,
+              "bulkDealPrice": 14.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Rikyu Chasaku Jasmine Green Tea",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Rikyu Chasaku",
+              "weight": 0.55,
+              "bulkDealPrice": 14.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Youcongqi Green Mandarin Oolong Tea",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Youcongqi",
+              "weight": 0.608,
+              "bulkDealPrice": 20.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Vita Lemon Tea (VLT)",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Vita",
+              "weight": 0.5,
+              "bulkDealPrice": 20.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Vita Ya Shi Xiang Lemon Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Vita",
+              "weight": 0.5,
+              "bulkDealPrice": 20.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Tao Ti Honey Green Tea (Low Sugar)",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Tao Ti",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Robiff Ooolong Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Robiff",
+              "weight": 0.5,
+              "bulkDealPrice": 16.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Nongfu Spring Oriental Leaf Ganpu Green Tea Sugar Free",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Nongfu Spring",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.5,
+              "bulkDealPrice": 14.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kirin Afternoon Tea Lemon",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Kirin",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Tao Ti Apple Green Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Tao Ti",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Tao Ti Yashixiang Lemon Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Tao Ti",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Tao Ti Yashixiang Grapefruit Tea",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Tao Ti",
+              "weight": 0.5,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Authentic Tea House Oolong Tea (No Sugar)",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 1.2,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Authentic Tea House Dahongpao Oolong Tea",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "weight": 1.2,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Authentic Tea House Yinhao Jasmine Green Tea (No Sugar)",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Authentic Tea House",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 1.2,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Robiff Ooolong Tea",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Robiff",
+              "weight": 0.9
+            },
+            {
+              "name": "Vita Cold Brew No Sugar Tie Guan Yin",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Tea",
+              "brand": "Vita",
+              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "weight": 0.86
+            }
+          ]
+        },
+        {
+          "name": "Toiletries",
+          "items": [
+            {
+              "name": "Darlie Double Action Oral Care Travel Kit",
+              "price": 12.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Darlie",
+              "weight": 0.05
+            },
+            {
+              "name": "Colgate Charcoal Travel Kit",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Colgate",
+              "weight": 0.05
+            },
+            {
+              "name": "Colgate Sensitive Pro-Relief Toothpaste",
+              "price": 49.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Colgate",
+              "weight": 0.075
+            },
+            {
+              "name": "Colgate Total Active Prevention Toothpaste",
+              "price": 54.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Colgate",
+              "weight": 0.095
+            },
+            {
+              "name": "Dettol Original Soap 3pcs",
+              "price": 36.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dettol",
+              "weight": 0.3
+            },
+            {
+              "name": "Dove Beauty Bar",
+              "price": 13.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove",
+              "weight": 0.09
+            },
+            {
+              "name": "Vidal Sasson Moisturizing Anti-Dandruff Shampoo",
+              "price": 67.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Vidal Sasson",
+              "weight": 0.75
+            },
+            {
+              "name": "Vidal Sasson Light & Soft Smooth Shampoo",
+              "price": 67.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Vidal Sasson",
+              "weight": 0.75
+            },
+            {
+              "name": "Sebamed Oily Scalp Shampoo",
+              "price": 116.8,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Sebamed",
+              "weight": 0.4
+            },
+            {
+              "name": "Tresemme Conditioner Cleanse & Replenish",
+              "price": 75.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Tresemme",
+              "weight": 0.94
+            },
+            {
+              "name": "Dove Peptide Intense Repair Shampoo",
+              "price": 59.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove",
+              "weight": 0.58,
+              "bulkDealPrice": 119.8,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Dove Elastin Long & Thick Shampoo",
+              "price": 59.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Dove",
+              "weight": 0.58,
+              "bulkDealPrice": 119.8,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Pantene Milky Repair Shampoo",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Pantene",
+              "weight": 0.65
+            },
+            {
+              "name": "Pantene Anti-Hair Breakage Shampoo",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Pantene",
+              "weight": 0.65
+            },
+            {
+              "name": "Pantene Silky Smooth Conditioner",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "brand": "Pantene",
+              "weight": 0.65
+            }
+          ]
+        },
+        {
+          "name": "Instant Noodles",
+          "items": [
+            {
+              "name": "Instant Carbonara",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "NUPasta",
+              "weight": 0.092,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Mushroom Carbonara Mac",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Prego",
+              "weight": 0.071,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Mac n Cheese",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Prego",
+              "weight": 0.071,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Cheese Bokki",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Ottogi",
+              "weight": 0.055,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Buldak Carbonara Hot Chicken Flavor",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Buldak Hot Chicken Flavor",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Buldak Hot Chicken Flavor Ramen Cheese",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Samyang",
+              "weight": 0.105,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Shin Ramyun Rose",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "weight": 0.108,
+              "bulkDealPrice": 24.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Korean Clay Pot Ramyun Bowl",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "weight": 0.108,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Shin Ramyun",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "weight": 0.108,
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "Omori Kimchi Stew Cup Ramen",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "GS25",
+              "weight": 0.15
+            },
+            {
+              "name": "Saeng Saeng Bowl Udon",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Nongshim",
+              "weight": 0.276
+            }
+          ]
+        },
+        {
+          "name": "Condiments",
+          "items": [
+            {
+              "name": "Del Monte Tomato Ketchup",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Del Monte",
+              "weight": 0.3,
+              "bulkDealPrice": 16.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "COLAVITA Aged Balsamic Vinegar",
+              "price": 46.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "COLAVITA",
+              "weight": 0.5
+            },
+            {
+              "name": "Kraft Miracle Whip",
+              "price": 43.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Kraft",
+              "weight": 0.44
+            },
+            {
+              "name": "SELECT Thousand Island Dressing",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "SELECT",
+              "weight": 0.3
+            },
+            {
+              "name": "SELECT Roasted Sesame Sauce",
+              "price": 33.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "SELECT",
+              "weight": 0.39
+            },
+            {
+              "name": "Mizkan Gold Sesame Sauce",
+              "price": 42.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Mizkan",
+              "weight": 0.25,
+              "bulkDealPrice": 42.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kewpie Roasted Sesame Dressing",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Kewpie",
+              "weight": 0.25,
+              "bulkDealPrice": 48.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Kewpie Japanese Dressing",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Kewpie",
+              "weight": 0.25,
+              "bulkDealPrice": 48.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Char Siu Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Lee Kum Kee",
+              "weight": 0.24
+            },
+            {
+              "name": "Tabasco Pepper Sauce",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "Tabasco",
+              "weight": 0.06
+            },
+            {
+              "name": "Neri Wasabi",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "brand": "S&B",
+              "weight": 0.043
+            }
+          ]
+        },
+        {
+          "name": "Household",
+          "items": [
+            {
+              "name": "BioKill Long Lasting Extra Insecticide",
+              "price": 79.9,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "BioKill",
+              "weight": 0.5,
+              "bulkDealPrice": 135.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "BioKill Universal Insecticide",
+              "price": 68.9,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "BioKill",
+              "weight": 0.5,
+              "bulkDealPrice": 125.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Speedtox Fleas & Mites Fumigator",
+              "price": 86.7,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "Speedtox",
+              "weight": 0.01
+            },
+            {
+              "name": "Sukki-ri! Deodorizing Chamomile Air Freshner",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "Sukki-ri!",
+              "weight": 0.4
+            },
+            {
+              "name": "Select Dehumidifier Lavender Scent",
+              "price": 21.5,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "Select",
+              "weight": 0.45,
+              "bulkDealPrice": 30.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Antibacterial hand wash",
+              "price": 37.0,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "Dettol",
+              "weight": 0.5
+            },
+            {
+              "name": "Body Wash",
+              "price": 140.0,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "brand": "Ecostore",
+              "weight": 0.9
+            }
+          ]
+        },
+        {
+          "name": "Canned Goods",
+          "items": [
+            {
+              "name": "Smedley's Tomato Sauce Baked Beans",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Smedley's",
+              "weight": 0.22,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Imperial Bird's Nest Conch with Scallop Soup",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Imperial Bird's Nest",
+              "weight": 0.32,
+              "bulkDealPrice": 72.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Imperial Bird's Nest Conch Ginkgo & Pig Lung Soup",
+              "price": 48.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Imperial Bird's Nest",
+              "weight": 0.32,
+              "bulkDealPrice": 72.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Lee Kum Kee Abalone In Abalone Sauce",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Lee Kum Kee",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-411027.jpg?height=176",
+              "weight": 0.18
+            },
+            {
+              "name": "Lee Kum Kee Abalone In Red Brai Sauce with Dry Scalop",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Lee Kum Kee",
+              "weight": 0.18
+            },
+            {
+              "name": "Lee Kum Kee Abalone In Premium Oyster Sauce",
+              "price": 39.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "brand": "Lee Kum Kee",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-395591.jpg?height=176",
+              "weight": 0.18
+            }
+          ]
+        },
+        {
+          "name": "Sauces",
+          "items": [
+            {
+              "name": "Lee Kum Kee Premium Oyster Sauce",
+              "price": 27.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Lee Kum Kee",
+              "weight": 0.35
+            },
+            {
+              "name": "Napolitan Spaghetti Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Hachi",
+              "weight": 0.285,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Carbonara Spaghetti Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Hachi",
+              "weight": 0.285,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Arrabiata Spaghetti Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Hachi",
+              "weight": 0.285,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Clams Consomme Spaghetti Sauce",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Hachi",
+              "weight": 0.285,
+              "bulkDealPrice": 18.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Original Chunky Salsa (Mild)",
+              "price": 52.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "brand": "Old El Paso",
+              "weight": 0.226
+            }
+          ]
+        },
+        {
+          "name": "Rice & Noodles",
+          "items": [
+            {
+              "name": "DE-MA-E Iccho Bar Noodle Kyushu Tonkotsu Flavour",
+              "price": 12.6,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "DE-MA-E",
+              "weight": 0.192,
+              "bulkDealPrice": 18.9,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "DE-MA-E Iccho Bar Noodle Shoyu Tonkotsu Flavour",
+              "price": 12.6,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "DE-MA-E",
+              "weight": 0.192,
+              "bulkDealPrice": 18.9,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Japanese Red Bean Cooked Rice",
+              "price": 14.9,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Taimatsu Foods",
+              "weight": 0.15
+            },
+            {
+              "name": "Cooked Japanese Rice",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Golden Elephant",
+              "weight": 0.17
+            },
+            {
+              "name": "Cooked Jasmine Rice",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Golden Elephant",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/cs9ny-496556.jpg?height=176",
+              "weight": 0.17
+            }
+          ]
+        },
+        {
+          "name": "Chips",
+          "items": [
+            {
+              "name": "Calbee BBQ Flavoured Wave Cut Potato Chips",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "weight": 0.192,
+              "bulkDealPrice": 48.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Calbee Blazin Hot Cheese Grill-a-corn",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "weight": 0.063,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Calbee Smoky Cheese Flavoured Grill A Corn",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "weight": 0.08,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            }
+          ]
+        },
+        {
+          "name": "Pickles",
+          "items": [
+            {
+              "name": "Double Spicy Mustard Tuber",
+              "price": 16.6,
+              "category": "Groceries",
+              "subcategory": "Pickles",
+              "brand": "Yummy House",
+              "weight": 0.21
+            },
+            {
+              "name": "Sliced Mustard Tuber",
+              "price": 16.6,
+              "category": "Groceries",
+              "subcategory": "Pickles",
+              "brand": "Yummy House",
+              "weight": 0.21
+            },
+            {
+              "name": "Spicy Mustard Tuber",
+              "price": 16.6,
+              "category": "Groceries",
+              "subcategory": "Pickles",
+              "brand": "Yummy House",
+              "weight": 0.21
+            }
+          ]
+        },
+        {
+          "name": "Crackers",
+          "items": [
+            {
+              "name": "CEO House Soda Biscuit - Seaweed Flavor",
+              "price": 13.5,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "CEO House",
+              "weight": 0.27,
+              "bulkDealPrice": 27.0,
+              "bulkDealQty": 3
+            },
+            {
+              "name": "CEO House Soda Biscuit - Wasabi Flavor",
+              "price": 13.5,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "CEO House",
+              "weight": 0.27,
+              "bulkDealPrice": 27.0,
+              "bulkDealQty": 4
+            }
+          ]
+        },
+        {
+          "name": "Biscuits",
+          "items": [
+            {
+              "name": "Mcvitie's Marie Finger Biscuit",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Mcvitie's",
+              "weight": 0.2,
+              "bulkDealPrice": 33.0,
+              "bulkDealQty": 2
+            }
+          ]
+        },
+        {
+          "name": "Cleaning Supplies",
+          "items": [
+            {
+              "name": "Dettol Disinfectant Spray",
+              "price": 64.9,
+              "category": "Groceries",
+              "subcategory": "Cleaning Supplies",
+              "brand": "Dettol",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/HK-DFI/2024-5-7/h21k-562884.jpg?height=176",
+              "weight": 0.45
+            }
+          ]
+        },
+        {
+          "name": "Other",
+          "items": [
+            {
+              "name": "Sardines in Tomato Sauce",
+              "price": 0.0,
+              "category": "Groceries",
+              "subcategory": "Other",
+              "brand": "Del Monte",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+            }
+          ]
+        },
+        {
+          "name": "Snacks",
+          "items": [
+            {
+              "name": "Imperial Banquet Egg Rolls",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Imperial Banquet",
+              "weight": 0.15,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fresh Food",
+      "subcategories": []
+    }
+  ]
+}
