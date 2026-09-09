@@ -65,15 +65,23 @@ export function groupProductsByCategory(items: MenuItem[]): {
   }));
 }
 
+function inferStoreSection(item: MenuItem): "dry" | "refrigerated" {
+  if (item.storeSection) return item.storeSection;
+  const freshAisles = getFreshFoodAisleIds();
+  if (freshAisles.has(item.category) || isRefrigeratedCategory(item.category)) {
+    return "refrigerated";
+  }
+  return "dry";
+}
+
 export function splitProductsBySection(items: MenuItem[]): {
   dry: MenuItem[];
   refrigerated: MenuItem[];
 } {
-  const freshAisles = getFreshFoodAisleIds();
   const dry: MenuItem[] = [];
   const refrigerated: MenuItem[] = [];
   for (const item of items) {
-    if (freshAisles.has(item.category) || isRefrigeratedCategory(item.category)) {
+    if (inferStoreSection(item) === "refrigerated") {
       refrigerated.push(item);
     } else {
       dry.push(item);

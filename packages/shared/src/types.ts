@@ -87,10 +87,15 @@ export function categoryLabel(category: string): string {
 
 export type PriceType = "fixed" | "variable" | "range";
 
+/** Pantry vs chilled store area (Excel top-level Category). */
+export type StoreSection = "refrigerated" | "dry";
+
 export interface MenuItem {
   id: string;
   name: string;
   category: string;
+  /** Excel Category: Groceries → dry, Fresh Food → refrigerated. */
+  storeSection?: StoreSection;
   price: number;
   salePrice?: number;
   bulkDealQty?: number;

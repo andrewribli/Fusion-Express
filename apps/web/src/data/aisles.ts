@@ -1,7 +1,8 @@
 import catalog from "@fusion-express/shared/data/foodpanda-fusion-catalog.json";
 import type { MenuCategory } from "@/lib/types";
+import type { StoreSection } from "@fusion-express/shared/types";
 
-export type StoreSection = "refrigerated" | "dry";
+export type { StoreSection };
 
 export interface Aisle {
   id: string;

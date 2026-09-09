@@ -1,6 +1,6 @@
 import catalog from "@fusion-express/shared/data/foodpanda-fusion-catalog.json";
 import { resolveProductImage } from "@fusion-express/shared/resolve-image";
-import type { MenuItem } from "@/lib/types";
+import type { MenuItem, StoreSection } from "@/lib/types";
 
 interface CatalogItem {
   name: string;
@@ -21,6 +21,11 @@ interface CatalogNode {
 }
 
 const FRESH_FOOD_LABELS = new Set(["fresh food", "refrigerated"]);
+
+export function catalogStoreSection(topLevelCategory: string): StoreSection {
+  const label = topLevelCategory.trim().toLowerCase();
+  return FRESH_FOOD_LABELS.has(label) ? "refrigerated" : "dry";
+}
 
 function slugify(value: string): string {
   return value
@@ -87,6 +92,7 @@ export function getCatalogMenuItems(): MenuItem[] {
   if (cached) return cached;
   cached = flattenCatalog().map((item, index) => {
     const sectionLabel = item.category;
+    const storeSection = catalogStoreSection(sectionLabel);
     const subcategory = item.subcategory ?? sectionLabel;
     const aisleId = slugify(subcategory) || "other";
     const image = resolveProductImage({
@@ -103,6 +109,7 @@ export function getCatalogMenuItems(): MenuItem[] {
       id: slugId(item.name, index),
       name: item.name,
       category: aisleId,
+      storeSection,
       price: item.price,
       unit: "each",
       image,

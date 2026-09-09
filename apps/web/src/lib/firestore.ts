@@ -52,6 +52,8 @@ export function productBelongsToAisle(
   aisleId: string,
   section: StoreSection,
 ): boolean {
+  if (item.storeSection && item.storeSection !== section) return false;
+
   const cat = categorySlug(item.category);
   if (cat === aisleId) return true;
 
