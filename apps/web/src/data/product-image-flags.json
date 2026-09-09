@@ -1,0 +1,102 @@
+{
+  "placeholders": [
+    {
+      "id": "pagoda-kumquat-lemon-bundle",
+      "name": "百果園金桔檸檬 (bundle)",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Pagoda%20kumquat%20lemon",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "pagoda-kumquat-lemon",
+      "name": "百果園金桔檸檬 (individual)",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Pagoda%20kumquat%20lemon",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "tao-ti-mandarin-lemon",
+      "name": "Tao Ti Mandarin Lemon Juice Drink",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Tao%20Ti%20mandarin%20lemon",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "milk-kowloon",
+      "name": "Kowloon Dairy Milk 1L",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Kowloon%20Dairy%20milk",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "milk-meiji",
+      "name": "Meiji Milk 1L",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Meiji%20milk",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "megabowl-beef",
+      "name": "Mega Bowl Beef Fried Rice",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20beef",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "megabowl-chicken",
+      "name": "Mega Bowl Chicken Rice",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20chicken",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "megabowl-seafood",
+      "name": "Mega Bowl Seafood Rice",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20seafood",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "megabowl-tom-yum",
+      "name": "Mega Bowl Tom Yum Fried Rice",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20tom%20yum",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "megabowl-spicy-pork",
+      "name": "Mega Bowl Spicy Pork Rice",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20spicy%20pork",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    },
+    {
+      "id": "megabowl-kimchi",
+      "name": "Mega Bowl Kimchi Rice",
+      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20kimchi",
+      "reason": "No Commons pack shot for this HK SKU. Replace with a Fusion shelf photo."
+    }
+  ],
+  "closeMatch": [
+    {
+      "id": "nissin-cup-chicken",
+      "name": "Nissin Cup Noodles Chicken",
+      "image": "/images/products/nissin-cup-seafood.jpg",
+      "reason": "Real product photo, but flavor/size/packaging may not match the Fusion SKU."
+    },
+    {
+      "id": "nissin-cup-curry",
+      "name": "Nissin Cup Noodles Curry",
+      "image": "/images/products/nissin-cup-seafood.jpg",
+      "reason": "Real product photo, but flavor/size/packaging may not match the Fusion SKU."
+    },
+    {
+      "id": "coke-zero-can",
+      "name": "Coca-Cola Zero Can",
+      "image": "/images/products/coke-zero-can.jpg",
+      "reason": "Real product photo, but flavor/size/packaging may not match the Fusion SKU."
+    },
+    {
+      "id": "pocari-sweat-largest",
+      "name": "Pocari Sweat (biggest size in store)",
+      "image": "/images/products/pocari-sweat-largest.jpg",
+      "reason": "Real product photo, but flavor/size/packaging may not match the Fusion SKU."
+    },
+    {
+      "id": "fanta-mini-6pack-orange",
+      "name": "Fanta Mini 6×200ml (Orange)",
+      "image": "/images/products/fanta-mini.jpg",
+      "reason": "Real product photo, but flavor/size/packaging may not match the Fusion SKU."
+    }
+  ]
+}

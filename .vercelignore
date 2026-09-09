@@ -1,0 +1,20 @@
+.turbo
+.next
+apps/web/.next
+apps/mobile/.expo
+apps/mobile/dist
+node_modules
+.git
+.cursor
+.env
+.env.local
+firebase-service-account.json
+*.tsbuildinfo
+next-env.d.ts
+scripts/__pycache__
+*.zip
+FoodPanda Data2.txt
+FoodPanda Fusion Data.txt
+Product List Catalog.xlsx
+06_large_demo_dataset.sql
+scripts/_image_misses.txt

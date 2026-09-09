@@ -1,30 +1,24 @@
 {
   "name": "fusion-express",
-  "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "seed": "tsx scripts/seed-menu.ts"
-  },
-  "dependencies": {
-    "firebase": "^12.17.1",
-    "next": "16.3.1",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "dev": "turbo run dev --filter=@fusion-express/web",
+    "dev:web": "turbo run dev --filter=@fusion-express/web",
+    "dev:mobile": "npm run start -w @fusion-express/mobile",
+    "build": "turbo run build --filter=@fusion-express/web",
+    "build:web": "turbo run build --filter=@fusion-express/web",
+    "lint": "turbo run lint --filter=@fusion-express/web",
+    "seed": "npm run seed -w @fusion-express/web"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.1",
-    "firebase-admin": "^14.2.0",
-    "tailwindcss": "^4",
-    "tsx": "^4.23.12",
-    "typescript": "^5"
-  }
+    "turbo": "^2.5.4"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.9.2"
 }
