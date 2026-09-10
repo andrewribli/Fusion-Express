@@ -13,6 +13,7 @@
     "./products": "./src/products.ts",
     "./product-images": "./src/product-images.ts",
     "./resolve-image": "./src/resolve-image.ts",
+    "./product-text": "./src/product-text.ts",
     "./firebase": "./src/firebase.ts",
     "./auth": "./src/auth.ts",
     "./cuhk-email": "./src/cuhk-email.ts",

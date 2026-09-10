@@ -32,6 +32,8 @@ function slugify(value: string): string {
     .slice(0, 72);
 }
 
+const MEAT_AISLE_ORDER = ["beef", "chicken", "pork", "seafood", "others"] as const;
+
 function aislesFromCatalog(section: StoreSection): Aisle[] {
   const wantFresh = section === "refrigerated";
   const categories =
@@ -59,7 +61,16 @@ function aislesFromCatalog(section: StoreSection): Aisle[] {
     }
   }
 
-  return out;
+  return out.sort((a, b) => {
+    const ai = MEAT_AISLE_ORDER.indexOf(a.id as (typeof MEAT_AISLE_ORDER)[number]);
+    const bi = MEAT_AISLE_ORDER.indexOf(b.id as (typeof MEAT_AISLE_ORDER)[number]);
+    const aMeat = ai >= 0;
+    const bMeat = bi >= 0;
+    if (aMeat && bMeat) return ai - bi;
+    if (aMeat && !bMeat) return -1;
+    if (!aMeat && bMeat) return 1;
+    return 0;
+  });
 }
 
 export const REFRIGERATED_AISLES: Aisle[] = aislesFromCatalog("refrigerated");

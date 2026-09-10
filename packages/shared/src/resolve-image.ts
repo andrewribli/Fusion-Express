@@ -33,6 +33,9 @@ export function resolveProductImage(item: {
   name?: string;
   image?: string;
 }): string | undefined {
+  if (item.image?.startsWith("/images/catalog/")) {
+    return item.image;
+  }
   const named = item.name ? byName[item.name] : undefined;
   if (named) return named;
   if (item.image && !isGenericImageUrl(item.image)) {

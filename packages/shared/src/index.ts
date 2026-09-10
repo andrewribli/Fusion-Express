@@ -10,5 +10,6 @@ export * from "./firebase";
 export * from "./auth";
 export * from "./products";
 export * from "./resolve-image";
+export * from "./product-text";
 export * from "./orders";
 export * from "./cuhk-email";

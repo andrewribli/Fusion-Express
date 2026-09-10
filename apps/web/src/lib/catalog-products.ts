@@ -1,4 +1,5 @@
 import catalog from "@fusion-express/shared/data/foodpanda-fusion-catalog.json";
+import { cleanBrand, cleanProductName } from "@fusion-express/shared";
 import { resolveProductImage } from "@fusion-express/shared/resolve-image";
 import type { MenuItem, StoreSection } from "@/lib/types";
 
@@ -99,15 +100,18 @@ export function getCatalogMenuItems(): MenuItem[] {
       name: item.name,
       image:
         item.image &&
-        item.image.startsWith("http") &&
+        (item.image.startsWith("http") || item.image.startsWith("/images/")) &&
         !item.image.includes("…") &&
         !item.image.includes("...")
           ? item.image
           : undefined,
     });
+    const brand = cleanBrand(item.brand);
+    const name = cleanProductName(item.name, { brand, subcategory });
+
     return {
       id: slugId(item.name, index),
-      name: item.name,
+      name,
       category: aisleId,
       storeSection,
       price: item.price,
@@ -119,7 +123,7 @@ export function getCatalogMenuItems(): MenuItem[] {
       sortOrder: index,
       weightKg: item.weight ?? 0.2,
       subcategory,
-      itemNote: item.brand,
+      itemNote: brand,
       bulkDealPrice: item.bulkDealPrice,
       bulkDealQty: item.bulkDealQty,
     };

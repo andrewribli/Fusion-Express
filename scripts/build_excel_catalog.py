@@ -9,12 +9,40 @@ from pathlib import Path
 
 import openpyxl
 
+from sanitize_product_text import clean_brand, clean_name
+
 ROOT = Path(__file__).resolve().parents[1]
 XLSX = ROOT / "Product List Catalog.xlsx"
 OUT = ROOT / "packages" / "shared" / "data" / "foodpanda-fusion-catalog.json"
 OLD_CATALOG = OUT
+ENRICHMENT = ROOT / "packages" / "shared" / "data" / "parknshop-enrichment.json"
+DRIVE_IMAGES = ROOT / "apps" / "web" / "public" / "images" / "catalog"
+
+# Photo-notes / placeholders we could not identify on ParknShop.
+UNIDENTIFIED_RE = re.compile(
+    r"unknown|unclear|partial|facings?|right-edge|left-edge|bottom-edge|"
+    r"product unknown|variant unknown|obscured",
+    re.I,
+)
+
+
+def should_skip_row(raw_name: str, excel_price: object, enriched: dict) -> bool:
+    """Drop items we guessed instead of identifying on ParknShop."""
+    if UNIDENTIFIED_RE.search(raw_name):
+        return True
+    guessed = enriched.get("priceSource") in {"median", "foodpanda"}
+    if guessed:
+        return True
+    no_excel = excel_price is None or (isinstance(excel_price, (int, float)) and float(excel_price) <= 0)
+    if no_excel and not enriched.get("pnsUrl") and not enriched.get("pnsName"):
+        if enriched.get("price") is not None:
+            return True
+    return False
 
 SECTION_ORDER = ("Groceries", "Fresh Food")
+
+# Meat aisles: beef first, then typical campus demand.
+MEAT_SUB_ORDER = ("Beef", "Chicken", "Pork", "Seafood", "Others")
 
 GROCERIES_ALIASES = {
     "groceries",
@@ -43,9 +71,158 @@ def normalize_section(raw: object) -> str:
     return label or "Groceries"
 
 
+CHILLED_GROCERY_SUBS = {
+    "ice cream": "Ice Cream",
+    "frozen vegetables": "Frozen Vegetables",
+    "frozen meat": "Frozen Meat",
+    "meat": "Meat",
+}
+
+
 def normalize_subcategory(raw: object) -> str:
     label = str(raw).strip() if raw else ""
-    return label or "Other"
+    return label or ""
+
+
+def infer_fresh_subcategory(name: str, brand: str | None) -> str:
+    n = f"{brand or ''} {name}".lower()
+    if any(w in n for w in ("sandwich", "onigiri", "bento", "ready meal")):
+        return "Ready Meals"
+    if any(w in n for w in ("drink", "bottled")):
+        return "Chilled Drinks"
+    if "salmon" in n or "seafood" in n:
+        return "Seafood"
+    if any(w in n for w in ("tofu", "bean curd")):
+        return "Dairy"
+    if "kimchi" in n:
+        return "Vegetables"
+    if "egg" in n:
+        return "Dairy"
+    if any(
+        w in n
+        for w in (
+            "yogurt",
+            "yoghurt",
+            "cream",
+            "butter",
+            "cheese",
+            "cheddar",
+            "mozzarella",
+            "parmesan",
+            "spread",
+            "dairy",
+        )
+    ):
+        return "Dairy"
+    if any(
+        w in n
+        for w in (
+            "blueberry",
+            "blueberries",
+            "kiwi",
+            "fruit",
+            "watermelon",
+            "melon",
+            "grape",
+            "peach",
+            "citrus",
+            "orange",
+        )
+    ):
+        return "Fruit"
+    return "Other"
+
+
+def classify_meat(name: str, brand: str | None) -> str:
+    n = f"{brand or ''} {name}".lower()
+    if any(
+        w in n
+        for w in ("plant-based", "plant based", "meat zero", "vegetarian", "vegan")
+    ):
+        return "Others"
+    if any(
+        w in n
+        for w in (
+            "salmon",
+            "prawn",
+            "shrimp",
+            "fish",
+            "seafood",
+            "abalone",
+            "duck leg",
+            "confit duck",
+        )
+    ):
+        return "Seafood"
+    if any(
+        w in n
+        for w in ("chicken", "poultry", "wing", "thigh", "breast", "drumstick")
+    ):
+        return "Chicken"
+    if any(
+        w in n
+        for w in (
+            "beef",
+            "steak",
+            "striploin",
+            "angus",
+            "grain fed",
+            "hot pot beef",
+            "halal beef",
+        )
+    ):
+        return "Beef"
+    if any(
+        w in n
+        for w in (
+            "pork",
+            "belly",
+            "spare rib",
+            "sparerib",
+            "mince",
+            "ground pork",
+            "collar",
+            "sausage",
+            "bacon",
+            "ham",
+            "patty",
+        )
+    ):
+        return "Pork"
+    return "Others"
+
+
+def resolve_section_and_sub(
+    raw_section: object, raw_sub: object, name: str, brand: str | None
+) -> tuple[str, str]:
+    section = normalize_section(raw_section)
+    sub = normalize_subcategory(raw_sub)
+
+    # Frozen / chilled grocery rows belong in Fresh Food.
+    if section == "Groceries" and sub.lower() in CHILLED_GROCERY_SUBS:
+        section = "Fresh Food"
+        sub = CHILLED_GROCERY_SUBS[sub.lower()]
+
+    meat_subs = {"meat", "frozen meat", "pork", "beef", "chicken", "seafood", "others"}
+    if sub.lower() in meat_subs:
+        classified = classify_meat(name, brand)
+        n = f"{brand or ''} {name}".lower()
+        if sub.lower() in {"meat", "frozen meat"}:
+            sub = classified
+        elif classified == "Others" and any(
+            w in n for w in ("plant-based", "plant based", "meat zero")
+        ):
+            sub = "Others"
+        elif classified in MEAT_SUB_ORDER and classified != sub:
+            if any(w in n for w in ("beef", "chicken", "pork", "seafood")):
+                sub = classified
+
+    if section == "Fresh Food" and not sub:
+        sub = infer_fresh_subcategory(name, brand)
+
+    if not sub:
+        sub = "Other"
+    return section, sub
 
 
 def parse_weight(raw: object) -> float | None:
@@ -105,9 +282,29 @@ def match_image(name: str, images: dict[str, str]) -> str | None:
     return None
 
 
+def drive_image_url(raw: object) -> str | None:
+    """Map Excel Image Source (e.g. IMG_7053.HEIC) to a local catalog photo."""
+    if not raw:
+        return None
+    name = str(raw).strip()
+    if not name.upper().endswith(".HEIC"):
+        return None
+    stem = Path(name).stem.lower().replace("_", "-")
+    if (DRIVE_IMAGES / f"{stem}.jpg").exists():
+        return f"/images/catalog/{stem}.jpg"
+    return None
+
+
+def load_enrichment() -> dict[str, dict]:
+    if not ENRICHMENT.exists():
+        return {}
+    return json.loads(ENRICHMENT.read_text(encoding="utf-8"))
+
+
 def main() -> None:
     # Capture images from previous catalog before overwrite.
     images = load_old_images()
+    enrichment = load_enrichment()
 
     wb = openpyxl.load_workbook(XLSX, read_only=True, data_only=True)
     ws = wb["Sheet1"]
@@ -119,25 +316,48 @@ def main() -> None:
     for row in rows[1:]:
         if not row or len(row) < 6 or not row[2]:
             continue
-        name = str(row[2]).strip()
-        brand = str(row[1]).strip() if row[1] else None
+        raw_name = str(row[2]).strip()
+        raw_brand = str(row[1]).strip() if row[1] else None
         price = row[3]
-        category = normalize_section(row[4] if len(row) > 4 else None)
-        subcategory = normalize_subcategory(row[5] if len(row) > 5 else None)
+        enriched = enrichment.get(raw_name) or {}
+        if should_skip_row(raw_name, price, enriched):
+            continue
+        brand = clean_brand(raw_brand)
+        category, subcategory = resolve_section_and_sub(
+            row[4] if len(row) > 4 else None,
+            row[5] if len(row) > 5 else None,
+            raw_name,
+            brand or raw_brand,
+        )
+        use_pns_name = bool(UNIDENTIFIED_RE.search(raw_name))
+        name = enriched.get("resolvedName") or clean_name(
+            raw_name,
+            brand,
+            subcategory,
+            pns_name=enriched.get("pnsName") if use_pns_name else None,
+        )
         weight = parse_weight(row[6] if len(row) > 6 else None)
         multibuy = parse_multibuy(row[7] if len(row) > 7 else None)
-        image = match_image(name, images)
+        if enriched.get("subcategory"):
+            subcategory = enriched["subcategory"]
+        drive_img = drive_image_url(row[11] if len(row) > 11 else None)
+        image = enriched.get("image") or drive_img or match_image(name, images)
         if image:
             matched += 1
+        resolved_price = price
+        if resolved_price is None and enriched.get("price") is not None:
+            resolved_price = enriched["price"]
 
         item: dict = {
             "name": name,
-            "price": float(price) if price is not None else 0.0,
+            "price": float(resolved_price) if resolved_price is not None else 0.0,
             "category": category,
             "subcategory": subcategory,
         }
         if brand:
             item["brand"] = brand
+        elif enriched.get("pnsBrand"):
+            item["brand"] = enriched["pnsBrand"]
         if image:
             item["image"] = image
         if weight is not None:
@@ -152,7 +372,13 @@ def main() -> None:
     for cat_name in SECTION_ORDER:
         subs = buckets.get(cat_name, {})
         node = {"name": cat_name, "subcategories": []}
-        for sub_name in sorted(subs.keys(), key=lambda s: (-len(subs[s]), s)):
+
+        def sub_key(s: str, counts: dict[str, list] = subs) -> tuple:
+            if cat_name == "Fresh Food" and s in MEAT_SUB_ORDER:
+                return (0, MEAT_SUB_ORDER.index(s))
+            return (1, -len(counts[s]), s)
+
+        for sub_name in sorted(subs.keys(), key=sub_key):
             node["subcategories"].append(
                 {"name": sub_name, "items": subs[sub_name]}
             )
