@@ -23,15 +23,29 @@ export const AISLE_IMAGES: Record<string, string> = {
   biscuits: "/images/aisles/bread.jpg",
   "cleaning-supplies": "/images/aisles/household-essentials.jpg",
   snacks: "/images/aisles/snacks.jpg",
+  confectionary: "/images/aisles/snacks.jpg",
   other: "/images/aisles/household-essentials.jpg",
-  // legacy
+  drinks: "/images/aisles/drinks.jpg",
+  "hot-drinks": "/images/aisles/coffee-tea.jpg",
+  "bread-and-bakery": "/images/aisles/bread.jpg",
   meat: "/images/aisles/meat.png",
+  beef: "/images/aisles/meat.png",
+  pork: "/images/aisles/meat.png",
+  chicken: "/images/aisles/meat.png",
+  others: "/images/aisles/meat.png",
   seafood: "/images/aisles/seafood.jpg",
+  dairy: "/images/aisles/dairy-eggs.jpg",
+  vegetables: "/images/aisles/fruit-veg.jpg",
+  fruit: "/images/aisles/fruit-veg.jpg",
+  "frozen-meat": "/images/aisles/frozen.jpg",
+  "frozen-vegetables": "/images/aisles/frozen.jpg",
+  "ice-cream": "/images/aisles/frozen.jpg",
+  "ready-meals": "/images/aisles/salads.jpg",
+  "chilled-drinks": "/images/aisles/chilled-drinks.jpg",
+  // legacy
   "dairy-eggs": "/images/aisles/dairy-eggs.jpg",
   frozen: "/images/aisles/frozen.jpg",
-  "chilled-drinks": "/images/aisles/chilled-drinks.jpg",
   salads: "/images/aisles/salads.jpg",
-  drinks: "/images/aisles/drinks.jpg",
   bread: "/images/aisles/bread.jpg",
   "coffee-tea": "/images/aisles/coffee-tea.jpg",
   "household-essentials": "/images/aisles/household-essentials.jpg",
@@ -92,8 +106,6 @@ export function getItemImage(item: {
 }): string {
   const resolved = resolveProductImage(item);
   if (resolved) return resolved;
-  if (item.image && !item.image.includes("unsplash") && !item.image.includes("placehold")) {
-    return item.image;
-  }
-  return "";
+  if (item.image) return item.image;
+  return getAisleImage(item.category);
 }

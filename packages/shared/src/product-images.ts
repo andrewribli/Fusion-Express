@@ -248,11 +248,108 @@ for (const [id, url] of Object.entries(extras)) {
   if (!PRODUCT_IMAGES[id]) PRODUCT_IMAGES[id] = { url, kind: "unsplash" };
 }
 
-export function imageForItem(id: string, category: string): string {
-  return PRODUCT_IMAGES[id]?.url ?? byCategory[category] ?? U.chips;
+export function imageForItem(id: string, _category: string): string {
+  const mapped = PRODUCT_IMAGES[id];
+  if (mapped?.kind === "local-commons") return mapped.url;
+  return "";
 }
 
 export function imageKindForItem(id: string): ImageKind {
   if (PRODUCT_IMAGES[id]) return PRODUCT_IMAGES[id].kind;
   return "unsplash";
+}
+
+const THEME_PHOTOS: Record<string, string[]> = {
+  beef: [
+    unsplash("photo-1603048297172-c92544798d5e"),
+    unsplash("photo-1558030006-450675393462"),
+    unsplash("photo-1544025162-d76690232da9"),
+  ],
+  pork: [
+    unsplash("photo-1602470520998-f4a76d0b8f62"),
+    unsplash("photo-1529193591184-b1d5fddd9eef"),
+    unsplash("photo-1626082927389-6cd097cdc6ec"),
+  ],
+  chicken: [
+    unsplash("photo-1598103442097-8b74394b95c2"),
+    unsplash("photo-1604503468506-a8da13d82791"),
+    unsplash("photo-1610057099443-fde8c4d57a89"),
+  ],
+  seafood: [
+    unsplash("photo-1559737558-2f5a35f4523b"),
+    unsplash("photo-1615141982883-c7ad0e69fd62"),
+    unsplash("photo-1534604973900-c43ab4c2e0ab"),
+  ],
+  dairy: [
+    unsplash("photo-1563636619-e9143da7973b"),
+    unsplash("photo-1628088062854-d1870b4553da"),
+    unsplash("photo-1486297678162-eb2a19b0a32d"),
+  ],
+  eggs: [unsplash("photo-1582722872445-44dc5f7e3c8f"), unsplash("photo-1506976785307-8732e57605d0")],
+  noodles: [unsplash("photo-1569718212165-3a8278d5f624"), unsplash("photo-1612929633738-8fe44f7ec841")],
+  rice: [unsplash("photo-1536304993881-ff6e9eefa2a6"), unsplash("photo-1516684669134-de6f7c473a2a")],
+  snacks: [unsplash("photo-1566478989037-eec170784d0b"), unsplash("photo-1621939514649-280e2ee25f60")],
+  chocolate: [unsplash("photo-1548907040-4baa42d10919"), unsplash("photo-1606312619070-d48b4c652a82")],
+  bread: [unsplash("photo-1509440159596-0249088772ff"), unsplash("photo-1549931319-a545dcf3bc73")],
+  fruit: [unsplash("photo-1619566636858-adf3ef46400b"), unsplash("photo-1610832958506-aa56368176cf")],
+  veg: [unsplash("photo-1540420773420-3366772f4999"), unsplash("photo-1566385101042-1a0aa0c1268c")],
+  drinks: [unsplash("photo-1629203851122-3726ecdf080e"), unsplash("photo-1600271886742-f049cd451bba")],
+  coffee: [unsplash("photo-1514432324607-a09d9b4aefdd"), unsplash("photo-1495474472287-4d71bcdd2085")],
+  frozen: [unsplash("photo-1565299624946-b28f40a0ae38"), unsplash("photo-1497034825429-c343d7c6a68f")],
+  sauce: [unsplash("photo-1472476443507-c7a5948772fc"), unsplash("photo-1473093295043-cdd812d0e601")],
+  canned: [unsplash("photo-1534483509719-3feaee7c3cb5"), unsplash("photo-1584473457406-6240486418e9")],
+  toiletry: [unsplash("photo-1556228578-0d85b1a4d571"), unsplash("photo-1556228720-195a672e8a03")],
+  household: [unsplash("photo-1563453392212-326f5e854473"), unsplash("photo-1581578731548-c64695cc6952")],
+  grocery: [unsplash("photo-1542838132-92c53300491e"), unsplash("photo-1578662996442-48f60103fc96")],
+};
+
+const THEME_KEYWORDS: Array<[string, string[]]> = [
+  ["beef", ["beef", "steak", "striploin", "angus", "brisket"]],
+  ["pork", ["pork", "bacon", "sausage", "ham", "belly"]],
+  ["chicken", ["chicken", "poultry", "wing", "thigh", "nugget"]],
+  ["seafood", ["fish", "salmon", "shrimp", "prawn", "seafood", "tuna", "crab"]],
+  ["eggs", ["egg"]],
+  ["dairy", ["milk", "yogurt", "yoghurt", "cheese", "butter", "cream"]],
+  ["noodles", ["noodle", "ramen", "pasta", "udon", "vermicelli"]],
+  ["rice", ["rice"]],
+  ["snacks", ["chip", "crisp", "cracker", "snack", "biscuit"]],
+  ["chocolate", ["chocolate", "cocoa", "oreo"]],
+  ["bread", ["bread", "bun", "bakery", "cake", "muffin"]],
+  ["fruit", ["fruit", "apple", "banana", "orange", "berry", "grape"]],
+  ["veg", ["vegetable", "veg", "lettuce", "tomato", "onion", "cabbage"]],
+  ["drinks", ["drink", "juice", "soda", "cola", "tea", "water", "beverage"]],
+  ["coffee", ["coffee", "nescafe", "latte"]],
+  ["frozen", ["frozen", "ice cream", "dumpling"]],
+  ["sauce", ["sauce", "soy", "ketchup", "seasoning", "oil"]],
+  ["canned", ["canned", "tin"]],
+  ["toiletry", ["soap", "shampoo", "toothpaste", "deodorant", "wash"]],
+  ["household", ["detergent", "tissue", "cleaner", "toilet"]],
+];
+
+function hashPick(seed: string, n: number): number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h) % n;
+}
+
+function themeForText(text: string): string {
+  const n = text.toLowerCase();
+  for (const [theme, words] of THEME_KEYWORDS) {
+    if (words.some((w) => n.includes(w))) return theme;
+  }
+  return "grocery";
+}
+
+/** Stable Unsplash photo that matches the product name / aisle. */
+export function fallbackImageForDescription(
+  name?: string,
+  category?: string,
+): string {
+  const seed = `${name || ""} ${category || ""}`.trim() || "grocery";
+  const theme = themeForText(seed);
+  const pool = THEME_PHOTOS[theme] ?? THEME_PHOTOS.grocery;
+  return pool[hashPick(seed, pool.length)] ?? pool[0];
 }

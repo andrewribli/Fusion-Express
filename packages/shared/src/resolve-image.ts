@@ -1,5 +1,5 @@
 import overrides from "../data/product-image-overrides.json";
-import { PRODUCT_IMAGES } from "./product-images";
+import { fallbackImageForDescription, PRODUCT_IMAGES } from "./product-images";
 
 const byName = overrides as Record<string, string>;
 
@@ -32,6 +32,7 @@ export function resolveProductImage(item: {
   id?: string;
   name?: string;
   image?: string;
+  category?: string;
 }): string | undefined {
   if (item.image?.startsWith("/images/catalog/")) {
     return item.image;
@@ -45,5 +46,5 @@ export function resolveProductImage(item: {
     const mapped = PRODUCT_IMAGES[item.id];
     if (mapped?.kind === "local-commons") return mapped.url;
   }
-  return undefined;
+  return fallbackImageForDescription(item.name, item.category);
 }

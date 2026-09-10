@@ -98,6 +98,7 @@ export function getCatalogMenuItems(): MenuItem[] {
     const aisleId = slugify(subcategory) || "other";
     const image = resolveProductImage({
       name: item.name,
+      category: aisleId,
       image:
         item.image &&
         (item.image.startsWith("http") || item.image.startsWith("/images/")) &&

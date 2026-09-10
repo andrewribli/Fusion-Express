@@ -26,6 +26,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.deliveryhero.io",
       },
+      {
+        protocol: "https",
+        hostname: "medias.pns.hk",
+      },
+      {
+        protocol: "https",
+        hostname: "images.openfoodfacts.org",
+      },
     ],
   },
 };
