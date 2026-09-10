@@ -16,6 +16,7 @@ OVERRIDES = DATA / "product-image-overrides.json"
 MEAT = DATA / "foodpanda-fusion-meat.json"
 HOUSEHOLD = DATA / "foodpanda-fusion-household.json"
 HOUSEHOLD_RAW = DATA / "foodpanda-fusion-household.raw.json"
+CATALOG = DATA / "foodpanda-fusion-catalog.json"
 
 SESSION = requests.Session()
 SESSION.headers.update(
@@ -79,10 +80,29 @@ def load_fallback_index() -> list[dict]:
                 }
             )
 
+    if CATALOG.exists():
+        catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+
+        def walk(nodes: list) -> None:
+            for node in nodes:
+                for item in node.get("items") or []:
+                    if item.get("image") and item.get("name"):
+                        rows.append(
+                            {
+                                "name": item["name"],
+                                "image": item["image"],
+                                "price": item.get("price"),
+                                "source": "catalog",
+                            }
+                        )
+                walk(node.get("subcategories") or [])
+
+        walk(catalog.get("categories") or [])
+
     return rows
 
 
-def match_fallback(name: str, index: list[dict], min_score: float = 0.72) -> dict | None:
+def match_fallback(name: str, index: list[dict], min_score: float = 0.62) -> dict | None:
     best: dict | None = None
     best_score = min_score
     for row in index:
@@ -95,20 +115,27 @@ def match_fallback(name: str, index: list[dict], min_score: float = 0.72) -> dic
 
 def bing_pns_image(name: str) -> str | None:
     query = f"site:medias.pns.hk {name}"
-    url = "https://www.bing.com/images/search?" + urllib.parse.urlencode({"q": query, "first": "1"})
-    try:
-        resp = SESSION.get(url, timeout=20)
-        resp.raise_for_status()
-    except requests.RequestException:
-        return None
-
-    for match in re.finditer(
-        r"https://medias\.pns\.hk/publishing/[^\"'&\s<>]+",
-        resp.text,
+    for base in (
+        "https://www.bing.com/images/search",
+        "https://html.duckduckgo.com/html/",
     ):
-        candidate = match.group(0)
-        if "front-prodcat" in candidate or "PNSHK-" in candidate:
-            return candidate
+        if "duckduckgo" in base:
+            url = base + "?" + urllib.parse.urlencode({"q": query})
+        else:
+            url = base + "?" + urllib.parse.urlencode({"q": query, "first": "1"})
+        try:
+            resp = SESSION.get(url, timeout=20)
+            resp.raise_for_status()
+        except requests.RequestException:
+            continue
+
+        for match in re.finditer(
+            r"https://medias\.pns\.hk/publishing/[^\"'&\s<>]+",
+            resp.text,
+        ):
+            candidate = match.group(0)
+            if "front-prodcat" in candidate or "PNSHK-" in candidate:
+                return candidate
     return None
 
 

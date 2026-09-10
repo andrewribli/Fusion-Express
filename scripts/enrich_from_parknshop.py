@@ -169,6 +169,13 @@ def enrich_browser(page, product: dict, delay: float, only_missing_price: bool) 
 
     match = pick_best_product(product["name"], products)
     if not match:
+        words = [w for w in re.split(r"\W+", product["name"]) if len(w) > 2][:6]
+        if len(words) >= 3:
+            short_query = " ".join(words)
+            products = fetch_pns_search(page, short_query)
+            time.sleep(delay)
+            match = pick_best_product(product["name"], products)
+    if not match:
         return None
 
     image = parse_pns_image(match)
@@ -185,9 +192,9 @@ def enrich_browser(page, product: dict, delay: float, only_missing_price: bool) 
         entry["image"] = image
     if price is not None:
         entry["price"] = price
-    elif product.get("excelPrice"):
-        entry["price"] = product["excelPrice"]
-    if len(entry) <= 5:
+    elif product.get("excelPrice") is not None:
+        entry["price"] = round(float(product["excelPrice"]), 2)
+    if "image" not in entry and "price" not in entry:
         return None
     return entry
 
@@ -292,7 +299,7 @@ def run(args: argparse.Namespace) -> None:
         if args.only_missing_price:
             if not existing.get("price"):
                 todo.append(prod)
-        elif not existing.get("image") or not existing.get("price"):
+        elif not existing.get("image"):
             todo.append(prod)
 
     print(f"Browser pass for {len(todo)} / {len(products)} products")
