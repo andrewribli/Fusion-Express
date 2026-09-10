@@ -12,6 +12,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Darlie",
+              "image": "https://medias.pns.hk/publishing/PNSHK-189240-front-prodcat.jpg?version=1762950532",
               "weight": 0.05
             },
             {
@@ -20,14 +21,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Colgate",
+              "image": "https://medias.pns.hk/publishing/PNSHK-814335-front-prodcat.jpg?version=1744378829",
               "weight": 0.05
             },
             {
               "name": "Colgate Sensitive Pro-Relief Toothpaste",
-              "price": 49.9,
+              "price": 33.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Colgate",
+              "image": "https://medias.pns.hk/publishing/PNSHK-462040-front-prodcat.jpg?version=1757680264",
               "weight": 0.075
             },
             {
@@ -52,6 +55,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Dove",
+              "image": "https://medias.pns.hk/publishing/PNSHK-117526-front-prodcat.jpg",
               "weight": 0.09
             },
             {
@@ -68,6 +72,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Vidal Sasson",
+              "image": "https://medias.pns.hk/publishing/PNSHK-244826-front-prodcat.jpg?version=1773145897",
               "weight": 0.75
             },
             {
@@ -76,6 +81,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Sebamed",
+              "image": "https://medias.pns.hk/publishing/PNSHK-189408-front-prodcat.jpg?version=1758543690",
               "weight": 0.4
             },
             {
@@ -84,6 +90,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Tresemme",
+              "image": "https://medias.pns.hk/publishing/PNSHK-156712-front-prodcat.jpg?version=1770812612",
               "weight": 0.94
             },
             {
@@ -92,6 +99,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Dove",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157090-front-prodcat.jpg?version=1776428702",
               "weight": 0.58,
               "bulkDealPrice": 119.8,
               "bulkDealQty": 3
@@ -102,6 +110,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Dove",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157093-front-prodcat.jpg?version=1776429327",
               "weight": 0.58,
               "bulkDealPrice": 119.8,
               "bulkDealQty": 3
@@ -112,6 +121,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Pantene",
+              "image": "https://medias.pns.hk/publishing/PNSHK-821209-front-prodcat.jpg?version=1765283498",
               "weight": 0.65
             },
             {
@@ -120,14 +130,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Pantene",
+              "image": "https://medias.pns.hk/publishing/PNSHK-821215-front-prodcat.jpg?version=1765283519",
               "weight": 0.65
             },
             {
               "name": "Pantene Silky Smooth Conditioner",
-              "price": 64.9,
+              "price": 62.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Pantene",
+              "image": "https://medias.pns.hk/publishing/PNSHK-810577-front-prodcat.jpg",
               "weight": 0.65
             },
             {
@@ -136,6 +148,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WALCH",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419777-front-prodcat.jpg",
               "weight": 0.45
             },
             {
@@ -148,10 +161,11 @@
             },
             {
               "name": "WATSONS Green Tea + Apple Handwash",
-              "price": 14.0,
+              "price": 11.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103929-front-prodcat.jpg?version=1761049279",
               "weight": 0.5
             },
             {
@@ -160,6 +174,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "BIORE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-816766-front-prodcat.jpg?version=1733399868",
               "weight": 0.04
             },
             {
@@ -171,10 +186,11 @@
             },
             {
               "name": "NIVEA Invisible Black & White Power Spray",
-              "price": 40.0,
+              "price": 29.6,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246325-front-prodcat.jpg",
               "weight": 0.15
             },
             {
@@ -183,14 +199,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-112929-front-prodcat.jpg",
               "weight": 0.15
             },
             {
               "name": "NIVEA Invisible Black & White Clear Spray",
-              "price": 40.0,
+              "price": 29.6,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246322-front-prodcat.jpg",
               "weight": 0.15
             },
             {
@@ -220,14 +238,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-245719-front-prodcat.jpg?version=1754067098",
               "weight": 0.5
             },
             {
               "name": "DETTOL Dettol Hand Wash Sensitive",
-              "price": 37.0,
+              "price": 42.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-284794-front-prodcat.jpg?version=1754067347",
               "weight": 0.5
             },
             {
@@ -243,6 +263,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-821996-front-prodcat.jpg?version=1778849489",
               "weight": 0.3
             },
             {
@@ -251,6 +272,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479014-front-prodcat.jpg?version=1753879277",
               "weight": 0.25
             },
             {
@@ -267,6 +289,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WALCH",
+              "image": "https://medias.pns.hk/publishing/PNSHK-469800-front-prodcat.jpg",
               "weight": 0.29
             },
             {
@@ -281,21 +304,24 @@
               "price": 80.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DETTOL"
+              "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246257-front-prodcat.jpg?version=1767962163"
             },
             {
               "name": "DETTOL Dettol Antibacterial Skincare Hand Wash 500g Tripack",
               "price": 80.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DETTOL"
+              "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246258-front-prodcat.jpg?version=1754066737"
             },
             {
               "name": "DOVE Body Wash - Beauty Nourishing",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-449916-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -308,42 +334,47 @@
             },
             {
               "name": "DOVE Dove Body Wash 1000g - Grapefruit & Lime",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-140109-front-prodcat.jpg?version=1733394129",
               "weight": 1.0
             },
             {
               "name": "DOVE Dove Body Wash 1000g - Yuzu & Glacier",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-810423-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "DOVE Body Wash - Acai Berry",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-406877-front-prodcat.jpg?version=1744201620",
               "weight": 1.0
             },
             {
               "name": "DOVE Dove Body Wash 1000g - White Peach & White Tea",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-810422-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "DETTOL Dettol Pine Antibacterial Ph-balanced Body Wash",
-              "price": 63.0,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-241172-front-prodcat.jpg?version=1767961859",
               "weight": 0.95
             },
             {
@@ -356,10 +387,11 @@
             },
             {
               "name": "DETTOL Profresh Peach",
-              "price": 68.0,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-236008-front-prodcat.jpg?version=1778848487",
               "weight": 0.95
             },
             {
@@ -375,42 +407,48 @@
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246881-front-prodcat.jpg?version=1732795609"
             },
             {
               "name": "DOVE Go Fresh Body Wash - Peach Tp (random Free Gift)",
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-493761-front-prodcat.jpg?version=1733301914"
             },
             {
               "name": "DOVE Go Fresh Body Wash - Lavender+sakura (random Free Gift)",
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-801655-front-prodcat.jpg"
             },
             {
               "name": "DOVE Dove Beauty Nourishing + Grapefruit Bp",
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-140110-front-prodcat.jpg?version=1733392600"
             },
             {
               "name": "OPAL Moisturising Anti-bacterial Shower Foam",
               "price": 86.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "OPAL"
+              "brand": "OPAL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-395353-front-prodcat.jpg"
             },
             {
               "name": "LUX Shower Gel Soft Kiss (variant/size inferred)",
-              "price": 40.0,
+              "price": 32.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "LUX"
+              "brand": "LUX",
+              "image": "https://medias.pns.hk/publishing/PNSHK-381546-front-prodcat.jpg"
             },
             {
               "name": "Unknown white/red body-wash product",
@@ -439,6 +477,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-409791-front-prodcat.jpg?version=1768236905",
               "weight": 0.5
             },
             {
@@ -461,14 +500,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WALCH",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419777-front-prodcat.jpg",
               "weight": 0.45
             },
             {
               "name": "KIREI KIREI Anti-bac Foaming Hw (baby Powder)",
-              "price": 35.0,
+              "price": 29.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "KIREI KIREI",
+              "image": "https://medias.pns.hk/publishing/PNSHK-383573-front-prodcat.jpg?version=1771849213",
               "weight": 0.49,
               "bulkDealPrice": 59.5,
               "bulkDealQty": 2
@@ -479,6 +520,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-817004-front-prodcat.jpg?version=1727266805",
               "weight": 0.3
             },
             {
@@ -487,22 +529,25 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "BIORE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-816766-front-prodcat.jpg?version=1733399868",
               "weight": 0.04
             },
             {
               "name": "REXONA Rexona Women Aerosol 135ml - Cotton Dry",
-              "price": 29.0,
+              "price": 20.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "REXONA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411433-front-prodcat.jpg",
               "weight": 0.135
             },
             {
               "name": "NIVEA Invisible Black & White Power Spray",
-              "price": 40.0,
+              "price": 29.6,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246325-front-prodcat.jpg",
               "weight": 0.15
             },
             {
@@ -511,14 +556,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-112929-front-prodcat.jpg",
               "weight": 0.15
             },
             {
               "name": "NIVEA Invisible Black & White Clear Spray",
-              "price": 40.0,
+              "price": 29.6,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246322-front-prodcat.jpg",
               "weight": 0.15
             },
             {
@@ -542,14 +589,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-245719-front-prodcat.jpg?version=1754067098",
               "weight": 0.5
             },
             {
               "name": "DETTOL Dettol Hand Wash Sensitive",
-              "price": 37.0,
+              "price": 42.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-284794-front-prodcat.jpg?version=1754067347",
               "weight": 0.5
             },
             {
@@ -566,6 +615,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-821996-front-prodcat.jpg?version=1778849489",
               "weight": 0.3
             },
             {
@@ -574,14 +624,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479014-front-prodcat.jpg?version=1753879277",
               "weight": 0.25
             },
             {
               "name": "WATSONS Antibacterial Cream Hand Wash Pine",
-              "price": 15.0,
+              "price": 14.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-817005-front-prodcat.jpg?version=1727266822",
               "weight": 0.5
             },
             {
@@ -590,14 +642,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WALCH",
+              "image": "https://medias.pns.hk/publishing/PNSHK-469800-front-prodcat.jpg",
               "weight": 0.29
             },
             {
               "name": "WATSONS Lavender & Chamomile Handwash",
-              "price": 13.9,
+              "price": 11.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-810714-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -607,53 +661,60 @@
               "price": 80.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DETTOL"
+              "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246257-front-prodcat.jpg?version=1767962163"
             },
             {
               "name": "DETTOL Dettol Antibacterial Skincare Hand Wash 500g Tripack",
               "price": 80.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DETTOL"
+              "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246258-front-prodcat.jpg?version=1754066737"
             },
             {
               "name": "DOVE Body Wash - Beauty Nourishing",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-449916-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "DOVE Dove Body Wash 1000g - Grapefruit & Lime",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-140109-front-prodcat.jpg?version=1733394129",
               "weight": 1.0
             },
             {
               "name": "DOVE Dove Body Wash 1000g - Acai Berry",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-406877-front-prodcat.jpg?version=1744201620",
               "weight": 1.0
             },
             {
               "name": "DOVE Dove Body Wash 1000g - White Peach & White Tea",
-              "price": 47.9,
+              "price": 39.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-810422-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "DETTOL Original Antibacterial pH-balanced Body Wash",
-              "price": 63.0,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-241176-front-prodcat.jpg?version=1748867174",
               "weight": 0.3
             },
             {
@@ -666,10 +727,11 @@
             },
             {
               "name": "DETTOL Profresh Peach Burst Body Wash",
-              "price": 68.0,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-236008-front-prodcat.jpg?version=1778848487",
               "weight": 0.95
             },
             {
@@ -684,28 +746,32 @@
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246881-front-prodcat.jpg?version=1732795609"
             },
             {
               "name": "DOVE Beauty Nourishing + Peach Twin Pack (variant inferred)",
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246881-front-prodcat.jpg?version=1732795609"
             },
             {
               "name": "DOVE Beauty Nourishing + Lavender Twin Pack",
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-491316-front-prodcat.jpg?version=1733284940"
             },
             {
               "name": "DOVE Beauty Nourishing + Almond Twin Pack (variant inferred)",
               "price": 69.0,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "DOVE"
+              "brand": "DOVE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-246881-front-prodcat.jpg?version=1732795609"
             },
             {
               "name": "Unknown Dove multipack (rear/variant unclear)",
@@ -716,10 +782,11 @@
             },
             {
               "name": "DETTOL Profresh Green Tea & Jasmine Body Wash Twin Pack",
-              "price": 89.0,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-254022-front-prodcat.jpg?version=1767962132",
               "weight": 0.95
             },
             {
@@ -728,14 +795,16 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-125681-front-prodcat.jpg?version=1767961362",
               "weight": 0.9
             },
             {
               "name": "DETTOL Proskin Moisturising Aloe Vera & Milky Smooth Shower Cream Twin Pack",
-              "price": 89.0,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-263605-front-prodcat.jpg?version=1778848957",
               "weight": 0.95
             },
             {
@@ -744,6 +813,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-145112-front-prodcat.jpg?version=1778847676",
               "weight": 0.9
             },
             {
@@ -752,6 +822,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-471452-front-prodcat.jpg?version=1767886408",
               "weight": 0.95
             },
             {
@@ -767,7 +838,8 @@
               "price": 86.5,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "OPAL"
+              "brand": "OPAL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-395353-front-prodcat.jpg"
             },
             {
               "name": "Unknown white/green personal-care multipack (20-marked)",
@@ -785,10 +857,11 @@
             },
             {
               "name": "LUX Shower Gel Soft Kiss (size/pack inferred)",
-              "price": 40.0,
+              "price": 62.9,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "LUX"
+              "brand": "LUX",
+              "image": "https://medias.pns.hk/publishing/PNSHK-465416-front-prodcat.jpg"
             },
             {
               "name": "Unknown white/red body-wash product",
@@ -841,10 +914,11 @@
             },
             {
               "name": "Dove body wash/refill multipack",
-              "price": 0.0,
+              "price": 19.4,
               "category": "Groceries",
               "subcategory": "Toiletries",
-              "brand": "Dove"
+              "brand": "Dove",
+              "image": "https://medias.pns.hk/publishing/PNSHK-815725-front-prodcat.jpg?version=1733393826"
             },
             {
               "name": "Unknown pink bottled personal-care product",
@@ -891,17 +965,18 @@
             },
             {
               "name": "Mushroom Carbonara Mac",
-              "price": 16.0,
+              "price": 16.9,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Prego",
+              "image": "https://medias.pns.hk/publishing/PNSHK-147989-front-prodcat.jpg?version=1733431914",
               "weight": 0.071,
               "bulkDealPrice": 24.0,
               "bulkDealQty": 2
             },
             {
               "name": "Mac n Cheese",
-              "price": 16.0,
+              "price": 38.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Prego",
@@ -915,68 +990,73 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-376569-front-prodcat.jpg?version=1739276682",
               "weight": 0.055,
               "bulkDealPrice": 24.0,
               "bulkDealQty": 3
             },
             {
               "name": "Buldak Carbonara Hot Chicken Flavor",
-              "price": 16.0,
+              "price": 39.9,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
               "weight": 0.105,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
             {
               "name": "Buldak Hot Chicken Flavor",
-              "price": 16.0,
+              "price": 39.9,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
               "weight": 0.105,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
             {
               "name": "Buldak Hot Chicken Flavor Ramen Cheese",
-              "price": 16.0,
+              "price": 255.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103906-front-prodcat.jpg?version=1752841624",
               "weight": 0.105,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
             {
               "name": "Shin Ramyun Rose",
-              "price": 14.0,
+              "price": 24.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nongshim",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162584-front-prodcat.jpg?version=1781180567",
               "weight": 0.108,
               "bulkDealPrice": 24.0,
               "bulkDealQty": 2
             },
             {
               "name": "Korean Clay Pot Ramyun Bowl",
-              "price": 12.5,
+              "price": 26.6,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nongshim",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105967-front-prodcat.jpg?version=1732703437",
               "weight": 0.108,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 3
             },
             {
               "name": "Shin Ramyun",
-              "price": 12.5,
+              "price": 26.6,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nongshim",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-158369-front-prodcat.jpg?version=1732748883",
               "weight": 0.108,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 3
@@ -995,21 +1075,8 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nongshim",
+              "image": "https://medias.pns.hk/publishing/PNSHK-106926-front-prodcat.jpg?version=1732705638",
               "weight": 0.276
-            },
-            {
-              "name": "Knorr Q/S Macaroni Chicken Broth",
-              "price": 27.9,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Knorr"
-            },
-            {
-              "name": "Knorr Q/S Macaroni Abalone & Chix",
-              "price": 27.9,
-              "category": "Groceries",
-              "subcategory": "Instant Noodles",
-              "brand": "Knorr"
             },
             {
               "name": "Knorr Q/S Macaroni Chicken Broth",
@@ -1017,26 +1084,45 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Knorr",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109026-front-prodcat.jpg"
+            },
+            {
+              "name": "Knorr Q/S Macaroni Abalone & Chix",
+              "price": 25.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr",
+              "image": "https://medias.pns.hk/publishing/PNSHK-383614-front-prodcat.jpg?version=1732862597"
+            },
+            {
+              "name": "Knorr Q/S Macaroni Chicken Broth",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Knorr",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109026-front-prodcat.jpg",
               "weight": 0.08,
               "bulkDealPrice": 19.0,
               "bulkDealQty": 3
             },
             {
               "name": "Knorr Q/S Macaroni Abalone & Chix",
-              "price": 9.5,
+              "price": 25.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Knorr",
+              "image": "https://medias.pns.hk/publishing/PNSHK-383614-front-prodcat.jpg?version=1732862597",
               "weight": 0.08,
               "bulkDealPrice": 19.0,
               "bulkDealQty": 3
             },
             {
               "name": "Knorr Q/S Macaroni Pork Bone Broth",
-              "price": 9.5,
+              "price": 25.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Knorr",
+              "image": "https://medias.pns.hk/publishing/PNSHK-458544-front-prodcat.jpg?version=1732950984",
               "weight": 0.08,
               "bulkDealPrice": 19.0,
               "bulkDealQty": 3
@@ -1050,21 +1136,22 @@
             },
             {
               "name": "Nong Shim Shin Ramyun",
-              "price": 20.0,
+              "price": 26.6,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-158369-front-prodcat.jpg?version=1732748883",
               "weight": 0.12,
               "bulkDealPrice": 32.0,
               "bulkDealQty": 2
             },
             {
               "name": "Prima Taste Laksa LaMian",
-              "price": 30.0,
+              "price": 66.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Prima Taste",
+              "image": "https://medias.pns.hk/publishing/PNSHK-159062-front-prodcat.jpg",
               "weight": 0.144,
               "bulkDealPrice": 54.0,
               "bulkDealQty": 2
@@ -1075,6 +1162,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nissin",
+              "image": "https://images.openfoodfacts.org/images/products/000/002/084/2499/front_en.148.400.jpg",
               "weight": 0.091
             },
             {
@@ -1083,16 +1171,18 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Fuku",
+              "image": "https://images.openfoodfacts.org/images/products/611/124/534/3006/front_ar.14.400.jpg",
               "weight": 0.06,
               "bulkDealPrice": 30.0,
               "bulkDealQty": 2
             },
             {
               "name": "Fuku Superior Soup Instant Noodle",
-              "price": 18.0,
+              "price": 4.9,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Fuku",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116117-front-prodcat.jpg",
               "weight": 0.09,
               "bulkDealPrice": 30.0,
               "bulkDealQty": 2
@@ -1103,6 +1193,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Fuku",
+              "image": "https://medias.pns.hk/publishing/PNSHK-181937-front-prodcat.jpg?version=1732752693",
               "weight": 0.065,
               "bulkDealPrice": 30.0,
               "bulkDealQty": 2
@@ -1113,17 +1204,18 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Chewy",
+              "image": "https://images.openfoodfacts.org/images/products/611/124/534/3006/front_ar.14.400.jpg",
               "weight": 0.065,
               "bulkDealPrice": 38.0,
               "bulkDealQty": 2
             },
             {
               "name": "Nong Shim Shin Ramyun 5-Pack",
-              "price": 26.6,
+              "price": 170.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/192496.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103635-front-prodcat.jpg?version=1752841489",
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
             },
@@ -1133,33 +1225,37 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105967-front-prodcat.jpg?version=1732703437",
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
             },
             {
               "name": "Nong Shim Potato Noodle",
-              "price": 27.9,
+              "price": 225.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103509-front-prodcat.jpg?version=1752841449",
               "weight": 0.1,
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
             },
             {
               "name": "Samyang Buldak Hot Chicken Flavor Ramen Multi",
-              "price": 44.0,
+              "price": 255.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103906-front-prodcat.jpg?version=1752841624",
               "weight": 0.14
             },
             {
               "name": "Samyang Hotchicken Carbonara Flavor Ramen Multi",
-              "price": 44.0,
+              "price": 300.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103932-front-prodcat.jpg?version=1752841356",
               "weight": 0.65
             },
             {
@@ -1168,14 +1264,16 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-123814-front-prodcat.jpg?version=1751286260",
               "weight": 0.105
             },
             {
               "name": "Samyang Tangle Garlic Oil Instant Pasta",
-              "price": 41.9,
+              "price": 16.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Samyang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162582-front-prodcat.jpg?version=1781180487",
               "weight": 0.1
             },
             {
@@ -1184,14 +1282,16 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Youus",
+              "image": "https://medias.pns.hk/publishing/PNSHK-398504-front-prodcat.jpg",
               "weight": 0.16
             },
             {
               "name": "Nong Shim Ansungtangmyun",
-              "price": 58.0,
+              "price": 32.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
-              "brand": "Nong Shim"
+              "brand": "Nong Shim",
+              "image": "https://medias.pns.hk/publishing/PNSHK-106393-front-prodcat.jpg"
             },
             {
               "name": "Youus Gonghwachun Zajang Noodle Multi Pack",
@@ -1199,6 +1299,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Youus",
+              "image": "https://medias.pns.hk/publishing/PNSHK-398520-front-prodcat.jpg",
               "weight": 0.195
             },
             {
@@ -1217,6 +1318,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Kiki",
+              "image": "https://medias.pns.hk/publishing/PNSHK-496948-front-prodcat.jpg",
               "weight": 0.45
             },
             {
@@ -1225,6 +1327,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Kiki",
+              "image": "https://medias.pns.hk/publishing/PNSHK-496947-front-prodcat.jpg",
               "weight": 0.45
             },
             {
@@ -1233,16 +1336,18 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-349665-front-prodcat.jpg?version=1756796784",
               "weight": 0.111,
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
             },
             {
               "name": "Ottogi Real Cheese Ramen",
-              "price": 33.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-488811-front-prodcat.jpg?version=1739276525",
               "weight": 0.135
             },
             {
@@ -1251,14 +1356,16 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-139055-front-prodcat.jpg?version=1754536841",
               "weight": 0.11
             },
             {
               "name": "Ottogi Spicy Cheese Ramen Noodle",
-              "price": 33.0,
+              "price": 30.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-390832-front-prodcat.jpg",
               "weight": 0.111
             },
             {
@@ -1293,10 +1400,11 @@
             },
             {
               "name": "Fuku Superior Soup Instant Noodle",
-              "price": 14.0,
+              "price": 4.9,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Fuku",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116117-front-prodcat.jpg",
               "weight": 0.09
             },
             {
@@ -1324,6 +1432,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lao Gan Ma",
+              "image": "https://medias.pns.hk/publishing/PNSHK-171520-front-prodcat.jpg?version=1757680206",
               "weight": 0.28
             },
             {
@@ -1332,16 +1441,18 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116155-front-prodcat.jpg",
               "weight": 0.213,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
             {
               "name": "Minced Garlic (326G)",
-              "price": 26.0,
+              "price": 16.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116155-front-prodcat.jpg",
               "weight": 0.326
             },
             {
@@ -1350,6 +1461,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-463619-front-prodcat.jpg",
               "weight": 0.24,
               "bulkDealPrice": 30.0,
               "bulkDealQty": 2
@@ -1360,14 +1472,16 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-317584-front-prodcat.jpg",
               "weight": 0.226
             },
             {
               "name": "Black Sesame Oil",
-              "price": 21.9,
+              "price": 22.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Amoy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-145120-front-prodcat.jpg",
               "weight": 0.15
             },
             {
@@ -1376,6 +1490,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-163959-front-prodcat.jpg?version=1732764845",
               "weight": 0.207
             },
             {
@@ -1384,6 +1499,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-154400-front-prodcat.jpg?version=1764159615",
               "weight": 0.25
             },
             {
@@ -1392,6 +1508,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-153633-front-prodcat.jpg",
               "weight": 0.207
             },
             {
@@ -1400,14 +1517,16 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Amoy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115178-front-prodcat.jpg?version=1732722217",
               "weight": 0.25
             },
             {
               "name": "Grated Parmesan",
-              "price": 17.0,
+              "price": 33.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Kraft",
+              "image": "https://medias.pns.hk/publishing/PNSHK-151698-front-prodcat.jpg?version=1732747130",
               "weight": 0.04
             },
             {
@@ -1416,6 +1535,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Sheng Long",
+              "image": "https://medias.pns.hk/publishing/PNSHK-358470-front-prodcat.jpg",
               "weight": 0.838
             },
             {
@@ -1448,6 +1568,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Guyue Longshan",
+              "image": "https://medias.pns.hk/publishing/PNSHK-188031-front-prodcat.jpg?version=1732777697",
               "weight": 0.5
             },
             {
@@ -1456,24 +1577,27 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-185133-front-prodcat.jpg?version=1786969804",
               "weight": 0.5
             },
             {
               "name": "Naturally Brewed Soy Suace",
-              "price": 17.0,
+              "price": 31.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Kikkoman",
+              "image": "https://medias.pns.hk/publishing/PNSHK-144971-front-prodcat.jpg?version=1721046004",
               "weight": 0.5,
               "bulkDealPrice": 34.0,
               "bulkDealQty": 2
             },
             {
               "name": "Naturally Brewed Soy Sauce",
-              "price": 36.0,
+              "price": 31.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Kikkoman",
+              "image": "https://medias.pns.hk/publishing/PNSHK-144971-front-prodcat.jpg?version=1721046004",
               "weight": 0.6
             },
             {
@@ -1482,14 +1606,16 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Kikkoman",
+              "image": "https://images.openfoodfacts.org/images/products/871/503/511/0809/front_en.194.400.jpg",
               "weight": 0.6
             },
             {
               "name": "Premium Light Soy Sauce",
-              "price": 13.0,
+              "price": 21.5,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105871-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -1500,6 +1626,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Amoy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115117-front-prodcat.jpg?version=1732715505",
               "weight": 0.5
             },
             {
@@ -1508,6 +1635,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Suree",
+              "image": "https://medias.pns.hk/publishing/PNSHK-167348-front-prodcat.jpg?version=1736338998",
               "weight": 0.5
             },
             {
@@ -1520,18 +1648,20 @@
             },
             {
               "name": "Garlic Salt",
-              "price": 39.0,
+              "price": 54.5,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lawry's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103465-front-prodcat.jpg",
               "weight": 0.085
             },
             {
               "name": "Garlic Powder",
-              "price": 96.5,
+              "price": 64.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lawry's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-114160-front-prodcat.jpg",
               "weight": 0.155
             },
             {
@@ -1540,6 +1670,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479413-front-prodcat.jpg",
               "weight": 0.1
             },
             {
@@ -1548,6 +1679,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479415-front-prodcat.jpg",
               "weight": 0.045
             },
             {
@@ -1556,6 +1688,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479417-front-prodcat.jpg",
               "weight": 0.06
             },
             {
@@ -1564,6 +1697,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479414-front-prodcat.jpg",
               "weight": 0.06
             },
             {
@@ -1572,6 +1706,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105592-front-prodcat.jpg?version=1732701524",
               "weight": 0.01
             },
             {
@@ -1580,6 +1715,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105590-front-prodcat.jpg?version=1732703273",
               "weight": 0.01
             },
             {
@@ -1588,6 +1724,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-139160-front-prodcat.jpg?version=1732759228",
               "weight": 0.01
             },
             {
@@ -1596,6 +1733,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105593-front-prodcat.jpg?version=1732701551",
               "weight": 0.01
             },
             {
@@ -1604,6 +1742,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-490656-front-prodcat.jpg?version=1733297319",
               "weight": 0.01
             },
             {
@@ -1612,7 +1751,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Knorr",
-              "image": "https://foodpanda.dhmedia.io/image/darkstores-tw/food/0058/14050126.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-483128-front-prodcat.jpg",
               "weight": 0.2
             },
             {
@@ -1621,6 +1760,7 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-150088-front-prodcat.jpg?version=1778588453",
               "weight": 0.535
             },
             {
@@ -1629,15 +1769,16 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Swanson",
+              "image": "https://medias.pns.hk/publishing/PNSHK-354037-front-prodcat.jpg?version=1732839892",
               "weight": 0.27
             },
             {
               "name": "Chicken Powder",
-              "price": 25.0,
+              "price": 25.9,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Select",
-              "image": "https://images.openfoodfacts.org/images/products/871/256/647/9368/front_en.58.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103288-front-prodcat.jpg?version=1732701807",
               "weight": 0.575
             },
             {
@@ -1646,46 +1787,47 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Knorr",
-              "image": "https://images.openfoodfacts.org/images/products/871/256/647/9368/front_en.58.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103288-front-prodcat.jpg?version=1732701807",
               "weight": 0.273
             },
             {
               "name": "Premium Chicken Bouilion POwder",
-              "price": 32.9,
+              "price": 23.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419914-front-prodcat.jpg",
               "weight": 0.175
             },
             {
               "name": "Sugar",
-              "price": 9.9,
+              "price": 290.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Meadows",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102619-front-prodcat.jpg?version=1752841460",
               "weight": 0.7,
               "bulkDealPrice": 14.0,
               "bulkDealQty": 2
             },
             {
               "name": "Sugar",
-              "price": 10.0,
+              "price": 290.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Taikoo",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102619-front-prodcat.jpg?version=1752841460",
               "weight": 0.7,
               "bulkDealPrice": 17.5,
               "bulkDealQty": 2
             },
             {
               "name": "Red Sugar",
-              "price": 31.0,
+              "price": 11.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Taikoo",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-302355-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -1694,36 +1836,36 @@
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Gold Medal",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-181597-front-prodcat.jpg?version=1732767379",
               "weight": 0.4
             },
             {
               "name": "Rock Sugar",
-              "price": 12.0,
+              "price": 11.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Taikoo",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-181600-front-prodcat.jpg?version=1732767391",
               "weight": 0.35,
               "bulkDealPrice": 20.5,
               "bulkDealQty": 2
             },
             {
               "name": "Rock Sugar",
-              "price": 14.0,
+              "price": 11.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Gold Medal",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-181600-front-prodcat.jpg?version=1732767391",
               "weight": 0.4
             },
             {
               "name": "Golden Coffee Sugar Crystals",
-              "price": 36.0,
+              "price": 28.0,
               "category": "Groceries",
               "subcategory": "Seasonings",
               "brand": "Taikoo",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-144975-front-prodcat.jpg",
               "weight": 0.38
             }
           ]
@@ -1737,6 +1879,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Smedley's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111345-front-prodcat.jpg",
               "weight": 0.22,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -1747,6 +1890,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Imperial Bird's Nest",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120210-front-prodcat.jpg?version=1732729845",
               "weight": 0.32,
               "bulkDealPrice": 72.0,
               "bulkDealQty": 2
@@ -1757,6 +1901,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Imperial Bird's Nest",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120206-front-prodcat.jpg?version=1732729828",
               "weight": 0.32,
               "bulkDealPrice": 72.0,
               "bulkDealQty": 2
@@ -1767,7 +1912,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Lee Kum Kee",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-411027.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411027-front-prodcat.jpg?version=1732899173",
               "weight": 0.18
             },
             {
@@ -1776,6 +1921,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-410257-front-prodcat.jpg?version=1732880555",
               "weight": 0.18
             },
             {
@@ -1784,16 +1930,16 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Lee Kum Kee",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-395591.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-395591-front-prodcat.jpg?version=1732868217",
               "weight": 0.18
             },
             {
               "name": "Sardines in Tomato Sauce",
-              "price": 0.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Unknown",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+              "image": "https://medias.pns.hk/publishing/PNSHK-400217-front-prodcat.jpg?version=1779193288"
             },
             {
               "name": "Ciao Chicken Cat Food",
@@ -1804,10 +1950,11 @@
             },
             {
               "name": "BeF Sardines",
-              "price": 20.0,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
-              "brand": "BeF"
+              "brand": "BeF",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103158-front-prodcat.jpg"
             },
             {
               "name": "Campbell's Creamy Chicken Mushroom Soup",
@@ -1815,30 +1962,34 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Campbell's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-422887-front-prodcat.jpg?version=1780662230",
               "weight": 0.3
             },
             {
               "name": "Campbell's Cream Of Mushroom Soup",
-              "price": 17.0,
+              "price": 20.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Campbell's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-152178-front-prodcat.jpg?version=1732747189",
               "weight": 0.295
             },
             {
               "name": "Select Pieces & Stems Button Mushroom",
-              "price": 10.2,
+              "price": 12.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-459831-front-prodcat.jpg?version=1732927517",
               "weight": 0.425
             },
             {
               "name": "Smedley's Baked Beans In Tomato Sauce",
-              "price": 17.0,
+              "price": 10.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Smedley's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111345-front-prodcat.jpg",
               "weight": 0.42
             },
             {
@@ -1847,14 +1998,16 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Heinz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101405-front-prodcat.jpg",
               "weight": 0.2
             },
             {
               "name": "Del Monte Baked Beans 3-In-1 Pack",
-              "price": 20.0,
+              "price": 25.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-403351-front-prodcat.jpg",
               "weight": 0.19
             },
             {
@@ -1867,28 +2020,31 @@
             },
             {
               "name": "Del Monte Whole Kernel Corn 3-In-1 Pack",
-              "price": 19.0,
+              "price": 25.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-403352-front-prodcat.jpg",
               "weight": 0.19
             },
             {
               "name": "Del Monte Whole Kernel Corn",
-              "price": 11.0,
+              "price": 12.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-403340-front-prodcat.jpg?version=1765292505",
               "weight": 0.34,
               "bulkDealPrice": 13.8,
               "bulkDealQty": 2
             },
             {
               "name": "Del Monte Sweet Corn Cream Style",
-              "price": 11.0,
+              "price": 12.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-403140-front-prodcat.jpg?version=1765282815",
               "weight": 0.34,
               "bulkDealPrice": 13.8,
               "bulkDealQty": 2
@@ -1899,6 +2055,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-403340-front-prodcat.jpg?version=1765292505",
               "weight": 0.42,
               "bulkDealPrice": 21.0,
               "bulkDealQty": 2
@@ -1909,6 +2066,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-403140-front-prodcat.jpg?version=1765282815",
               "weight": 0.42,
               "bulkDealPrice": 21.0,
               "bulkDealQty": 2
@@ -1919,6 +2077,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Ciao",
+              "image": "https://medias.pns.hk/publishing/PNSHK-147483-front-prodcat.jpg?version=1763382009",
               "weight": 0.4
             },
             {
@@ -1926,14 +2085,16 @@
               "price": 20.5,
               "category": "Groceries",
               "subcategory": "Canned Goods",
-              "brand": "S&W"
+              "brand": "S&W",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101424-front-prodcat.jpg"
             },
             {
               "name": "Golden Crown Mandarin Oranges",
               "price": 12.5,
               "category": "Groceries",
               "subcategory": "Canned Goods",
-              "brand": "Golden Crown"
+              "brand": "Golden Crown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-112923-front-prodcat.jpg"
             },
             {
               "name": "Del Monte Fresh Cut Pear Halves",
@@ -1950,36 +2111,40 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101025-front-prodcat.jpg",
               "weight": 0.42,
               "bulkDealPrice": 40.0,
               "bulkDealQty": 2
             },
             {
               "name": "Del Monte Sliced Pineapple In Heavy Syrup",
-              "price": 12.0,
+              "price": 22.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101019-front-prodcat.jpg",
               "weight": 0.234,
               "bulkDealPrice": 22.0,
               "bulkDealQty": 2
             },
             {
               "name": "Del Monte Sliced Pineapple In Heavy Syrup",
-              "price": 23.0,
+              "price": 22.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101019-front-prodcat.jpg",
               "weight": 0.836,
               "bulkDealPrice": 37.0,
               "bulkDealQty": 2
             },
             {
               "name": "Del Monte S. Africa Peach Halves",
-              "price": 30.0,
+              "price": 22.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101025-front-prodcat.jpg",
               "weight": 0.825,
               "bulkDealPrice": 46.0,
               "bulkDealQty": 2
@@ -1990,6 +2155,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157040-front-prodcat.jpg",
               "bulkDealPrice": 37.0,
               "bulkDealQty": 2
             },
@@ -2016,11 +2182,11 @@
             },
             {
               "name": "Unknown sardines in tomato sauce",
-              "price": 15.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Unknown",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+              "image": "https://medias.pns.hk/publishing/PNSHK-400217-front-prodcat.jpg?version=1779193288"
             },
             {
               "name": "Unknown sardines in tomato sauce, second variant",
@@ -2053,17 +2219,19 @@
             },
             {
               "name": "Unknown canned meat/fish, yellow-red variant",
-              "price": 45.0,
+              "price": 15.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             },
             {
               "name": "Unknown canned meat/fish, green variant",
               "price": 15.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             },
             {
               "name": "Ligo Lite canned fish",
@@ -2081,10 +2249,11 @@
             },
             {
               "name": "Unknown canned meat/fish, blue variant",
-              "price": 30.0,
+              "price": 15.0,
               "category": "Groceries",
               "subcategory": "Canned Goods",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             }
           ]
         },
@@ -2097,16 +2266,18 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Del Monte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-106085-front-prodcat.jpg?version=1732706027",
               "weight": 0.3,
               "bulkDealPrice": 16.0,
               "bulkDealQty": 2
             },
             {
               "name": "COLAVITA Aged Balsamic Vinegar",
-              "price": 46.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "COLAVITA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-184652-front-prodcat.jpg",
               "weight": 0.5
             },
             {
@@ -2115,50 +2286,56 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Kraft",
+              "image": "https://medias.pns.hk/publishing/PNSHK-114730-front-prodcat.jpg",
               "weight": 0.44
             },
             {
               "name": "SELECT Thousand Island Dressing",
-              "price": 20.0,
+              "price": 15.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "SELECT",
+              "image": "https://medias.pns.hk/publishing/PNSHK-124260-front-prodcat.jpg?version=1732732235",
               "weight": 0.3
             },
             {
               "name": "SELECT Roasted Sesame Sauce",
-              "price": 33.0,
+              "price": 29.9,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "SELECT",
+              "image": "https://medias.pns.hk/publishing/PNSHK-124259-front-prodcat.jpg?version=1732732230",
               "weight": 0.39
             },
             {
               "name": "Mizkan Gold Sesame Sauce",
-              "price": 42.0,
+              "price": 28.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Mizkan",
+              "image": "https://medias.pns.hk/publishing/PNSHK-459736-front-prodcat.jpg",
               "weight": 0.25,
               "bulkDealPrice": 42.0,
               "bulkDealQty": 2
             },
             {
               "name": "Kewpie Roasted Sesame Dressing",
-              "price": 48.0,
+              "price": 30.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Kewpie",
+              "image": "https://medias.pns.hk/publishing/PNSHK-189556-front-prodcat.jpg?version=1774355021",
               "weight": 0.25,
               "bulkDealPrice": 48.0,
               "bulkDealQty": 2
             },
             {
               "name": "Kewpie Japanese Dressing",
-              "price": 48.0,
+              "price": 30.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Kewpie",
+              "image": "https://medias.pns.hk/publishing/PNSHK-155780-front-prodcat.jpg?version=1777864819",
               "weight": 0.25,
               "bulkDealPrice": 48.0,
               "bulkDealQty": 2
@@ -2169,6 +2346,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-113052-front-prodcat.jpg",
               "weight": 0.24
             },
             {
@@ -2177,6 +2355,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Tabasco",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111083-front-prodcat.jpg",
               "weight": 0.06
             },
             {
@@ -2185,6 +2364,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "S&B",
+              "image": "https://medias.pns.hk/publishing/PNSHK-121897-front-prodcat.jpg",
               "weight": 0.043
             },
             {
@@ -2196,33 +2376,37 @@
             },
             {
               "name": "Select Centifloral Honey",
-              "price": 63.0,
+              "price": 65.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-449325-front-prodcat.jpg?version=1732941486",
               "weight": 0.4
             },
             {
               "name": "Select Winter Honey",
-              "price": 63.0,
+              "price": 73.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-449324-front-prodcat.jpg?version=1732941474",
               "weight": 0.4
             },
             {
               "name": "Skippy Peanut Butter",
-              "price": 0.0,
+              "price": 20.0,
               "category": "Groceries",
               "subcategory": "Condiments",
-              "brand": "Skippy"
+              "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-412690-front-prodcat.jpg?version=1776774156"
             },
             {
               "name": "Essential Waitrose Pure Clear Honey",
-              "price": 42.0,
+              "price": 38.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Essential Waitrose",
+              "image": "https://medias.pns.hk/publishing/PNSHK-354674-front-prodcat.jpg?version=1732829630",
               "weight": 0.454
             },
             {
@@ -2239,22 +2423,25 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Naturohoney",
+              "image": "https://medias.pns.hk/publishing/PNSHK-357120-front-prodcat.jpg",
               "weight": 0.375
             },
             {
               "name": "Select Winter Honey",
-              "price": 79.0,
+              "price": 73.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-449324-front-prodcat.jpg?version=1732941474",
               "weight": 1.0
             },
             {
               "name": "Select Centifloral Honey",
-              "price": 66.0,
+              "price": 65.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-449325-front-prodcat.jpg?version=1732941486",
               "weight": 1.0
             },
             {
@@ -2263,6 +2450,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Po Sang Yuen",
+              "image": "https://medias.pns.hk/publishing/PNSHK-387160-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -2271,6 +2459,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Po Sang Yuen",
+              "image": "https://medias.pns.hk/publishing/PNSHK-124726-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -2283,50 +2472,56 @@
             },
             {
               "name": "Food Nation Raspberry Spread",
-              "price": 34.0,
+              "price": 33.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-461436-front-prodcat.jpg",
               "weight": 0.285
             },
             {
               "name": "Food Nation Strawberry Spread",
-              "price": 34.0,
+              "price": 33.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-461433-front-prodcat.jpg",
               "weight": 0.285
             },
             {
               "name": "Food Nation Blueberry Spread",
-              "price": 34.0,
+              "price": 33.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
+              "image": "https://medias.pns.hk/publishing/PNSHK-461434-front-prodcat.jpg",
               "weight": 0.285
             },
             {
               "name": "St. Dalfour Strawberry Spread",
-              "price": 52.0,
+              "price": 31.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "St. Dalfour",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116235-front-prodcat.jpg",
               "weight": 0.284
             },
             {
               "name": "Bonne Maman Strawberry Jam",
-              "price": 29.0,
+              "price": 42.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
+              "image": "https://medias.pns.hk/publishing/PNSHK-156197-front-prodcat.jpg",
               "weight": 0.225
             },
             {
               "name": "Bonne Maman Wild Blueberry Preserves",
-              "price": 29.0,
+              "price": 42.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
+              "image": "https://medias.pns.hk/publishing/PNSHK-138639-front-prodcat.jpg",
               "weight": 0.225
             },
             {
@@ -2335,6 +2530,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
+              "image": "https://medias.pns.hk/publishing/PNSHK-156197-front-prodcat.jpg",
               "weight": 0.37
             },
             {
@@ -2343,6 +2539,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
+              "image": "https://medias.pns.hk/publishing/PNSHK-138639-front-prodcat.jpg",
               "weight": 0.37
             },
             {
@@ -2354,66 +2551,74 @@
             },
             {
               "name": "Skippy Peanut Butter Creamy",
-              "price": 36.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-104707-front-prodcat.jpg",
               "weight": 0.34
             },
             {
               "name": "Skippy Peanut Butter Chunky",
-              "price": 36.0,
+              "price": 43.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-104704-front-prodcat.jpg",
               "weight": 0.34
             },
             {
               "name": "Skippy Peanut Butter W/ Choc Stripe",
-              "price": 31.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-107885-front-prodcat.jpg",
               "weight": 0.34
             },
             {
               "name": "Skippy Peanut Butter Creamy",
-              "price": 44.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-104707-front-prodcat.jpg",
               "weight": 0.51
             },
             {
               "name": "Skippy Peanut Butter Chunky",
-              "price": 44.0,
+              "price": 43.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-104704-front-prodcat.jpg",
               "weight": 0.51
             },
             {
               "name": "Skippy Peanut Butter Super Chunk",
-              "price": 31.0,
+              "price": 30.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-376862-front-prodcat.jpg",
               "weight": 0.462
             },
             {
               "name": "KARA Coconut Cream",
-              "price": 12.5,
+              "price": 13.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "KARA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-170045-front-prodcat.jpg",
               "weight": 0.2
             },
             {
               "name": "Nutella Hazelnut Spread With Cocoa",
-              "price": 50.0,
+              "price": 28.0,
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Nutella",
+              "image": "https://medias.pns.hk/publishing/PNSHK-451816-front-prodcat.jpg?version=1732917817",
               "weight": 0.35
             }
           ]
@@ -2449,6 +2654,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-68340-front-prodcat.jpg?version=1784118316",
               "weight": 0.215
             },
             {
@@ -2456,7 +2662,8 @@
               "price": 14.9,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-68366-front-prodcat.jpg?version=1784118156"
             },
             {
               "name": "Unknown bakery product (top shelf; label obscured)",
@@ -2477,46 +2684,52 @@
               "price": 10.9,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-19169-front-prodcat.jpg?version=1785327961"
             },
             {
               "name": "Select Crustless Wheat Sandwich Bread 6s",
               "price": 10.9,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-19169-front-prodcat.jpg?version=1785327961"
             },
             {
               "name": "Select Sourdough Bagel",
               "price": 25.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-72909-front-prodcat.jpg?version=1765212950"
             },
             {
               "name": "Select Triple Cheese Sourdough Bagel",
               "price": 29.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-72911-front-prodcat.jpg?version=1765196412"
             },
             {
               "name": "Select Wheat Sourdough Toast",
               "price": 22.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-72905-front-prodcat.jpg?version=1765196422"
             },
             {
               "name": "Select Apricot Rye Sourdough Toast",
               "price": 26.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-72907-front-prodcat.jpg?version=1765196410"
             },
             {
               "name": "Select Fig And Walnut Sourdough Toast",
-              "price": 20.0,
+              "price": 26.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select"
@@ -2526,28 +2739,32 @@
               "price": 18.5,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-68321-front-prodcat.jpg?version=1785327711"
             },
             {
               "name": "Select Whole Wheat Sandwich Bread 8s",
               "price": 12.5,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-19174-front-prodcat.jpg?version=1784118224"
             },
             {
               "name": "Select Multi-grain English Bread",
               "price": 17.5,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-68322-front-prodcat.jpg?version=1785327923"
             },
             {
               "name": "Unknown Select 7-grain English bread variant",
-              "price": 19.5,
+              "price": 17.5,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Select"
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-68322-front-prodcat.jpg?version=1785327923"
             },
             {
               "name": "Unknown packaged bakery product (bottom shelf, far left)",
@@ -2614,10 +2831,11 @@
             },
             {
               "name": "Unknown Tomato Cheese Pizza",
-              "price": 0.0,
+              "price": 45.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-129290-front-prodcat.jpg?version=1735802436"
             },
             {
               "name": "Unknown Pizza SALAME",
@@ -2628,10 +2846,11 @@
             },
             {
               "name": "Unknown Tomato Cheese Pizza",
-              "price": 0.0,
+              "price": 45.0,
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-129290-front-prodcat.jpg?version=1735802436"
             }
           ]
         },
@@ -2651,6 +2870,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-131790-front-prodcat.jpg?version=1750249586",
               "weight": 0.052
             },
             {
@@ -2659,6 +2879,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-107070-front-prodcat.jpg?version=1750249376",
               "weight": 0.055
             },
             {
@@ -2667,6 +2888,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-139716-front-prodcat.jpg",
               "weight": 0.056
             },
             {
@@ -2675,6 +2897,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-807434-front-prodcat.jpg?version=1729167611",
               "weight": 0.055
             },
             {
@@ -2683,6 +2906,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-104028-front-prodcat.jpg?version=1750249469",
               "weight": 0.057
             },
             {
@@ -2690,14 +2914,16 @@
               "price": 29.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "STARBUCKS"
+              "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-401354-front-prodcat.jpg"
             },
             {
               "name": "Starbucks Caramel Latte Premium Mixes",
               "price": 29.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "STARBUCKS"
+              "brand": "STARBUCKS",
+              "image": "https://medias.pns.hk/publishing/PNSHK-401357-front-prodcat.jpg?version=1732883378"
             },
             {
               "name": "Unknown coffee product (middle-shelf left-edge partial)",
@@ -2712,6 +2938,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "KEY COFFEE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-481487-front-prodcat.jpg?version=1780575830",
               "weight": 0.08
             },
             {
@@ -2720,6 +2947,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "KEY COFFEE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-405198-front-prodcat.jpg",
               "weight": 0.008
             },
             {
@@ -2727,53 +2955,60 @@
               "price": 35.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "UCC"
+              "brand": "UCC",
+              "image": "https://medias.pns.hk/publishing/PNSHK-114788-front-prodcat.jpg?version=1788351912"
             },
             {
               "name": "MAXWELL Coffee Mix 3 In 1",
-              "price": 38.0,
+              "price": 50.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "MAXWELL"
+              "brand": "MAXWELL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-112222-front-prodcat.jpg"
             },
             {
               "name": "CASINO Coffee Espresso [France]",
-              "price": 69.9,
+              "price": 69.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "CASINO",
+              "image": "https://medias.pns.hk/publishing/PNSHK-382760-front-prodcat.jpg",
               "weight": 0.25,
               "bulkDealPrice": 118.0,
               "bulkDealQty": 2
             },
             {
               "name": "MAXWELL 3+1 Rich Coffee",
-              "price": 0.0,
+              "price": 50.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "MAXWELL"
+              "brand": "MAXWELL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-177437-front-prodcat.jpg"
             },
             {
               "name": "MAXWELL Coffee Mix Lite",
-              "price": 0.0,
+              "price": 50.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "MAXWELL"
+              "brand": "MAXWELL",
+              "image": "https://medias.pns.hk/publishing/PNSHK-128154-front-prodcat.jpg"
             },
             {
               "name": "NESCAFÉ 1+2 Rich Instant Coffee Mix",
-              "price": 0.0,
+              "price": 44.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-447349-front-prodcat.jpg?version=1750336017",
               "weight": 0.013
             },
             {
               "name": "NESCAFÉ 1+2 Smooth Milky Mix",
-              "price": 0.0,
+              "price": 32.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-433668-front-prodcat.jpg?version=1750335637",
               "weight": 0.015
             },
             {
@@ -2785,10 +3020,11 @@
             },
             {
               "name": "NESCAFE 1+2 Coffee",
-              "price": 0.0,
+              "price": 32.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "NESCAFE"
+              "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-433666-front-prodcat.jpg?version=1750335679"
             },
             {
               "name": "NESCAFE Nescafe 1+2 Original Stick 15gx42",
@@ -2803,6 +3039,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-447349-front-prodcat.jpg?version=1750336017",
               "weight": 0.013
             },
             {
@@ -2811,14 +3048,16 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-454099-front-prodcat.jpg?version=1757507540",
               "weight": 0.029
             },
             {
               "name": "NESCAFE Prm White Coffee Unswt",
-              "price": 56.5,
+              "price": 42.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-458637-front-prodcat.jpg",
               "weight": 0.021
             },
             {
@@ -2826,23 +3065,16 @@
               "price": 42.0,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "NESCAFE"
+              "brand": "NESCAFE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479007-front-prodcat.jpg?version=1757507434"
             },
             {
               "name": "OLD TOWN 3 In 1 Hazelnut White Coffee",
-              "price": 33.0,
+              "price": 39.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "OLD TOWN",
-              "bulkDealPrice": 56.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "OLD TOWN 3 In 1 Classic White Coffee",
-              "price": 33.0,
-              "category": "Groceries",
-              "subcategory": "Hot Drinks",
-              "brand": "OLD TOWN",
+              "image": "https://medias.pns.hk/publishing/PNSHK-433685-front-prodcat.jpg",
               "bulkDealPrice": 56.0,
               "bulkDealQty": 2
             },
@@ -2851,7 +3083,18 @@
               "price": 39.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
-              "brand": "OLD TOWN"
+              "brand": "OLD TOWN",
+              "image": "https://medias.pns.hk/publishing/PNSHK-433683-front-prodcat.jpg",
+              "bulkDealPrice": 56.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "OLD TOWN 3 In 1 Classic White Coffee",
+              "price": 39.9,
+              "category": "Groceries",
+              "subcategory": "Hot Drinks",
+              "brand": "OLD TOWN",
+              "image": "https://medias.pns.hk/publishing/PNSHK-433683-front-prodcat.jpg"
             }
           ]
         },
@@ -2860,10 +3103,11 @@
           "items": [
             {
               "name": "Authentic Tea House Cold Brew Taiwan Oolong Tea",
-              "price": 10.5,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Authentic Tea House",
+              "image": "https://medias.pns.hk/publishing/PNSHK-339990-front-prodcat.jpg?version=1779366236",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -2880,32 +3124,33 @@
             },
             {
               "name": "Authentic Tea House Oolong Tea (No Sugar)",
-              "price": 10.0,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Authentic Tea House",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157751-front-prodcat.jpg?version=1779366252",
               "weight": 0.5,
               "bulkDealPrice": 13.0,
               "bulkDealQty": 2
             },
             {
               "name": "Authentic Tea House Jasmine Green Tea (No Sugar)",
-              "price": 1.5,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Authentic Tea House",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-339989-front-prodcat.jpg?version=1779366289",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
             },
             {
               "name": "ITO EN Japanese Green Tea",
-              "price": 10.0,
+              "price": 8.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "ITO EN",
+              "image": "https://medias.pns.hk/publishing/PNSHK-387337-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 17.0,
               "bulkDealQty": 2
@@ -2916,6 +3161,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Tao Ti",
+              "image": "https://medias.pns.hk/publishing/PNSHK-126987-front-prodcat.jpg?version=1784118062",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -2926,6 +3172,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Tao Ti",
+              "image": "https://medias.pns.hk/publishing/PNSHK-346437-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -2936,6 +3183,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Suntory",
+              "image": "https://medias.pns.hk/publishing/PNSHK-142277-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -2946,16 +3194,18 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Suntory",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111543-front-prodcat.jpg?version=1750240278",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
             },
             {
               "name": "Kirin Rich Green Tea",
-              "price": 9.0,
+              "price": 12.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Kirin",
+              "image": "https://medias.pns.hk/publishing/PNSHK-460651-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -2966,6 +3216,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Rikyu Chasaku",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479402-front-prodcat.jpg",
               "weight": 0.55,
               "bulkDealPrice": 14.0,
               "bulkDealQty": 2
@@ -2976,6 +3227,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Rikyu Chasaku",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479403-front-prodcat.jpg",
               "weight": 0.55,
               "bulkDealPrice": 14.0,
               "bulkDealQty": 2
@@ -2986,37 +3238,40 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Youcongqi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-164037-front-prodcat.jpg?version=1786364456",
               "weight": 0.608,
               "bulkDealPrice": 20.0,
               "bulkDealQty": 3
             },
             {
               "name": "Vita Lemon Tea (VLT)",
-              "price": 9.0,
+              "price": 25.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Vita",
+              "image": "https://medias.pns.hk/publishing/PNSHK-193709-front-prodcat.jpg?version=1751545212",
               "weight": 0.5,
               "bulkDealPrice": 20.0,
               "bulkDealQty": 3
             },
             {
               "name": "Vita Ya Shi Xiang Lemon Tea",
-              "price": 9.0,
+              "price": 160.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Vita",
+              "image": "https://medias.pns.hk/publishing/PNSHK-406580-front-prodcat.jpg?version=1771936734",
               "weight": 0.5,
               "bulkDealPrice": 20.0,
               "bulkDealQty": 3
             },
             {
               "name": "Tao Ti Honey Green Tea (Low Sugar)",
-              "price": 9.0,
+              "price": 14.5,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Tao Ti",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-158875-front-prodcat.jpg?version=1787921055",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -3027,17 +3282,18 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Robiff",
+              "image": "https://medias.pns.hk/publishing/PNSHK-194058-front-prodcat.jpg?version=1718190980",
               "weight": 0.5,
               "bulkDealPrice": 16.0,
               "bulkDealQty": 2
             },
             {
               "name": "Nongfu Spring Oriental Leaf Ganpu Green Tea Sugar Free",
-              "price": 10.0,
+              "price": 123.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Nongfu Spring",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-161936-front-prodcat.jpg?version=1778761297",
               "weight": 0.5,
               "bulkDealPrice": 14.0,
               "bulkDealQty": 2
@@ -3048,6 +3304,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Kirin",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102054-front-prodcat.jpg?version=1788351859",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -3058,26 +3315,29 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Tao Ti",
+              "image": "https://medias.pns.hk/publishing/PNSHK-164893-front-prodcat.jpg?version=1774873560",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
             },
             {
               "name": "Tao Ti Yashixiang Lemon Tea",
-              "price": 9.0,
+              "price": 14.5,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Tao Ti",
+              "image": "https://medias.pns.hk/publishing/PNSHK-149020-front-prodcat.jpg?version=1751286284",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
             },
             {
               "name": "Tao Ti Yashixiang Grapefruit Tea",
-              "price": 9.0,
+              "price": 14.5,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Tao Ti",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162546-front-prodcat.jpg?version=1782994903",
               "weight": 0.5,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -3088,17 +3348,18 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Authentic Tea House",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157751-front-prodcat.jpg?version=1779366252",
               "weight": 1.2,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
             {
               "name": "Authentic Tea House Dahongpao Oolong Tea",
-              "price": 17.0,
+              "price": 10.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Authentic Tea House",
+              "image": "https://medias.pns.hk/publishing/PNSHK-305363-front-prodcat.jpg?version=1749126331",
               "weight": 1.2,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
@@ -3109,17 +3370,18 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Authentic Tea House",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-339989-front-prodcat.jpg?version=1779366289",
               "weight": 1.2,
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
             {
               "name": "Robiff Ooolong Tea",
-              "price": 14.0,
+              "price": 9.0,
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Robiff",
+              "image": "https://medias.pns.hk/publishing/PNSHK-194058-front-prodcat.jpg?version=1718190980",
               "weight": 0.9
             },
             {
@@ -3128,7 +3390,7 @@
               "category": "Groceries",
               "subcategory": "Tea",
               "brand": "Vita",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-404595-front-prodcat.jpg?version=1779453654",
               "weight": 0.86
             }
           ]
@@ -3164,14 +3426,16 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-402055-front-prodcat.jpg?version=1746621424",
               "weight": 0.18
             },
             {
               "name": "GOODMATE Chocolate Deluxe Oatmilk",
-              "price": 25.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-402060-front-prodcat.jpg?version=1746621083",
               "weight": 0.18
             },
             {
@@ -3180,6 +3444,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-402055-front-prodcat.jpg?version=1746621424",
               "weight": 1.0
             },
             {
@@ -3188,7 +3453,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
-              "image": "https://images.openfoodfacts.org/images/products/085/000/823/0097/front_en.3.400.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-402051-front-prodcat.jpg?version=1746621056",
               "weight": 1.0
             },
             {
@@ -3197,22 +3462,25 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-402060-front-prodcat.jpg?version=1746621083",
               "weight": 1.0
             },
             {
               "name": "137 DEGREES Almond Milk Original",
-              "price": 42.0,
+              "price": 42.9,
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "137 DEGREES",
+              "image": "https://medias.pns.hk/publishing/PNSHK-409033-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "137 DEGREES Almond Milk Unsweetened",
-              "price": 42.0,
+              "price": 42.9,
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "137 DEGREES",
+              "image": "https://medias.pns.hk/publishing/PNSHK-409034-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -3221,6 +3489,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "OATLY",
+              "image": "https://medias.pns.hk/publishing/PNSHK-340671-front-prodcat.jpg?version=1749126274",
               "weight": 1.0
             },
             {
@@ -3229,14 +3498,16 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "OATLY",
+              "image": "https://medias.pns.hk/publishing/PNSHK-125261-front-prodcat.jpg?version=1749126124",
               "weight": 1.0
             },
             {
               "name": "OATLY Oat Drink Enriched",
-              "price": 0.0,
+              "price": 25.0,
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "OATLY",
+              "image": "https://medias.pns.hk/publishing/PNSHK-497187-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -3245,6 +3516,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "VITASOY",
+              "image": "https://images.openfoodfacts.org/images/products/934/165/000/1728/front_en.34.400.jpg",
               "weight": 1.0
             },
             {
@@ -3253,6 +3525,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "BLUE DIAMOND",
+              "image": "https://medias.pns.hk/publishing/PNSHK-385806-front-prodcat.jpg?version=1733366049",
               "weight": 0.946
             },
             {
@@ -3261,14 +3534,16 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "BLUE DIAMOND",
+              "image": "https://medias.pns.hk/publishing/PNSHK-134992-front-prodcat.jpg",
               "weight": 0.946
             },
             {
               "name": "VITA Chocolate Milk Beverage",
-              "price": 42.0,
+              "price": 33.0,
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "VITA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-159169-front-prodcat.jpg?version=1765801817",
               "weight": 1.0
             },
             {
@@ -3385,6 +3660,7 @@
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
               "brand": "DE-MA-E",
+              "image": "https://medias.pns.hk/publishing/PNSHK-418931-front-prodcat.jpg?version=1745842852",
               "weight": 0.192,
               "bulkDealPrice": 18.9,
               "bulkDealQty": 2
@@ -3395,6 +3671,7 @@
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
               "brand": "DE-MA-E",
+              "image": "https://medias.pns.hk/publishing/PNSHK-418931-front-prodcat.jpg?version=1745842852",
               "weight": 0.192,
               "bulkDealPrice": 18.9,
               "bulkDealQty": 2
@@ -3405,23 +3682,25 @@
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
               "brand": "Taimatsu Foods",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162853-front-prodcat.jpg?version=1781699001",
               "weight": 0.15
             },
             {
               "name": "Cooked Japanese Rice",
-              "price": 15.0,
+              "price": 15.9,
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
               "brand": "Golden Elephant",
+              "image": "https://medias.pns.hk/publishing/PNSHK-396799-front-prodcat.jpg?version=1732878469",
               "weight": 0.17
             },
             {
               "name": "Cooked Jasmine Rice",
-              "price": 13.0,
+              "price": 13.9,
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
               "brand": "Golden Elephant",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/cs9ny-496556.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-496556-front-prodcat.jpg?version=1733286893",
               "weight": 0.17
             },
             {
@@ -3454,17 +3733,19 @@
             },
             {
               "name": "Unknown Fish Noodle",
-              "price": 18.0,
-              "category": "Groceries",
-              "subcategory": "Rice & Noodles",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Unknown Inaniwa-style Udon",
-              "price": 39.9,
+              "price": 59.9,
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
               "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102115-front-prodcat.jpg"
+            },
+            {
+              "name": "Unknown Inaniwa-style Udon",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-406393-front-prodcat.jpg",
               "weight": 0.25
             },
             {
@@ -3481,10 +3762,11 @@
           "items": [
             {
               "name": "Select Grass Jelly",
-              "price": 12.5,
+              "price": 12.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-119660-front-prodcat.jpg?version=1780922073",
               "weight": 0.53
             },
             {
@@ -3493,6 +3775,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Robertsons",
+              "image": "https://medias.pns.hk/publishing/PNSHK-117406-front-prodcat.jpg?version=1732719261",
               "weight": 0.08
             },
             {
@@ -3501,6 +3784,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Robertsons",
+              "image": "https://medias.pns.hk/publishing/PNSHK-117406-front-prodcat.jpg?version=1732719261",
               "weight": 0.08
             },
             {
@@ -3509,54 +3793,61 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Robertsons",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102241-front-prodcat.jpg?version=1732702535",
               "weight": 0.08
             },
             {
               "name": "Nissin Retort Pouch Red Bean W Lotus Seeds Dessert",
-              "price": 18.0,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Nissin",
+              "image": "https://medias.pns.hk/publishing/PNSHK-171100-front-prodcat.jpg?version=1732751558",
               "weight": 0.22
             },
             {
               "name": "Nissin Retort Pouch Cha Cha Dessert",
-              "price": 18.0,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Nissin",
+              "image": "https://medias.pns.hk/publishing/PNSHK-171095-front-prodcat.jpg?version=1732751564",
               "weight": 0.22
             },
             {
               "name": "Nissin Retort Pouch Black Sesame Dessert",
-              "price": 18.0,
+              "price": 17.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Nissin",
+              "image": "https://medias.pns.hk/publishing/PNSHK-171101-front-prodcat.jpg?version=1732751569",
               "weight": 0.22
             },
             {
               "name": "Yue Zhuan Red Bean With Tangerine Peel & Lotus Seeds Dessert",
-              "price": 22.0,
+              "price": 21.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Yue Zhuan",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109185-front-prodcat.jpg?version=1732707815",
               "weight": 0.22
             },
             {
               "name": "Yue Zhuan Black Glutinous Rice With Taro & Coconut Milk",
-              "price": 22.0,
+              "price": 21.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Yue Zhuan",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109184-front-prodcat.jpg?version=1732707850",
               "weight": 0.22
             },
             {
               "name": "Yue Zhuan Ground Black Sesame Dessert",
-              "price": 22.0,
+              "price": 21.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Yue Zhuan",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109181-front-prodcat.jpg?version=1732707865",
               "weight": 0.22
             }
           ]
@@ -3570,6 +3861,7 @@
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "BioKill",
+              "image": "https://medias.pns.hk/publishing/PNSHK-320597-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 135.0,
               "bulkDealQty": 2
@@ -3580,6 +3872,7 @@
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "BioKill",
+              "image": "https://medias.pns.hk/publishing/PNSHK-161908-front-prodcat.jpg",
               "weight": 0.5,
               "bulkDealPrice": 125.0,
               "bulkDealQty": 2
@@ -3590,6 +3883,7 @@
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "Speedtox",
+              "image": "https://medias.pns.hk/publishing/PNSHK-199821-front-prodcat.jpg",
               "weight": 0.01
             },
             {
@@ -3606,24 +3900,27 @@
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-324582-front-prodcat.jpg",
               "weight": 0.45,
               "bulkDealPrice": 30.0,
               "bulkDealQty": 2
             },
             {
               "name": "Antibacterial hand wash",
-              "price": 37.0,
+              "price": 34.0,
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "Dettol",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419771-front-prodcat.jpg",
               "weight": 0.5
             },
             {
               "name": "Body Wash",
-              "price": 140.0,
+              "price": 43.8,
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "Ecostore",
+              "image": "https://medias.pns.hk/publishing/PNSHK-210548-front-prodcat.jpg",
               "weight": 0.9
             },
             {
@@ -3640,10 +3937,11 @@
           "items": [
             {
               "name": "Lee Kum Kee Premium Oyster Sauce",
-              "price": 27.0,
+              "price": 40.0,
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Lee Kum Kee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105957-front-prodcat.jpg?version=1732704905",
               "weight": 0.35
             },
             {
@@ -3652,6 +3950,7 @@
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Hachi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419063-front-prodcat.jpg?version=1746793592",
               "weight": 0.285,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -3662,6 +3961,7 @@
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Hachi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419017-front-prodcat.jpg?version=1746793357",
               "weight": 0.285,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -3672,6 +3972,7 @@
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Hachi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419066-front-prodcat.jpg?version=1756902614",
               "weight": 0.285,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -3682,6 +3983,7 @@
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Hachi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419064-front-prodcat.jpg?version=1756902616",
               "weight": 0.285,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -3692,14 +3994,16 @@
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Old El Paso",
+              "image": "https://medias.pns.hk/publishing/PNSHK-140595-front-prodcat.jpg",
               "weight": 0.226
             },
             {
               "name": "Barilla Pesto alla Genovese",
-              "price": 39.5,
+              "price": 35.5,
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Barilla",
+              "image": "https://medias.pns.hk/publishing/PNSHK-362674-front-prodcat.jpg",
               "weight": 0.19
             }
           ]
@@ -3709,18 +4013,19 @@
           "items": [
             {
               "name": "Kwangtung Mijiu (M)",
-              "price": 0.0,
+              "price": 11.9,
               "category": "Groceries",
               "subcategory": "Other",
-              "brand": "P/R Bridge"
+              "brand": "P/R Bridge",
+              "image": "https://medias.pns.hk/publishing/PNSHK-122294-front-prodcat.jpg"
             },
             {
               "name": "Sardines in Tomato Sauce",
-              "price": 0.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Other",
               "brand": "Del Monte",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
+              "image": "https://medias.pns.hk/publishing/PNSHK-400217-front-prodcat.jpg?version=1779193288"
             },
             {
               "name": "Unknown KERISOM frozen prepared-food facings",
@@ -3747,6 +4052,7 @@
               "category": "Groceries",
               "subcategory": "Chips",
               "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-302347-front-prodcat.jpg?version=1753273247",
               "weight": 0.192,
               "bulkDealPrice": 48.0,
               "bulkDealQty": 2
@@ -3757,6 +4063,7 @@
               "category": "Groceries",
               "subcategory": "Chips",
               "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-341122-front-prodcat.jpg",
               "weight": 0.063,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -3767,6 +4074,7 @@
               "category": "Groceries",
               "subcategory": "Chips",
               "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-416088-front-prodcat.jpg",
               "weight": 0.08,
               "bulkDealPrice": 15.0,
               "bulkDealQty": 2
@@ -3778,7 +4086,7 @@
           "items": [
             {
               "name": "Unknown Riced Cauliflower",
-              "price": 0.0,
+              "price": 35.0,
               "category": "Groceries",
               "subcategory": "Frozen Vegetables",
               "brand": "Unknown"
@@ -3808,6 +4116,7 @@
               "category": "Groceries",
               "subcategory": "Pickles",
               "brand": "Yummy House",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411353-front-prodcat.jpg",
               "weight": 0.21
             },
             {
@@ -3816,6 +4125,7 @@
               "category": "Groceries",
               "subcategory": "Pickles",
               "brand": "Yummy House",
+              "image": "https://medias.pns.hk/publishing/PNSHK-317590-front-prodcat.jpg",
               "weight": 0.21
             },
             {
@@ -3824,6 +4134,7 @@
               "category": "Groceries",
               "subcategory": "Pickles",
               "brand": "Yummy House",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411353-front-prodcat.jpg",
               "weight": 0.21
             }
           ]
@@ -3837,6 +4148,7 @@
               "category": "Groceries",
               "subcategory": "Snacks",
               "brand": "Imperial Banquet",
+              "image": "https://medias.pns.hk/publishing/PNSHK-423500-front-prodcat.jpg?version=1732910917",
               "weight": 0.15,
               "bulkDealPrice": 26.0,
               "bulkDealQty": 2
@@ -3866,7 +4178,7 @@
               "category": "Groceries",
               "subcategory": "Cleaning Supplies",
               "brand": "Dettol",
-              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/HK-DFI/2024-5-7/h21k-562884.jpg?height=176",
+              "image": "https://medias.pns.hk/publishing/PNSHK-470663-front-prodcat.jpg?version=1753878759",
               "weight": 0.45
             },
             {
@@ -3897,6 +4209,7 @@
               "category": "Groceries",
               "subcategory": "Crackers",
               "brand": "CEO House",
+              "image": "https://medias.pns.hk/publishing/PNSHK-390959-front-prodcat.jpg?version=1776688567",
               "weight": 0.27,
               "bulkDealPrice": 27.0,
               "bulkDealQty": 4
@@ -3912,6 +4225,7 @@
               "category": "Groceries",
               "subcategory": "Biscuits",
               "brand": "Mcvitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115114-front-prodcat.jpg?version=1732715500",
               "weight": 0.2,
               "bulkDealPrice": 33.0,
               "bulkDealQty": 2
@@ -3919,25 +4233,25 @@
           ]
         },
         {
-          "name": "Frozen Meat",
+          "name": "Chicken",
           "items": [
             {
               "name": "Unknown Sous Vide Confit Duck Leg",
               "price": 29.9,
               "category": "Groceries",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Chicken",
               "brand": "Unknown"
             }
           ]
         },
         {
-          "name": "Meat",
+          "name": "Others",
           "items": [
             {
               "name": "Unknown packaged meat product",
               "price": 0.0,
               "category": "Groceries",
-              "subcategory": "Meat",
+              "subcategory": "Others",
               "brand": "Unknown"
             }
           ]
@@ -4045,10 +4359,11 @@
             },
             {
               "name": "Calypso Jumbo Blueberries",
-              "price": 26.0,
+              "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Other",
               "brand": "Calypso",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37372-front-prodcat.jpg?version=1787921077",
               "weight": 0.2
             },
             {
@@ -4056,7 +4371,8 @@
               "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "CORE"
+              "brand": "CORE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37372-front-prodcat.jpg?version=1787921077"
             },
             {
               "name": "Unknown packaged red-flesh kiwifruit",
@@ -4095,17 +4411,19 @@
             },
             {
               "name": "Whole watermelon",
-              "price": 25.0,
+              "price": 198.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162663-front-prodcat.jpg?version=1786710008"
             },
             {
               "name": "Whole melon",
-              "price": 24.0,
+              "price": 29.9,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-421138-front-prodcat.jpg"
             },
             {
               "name": "Unknown packaged melon pieces",
@@ -4116,10 +4434,11 @@
             },
             {
               "name": "Calypso Jumbo Blueberries",
-              "price": 26.0,
+              "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Other",
               "brand": "Calypso",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37372-front-prodcat.jpg?version=1787921077",
               "weight": 0.2
             },
             {
@@ -4127,7 +4446,8 @@
               "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "CORE"
+              "brand": "CORE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37372-front-prodcat.jpg?version=1787921077"
             },
             {
               "name": "Unknown packaged red-flesh kiwifruit",
@@ -4159,10 +4479,11 @@
             },
             {
               "name": "CORE Jumbo Blueberries",
-              "price": 32.0,
+              "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Other",
               "brand": "CORE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37372-front-prodcat.jpg?version=1787921077",
               "bulkDealPrice": 32.0,
               "bulkDealQty": 2
             },
@@ -4175,17 +4496,19 @@
             },
             {
               "name": "Unknown Golden peaches",
-              "price": 22.9,
+              "price": 55.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-151860-front-prodcat.jpg?version=1759234811"
             },
             {
               "name": "Unknown peach pack, second variant",
-              "price": 22.9,
+              "price": 15.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             },
             {
               "name": "Unknown small green/brown fruit pack",
@@ -4224,10 +4547,11 @@
             },
             {
               "name": "Unknown netted citrus pack, second variant",
-              "price": 0.0,
+              "price": 15.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             },
             {
               "name": "Unknown packaged oranges",
@@ -4282,10 +4606,11 @@
             },
             {
               "name": "Unknown cage-free egg carton",
-              "price": 23.0,
+              "price": 42.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110350-front-prodcat.jpg?version=1730722805"
             },
             {
               "name": "Unknown brown egg carton",
@@ -4335,17 +4660,19 @@
             },
             {
               "name": "Unknown cage-free fresh eggs",
-              "price": 23.0,
+              "price": 42.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110350-front-prodcat.jpg?version=1730722805"
             },
             {
               "name": "Unknown cage-free egg carton",
-              "price": 0.0,
+              "price": 42.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110350-front-prodcat.jpg?version=1730722805"
             },
             {
               "name": "Unknown New Generation egg carton",
@@ -4363,18 +4690,20 @@
             },
             {
               "name": "President Whipping Cream",
-              "price": 80.0,
+              "price": 40.0,
               "category": "Fresh Food",
               "subcategory": "Other",
               "brand": "President",
+              "image": "https://medias.pns.hk/publishing/PNSHK-156815-front-prodcat.jpg?version=1782131159",
               "weight": 0.5
             },
             {
               "name": "President Light Cream",
-              "price": 62.0,
+              "price": 315.0,
               "category": "Fresh Food",
               "subcategory": "Other",
               "brand": "President",
+              "image": "https://medias.pns.hk/publishing/PNSHK-812660-front-prodcat.jpg",
               "weight": 0.2
             },
             {
@@ -4391,28 +4720,32 @@
               "price": 25.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Chobani"
+              "brand": "Chobani",
+              "image": "https://medias.pns.hk/publishing/PNSHK-391636-front-prodcat.jpg?version=1759380032"
             },
             {
               "name": "Chobani Greek Yogurt, plain/other variant",
-              "price": 26.0,
+              "price": 12.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Chobani"
+              "brand": "Chobani",
+              "image": "https://medias.pns.hk/publishing/PNSHK-417462-front-prodcat.jpg"
             },
             {
               "name": "Unknown 100% Greek yogurt",
-              "price": 31.9,
+              "price": 23.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-149023-front-prodcat.jpg?version=1729513228"
             },
             {
               "name": "Unknown Greek yogurt, second variant",
-              "price": 33.0,
+              "price": 15.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/103162.jpg?height=176"
             },
             {
               "name": "Meiji probiotic yogurt",
@@ -4444,17 +4777,19 @@
             },
             {
               "name": "Daisy sour cream",
-              "price": 40.0,
+              "price": 39.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Daisy"
+              "brand": "Daisy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-155513-front-prodcat.jpg?version=1778847622"
             },
             {
               "name": "Lurpak spreadable butter",
-              "price": 0.0,
+              "price": 71.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Lurpak"
+              "brand": "Lurpak",
+              "image": "https://medias.pns.hk/publishing/PNSHK-459345-front-prodcat.jpg?version=1768998207"
             },
             {
               "name": "Flora spread, original/light variant",
@@ -4475,7 +4810,8 @@
               "price": 52.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Crystal Farms"
+              "brand": "Crystal Farms",
+              "image": "https://medias.pns.hk/publishing/PNSHK-380394-front-prodcat.jpg?version=1762863644"
             },
             {
               "name": "Unknown dairy tub",
@@ -4493,10 +4829,11 @@
             },
             {
               "name": "Chesdale sliced cheese",
-              "price": 39.0,
+              "price": 55.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Chesdale"
+              "brand": "Chesdale",
+              "image": "https://medias.pns.hk/publishing/PNSHK-154932-front-prodcat.jpg?version=1770639755"
             },
             {
               "name": "Kraft Singles",
@@ -4507,10 +4844,11 @@
             },
             {
               "name": "President Cheddar",
-              "price": 39.0,
+              "price": 62.9,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "President"
+              "brand": "President",
+              "image": "https://medias.pns.hk/publishing/PNSHK-36303-front-prodcat.jpg"
             },
             {
               "name": "The Laughing Cow cheese",
@@ -4549,38 +4887,43 @@
             },
             {
               "name": "President butter",
-              "price": 40.0,
+              "price": 26.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "President"
+              "brand": "President",
+              "image": "https://medias.pns.hk/publishing/PNSHK-329389-front-prodcat.jpg"
             },
             {
               "name": "Westgold butter",
-              "price": 40.0,
+              "price": 48.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Westgold"
+              "brand": "Westgold",
+              "image": "https://medias.pns.hk/publishing/PNSHK-185574-front-prodcat.jpg?version=1731068424"
             },
             {
               "name": "Anchor butter",
-              "price": 35.0,
+              "price": 26.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Anchor"
+              "brand": "Anchor",
+              "image": "https://medias.pns.hk/publishing/PNSHK-329389-front-prodcat.jpg"
             },
             {
               "name": "Daisy butter",
-              "price": 40.0,
+              "price": 26.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Daisy"
+              "brand": "Daisy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-329389-front-prodcat.jpg"
             },
             {
               "name": "Lurpak spreadable butter",
-              "price": 58.0,
+              "price": 71.0,
               "category": "Fresh Food",
               "subcategory": "Other",
-              "brand": "Lurpak"
+              "brand": "Lurpak",
+              "image": "https://medias.pns.hk/publishing/PNSHK-459345-front-prodcat.jpg?version=1768998207"
             },
             {
               "name": "Flora Original/Light spread",
@@ -4599,383 +4942,41 @@
           ]
         },
         {
-          "name": "Meat",
-          "items": [
-            {
-              "name": "Select pork slices/chops, cut Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select pork belly/sliced pork",
-              "price": 38.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select",
-              "weight": 0.181
-            },
-            {
-              "name": "Select pork belly slices",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select pork belly/sliced pork",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select",
-              "weight": 0.248
-            },
-            {
-              "name": "Select pork slices, cut Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select pork belly/sliced pork",
-              "price": 39.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select pork slices, cut Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Chilled beef/pork tray, product Unknown",
-              "price": 42.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Chilled prepared meat tray, product Unknown",
-              "price": 35.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Select sliced pork/belly",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select pork ribs/chunks",
-              "price": 36.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select pork chunks",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Pork mince/ground pork",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Pork slices",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Beef steak/sliced beef, cut Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Chopped meat/offal tray, product Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Marinated pork/steak tray, cut Unknown",
-              "price": 134.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Marinated pork tray, cut Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Mixed marinated meat tray",
-              "price": 58.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Pork/offal pieces",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Ground pork/minced pork",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Chicken breast fillets",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Chicken thigh/drumstick pieces",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Japanese-style salad chicken, herb/seasoned variant",
-              "price": 25.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown",
-              "bulkDealPrice": 25.0,
-              "bulkDealQty": 2
-            },
-            {
-              "name": "Samlip Sausage Original",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Samlip",
-              "weight": 0.35
-            },
-            {
-              "name": "Samlip Sausage Smoked",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Samlip",
-              "weight": 0.35
-            },
-            {
-              "name": "Samlip Sausage Basil",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Samlip",
-              "weight": 0.35
-            },
-            {
-              "name": "Packaged sliced/processed meat, variant Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Packaged burger patties/processed meat, variant Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Farmer Chinese chilled pork tray",
-              "price": 42.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Farmer Chinese chilled pork tray, variant Unknown",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Marinated pork tray",
-              "price": 134.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Mixed marinated meat tray with red pepper",
-              "price": 58.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Pork mince/ground pork",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Chicken breast fillets",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Chicken thigh/drumstick pieces",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Unknown VISMARA packaged food",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "VISMARA"
-            },
-            {
-              "name": "Select Aust Chilled Minced Beef",
-              "price": 41.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select",
-              "weight": 0.177
-            },
-            {
-              "name": "Select Aust Chilled Lean Beef",
-              "price": 41.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select",
-              "weight": 0.181
-            },
-            {
-              "name": "Morliny Smoked Bacon",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Morliny"
-            },
-            {
-              "name": "Samlip Sausage Basil",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Samlip",
-              "weight": 0.35
-            },
-            {
-              "name": "Select chicken breast fillets",
-              "price": 36.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select chicken thigh pieces (diced)",
-              "price": 36.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "Select chicken dark meat/wing pieces",
-              "price": 28.9,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Select"
-            },
-            {
-              "name": "ang Australian Striploin Steak",
-              "price": 42.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "ang",
-              "weight": 0.23
-            },
-            {
-              "name": "Ho e Sik Spaghetti with Meat in Tomato Sauce",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "Ho e Sik",
-              "weight": 0.285
-            },
-            {
-              "name": "ang Australian Grain-Fed Angus Beef Patty (Southern Grain)",
-              "price": 0.0,
-              "category": "Fresh Food",
-              "subcategory": "Meat",
-              "brand": "ang"
-            }
-          ]
-        },
-        {
           "name": "Dairy",
           "items": [
             {
               "name": "Strawberry Flavour Drinking Yoghurt (case; brand unclear)",
-              "price": 0.0,
+              "price": 16.0,
               "category": "Fresh Food",
               "subcategory": "Dairy",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-496401-front-prodcat.jpg?version=1733286726"
             },
             {
               "name": "Pauls Skimmed Milk",
-              "price": 0.0,
+              "price": 28.9,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
+              "image": "https://medias.pns.hk/publishing/PNSHK-117156-front-prodcat.jpg",
               "weight": 0.25
             },
             {
               "name": "Dutch Lady Chocolate Milk Beverage",
-              "price": 0.0,
+              "price": 16.0,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-463122-front-prodcat.jpg",
               "weight": 0.225
             },
             {
               "name": "Black & White Pure Milk",
-              "price": 25.0,
+              "price": 23.0,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Black & White",
+              "image": "https://medias.pns.hk/publishing/PNSHK-487709-front-prodcat.jpg?version=1733283550",
               "weight": 1.0
             },
             {
@@ -4984,6 +4985,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419941-front-prodcat.jpg?version=1767886469",
               "weight": 1.0
             },
             {
@@ -4992,6 +4994,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-419943-front-prodcat.jpg?version=1767886285",
               "weight": 1.0
             },
             {
@@ -5000,6 +5003,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-378817-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -5008,14 +5012,16 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Harvey Fresh",
+              "image": "https://medias.pns.hk/publishing/PNSHK-199429-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "Daioni Organic Whole Milk",
-              "price": 32.0,
+              "price": 32.5,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Daioni",
+              "image": "https://medias.pns.hk/publishing/PNSHK-445582-front-prodcat.jpg?version=1788265476",
               "weight": 1.0,
               "bulkDealPrice": 52.0,
               "bulkDealQty": 2
@@ -5033,24 +5039,27 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Devondale",
+              "image": "https://medias.pns.hk/publishing/PNSHK-127128-front-prodcat.jpg?version=1732735995",
               "weight": 1.0
             },
             {
               "name": "Devondale Skim UHT Milk (Extra Light)",
-              "price": 22.0,
+              "price": 23.9,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Devondale",
+              "image": "https://medias.pns.hk/publishing/PNSHK-127129-front-prodcat.jpg",
               "weight": 1.0,
               "bulkDealPrice": 38.0,
               "bulkDealQty": 2
             },
             {
               "name": "Pauls Pure Full Cream Milk",
-              "price": 28.9,
+              "price": 23.0,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110104-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -5059,14 +5068,16 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
+              "image": "https://medias.pns.hk/publishing/PNSHK-117156-front-prodcat.jpg",
               "weight": 1.0
             },
             {
               "name": "Emmi Swiss Premium Whole Milk",
-              "price": 29.9,
+              "price": 12.5,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Emmi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-366223-front-prodcat.jpg",
               "weight": 1.0,
               "bulkDealPrice": 51.0,
               "bulkDealQty": 2
@@ -5077,6 +5088,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Emmi",
+              "image": "https://medias.pns.hk/publishing/PNSHK-445810-front-prodcat.jpg",
               "weight": 1.0,
               "bulkDealPrice": 55.0,
               "bulkDealQty": 2
@@ -5087,6 +5099,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Black & White",
+              "image": "https://medias.pns.hk/publishing/PNSHK-487709-front-prodcat.jpg?version=1733283550",
               "weight": 1.0
             },
             {
@@ -5102,6 +5115,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Australia's Own",
+              "image": "https://medias.pns.hk/publishing/PNSHK-140922-front-prodcat.jpg?version=1750076642",
               "weight": 1.0
             },
             {
@@ -5110,6 +5124,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Aus'Mania",
+              "image": "https://medias.pns.hk/publishing/PNSHK-130572-front-prodcat.jpg?version=1733388658",
               "weight": 1.0,
               "bulkDealPrice": 26.0,
               "bulkDealQty": 2
@@ -5120,26 +5135,29 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Aus'Mania",
+              "image": "https://medias.pns.hk/publishing/PNSHK-130573-front-prodcat.jpg?version=1733388653",
               "weight": 1.0,
               "bulkDealPrice": 26.0,
               "bulkDealQty": 2
             },
             {
               "name": "Dutch Lady Original Milk Beverage",
-              "price": 21.0,
+              "price": 10.5,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-140042-front-prodcat.jpg?version=1733390057",
               "weight": 0.946,
               "bulkDealPrice": 42.0,
               "bulkDealQty": 3
             },
             {
               "name": "Dutch Lady High Calcium Less Fat Milk Beverage",
-              "price": 21.0,
+              "price": 35.0,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-463120-front-prodcat.jpg?version=1732928254",
               "weight": 0.946,
               "bulkDealPrice": 42.0,
               "bulkDealQty": 3
@@ -5150,6 +5168,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Fred & Chloe",
+              "image": "https://medias.pns.hk/publishing/PNSHK-370400-front-prodcat.jpg?version=1732837110",
               "weight": 1.0,
               "bulkDealPrice": 35.0,
               "bulkDealQty": 2
@@ -5163,10 +5182,11 @@
             },
             {
               "name": "MENGNIU Pure Milk",
-              "price": 52.9,
+              "price": 38.9,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "MENGNIU",
+              "image": "https://medias.pns.hk/publishing/PNSHK-358216-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -5175,6 +5195,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110103-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -5183,6 +5204,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162995-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -5191,6 +5213,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
+              "image": "https://medias.pns.hk/publishing/PNSHK-182972-front-prodcat.jpg",
               "weight": 1.0
             },
             {
@@ -5199,14 +5222,16 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "MILK DELUXE",
+              "image": "https://medias.pns.hk/publishing/PNSHK-371260-front-prodcat.jpg",
               "weight": 0.25
             },
             {
               "name": "VITA Pure Milk",
-              "price": 38.0,
+              "price": 38.9,
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "VITA",
+              "image": "https://medias.pns.hk/publishing/PNSHK-358216-front-prodcat.jpg",
               "weight": 0.236,
               "bulkDealPrice": 52.0,
               "bulkDealQty": 2
@@ -5217,6 +5242,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-463125-front-prodcat.jpg?version=1732928747",
               "weight": 0.946,
               "bulkDealPrice": 126.0,
               "bulkDealQty": 3
@@ -5227,9 +5253,211 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-491776-front-prodcat.jpg?version=1733298351",
               "weight": 0.946,
               "bulkDealPrice": 126.0,
               "bulkDealQty": 3
+            }
+          ]
+        },
+        {
+          "name": "Pork",
+          "items": [
+            {
+              "name": "Select pork slices/chops, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork belly/sliced pork",
+              "price": 30.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-45464-front-prodcat.jpg?version=1768998080",
+              "weight": 0.181
+            },
+            {
+              "name": "Select pork belly slices",
+              "price": 30.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-45464-front-prodcat.jpg?version=1768998080"
+            },
+            {
+              "name": "Select pork belly/sliced pork",
+              "price": 30.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-45464-front-prodcat.jpg?version=1768998080",
+              "weight": 0.248
+            },
+            {
+              "name": "Select pork slices, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select"
+            },
+            {
+              "name": "Select pork belly/sliced pork",
+              "price": 30.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-45464-front-prodcat.jpg?version=1768998080"
+            },
+            {
+              "name": "Select pork slices, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select"
+            },
+            {
+              "name": "Select sliced pork/belly",
+              "price": 57.9,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…603aad-b2bd-4e4c-9483-ab957a46a1b7.jpg?height=176"
+            },
+            {
+              "name": "Select pork ribs/chunks",
+              "price": 36.9,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/405/648/975/7870/front_en.5.400.jpg"
+            },
+            {
+              "name": "Select pork chunks",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/405/648/975/7870/front_en.5.400.jpg"
+            },
+            {
+              "name": "Pork mince/ground pork",
+              "price": 15.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-167504-front-prodcat.jpg"
+            },
+            {
+              "name": "Pork slices",
+              "price": 48.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-28755-front-prodcat.jpg?version=1770726080"
+            },
+            {
+              "name": "Marinated pork tray, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Pork/offal pieces",
+              "price": 48.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-28755-front-prodcat.jpg?version=1770726080"
+            },
+            {
+              "name": "Ground pork/minced pork",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg"
+            },
+            {
+              "name": "Samlip Sausage Original",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Samlip Sausage Smoked",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Samlip Sausage Basil",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Farmer Chinese chilled pork tray",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Farmer Chinese chilled pork tray, variant Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Marinated pork tray",
+              "price": 134.9,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown",
+              "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg"
+            },
+            {
+              "name": "Pork mince/ground pork",
+              "price": 15.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-167504-front-prodcat.jpg"
+            },
+            {
+              "name": "Morliny Smoked Bacon",
+              "price": 36.9,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Morliny",
+              "image": "https://medias.pns.hk/publishing/PNSHK-94213-front-prodcat.jpg"
+            },
+            {
+              "name": "Samlip Sausage Basil",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Samlip",
+              "weight": 0.35
+            },
+            {
+              "name": "Select Pork Patties",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Pork",
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-190951-front-prodcat.jpg"
             }
           ]
         },
@@ -5242,6 +5470,7 @@
               "category": "Fresh Food",
               "subcategory": "Seafood",
               "brand": "Salmon Farm",
+              "image": "https://medias.pns.hk/publishing/PNSHK-48124-front-prodcat.jpg",
               "weight": 0.1
             },
             {
@@ -5371,19 +5600,29 @@
               "brand": "Unknown"
             },
             {
+              "name": "Select Chicken with Dried Abalone (Brazil)",
+              "price": 38.9,
+              "category": "Fresh Food",
+              "subcategory": "Seafood",
+              "brand": "Select",
+              "weight": 1.13
+            },
+            {
               "name": "Ho e Sik Spaghetti of Clams in White Wine Sauce",
-              "price": 0.0,
+              "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Seafood",
               "brand": "Ho e Sik",
+              "image": "https://medias.pns.hk/publishing/PNSHK-137771-front-prodcat.jpg",
               "weight": 0.28
             },
             {
               "name": "Frozen Peeled Whiteleg Shrimp Meat",
-              "price": 52.9,
+              "price": 26.9,
               "category": "Fresh Food",
               "subcategory": "Seafood",
               "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-46310-front-prodcat.jpg",
               "bulkDealPrice": 30.0,
               "bulkDealQty": 2
             },
@@ -5393,140 +5632,156 @@
               "category": "Fresh Food",
               "subcategory": "Seafood",
               "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/000/002/093/3876/front_hr.28.400.jpg",
               "weight": 0.26
             }
           ]
         },
         {
-          "name": "Frozen Meat",
+          "name": "Beef",
           "items": [
+            {
+              "name": "Chilled beef/pork tray, product Unknown",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Beef",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Beef steak/sliced beef, cut Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Beef",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Marinated pork/steak tray, cut Unknown",
+              "price": 134.9,
+              "category": "Fresh Food",
+              "subcategory": "Beef",
+              "brand": "Unknown"
+            },
             {
               "name": "Unknown blue/white beef pack",
               "price": 0.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
               "name": "SELECT U.S.A. Grain Fed Hot Pot Beef",
               "price": 49.9,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "SELECT"
+              "subcategory": "Beef",
+              "brand": "SELECT",
+              "image": "https://medias.pns.hk/publishing/PNSHK-28389-front-prodcat.jpg"
             },
             {
               "name": "Unknown halal beef pack (left)",
               "price": 68.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
               "name": "Unknown halal beef pack (right)",
               "price": 58.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
               "name": "Unknown Danish Crown beef/meat facing",
               "price": 72.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Danish Crown"
-            },
-            {
-              "name": "Unknown packaged meat facings",
-              "price": 42.0,
-              "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "Unknown"
             },
             {
               "name": "Unknown blue/white beef pack",
               "price": 0.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
               "name": "SELECT U.S.A. Grain Fed Hot Pot Beef",
               "price": 49.9,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "SELECT"
+              "subcategory": "Beef",
+              "brand": "SELECT",
+              "image": "https://medias.pns.hk/publishing/PNSHK-28389-front-prodcat.jpg"
             },
             {
               "name": "Unknown halal beef facings",
               "price": 68.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
               "name": "Unknown Danish Crown beef/meat facing",
               "price": 72.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Danish Crown"
-            },
-            {
-              "name": "Unknown packaged meat facing",
-              "price": 42.0,
-              "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "Unknown"
             },
             {
               "name": "SELECT U.S.A. Grain Fed Hot Pot Beef",
               "price": 49.9,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "SELECT"
+              "subcategory": "Beef",
+              "brand": "SELECT",
+              "image": "https://medias.pns.hk/publishing/PNSHK-28389-front-prodcat.jpg"
             },
             {
               "name": "Unknown blue/white beef pack",
               "price": 0.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
               "name": "Unknown halal beef facings",
               "price": 68.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Unknown"
             },
             {
-              "name": "Unknown purple-pack frozen food facings",
-              "price": 35.0,
+              "name": "Select Aust Chilled Minced Beef",
+              "price": 35.9,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "Unknown"
-            },
-            {
-              "name": "Select Chicken with Dried Abalone (Brazil)",
-              "price": 38.9,
-              "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
+              "subcategory": "Beef",
               "brand": "Select",
-              "weight": 1.13
+              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…ebf497-b851-4570-a4e1-a8689a4707f0.JPG?height=176",
+              "weight": 0.177
             },
             {
-              "name": "Meat Zero Plant-Based Minced Meat",
-              "price": 35.0,
+              "name": "Select Aust Chilled Lean Beef",
+              "price": 35.9,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "Meat Zero",
-              "weight": 0.22
+              "subcategory": "Beef",
+              "brand": "Select",
+              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…ebf497-b851-4570-a4e1-a8689a4707f0.JPG?height=176",
+              "weight": 0.181
             },
             {
-              "name": "Select Pork Patties",
-              "price": 35.0,
+              "name": "ang Australian Striploin Steak",
+              "price": 58.0,
               "category": "Fresh Food",
-              "subcategory": "Frozen Meat",
-              "brand": "Select"
+              "subcategory": "Beef",
+              "brand": "ang",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37401-front-prodcat.jpg?version=1770207746",
+              "weight": 0.23
+            },
+            {
+              "name": "ang Australian Grain-Fed Angus Beef Patty (Southern Grain)",
+              "price": 29.9,
+              "category": "Fresh Food",
+              "subcategory": "Beef",
+              "brand": "ang",
+              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…610a8f-dc28-4f2a-a740-6b27134658e8.jpg?height=176"
             }
           ]
         },
@@ -5535,10 +5790,11 @@
           "items": [
             {
               "name": "Red chili peppers, packaged",
-              "price": 7.9,
+              "price": 28.0,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479415-front-prodcat.jpg"
             },
             {
               "name": "Packaged mushrooms, mixed/unknown variety",
@@ -5556,10 +5812,11 @@
             },
             {
               "name": "White mushrooms, packaged",
-              "price": 9.9,
+              "price": 28.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-88575-front-prodcat.jpg?version=1776342785"
             },
             {
               "name": "Oyster/mixed mushrooms, packaged",
@@ -5591,24 +5848,27 @@
             },
             {
               "name": "Baby corn, packaged",
-              "price": 12.9,
+              "price": 7.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-125838-front-prodcat.jpg"
             },
             {
               "name": "Leafy vegetables/cabbage, packaged",
               "price": 10.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://images.openfoodfacts.org/images/products/081/007/555/3161/front_en.49.400.jpg"
             },
             {
               "name": "Carrots, packaged",
-              "price": 14.9,
+              "price": 35.0,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-108171-front-prodcat.jpg?version=1753273367"
             },
             {
               "name": "Eggplant, packaged",
@@ -5619,17 +5879,112 @@
             },
             {
               "name": "Bell peppers, packaged",
-              "price": 14.9,
+              "price": 28.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-40697-front-prodcat.jpg?version=1779107672"
             },
             {
               "name": "Chinese cabbage/lettuce, packaged",
               "price": 9.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
+              "brand": "Unknown",
+              "image": "https://images.openfoodfacts.org/images/products/325/622/380/0287/front_fr.23.400.jpg"
+            }
+          ]
+        },
+        {
+          "name": "Others",
+          "items": [
+            {
+              "name": "Chilled prepared meat tray, product Unknown",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
               "brand": "Unknown"
+            },
+            {
+              "name": "Chopped meat/offal tray, product Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Mixed marinated meat tray",
+              "price": 58.9,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Packaged sliced/processed meat, variant Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Packaged burger patties/processed meat, variant Unknown",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Mixed marinated meat tray with red pepper",
+              "price": 58.9,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown VISMARA packaged food",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "VISMARA"
+            },
+            {
+              "name": "Unknown packaged meat facings",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown packaged meat facing",
+              "price": 42.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Unknown purple-pack frozen food facings",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Unknown"
+            },
+            {
+              "name": "Ho e Sik Spaghetti with Meat in Tomato Sauce",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Ho e Sik",
+              "image": "https://medias.pns.hk/publishing/PNSHK-191412-front-prodcat.jpg",
+              "weight": 0.285
+            },
+            {
+              "name": "Meat Zero Plant-Based Minced Meat",
+              "price": 21.9,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "brand": "Meat Zero",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448736-front-prodcat.jpg",
+              "weight": 0.22
             }
           ]
         },
@@ -5652,10 +6007,11 @@
             },
             {
               "name": "Bananas, loose",
-              "price": 4.7,
+              "price": 16.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-75536-front-prodcat.jpg?version=1749698471"
             },
             {
               "name": "Oranges/mandarins, loose",
@@ -5666,31 +6022,35 @@
             },
             {
               "name": "Lemons, loose",
-              "price": 22.0,
+              "price": 5.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-75504-front-prodcat.jpg"
             },
             {
               "name": "Dragon fruit",
-              "price": 14.9,
+              "price": 24.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116679-front-prodcat.jpg"
             },
             {
               "name": "Pineapple, loose",
-              "price": 0.0,
+              "price": 17.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-361856-front-prodcat.jpg"
             },
             {
               "name": "Avocados, loose",
-              "price": 35.0,
+              "price": 11.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-75516-front-prodcat.jpg?version=1781094653"
             },
             {
               "name": "Kiwifruit, loose",
@@ -5701,10 +6061,80 @@
             },
             {
               "name": "Bananas, loose",
-              "price": 4.7,
+              "price": 16.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "brand": "Unknown"
+              "brand": "Unknown",
+              "image": "https://medias.pns.hk/publishing/PNSHK-75536-front-prodcat.jpg?version=1749698471"
+            }
+          ]
+        },
+        {
+          "name": "Chicken",
+          "items": [
+            {
+              "name": "Chicken breast fillets",
+              "price": 72.0,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/505/477/514/7069/front_en.34.400.jpg"
+            },
+            {
+              "name": "Chicken thigh/drumstick pieces",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/000/000/029/6717/front_en.21.400.jpg"
+            },
+            {
+              "name": "Japanese-style salad chicken, herb/seasoned variant",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Unknown",
+              "bulkDealPrice": 25.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Chicken breast fillets",
+              "price": 72.0,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/505/477/514/7069/front_en.34.400.jpg"
+            },
+            {
+              "name": "Chicken thigh/drumstick pieces",
+              "price": 0.0,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select",
+              "image": "https://images.openfoodfacts.org/images/products/000/000/029/6717/front_en.21.400.jpg"
+            },
+            {
+              "name": "Select chicken breast fillets",
+              "price": 99.0,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select",
+              "image": "https://medias.pns.hk/publishing/PNSHK-194082-front-prodcat.jpg"
+            },
+            {
+              "name": "Select chicken thigh pieces (diced)",
+              "price": 42.9,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select",
+              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…5ca5b1-f802-4ad0-b9d7-06490939b5f7.jpg?height=176"
+            },
+            {
+              "name": "Select chicken dark meat/wing pieces",
+              "price": 28.9,
+              "category": "Fresh Food",
+              "subcategory": "Chicken",
+              "brand": "Select"
             }
           ]
         }

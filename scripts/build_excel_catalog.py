@@ -12,7 +12,11 @@ import openpyxl
 ROOT = Path(__file__).resolve().parents[1]
 XLSX = ROOT / "Product List Catalog.xlsx"
 OUT = ROOT / "packages" / "shared" / "data" / "foodpanda-fusion-catalog.json"
+ENRICHMENT = ROOT / "packages" / "shared" / "data" / "parknshop-enrichment.json"
 OLD_CATALOG = OUT
+
+MEAT_PARENT_SUBS = {"Meat", "Frozen Meat", "Seafood"}
+MEAT_CLASSIFIED = ("Beef", "Pork", "Chicken", "Seafood", "Others")
 
 SECTION_ORDER = ("Groceries", "Fresh Food")
 
@@ -46,6 +50,70 @@ def normalize_section(raw: object) -> str:
 def normalize_subcategory(raw: object) -> str:
     label = str(raw).strip() if raw else ""
     return label or "Other"
+
+
+def classify_meat_subcategory(name: str, subcategory: str) -> str:
+    if subcategory == "Seafood":
+        return "Seafood"
+    if subcategory not in MEAT_PARENT_SUBS:
+        return subcategory
+
+    n = name.lower()
+    seafood = (
+        "fish",
+        "salmon",
+        "prawn",
+        "shrimp",
+        "seafood",
+        "cuttlefish",
+        "mackerel",
+        "tuna",
+        "crab",
+        "sardine",
+        "cod",
+        "halibut",
+        "pomfano",
+        "fish ball",
+        "fishball",
+        "fish maw",
+        "scallop",
+        "abalone",
+    )
+    if any(k in n for k in seafood):
+        return "Seafood"
+    beef = ("beef", "angus", "steak", "ribeye", "striploin", "brisket", "patty", "ox ")
+    if any(k in n for k in beef):
+        return "Beef"
+    pork = (
+        "pork",
+        "bacon",
+        "ham",
+        "sausage",
+        "luncheon",
+        "salami",
+        "pancetta",
+        "bratwurst",
+        "streaky",
+        "frank",
+        "franks",
+    )
+    if any(k in n for k in pork):
+        return "Pork"
+    poultry = ("chicken", "duck", "turkey", "quail")
+    if any(k in n for k in poultry):
+        return "Chicken"
+    return "Others"
+
+
+def normalize_cache_key(name: str) -> str:
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", name.lower()).split())
+
+
+def load_enrichment() -> dict[str, dict]:
+    if not ENRICHMENT.exists():
+        return {}
+    data = json.loads(ENRICHMENT.read_text(encoding="utf-8"))
+    return data.get("items") or {}
 
 
 def parse_weight(raw: object) -> float | None:
@@ -108,6 +176,7 @@ def match_image(name: str, images: dict[str, str]) -> str | None:
 def main() -> None:
     # Capture images from previous catalog before overwrite.
     images = load_old_images()
+    enrichment = load_enrichment()
 
     wb = openpyxl.load_workbook(XLSX, read_only=True, data_only=True)
     ws = wb["Sheet1"]
@@ -115,6 +184,8 @@ def main() -> None:
 
     buckets: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
     matched = 0
+    enriched_images = 0
+    enriched_prices = 0
 
     for row in rows[1:]:
         if not row or len(row) < 6 or not row[2]:
@@ -124,15 +195,25 @@ def main() -> None:
         price = row[3]
         category = normalize_section(row[4] if len(row) > 4 else None)
         subcategory = normalize_subcategory(row[5] if len(row) > 5 else None)
+        subcategory = classify_meat_subcategory(name, subcategory)
         weight = parse_weight(row[6] if len(row) > 6 else None)
         multibuy = parse_multibuy(row[7] if len(row) > 7 else None)
         image = match_image(name, images)
-        if image:
+        enrich = enrichment.get(normalize_cache_key(name), {})
+        if enrich.get("image"):
+            image = enrich["image"]
+            enriched_images += 1
+        elif image:
             matched += 1
+
+        item_price = float(price) if price is not None else 0.0
+        if enrich.get("price") is not None:
+            item_price = float(enrich["price"])
+            enriched_prices += 1
 
         item: dict = {
             "name": name,
-            "price": float(price) if price is not None else 0.0,
+            "price": item_price,
             "category": category,
             "subcategory": subcategory,
         }
@@ -174,7 +255,33 @@ def main() -> None:
         encoding="utf-8",
     )
     total = sum(len(v) for c in buckets.values() for v in c.values())
-    print(f"Wrote {OUT} ({total} items, {matched} with images)")
+    with_image = sum(
+        1
+        for c in buckets.values()
+        for items in c.values()
+        for it in items
+        if it.get("image")
+    )
+    with_price = sum(
+        1
+        for c in buckets.values()
+        for items in c.values()
+        for it in items
+        if it.get("price", 0) > 0
+    )
+    meat_counts = {
+        sub: len(buckets.get("Fresh Food", {}).get(sub, []))
+        + len(buckets.get("Groceries", {}).get(sub, []))
+        for sub in MEAT_CLASSIFIED
+    }
+    print(
+        f"Wrote {OUT} ({total} items, {with_image} with images, {with_price} with price)"
+    )
+    print(
+        f"Images: {enriched_images} from enrichment, {matched} from previous catalog"
+    )
+    print(f"Prices from enrichment: {enriched_prices}")
+    print(f"Meat subcategories: {meat_counts}")
 
 
 if __name__ == "__main__":
