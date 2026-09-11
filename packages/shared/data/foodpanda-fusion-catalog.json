@@ -2033,13 +2033,6 @@
               "weight": 0.18
             },
             {
-              "name": "Sardines in Tomato Sauce",
-              "price": 49.9,
-              "category": "Groceries",
-              "subcategory": "Canned Goods",
-              "image": "https://medias.pns.hk/publishing/PNSHK-400217-front-prodcat.jpg?version=1779193288"
-            },
-            {
               "name": "Chicken Cat Food",
               "price": 53.0,
               "category": "Groceries",
@@ -2677,7 +2670,7 @@
             },
             {
               "name": "NESCAFÉ 1+2 Rich Instant Coffee Mix",
-              "price": 44.0,
+              "price": 42.9,
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
@@ -3191,7 +3184,7 @@
             },
             {
               "name": "Tissue/toilet-paper multipack",
-              "price": 35.9,
+              "price": 0.0,
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "Walch",
@@ -3425,27 +3418,6 @@
           ]
         },
         {
-          "name": "Other",
-          "items": [
-            {
-              "name": "Kwangtung Mijiu (M)",
-              "price": 11.9,
-              "category": "Groceries",
-              "subcategory": "Other",
-              "brand": "P/R Bridge",
-              "image": "https://medias.pns.hk/publishing/PNSHK-122294-front-prodcat.jpg"
-            },
-            {
-              "name": "Sardines in Tomato Sauce",
-              "price": 49.9,
-              "category": "Groceries",
-              "subcategory": "Other",
-              "brand": "Del Monte",
-              "image": "https://medias.pns.hk/publishing/PNSHK-400217-front-prodcat.jpg?version=1779193288"
-            }
-          ]
-        },
-        {
           "name": "Snacks",
           "items": [
             {
@@ -3494,6 +3466,19 @@
               "brand": "Dettol",
               "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/HK-DFI/2024-5-7/h21k-562884.jpg?height=176",
               "weight": 0.45
+            }
+          ]
+        },
+        {
+          "name": "Other",
+          "items": [
+            {
+              "name": "Kwangtung Mijiu (M)",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Other",
+              "brand": "P/R Bridge",
+              "image": "https://medias.pns.hk/publishing/PNSHK-122294-front-prodcat.jpg"
             }
           ]
         }
@@ -3549,16 +3534,16 @@
             },
             {
               "name": "Australian Striploin Steak",
-              "price": 58.0,
+              "price": 42.0,
               "category": "Fresh Food",
               "subcategory": "Beef",
-              "brand": "AMG",
-              "image": "https://medias.pns.hk/publishing/PNSHK-37401-front-prodcat.jpg?version=1770207746",
+              "brand": "ang",
+              "image": "/images/catalog/img-7190.jpg",
               "weight": 0.23
             },
             {
               "name": "Australian Grain-Fed Angus Beef Patty (Southern Grain)",
-              "price": 42.0,
+              "price": 0.0,
               "category": "Fresh Food",
               "subcategory": "Beef",
               "brand": "ang",
@@ -3579,7 +3564,7 @@
             },
             {
               "name": "Chicken thigh/drumstick pieces",
-              "price": 28.9,
+              "price": 0.0,
               "category": "Fresh Food",
               "subcategory": "Chicken",
               "brand": "Select",
@@ -3604,7 +3589,7 @@
             },
             {
               "name": "Chicken thigh/drumstick pieces",
-              "price": 28.9,
+              "price": 0.0,
               "category": "Fresh Food",
               "subcategory": "Chicken",
               "brand": "Select",
@@ -3640,91 +3625,21 @@
           "name": "Pork",
           "items": [
             {
-              "name": "Pork belly/sliced pork",
-              "price": 38.9,
+              "name": "SELECT Spain Pork Belly Sukiyaki",
+              "price": 39.9,
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Select",
-              "image": "/images/catalog/img-7073.jpg",
+              "image": "https://medias.pns.hk/publishing/PNSHK-89360-front-zoom.jpg?version=1738672512",
               "weight": 0.181
             },
             {
-              "name": "Pork belly slices",
-              "price": 39.9,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "brand": "Select",
-              "image": "/images/catalog/img-7073.jpg"
-            },
-            {
-              "name": "Pork belly/sliced pork",
-              "price": 39.9,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "brand": "Select",
-              "image": "/images/catalog/img-7073.jpg",
-              "weight": 0.248
-            },
-            {
-              "name": "Pork belly/sliced pork",
-              "price": 39.9,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "brand": "Select",
-              "image": "/images/catalog/img-7073.jpg"
-            },
-            {
-              "name": "Sliced pork/belly",
-              "price": 39.9,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "brand": "Select",
-              "image": "/images/catalog/img-7074.jpg"
-            },
-            {
-              "name": "Pork ribs/chunks",
-              "price": 36.9,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "brand": "Select",
-              "image": "/images/catalog/img-7074.jpg"
-            },
-            {
-              "name": "Pork chunks",
-              "price": 33.0,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "brand": "Select",
-              "image": "/images/catalog/img-7074.jpg"
-            },
-            {
-              "name": "Pork mince/ground pork",
-              "price": 27.0,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "image": "https://medias.pns.hk/publishing/PNSHK-167504-front-prodcat.jpg"
-            },
-            {
-              "name": "Pork slices",
-              "price": 75.0,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "image": "https://medias.pns.hk/publishing/PNSHK-28755-front-prodcat.jpg?version=1770726080"
-            },
-            {
-              "name": "Pork/offal pieces",
-              "price": 48.0,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "image": "https://medias.pns.hk/publishing/PNSHK-28755-front-prodcat.jpg?version=1770726080"
-            },
-            {
-              "name": "Ground pork/minced pork",
+              "name": "SELECT Spain Minced Pork",
               "price": 38.9,
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Select",
-              "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg"
+              "image": "https://medias.pns.hk/publishing/PNSHK-89353-front-zoom.jpg?version=1738672389"
             },
             {
               "name": "Sausage Original",
@@ -3754,27 +3669,6 @@
               "weight": 0.35
             },
             {
-              "name": "Farmer Chinese chilled pork tray",
-              "price": 42.0,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "image": "/images/catalog/img-7077.jpg"
-            },
-            {
-              "name": "Marinated pork tray",
-              "price": 134.9,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg"
-            },
-            {
-              "name": "Pork mince/ground pork",
-              "price": 27.0,
-              "category": "Fresh Food",
-              "subcategory": "Pork",
-              "image": "https://medias.pns.hk/publishing/PNSHK-167504-front-prodcat.jpg"
-            },
-            {
               "name": "Smoked Bacon",
               "price": 43.9,
               "category": "Fresh Food",
@@ -3793,7 +3687,7 @@
             },
             {
               "name": "Pork Patties",
-              "price": 27.0,
+              "price": 35.0,
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Select",
@@ -3879,7 +3773,7 @@
             },
             {
               "name": "Plant-Based Minced Meat",
-              "price": 21.9,
+              "price": 35.0,
               "category": "Fresh Food",
               "subcategory": "Others",
               "brand": "Meat Zero",
@@ -4403,7 +4297,7 @@
           "items": [
             {
               "name": "Packaged red berries/cherries",
-              "price": 22.9,
+              "price": 0.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
               "image": "/images/catalog/img-7069.jpg"

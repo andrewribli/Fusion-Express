@@ -25,13 +25,90 @@ UNIDENTIFIED_RE = re.compile(
     re.I,
 )
 
+# Shelf-photo pork notes that were fuzzy-matched to the wrong PNS SKU
+# (dumplings, cat food, frozen hot-pot loin, etc.) or duplicated.
+GENERIC_PORK_PHOTO_RE = re.compile(
+    r"pork belly|sliced pork|pork slices|pork chunks|pork ribs|"
+    r"pork/offal|offal pieces|marinated pork|pork mince|"
+    r"mince/ground pork|chilled pork tray|pork/steak|chopped meat",
+    re.I,
+)
+WRONG_PNS_RE = re.compile(
+    r"dumpling|wonton|cat alu|kariyudo|bean paste|\bpet\b|dog food|cat food",
+    re.I,
+)
 
-def should_skip_row(raw_name: str, excel_price: object, enriched: dict) -> bool:
+
+def _weight_grams(raw: object) -> float | None:
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*G", text, re.I)
+    if match:
+        return float(match.group(1))
+    return None
+
+
+def _pns_name(enriched: dict) -> str:
+    return str(enriched.get("pnsName") or "")
+
+
+# Live pns.hk checks (2026-09-11). Enrichment cache is overwritten by the
+# fuzzy auditor, so keep these SKUs here.
+VERIFIED_PNS = {
+    "Select pork belly/sliced pork": {
+        "pnsName": "SELECT Spain Pork Belly Sukiyaki",
+        "resolvedName": "SELECT Spain Pork Belly Sukiyaki",
+        "price": 39.9,
+        "image": "https://medias.pns.hk/publishing/PNSHK-89360-front-zoom.jpg?version=1738672512",
+        "pnsUrl": "/en/spain-pork-belly-sukiyaki-pre-fro-chilled-0-4c/p/BP_89360",
+        "onlyWeightG": 181,
+    },
+    "Ground pork/minced pork": {
+        "pnsName": "SELECT Spain Minced Pork",
+        "resolvedName": "SELECT Spain Minced Pork",
+        "price": 38.9,
+        "image": "https://medias.pns.hk/publishing/PNSHK-89353-front-zoom.jpg?version=1738672389",
+        "pnsUrl": "/en/spain-minced-pork-chilled-0-4c/p/BP_89353",
+    },
+}
+
+
+def apply_verified_pns(raw_name: str, enriched: dict, weight_raw: object) -> dict:
+    spec = VERIFIED_PNS.get(raw_name)
+    if not spec:
+        return enriched
+    only_w = spec.get("onlyWeightG")
+    if only_w is not None:
+        grams = _weight_grams(weight_raw)
+        if grams is None or abs(grams - only_w) >= 2:
+            return enriched
+    overlay = {k: v for k, v in spec.items() if k != "onlyWeightG"}
+    return {**enriched, **overlay}
+
+
+def should_skip_row(
+    raw_name: str,
+    excel_price: object,
+    enriched: dict,
+    weight_raw: object = None,
+) -> bool:
     """Drop items we guessed instead of identifying on ParknShop."""
     if UNIDENTIFIED_RE.search(raw_name):
         return True
     guessed = enriched.get("priceSource") in {"median", "foodpanda"}
     if guessed:
+        return True
+    if WRONG_PNS_RE.search(_pns_name(enriched)) and GENERIC_PORK_PHOTO_RE.search(raw_name):
+        return True
+    if GENERIC_PORK_PHOTO_RE.search(raw_name):
+        grams = _weight_grams(weight_raw)
+        # Confirmed: SELECT Spain Pork Belly Sukiyaki, 181g, $39.90 on pns.hk.
+        if re.search(r"pork belly/sliced pork", raw_name, re.I) and grams and abs(grams - 181) < 2:
+            return False
+        # Confirmed: SELECT Spain Minced Pork, 181g, $38.90 on pns.hk.
+        if re.search(r"^ground pork/minced pork$", raw_name, re.I):
+            return False
         return True
     no_excel = excel_price is None or (isinstance(excel_price, (int, float)) and float(excel_price) <= 0)
     if no_excel and not enriched.get("pnsUrl") and not enriched.get("pnsName"):
@@ -319,8 +396,9 @@ def main() -> None:
         raw_name = str(row[2]).strip()
         raw_brand = str(row[1]).strip() if row[1] else None
         price = row[3]
-        enriched = enrichment.get(raw_name) or {}
-        if should_skip_row(raw_name, price, enriched):
+        weight_raw = row[6] if len(row) > 6 else None
+        enriched = apply_verified_pns(raw_name, enrichment.get(raw_name) or {}, weight_raw)
+        if should_skip_row(raw_name, price, enriched, weight_raw):
             continue
         brand = clean_brand(raw_brand)
         category, subcategory = resolve_section_and_sub(
@@ -329,14 +407,22 @@ def main() -> None:
             raw_name,
             brand or raw_brand,
         )
-        use_pns_name = bool(UNIDENTIFIED_RE.search(raw_name))
+        use_pns_name = bool(
+            UNIDENTIFIED_RE.search(raw_name)
+            or enriched.get("resolvedName")
+            or (
+                GENERIC_PORK_PHOTO_RE.search(raw_name)
+                and enriched.get("pnsName")
+                and not WRONG_PNS_RE.search(_pns_name(enriched))
+            )
+        )
         name = enriched.get("resolvedName") or clean_name(
             raw_name,
             brand,
             subcategory,
             pns_name=enriched.get("pnsName") if use_pns_name else None,
         )
-        weight = parse_weight(row[6] if len(row) > 6 else None)
+        weight = parse_weight(weight_raw)
         multibuy = parse_multibuy(row[7] if len(row) > 7 else None)
         if enriched.get("subcategory"):
             subcategory = enriched["subcategory"]
@@ -346,6 +432,14 @@ def main() -> None:
             matched += 1
         resolved_price = price
         if resolved_price is None and enriched.get("price") is not None:
+            resolved_price = enriched["price"]
+        grams = _weight_grams(weight_raw)
+        if (
+            re.search(r"pork belly/sliced pork", raw_name, re.I)
+            and grams
+            and abs(grams - 181) < 2
+            and enriched.get("price") is not None
+        ):
             resolved_price = enriched["price"]
 
         item: dict = {
