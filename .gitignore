@@ -18,6 +18,9 @@ node_modules/
 /apps/web/.next/
 /out/
 
+# turborepo
+.turbo/
+
 # expo
 /apps/mobile/.expo/
 /apps/mobile/dist/
