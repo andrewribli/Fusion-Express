@@ -1,4 +1,9 @@
 import type { Order, OrderStatus } from "@/lib/types";
+import type {
+  AdminChatMessage,
+  AdminChatRole,
+  AdminChatThread,
+} from "@/lib/admin-chat";
 import {
   PAYMENT_REMINDER_HOURS,
   PAYMENT_WINDOW_HOURS,
@@ -122,4 +127,69 @@ export function maybeSendPaymentReminders(order: Order): void {
     notifyPaymentReminder(order, "final");
     markSent(order.id, "final");
   }
+}
+
+// ---- Admin chat notifications ----------------------------------------------
+
+const CHAT_NOTIFIED_KEY = "gracerun_chat_notified";
+
+function readNotifiedIds(): Set<string> {
+  if (typeof localStorage === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(CHAT_NOTIFIED_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveNotifiedIds(ids: Set<string>): void {
+  if (typeof localStorage === "undefined") return;
+  try {
+    // Keep the set bounded so it does not grow forever.
+    localStorage.setItem(CHAT_NOTIFIED_KEY, JSON.stringify([...ids].slice(-500)));
+  } catch {
+    // best-effort dedupe only
+  }
+}
+
+/**
+ * Notify the viewer about new admin-chat messages authored by the other side.
+ * Admins are alerted to customer/runner messages; customers and runners are
+ * alerted to admin replies. De-duplicated per message id.
+ */
+export function notifyNewAdminMessages(
+  messages: AdminChatMessage[],
+  viewerRole: AdminChatRole,
+): void {
+  if (!canNotify()) return;
+  const notified = readNotifiedIds();
+  let changed = false;
+  for (const msg of messages) {
+    if (msg.senderRole === viewerRole) continue;
+    if (notified.has(msg.id)) continue;
+    const label =
+      viewerRole === "admin"
+        ? `${msg.senderName} (${msg.party}) · ${msg.orderId}`
+        : `GraceRun · ${msg.orderId}`;
+    const body = msg.message || (msg.imageUrl ? "📷 Photo" : "");
+    show(`${label}: ${body}`, `admin-chat-${msg.id}`);
+    notified.add(msg.id);
+    changed = true;
+  }
+  if (changed) saveNotifiedIds(notified);
+}
+
+/**
+ * Admin-dashboard notification for a thread that just received a message from a
+ * customer or runner. The tag includes the update time so the same activity is
+ * not shown twice.
+ */
+export function notifyAdminThreadActivity(thread: AdminChatThread): void {
+  if (!canNotify()) return;
+  const who = thread.party === "customer" ? "Customer" : "Runner";
+  show(
+    `${who} · ${thread.orderId}: ${thread.lastMessage || "New message"}`,
+    `admin-thread-${thread.id}-${thread.updatedAt.getTime()}`,
+  );
 }
