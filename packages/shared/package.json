@@ -10,6 +10,7 @@
     "./app-env": "./src/app-env.ts",
     "./delivery": "./src/delivery.ts",
     "./orders": "./src/orders.ts",
+    "./payments": "./src/payments.ts",
     "./products": "./src/products.ts",
     "./product-images": "./src/product-images.ts",
     "./resolve-image": "./src/resolve-image.ts",

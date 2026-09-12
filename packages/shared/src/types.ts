@@ -173,6 +173,8 @@ export interface Order {
   total: number;
   paymentReceived: boolean;
   paymentMethod?: "PayMe" | "FPS";
+  /** When the customer confirmed they paid GraceRun. */
+  paidAt?: Date;
   /** Doc id in /runners. */
   runnerId?: string;
   /**

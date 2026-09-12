@@ -11,4 +11,5 @@ export * from "./auth";
 export * from "./products";
 export * from "./resolve-image";
 export * from "./orders";
+export * from "./payments";
 export * from "./cuhk-email";

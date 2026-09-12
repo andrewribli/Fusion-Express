@@ -90,6 +90,35 @@ export const MOCK_ORDERS: Order[] = [
     updatedAt: new Date("2026-08-14T08:40:00"),
     pickedUpAt: new Date("2026-08-14T08:40:00"),
   },
+  {
+    // Recently delivered and awaiting payment — used to demo the "Pay GraceRun
+    // now" flow and the 24-hour payment countdown. Delivered ~2h ago so the
+    // payment is still within the 24-hour window.
+    id: "FE-1005",
+    sessionId: "demo-session-5",
+    customerId: "1155123456",
+    customerName: "Demo Customer",
+    items: [
+      { itemId: "shin-ramyun", name: "Shin Ramyun", price: 12.5, quantity: 2 },
+      { itemId: "pocari-sweat", name: "Pocari Sweat 500ml", price: 9, quantity: 1 },
+    ],
+    status: "delivered",
+    college: "Shaw College",
+    hall: "Sun Chui",
+    roomNumber: "512",
+    lobbyPoint: "Sun Chui lobby",
+    subtotal: 34,
+    deliveryFee: 10,
+    total: 44,
+    paymentReceived: false,
+    runnerId: "demo-runner",
+    runnerName: "Alex",
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    pickedUpAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000),
+    deliveredAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    tillPricesSubmittedAt: new Date(Date.now() - 2.2 * 60 * 60 * 1000),
+  },
 ];
 
 export function getMockOrderById(orderId: string): Order | undefined {

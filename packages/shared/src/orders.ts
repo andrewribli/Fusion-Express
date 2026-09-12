@@ -117,6 +117,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     total: Number(data.total ?? 0),
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
+    paidAt: data.paidAt ? toDate(data.paidAt) : undefined,
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
     runnerName: data.runnerName ? String(data.runnerName) : undefined,
     runnerRating: data.runnerRating != null ? Number(data.runnerRating) : undefined,
@@ -702,6 +703,31 @@ export async function fetchOrdersNeedingRefund(): Promise<Order[]> {
   return orders
     .filter((o) => o.priceAdjustmentStatus === "refund_pending")
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+}
+
+/**
+ * Record that the customer has paid GraceRun for a delivered order. In the MVP
+ * there is no automated payment verification, so the customer self-confirms
+ * after sending money via PayMe or FPS; the owner can reconcile in Firestore.
+ */
+export async function markPaymentReceived(
+  orderId: string,
+  method?: Order["paymentMethod"],
+): Promise<void> {
+  const now = new Date();
+  await patchOrder(
+    orderId,
+    {
+      paymentReceived: true,
+      paymentMethod: method,
+      paidAt: Timestamp.fromDate(now),
+    },
+    (mock) => {
+      mock.paymentReceived = true;
+      if (method) mock.paymentMethod = method;
+      mock.paidAt = now;
+    },
+  );
 }
 
 export function tillPricesReady(order: Order): boolean {
