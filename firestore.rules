@@ -1,45 +1,345 @@
 rules_version = '2';
+
+/**
+ * GraceRun Firestore rules.
+ *
+ * Default is deny: there is deliberately no `match /{document=**}` catch-all.
+ * Every collection the app touches is listed here, so a new collection is
+ * locked until someone adds a rule for it on purpose.
+ *
+ * Rules are not filters. A query is rejected unless its own where-clauses
+ * prove that every possible result satisfies the rule, so the `list` rules
+ * below dictate the exact queries the client is allowed to run:
+ *
+ *   orders  where customerId == uid                    (customer history)
+ *           where status == 'pending'                   (runner job board)
+ *           where runnerUid == uid                      (runner's own jobs)
+ *           anything, for an admin
+ *   runners where uid == uid                            (find my runner doc)
+ *   users   nothing, unless admin
+ *
+ * Changing a query in the app usually means changing a `list` rule here.
+ */
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Store catalog. Public read so aisle/menu pages can load without
-    // racing Firebase Auth. Writes still require a signed-in user.
+
+    // ---------------------------------------------------------------- helpers
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    /**
+     * Admin rights live in their own collection because a user can write their
+     * own /users doc — an `isAdmin` field there would be self-grantable.
+     * Admin docs are created from the Firebase console or the Admin SDK only.
+     */
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(uid()));
+    }
+
+    function profilePath() {
+      return /databases/$(database)/documents/users/$(uid());
+    }
+
+    function hasProfile() {
+      return signedIn() && exists(profilePath());
+    }
+
+    function profile() {
+      return get(profilePath()).data;
+    }
+
+    /** Runners self-register by accepting the runner terms. */
+    function isRunner() {
+      return hasProfile() && profile().get('isRunner', false) == true;
+    }
+
+    /** Doc id in /runners for the current user, or '' if they have none. */
+    function myRunnerDocId() {
+      return hasProfile() ? profile().get('runnerId', '') : '';
+    }
+
+    function isOrderCustomer(order) {
+      return signedIn() && order.customerId == uid();
+    }
+
+    /**
+     * Orders written before runnerUid existed only carry runnerId, which is a
+     * /runners doc id rather than an auth uid, so fall back to matching that
+     * against the caller's own profile.
+     */
+    function isOrderRunner(order) {
+      return signedIn() && (
+        order.get('runnerUid', '') == uid()
+        || (myRunnerDocId() != '' && order.get('runnerId', '') == myRunnerDocId())
+      );
+    }
+
+    function order(orderId) {
+      return get(/databases/$(database)/documents/orders/$(orderId)).data;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ---------------------------------------------------------------- catalog
+
+    // The store catalog is public so browse pages render without waiting on
+    // Auth. Seeding runs through the Admin SDK, which ignores these rules.
     match /products/{productId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow get, list: if true;
+      allow write: if false;
     }
 
-    match /products_test/{productId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    match /menu/{itemId} {
+      allow get, list: if true;
+      allow write: if false;
     }
 
-    // Public username → email lookup so people can sign in without being
-    // authenticated first. Only the owner may write their mapping.
+    // -------------------------------------------------------------- usernames
+
+    // Sign-in resolves a username to an email before the user is authenticated,
+    // so a single doc must be world-readable by exact id. `list` stays closed
+    // so the collection cannot be dumped for every student's email.
     match /usernames/{username} {
-      allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
         && request.resource.data.email is string;
-      allow update, delete: if request.auth != null
-        && resource.data.uid == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.uid == uid();
     }
 
-    match /usernames_test/{username} {
-      allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.email is string;
-      allow update, delete: if request.auth != null
-        && resource.data.uid == request.auth.uid;
+    // ------------------------------------------------------------------ users
+
+    /** customer | runner | both — anything else is rejected outright. */
+    function roleIsValid() {
+      return !request.resource.data.keys().hasAny(['role'])
+        || request.resource.data.role in ['customer', 'runner', 'both'];
     }
 
-    // OTP cookies are server-side. Never allow client access to email OTP docs.
+    match /users/{userId} {
+      allow get: if signedIn() && (uid() == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if signedIn() && uid() == userId && roleIsValid();
+      allow update: if signedIn() && uid() == userId && roleIsValid();
+      allow delete: if false;
+    }
+
+    match /admins/{adminUid} {
+      allow get: if signedIn() && uid() == adminUid;
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // ---------------------------------------------------------------- runners
+
+    match /runners/{runnerId} {
+      allow get: if signedIn() && (
+        resource.data.get('uid', '') == uid()
+        || myRunnerDocId() == runnerId
+        || isAdmin()
+      );
+      allow list: if resource.data.uid == uid();
+      allow create: if signedIn() && request.resource.data.uid == uid();
+      allow update: if signedIn() && (
+        resource.data.get('uid', '') == uid()
+        || myRunnerDocId() == runnerId
+      );
+      allow delete: if false;
+    }
+
+    // ----------------------------------------------------------------- orders
+
+    match /orders/{orderId} {
+      // A runner has to read a pending order to decide whether to accept it,
+      // which also covers the transaction read inside acceptOrder().
+      allow get: if isOrderCustomer(resource.data)
+        || isOrderRunner(resource.data)
+        || (isRunner() && resource.data.status == 'pending')
+        || isAdmin();
+
+      allow list: if resource.data.customerId == uid()
+        || resource.data.runnerUid == uid()
+        || (isRunner() && resource.data.status == 'pending')
+        || isAdmin();
+
+      allow create: if signedIn()
+        && request.resource.data.customerId == uid()
+        && request.resource.data.status == 'pending'
+        && request.resource.data.get('runnerId', '') == ''
+        && request.resource.data.get('runnerUid', '') == '';
+
+      // Customers may cancel, approve a price increase, and rate. Anything
+      // outside these key sets — including who the order belongs to — is fixed.
+      allow update: if isOrderCustomer(resource.data) && (
+        (
+          changedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status == 'cancelled'
+        )
+        || (
+          changedKeys().hasOnly([
+            'subtotal', 'total', 'priceAdjustmentStatus',
+            'customerApprovedPriceAt', 'updatedAt'
+          ])
+          && request.resource.data.priceAdjustmentStatus == 'approved'
+        )
+        || changedKeys().hasOnly(['runnerRating', 'updatedAt'])
+        || (
+          resource.data.status in ['delivered', 'runner_paid']
+          && changedKeys().hasOnly([
+            'status', 'customerPaidAt', 'paymentReceived', 'updatedAt'
+          ])
+          && request.resource.data.status in ['customer_paid', 'paid']
+          && request.resource.data.paymentReceived == true
+        )
+      );
+
+      // Claiming an unassigned order. Self-pickup is blocked here as well as
+      // in the client so it cannot be bypassed.
+      allow update: if isRunner()
+        && resource.data.status == 'pending'
+        && resource.data.customerId != uid()
+        && changedKeys().hasOnly([
+          'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
+          'acceptedAt', 'runnerPaymentMethod', 'runnerPaymentId', 'runnerEmail'
+        ])
+        && request.resource.data.status in ['accepted', 'assigned']
+        && request.resource.data.runnerUid == uid();
+
+      // The assigned runner drives the order to delivery.
+      allow update: if isOrderRunner(resource.data)
+        && changedKeys().hasOnly([
+          'status', 'updatedAt', 'pickedUpAt', 'deliveredAt',
+          'acceptedAt', 'purchasedAt', 'receiptUrl', 'bankStatementUrl',
+          'finalTotal', 'amountPaidByRunner', 'runnerVerified',
+          'deliveryPhotoUrl', 'runnerNote', 'runnerName', 'runnerLocation',
+          'items', 'estimatedSubtotal', 'actualSubtotal', 'priceDifference',
+          'priceAdjustmentStatus', 'refundAmount', 'subtotal', 'total',
+          'tillPricesSubmittedAt'
+        ])
+        && request.resource.data.status != 'pending';
+
+      allow update: if isAdmin()
+        && changedKeys().hasOnly([
+          'priceAdjustmentStatus', 'refundedAt', 'updatedAt',
+          'status', 'runnerPaidAt', 'adminVerified', 'customerNameOnReceipt'
+        ]);
+
+      allow delete: if false;
+    }
+
+    match /ratings/{orderId} {
+      allow get: if signedIn()
+        && (resource.data.get('customerId', '') == uid() || isAdmin());
+      allow list: if isAdmin();
+      allow create: if signedIn() && request.resource.data.customerId == uid();
+      allow update: if signedIn() && resource.data.customerId == uid();
+      allow delete: if false;
+    }
+
+    // Order chat is between the customer and the assigned runner only.
+    match /chats/{orderId}/messages/{messageId} {
+      allow get, list: if isOrderCustomer(order(orderId))
+        || isOrderRunner(order(orderId))
+        || isAdmin();
+      allow create: if (
+          isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
+        )
+        && request.resource.data.senderId in [
+          uid(), myRunnerDocId(), profile().get('studentId', '')
+        ];
+      allow update, delete: if false;
+    }
+
+    // OTP verification is cookie-based and server-side. Nothing may touch this.
     match /emailOtps/{email} {
       allow read, write: if false;
     }
 
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    match /feedback/{id} {
+      function feedbackCreate() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['userId', 'message', 'createdAt', 'status'])
+          && data.userId is string
+          && data.userId.size() > 0
+          && data.userId.size() < 128
+          && data.message is string
+          && data.message.size() > 0
+          && data.message.size() <= 2000
+          && data.createdAt is timestamp
+          && data.status == 'unread'
+          && (!('userName' in data) || (data.userName is string && data.userName.size() < 120))
+          && (
+            (signedIn() && data.userId == uid())
+            || data.userId == 'anonymous'
+          );
+      }
+
+      allow create: if feedbackCreate();
+      allow get, list: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['unread', 'read', 'resolved'];
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------- staging (*_test) twins
+
+    // Preview deploys point at these collections and hold throwaway data only.
+    // They stay behind sign-in, matching the previous catch-all, rather than
+    // being opened to the world. Note that preview builds use session-only demo
+    // logins with no Firebase Auth, so writes from a preview deploy will be
+    // rejected until that flow signs in (anonymous auth would fix it).
+    match /products_test/{productId} {
+      allow get, list: if true;
+      allow write: if false;
+    }
+
+    match /menu_test/{itemId} {
+      allow get, list: if true;
+      allow write: if false;
+    }
+
+    match /usernames_test/{username} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.email is string;
+      allow update, delete: if signedIn() && resource.data.uid == uid();
+    }
+
+    match /users_test/{userId} {
+      allow read, write: if signedIn();
+    }
+
+    match /runners_test/{runnerId} {
+      allow read, write: if signedIn();
+    }
+
+    match /orders_test/{orderId} {
+      allow read, write: if signedIn();
+    }
+
+    match /chats_test/{orderId}/messages/{messageId} {
+      allow read, write: if signedIn();
+    }
+
+    match /feedback_test/{id} {
+      allow create: if signedIn()
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.status == 'unread';
+      allow get, list, update, delete: if isAdmin();
     }
   }
 }
