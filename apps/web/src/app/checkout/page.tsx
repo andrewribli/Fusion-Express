@@ -9,6 +9,7 @@ import { ConfirmOrderModal } from "@/components/ConfirmOrderModal";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
 import { ManualItemForm } from "@/components/ManualItemForm";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { PaymentMethods } from "@/components/PaymentMethods";
 import { PriceDisclaimer } from "@/components/PriceDisclaimer";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useCart } from "@/context/CartContext";
@@ -153,6 +154,15 @@ export default function CheckoutPage() {
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
             <PriceDisclaimer className="mb-4" />
+            <div className="mb-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
+              <p className="text-sm font-bold text-green-800">
+                You&apos;ll pay after delivery. No payment needed now.
+              </p>
+              <p className="mt-0.5 text-xs text-green-700">
+                Place your order for free. You only pay GraceRun once your
+                groceries arrive.
+              </p>
+            </div>
             {placeError && (
               <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {placeError}
@@ -263,9 +273,27 @@ export default function CheckoutPage() {
                 />
               </section>
 
-              <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                Pay via PayMe or FPS after delivery.
-              </div>
+              <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-gray-900">
+                    How you&apos;ll pay
+                  </h2>
+                  <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">
+                    After delivery
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Payment happens <strong>after</strong> your groceries arrive.
+                  You&apos;ll get a reminder to pay GraceRun within 24 hours via
+                  PayMe or FPS to the account below.
+                </p>
+                <PaymentMethods className="mt-3" />
+                <p className="mt-3 text-[11px] leading-relaxed text-gray-400">
+                  By placing this order, you agree to pay GraceRun within 24
+                  hours of delivery via PayMe or FPS to the account provided in
+                  the app.
+                </p>
+              </section>
 
               <button
                 type="submit"
