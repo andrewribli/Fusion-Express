@@ -36,6 +36,7 @@ const SECTIONS = [
       "Earnings are tracked in the Runner Dashboard under the Earnings tab.",
       "Payouts are processed weekly via your registered PayMe or FPS account.",
       "Pending payments appear until the customer's order is marked delivered and payment is confirmed.",
+      "Customers agree to pay GraceRun within 24 hours of delivery. Payment can be made via PayMe or FPS to the account provided in the app.",
     ],
   },
   {
