@@ -10,6 +10,12 @@ export function isOverOrderLimit(subtotal: number): boolean {
   return subtotal > MAX_ORDER_VALUE;
 }
 
+export const DEFAULT_SPECIAL_INSTRUCTIONS = "None for now";
+
+export function resolveSpecialInstructions(note?: string | null): string {
+  return note?.trim() || DEFAULT_SPECIAL_INSTRUCTIONS;
+}
+
 export function getEstimatedDeliveryTime(from: Date = new Date()): Date {
   return new Date(from.getTime() + ESTIMATED_DELIVERY_MINUTES * 60 * 1000);
 }
