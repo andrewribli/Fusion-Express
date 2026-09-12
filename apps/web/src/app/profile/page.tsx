@@ -133,6 +133,13 @@ export default function ProfilePage() {
             >
               Log out / Sign out
             </button>
+
+            <Link
+              href="/admin"
+              className="mt-4 block text-center text-xs font-medium text-white/50 underline"
+            >
+              GraceRun Admin
+            </Link>
           </main>
         </LakersWallpaper>
       </AppShell>
