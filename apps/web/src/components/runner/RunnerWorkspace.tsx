@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AdminChatPanel } from "@/components/AdminChatPanel";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
@@ -293,6 +294,20 @@ export default function RunnerDashboardPage() {
                     {active.map((order) => (
                       <OrderCard key={order.id} order={order}>
                         <OrderChatPanel order={order} compact />
+                        {user && (
+                          <AdminChatPanel
+                            orderId={order.id}
+                            party="runner"
+                            viewerRole="runner"
+                            viewerId={getUserAccountId(user)}
+                            viewerName={user.fullName}
+                            partyUserId={getUserAccountId(user)}
+                            title="Chat with Admin"
+                            subtitle="Receipt total, reimbursement & delivery"
+                            allowImage
+                            compact
+                          />
+                        )}
                         {order.status === "assigned" && (
                           <div className="mt-3 space-y-2">
                             <textarea
