@@ -175,7 +175,9 @@ service cloud.firestore {
         && request.resource.data.customerId == uid()
         && request.resource.data.status == 'pending'
         && request.resource.data.get('runnerId', '') == ''
-        && request.resource.data.get('runnerUid', '') == '';
+        && request.resource.data.get('runnerUid', '') == ''
+        && request.resource.data.subtotal is number
+        && request.resource.data.subtotal <= 200;
 
       // Customers may cancel, approve a price increase, and rate. Anything
       // outside these key sets — including who the order belongs to — is fixed.
