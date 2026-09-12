@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
+import { PaymentStatusCard } from "@/components/PaymentStatusCard";
 import { PageWallpaper } from "@/components/PageWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { BG_ORDERS } from "@/data/page-backgrounds";
@@ -15,6 +16,7 @@ import { useUser, getUserAccountId } from "@/context/UserContext";
 import { isChatActive } from "@/lib/constants";
 import { getMenuItemById } from "@/lib/menu";
 import { cancelOrder, fetchOrdersByIds, getOrderHistoryIds } from "@/lib/orders";
+import { maybeSendPaymentReminders } from "@/lib/notifications";
 import { ORDER_STATUS_LABELS, type Order } from "@/lib/types";
 
 export default function OrdersPage() {
@@ -29,6 +31,7 @@ export default function OrdersPage() {
     const ids = getOrderHistoryIds();
     const results = await fetchOrdersByIds(ids);
     setOrders(results);
+    results.forEach(maybeSendPaymentReminders);
     setLoading(false);
   }
 
@@ -126,6 +129,12 @@ export default function OrdersPage() {
                         </button>
                       )}
                     </div>
+
+                    {order.status === "delivered" && (
+                      <div className="mt-3 border-t border-gray-100 pt-3">
+                        <PaymentStatusCard order={order} compact onPaid={load} />
+                      </div>
+                    )}
 
                     {isChatActive(order.status) && (
                       <OrderChatPanel order={order} compact />

@@ -1,14 +1,29 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { PaymentStatusCard } from "@/components/PaymentStatusCard";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
+import { fetchOrdersByIds, getOrderHistoryIds } from "@/lib/orders";
+import { isPaymentOutstanding } from "@/lib/payments";
+import type { Order } from "@/lib/types";
 
 export default function ProfilePage() {
   const { user, logout } = useUser();
+  const [outstanding, setOutstanding] = useState<Order[]>([]);
+
+  const loadOutstanding = useCallback(async () => {
+    const orders = await fetchOrdersByIds(getOrderHistoryIds());
+    setOutstanding(orders.filter((o) => isPaymentOutstanding(o)));
+  }, []);
+
+  useEffect(() => {
+    void loadOutstanding();
+  }, [loadOutstanding]);
 
   return (
     <RequireAuth>
@@ -29,6 +44,41 @@ export default function ProfilePage() {
                 <p className="text-sm text-gray-600">Phone: {user.phone}</p>
               )}
             </section>
+
+            {outstanding.length > 0 && (
+              <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                <h2 className="text-sm font-semibold text-amber-900">
+                  Outstanding Payments
+                </h2>
+                <p className="mt-1 text-xs text-amber-800">
+                  These delivered orders still need to be paid to GraceRun.
+                </p>
+                <ul className="mt-3 space-y-3">
+                  {outstanding.map((order) => (
+                    <li
+                      key={order.id}
+                      className="rounded-xl border border-amber-100 bg-white p-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={`/track?orderId=${order.id}`}
+                          className="text-sm font-bold text-gray-900"
+                        >
+                          {order.id}
+                        </Link>
+                      </div>
+                      <div className="mt-2">
+                        <PaymentStatusCard
+                          order={order}
+                          compact
+                          onPaid={loadOutstanding}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <section className="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-500">Delivery Address</h2>
