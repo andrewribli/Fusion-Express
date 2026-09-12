@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { AdminChatPanel } from "@/components/AdminChatPanel";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { PaymentStatusCard } from "@/components/PaymentStatusCard";
@@ -205,6 +206,20 @@ function TrackContent() {
 
           {order.status !== "cancelled" && (
             <PaymentStatusCard order={order} onPaid={() => lookup(order.id)} />
+          )}
+
+          {user && getUserAccountId(user) === order.customerId && (
+            <AdminChatPanel
+              orderId={order.id}
+              party="customer"
+              viewerRole="customer"
+              viewerId={getUserAccountId(user)}
+              viewerName={user.fullName}
+              partyUserId={order.customerId}
+              title="Chat with GraceRun"
+              subtitle="Payment help & issues · admin only"
+              compact
+            />
           )}
 
           <OrderProgressBar status={order.status} />
