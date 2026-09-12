@@ -134,16 +134,20 @@ export async function signInWithUsername(
   return signInWithEmail(await resolveSignInEmail(username), password);
 }
 
-export async function sendPasswordReset(email: string): Promise<void> {
+export async function sendPasswordReset(identifier: string): Promise<void> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured");
   }
+  const resolved = identifier.includes("@")
+    ? identifier.trim().toLowerCase()
+    : await resolveSignInEmail(identifier);
+  const cuhkErr = validateCuhkStudentEmail(resolved);
+  if (cuhkErr && !resolved.endsWith(`@${EMAIL_DOMAIN}`)) {
+    throw new Error(cuhkErr);
+  }
   // Skip continueUrl — unlisted origins (including Vercel hosts not yet in the
   // live Auth allowlist) make Firebase refuse the reset for real accounts.
-  await sendPasswordResetEmail(
-    getAuthClient(),
-    email.trim().toLowerCase(),
-  );
+  await sendPasswordResetEmail(getAuthClient(), resolved);
 }
 
 export async function changePassword(
