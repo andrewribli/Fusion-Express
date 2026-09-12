@@ -1,8 +1,11 @@
 import {
+  EmailAuthProvider,
   createUserWithEmailAndPassword,
+  reauthenticateWithCredential,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  updatePassword,
   type User,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -141,6 +144,24 @@ export async function sendPasswordReset(email: string): Promise<void> {
     getAuthClient(),
     email.trim().toLowerCase(),
   );
+}
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured");
+  }
+  const user = getAuthClient().currentUser;
+  if (!user?.email) {
+    throw new Error("Please sign in again before changing your password");
+  }
+  const newErr = validatePassword(newPassword);
+  if (newErr) throw new Error(newErr);
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
 }
 
 export async function signOutUser(): Promise<void> {

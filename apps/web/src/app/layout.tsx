@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   title: "GraceRun — Groceries. Delivered with grace.",
   description: "Groceries. Delivered with grace. Order from Fusion supermarket to your CUHK dorm lobby.",
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/images/gracerun-icon.png" }],
-    apple: "/images/gracerun-icon.png",
+    icon: [{ url: "/images/gracerun-icon.png?v=3", type: "image/png" }],
+    apple: "/images/gracerun-icon.png?v=3",
   },
   appleWebApp: {
     capable: true,

@@ -6,13 +6,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-[480px] items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2.5">
-          <AppLogo size={36} className="h-9 w-9" />
-          <div>
-            <p className="text-sm font-bold leading-tight text-gray-900">
-              Fusion Express
-            </p>
-            <p className="text-xs text-gray-500">CUHK dorm delivery</p>
-          </div>
+          <AppLogo size={48} className="h-12 w-12" />
         </Link>
         <nav className="flex items-center gap-3 text-xs font-medium">
           <Link href="/track" className="text-gray-600 hover:text-fusion-red">

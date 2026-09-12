@@ -1,6 +1,5 @@
-import Image from "next/image";
-
-export const APP_LOGO_SRC = "/images/fusion-express-logo.png";
+export const APP_LOGO_SRC = "/images/gracerun-logo.png?v=3";
+export const APP_ICON_SRC = "/images/gracerun-icon.png?v=3";
 
 export function AppLogo({
   size = 32,
@@ -12,13 +11,15 @@ export function AppLogo({
   priority?: boolean;
 }) {
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src={APP_LOGO_SRC}
-      alt="Fusion Express"
+      alt="GraceRun"
       width={size}
       height={size}
-      priority={priority}
-      className={`rounded-lg object-cover ${className}`}
+      decoding="async"
+      fetchPriority={priority ? "high" : "auto"}
+      className={`rounded-[22%] bg-black object-contain ${className}`}
     />
   );
 }
