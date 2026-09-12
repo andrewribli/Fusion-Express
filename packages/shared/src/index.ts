@@ -12,4 +12,5 @@ export * from "./products";
 export * from "./resolve-image";
 export * from "./orders";
 export * from "./payments";
+export * from "./admin-chat";
 export * from "./cuhk-email";
