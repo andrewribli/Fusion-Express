@@ -8,13 +8,15 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
+import { PaymentStatusCard } from "@/components/PaymentStatusCard";
 import { RatingModal } from "@/components/RatingModal";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { formatEta, getEstimatedDeliveryTime } from "@/lib/constants";
-import { cancelOrder, fetchOrder } from "@/lib/orders";
+import { cancelOrder, fetchOrder, saveOrderToHistory } from "@/lib/orders";
 import {
+  maybeSendPaymentReminders,
   notifyOrderStatus,
   requestNotificationPermission,
 } from "@/lib/notifications";
@@ -40,7 +42,11 @@ function TrackContent() {
     if (found && lastStatus.current && lastStatus.current !== found.status) {
       notifyOrderStatus(found.id, found.status);
     }
-    if (found) lastStatus.current = found.status;
+    if (found) {
+      lastStatus.current = found.status;
+      saveOrderToHistory(found.id);
+      maybeSendPaymentReminders(found);
+    }
     setOrder(found);
     setNotFound(!found);
     if (found?.runnerRating) setRated(true);
@@ -196,6 +202,10 @@ function TrackContent() {
               </div>
             )}
           </div>
+
+          {order.status !== "cancelled" && (
+            <PaymentStatusCard order={order} onPaid={() => lookup(order.id)} />
+          )}
 
           <OrderProgressBar status={order.status} />
 
