@@ -72,7 +72,11 @@ export function NavIcon({
     case "runner":
       return (
         <svg {...common}>
-          <path d="M13 3 4 14h7l-1 7 10-12h-7l1-6Z" />
+          <circle cx="14" cy="5" r="2.25" />
+          <path d="M8 11.5 11 9.5l2.5 1.5L12 15l3 2.5" />
+          <path d="m13.5 11 3-1.5 2 3" />
+          <path d="M11 15.5 8.5 20" />
+          <path d="m15 17.5 1.5 3.5" />
         </svg>
       );
     case "available":
