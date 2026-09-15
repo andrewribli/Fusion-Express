@@ -108,7 +108,12 @@ export function getCatalogMenuItems(): MenuItem[] {
           : undefined,
     });
     const brand = cleanBrand(item.brand);
-    const name = cleanProductName(item.name, { brand, subcategory });
+    const cleaned = cleanProductName(item.name, { brand, subcategory });
+    // Keep brand visible on cards (MenuItemCard only renders `name`).
+    const name =
+      brand && !cleaned.toLowerCase().includes(brand.toLowerCase())
+        ? `${brand} ${cleaned}`
+        : cleaned;
 
     return {
       id: slugId(item.name, index),

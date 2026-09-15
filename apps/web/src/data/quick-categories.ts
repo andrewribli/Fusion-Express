@@ -46,12 +46,6 @@ export const QUICK_CATEGORIES: QuickCategory[] = [
     image: AISLE_IMAGES.snacks,
   },
   {
-    id: "chips",
-    label: "Chips",
-    href: "/browse/dry/chips",
-    image: AISLE_IMAGES.chips,
-  },
-  {
     id: "rice-noodles",
     label: "Rice & Noodles",
     href: "/browse/dry/rice-noodles",
