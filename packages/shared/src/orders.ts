@@ -663,20 +663,20 @@ export async function uploadDeliveryPhoto(
     "name" in file && typeof (file as { name?: string }).name === "string"
       ? (file as { name: string }).name
       : filename;
-  if (isFirebaseConfigured()) {
-    try {
-      const storageRef = ref(
-        getFirebaseStorage(),
-        storagePath(`delivery-proofs/${orderId}/${name}`),
-      );
-      await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
-    } catch {
-      // fallback
-    }
+  if (!isFirebaseConfigured()) {
+    return `mock://delivery/${orderId}/${name}`;
   }
-
-  return `mock://delivery/${orderId}/${name}`;
+  try {
+    const storageRef = ref(
+      getFirebaseStorage(),
+      storagePath(`delivery-proofs/${orderId}/${Date.now()}-${name}`),
+    );
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  } catch (err) {
+    console.error("uploadDeliveryPhoto failed", err);
+    throw new Error("Lobby photo upload failed. Please try again.");
+  }
 }
 
 export async function fetchOrdersByIds(ids: string[]): Promise<Order[]> {
@@ -966,19 +966,20 @@ export async function uploadReceiptPhoto(
     "name" in file && typeof (file as { name?: string }).name === "string"
       ? (file as { name: string }).name
       : filename;
-  if (isFirebaseConfigured()) {
-    try {
-      const storageRef = ref(
-        getFirebaseStorage(),
-        storagePath(`receipts/${orderId}/${name}`),
-      );
-      await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
-    } catch {
-      // fallback
-    }
+  if (!isFirebaseConfigured()) {
+    return `mock://receipt/${orderId}/${name}`;
   }
-  return `mock://receipt/${orderId}/${name}`;
+  try {
+    const storageRef = ref(
+      getFirebaseStorage(),
+      storagePath(`receipts/${orderId}/${Date.now()}-${name}`),
+    );
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  } catch (err) {
+    console.error("uploadReceiptPhoto failed", err);
+    throw new Error("Receipt upload failed. Please try again.");
+  }
 }
 
 export async function markPurchased(
@@ -1000,19 +1001,82 @@ export async function uploadBankStatementPhoto(
     "name" in file && typeof (file as { name?: string }).name === "string"
       ? (file as { name: string }).name
       : filename;
+  if (!isFirebaseConfigured()) {
+    return `mock://bank/${orderId}/${name}`;
+  }
+  try {
+    const storageRef = ref(
+      getFirebaseStorage(),
+      storagePath(`bank-statements/${orderId}/${Date.now()}-${name}`),
+    );
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  } catch (err) {
+    console.error("uploadBankStatementPhoto failed", err);
+    throw new Error("Bank statement upload failed. Please try again.");
+  }
+}
+
+/** Persist runner proof fields without changing order status (survives refresh). */
+export async function saveRunnerDeliveryProgress(
+  orderId: string,
+  progress: {
+    receiptUrl?: string;
+    bankStatementUrl?: string;
+    deliveryPhotoUrl?: string;
+    finalTotal?: number;
+    runnerVerified?: boolean;
+  },
+): Promise<void> {
+  const updates: Record<string, unknown> = {};
+  if (progress.receiptUrl) updates.receiptUrl = progress.receiptUrl;
+  if (progress.bankStatementUrl) {
+    updates.bankStatementUrl = progress.bankStatementUrl;
+  }
+  if (progress.deliveryPhotoUrl) {
+    updates.deliveryPhotoUrl = progress.deliveryPhotoUrl;
+  }
+  if (progress.finalTotal != null) {
+    if (!(progress.finalTotal > 0)) {
+      throw new Error("Enter the Fusion receipt total.");
+    }
+    updates.finalTotal = round2(progress.finalTotal);
+  }
+  if (progress.runnerVerified != null) {
+    updates.runnerVerified = progress.runnerVerified;
+  }
+  if (Object.keys(updates).length === 0) return;
+
+  const now = new Date();
   if (isFirebaseConfigured()) {
     try {
-      const storageRef = ref(
-        getFirebaseStorage(),
-        storagePath(`bank-statements/${orderId}/${name}`),
-      );
-      await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
-    } catch {
-      // fallback
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined({
+        ...updates,
+        updatedAt: Timestamp.fromDate(now),
+      }));
+      return;
+    } catch (err) {
+      console.error("saveRunnerDeliveryProgress failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not save progress. Please try again.");
     }
   }
-  return `mock://bank/${orderId}/${name}`;
+
+  const order = getMockOrderById(orderId);
+  if (!order) throw new Error("Order not found");
+  if (progress.receiptUrl) order.receiptUrl = progress.receiptUrl;
+  if (progress.bankStatementUrl) {
+    order.bankStatementUrl = progress.bankStatementUrl;
+  }
+  if (progress.deliveryPhotoUrl) {
+    order.deliveryPhotoUrl = progress.deliveryPhotoUrl;
+  }
+  if (progress.finalTotal != null) order.finalTotal = round2(progress.finalTotal);
+  if (progress.runnerVerified != null) {
+    order.runnerVerified = progress.runnerVerified;
+  }
+  order.updatedAt = now;
 }
 
 export async function markDeliveredWithTotal(

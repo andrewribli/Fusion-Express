@@ -24,6 +24,7 @@ import {
   markDeliveredWithTotal,
   markPurchased,
   OrderAlreadyTakenError,
+  saveRunnerDeliveryProgress,
   SelfPickupError,
   updateRunnerLocation,
   uploadBankStatementPhoto,
@@ -242,12 +243,25 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
   const [bagConfirmed, setBagConfirmed] = useState<Record<string, boolean>>({});
   const [deliverError, setDeliverError] = useState("");
   const [purchasingId, setPurchasingId] = useState("");
+  const [uploading, setUploading] = useState<
+    "" | "receipt" | "bank" | "photo" | "total"
+  >("");
   const [flowOrderId, setFlowOrderId] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const initialLoad = useRef(true);
-  const purchaseInFlight = useRef(new Set<string>());
-  const uploadedProofRef = useRef<
-    Record<string, { receiptUrl?: string; bankStatementUrl?: string }>
+  const finalTotalSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressRef = useRef<
+    Record<
+      string,
+      {
+        receiptUrl?: string;
+        bankStatementUrl?: string;
+        deliveryPhotoUrl?: string;
+        finalTotal?: number;
+        runnerVerified?: boolean;
+        status?: Order["status"];
+      }
+    >
   >({});
   const openDeliveries = active.filter(
     (order) => !isRunnerDeliveryExpired(order, now),
@@ -261,6 +275,89 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    setFinalTotals((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const order of active) {
+        if (order.finalTotal != null && (next[order.id] == null || next[order.id] === "")) {
+          next[order.id] = String(order.finalTotal);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    setBagConfirmed((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const order of active) {
+        if (order.runnerVerified && !next[order.id]) {
+          next[order.id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [active]);
+
+  function patchActiveOrder(orderId: string, patch: Partial<Order>) {
+    progressRef.current[orderId] = {
+      ...progressRef.current[orderId],
+      ...patch,
+    };
+    setActive((prev) =>
+      prev.map((item) => (item.id === orderId ? { ...item, ...patch } : item)),
+    );
+  }
+
+  function orderWithProgress(orderId: string): Order | undefined {
+    const order = openDeliveries.find((o) => o.id === orderId);
+    if (!order) return undefined;
+    return { ...order, ...progressRef.current[orderId] };
+  }
+
+  async function withTimeout<T>(
+    promise: Promise<T>,
+    ms: number,
+    label: string,
+  ): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        promise,
+        new Promise<T>((_, reject) => {
+          timer = setTimeout(
+            () =>
+              reject(
+                new Error(
+                  `${label} timed out. Check your connection and try again.`,
+                ),
+              ),
+            ms,
+          );
+        }),
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  async function maybeMarkPurchased(orderId: string) {
+    const order = orderWithProgress(orderId);
+    if (!order?.receiptUrl || !order.bankStatementUrl) return;
+    if (order.status === "purchased" || order.status === "delivered") return;
+    await markPurchased(orderId, {
+      receiptUrl: order.receiptUrl,
+      bankStatementUrl: order.bankStatementUrl,
+    });
+    patchActiveOrder(orderId, { status: "purchased" });
+    void notifyOrderStatus({
+      customerEmail: order.customerEmail,
+      orderId,
+      status: "purchased",
+    });
+  }
 
   const refresh = useCallback(async () => {
     if (!user) return;
@@ -295,23 +392,22 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         runnerId ? fetchRunner(runnerId) : Promise.resolve(null),
       ]);
       setPending(p);
-      setActive((prev) =>
+      setActive(
         a.map((order) => {
-          if (!purchaseInFlight.current.has(order.id)) return order;
-          if (order.status === "purchased") {
-            purchaseInFlight.current.delete(order.id);
-            return order;
-          }
-          const local = prev.find((item) => item.id === order.id);
-          if (local?.status === "purchased") {
-            return {
-              ...order,
-              status: "purchased",
-              receiptUrl: local.receiptUrl ?? order.receiptUrl,
-              bankStatementUrl: local.bankStatementUrl ?? order.bankStatementUrl,
-            };
-          }
-          return order;
+          const local = progressRef.current[order.id];
+          if (!local) return order;
+          return {
+            ...order,
+            receiptUrl: order.receiptUrl ?? local.receiptUrl,
+            bankStatementUrl: order.bankStatementUrl ?? local.bankStatementUrl,
+            deliveryPhotoUrl: order.deliveryPhotoUrl ?? local.deliveryPhotoUrl,
+            finalTotal: order.finalTotal ?? local.finalTotal,
+            runnerVerified: order.runnerVerified || local.runnerVerified,
+            status:
+              order.status === "accepted" && local.status === "purchased"
+                ? "purchased"
+                : order.status,
+          };
         }),
       );
       setDelivered(d);
@@ -429,90 +525,177 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     }
   }
 
-  async function handlePurchased(orderId: string): Promise<boolean> {
-    const receipt = receiptFiles[orderId];
-    const bank = bankFiles[orderId];
-    if (!receipt) {
-      setDeliverError("Please upload your receipt first.");
-      return false;
-    }
-    if (!bank) {
-      setDeliverError("Please upload your bank statement first.");
-      return false;
-    }
-
-    const order = openDeliveries.find((o) => o.id === orderId);
+  async function handleReceiptUpload(orderId: string, file: File) {
+    setReceiptFiles((prev) => ({ ...prev, [orderId]: file }));
     setDeliverError("");
-    purchaseInFlight.current.add(orderId);
-    setActive((prev) =>
-      prev.map((item) =>
-        item.id === orderId ? { ...item, status: "purchased" } : item,
-      ),
-    );
+    setUploading("receipt");
+    try {
+      const compressed = await withTimeout(
+        compressImage(file),
+        20000,
+        "Receipt compress",
+      );
+      const receiptUrl = await withTimeout(
+        uploadReceiptPhoto(orderId, compressed),
+        45000,
+        "Receipt upload",
+      );
+      await withTimeout(
+        saveRunnerDeliveryProgress(orderId, { receiptUrl }),
+        15000,
+        "Save receipt",
+      );
+      patchActiveOrder(orderId, { receiptUrl });
+      await maybeMarkPurchased(orderId);
+    } catch (err) {
+      console.error("Receipt save failed", err);
+      setDeliverError(
+        err instanceof Error ? err.message : "Receipt upload failed. Please try again.",
+      );
+    } finally {
+      setUploading("");
+    }
+  }
 
-    void (async () => {
-      try {
-        const [receiptFile, bankFile] = await Promise.all([
-          compressImage(receipt),
-          compressImage(bank),
-        ]);
-        const [receiptUrl, bankStatementUrl] = await Promise.all([
-          uploadReceiptPhoto(orderId, receiptFile),
-          uploadBankStatementPhoto(orderId, bankFile),
-        ]);
-        await markPurchased(orderId, { receiptUrl, bankStatementUrl });
-        uploadedProofRef.current[orderId] = { receiptUrl, bankStatementUrl };
-        setActive((prev) =>
-          prev.map((item) =>
-            item.id === orderId
-              ? { ...item, status: "purchased", receiptUrl, bankStatementUrl }
-              : item,
-          ),
-        );
-        if (order) {
-          void notifyOrderStatus({
-            customerEmail: order.customerEmail,
-            orderId,
-            status: "purchased",
-          });
+  async function handleBankUpload(orderId: string, file: File) {
+    setBankFiles((prev) => ({ ...prev, [orderId]: file }));
+    setDeliverError("");
+    setUploading("bank");
+    try {
+      const compressed = await withTimeout(
+        compressImage(file),
+        20000,
+        "Bank compress",
+      );
+      const bankStatementUrl = await withTimeout(
+        uploadBankStatementPhoto(orderId, compressed),
+        45000,
+        "Bank statement upload",
+      );
+      await withTimeout(
+        saveRunnerDeliveryProgress(orderId, { bankStatementUrl }),
+        15000,
+        "Save bank statement",
+      );
+      patchActiveOrder(orderId, { bankStatementUrl });
+      await maybeMarkPurchased(orderId);
+    } catch (err) {
+      console.error("Bank statement save failed", err);
+      setDeliverError(
+        err instanceof Error
+          ? err.message
+          : "Bank statement upload failed. Please try again.",
+      );
+    } finally {
+      setUploading("");
+    }
+  }
+
+  async function handleLobbyUpload(orderId: string, file: File) {
+    setPhotoFiles((prev) => ({ ...prev, [orderId]: file }));
+    setDeliverError("");
+    setUploading("photo");
+    try {
+      const compressed = await withTimeout(
+        compressImage(file),
+        20000,
+        "Photo compress",
+      );
+      const deliveryPhotoUrl = await withTimeout(
+        uploadDeliveryPhoto(orderId, compressed),
+        45000,
+        "Lobby photo upload",
+      );
+      await withTimeout(
+        saveRunnerDeliveryProgress(orderId, { deliveryPhotoUrl }),
+        15000,
+        "Save lobby photo",
+      );
+      patchActiveOrder(orderId, { deliveryPhotoUrl });
+    } catch (err) {
+      console.error("Lobby photo save failed", err);
+      setDeliverError(
+        err instanceof Error
+          ? err.message
+          : "Lobby photo upload failed. Please try again.",
+      );
+    } finally {
+      setUploading("");
+    }
+  }
+
+  async function handleBagConfirmed(orderId: string, value: boolean) {
+    setBagConfirmed((prev) => ({ ...prev, [orderId]: value }));
+    setDeliverError("");
+    try {
+      await withTimeout(
+        saveRunnerDeliveryProgress(orderId, { runnerVerified: value }),
+        15000,
+        "Save bag confirmation",
+      );
+      patchActiveOrder(orderId, { runnerVerified: value });
+    } catch (err) {
+      console.error("Bag confirmation save failed", err);
+      setDeliverError(
+        err instanceof Error
+          ? err.message
+          : "Could not save confirmation. Please try again.",
+      );
+    }
+  }
+
+  function handleFinalTotalChange(orderId: string, value: string) {
+    setFinalTotals((prev) => ({ ...prev, [orderId]: value }));
+    if (finalTotalSaveTimer.current) clearTimeout(finalTotalSaveTimer.current);
+    const amount = Number(value);
+    if (!(amount > 0)) return;
+    finalTotalSaveTimer.current = setTimeout(() => {
+      void (async () => {
+        setUploading("total");
+        setDeliverError("");
+        try {
+          await withTimeout(
+            saveRunnerDeliveryProgress(orderId, { finalTotal: amount }),
+            15000,
+            "Save final total",
+          );
+          patchActiveOrder(orderId, { finalTotal: amount });
+        } catch (err) {
+          console.error("Final total save failed", err);
+          setDeliverError(
+            err instanceof Error
+              ? err.message
+              : "Could not save total. Please try again.",
+          );
+        } finally {
+          setUploading("");
         }
-        await refresh();
-        purchaseInFlight.current.delete(orderId);
-      } catch (err) {
-        purchaseInFlight.current.delete(orderId);
-        setActive((prev) =>
-          prev.map((item) =>
-            item.id === orderId && item.status === "purchased"
-              ? { ...item, status: "accepted" }
-              : item,
-          ),
-        );
-        setDeliverError(
-          err instanceof Error
-            ? err.message
-            : "Could not save the purchase. You can keep going — it will save again when you mark delivered.",
-        );
-      }
-    })();
-
-    return true;
+      })();
+    }, 500);
   }
 
   async function handleDelivered(orderId: string): Promise<boolean> {
-    const order = openDeliveries.find((o) => o.id === orderId);
+    const order = orderWithProgress(orderId);
     const file = photoFiles[orderId];
     const bank = bankFiles[orderId];
     const receipt = receiptFiles[orderId];
-    const finalTotal = Number(finalTotals[orderId]);
-    if (!order?.receiptUrl && !receipt) {
+    const finalTotal = Number(finalTotals[orderId] || order?.finalTotal);
+    setDeliverError("");
+
+    let receiptUrl = order?.receiptUrl;
+    let bankStatementUrl = order?.bankStatementUrl;
+    let deliveryPhotoUrl = order?.deliveryPhotoUrl;
+    const verified = Boolean(bagConfirmed[orderId] || order?.runnerVerified);
+
+    if (!receiptUrl && !receipt) {
       setDeliverError("Upload the Fusion receipt photo.");
       return false;
     }
-    if (!order?.bankStatementUrl && !bank) {
+    if (!bankStatementUrl && !bank) {
       setDeliverError("Upload a bank statement of the Fusion payment.");
       return false;
     }
-    if (!file) {
+    if (!deliveryPhotoUrl && !file) {
       setDeliverError("A lobby photo is required before you mark delivered.");
       return false;
     }
@@ -520,91 +703,67 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       setDeliverError("Enter the final Fusion receipt total before marking delivered.");
       return false;
     }
-    if (!bagConfirmed[orderId]) {
+    if (!verified) {
       setDeliverError(
         "Confirm you wrote the customer's full name on the receipt and attached it to the bag.",
       );
       return false;
     }
-    setDeliverError("");
+
     setPurchasingId(orderId);
     try {
-      // Wait briefly if purchase uploads are still running so we can reuse URLs.
-      if (purchaseInFlight.current.has(orderId)) {
-        const deadline = Date.now() + 20000;
-        while (purchaseInFlight.current.has(orderId) && Date.now() < deadline) {
-          await new Promise((r) => setTimeout(r, 400));
-        }
+      if (!receiptUrl && receipt) {
+        const compressed = await withTimeout(
+          compressImage(receipt),
+          20000,
+          "Receipt compress",
+        );
+        receiptUrl = await withTimeout(
+          uploadReceiptPhoto(orderId, compressed),
+          45000,
+          "Receipt upload",
+        );
+        await saveRunnerDeliveryProgress(orderId, { receiptUrl });
+        patchActiveOrder(orderId, { receiptUrl });
+      }
+      if (!bankStatementUrl && bank) {
+        const compressed = await withTimeout(
+          compressImage(bank),
+          20000,
+          "Bank compress",
+        );
+        bankStatementUrl = await withTimeout(
+          uploadBankStatementPhoto(orderId, compressed),
+          45000,
+          "Bank statement upload",
+        );
+        await saveRunnerDeliveryProgress(orderId, { bankStatementUrl });
+        patchActiveOrder(orderId, { bankStatementUrl });
+      }
+      if (!deliveryPhotoUrl && file) {
+        const compressed = await withTimeout(
+          compressImage(file),
+          20000,
+          "Photo compress",
+        );
+        deliveryPhotoUrl = await withTimeout(
+          uploadDeliveryPhoto(orderId, compressed),
+          45000,
+          "Lobby photo upload",
+        );
+        await saveRunnerDeliveryProgress(orderId, { deliveryPhotoUrl });
+        patchActiveOrder(orderId, { deliveryPhotoUrl });
       }
 
-      const latest =
-        openDeliveries.find((o) => o.id === orderId) ?? order;
-      const proof = uploadedProofRef.current[orderId];
-      const existingReceipt = latest?.receiptUrl || proof?.receiptUrl;
-      const existingBank = latest?.bankStatementUrl || proof?.bankStatementUrl;
-      const needReceiptUpload = !existingReceipt && Boolean(receipt);
-      const needBankUpload = !existingBank && Boolean(bank);
-
-      const withTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
-        let timer: ReturnType<typeof setTimeout> | undefined;
-        try {
-          return await Promise.race([
-            promise,
-            new Promise<T>((_, reject) => {
-              timer = setTimeout(
-                () => reject(new Error(`${label} timed out. Check your connection and try again.`)),
-                ms,
-              );
-            }),
-          ]);
-        } finally {
-          if (timer) clearTimeout(timer);
-        }
-      };
-
-      const photo = await withTimeout(compressImage(file), 20000, "Photo compress");
-      const [bankPhoto, receiptPhoto] = await Promise.all([
-        needBankUpload && bank
-          ? withTimeout(compressImage(bank), 20000, "Bank compress")
-          : Promise.resolve(undefined),
-        needReceiptUpload && receipt
-          ? withTimeout(compressImage(receipt), 20000, "Receipt compress")
-          : Promise.resolve(undefined),
-      ]);
-
-      const photoUrl = await withTimeout(
-        uploadDeliveryPhoto(orderId, photo),
-        45000,
-        "Lobby photo upload",
-      );
-      const bankStatementUrl = bankPhoto
-        ? await withTimeout(
-            uploadBankStatementPhoto(orderId, bankPhoto),
-            45000,
-            "Bank statement upload",
-          )
-        : existingBank;
-      const receiptUrl = receiptPhoto
-        ? await withTimeout(
-            uploadReceiptPhoto(orderId, receiptPhoto),
-            45000,
-            "Receipt upload",
-          )
-        : existingReceipt;
-
-      if (!bankStatementUrl) {
-        setDeliverError("Upload a bank statement of the Fusion payment.");
-        return false;
-      }
-      if (!receiptUrl) {
-        setDeliverError("Upload the Fusion receipt photo.");
+      if (!receiptUrl || !bankStatementUrl || !deliveryPhotoUrl) {
+        setDeliverError("Missing proof photos. Re-upload and try again.");
         return false;
       }
 
       await withTimeout(
         markDeliveredWithTotal(orderId, {
           finalTotal,
-          deliveryPhotoUrl: photoUrl,
+          deliveryPhotoUrl,
           bankStatementUrl,
           receiptUrl,
           runnerVerified: true,
@@ -613,17 +772,19 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         "Mark delivered",
       );
 
-      if (latest) {
+      if (order) {
         void notifyOrderStatus({
-          customerEmail: latest.customerEmail,
+          customerEmail: order.customerEmail,
           orderId,
           status: "delivered",
         });
       }
-      // Don't block the UI on refresh — status write already succeeded.
+      delete progressRef.current[orderId];
+      setFlowOrderId(null);
       void refresh();
       return true;
     } catch (err) {
+      console.error("Mark delivered failed", err);
       setDeliverError(
         err instanceof Error ? err.message : "Could not mark as delivered.",
       );
@@ -841,32 +1002,32 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       />
       {flowOrder && (
         <RunnerDeliveryFlow
-          order={flowOrder}
+          order={orderWithProgress(flowOrder.id) ?? flowOrder}
           receiptFile={receiptFiles[flowOrder.id]}
           bankFile={bankFiles[flowOrder.id]}
           photoFile={photoFiles[flowOrder.id]}
-          finalTotal={finalTotals[flowOrder.id] ?? ""}
-          bagConfirmed={Boolean(bagConfirmed[flowOrder.id])}
+          finalTotal={
+            finalTotals[flowOrder.id] ??
+            (flowOrder.finalTotal != null ? String(flowOrder.finalTotal) : "")
+          }
+          bagConfirmed={Boolean(
+            bagConfirmed[flowOrder.id] || flowOrder.runnerVerified,
+          )}
           busy={purchasingId === flowOrder.id}
+          uploading={uploading}
           error={deliverError}
-          onReceipt={(file) =>
-            setReceiptFiles((prev) => ({ ...prev, [flowOrder.id]: file }))
-          }
-          onBank={(file) =>
-            setBankFiles((prev) => ({ ...prev, [flowOrder.id]: file }))
-          }
-          onPhoto={(file) =>
-            setPhotoFiles((prev) => ({ ...prev, [flowOrder.id]: file }))
-          }
-          onFinalTotal={(value) =>
-            setFinalTotals((prev) => ({ ...prev, [flowOrder.id]: value }))
-          }
+          onReceipt={(file) => void handleReceiptUpload(flowOrder.id, file)}
+          onBank={(file) => void handleBankUpload(flowOrder.id, file)}
+          onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
+          onFinalTotal={(value) => handleFinalTotalChange(flowOrder.id, value)}
           onBagConfirmed={(value) =>
-            setBagConfirmed((prev) => ({ ...prev, [flowOrder.id]: value }))
+            void handleBagConfirmed(flowOrder.id, value)
           }
-          onPurchased={() => handlePurchased(flowOrder.id)}
           onDelivered={() => handleDelivered(flowOrder.id)}
-          onClose={() => setFlowOrderId(null)}
+          onClose={() => {
+            setDeliverError("");
+            setFlowOrderId(null);
+          }}
         />
       )}
       <RunnerAcceptConfirmModal

@@ -6,17 +6,22 @@ export function FileDropzone({
   label,
   hint,
   file,
+  existingUrl,
+  busy = false,
   onFile,
   accept = "image/*",
 }: {
   label: string;
   hint: string;
   file?: File;
+  existingUrl?: string;
+  busy?: boolean;
   onFile: (file: File) => void;
   accept?: string;
 }) {
   const id = useId();
   const [dragOver, setDragOver] = useState(false);
+  const saved = Boolean(file || existingUrl);
 
   function takeFile(list: FileList | null) {
     const next = list?.[0];
@@ -30,26 +35,29 @@ export function FileDropzone({
         htmlFor={id}
         onDragOver={(e) => {
           e.preventDefault();
-          setDragOver(true);
+          if (!busy) setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
           e.preventDefault();
           setDragOver(false);
-          takeFile(e.dataTransfer.files);
+          if (!busy) takeFile(e.dataTransfer.files);
         }}
         className={`flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-6 text-center transition ${
-          dragOver
-            ? "border-[#ED1C24] bg-[#ED1C24]/15"
-            : file
-              ? "border-green-500 bg-green-50"
-              : "border-[#C4A574] bg-[#FFF8EE]"
+          busy
+            ? "border-[#ED1C24] bg-[#ED1C24]/10"
+            : dragOver
+              ? "border-[#ED1C24] bg-[#ED1C24]/15"
+              : saved
+                ? "border-green-500 bg-green-50"
+                : "border-[#C4A574] bg-[#FFF8EE]"
         }`}
       >
         <input
           id={id}
           type="file"
           accept={accept}
+          disabled={busy}
           className="sr-only"
           onChange={(e) => {
             takeFile(e.target.files);
@@ -58,14 +66,22 @@ export function FileDropzone({
         />
         <p
           className={`max-w-[16rem] text-sm font-semibold leading-snug ${
-            file ? "text-green-800" : "text-[#5C4033]"
+            busy ? "text-[#ED1C24]" : saved ? "text-green-800" : "text-[#5C4033]"
           }`}
         >
-          {file ? file.name : hint}
+          {busy
+            ? "Uploading…"
+            : file
+              ? file.name
+              : existingUrl
+                ? "Photo saved"
+                : hint}
         </p>
-        {file ? (
+        {busy ? (
+          <p className="mt-1 text-xs font-medium text-[#ED1C24]">Please wait</p>
+        ) : saved ? (
           <p className="mt-1 text-xs font-medium text-green-700">
-            Ready — click to replace
+            Saved — click to replace
           </p>
         ) : (
           <p className="mt-2 text-xs text-[#8A6A4F]">PNG or JPG</p>

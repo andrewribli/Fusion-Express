@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
 import { FileDropzone } from "@/components/FileDropzone";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
@@ -17,6 +17,18 @@ const STEPS = [
   "Confirm",
 ] as const;
 
+/** Resume wizard at the first incomplete step based on Firestore fields. */
+export function runnerFlowStartStep(order: Order): number {
+  const hasReceipt = Boolean(order.receiptUrl);
+  const hasBank = Boolean(order.bankStatementUrl);
+  if (!hasReceipt || !hasBank) {
+    return hasReceipt || hasBank ? 1 : 0;
+  }
+  if (!order.deliveryPhotoUrl || !order.runnerVerified) return 2;
+  if (!(Number(order.finalTotal) > 0)) return 3;
+  return 4;
+}
+
 export function RunnerDeliveryFlow({
   order,
   receiptFile,
@@ -25,13 +37,13 @@ export function RunnerDeliveryFlow({
   finalTotal,
   bagConfirmed,
   busy,
+  uploading,
   error,
   onReceipt,
   onBank,
   onPhoto,
   onFinalTotal,
   onBagConfirmed,
-  onPurchased,
   onDelivered,
   onClose,
 }: {
@@ -42,34 +54,37 @@ export function RunnerDeliveryFlow({
   finalTotal: string;
   bagConfirmed: boolean;
   busy: boolean;
+  uploading: "" | "receipt" | "bank" | "photo" | "total";
   error: string;
   onReceipt: (file: File) => void;
   onBank: (file: File) => void;
   onPhoto: (file: File) => void;
   onFinalTotal: (value: string) => void;
   onBagConfirmed: (value: boolean) => void;
-  onPurchased: () => Promise<boolean>;
   onDelivered: () => Promise<boolean>;
   onClose: () => void;
 }) {
-  const purchased = order.status === "purchased";
-  const [step, setStep] = useState(purchased ? 2 : 0);
+  const [step, setStep] = useState(() => runnerFlowStartStep(order));
   const hasReceipt = Boolean(order.receiptUrl || receiptFile);
   const hasBank = Boolean(order.bankStatementUrl || bankFile);
+  const hasLobby = Boolean(order.deliveryPhotoUrl || photoFile);
   const totalOk = Number(finalTotal) > 0;
+  const blocked = busy || uploading !== "";
+
+  useEffect(() => {
+    setStep(runnerFlowStartStep(order));
+    // Only re-seed when opening a different order.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: order.id only
+  }, [order.id]);
 
   function canLeave(index: number): boolean {
-    if (index === 1) return purchased || (hasReceipt && hasBank);
-    if (index === 2) return bagConfirmed && Boolean(photoFile);
-    if (index === 3) return totalOk;
+    if (index === 1) return hasReceipt && hasBank && uploading === "";
+    if (index === 2) return bagConfirmed && hasLobby && uploading === "";
+    if (index === 3) return totalOk && uploading === "";
     return true;
   }
 
-  async function next() {
-    if (step === 1 && !purchased) {
-      if (!hasReceipt || !hasBank) return;
-      void onPurchased();
-    }
+  function next() {
     setStep((current) => Math.min(current + 1, STEPS.length - 1));
   }
 
@@ -156,28 +171,29 @@ export function RunnerDeliveryFlow({
             <div className="space-y-3">
               <p className="text-sm text-[#f5f5f5]">
                 Pay ${order.subtotal} at Fusion yourself, then attach the receipt and bank
-                statement. Next unlocks as soon as both photos are attached.
+                statement. Each photo saves as soon as you pick it.
               </p>
-              {purchased ? (
+              {order.status === "purchased" && order.receiptUrl && order.bankStatementUrl ? (
                 <p className="rounded-xl bg-green-950 px-3 py-2 text-sm text-green-200">
-                  Already marked purchased. Continue to delivery.
+                  Purchase proof already saved. Continue to delivery.
                 </p>
-              ) : (
-                <>
-                  <FileDropzone
-                    label="Fusion receipt (required)"
-                    hint="Tap to take or choose a photo"
-                    file={receiptFile}
-                    onFile={onReceipt}
-                  />
-                  <FileDropzone
-                    label="Bank statement (required)"
-                    hint="Screenshot of the Fusion payment"
-                    file={bankFile}
-                    onFile={onBank}
-                  />
-                </>
-              )}
+              ) : null}
+              <FileDropzone
+                label="Fusion receipt (required)"
+                hint="Tap to take or choose a photo"
+                file={receiptFile}
+                existingUrl={order.receiptUrl}
+                busy={uploading === "receipt"}
+                onFile={onReceipt}
+              />
+              <FileDropzone
+                label="Bank statement (required)"
+                hint="Screenshot of the Fusion payment"
+                file={bankFile}
+                existingUrl={order.bankStatementUrl}
+                busy={uploading === "bank"}
+                onFile={onBank}
+              />
             </div>
           )}
 
@@ -200,6 +216,8 @@ export function RunnerDeliveryFlow({
                 label="Lobby photo (required)"
                 hint="Photo of the bag at the lobby, receipt visible"
                 file={photoFile}
+                existingUrl={order.deliveryPhotoUrl}
+                busy={uploading === "photo"}
                 onFile={onPhoto}
               />
             </div>
@@ -224,6 +242,11 @@ export function RunnerDeliveryFlow({
                 placeholder={String(order.subtotal)}
                 className="min-h-12 w-full rounded-xl border border-white/15 bg-[#2a2a2a] px-4 text-lg font-bold text-white"
               />
+              {uploading === "total" ? (
+                <p className="text-xs text-[#c4c4c4]">Saving total…</p>
+              ) : order.finalTotal != null && Number(finalTotal) === order.finalTotal ? (
+                <p className="text-xs text-green-300">Total saved</p>
+              ) : null}
             </div>
           )}
 
@@ -232,7 +255,7 @@ export function RunnerDeliveryFlow({
               <p>Receipt: {hasReceipt ? "uploaded" : "missing"}</p>
               <p>Bank statement: {hasBank ? "uploaded" : "missing"}</p>
               <p>Name on bag: {bagConfirmed ? "confirmed" : "not confirmed"}</p>
-              <p>Lobby photo: {photoFile ? "ready" : "missing"}</p>
+              <p>Lobby photo: {hasLobby ? "ready" : "missing"}</p>
               <p className="text-lg font-bold text-white">
                 Final total: {totalOk ? `$${finalTotal}` : "missing"}
               </p>
@@ -252,7 +275,7 @@ export function RunnerDeliveryFlow({
         <div className="flex gap-2 border-t border-white/10 p-4">
           <button
             type="button"
-            disabled={step === 0 || busy}
+            disabled={step === 0 || blocked}
             onClick={() => setStep((current) => Math.max(0, current - 1))}
             className="min-h-12 flex-1 rounded-xl border border-white/20 text-sm font-bold text-white disabled:opacity-40"
           >
@@ -261,21 +284,21 @@ export function RunnerDeliveryFlow({
           {step < STEPS.length - 1 ? (
             <button
               type="button"
-              disabled={(step > 0 && !canLeave(step)) || (busy && step !== 1)}
-              onClick={() => void next()}
+              disabled={(step > 0 && !canLeave(step)) || blocked}
+              onClick={() => next()}
               className="min-h-12 flex-[2] rounded-xl bg-[#ED1C24] text-sm font-bold text-white disabled:opacity-40"
             >
-              Next
+              {uploading ? "Saving…" : "Next"}
             </button>
           ) : (
             <button
               type="button"
               disabled={
-                busy ||
+                blocked ||
                 !hasReceipt ||
                 !hasBank ||
                 !bagConfirmed ||
-                !photoFile ||
+                !hasLobby ||
                 !totalOk
               }
               onClick={() => void finish()}
