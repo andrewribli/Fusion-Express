@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { MenuItem } from "@/lib/types";
 import { formatMenuPrice } from "@/lib/types";
-import { useCart } from "@/context/CartContext";
 import { getItemImage } from "@/data/aisle-images";
+import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 
 interface MenuItemCardProps {
@@ -13,19 +13,7 @@ interface MenuItemCardProps {
 }
 
 export function MenuItemCard({ item }: MenuItemCardProps) {
-  const { items, setQuantity } = useCart();
-  const inCart = items.find((c) => c.item.id === item.id);
-  const quantity = inCart?.quantity ?? 0;
   const [open, setOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const sync = () => setIsMobile(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   function onCardActivate() {
     if (!item.inStock) return;
@@ -59,11 +47,7 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
               sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
             />
           ) : null}
-          {quantity > 0 ? (
-            <span className="absolute right-1 top-1 rounded-full bg-[#ED1C24] px-1.5 py-0.5 text-[10px] font-bold text-white">
-              {quantity}
-            </span>
-          ) : null}
+          <ProductCardQtyControl item={item} />
         </div>
         <div className="flex flex-1 flex-col p-2.5">
           <h3
@@ -85,39 +69,7 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
             <p className="mt-2 text-xs font-semibold" style={{ color: "#9ca3af" }}>
               Out of stock
             </p>
-          ) : quantity > 0 ? (
-            <div
-              className="mt-2 flex items-center justify-between rounded-lg px-1.5 py-1"
-              style={{ backgroundColor: "#fef2f2" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                onClick={() => setQuantity(item.id, quantity - 1)}
-                className="flex h-11 w-11 items-center justify-center rounded-lg text-base font-bold shadow-sm"
-                style={{ backgroundColor: "#ffffff", color: "#ED1C24" }}
-                aria-label="Decrease quantity"
-              >
-                −
-              </button>
-              <span className="text-sm font-semibold" style={{ color: "#111111" }}>
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() => setQuantity(item.id, quantity + 1)}
-                className="flex h-11 w-11 items-center justify-center rounded-lg text-base font-bold text-white shadow-sm"
-                style={{ backgroundColor: "#ED1C24" }}
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
-            </div>
-          ) : (
-            <p className="mt-2 text-[10px] font-semibold" style={{ color: "#9ca3af" }}>
-              {isMobile ? "Tap for details" : "Tap to add"}
-            </p>
-          )}
+          ) : null}
         </div>
       </div>
 

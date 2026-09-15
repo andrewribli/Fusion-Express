@@ -16,6 +16,7 @@ import { CustomItemCard } from "@/components/CustomItemCard";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { OrderActionBar } from "@/components/OrderActionBar";
+import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 import { SECTION_META } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
@@ -51,10 +52,17 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
 
   return (
     <>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen(true)}
-        className="shop-surface flex w-[148px] shrink-0 flex-col overflow-hidden rounded-2xl text-left sm:w-[156px]"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+        className="shop-surface flex w-[148px] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl text-left sm:w-[156px]"
         style={{
           backgroundColor: "#ffffff",
           boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
@@ -74,11 +82,12 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
             />
           ) : null}
           <span
-            className="absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
+            className="absolute left-2 top-2 z-[1] rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
             style={{ backgroundColor: "#ED1C24" }}
           >
             {badge}
           </span>
+          <ProductCardQtyControl item={item} size="sm" />
         </div>
         <div className="flex flex-col gap-1.5 px-3 pb-3 pt-2">
           <p
@@ -91,7 +100,7 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
             {priceLabel(item)}
           </p>
         </div>
-      </button>
+      </div>
       <ProductQuickAddModal item={item} open={open} onClose={() => setOpen(false)} />
     </>
   );
