@@ -65,6 +65,9 @@ export default function AdminUsersPage() {
                 <Link href="/admin/feedback" className="font-medium text-[#ED1C24] underline">
                   Feedback
                 </Link>
+                <Link href="/admin/support" className="font-medium text-[#ED1C24] underline">
+                  Support chat
+                </Link>
                 {" · "}
                 <Link href="/admin/warnings" className="font-medium text-[#ED1C24] underline">
                   Warnings

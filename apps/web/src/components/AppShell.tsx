@@ -1,7 +1,7 @@
 "use client";
 
 import { BottomNav } from "@/components/BottomNav";
-import { FeedbackButton } from "@/components/FeedbackButton";
+import { AdminSupportChat } from "@/components/AdminSupportChat";
 import { SiteFooter } from "@/components/SiteFooter";
 import { TrackOrderFab } from "@/components/TrackOrderFab";
 import { ActiveOrdersProvider } from "@/lib/use-active-orders";
@@ -19,7 +19,7 @@ export function AppShell({ children, hideNav }: AppShellProps) {
         <SiteFooter />
       </div>
       {!hideNav && <TrackOrderFab />}
-      {!hideNav && <FeedbackButton />}
+      {!hideNav && <AdminSupportChat />}
       {!hideNav && <BottomNav />}
     </ActiveOrdersProvider>
   );

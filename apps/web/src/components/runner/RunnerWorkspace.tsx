@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { AdminSupportChat } from "@/components/AdminSupportChat";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireRunner } from "@/components/RequireAuth";
 import { RunnerAcceptConfirmModal } from "@/components/RunnerAcceptConfirmModal";
@@ -245,6 +246,9 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
   const [now, setNow] = useState(() => Date.now());
   const initialLoad = useRef(true);
   const purchaseInFlight = useRef(new Set<string>());
+  const uploadedProofRef = useRef<
+    Record<string, { receiptUrl?: string; bankStatementUrl?: string }>
+  >({});
   const openDeliveries = active.filter(
     (order) => !isRunnerDeliveryExpired(order, now),
   );
@@ -457,6 +461,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           uploadBankStatementPhoto(orderId, bankFile),
         ]);
         await markPurchased(orderId, { receiptUrl, bankStatementUrl });
+        uploadedProofRef.current[orderId] = { receiptUrl, bankStatementUrl };
         setActive((prev) =>
           prev.map((item) =>
             item.id === orderId
@@ -472,6 +477,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           });
         }
         await refresh();
+        purchaseInFlight.current.delete(orderId);
       } catch (err) {
         purchaseInFlight.current.delete(orderId);
         setActive((prev) =>
@@ -523,41 +529,100 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     setDeliverError("");
     setPurchasingId(orderId);
     try {
-    const [photo, bankPhoto, receiptPhoto] = await Promise.all([
-      compressImage(file),
-      bank ? compressImage(bank) : Promise.resolve(undefined),
-      receipt ? compressImage(receipt) : Promise.resolve(undefined),
-    ]);
-    const [photoUrl, bankStatementUrl, receiptUrl] = await Promise.all([
-      uploadDeliveryPhoto(orderId, photo),
-      bankPhoto
-        ? uploadBankStatementPhoto(orderId, bankPhoto)
-        : Promise.resolve(order?.bankStatementUrl),
-      receiptPhoto
-        ? uploadReceiptPhoto(orderId, receiptPhoto)
-        : Promise.resolve(order?.receiptUrl),
-    ]);
-    if (!bankStatementUrl) {
-      setDeliverError("Upload a bank statement of the Fusion payment.");
-      return false;
-    }
-    await markDeliveredWithTotal(orderId, {
-      finalTotal,
-      deliveryPhotoUrl: photoUrl,
-      bankStatementUrl,
-      receiptUrl,
-      runnerVerified: true,
-    });
+      // Wait briefly if purchase uploads are still running so we can reuse URLs.
+      if (purchaseInFlight.current.has(orderId)) {
+        const deadline = Date.now() + 20000;
+        while (purchaseInFlight.current.has(orderId) && Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      }
 
-    if (order) {
-      void notifyOrderStatus({
-        customerEmail: order.customerEmail,
-        orderId,
-        status: "delivered",
-      });
-    }
-    await refresh();
-    return true;
+      const latest =
+        openDeliveries.find((o) => o.id === orderId) ?? order;
+      const proof = uploadedProofRef.current[orderId];
+      const existingReceipt = latest?.receiptUrl || proof?.receiptUrl;
+      const existingBank = latest?.bankStatementUrl || proof?.bankStatementUrl;
+      const needReceiptUpload = !existingReceipt && Boolean(receipt);
+      const needBankUpload = !existingBank && Boolean(bank);
+
+      const withTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          return await Promise.race([
+            promise,
+            new Promise<T>((_, reject) => {
+              timer = setTimeout(
+                () => reject(new Error(`${label} timed out. Check your connection and try again.`)),
+                ms,
+              );
+            }),
+          ]);
+        } finally {
+          if (timer) clearTimeout(timer);
+        }
+      };
+
+      const photo = await withTimeout(compressImage(file), 20000, "Photo compress");
+      const [bankPhoto, receiptPhoto] = await Promise.all([
+        needBankUpload && bank
+          ? withTimeout(compressImage(bank), 20000, "Bank compress")
+          : Promise.resolve(undefined),
+        needReceiptUpload && receipt
+          ? withTimeout(compressImage(receipt), 20000, "Receipt compress")
+          : Promise.resolve(undefined),
+      ]);
+
+      const photoUrl = await withTimeout(
+        uploadDeliveryPhoto(orderId, photo),
+        45000,
+        "Lobby photo upload",
+      );
+      const bankStatementUrl = bankPhoto
+        ? await withTimeout(
+            uploadBankStatementPhoto(orderId, bankPhoto),
+            45000,
+            "Bank statement upload",
+          )
+        : existingBank;
+      const receiptUrl = receiptPhoto
+        ? await withTimeout(
+            uploadReceiptPhoto(orderId, receiptPhoto),
+            45000,
+            "Receipt upload",
+          )
+        : existingReceipt;
+
+      if (!bankStatementUrl) {
+        setDeliverError("Upload a bank statement of the Fusion payment.");
+        return false;
+      }
+      if (!receiptUrl) {
+        setDeliverError("Upload the Fusion receipt photo.");
+        return false;
+      }
+
+      await withTimeout(
+        markDeliveredWithTotal(orderId, {
+          finalTotal,
+          deliveryPhotoUrl: photoUrl,
+          bankStatementUrl,
+          receiptUrl,
+          runnerVerified: true,
+        }),
+        20000,
+        "Mark delivered",
+      );
+
+      if (latest) {
+        void notifyOrderStatus({
+          customerEmail: latest.customerEmail,
+          orderId,
+          status: "delivered",
+        });
+      }
+      // Don't block the UI on refresh — status write already succeeded.
+      void refresh();
+      return true;
     } catch (err) {
       setDeliverError(
         err instanceof Error ? err.message : "Could not mark as delivered.",
@@ -647,6 +712,9 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
             {!loading && tab === "active" && (
               <section className="mt-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
                 <div>
+                <div className="mb-3">
+                  <AdminSupportChat embedded />
+                </div>
                 {deliverError && (
                   <p className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                     {deliverError}

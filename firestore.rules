@@ -305,6 +305,25 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // User ↔ admin support chat (payments, receipts, disputes).
+    match /supportChats/{userId} {
+      allow get: if signedIn() && (uid() == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if signedIn() && (uid() == userId || isAdmin());
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow get, list: if signedIn() && (uid() == userId || isAdmin());
+        allow create: if signedIn()
+          && (uid() == userId || isAdmin())
+          && request.resource.data.senderId == uid()
+          && request.resource.data.message is string
+          && request.resource.data.message.size() > 0
+          && request.resource.data.message.size() <= 2000;
+        allow update, delete: if false;
+      }
+    }
+
     // ------------------------------------------------- staging (*_test) twins
 
     // Preview deploys point at these collections and hold throwaway data only.
@@ -355,6 +374,13 @@ service cloud.firestore {
         && request.resource.data.message.size() <= 2000
         && request.resource.data.status == 'unread';
       allow get, list, update, delete: if isAdmin();
+    }
+
+    match /supportChats_test/{userId} {
+      allow read, write: if signedIn();
+      match /messages/{messageId} {
+        allow read, write: if signedIn();
+      }
     }
   }
 }
