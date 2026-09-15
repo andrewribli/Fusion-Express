@@ -126,6 +126,34 @@ export {
   TRACKING_STEPS,
   getStepIndex,
   normalizeOrderStatus,
+  isActiveRunnerStatus,
+  isActiveCustomerOrderStatus,
+  MAX_ACTIVE_CUSTOMER_ORDERS,
+  ACTIVE_ORDER_LIMIT_MESSAGE,
+  formatOrderPlacedAt,
+  groceryAmountDue,
+  hasConfirmedGroceryTotal,
+  customerAmountDue,
+  runnerReimburseTotal,
+  adminPayoutLabel,
+  CUSTOMER_PAY_WINDOW_MS,
+  CUSTOMER_PAY_REMINDER_MS,
+  RUNNER_DELIVERY_WINDOW_MS,
+  RUNNER_DEADLINE_REMINDER_MS,
+  CUSTOMER_DEADLINE_REMINDER_MS,
+  RUNNER_DEADLINE_WARNING,
+  EXPIRED_DELIVERIES_NOTICE,
+  CUSTOMER_DEADLINE_WARNING,
+  formatRemaining,
+  runnerDeadlineOf,
+  customerDeadlineOf,
+  isRunnerDeliveryOpen,
+  isRunnerHoldStatus,
+  isRunnerDeliveryExpired,
+  runnerExpiredAtOf,
+  formatExpiredAgo,
+  runnerWarningTotal,
+  isCustomerPaymentOpen,
 } from "./order-status";
 
 
@@ -178,6 +206,21 @@ export interface Order {
   total: number;
   paymentReceived: boolean;
   paymentMethod?: "PayMe" | "FPS";
+  /** Grocery receipt total the runner spent at Fusion. */
+  finalTotal?: number;
+  amountPaidByRunner?: number;
+  receiptUrl?: string;
+  bankStatementUrl?: string;
+  customerNameOnReceipt?: boolean;
+  runnerVerified?: boolean;
+  adminVerified?: boolean;
+  customerPaidAt?: Date;
+  runnerPaidAt?: Date;
+  runnerEmail?: string;
+  acceptedAt?: Date;
+  purchasedAt?: Date;
+  runnerPaymentMethod?: "PayMe" | "FPS";
+  runnerPaymentId?: string;
   /** Doc id in /runners. */
   runnerId?: string;
   /**
@@ -193,6 +236,16 @@ export interface Order {
   updatedAt: Date;
   pickedUpAt?: Date;
   deliveredAt?: Date;
+  runnerDeadline?: Date;
+  customerDeadline?: Date;
+  runnerWarningCount?: number;
+  customerWarningCount?: number;
+  runnerExpiredAt?: Date;
+  customerOverdueAt?: Date;
+  runnerReminderSentAt?: Date;
+  customerReminderSentAt?: Date;
+  adminMissedNotifiedAt?: Date;
+  lastEscalatedAt?: Date;
   /** Original app subtotal before till prices. */
   estimatedSubtotal?: number;
   actualSubtotal?: number;
