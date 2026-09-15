@@ -19,8 +19,13 @@ export const ZONE_LABELS: Record<DeliveryZone, string> = {
 /** Colleges / residences relative to Fusion at Benjamin Franklin Centre */
 const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "Chung Chi College": 1,
+  "S.H. Ho College (SHHO)": 1,
+  "Morningside College": 1,
   "United College": 2,
   "Shaw College": 2,
+  "Lee Woo Sing College (LWS)": 2,
+  "C.W. Chu College": 3,
+  "Wu Yee Sun College (WYS)": 3,
   "New Asia College": 3,
   "International House (I-House)": 3,
   "Postgraduate Halls (PGH)": 3,

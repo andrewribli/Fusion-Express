@@ -4,25 +4,45 @@ export interface NavTab {
   href: string;
   label: string;
   /** Stable id for SVG icon mapping. */
-  iconId: "home" | "track" | "cart" | "profile" | "available" | "deliveries" | "orders" | "earnings" | "search" | "category";
+  iconId:
+    | "home"
+    | "track"
+    | "cart"
+    | "profile"
+    | "available"
+    | "deliveries"
+    | "orders"
+    | "earnings"
+    | "search"
+    | "category"
+    | "add"
+    | "runner";
   /** Extra prefixes that should light this tab up. */
   match?: string[];
+  /** Non-route actions handled by BottomNav / AppHeader. */
+  action?: "manual-add" | "switch-runner" | "switch-customer";
 }
 
 export const CUSTOMER_TABS: NavTab[] = [
   { href: "/", label: "Home", iconId: "home", match: ["/", "/home"] },
+  { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
-    href: "/browse/dry",
-    label: "Category",
-    iconId: "category",
-    match: ["/browse", "/menu"],
+    href: "#runner",
+    label: "Runner",
+    iconId: "runner",
+    action: "switch-runner",
   },
-  { href: "/#search", label: "Search", iconId: "search" },
   { href: "/cart", label: "Cart", iconId: "cart", match: ["/checkout"] },
   { href: "/profile", label: "Account", iconId: "profile" },
 ];
 
 export const RUNNER_TABS: NavTab[] = [
+  {
+    href: "#customer",
+    label: "Shop",
+    iconId: "home",
+    action: "switch-customer",
+  },
   { href: "/runner/dashboard", label: "Available", iconId: "available" },
   {
     href: "/runner/deliveries",
@@ -30,7 +50,6 @@ export const RUNNER_TABS: NavTab[] = [
     iconId: "deliveries",
     match: ["/runner/expired"],
   },
-  { href: "/orders", label: "Orders", iconId: "orders" },
   { href: "/runner/earnings", label: "Earnings", iconId: "earnings" },
   { href: "/runner/profile", label: "Profile", iconId: "profile" },
 ];
@@ -40,6 +59,7 @@ export function tabsForMode(mode: AppMode): NavTab[] {
 }
 
 export function isTabActive(tab: NavTab, pathname: string): boolean {
+  if (tab.action) return false;
   if (pathname === tab.href) return true;
   for (const prefix of tab.match ?? []) {
     if (prefix === "/" ? pathname === "/" : pathname.startsWith(prefix)) {
@@ -68,4 +88,14 @@ export function isShopPath(pathname: string): boolean {
 
 export function homeForMode(mode: AppMode): string {
   return mode === "runner" ? "/runner/dashboard" : "/";
+}
+
+/** Where the Runner tab / Switch to Runner button should send the user. */
+export function runnerEntryHref(opts: {
+  loggedIn: boolean;
+  canRunnerMode: boolean;
+}): string {
+  if (!opts.loggedIn) return "/login?next=/runner/terms";
+  if (opts.canRunnerMode) return "/runner/dashboard";
+  return "/runner/terms";
 }

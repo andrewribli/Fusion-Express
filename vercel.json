@@ -2,5 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "buildCommand": "npx turbo run build --filter=@fusion-express/web"
+  "buildCommand": "npx turbo run build --filter=@fusion-express/web",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "servecart.vercel.app"
+        }
+      ],
+      "destination": "https://gracerun.vercel.app/:path*",
+      "statusCode": 301
+    }
+  ]
 }

@@ -16,6 +16,7 @@ import { CustomItemCard } from "@/components/CustomItemCard";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { OrderActionBar } from "@/components/OrderActionBar";
+import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 import { SECTION_META } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
 import { QUICK_CATEGORIES } from "@/data/quick-categories";
@@ -23,6 +24,8 @@ import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { loadAllProducts } from "@/lib/firestore";
 import { resolveHomePopularItems } from "@/lib/home-popular";
+import { runnerEntryHref } from "@/lib/nav";
+import { useManualItemModal } from "@/lib/manual-item-modal";
 import { searchItems } from "@/lib/menu";
 import { popularityScore, topPopularItems } from "@/lib/popular-items";
 import { formatMenuPrice, type MenuItem } from "@/lib/types";
@@ -42,49 +45,55 @@ function priceLabel(item: MenuItem): string {
 }
 
 function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
-  const { addItem } = useCart();
+  const [open, setOpen] = useState(false);
   const badge = pickBadge(item, index);
   const image = getItemImage(item);
 
   return (
-    <button
-      type="button"
-      onClick={() => addItem(item)}
-      className="shop-surface flex w-[42vw] max-w-[160px] shrink-0 flex-col overflow-hidden rounded-xl text-left sm:w-[150px]"
-      style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}
-    >
-      <div className="relative aspect-square w-full bg-[#f7f7f7]">
-        {image ? (
-          <Image
-            src={image}
-            alt=""
-            fill
-            className="object-contain p-2"
-            sizes="160px"
-          />
-        ) : null}
-        <span
-          className="absolute bottom-1.5 left-1.5 max-w-[90%] truncate rounded px-1.5 py-0.5 text-[10px] font-bold text-white"
-          style={{ backgroundColor: "rgba(237,28,36,0.92)" }}
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="shop-surface flex w-[148px] shrink-0 flex-col overflow-hidden rounded-2xl text-left sm:w-[156px]"
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+        }}
+      >
+        <div
+          className="relative aspect-square w-full"
+          style={{ backgroundColor: "#fafafa" }}
         >
-          {badge}
-        </span>
-      </div>
-      <div className="flex flex-col gap-1 px-2.5 pb-2.5 pt-2">
-        <p
-          className="line-clamp-2 min-h-[2.4rem] text-[12px] font-medium leading-snug"
-          style={{ color: "#222" }}
-        >
-          {item.name}
-        </p>
-        <p
-          className="text-[15px] font-extrabold leading-none"
-          style={{ color: "#ED1C24" }}
-        >
-          {priceLabel(item)}
-        </p>
-      </div>
-    </button>
+          {image ? (
+            <Image
+              src={image}
+              alt=""
+              fill
+              className="object-contain p-3"
+              sizes="160px"
+            />
+          ) : null}
+          <span
+            className="absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
+            style={{ backgroundColor: "#ED1C24" }}
+          >
+            {badge}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1.5 px-3 pb-3 pt-2">
+          <p
+            className="line-clamp-2 min-h-[2.5rem] text-[12px] font-semibold leading-snug"
+            style={{ color: "#111111" }}
+          >
+            {item.name}
+          </p>
+          <p className="text-lg font-extrabold leading-none" style={{ color: "#ED1C24" }}>
+            {priceLabel(item)}
+          </p>
+        </div>
+      </button>
+      <ProductQuickAddModal item={item} open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }
 
@@ -114,8 +123,8 @@ function HomeSearchBar({
   return (
     <div className="relative min-w-0 flex-1">
       <div
-        className="flex h-10 w-full min-w-0 items-center gap-0.5 rounded-full pl-2.5 pr-1"
-        style={{ backgroundColor: "#ffffff" }}
+        className="flex h-11 w-full min-w-0 items-center gap-1 rounded-full pl-3 pr-1.5"
+        style={{ backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
       >
         <input
           ref={inputRef}
@@ -127,14 +136,14 @@ function HomeSearchBar({
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
           placeholder="Search Fusion"
           className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
-          style={{ color: "#111" }}
+          style={{ backgroundColor: "transparent", color: "#111111" }}
           autoComplete="off"
         />
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-          style={{ color: "#555" }}
+          style={{ color: "#555555" }}
           aria-label="Scan or upload a product photo"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -149,7 +158,7 @@ function HomeSearchBar({
         <button
           type="button"
           onClick={() => inputRef.current?.focus()}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
           style={{ backgroundColor: "#ff6a00" }}
           aria-label="Search"
         >
@@ -172,15 +181,19 @@ function HomeSearchBar({
       />
       {focused && suggestions.length > 0 && (
         <ul
-          className="shop-surface absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-xl py-1 shadow-lg"
-          style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+          className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
+          style={{
+            backgroundColor: "#ffffff",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          }}
         >
           {suggestions.map((item) => (
             <li key={item.id}>
               <button
                 type="button"
-                className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm hover:bg-red-50"
-                style={{ color: "#111" }}
+                className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm"
+                style={{ color: "#111111" }}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   onSelect(item);
@@ -202,7 +215,8 @@ function HomeSearchBar({
 
 export function ShopHome() {
   const { addItem, itemCount } = useCart();
-  const { user } = useUser();
+  const { user, setMode, canRunnerMode } = useUser();
+  const { openManualItem } = useManualItemModal();
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -252,13 +266,14 @@ export function ShopHome() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash === "#search") {
-      searchRef.current?.focus();
+    if (window.location.hash === "#search") searchRef.current?.focus();
+    if (
+      window.location.hash === "#manual-item" ||
+      window.location.hash === "#add"
+    ) {
+      openManualItem();
     }
-    if (window.location.hash === "#manual-item") {
-      document.getElementById("manual-item")?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [productsLoading]);
+  }, [productsLoading, openManualItem]);
 
   const loadMore = useCallback(() => {
     setFeedCount((n) => Math.min(n + BATCH, feedPool.length));
@@ -282,11 +297,11 @@ export function ShopHome() {
 
   return (
     <AppShell>
-      <div className="shop-page min-h-screen">
+      <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
         <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
-          <div className="mx-auto flex max-w-7xl items-center gap-1.5 px-2.5 py-2 sm:gap-2 sm:px-4">
+          <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
             <Link href="/" className="hidden shrink-0 sm:block">
-              <span className="text-sm font-extrabold tracking-tight text-white">
+              <span className="text-base font-extrabold tracking-tight text-white">
                 GraceRun
               </span>
             </Link>
@@ -302,7 +317,7 @@ export function ShopHome() {
             />
             <Link
               href={itemCount > 0 ? (user ? "/cart" : "/login?next=/cart") : "/cart"}
-              className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
               aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -318,11 +333,24 @@ export function ShopHome() {
               {itemCount > 0 && (
                 <span
                   className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
-                  style={{ backgroundColor: "#fff", color: "#ED1C24" }}
+                  style={{ backgroundColor: "#ffffff", color: "#ED1C24" }}
                 >
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
+            </Link>
+            <Link
+              href={runnerEntryHref({
+                loggedIn: Boolean(user),
+                canRunnerMode,
+              })}
+              onClick={() => {
+                if (canRunnerMode) setMode("runner");
+              }}
+              className="hidden min-h-10 shrink-0 items-center rounded-full bg-white px-3 py-2 text-xs font-bold shadow-sm hover:bg-red-50 sm:inline-flex"
+              style={{ color: "#ED1C24" }}
+            >
+              Switch to Runner
             </Link>
             <div className="hidden shrink-0 sm:block">
               <AccountMenu hideThemeChip />
@@ -330,35 +358,68 @@ export function ShopHome() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl pb-36">
-          <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-6 xl:px-4 xl:pt-4">
-            <div className="min-w-0">
-              <section className="shop-surface px-2 py-3" aria-label="Categories">
-                <div className="scrollbar-hide flex gap-1 overflow-x-auto px-1">
-                  {QUICK_CATEGORIES.map((cat) => (
-                    <Link
-                      key={cat.id}
-                      href={cat.href}
-                      className="flex w-[68px] shrink-0 flex-col items-center gap-1.5 px-0.5 text-center"
-                    >
-                      <span
-                        className="flex h-12 w-12 items-center justify-center rounded-full text-[22px]"
-                        style={{ backgroundColor: "#ffe8e8" }}
-                        aria-hidden
+        <main className="mx-auto w-full max-w-7xl px-0 pb-36 sm:px-4">
+          <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
+            <div className="min-w-0 space-y-4">
+              <section
+                className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
+                style={{ backgroundColor: "#ffffff" }}
+                aria-label="Categories"
+              >
+                <div className="scrollbar-hide flex gap-2 overflow-x-auto px-1">
+                  {QUICK_CATEGORIES.map((cat) =>
+                    cat.id === "manual" ? (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={openManualItem}
+                        className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
                       >
-                        {cat.emoji}
-                      </span>
-                      <span className="shop-label line-clamp-2 text-[11px] font-semibold leading-tight">
-                        {cat.label}
-                      </span>
-                    </Link>
-                  ))}
+                        <span
+                          className="flex h-14 w-14 items-center justify-center rounded-2xl text-[26px]"
+                          style={{ backgroundColor: "#ffe4e6" }}
+                          aria-hidden
+                        >
+                          {cat.emoji}
+                        </span>
+                        <span
+                          className="shop-label line-clamp-2 text-[12px] font-semibold leading-tight"
+                          style={{ color: "#111111" }}
+                        >
+                          {cat.label}
+                        </span>
+                      </button>
+                    ) : (
+                      <Link
+                        key={cat.id}
+                        href={cat.href}
+                        className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
+                      >
+                        <span
+                          className="flex h-14 w-14 items-center justify-center rounded-2xl text-[26px]"
+                          style={{ backgroundColor: "#ffe4e6" }}
+                          aria-hidden
+                        >
+                          {cat.emoji}
+                        </span>
+                        <span
+                          className="shop-label line-clamp-2 text-[12px] font-semibold leading-tight"
+                          style={{ color: "#111111" }}
+                        >
+                          {cat.label}
+                        </span>
+                      </Link>
+                    ),
+                  )}
                 </div>
               </section>
 
               {searching ? (
-                <section className="mt-2 px-3">
-                  <h2 className="text-sm font-bold" style={{ color: "#111" }}>
+                <section
+                  className="shop-surface rounded-2xl px-4 py-4 shadow-sm"
+                  style={{ backgroundColor: "#ffffff" }}
+                >
+                  <h2 className="text-base font-bold" style={{ color: "#111111" }}>
                     Results for “{search.trim()}”
                   </h2>
                   {searchResults.length === 0 ? (
@@ -366,7 +427,7 @@ export function ShopHome() {
                       No matches. Try another name or add a custom item below.
                     </p>
                   ) : (
-                    <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                    <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                       {searchResults.map((item) => (
                         <li key={item.id}>
                           <MenuItemCard item={item} />
@@ -377,20 +438,23 @@ export function ShopHome() {
                 </section>
               ) : (
                 <>
-                  <section className="shop-surface mt-2 px-3 py-3">
-                    <div className="mb-2.5 flex items-center justify-between gap-2">
-                      <h2 className="text-base font-extrabold" style={{ color: "#111" }}>
+                  <section
+                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    style={{ backgroundColor: "#ffffff" }}
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
                         TOP Picks
                       </h2>
                       <Link
                         href="/browse/dry"
-                        className="shrink-0 text-xs font-semibold"
+                        className="shrink-0 text-sm font-semibold"
                         style={{ color: "#ED1C24" }}
                       >
                         Curated ›
                       </Link>
                     </div>
-                    <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5">
+                    <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
                       {popularItems.map((item, index) => (
                         <TopPickCard key={item.id} item={item} index={index} />
                       ))}
@@ -402,7 +466,7 @@ export function ShopHome() {
                     </div>
                   </section>
 
-                  <section className="mt-2 grid grid-cols-2 gap-2 px-3">
+                  <section className="grid grid-cols-2 gap-3 px-3 sm:px-0">
                     <AislePhotoButton
                       href="/browse/dry"
                       imageSrc="/images/aisle-dry.png"
@@ -423,12 +487,15 @@ export function ShopHome() {
                     />
                   </section>
 
-                  <div id="manual-item" className="mt-2 px-3">
+                  <div id="manual-item" className="px-3 sm:px-0">
                     <CustomItemCard />
                   </div>
 
-                  <section className="shop-surface mt-2 px-3 py-3">
-                    <h2 className="text-base font-extrabold" style={{ color: "#111" }}>
+                  <section
+                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    style={{ backgroundColor: "#ffffff" }}
+                  >
+                    <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
                       You may also like
                     </h2>
                     {productsLoading ? (
@@ -437,7 +504,7 @@ export function ShopHome() {
                       </p>
                     ) : (
                       <>
-                        <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                           {feedVisible.map((item) => (
                             <li key={item.id}>
                               <MenuItemCard item={item} />
@@ -457,7 +524,7 @@ export function ShopHome() {
               )}
             </div>
 
-            <div className="hidden xl:sticky xl:top-20 xl:block">
+            <div className="hidden px-0 xl:sticky xl:top-20 xl:block">
               <MenuCartSummary />
             </div>
           </div>

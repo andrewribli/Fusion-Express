@@ -179,6 +179,13 @@ service cloud.firestore {
         && request.resource.data.subtotal is number
         && request.resource.data.subtotal <= 200;
 
+      allow update: if isOrderCustomer(resource.data)
+        && resource.data.status in ['delivered', 'runner_paid']
+        && changedKeys().hasOnly([
+          'customerDeadline', 'customerOverdueAt', 'customerWarningCount',
+          'customerReminderSentAt', 'adminMissedNotifiedAt', 'updatedAt'
+        ]);
+
       // Customers may cancel, approve a price increase, and rate. Anything
       // outside these key sets — including who the order belongs to — is fixed.
       allow update: if isOrderCustomer(resource.data) && (
@@ -211,7 +218,8 @@ service cloud.firestore {
         && resource.data.customerId != uid()
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
-          'acceptedAt', 'runnerPaymentMethod', 'runnerPaymentId', 'runnerEmail'
+          'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
+          'runnerPaymentId', 'runnerEmail'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
         && request.resource.data.runnerUid == uid();
@@ -225,14 +233,20 @@ service cloud.firestore {
           'deliveryPhotoUrl', 'runnerNote', 'runnerName', 'runnerLocation',
           'items', 'estimatedSubtotal', 'actualSubtotal', 'priceDifference',
           'priceAdjustmentStatus', 'refundAmount', 'subtotal', 'total',
-          'tillPricesSubmittedAt'
+          'tillPricesSubmittedAt', 'runnerDeadline', 'customerDeadline',
+          'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
+          'adminMissedNotifiedAt'
         ])
         && request.resource.data.status != 'pending';
 
       allow update: if isAdmin()
         && changedKeys().hasOnly([
           'priceAdjustmentStatus', 'refundedAt', 'updatedAt',
-          'status', 'runnerPaidAt', 'adminVerified', 'customerNameOnReceipt'
+          'status', 'runnerPaidAt', 'adminVerified', 'customerNameOnReceipt',
+          'runnerDeadline', 'customerDeadline', 'runnerWarningCount',
+          'customerWarningCount', 'runnerExpiredAt', 'customerOverdueAt',
+          'runnerReminderSentAt', 'customerReminderSentAt',
+          'adminMissedNotifiedAt', 'lastEscalatedAt'
         ]);
 
       allow delete: if false;
@@ -269,8 +283,10 @@ service cloud.firestore {
     match /feedback/{id} {
       function feedbackCreate() {
         let data = request.resource.data;
-        return data.keys().hasAll(['userId', 'message', 'createdAt', 'status'])
-          && data.userId is string
+        return signedIn()
+          && data.keys().hasAll(['userId', 'message', 'createdAt', 'status'])
+          && data.keys().hasOnly(['userId', 'message', 'createdAt', 'status', 'userName'])
+          && data.userId == uid()
           && data.userId.size() > 0
           && data.userId.size() < 128
           && data.message is string
@@ -278,11 +294,7 @@ service cloud.firestore {
           && data.message.size() <= 2000
           && data.createdAt is timestamp
           && data.status == 'unread'
-          && (!('userName' in data) || (data.userName is string && data.userName.size() < 120))
-          && (
-            (signedIn() && data.userId == uid())
-            || data.userId == 'anonymous'
-          );
+          && (!('userName' in data) || (data.userName is string && data.userName.size() < 120));
       }
 
       allow create: if feedbackCreate();
@@ -337,6 +349,7 @@ service cloud.firestore {
 
     match /feedback_test/{id} {
       allow create: if signedIn()
+        && request.resource.data.userId == uid()
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
         && request.resource.data.message.size() <= 2000

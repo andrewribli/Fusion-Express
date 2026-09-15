@@ -1,15 +1,28 @@
 import type { MenuItem } from "./types";
-import { RUNNER_JUDGMENT_NOTE } from "./constants";
+import {
+  CUSTOM_ITEM_DEFAULT_WEIGHT_KG,
+  RUNNER_JUDGMENT_NOTE,
+} from "./constants";
 
-export function createCustomMenuItem(name: string, weightKg = 0.3): MenuItem {
+export function createCustomMenuItem(
+  name: string,
+  options?: { weightKg?: number; estimatedPrice?: number },
+): MenuItem {
+  const weightKg = options?.weightKg ?? CUSTOM_ITEM_DEFAULT_WEIGHT_KG;
+  const estimatedPrice = options?.estimatedPrice;
+  const hasEstimate =
+    typeof estimatedPrice === "number" &&
+    Number.isFinite(estimatedPrice) &&
+    estimatedPrice > 0;
+
   return {
     id: `custom-${Date.now()}`,
     name: name.trim(),
     category: "snacks",
-    price: 0,
+    price: hasEstimate ? estimatedPrice : 0,
     unit: "item",
     image: "/images/aisles/snacks.jpg",
-    priceType: "variable",
+    priceType: hasEstimate ? "fixed" : "variable",
     runnerInputsPrice: true,
     itemNote: RUNNER_JUDGMENT_NOTE,
     inStock: true,

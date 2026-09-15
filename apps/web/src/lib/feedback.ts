@@ -9,7 +9,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { collectionName } from "@/lib/constants";
-import { getDb, isFirebaseConfigured } from "@/lib/firebase";
+import { getAuthClient, getDb, isFirebaseConfigured } from "@/lib/firebase";
 
 export type FeedbackStatus = "unread" | "read" | "resolved";
 
@@ -29,23 +29,56 @@ function parseStatus(value: unknown): FeedbackStatus {
   return "unread";
 }
 
+export function feedbackErrorMessage(err: unknown): string {
+  const code =
+    typeof err === "object" && err && "code" in err
+      ? String((err as { code: string }).code)
+      : "";
+  const raw = err instanceof Error ? err.message : "";
+  if (code === "permission-denied" || /permission|insufficient/i.test(raw)) {
+    return "Couldn't save that. Sign in and try again.";
+  }
+  if (code === "unavailable" || /network|offline/i.test(raw)) {
+    return "Network issue — check your connection and try again.";
+  }
+  return raw || "Could not send feedback. Please try again.";
+}
+
 export async function submitFeedback(input: {
-  userId: string;
+  userId?: string;
   userName?: string;
   message: string;
 }): Promise<void> {
   if (!isFirebaseConfigured()) {
-    throw new Error("Firebase is not configured");
+    throw new Error("Feedback isn't available right now. Please try again later.");
+  }
+  const authUid = getAuthClient().currentUser?.uid ?? input.userId?.trim();
+  if (!authUid) {
+    throw new Error("Sign in to send feedback.");
   }
   const message = input.message.trim();
   if (!message) throw new Error("Write a short message first.");
-  await addDoc(collection(getDb(), COLLECTION()), {
-    userId: input.userId,
-    userName: input.userName?.trim() || "",
+
+  const payload: {
+    userId: string;
+    message: string;
+    createdAt: Timestamp;
+    status: FeedbackStatus;
+    userName?: string;
+  } = {
+    userId: authUid,
     message,
     createdAt: Timestamp.now(),
     status: "unread",
-  });
+  };
+  const userName = input.userName?.trim();
+  if (userName) payload.userName = userName;
+
+  try {
+    await addDoc(collection(getDb(), COLLECTION()), payload);
+  } catch (err) {
+    throw new Error(feedbackErrorMessage(err));
+  }
 }
 
 export async function fetchAllFeedback(): Promise<FeedbackItem[]> {

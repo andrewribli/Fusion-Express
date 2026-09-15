@@ -6,8 +6,26 @@ import {
   getMockRunnerOrders,
 } from "./mock-orders";
 import { collectionName, isStagingApp, storagePath } from "./app-env";
+import {
+  isOverOrderLimit,
+  ORDER_LIMIT_MESSAGE,
+  resolveSpecialInstructions,
+} from "./constants";
 import type { Order, OrderItem, OrderStatus, PriceAdjustmentStatus } from "./types";
-import { normalizeOrderStatus } from "./order-status";
+import {
+  ACTIVE_ORDER_LIMIT_MESSAGE,
+  CUSTOMER_DEADLINE_REMINDER_MS,
+  CUSTOMER_PAY_WINDOW_MS,
+  customerDeadlineOf,
+  isActiveCustomerOrderStatus,
+  isCustomerPaymentOpen,
+  isRunnerDeliveryOpen,
+  MAX_ACTIVE_CUSTOMER_ORDERS,
+  normalizeOrderStatus,
+  RUNNER_DEADLINE_REMINDER_MS,
+  RUNNER_DELIVERY_WINDOW_MS,
+  runnerDeadlineOf,
+} from "./order-status";
 import { omitUndefined } from "./omit-undefined";
 import { getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
 import {
@@ -16,6 +34,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
   runTransaction,
   updateDoc,
@@ -98,6 +118,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     sessionId: String(data.sessionId ?? ""),
     customerId: String(data.customerId ?? data.sessionId ?? ""),
     customerName: data.customerName ? String(data.customerName) : undefined,
+    customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     items: parseItems(data.items),
     status: normalizeOrderStatus(String(data.status ?? "pending")),
     college: String(data.college ?? ""),
@@ -117,7 +138,35 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     total: Number(data.total ?? 0),
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
+    finalTotal: data.finalTotal != null ? Number(data.finalTotal) : undefined,
+    amountPaidByRunner:
+      data.amountPaidByRunner != null
+        ? Number(data.amountPaidByRunner)
+        : data.finalTotal != null
+          ? Number(data.finalTotal)
+          : undefined,
+    receiptUrl: data.receiptUrl ? String(data.receiptUrl) : undefined,
+    bankStatementUrl: data.bankStatementUrl
+      ? String(data.bankStatementUrl)
+      : undefined,
+    customerNameOnReceipt: Boolean(data.customerNameOnReceipt),
+    runnerVerified: Boolean(data.runnerVerified),
+    adminVerified: Boolean(data.adminVerified),
+    customerPaidAt: data.customerPaidAt ? toDate(data.customerPaidAt) : undefined,
+    runnerPaidAt: data.runnerPaidAt ? toDate(data.runnerPaidAt) : undefined,
+    runnerEmail: data.runnerEmail ? String(data.runnerEmail) : undefined,
+    acceptedAt: data.acceptedAt ? toDate(data.acceptedAt) : undefined,
+    purchasedAt: data.purchasedAt
+      ? toDate(data.purchasedAt)
+      : data.pickedUpAt
+        ? toDate(data.pickedUpAt)
+        : undefined,
+    runnerPaymentMethod: data.runnerPaymentMethod as Order["runnerPaymentMethod"],
+    runnerPaymentId: data.runnerPaymentId
+      ? String(data.runnerPaymentId)
+      : undefined,
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
+    runnerUid: data.runnerUid ? String(data.runnerUid) : undefined,
     runnerName: data.runnerName ? String(data.runnerName) : undefined,
     runnerRating: data.runnerRating != null ? Number(data.runnerRating) : undefined,
     deliveryPhotoUrl: data.deliveryPhotoUrl
@@ -130,6 +179,34 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
     deliveredAt: data.deliveredAt ? toDate(data.deliveredAt) : undefined,
+    runnerDeadline: data.runnerDeadline ? toDate(data.runnerDeadline) : undefined,
+    customerDeadline: data.customerDeadline
+      ? toDate(data.customerDeadline)
+      : undefined,
+    runnerWarningCount:
+      data.runnerWarningCount != null ? Number(data.runnerWarningCount) : undefined,
+    customerWarningCount:
+      data.customerWarningCount != null
+        ? Number(data.customerWarningCount)
+        : undefined,
+    runnerExpiredAt: data.runnerExpiredAt
+      ? toDate(data.runnerExpiredAt)
+      : undefined,
+    customerOverdueAt: data.customerOverdueAt
+      ? toDate(data.customerOverdueAt)
+      : undefined,
+    runnerReminderSentAt: data.runnerReminderSentAt
+      ? toDate(data.runnerReminderSentAt)
+      : undefined,
+    customerReminderSentAt: data.customerReminderSentAt
+      ? toDate(data.customerReminderSentAt)
+      : undefined,
+    adminMissedNotifiedAt: data.adminMissedNotifiedAt
+      ? toDate(data.adminMissedNotifiedAt)
+      : undefined,
+    lastEscalatedAt: data.lastEscalatedAt
+      ? toDate(data.lastEscalatedAt)
+      : undefined,
     estimatedSubtotal:
       data.estimatedSubtotal != null ? Number(data.estimatedSubtotal) : undefined,
     actualSubtotal:
@@ -179,13 +256,26 @@ export function orderGrandTotal(
 export async function createOrder(
   order: Omit<Order, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
+  if (isOverOrderLimit(order.subtotal)) {
+    throw new Error(ORDER_LIMIT_MESSAGE);
+  }
+  if (order.customerId) {
+    const active = await fetchActiveCustomerOrders(order.customerId);
+    if (active.length >= MAX_ACTIVE_CUSTOMER_ORDERS) {
+      throw new Error(ACTIVE_ORDER_LIMIT_MESSAGE);
+    }
+  }
   const now = new Date();
   const id = `FE-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderWithNotes = {
+    ...order,
+    customerNote: resolveSpecialInstructions(order.customerNote),
+  };
 
   if (isFirebaseConfigured()) {
     try {
       const payload = omitUndefined({
-        ...order,
+        ...orderWithNotes,
         status: "pending",
         fusionPaidByPlatform: true,
         estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
@@ -196,7 +286,6 @@ export async function createOrder(
           : undefined,
       } as Record<string, unknown>);
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
-      saveOrderToHistory(ref.id);
       return ref.id;
     } catch (err) {
       console.error("createOrder Firestore failed", err);
@@ -207,7 +296,7 @@ export async function createOrder(
   }
 
   const fullOrder: Order = {
-    ...order,
+    ...orderWithNotes,
     id,
     status: "pending",
     fusionPaidByPlatform: true,
@@ -254,17 +343,40 @@ function filterOwnOrders(orders: Order[], excludeCustomerId?: string): Order[] {
   return orders.filter((o) => o.customerId !== excludeCustomerId);
 }
 
+const ORDER_PAGE_SIZE = 100;
+
+function parseSnapshotDocs(
+  docs: { id: string; data: () => unknown }[],
+): Order[] {
+  return docs.map((d) =>
+    parseOrder(d.id, d.data() as Record<string, unknown>),
+  );
+}
+
+function byNewestFirst(a: Order, b: Order): number {
+  return b.createdAt.getTime() - a.createdAt.getTime();
+}
+
+/**
+ * Security rules only allow queries they can prove are scoped, so every read
+ * below filters on the field the matching `list` rule checks. Widening one of
+ * these queries without updating firestore.rules will fail with
+ * "Missing or insufficient permissions".
+ */
 export async function fetchPendingOrders(
   excludeCustomerId?: string,
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
-      const snap = await getDocs(collection(getDb(), ORDERS_COLLECTION));
-      const orders = snap.docs
-        .map((d) => parseOrder(d.id, d.data() as Record<string, unknown>))
-        .filter((o) => o.status === "pending")
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      return filterOwnOrders(orders, excludeCustomerId);
+      const snap = await getDocs(
+        query(
+          collection(getDb(), ORDERS_COLLECTION),
+          where("status", "==", "pending"),
+          orderBy("createdAt", "desc"),
+          limit(ORDER_PAGE_SIZE),
+        ),
+      );
+      return filterOwnOrders(parseSnapshotDocs(snap.docs), excludeCustomerId);
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
       throw err instanceof Error
@@ -276,22 +388,52 @@ export async function fetchPendingOrders(
   return filterOwnOrders(getMockPendingOrders(), excludeCustomerId);
 }
 
-async function fetchAllOrdersFromFirestore(): Promise<Order[]> {
-  const snap = await getDocs(collection(getDb(), ORDERS_COLLECTION));
-  return snap.docs.map((d) =>
-    parseOrder(d.id, d.data() as Record<string, unknown>),
-  );
-}
-
-export async function fetchRunnerOrders(runnerId: string): Promise<Order[]> {
+/** Order history for the signed-in customer, keyed on their auth uid. */
+export async function fetchOrdersByCustomer(
+  customerId: string,
+): Promise<Order[]> {
+  if (!customerId) return [];
   if (isFirebaseConfigured()) {
     try {
-      const orders = await fetchAllOrdersFromFirestore();
-      return orders.filter(
-        (o) =>
-          o.runnerId === runnerId &&
-          (o.status === "assigned" || o.status === "picked"),
+      const snap = await getDocs(
+        query(
+          collection(getDb(), ORDERS_COLLECTION),
+          where("customerId", "==", customerId),
+          orderBy("createdAt", "desc"),
+          limit(ORDER_PAGE_SIZE),
+        ),
       );
+      return parseSnapshotDocs(snap.docs);
+    } catch (err) {
+      console.error("fetchOrdersByCustomer Firestore failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not load your orders.");
+    }
+  }
+
+  return [];
+}
+
+export async function fetchActiveCustomerOrders(
+  customerId: string,
+): Promise<Order[]> {
+  const orders = await fetchOrdersByCustomer(customerId);
+  return orders.filter((order) => isActiveCustomerOrderStatus(order.status));
+}
+
+export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
+  if (!runnerUid) return [];
+  if (isFirebaseConfigured()) {
+    try {
+      const snap = await getDocs(
+        query(
+          collection(getDb(), ORDERS_COLLECTION),
+          where("runnerUid", "==", runnerUid),
+          where("status", "in", ["accepted", "purchased", "assigned", "picked"]),
+        ),
+      );
+      return parseSnapshotDocs(snap.docs).sort(byNewestFirst);
     } catch (err) {
       console.error("fetchRunnerOrders Firestore failed", err);
       throw err instanceof Error
@@ -300,18 +442,24 @@ export async function fetchRunnerOrders(runnerId: string): Promise<Order[]> {
     }
   }
 
-  return getMockRunnerOrders(runnerId);
+  return getMockRunnerOrders(runnerUid);
 }
 
 export async function fetchDeliveredOrdersByRunner(
-  runnerId: string,
+  runnerUid: string,
 ): Promise<Order[]> {
+  if (!runnerUid) return [];
   if (isFirebaseConfigured()) {
     try {
-      const orders = await fetchAllOrdersFromFirestore();
-      return orders.filter(
-        (o) => o.runnerId === runnerId && o.status === "delivered",
+      const snap = await getDocs(
+        query(
+          collection(getDb(), ORDERS_COLLECTION),
+          where("runnerUid", "==", runnerUid),
+          where("status", "in", ["delivered", "runner_paid", "customer_paid", "paid", "completed"]),
+          limit(ORDER_PAGE_SIZE),
+        ),
       );
+      return parseSnapshotDocs(snap.docs).sort(byNewestFirst);
     } catch (err) {
       console.error("fetchDeliveredOrdersByRunner Firestore failed", err);
       throw err instanceof Error
@@ -320,15 +468,27 @@ export async function fetchDeliveredOrdersByRunner(
     }
   }
 
-  return getMockRunnerOrders(runnerId, true);
+  return getMockRunnerOrders(runnerUid, true);
 }
 
+/**
+ * @param runnerId doc id in /runners
+ * @param runnerUid auth uid of the runner; stored so security rules and the
+ *   runner's own order queries can match on request.auth.uid
+ */
 export async function acceptOrder(
   orderId: string,
   runnerId: string,
   runnerName: string,
-  runnerCustomerId: string,
+  runnerUid: string,
+  payment?: { method: "PayMe" | "FPS"; id: string; email?: string },
 ): Promise<void> {
+  const now = new Date();
+  const paymentFields = omitUndefined({
+    runnerPaymentMethod: payment?.method,
+    runnerPaymentId: payment?.id,
+    runnerEmail: payment?.email,
+  });
   if (isFirebaseConfigured()) {
     const db = getDb();
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
@@ -336,18 +496,24 @@ export async function acceptOrder(
       const snap = await tx.get(orderRef);
       if (!snap.exists()) throw new Error("Order not found");
       const order = parseOrder(snap.id, snap.data() as Record<string, unknown>);
-      if (order.customerId === runnerCustomerId) {
+      if (order.customerId === runnerUid) {
         throw new SelfPickupError();
       }
       if (order.status !== "pending") {
-        if (order.runnerId === runnerId) return;
+        if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
         throw new OrderAlreadyTakenError();
       }
       tx.update(orderRef, {
-        status: "assigned",
+        status: "accepted",
         runnerId,
+        runnerUid,
         runnerName,
-        updatedAt: Timestamp.fromDate(new Date()),
+        acceptedAt: Timestamp.fromDate(now),
+        runnerDeadline: Timestamp.fromDate(
+          new Date(now.getTime() + RUNNER_DELIVERY_WINDOW_MS),
+        ),
+        updatedAt: Timestamp.fromDate(now),
+        ...paymentFields,
       });
     });
     return;
@@ -355,21 +521,42 @@ export async function acceptOrder(
 
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.customerId === runnerCustomerId) {
+  if (order.customerId === runnerUid) {
     throw new SelfPickupError();
   }
   if (order.status !== "pending") {
-    if (order.runnerId === runnerId) return;
+    if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
     throw new OrderAlreadyTakenError();
   }
-  await updateOrderStatus(orderId, "assigned", { runnerId, runnerName });
+  await updateOrderStatus(orderId, "accepted", {
+    runnerId,
+    runnerUid,
+    runnerName,
+    runnerPaymentMethod: payment?.method,
+    runnerPaymentId: payment?.id,
+    runnerEmail: payment?.email,
+  });
 }
 
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
   extras?: Partial<
-    Pick<Order, "runnerName" | "runnerId" | "deliveryPhotoUrl">
+    Pick<
+      Order,
+      | "runnerName"
+      | "runnerId"
+      | "runnerUid"
+      | "deliveryPhotoUrl"
+      | "receiptUrl"
+      | "bankStatementUrl"
+      | "finalTotal"
+      | "amountPaidByRunner"
+      | "runnerVerified"
+      | "runnerPaymentMethod"
+      | "runnerPaymentId"
+      | "runnerEmail"
+    >
   >,
 ): Promise<void> {
   const now = new Date();
@@ -380,21 +567,56 @@ export async function updateOrderStatus(
         status,
         updatedAt: Timestamp.fromDate(now),
       };
-      if (status === "picked") {
+      if (status === "accepted") {
+        updates.acceptedAt = Timestamp.fromDate(now);
+        updates.runnerDeadline = Timestamp.fromDate(
+          new Date(now.getTime() + RUNNER_DELIVERY_WINDOW_MS),
+        );
+      }
+      if (status === "purchased") {
+        updates.purchasedAt = Timestamp.fromDate(now);
         updates.pickedUpAt = Timestamp.fromDate(now);
       }
       if (status === "delivered") {
         updates.deliveredAt = Timestamp.fromDate(now);
+        updates.customerDeadline = Timestamp.fromDate(
+          new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS),
+        );
+      }
+      if (status === "customer_paid") {
+        updates.customerPaidAt = Timestamp.fromDate(now);
+        updates.paymentReceived = true;
+      }
+      if (status === "runner_paid") {
+        updates.runnerPaidAt = Timestamp.fromDate(now);
       }
       if (extras?.runnerName) updates.runnerName = extras.runnerName;
       if (extras?.runnerId) updates.runnerId = extras.runnerId;
+      if (extras?.runnerUid) updates.runnerUid = extras.runnerUid;
       if (extras?.deliveryPhotoUrl) {
         updates.deliveryPhotoUrl = extras.deliveryPhotoUrl;
       }
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), updates);
+      if (extras?.receiptUrl) updates.receiptUrl = extras.receiptUrl;
+      if (extras?.bankStatementUrl) updates.bankStatementUrl = extras.bankStatementUrl;
+      if (extras?.finalTotal != null) updates.finalTotal = extras.finalTotal;
+      if (extras?.amountPaidByRunner != null) {
+        updates.amountPaidByRunner = extras.amountPaidByRunner;
+      }
+      if (extras?.runnerVerified != null) updates.runnerVerified = extras.runnerVerified;
+      if (extras?.runnerEmail) updates.runnerEmail = extras.runnerEmail;
+      if (extras?.runnerPaymentMethod) {
+        updates.runnerPaymentMethod = extras.runnerPaymentMethod;
+      }
+      if (extras?.runnerPaymentId) {
+        updates.runnerPaymentId = extras.runnerPaymentId;
+      }
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined(updates));
       return;
-    } catch {
-      // fallback to mock in-memory
+    } catch (err) {
+      console.error("updateOrderStatus Firestore failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not update the order. Try again.");
     }
   }
 
@@ -402,11 +624,33 @@ export async function updateOrderStatus(
   if (order) {
     order.status = status;
     order.updatedAt = now;
-    if (status === "picked") order.pickedUpAt = now;
+    if (status === "accepted") order.acceptedAt = now;
+    if (status === "purchased") {
+      order.purchasedAt = now;
+      order.pickedUpAt = now;
+    }
     if (status === "delivered") order.deliveredAt = now;
+    if (status === "customer_paid") {
+      order.customerPaidAt = now;
+      order.paymentReceived = true;
+    }
+    if (status === "runner_paid") order.runnerPaidAt = now;
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
+    if (extras?.runnerUid) order.runnerUid = extras.runnerUid;
     if (extras?.deliveryPhotoUrl) order.deliveryPhotoUrl = extras.deliveryPhotoUrl;
+    if (extras?.receiptUrl) order.receiptUrl = extras.receiptUrl;
+    if (extras?.bankStatementUrl) order.bankStatementUrl = extras.bankStatementUrl;
+    if (extras?.finalTotal != null) order.finalTotal = extras.finalTotal;
+    if (extras?.amountPaidByRunner != null) {
+      order.amountPaidByRunner = extras.amountPaidByRunner;
+    }
+    if (extras?.runnerVerified != null) order.runnerVerified = extras.runnerVerified;
+    if (extras?.runnerEmail) order.runnerEmail = extras.runnerEmail;
+    if (extras?.runnerPaymentMethod) {
+      order.runnerPaymentMethod = extras.runnerPaymentMethod;
+    }
+    if (extras?.runnerPaymentId) order.runnerPaymentId = extras.runnerPaymentId;
   }
 }
 
@@ -452,27 +696,11 @@ export async function cancelOrder(orderId: string, customerId: string): Promise<
   const canCancelPending = order.status === "pending";
   const canCancelPriceIncrease =
     order.priceAdjustmentStatus === "pending_customer" &&
-    (order.status === "assigned" || order.status === "pending");
+    (order.status === "accepted" || order.status === "pending");
   if (!canCancelPending && !canCancelPriceIncrease) {
     throw new Error("Order can only be cancelled before pickup");
   }
   await updateOrderStatus(orderId, "cancelled");
-}
-
-export async function fetchLiveDeliveryCount(): Promise<number> {
-  if (isFirebaseConfigured()) {
-    try {
-      const q = query(
-        collection(getDb(), ORDERS_COLLECTION),
-        where("status", "in", ["assigned", "picked"]),
-      );
-      const snap = await getDocs(q);
-      return snap.size;
-    } catch {
-      // fallback
-    }
-  }
-  return getMockActiveOrders().length;
 }
 
 export async function updateOrderRating(
@@ -517,8 +745,10 @@ export async function updateRunnerNote(
   }
 }
 
-export async function countRunnerActiveOrders(runnerId: string): Promise<number> {
-  const orders = await fetchRunnerOrders(runnerId);
+export async function countRunnerActiveOrders(
+  runnerUid: string,
+): Promise<number> {
+  const orders = await fetchRunnerOrders(runnerUid);
   return orders.length;
 }
 
@@ -556,8 +786,8 @@ export async function submitTillPrices(
 ): Promise<Order | null> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== "assigned") {
-    throw new Error("Till prices can only be submitted before pickup");
+  if (order.status !== "accepted") {
+    throw new Error("Till prices can only be submitted before purchase");
   }
 
   const items = order.items.map((item) => {
@@ -691,15 +921,26 @@ export async function markRefundComplete(orderId: string): Promise<void> {
   );
 }
 
+/** Admin-only: security rules reject this query for everyone else. */
 export async function fetchOrdersNeedingRefund(): Promise<Order[]> {
-  const orders = isFirebaseConfigured()
-    ? await fetchAllOrdersFromFirestore()
-    : [
-        ...getMockPendingOrders(),
-        ...getMockActiveOrders(),
-        ...getMockRunnerOrders("demo-runner", true),
-      ];
-  return orders
+  if (isFirebaseConfigured()) {
+    const snap = await getDocs(
+      query(
+        collection(getDb(), ORDERS_COLLECTION),
+        where("priceAdjustmentStatus", "==", "refund_pending"),
+        limit(ORDER_PAGE_SIZE),
+      ),
+    );
+    return parseSnapshotDocs(snap.docs).sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+    );
+  }
+
+  return [
+    ...getMockPendingOrders(),
+    ...getMockActiveOrders(),
+    ...getMockRunnerOrders("demo-runner", true),
+  ]
     .filter((o) => o.priceAdjustmentStatus === "refund_pending")
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 }
@@ -713,8 +954,292 @@ export function awaitingCustomerPriceApproval(order: Order): boolean {
 }
 
 export function canMarkPickedUp(order: Order): boolean {
-  if (order.status !== "assigned") return false;
-  if (!tillPricesReady(order)) return false;
-  if (awaitingCustomerPriceApproval(order)) return false;
-  return true;
+  return order.status === "accepted";
+}
+
+export async function uploadReceiptPhoto(
+  orderId: string,
+  file: Blob,
+  filename = "receipt.jpg",
+): Promise<string> {
+  const name =
+    "name" in file && typeof (file as { name?: string }).name === "string"
+      ? (file as { name: string }).name
+      : filename;
+  if (isFirebaseConfigured()) {
+    try {
+      const storageRef = ref(
+        getFirebaseStorage(),
+        storagePath(`receipts/${orderId}/${name}`),
+      );
+      await uploadBytes(storageRef, file);
+      return await getDownloadURL(storageRef);
+    } catch {
+      // fallback
+    }
+  }
+  return `mock://receipt/${orderId}/${name}`;
+}
+
+export async function markPurchased(
+  orderId: string,
+  opts: { receiptUrl: string; bankStatementUrl?: string },
+): Promise<void> {
+  await updateOrderStatus(orderId, "purchased", {
+    receiptUrl: opts.receiptUrl,
+    bankStatementUrl: opts.bankStatementUrl,
+  });
+}
+
+export async function uploadBankStatementPhoto(
+  orderId: string,
+  file: Blob,
+  filename = "bank.jpg",
+): Promise<string> {
+  const name =
+    "name" in file && typeof (file as { name?: string }).name === "string"
+      ? (file as { name: string }).name
+      : filename;
+  if (isFirebaseConfigured()) {
+    try {
+      const storageRef = ref(
+        getFirebaseStorage(),
+        storagePath(`bank-statements/${orderId}/${name}`),
+      );
+      await uploadBytes(storageRef, file);
+      return await getDownloadURL(storageRef);
+    } catch {
+      // fallback
+    }
+  }
+  return `mock://bank/${orderId}/${name}`;
+}
+
+export async function markDeliveredWithTotal(
+  orderId: string,
+  opts: {
+    finalTotal: number;
+    deliveryPhotoUrl?: string;
+    receiptUrl?: string;
+    bankStatementUrl: string;
+    runnerVerified: boolean;
+  },
+): Promise<void> {
+  if (!(opts.finalTotal > 0)) {
+    throw new Error("Enter the Fusion receipt total.");
+  }
+  if (!opts.bankStatementUrl) {
+    throw new Error("Upload a bank statement screenshot.");
+  }
+  if (!opts.runnerVerified) {
+    throw new Error("Confirm you wrote the customer's full name on the receipt.");
+  }
+  const amount = round2(opts.finalTotal);
+  await updateOrderStatus(orderId, "delivered", {
+    finalTotal: amount,
+    amountPaidByRunner: amount,
+    deliveryPhotoUrl: opts.deliveryPhotoUrl,
+    receiptUrl: opts.receiptUrl,
+    bankStatementUrl: opts.bankStatementUrl,
+    runnerVerified: true,
+  });
+}
+
+export async function markCustomerPaid(
+  orderId: string,
+  customerId: string,
+): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.customerId !== customerId) throw new Error("Not authorized");
+  if (order.status !== "delivered" && order.status !== "runner_paid") {
+    throw new Error("You can mark paid after delivery.");
+  }
+  await updateOrderStatus(orderId, "customer_paid");
+}
+
+export async function verifyAdminDelivery(
+  orderId: string,
+  opts: { customerNameOnReceipt: boolean },
+): Promise<void> {
+  await patchOrder(
+    orderId,
+    {
+      adminVerified: true,
+      customerNameOnReceipt: opts.customerNameOnReceipt,
+    },
+    (mock) => {
+      mock.adminVerified = true;
+      mock.customerNameOnReceipt = opts.customerNameOnReceipt;
+    },
+  );
+}
+
+export async function markRunnerPayout(orderId: string): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "delivered") {
+    throw new Error("Pay the runner after they mark delivered.");
+  }
+  await updateOrderStatus(orderId, "runner_paid");
+}
+
+export async function fetchOrdersAwaitingPayout(): Promise<Order[]> {
+  return fetchAdminReviewOrders();
+}
+
+export async function fetchAdminReviewOrders(): Promise<Order[]> {
+  if (isFirebaseConfigured()) {
+    const snap = await getDocs(
+      query(
+        collection(getDb(), ORDERS_COLLECTION),
+        where("status", "in", [
+          "delivered",
+          "runner_paid",
+          "customer_paid",
+          "paid",
+          "completed",
+        ]),
+        limit(ORDER_PAGE_SIZE),
+      ),
+    );
+    return parseSnapshotDocs(snap.docs).sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+    );
+  }
+
+  return [
+    ...getMockPendingOrders(),
+    ...getMockActiveOrders(),
+    ...getMockRunnerOrders("demo-runner", true),
+  ]
+    .filter((order) =>
+      ["delivered", "runner_paid", "customer_paid"].includes(order.status),
+    )
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+}
+
+export type DeadlineSyncResult = {
+  order: Order;
+  runnerExpired: boolean;
+  customerOverdue: boolean;
+  runnerReminderDue: boolean;
+  customerReminderDue: boolean;
+  adminMissedDue: boolean;
+};
+
+export async function syncOrderDeadlines(order: Order): Promise<DeadlineSyncResult> {
+  const now = new Date();
+  const updates: Record<string, unknown> = {};
+  const runnerDue = runnerDeadlineOf(order);
+  const customerDue = customerDeadlineOf(order);
+  let runnerExpired = Boolean(order.runnerExpiredAt);
+  let customerOverdue = Boolean(order.customerOverdueAt);
+  let runnerReminderDue = false;
+  let customerReminderDue = false;
+  let adminMissedDue = false;
+
+  if (isRunnerDeliveryOpen(order.status) && runnerDue) {
+    if (!order.runnerDeadline) updates.runnerDeadline = Timestamp.fromDate(runnerDue);
+    if (now.getTime() >= runnerDue.getTime() && !order.runnerExpiredAt) {
+      updates.runnerExpiredAt = Timestamp.fromDate(now);
+      updates.runnerWarningCount = (order.runnerWarningCount ?? 0) + 1;
+      runnerExpired = true;
+    }
+    if (
+      !order.runnerReminderSentAt &&
+      now.getTime() >= runnerDue.getTime() - RUNNER_DEADLINE_REMINDER_MS &&
+      now.getTime() < runnerDue.getTime()
+    ) {
+      updates.runnerReminderSentAt = Timestamp.fromDate(now);
+      runnerReminderDue = true;
+    }
+  }
+
+  if (isCustomerPaymentOpen(order.status) && customerDue) {
+    if (!order.customerDeadline) {
+      updates.customerDeadline = Timestamp.fromDate(customerDue);
+    }
+    if (now.getTime() >= customerDue.getTime() && !order.customerOverdueAt) {
+      updates.customerOverdueAt = Timestamp.fromDate(now);
+      updates.customerWarningCount = (order.customerWarningCount ?? 0) + 1;
+      customerOverdue = true;
+    }
+    if (
+      !order.customerReminderSentAt &&
+      now.getTime() >= customerDue.getTime() - CUSTOMER_DEADLINE_REMINDER_MS &&
+      now.getTime() < customerDue.getTime()
+    ) {
+      updates.customerReminderSentAt = Timestamp.fromDate(now);
+      customerReminderDue = true;
+    }
+  }
+
+  if (
+    !order.adminMissedNotifiedAt &&
+    (updates.runnerExpiredAt || updates.customerOverdueAt)
+  ) {
+    updates.adminMissedNotifiedAt = Timestamp.fromDate(now);
+    adminMissedDue = true;
+  }
+
+  if (Object.keys(updates).length > 0 && isFirebaseConfigured()) {
+    updates.updatedAt = Timestamp.fromDate(now);
+    try {
+      await updateDoc(
+        doc(getDb(), ORDERS_COLLECTION, order.id),
+        omitUndefined(updates),
+      );
+    } catch (err) {
+      console.error("syncOrderDeadlines failed", err);
+    }
+  }
+
+  return {
+    order,
+    runnerExpired,
+    customerOverdue,
+    runnerReminderDue,
+    customerReminderDue,
+    adminMissedDue,
+  };
+}
+
+export async function fetchDeadlineWatchOrders(): Promise<Order[]> {
+  if (!isFirebaseConfigured()) return [];
+  const snap = await getDocs(
+    query(
+      collection(getDb(), ORDERS_COLLECTION),
+      where("status", "in", [
+        "accepted",
+        "purchased",
+        "assigned",
+        "picked",
+        "delivered",
+        "runner_paid",
+      ]),
+      limit(ORDER_PAGE_SIZE),
+    ),
+  );
+  return parseSnapshotDocs(snap.docs);
+}
+
+export async function escalateDeadlineWarning(
+  orderId: string,
+  party: "runner" | "customer",
+): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  const now = new Date();
+  const field = party === "runner" ? "runnerWarningCount" : "customerWarningCount";
+  const next =
+    ((party === "runner" ? order.runnerWarningCount : order.customerWarningCount) ??
+      0) + 1;
+  if (isFirebaseConfigured()) {
+    await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), {
+      [field]: next,
+      lastEscalatedAt: Timestamp.fromDate(now),
+      updatedAt: Timestamp.fromDate(now),
+    });
+  }
 }

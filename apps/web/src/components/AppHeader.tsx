@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
 import { NavIcon } from "@/components/NavIcon";
@@ -9,10 +9,11 @@ import { RunnerModeBanner } from "@/components/RunnerModeBanner";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { isOverOrderLimit } from "@/lib/constants";
-import { isTabActive, tabsForMode } from "@/lib/nav";
+import { homeForMode, isTabActive, runnerEntryHref, tabsForMode, type NavTab } from "@/lib/nav";
 import { useTheme } from "@/lib/theme";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
-import { useModeSync } from "@/lib/use-mode-sync";
+import { useManualItemModal } from "@/lib/manual-item-modal";
+import { navModeForPath, useModeSync } from "@/lib/use-mode-sync";
 
 interface AppHeaderProps {
   showBack?: boolean;
@@ -53,12 +54,15 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const overLimit = isOverOrderLimit(subtotal);
   const { user, mode, setMode, canRunnerMode } = useUser();
   const pathname = usePathname();
+  const router = useRouter();
+  const { openManualItem } = useManualItemModal();
   useModeSync();
 
-  const runnerMode = mode === "runner";
-  const tabs = tabsForMode(mode);
+  const chromeMode = navModeForPath(pathname, mode);
+  const runnerMode = chromeMode === "runner";
+  const tabs = tabsForMode(chromeMode);
   const customerActive = useActiveCustomerOrders();
-  const home = runnerMode ? "/runner/dashboard" : "/";
+  const home = homeForMode(chromeMode);
   const activeTab = tabs.find((tab) => isTabActive(tab, pathname));
   const pageLabel = title ?? activeTab?.label ?? "GraceRun";
 
@@ -72,6 +76,29 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
           ? "text-white/75 hover:bg-white/10 hover:text-lakers-gold"
           : "text-gray-600 hover:bg-gray-100 hover:text-[#ED1C24]"
     }`;
+
+  function onTabClick(tab: NavTab, event: React.MouseEvent) {
+    if (tab.action === "manual-add") {
+      event.preventDefault();
+      openManualItem();
+      return;
+    }
+    if (tab.action === "switch-runner") {
+      event.preventDefault();
+      const href = runnerEntryHref({
+        loggedIn: Boolean(user),
+        canRunnerMode,
+      });
+      if (canRunnerMode) setMode("runner");
+      router.push(href);
+      return;
+    }
+    if (tab.action === "switch-customer") {
+      event.preventDefault();
+      setMode("customer");
+      router.push(homeForMode("customer"));
+    }
+  }
 
   return (
     <>
@@ -128,15 +155,12 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
 
           <nav className="flex shrink-0 items-center gap-1.5">
             <ThemeToggleButton runnerMode={runnerMode} />
-            {!runnerMode && (
+            {!runnerMode ? (
               <Link
-                href={
-                  canRunnerMode
-                    ? "/runner/dashboard"
-                    : user
-                      ? "/runner/terms"
-                      : "/login?next=/runner/terms"
-                }
+                href={runnerEntryHref({
+                  loggedIn: Boolean(user),
+                  canRunnerMode,
+                })}
                 onClick={() => {
                   if (canRunnerMode) setMode("runner");
                 }}
@@ -144,16 +168,34 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               >
                 Switch to Runner
               </Link>
+            ) : (
+              <Link
+                href="/"
+                onClick={() => setMode("customer")}
+                className="hidden min-h-11 items-center rounded-full bg-lakers-gold px-3 py-2 text-xs font-bold text-lakers-navy shadow-sm hover:brightness-105 sm:inline-flex"
+              >
+                Switch to Customer
+              </Link>
             )}
             {tabs
-              .filter((tab) => tab.label !== "Profile")
+              .filter(
+                (tab) =>
+                  tab.label !== "Profile" &&
+                  tab.action !== "switch-runner" &&
+                  tab.action !== "switch-customer",
+              )
               .map((tab) => {
                 const isTrack = tab.href === "/track";
-                const href = isTrack ? customerActive.href : tab.href;
+                const href = isTrack
+                  ? customerActive.href
+                  : tab.action
+                    ? "#"
+                    : tab.href;
                 return (
                   <Link
-                    key={tab.href}
+                    key={`${tab.label}-${tab.href}`}
                     href={href}
+                    onClick={(event) => onTabClick(tab, event)}
                     className={`${navLink(isTabActive(tab, pathname))} relative`}
                     aria-label={tab.label}
                     aria-current={isTabActive(tab, pathname) ? "page" : undefined}

@@ -6,19 +6,27 @@ import { usePathname, useRouter } from "next/navigation";
 import { NavIcon } from "@/components/NavIcon";
 import { useUser } from "@/context/UserContext";
 import { countRunnerActiveOrders } from "@/lib/orders";
-import { isTabActive, tabsForMode, type NavTab } from "@/lib/nav";
+import {
+  homeForMode,
+  isTabActive,
+  runnerEntryHref,
+  tabsForMode,
+  type NavTab,
+} from "@/lib/nav";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useCart } from "@/context/CartContext";
+import { useManualItemModal } from "@/lib/manual-item-modal";
+import { navModeForPath, useModeSync } from "@/lib/use-mode-sync";
 
 const GUEST_TABS: NavTab[] = [
   { href: "/", label: "Home", iconId: "home", match: ["/", "/home"] },
+  { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
-    href: "/browse/dry",
-    label: "Category",
-    iconId: "category",
-    match: ["/browse", "/menu"],
+    href: "#runner",
+    label: "Runner",
+    iconId: "runner",
+    action: "switch-runner",
   },
-  { href: "/#search", label: "Search", iconId: "search" },
   { href: "/cart", label: "Cart", iconId: "cart", match: ["/checkout"] },
   { href: "/login", label: "Account", iconId: "profile" },
 ];
@@ -26,12 +34,16 @@ const GUEST_TABS: NavTab[] = [
 export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, mode } = useUser();
+  const { user, mode, setMode, canRunnerMode } = useUser();
   const { itemCount } = useCart();
+  const { openManualItem } = useManualItemModal();
   const [activeCount, setActiveCount] = useState(0);
   const customerActive = useActiveCustomerOrders();
 
-  const runnerMode = mode === "runner";
+  useModeSync();
+
+  const chromeMode = navModeForPath(pathname, mode);
+  const runnerMode = chromeMode === "runner";
 
   useEffect(() => {
     const runnerUid = user?.isRunner ? user.uid : undefined;
@@ -43,25 +55,50 @@ export function BottomNav() {
     return () => clearInterval(interval);
   }, [user?.isRunner, user?.uid]);
 
-  const tabs = user ? tabsForMode(mode) : GUEST_TABS;
-  const accent = runnerMode ? "text-lakers-gold" : "text-[#ED1C24]";
+  const tabs = user ? tabsForMode(chromeMode) : GUEST_TABS;
+
+  function onTabClick(tab: NavTab, event: React.MouseEvent) {
+    if (tab.action === "manual-add") {
+      event.preventDefault();
+      openManualItem();
+      return;
+    }
+    if (tab.action === "switch-runner") {
+      event.preventDefault();
+      const href = runnerEntryHref({
+        loggedIn: Boolean(user),
+        canRunnerMode,
+      });
+      if (canRunnerMode) setMode("runner");
+      router.push(href);
+      return;
+    }
+    if (tab.action === "switch-customer") {
+      event.preventDefault();
+      setMode("customer");
+      router.push(homeForMode("customer"));
+    }
+  }
 
   return (
     <nav
-      className={`fixed inset-x-0 bottom-0 z-50 border-t backdrop-blur md:hidden ${
+      className="fixed inset-x-0 bottom-0 z-50 border-t md:hidden"
+      style={
         runnerMode
-          ? "border-lakers-gold/30 bg-lakers-navy/95"
-          : "border-gray-200 bg-white/95"
-      }`}
+          ? {
+              backgroundColor: "#1d1160",
+              borderColor: "rgba(253,185,39,0.35)",
+            }
+          : {
+              backgroundColor: "#ffffff",
+              borderColor: "#e5e7eb",
+            }
+      }
     >
       <div className="mx-auto flex max-w-[480px]">
         {tabs.map((tab) => {
-          const active =
-            tab.href === "/#search"
-              ? false
-              : isTabActive(tab, pathname);
+          const active = isTabActive(tab, pathname);
           const isTrack = tab.href === "/track";
-          const isSearch = tab.href === "/#search";
           const badge =
             tab.href === "/runner/deliveries"
               ? activeCount
@@ -70,47 +107,46 @@ export function BottomNav() {
                 : tab.href === "/cart"
                   ? itemCount
                   : 0;
+          const color = active
+            ? runnerMode
+              ? "#FDB927"
+              : "#ED1C24"
+            : runnerMode
+              ? "rgba(255,255,255,0.7)"
+              : "#6b7280";
           return (
             <Link
-              key={tab.href}
-              href={isTrack ? customerActive.href : isSearch ? "/" : tab.href}
+              key={`${chromeMode}-${tab.label}-${tab.href}`}
+              href={
+                isTrack
+                  ? customerActive.href
+                  : tab.action
+                    ? "#"
+                    : tab.href
+              }
               aria-label={tab.label}
               aria-current={active ? "page" : undefined}
-              onClick={(event) => {
-                if (!isSearch) return;
-                event.preventDefault();
-                if (pathname !== "/") {
-                  router.push("/#search");
-                  return;
-                }
-                document.getElementById("home-search")?.focus();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className={`relative flex min-h-[3.5rem] flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 text-center text-[10px] leading-tight ${
-                active
-                  ? `font-semibold ${accent}`
-                  : runnerMode
-                    ? "font-medium text-white/70"
-                    : "font-medium text-gray-600"
-              }`}
+              onClick={(event) => onTabClick(tab, event)}
+              className="relative flex min-h-[3.5rem] flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 text-center text-[10px] font-medium leading-tight"
+              style={{ color }}
             >
               {active ? (
                 <span
                   aria-hidden
-                  className={`absolute inset-x-6 top-0 h-0.5 rounded-full ${
-                    runnerMode ? "bg-lakers-gold" : "bg-[#ED1C24]"
-                  }`}
+                  className="absolute inset-x-6 top-0 h-0.5 rounded-full"
+                  style={{ backgroundColor: runnerMode ? "#FDB927" : "#ED1C24" }}
                 />
               ) : null}
               <span className="relative">
                 <NavIcon id={tab.iconId} className="h-6 w-6" />
                 {badge > 0 && (
                   <span
-                    className={`absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold ${
+                    className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold"
+                    style={
                       runnerMode
-                        ? "bg-lakers-gold text-lakers-navy"
-                        : "bg-[#ED1C24] text-white"
-                    }`}
+                        ? { backgroundColor: "#FDB927", color: "#1d1160" }
+                        : { backgroundColor: "#ED1C24", color: "#ffffff" }
+                    }
                   >
                     {badge > 9 ? "9+" : badge}
                   </span>

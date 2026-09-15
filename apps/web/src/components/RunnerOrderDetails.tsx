@@ -2,7 +2,7 @@ import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { calculateDeliveryFee } from "@/lib/delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { resolveSpecialInstructions } from "@/lib/constants";
-import { runnerEarningsForOrder, RUNNER_EARNINGS_RATE } from "@/lib/order-status";
+import { runnerEarningsForOrder } from "@/lib/order-status";
 import type { Order } from "@/lib/types";
 
 function formatKg(kg: number): string {
@@ -102,8 +102,9 @@ export function RunnerOrderDetails({
         </h3>
         <p className="mt-1 text-lg font-bold text-gray-900">${order.subtotal}</p>
         <p className="text-xs text-amber-900">
-          Pay this at Fusion from your own pocket. GraceRun reimburses you after
-          delivery.
+          Pay this at Fusion <span className="font-bold">yourself first</span>.
+          GraceRun reimburses you after delivery. Write the customer&apos;s full
+          name on the receipt.
         </p>
         {order.finalTotal != null && (
           <p className="mt-2 text-sm font-semibold text-gray-900">
@@ -138,7 +139,7 @@ export function RunnerOrderDetails({
         {showEarnings && (
           <div className="mt-3 rounded-xl bg-[#ED1C24]/10 px-3 py-2">
             <p className="text-xs text-gray-600">
-              Your cut ({RUNNER_EARNINGS_RATE * 100}% of delivery fee)
+              You will receive
             </p>
             <p className="text-lg font-bold text-[#ED1C24]">${earn}</p>
             {(order.tip ?? 0) > 0 && (

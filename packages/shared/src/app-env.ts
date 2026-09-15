@@ -5,7 +5,14 @@
  * Set NEXT_PUBLIC_APP_ENV=staging on the Vercel Preview environment (and the
  * staging git branch) so test deploys use *_test Firestore collections.
  */
-export function isStagingApp(): boolean {
+/**
+ * Staging vs production. Defaults to production so a missing env var never
+ * points the live site at test collections.
+ *
+ * Set NEXT_PUBLIC_APP_ENV=staging on the Vercel Preview environment (and the
+ * staging git branch) so test deploys use *_test Firestore collections.
+ */
+export function isStagingEnvVar(): boolean {
   const value = (
     process.env.NEXT_PUBLIC_APP_ENV ??
     process.env.EXPO_PUBLIC_APP_ENV ??
@@ -14,6 +21,20 @@ export function isStagingApp(): boolean {
     .trim()
     .toLowerCase();
   return value === "staging" || value === "test";
+}
+
+export function isStagingApp(): boolean {
+  if (isStagingEnvVar()) return true;
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host === "staging-servecart.vercel.app") return true;
+  }
+  return false;
+}
+
+/** Staging demo login: session-only, no Auth/Firestore user writes. */
+export function isDemoAuth(): boolean {
+  return isStagingApp();
 }
 
 const TEST_SUFFIX = "_test";

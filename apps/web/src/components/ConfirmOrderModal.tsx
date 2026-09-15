@@ -1,8 +1,9 @@
 "use client";
 
+import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import { LegalLink } from "@/components/LegalLink";
 import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
 import { formatEta } from "@/lib/constants";
-import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import type { DeliveryFeeBreakdown as FeeBreakdown } from "@/lib/delivery";
 
 interface ConfirmOrderModalProps {
@@ -15,7 +16,6 @@ interface ConfirmOrderModalProps {
   tip: number;
   college: string;
   hall: string;
-  roomNumber?: string;
   customerNote?: string;
   estimatedDeliveryAt: Date;
   deliveryFee: number;
@@ -32,7 +32,6 @@ export function ConfirmOrderModal({
   tip,
   college,
   hall,
-  roomNumber,
   customerNote,
   estimatedDeliveryAt,
   deliveryFee,
@@ -41,7 +40,7 @@ export function ConfirmOrderModal({
   if (!open) return null;
 
   const total = subtotal + deliveryFee + tip;
-  const address = formatDeliveryAddress(college, hall, roomNumber);
+  const address = formatDeliveryAddress(college, hall);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-4 sm:items-center">
@@ -97,6 +96,11 @@ export function ConfirmOrderModal({
 
         <p className="mt-3 text-xs text-fusion-red">
           Est. delivery by {formatEta(estimatedDeliveryAt)} (~30 min)
+        </p>
+
+        <p className="mt-3 text-xs text-gray-600">
+          By confirming, you agree to our{" "}
+          <LegalLink href="/terms">Terms &amp; Conditions</LegalLink>.
         </p>
 
         <div className="mt-5 flex gap-3">

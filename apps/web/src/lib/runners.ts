@@ -1,5 +1,5 @@
 import type { Runner, RunnerRegistrationInput } from "@/lib/types";
-import { collectionName } from "@/lib/constants";
+import { collectionName, isDemoAuth } from "@/lib/constants";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { omitUndefined } from "@/lib/omit-undefined";
 import {
@@ -8,7 +8,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  query,
   updateDoc,
+  where,
   Timestamp,
 } from "firebase/firestore";
 
@@ -37,20 +40,6 @@ function parseRunner(id: string, data: Record<string, unknown>): Runner {
   };
 }
 
-async function claimRunnerUid(runner: Runner, uid: string): Promise<Runner> {
-  if (runner.uid === uid) return runner;
-  if (isFirebaseConfigured()) {
-    try {
-      await updateDoc(doc(getDb(), RUNNERS_COLLECTION, runner.id), { uid });
-    } catch {
-      // still return claimed in memory for this session
-    }
-  } else {
-    mockRunners.set(runner.id, { ...runner, uid });
-  }
-  return { ...runner, uid };
-}
-
 function pickRunnerForUser(
   runners: Runner[],
   opts: { uid?: string; studentId?: string },
@@ -71,6 +60,9 @@ function pickRunnerForUser(
 export async function registerRunner(
   input: RunnerRegistrationInput,
 ): Promise<string> {
+  if (isDemoAuth()) {
+    return `demo-runner-${Date.now()}`;
+  }
   const existing = await findRunnerForUser({
     uid: input.uid,
     studentId: input.studentId,
@@ -115,29 +107,36 @@ export async function fetchRunner(runnerId: string): Promise<Runner | null> {
   return mockRunners.get(runnerId) ?? null;
 }
 
+/**
+ * Looks up the caller's own runner doc. Security rules only permit a query
+ * filtered on the caller's uid, so this can no longer scan the collection —
+ * a runner registered before uids were recorded is found through the runnerId
+ * stored on their user profile instead.
+ */
 export async function findRunnerForUser(opts: {
   uid?: string;
   studentId?: string;
 }): Promise<Runner | null> {
-  const runners = isFirebaseConfigured()
-    ? await (async () => {
-        try {
-          const snap = await getDocs(collection(getDb(), RUNNERS_COLLECTION));
-          return snap.docs.map((d) =>
-            parseRunner(d.id, d.data() as Record<string, unknown>),
-          );
-        } catch {
-          return [] as Runner[];
-        }
-      })()
-    : [...mockRunners.values()];
-
-  const picked = pickRunnerForUser(runners, opts);
-  if (!picked) return null;
-  if (opts.uid && !picked.uid) {
-    return claimRunnerUid(picked, opts.uid);
+  if (!isFirebaseConfigured()) {
+    return pickRunnerForUser([...mockRunners.values()], opts);
   }
-  return picked;
+  if (!opts.uid) return null;
+
+  try {
+    const snap = await getDocs(
+      query(
+        collection(getDb(), RUNNERS_COLLECTION),
+        where("uid", "==", opts.uid),
+        limit(1),
+      ),
+    );
+    const found = snap.docs[0];
+    return found
+      ? parseRunner(found.id, found.data() as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function addRunnerEarnings(

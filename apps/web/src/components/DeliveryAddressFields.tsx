@@ -15,23 +15,19 @@ const inputClassName =
 interface DeliveryAddressFieldsProps {
   college: string;
   hall: string;
-  roomNumber: string;
   onCollegeChange: (value: string) => void;
   onHallChange: (value: string) => void;
-  onRoomNumberChange: (value: string) => void;
   required?: boolean;
-  hideRoom?: boolean;
+  showPricing?: boolean;
 }
 
 export function DeliveryAddressFields({
   college,
   hall,
-  roomNumber,
   onCollegeChange,
   onHallChange,
-  onRoomNumberChange,
   required = true,
-  hideRoom = false,
+  showPricing = true,
 }: DeliveryAddressFieldsProps) {
   const halls = college ? getHallsForCollege(college as CuhkCollege) : [];
 
@@ -44,6 +40,7 @@ export function DeliveryAddressFields({
           onHallChange("");
         }}
         required={required}
+        showPricing={showPricing}
       />
 
       <div>
@@ -68,26 +65,8 @@ export function DeliveryAddressFields({
           ))}
         </select>
       </div>
-
-      {!hideRoom && (
-        <div>
-          <label htmlFor="roomNumber" className="block text-xs font-medium text-gray-600">
-            Room Number{" "}
-            <span className="font-normal text-gray-400">(optional)</span>
-          </label>
-          <input
-            id="roomNumber"
-            type="text"
-            value={roomNumber}
-            onChange={(e) => onRoomNumberChange(e.target.value)}
-            placeholder="e.g. 301"
-            className={inputClassName}
-          />
-        </div>
-      )}
     </div>
   );
 }
 
-const inputClassNameExport = inputClassName;
-export { inputClassNameExport as formInputClassName };
+export { inputClassName as formInputClassName };

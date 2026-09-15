@@ -8,15 +8,35 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "upload.wikimedia.org",
-        pathname: "/wikipedia/commons/**",
+        pathname: "/wikipedia/**",
       },
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "commons.wikimedia.org",
       },
       {
         protocol: "https",
-        hostname: "placehold.co",
+        hostname: "images.hktvmall.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images-dynamic.hktvmall.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn-media.hktvmall.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.openbeautyfacts.org",
+      },
+      {
+        protocol: "https",
+        hostname: "images.openproductsfacts.org",
+      },
+      {
+        protocol: "https",
+        hostname: "static.openfoodfacts.org",
       },
       {
         protocol: "https",
@@ -33,6 +53,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.openfoodfacts.org",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
       },
     ],
   },

@@ -8,6 +8,7 @@ import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { BrowseBreadcrumb } from "@/components/BrowseBreadcrumb";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
+import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { getAisleImage } from "@/data/aisle-images";
 import {
@@ -49,13 +50,15 @@ export default function BrowseSectionPage({
   return (
     <AppShell>
       <div className="min-h-screen bg-gray-50">
-          <AppHeader showBack backHref="/home" title={meta.title} />
+          <AppHeader showBack backHref="/" title={meta.title} />
 
           <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-36 md:px-6">
+            <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-6">
+            <div className="min-w-0">
             <BrowseBreadcrumb
               items={[
-                { label: "Shop Now", href: "/home" },
-                { label: "All categories", href: "/menu" },
+                { label: "Shop Now", href: "/" },
+                { label: "All categories", href: "/" },
                 { label: meta.title },
               ]}
             />
@@ -104,6 +107,11 @@ export default function BrowseSectionPage({
                   />
                 );
               })}
+            </div>
+            </div>
+            <div className="hidden xl:sticky xl:top-20 xl:block">
+              <MenuCartSummary />
+            </div>
             </div>
           </main>
           <OrderActionBar />

@@ -2,39 +2,44 @@
 
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { RUNNER_JUDGMENT_NOTE } from "@/lib/constants";
+import {
+  CUSTOM_ITEM_DEFAULT_WEIGHT_KG,
+  RUNNER_JUDGMENT_NOTE,
+} from "@/lib/constants";
 import { createCustomMenuItem } from "@/lib/custom-item";
 
-export function ManualItemForm({ className = "" }: { className?: string }) {
+export function ManualItemForm({
+  className = "",
+  onAdded,
+}: {
+  className?: string;
+  onAdded?: () => void;
+}) {
   const { addItem } = useCart();
   const [name, setName] = useState("");
-  const [weightKg, setWeightKg] = useState("0.3");
+  const [price, setPrice] = useState("");
+  const [qty, setQty] = useState(1);
   const [added, setAdded] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = name.trim();
-    const weight = Number(weightKg);
     if (!trimmed) return;
-    if (!Number.isFinite(weight) || weight <= 0) return;
-    addItem(createCustomMenuItem(trimmed, weight));
+    const parsed = Number.parseFloat(price);
+    const estimatedPrice =
+      Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+    addItem(createCustomMenuItem(trimmed, { estimatedPrice }), Math.max(1, qty));
     setAdded(trimmed);
     setName("");
-    setWeightKg("0.3");
+    setPrice("");
+    setQty(1);
+    onAdded?.();
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`rounded-2xl border-2 border-dashed border-fusion-red/50 bg-white p-4 shadow-sm ${className}`}
-    >
-      <p className="text-sm font-bold text-gray-900">Not on the menu?</p>
-      <p className="mt-1 text-sm text-gray-600">
-        Add your item manually. The runner will find it at Fusion.
-      </p>
-
-      <label htmlFor="manual-item-name" className="mt-3 block text-xs font-medium text-gray-600">
-        What should we pick up?
+    <form onSubmit={handleSubmit} className={className}>
+      <label htmlFor="manual-item-name" className="block text-xs font-medium text-gray-600">
+        Item name
       </label>
       <input
         id="manual-item-name"
@@ -43,34 +48,77 @@ export function ManualItemForm({ className = "" }: { className?: string }) {
           setName(e.target.value);
           setAdded("");
         }}
-        placeholder="e.g. 1 biggest Pocari Sweat, or a bag of ice"
+        placeholder='e.g. "Shin Ramyun"'
         className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
+        autoFocus
       />
 
-      <label htmlFor="manual-item-weight" className="mt-3 block text-xs font-medium text-gray-600">
-        Approx. weight (kg) — used for delivery fee
+      <label
+        htmlFor="manual-item-price"
+        className="mt-3 block text-xs font-medium text-gray-600"
+      >
+        Estimated price (optional)
       </label>
-      <input
-        id="manual-item-weight"
-        type="number"
-        min={0.05}
-        step={0.05}
-        value={weightKg}
-        onChange={(e) => setWeightKg(e.target.value)}
-        className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
-      />
+      <div className="relative mt-1">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+          HK$
+        </span>
+        <input
+          id="manual-item-price"
+          type="number"
+          inputMode="decimal"
+          min={0}
+          step="0.1"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          placeholder="e.g. 12"
+          className="w-full rounded-xl border border-gray-200 py-2.5 pl-12 pr-3 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
+        />
+      </div>
+
+      <label className="mt-3 block text-xs font-medium text-gray-600">Quantity</label>
+      <div className="mt-1 flex items-center justify-center gap-4">
+        <button
+          type="button"
+          onClick={() => setQty((n) => Math.max(1, n - 1))}
+          className="flex h-11 w-11 items-center justify-center rounded-full text-xl font-bold"
+          style={{ backgroundColor: "#f3f4f6", color: "#ED1C24" }}
+          aria-label="Decrease quantity"
+        >
+          −
+        </button>
+        <span className="min-w-8 text-center text-lg font-bold" style={{ color: "#111111" }}>
+          {qty}
+        </span>
+        <button
+          type="button"
+          onClick={() => setQty((n) => n + 1)}
+          className="flex h-11 w-11 items-center justify-center rounded-full text-xl font-bold text-white"
+          style={{ backgroundColor: "#ED1C24" }}
+          aria-label="Increase quantity"
+        >
+          +
+        </button>
+      </div>
 
       <button
         type="submit"
-        disabled={!name.trim() || Number(weightKg) <= 0}
-        className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-50"
+        disabled={!name.trim()}
+        className="mt-4 min-h-12 w-full rounded-full text-sm font-bold text-white disabled:opacity-50"
+        style={{ backgroundColor: "#ED1C24" }}
       >
-        Add this item to my order
+        Add to Cart
       </button>
       {added && (
-        <p className="mt-2 text-xs font-medium text-green-700">Added “{added}” to your cart.</p>
+        <p className="mt-2 text-xs font-medium text-green-700">
+          Added “{added}” to your cart.
+        </p>
       )}
-      <p className="mt-2 text-xs text-gray-500">{RUNNER_JUDGMENT_NOTE}</p>
+      <p className="mt-3 text-xs leading-relaxed text-gray-500">
+        The runner will find this item at Fusion. If it&apos;s not available, they&apos;ll
+        use their best judgment. Custom items count as {CUSTOM_ITEM_DEFAULT_WEIGHT_KG}{" "}
+        kg for the delivery-fee estimate. {RUNNER_JUDGMENT_NOTE}.
+      </p>
     </form>
   );
 }

@@ -20,7 +20,18 @@ export function ItemListRow({ item }: ItemListRowProps) {
   const [fav, setFav] = useState(() => isFavorite(item.id));
 
   return (
-    <li className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white/95 shadow-sm transition-shadow hover:shadow-md">
+    <li
+      role="button"
+      tabIndex={0}
+      onClick={() => addItem(item)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          addItem(item);
+        }
+      }}
+      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 bg-white/95 text-left shadow-sm transition-shadow hover:shadow-md"
+    >
       <div className="relative h-20 w-full bg-white sm:h-24">
         {getItemImage(item) ? (
           <Image
@@ -31,6 +42,11 @@ export function ItemListRow({ item }: ItemListRowProps) {
             sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
           />
         ) : null}
+        {quantity > 0 ? (
+          <span className="absolute right-1 top-1 rounded-full bg-[#ED1C24] px-1.5 py-0.5 text-[10px] font-bold text-white">
+            {quantity}
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-2.5">
         <div className="min-w-0 flex-1">
@@ -38,7 +54,10 @@ export function ItemListRow({ item }: ItemListRowProps) {
             <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900">{item.name}</h3>
             <button
               type="button"
-              onClick={() => setFav(toggleFavorite(item.id))}
+              onClick={(e) => {
+                e.stopPropagation();
+                setFav(toggleFavorite(item.id));
+              }}
               className="shrink-0 text-xs font-semibold text-fusion-red"
               aria-label={fav ? "Remove from favorites" : "Add to favorites"}
             >
@@ -71,33 +90,33 @@ export function ItemListRow({ item }: ItemListRowProps) {
           )}
         </div>
 
-      {quantity === 0 ? (
-        <button
-          type="button"
-          onClick={() => addItem(item)}
-          className="mt-auto w-full rounded-lg bg-fusion-red py-2 text-xs font-semibold text-white active:scale-[0.98]"
-        >
-          Add to Cart
-        </button>
-      ) : (
-        <div className="mt-auto flex items-center justify-between rounded-lg bg-red-50 px-2 py-1.5">
-          <button
-            type="button"
-            onClick={() => setQuantity(item.id, quantity - 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold text-fusion-red shadow-sm"
-          >
-            −
-          </button>
-          <span className="text-base font-bold text-gray-900">{quantity}</span>
-          <button
-            type="button"
-            onClick={() => setQuantity(item.id, quantity + 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-fusion-red text-lg font-bold text-white shadow-sm"
-          >
-            +
-          </button>
-        </div>
-      )}
+        {quantity > 0 ? (
+          <div className="mt-auto flex items-center justify-between rounded-lg bg-red-50 px-2 py-1.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setQuantity(item.id, quantity - 1);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold text-fusion-red shadow-sm"
+            >
+              −
+            </button>
+            <span className="text-base font-bold text-gray-900">{quantity}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setQuantity(item.id, quantity + 1);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-fusion-red text-lg font-bold text-white shadow-sm"
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <p className="mt-auto text-[10px] font-semibold text-gray-400">Tap to add</p>
+        )}
       </div>
     </li>
   );

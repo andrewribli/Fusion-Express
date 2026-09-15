@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { PageWallpaper } from "@/components/PageWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -13,8 +14,12 @@ import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { isChatActive } from "@/lib/constants";
-import { getMenuItemById } from "@/lib/menu";
-import { cancelOrder, fetchOrdersByIds, getOrderHistoryIds } from "@/lib/orders";
+import { loadAllProducts } from "@/lib/firestore";
+import { menuItemFromOrderLine } from "@/lib/reorder";
+import {
+  cancelOrder,
+  fetchOrdersByCustomer,
+} from "@/lib/orders";
 import { ORDER_STATUS_LABELS, type Order } from "@/lib/types";
 
 export default function OrdersPage() {
@@ -23,18 +28,31 @@ export default function OrdersPage() {
   const { addItem } = useCart();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   async function load() {
-    const ids = getOrderHistoryIds();
-    const results = await fetchOrdersByIds(ids);
-    setOrders(results);
-    setLoading(false);
+    if (!user) return;
+    setError("");
+    try {
+      const accountId = getUserAccountId(user);
+      const mine = (await fetchOrdersByCustomer(accountId)).filter(
+        (order) => order.customerId === accountId,
+      );
+      setOrders(mine);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load orders.");
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
+    if (!user) return;
     void load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   async function handleCancel(order: Order) {
     if (!user) return;
@@ -49,17 +67,16 @@ export default function OrdersPage() {
     }
   }
 
-  function handleReorder(order: Order) {
+  async function handleReorder(order: Order) {
+    const catalog = await loadAllProducts();
     let added = 0;
     for (const line of order.items) {
-      const item = getMenuItemById(line.itemId);
-      if (item) {
-        for (let i = 0; i < line.quantity; i++) addItem(item);
-        added += line.quantity;
-      }
+      const item = menuItemFromOrderLine(line, catalog);
+      addItem(item, line.quantity);
+      added += line.quantity;
     }
     if (added === 0) {
-      alert("Some items are no longer available.");
+      alert("Nothing from this order could be added.");
       return;
     }
     router.push("/cart");
@@ -74,10 +91,12 @@ export default function OrdersPage() {
           <main className="mx-auto max-w-[480px] px-4 py-4">
             {loading ? (
               <p className="text-sm text-lakers-gold">Loading orders…</p>
+            ) : error ? (
+              <p className="rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>
             ) : orders.length === 0 ? (
               <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
                 <p className="text-sm text-gray-600">No orders yet.</p>
-                <Link href="/home" className="mt-3 inline-block text-fusion-red underline">
+                <Link href="/" className="mt-3 inline-block text-fusion-red underline">
                   Place your first order
                 </Link>
               </div>
@@ -89,9 +108,9 @@ export default function OrdersPage() {
                     className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                   >
                     <Link href={`/track?orderId=${order.id}`}>
-                      <div className="flex justify-between">
-                        <p className="font-bold text-gray-900">{order.id}</p>
-                        <span className="rounded-full bg-lakers-gold/20 px-2 py-0.5 text-xs font-medium text-lakers-purple">
+                      <div className="flex items-start justify-between gap-3">
+                        <CustomerOrderHeading order={order} />
+                        <span className="shrink-0 rounded-full bg-lakers-gold/20 px-2 py-0.5 text-xs font-medium text-lakers-purple">
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
                       </div>
@@ -99,7 +118,6 @@ export default function OrdersPage() {
                         {formatDeliveryAddress(
                           order.college,
                           order.hall,
-                          order.roomNumber,
                         )}
                       </p>
                       <p className="mt-2 text-sm font-semibold">${order.total}</p>

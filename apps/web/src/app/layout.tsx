@@ -3,6 +3,8 @@ import { Geist } from "next/font/google";
 import { StagingBanner } from "@/components/StagingBanner";
 import { CartProvider } from "@/context/CartContext";
 import { UserProvider } from "@/context/UserContext";
+import { ManualItemModalProvider } from "@/lib/manual-item-modal";
+import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
 
 const geist = Geist({
@@ -34,13 +36,23 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geist.variable} h-full`}>
-      <body className="min-h-full bg-lakers-navy font-sans text-gray-900 antialiased">
-        <UserProvider>
-          <CartProvider>
-            <StagingBanner />
-            {children}
-          </CartProvider>
-        </UserProvider>
+      <body className="dark-mode min-h-full bg-lakers-navy font-sans text-gray-900 antialiased">
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('gracerun-theme');if(t==='lite'){document.body.classList.remove('dark-mode');document.body.classList.add('lite-mode');}}catch(e){}",
+          }}
+        />
+        <ThemeProvider>
+          <UserProvider>
+            <CartProvider>
+              <ManualItemModalProvider>
+                <StagingBanner />
+                {children}
+              </ManualItemModalProvider>
+            </CartProvider>
+          </UserProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

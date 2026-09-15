@@ -36,7 +36,7 @@ export function AislePhotoButton({
       />
       <div
         className="absolute inset-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+        style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
         aria-hidden
       />
       <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col p-3 text-white">

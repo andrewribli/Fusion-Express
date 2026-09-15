@@ -62,6 +62,19 @@ export function NavIcon({
           <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" />
         </svg>
       );
+    case "add":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8v8M8 12h8" />
+        </svg>
+      );
+    case "runner":
+      return (
+        <svg {...common}>
+          <path d="M13 3 4 14h7l-1 7 10-12h-7l1-6Z" />
+        </svg>
+      );
     case "available":
       return (
         <svg {...common}>

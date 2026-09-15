@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
+import { registerRunner } from "@/lib/runners";
 
 const SECTIONS = [
   {
     title: "1. Runner Responsibilities",
     body: [
-      "Pick up the correct items from Fusion supermarket as listed on the order.",
-      "Verify item names, quantities, and weights (especially for variable-price items).",
+      "Pick up the correct items from Fusion supermarket as listed on the order. You pay Fusion at the till; GraceRun reimburses you after delivery.",
+      "Write the customer's full name on the Fusion receipt and attach it to the grocery bag. This is required on every order.",
+      "Upload both a photo of the receipt and a screenshot of the bank/FPS transaction before you can mark delivered.",
       "Deliver orders to the customer's dorm hall lobby — not to individual rooms unless agreed.",
-      "Take a photo proof of delivery at the lobby when marking an order as delivered.",
+      "Attach the original Fusion receipt to the grocery bag, or place it inside the bag where the customer can find it.",
+      "Take a photo of the bag at the delivery location with the receipt visible. This photo is required to mark an order as delivered.",
+      "Allow location sharing while the order is active so the customer can see your progress.",
       "Communicate promptly if an item is out of stock or a price differs from the estimate.",
       "Handle all groceries with care — especially chilled, frozen, and fragile items.",
     ],
@@ -32,17 +36,16 @@ const SECTIONS = [
   {
     title: "3. Payment Terms",
     body: [
-      "Runners earn 70% of the $10 delivery fee ($7.00 HKD) per successfully completed delivery.",
-      "Earnings are tracked in the Runner Dashboard under the Earnings tab.",
-      "Payouts are processed weekly via your registered PayMe or FPS account.",
-      "Pending payments appear until the customer's order is marked delivered and payment is confirmed.",
+      "You pay Fusion at the till. GraceRun reimburses the receipt total plus your delivery fee after you deliver and the owner verifies your uploads.",
+      "Customers pay GraceRun (not you) within 24 hours of delivery.",
+      "Earnings and pending payouts are tracked in the Runner Dashboard and admin payouts page.",
     ],
   },
   {
     title: "4. Penalties for Miscarriage",
     body: [
       "Late delivery: 1st offence — warning; 2nd offence — 50% earnings deduction; 3rd offence — suspension.",
-      "Wrong items: Runner must replace the item at their own cost or forfeit the delivery fee for that order.",
+      "Wrong items: Report in the app immediately. Do not pay replacements from your own pocket unless GraceRun asks you to and reimburses you.",
       "No-show (accepting but not picking up): 14-day suspension; repeat offence — permanent ban.",
       "Theft or fraud: Immediate permanent ban and report to CUHK Security.",
       "Damaged goods due to runner negligence: Repair/replacement cost deducted from runner earnings.",
@@ -55,22 +58,22 @@ const SECTIONS = [
       "Do not harass, intimidate, or discriminate against any user.",
       "Do not share customer personal data (name, SID, room number, phone) outside the app.",
       "Do not solicit customers for personal business, other services, or off-platform payments.",
-      "Do not use the Fusion Express brand for any unauthorized purpose.",
+      "Do not use the GraceRun brand for any unauthorized purpose.",
     ],
   },
   {
     title: "6. Liability",
     body: [
       "Runners assume all risk while performing deliveries, including travel to/from Fusion and dorm lobbies.",
-      "Fusion Express is a matching platform only and is not responsible for runner safety, accidents, or injuries.",
-      "Runners are independent contractors, not employees of Fusion Express or CUHK.",
-      "Fusion Express is not liable for disputes between runners and customers regarding item quality or payment.",
+      "GraceRun is a matching platform only and is not responsible for runner safety, accidents, or injuries.",
+      "Runners are independent contractors, not employees of GraceRun or CUHK.",
+      "GraceRun is not liable for disputes between runners and customers regarding item quality or payment.",
     ],
   },
   {
     title: "7. Termination",
     body: [
-      "Fusion Express may suspend or terminate any runner account at any time, with or without cause.",
+      "GraceRun may suspend or terminate any runner account at any time, with or without cause.",
       "Grounds for termination include but are not limited to: policy violations, customer complaints, fraud, or inactivity.",
       "Upon termination, pending payouts for completed deliveries may be withheld pending investigation.",
     ],
@@ -87,7 +90,9 @@ const SECTIONS = [
 
 export default function RunnerTermsPage() {
   const router = useRouter();
-  const { user, isReady, acceptRunnerTerms } = useUser();
+  const { user, isReady, setRunnerRegistered, setMode } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isReady) return;
@@ -96,15 +101,47 @@ export default function RunnerTermsPage() {
     }
   }, [isReady, user, router]);
 
-  function handleAgree() {
-    acceptRunnerTerms();
-    router.push("/runner/register");
+  async function handleAgree() {
+    if (!user?.uid) {
+      setError("Please sign in again before becoming a runner.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const paymentId =
+        user.runnerPaymentId ||
+        user.phone?.trim() ||
+        user.studentId.trim() ||
+        user.email ||
+        user.uid;
+      const runnerId = await registerRunner({
+        uid: user.uid,
+        fullName: user.fullName.trim() || "Runner",
+        studentId: user.studentId.trim() || user.uid.slice(0, 8),
+        phone: user.phone?.trim() || paymentId,
+        college: user.college,
+        hall: user.hall,
+        paymentMethod: user.runnerPaymentMethod ?? "PayMe",
+        paymentId,
+      });
+      setRunnerRegistered(runnerId, {
+        method: user.runnerPaymentMethod ?? "PayMe",
+        id: paymentId,
+      });
+      setMode("runner");
+      router.push("/runner/dashboard");
+    } catch {
+      setError("Could not activate runner access. Try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <RequireAuth>
       <LakersWallpaper>
-        <AppHeader showBack backHref="/home" title="Runner Terms" />
+        <AppHeader showBack backHref="/" title="Runner Terms" />
 
         <main className="mx-auto max-w-[480px] px-4 py-6 pb-32">
           <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
@@ -112,7 +149,8 @@ export default function RunnerTermsPage() {
             Runner Terms &amp; Conditions
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            Please read carefully before becoming a Fusion Express runner.
+            Read these terms, then tap I Agree. That is all you need to start
+            picking up orders.
           </p>
 
           <div className="mt-6 space-y-8">
@@ -129,19 +167,25 @@ export default function RunnerTermsPage() {
               </section>
             ))}
           </div>
+          {error && (
+            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          )}
           </div>
 
           <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white p-4 md:static md:mt-10 md:border-0 md:p-0">
             <div className="mx-auto flex max-w-[480px] flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={handleAgree}
-                className="flex-1 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white shadow-md"
+                onClick={() => void handleAgree()}
+                disabled={loading}
+                className="flex-1 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white shadow-md disabled:opacity-60"
               >
-                I Agree
+                {loading ? "Saving…" : "I Agree"}
               </button>
               <Link
-                href="/home"
+                href="/"
                 className="flex-1 rounded-xl border border-gray-300 py-4 text-center text-base font-semibold text-gray-700"
               >
                 Cancel
