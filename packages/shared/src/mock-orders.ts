@@ -11,7 +11,7 @@ export const MOCK_ORDERS: Order[] = [
       { itemId: "indomie-goreng", name: "Indomie Mi Goreng", price: 8, quantity: 2 },
       { itemId: "coke-can", name: "Coca-Cola Can", price: 6, quantity: 1 },
     ],
-    status: "assigned",
+    status: "accepted",
     college: "Shaw College",
     hall: "Sun Chui",
     roomNumber: "301",
@@ -75,7 +75,7 @@ export const MOCK_ORDERS: Order[] = [
     items: [
       { itemId: "samyang-2x", name: "Samyang 2x Spicy Ramen", price: 15, quantity: 1 },
     ],
-    status: "picked",
+    status: "purchased",
     college: "New Asia College",
     hall: "Ch'ien Mu",
     roomNumber: "401",
@@ -109,13 +109,13 @@ export function getMockRunnerOrders(
   return MOCK_ORDERS.filter((o) => {
     if (o.runnerId !== runnerId) return false;
     if (deliveredOnly) return o.status === "delivered";
-    return o.status === "assigned" || o.status === "picked";
+    return o.status === "accepted" || o.status === "purchased";
   });
 }
 
 export function getMockActiveOrders(): Order[] {
   return MOCK_ORDERS.filter((o) =>
-    ["assigned", "picked"].includes(o.status),
+    ["accepted", "purchased"].includes(o.status),
   );
 }
 

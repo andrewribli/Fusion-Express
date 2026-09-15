@@ -30,6 +30,7 @@ export interface UserProfile {
   hall: string;
   roomNumber?: string;
   phone?: string;
+  photoURL?: string;
   isRunner?: boolean;
   runnerId?: string;
   runnerPaymentMethod?: "PayMe" | "FPS";
@@ -42,11 +43,19 @@ export interface UserProfile {
 const USER_STORAGE_KEY = "fusion_user_profile";
 const TERMS_ACCEPTED_KEY = "fusion_runner_terms_accepted";
 
+import type { AppMode } from "@/lib/roles";
+
+const MODE_STORAGE_KEY = "fusion_app_mode";
+
 interface UserContextValue {
   user: UserProfile | null;
   isReady: boolean;
   termsAccepted: boolean;
   firebaseEnabled: boolean;
+  mode: AppMode;
+  setMode: (mode: AppMode) => void;
+  canRunnerMode: boolean;
+  bootError?: string | null;
   /** @deprecated use signUp/signIn — kept for offline dev fallback */
   login: (profile: UserProfile) => void;
   signUp: (
@@ -118,11 +127,28 @@ async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> 
   return updated;
 }
 
+function loadMode(): AppMode {
+  if (typeof window === "undefined") return "customer";
+  return localStorage.getItem(MODE_STORAGE_KEY) === "runner" ? "runner" : "customer";
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [mode, setModeState] = useState<AppMode>("customer");
   const firebaseEnabled = isFirebaseConfigured();
+
+  const setMode = useCallback((next: AppMode) => {
+    setModeState(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(MODE_STORAGE_KEY, next);
+    }
+  }, []);
+
+  useEffect(() => {
+    setModeState(loadMode());
+  }, []);
 
   useEffect(() => {
     setTermsAccepted(loadTermsAccepted());
@@ -258,6 +284,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const hasAcceptedTerms =
     termsAccepted || Boolean(user?.isRunner || user?.termsAcceptedAt);
+  const canRunnerMode = Boolean(user?.isRunner && user?.runnerId);
 
   const value = useMemo(
     () => ({
@@ -265,6 +292,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isReady,
       termsAccepted: hasAcceptedTerms,
       firebaseEnabled,
+      mode,
+      setMode,
+      canRunnerMode,
+      bootError: null,
       login,
       signUp,
       signIn,
@@ -278,6 +309,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isReady,
       hasAcceptedTerms,
       firebaseEnabled,
+      mode,
+      setMode,
+      canRunnerMode,
       login,
       signUp,
       signIn,

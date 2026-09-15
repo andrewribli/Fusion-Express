@@ -15,21 +15,22 @@ const inputClassName =
 interface DeliveryAddressFieldsProps {
   college: string;
   hall: string;
-  roomNumber: string;
+  roomNumber?: string;
   onCollegeChange: (value: string) => void;
   onHallChange: (value: string) => void;
-  onRoomNumberChange: (value: string) => void;
+  onRoomNumberChange?: (value: string) => void;
   required?: boolean;
   hideRoom?: boolean;
+  showPricing?: boolean;
 }
 
 export function DeliveryAddressFields({
   college,
   hall,
-  roomNumber,
+  roomNumber = "",
   onCollegeChange,
   onHallChange,
-  onRoomNumberChange,
+  onRoomNumberChange = () => {},
   required = true,
   hideRoom = false,
 }: DeliveryAddressFieldsProps) {

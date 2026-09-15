@@ -118,7 +118,22 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
+    runnerUid: data.runnerUid ? String(data.runnerUid) : undefined,
     runnerName: data.runnerName ? String(data.runnerName) : undefined,
+    customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
+    finalTotal: data.finalTotal != null ? Number(data.finalTotal) : undefined,
+    amountPaidByRunner:
+      data.amountPaidByRunner != null ? Number(data.amountPaidByRunner) : undefined,
+    receiptUrl: data.receiptUrl ? String(data.receiptUrl) : undefined,
+    bankStatementUrl: data.bankStatementUrl
+      ? String(data.bankStatementUrl)
+      : undefined,
+    runnerVerified: data.runnerVerified != null ? Boolean(data.runnerVerified) : undefined,
+    acceptedAt: data.acceptedAt ? toDate(data.acceptedAt) : undefined,
+    purchasedAt: data.purchasedAt ? toDate(data.purchasedAt) : undefined,
+    runnerDeadline: data.runnerDeadline ? toDate(data.runnerDeadline) : undefined,
+    customerDeadline: data.customerDeadline ? toDate(data.customerDeadline) : undefined,
+    runnerExpiredAt: data.runnerExpiredAt ? toDate(data.runnerExpiredAt) : undefined,
     runnerRating: data.runnerRating != null ? Number(data.runnerRating) : undefined,
     deliveryPhotoUrl: data.deliveryPhotoUrl
       ? String(data.deliveryPhotoUrl)
@@ -283,14 +298,14 @@ async function fetchAllOrdersFromFirestore(): Promise<Order[]> {
   );
 }
 
-export async function fetchRunnerOrders(runnerId: string): Promise<Order[]> {
+export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
       const orders = await fetchAllOrdersFromFirestore();
       return orders.filter(
         (o) =>
-          o.runnerId === runnerId &&
-          (o.status === "assigned" || o.status === "picked"),
+          (o.runnerUid === runnerUid || o.runnerId === runnerUid) &&
+          (o.status === "accepted" || o.status === "purchased"),
       );
     } catch (err) {
       console.error("fetchRunnerOrders Firestore failed", err);
@@ -300,7 +315,7 @@ export async function fetchRunnerOrders(runnerId: string): Promise<Order[]> {
     }
   }
 
-  return getMockRunnerOrders(runnerId);
+  return getMockRunnerOrders(runnerUid);
 }
 
 export async function fetchDeliveredOrdersByRunner(
@@ -328,6 +343,11 @@ export async function acceptOrder(
   runnerId: string,
   runnerName: string,
   runnerCustomerId: string,
+  runnerPayment?: {
+    method?: "PayMe" | "FPS";
+    id?: string;
+    email?: string;
+  },
 ): Promise<void> {
   if (isFirebaseConfigured()) {
     const db = getDb();
@@ -344,9 +364,14 @@ export async function acceptOrder(
         throw new OrderAlreadyTakenError();
       }
       tx.update(orderRef, {
-        status: "assigned",
+        status: "accepted",
         runnerId,
+        runnerUid: runnerId,
         runnerName,
+        runnerPaymentMethod: runnerPayment?.method,
+        runnerPaymentId: runnerPayment?.id,
+        runnerEmail: runnerPayment?.email,
+        acceptedAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
       });
     });
@@ -362,7 +387,7 @@ export async function acceptOrder(
     if (order.runnerId === runnerId) return;
     throw new OrderAlreadyTakenError();
   }
-  await updateOrderStatus(orderId, "assigned", { runnerId, runnerName });
+  await updateOrderStatus(orderId, "accepted", { runnerId, runnerName });
 }
 
 export async function updateOrderStatus(
@@ -380,8 +405,12 @@ export async function updateOrderStatus(
         status,
         updatedAt: Timestamp.fromDate(now),
       };
-      if (status === "picked") {
+      if (status === "purchased") {
         updates.pickedUpAt = Timestamp.fromDate(now);
+        updates.purchasedAt = Timestamp.fromDate(now);
+      }
+      if (status === "accepted") {
+        updates.acceptedAt = Timestamp.fromDate(now);
       }
       if (status === "delivered") {
         updates.deliveredAt = Timestamp.fromDate(now);
@@ -402,7 +431,11 @@ export async function updateOrderStatus(
   if (order) {
     order.status = status;
     order.updatedAt = now;
-    if (status === "picked") order.pickedUpAt = now;
+    if (status === "purchased") {
+      order.pickedUpAt = now;
+      order.purchasedAt = now;
+    }
+    if (status === "accepted") order.acceptedAt = now;
     if (status === "delivered") order.deliveredAt = now;
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
@@ -452,7 +485,7 @@ export async function cancelOrder(orderId: string, customerId: string): Promise<
   const canCancelPending = order.status === "pending";
   const canCancelPriceIncrease =
     order.priceAdjustmentStatus === "pending_customer" &&
-    (order.status === "assigned" || order.status === "pending");
+    (order.status === "accepted" || order.status === "pending");
   if (!canCancelPending && !canCancelPriceIncrease) {
     throw new Error("Order can only be cancelled before pickup");
   }
@@ -464,7 +497,7 @@ export async function fetchLiveDeliveryCount(): Promise<number> {
     try {
       const q = query(
         collection(getDb(), ORDERS_COLLECTION),
-        where("status", "in", ["assigned", "picked"]),
+        where("status", "in", ["accepted", "purchased", "assigned", "picked"]),
       );
       const snap = await getDocs(q);
       return snap.size;
@@ -556,7 +589,7 @@ export async function submitTillPrices(
 ): Promise<Order | null> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== "assigned") {
+  if (order.status !== "accepted") {
     throw new Error("Till prices can only be submitted before pickup");
   }
 
@@ -713,8 +746,123 @@ export function awaitingCustomerPriceApproval(order: Order): boolean {
 }
 
 export function canMarkPickedUp(order: Order): boolean {
-  if (order.status !== "assigned") return false;
+  if (order.status !== "accepted") return false;
   if (!tillPricesReady(order)) return false;
   if (awaitingCustomerPriceApproval(order)) return false;
   return true;
+}
+
+export async function uploadReceiptPhoto(
+  orderId: string,
+  file: Blob,
+  filename = "receipt.jpg",
+): Promise<string> {
+  const name =
+    "name" in file && typeof (file as { name?: string }).name === "string"
+      ? (file as { name: string }).name
+      : filename;
+  if (isFirebaseConfigured()) {
+    try {
+      const storageRef = ref(
+        getFirebaseStorage(),
+        storagePath(`receipts/${orderId}/${name}`),
+      );
+      await uploadBytes(storageRef, file);
+      return await getDownloadURL(storageRef);
+    } catch {
+      // fallback
+    }
+  }
+  return `mock://receipt/${orderId}/${name}`;
+}
+
+export async function uploadBankStatementPhoto(
+  orderId: string,
+  file: Blob,
+  filename = "bank.jpg",
+): Promise<string> {
+  const name =
+    "name" in file && typeof (file as { name?: string }).name === "string"
+      ? (file as { name: string }).name
+      : filename;
+  if (isFirebaseConfigured()) {
+    try {
+      const storageRef = ref(
+        getFirebaseStorage(),
+        storagePath(`bank-statements/${orderId}/${name}`),
+      );
+      await uploadBytes(storageRef, file);
+      return await getDownloadURL(storageRef);
+    } catch {
+      // fallback
+    }
+  }
+  return `mock://bank/${orderId}/${name}`;
+}
+
+export async function markPurchased(
+  orderId: string,
+  urls: { receiptUrl: string; bankStatementUrl: string },
+): Promise<void> {
+  const now = new Date();
+  await patchOrder(
+    orderId,
+    {
+      status: "purchased",
+      receiptUrl: urls.receiptUrl,
+      bankStatementUrl: urls.bankStatementUrl,
+      purchasedAt: Timestamp.fromDate(now),
+      pickedUpAt: Timestamp.fromDate(now),
+    },
+    (mock) => {
+      mock.status = "purchased";
+      mock.receiptUrl = urls.receiptUrl;
+      mock.bankStatementUrl = urls.bankStatementUrl;
+      mock.purchasedAt = now;
+      mock.pickedUpAt = now;
+    },
+  );
+}
+
+export async function markDeliveredWithTotal(
+  orderId: string,
+  payload: {
+    finalTotal: number;
+    deliveryPhotoUrl: string;
+    bankStatementUrl: string;
+    receiptUrl?: string;
+    runnerVerified?: boolean;
+  },
+): Promise<void> {
+  const now = new Date();
+  const total = Math.round(payload.finalTotal * 100) / 100;
+  await patchOrder(
+    orderId,
+    {
+      status: "delivered",
+      finalTotal: total,
+      amountPaidByRunner: total,
+      actualSubtotal: total,
+      deliveryPhotoUrl: payload.deliveryPhotoUrl,
+      bankStatementUrl: payload.bankStatementUrl,
+      receiptUrl: payload.receiptUrl,
+      runnerVerified: payload.runnerVerified ?? true,
+      deliveredAt: Timestamp.fromDate(now),
+      customerDeadline: Timestamp.fromDate(
+        new Date(now.getTime() + 24 * 60 * 60 * 1000),
+      ),
+    },
+    (mock) => {
+      mock.status = "delivered";
+      mock.finalTotal = total;
+      mock.amountPaidByRunner = total;
+      mock.actualSubtotal = total;
+      mock.deliveryPhotoUrl = payload.deliveryPhotoUrl;
+      mock.bankStatementUrl = payload.bankStatementUrl;
+      if (payload.receiptUrl) mock.receiptUrl = payload.receiptUrl;
+      mock.runnerVerified = payload.runnerVerified ?? true;
+      mock.deliveredAt = now;
+      mock.customerDeadline = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    },
+  );
 }

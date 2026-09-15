@@ -40,9 +40,12 @@ export function FeedbackButton() {
     setError("");
     setSending(true);
     try {
+      if (!user?.uid && !user?.studentId) {
+        throw new Error("Sign in to send feedback.");
+      }
       await submitFeedback({
-        userId: user?.uid,
-        userName: user?.fullName || user?.username,
+        userId: user.uid ?? user.studentId!,
+        userName: user.fullName || user.username,
         message,
       });
       setMessage("");

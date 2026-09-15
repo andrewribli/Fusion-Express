@@ -26,3 +26,26 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
+export function RequireRunner({ children }: { children: React.ReactNode }) {
+  const { user, isReady, canRunnerMode } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isReady && (!user || !canRunnerMode)) {
+      router.replace("/runner/terms");
+    }
+  }, [user, isReady, canRunnerMode, router]);
+
+  if (!isReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-gray-500">
+        Loading…
+      </div>
+    );
+  }
+
+  if (!user || !canRunnerMode) return null;
+
+  return <>{children}</>;
+}

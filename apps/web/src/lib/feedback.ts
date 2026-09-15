@@ -77,3 +77,8 @@ export async function updateFeedbackStatus(
   if (!isFirebaseConfigured()) return;
   await updateDoc(doc(getDb(), COLLECTION(), id), { status });
 }
+
+export function feedbackErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message;
+  return "Could not send feedback. Try again.";
+}
