@@ -1,8 +1,8 @@
 import type { OrderStatus } from "@/lib/types";
 
 const STATUS_MESSAGES: Partial<Record<OrderStatus, string>> = {
-  assigned: "A runner has accepted your order!",
-  picked: "Your groceries have been picked up and are on the way.",
+  accepted: "A runner has accepted your order!",
+  purchased: "Your groceries have been picked up and are on the way.",
   delivered: "Your order has been delivered. Enjoy!",
 };
 
