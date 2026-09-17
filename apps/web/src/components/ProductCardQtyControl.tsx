@@ -16,8 +16,10 @@ export function ProductCardQtyControl({
 
   if (!item.inStock) return null;
 
-  const btn = size === "sm" ? "h-8 w-8 text-base" : "h-9 w-9 text-lg";
-  const pillPad = size === "sm" ? "h-8 gap-1.5 px-1" : "h-9 gap-1.5 px-1";
+  // Visual control stays compact; hit area is at least 44×44 for mobile taps.
+  const btnVisual = size === "sm" ? "h-8 w-8 text-base" : "h-9 w-9 text-lg";
+  const hit = "min-h-11 min-w-11";
+  const pillPad = size === "sm" ? "min-h-11 gap-0.5 px-0.5" : "min-h-11 gap-0.5 px-0.5";
   const qtyText = size === "sm" ? "text-xs" : "text-sm";
 
   if (quantity <= 0) {
@@ -29,18 +31,23 @@ export function ProductCardQtyControl({
           e.preventDefault();
           addItem(item);
         }}
-        className={`absolute bottom-1.5 right-1.5 z-10 flex ${btn} items-center justify-center rounded-full font-bold shadow-md`}
-        style={{ backgroundColor: "#ED1C24", color: "#ffffff" }}
+        className={`absolute bottom-0.5 right-0.5 z-10 flex ${hit} items-center justify-center`}
         aria-label={`Add ${item.name} to cart`}
       >
-        +
+        <span
+          className={`flex ${btnVisual} items-center justify-center rounded-full font-bold shadow-md`}
+          style={{ backgroundColor: "#ED1C24", color: "#ffffff" }}
+          aria-hidden
+        >
+          +
+        </span>
       </button>
     );
   }
 
   return (
     <div
-      className={`absolute bottom-1.5 right-1.5 z-10 flex ${pillPad} items-center rounded-full shadow-md`}
+      className={`absolute bottom-0.5 right-0.5 z-10 flex ${pillPad} items-center rounded-full shadow-md`}
       style={{ backgroundColor: "#ffffff" }}
       onClick={(e) => {
         e.stopPropagation();
@@ -50,14 +57,16 @@ export function ProductCardQtyControl({
       <button
         type="button"
         onClick={() => setQuantity(item.id, quantity - 1)}
-        className={`flex ${btn} items-center justify-center rounded-full font-bold`}
+        className={`flex ${hit} items-center justify-center rounded-full font-bold`}
         style={{ color: "#ED1C24" }}
         aria-label="Decrease quantity"
       >
-        −
+        <span className={btnVisual} aria-hidden>
+          −
+        </span>
       </button>
       <span
-        className={`min-w-4 text-center font-bold tabular-nums ${qtyText}`}
+        className={`min-w-5 text-center font-extrabold tabular-nums ${qtyText}`}
         style={{ color: "#111111" }}
       >
         {quantity}
@@ -65,11 +74,16 @@ export function ProductCardQtyControl({
       <button
         type="button"
         onClick={() => setQuantity(item.id, quantity + 1)}
-        className={`flex ${btn} items-center justify-center rounded-full font-bold text-white`}
-        style={{ backgroundColor: "#ED1C24" }}
+        className={`flex ${hit} items-center justify-center rounded-full font-bold text-white`}
         aria-label="Increase quantity"
       >
-        +
+        <span
+          className={`flex ${btnVisual} items-center justify-center rounded-full`}
+          style={{ backgroundColor: "#ED1C24" }}
+          aria-hidden
+        >
+          +
+        </span>
       </button>
     </div>
   );
