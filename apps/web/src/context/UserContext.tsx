@@ -351,6 +351,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         fullName: profile.fullName,
         email: profile.email,
         phone: profile.phone,
+        cuhkEmail: profile.cuhkEmail ?? profile.email,
+        cuhkVerifiedAt: profile.cuhkVerifiedAt ?? new Date().toISOString(),
         isGuest: false,
         isRunner: false,
       });
@@ -591,7 +593,11 @@ export function useUser() {
   return ctx;
 }
 
-/** Canonical customer/runner identity for orders & chat */
+/**
+ * Canonical identity for orders, active-order queries, and chat sends.
+ * Prefer Auth uid always. studentId is NOT used here — chat access still
+ * accepts studentId as a legacy fallback in `canAccessOrderChat`.
+ */
 export function getUserAccountId(user: UserProfile): string {
-  return user.uid ?? user.email ?? user.studentId ?? "";
+  return user.uid ?? "";
 }

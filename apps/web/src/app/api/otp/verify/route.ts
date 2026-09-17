@@ -4,6 +4,7 @@ import {
   clearOtpFailures,
   getOtpFailCount,
   issueResetSessionCookie,
+  issueSignupSessionCookie,
   jsonError,
   OTP_COOKIE,
   OTP_MAX_FAILURES,
@@ -13,6 +14,7 @@ import {
   recordOtpFailure,
   requireOtpSecret,
   RESET_SESSION_COOKIE,
+  SIGNUP_SESSION_COOKIE,
   verifyOtpCookie,
 } from "@/lib/otp-server";
 import { clientIp, consumeRateLimit } from "@/lib/rate-limit";
@@ -95,6 +97,14 @@ export async function POST(request: NextRequest) {
       response.cookies.set(
         RESET_SESSION_COOKIE,
         issueResetSessionCookie(email),
+        otpCookieOptions(),
+      );
+    } else {
+      // Foundation for a future /api/signup/complete gate. Client still
+      // re-checks verifiedEmail before createUserWithEmailAndPassword.
+      response.cookies.set(
+        SIGNUP_SESSION_COOKIE,
+        issueSignupSessionCookie(email),
         otpCookieOptions(),
       );
     }

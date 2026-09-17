@@ -141,6 +141,8 @@ export function isOwnChatMessage(
  * Mirrors the chat security rules: the customer and the assigned runner only.
  * Any other runner used to pass this check, but the rules now reject their
  * reads, so the panel must not be offered to them.
+ *
+ * studentId remains a legacy customerId fallback for older orders only.
  */
 export function canAccessOrderChat(
   order: { customerId: string; runnerId?: string; runnerUid?: string },
@@ -153,7 +155,7 @@ export function canAccessOrderChat(
 ): boolean {
   const customerMatch =
     (user.uid && order.customerId === user.uid) ||
-    order.customerId === user.studentId;
+    Boolean(user.studentId && order.customerId === user.studentId);
   if (customerMatch) return true;
   if (order.runnerUid && user.uid && order.runnerUid === user.uid) return true;
   if (order.runnerId && user.runnerId && order.runnerId === user.runnerId) {
