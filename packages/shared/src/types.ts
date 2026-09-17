@@ -190,6 +190,8 @@ export interface Order {
    * /users doc, which only the customer themselves may read.
    */
   customerEmail?: string;
+  /** Customer mobile for runner contact / guest checkout identity. */
+  customerPhone?: string;
   items: OrderItem[];
   status: OrderStatus;
   college: string;

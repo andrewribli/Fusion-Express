@@ -29,13 +29,11 @@ import {
   savePaymentMethod,
   type CustomerPaymentMethod,
 } from "@/lib/payment-method";
-import { usePlaceOrder } from "@/lib/use-place-order";
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const { placeOrder, loading, error } = usePlaceOrder();
   const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
 
   useEffect(() => {
@@ -196,34 +194,19 @@ export default function CartPage() {
                 <div className="mt-2">
                   <OrderLimitNotice subtotal={subtotal} />
                 </div>
-                {error ? (
-                  <p className="mt-2 text-sm text-red-600">{error}</p>
-                ) : null}
                 <button
                   type="button"
-                  disabled={overLimit || loading}
+                  disabled={overLimit}
                   onClick={() => {
-                    if (!user) {
-                      router.push("/login?next=/");
-                      return;
-                    }
-                    if (!user.college || !user.hall) {
-                      router.push("/checkout");
-                      return;
-                    }
-                    void placeOrder({
-                      college: user.college,
-                      hall: user.hall,
-                      paymentMethod,
-                    });
+                    // Guests and signed-in users both finish on checkout so we
+                    // can collect phone / dorm / lobby in one place.
+                    router.push("/checkout");
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"
                 >
-                  {loading
-                    ? "Placing…"
-                    : user
-                      ? `Complete Order · ${paymentMethod}`
-                      : "Sign in to complete order"}
+                  {user
+                    ? `Checkout · ${paymentMethod}`
+                    : "Checkout — no account needed"}
                 </button>
 
                 <button

@@ -98,12 +98,27 @@ export default function RunnerTermsPage() {
     if (!isReady) return;
     if (user?.isRunner) {
       router.replace("/runner/dashboard");
+      return;
+    }
+    // Guest checkout accounts need a full customer/runner profile first.
+    if (user?.isGuest) {
+      router.replace("/profile?complete=runner");
     }
   }, [isReady, user, router]);
 
   async function handleAgree() {
     if (!user?.uid) {
       setError("Please sign in again before becoming a runner.");
+      return;
+    }
+    if (user.isGuest || !user.fullName?.trim() || user.fullName === "Guest") {
+      setError(
+        "Finish a full customer account (name + student ID) before becoming a runner.",
+      );
+      return;
+    }
+    if (!user.studentId?.trim()) {
+      setError("Add your student ID on Profile before becoming a runner.");
       return;
     }
     setError("");

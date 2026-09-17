@@ -325,7 +325,7 @@ export function ShopHome() {
               }}
             />
             <Link
-              href={itemCount > 0 ? (user ? "/cart" : "/login?next=/cart") : "/cart"}
+              href="/cart"
               className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
               aria-label="Cart"
             >

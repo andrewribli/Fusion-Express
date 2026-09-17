@@ -117,6 +117,17 @@ service cloud.firestore {
       allow update, delete: if signedIn() && resource.data.uid == uid();
     }
 
+    // Guest checkout resolves phone → email before Auth; same pattern as usernames.
+    match /phones/{phone} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.email is string
+        && request.resource.data.phone is string;
+      allow update, delete: if signedIn() && resource.data.uid == uid();
+    }
+
     // ------------------------------------------------------------------ users
 
     /** customer | runner | both — anything else is rejected outright. */
@@ -347,6 +358,16 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.uid == uid()
         && request.resource.data.email is string;
+      allow update, delete: if signedIn() && resource.data.uid == uid();
+    }
+
+    match /phones_test/{phone} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.email is string
+        && request.resource.data.phone is string;
       allow update, delete: if signedIn() && resource.data.uid == uid();
     }
 

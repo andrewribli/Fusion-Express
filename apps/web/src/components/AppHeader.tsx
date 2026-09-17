@@ -212,7 +212,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
 
             {!runnerMode && (
               <Link
-                href={overLimit ? "/" : itemCount > 0 ? (user ? "/" : "/login?next=/") : "/"}
+                href={overLimit ? "/" : itemCount > 0 ? "/checkout" : "/cart"}
                 aria-disabled={overLimit}
                 className={`relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold shadow-sm ${
                   overLimit
@@ -220,7 +220,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                     : "bg-fusion-red text-white"
                 }`}
                 aria-label={
-                  overLimit ? "Order over 200 HKD limit" : "Complete order"
+                  overLimit ? "Order over 200 HKD limit" : "Checkout"
                 }
               >
                 <NavIcon id="cart" className="h-4 w-4" />
