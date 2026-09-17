@@ -26,6 +26,8 @@ Grok_Bot*
 GraceRun Logo.png
 Reply Letter.pdf
 SC-554-0803.pdf
-# Local CLI uploads cap at 100MB; these shelf photos are already on prior
-# production deploys / git. Exclude so messaging and other code can ship.
+# Local CLI uploads cap at 100MB; shelf photos (~170MB+) must be uploaded to
+# Blob/CDN separately — do not ship apps/web/public/images/catalog in deploys.
+# Catalog JSON no longer references /images/catalog/* (cleared to empty so the
+# app falls back to remote/override/aisle images).
 apps/web/public/images/catalog

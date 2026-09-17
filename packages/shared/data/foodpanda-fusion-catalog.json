@@ -151,7 +151,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
-              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…4a7824-f7d9-4615-a360-b4b54e09db36.jpg?height=176",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -178,7 +178,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
-              "image": "/images/catalog/img-7065.jpg",
+              "image": "",
               "weight": 0.15
             },
             {
@@ -196,7 +196,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
-              "image": "/images/catalog/img-7065.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -214,7 +214,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
-              "image": "/images/catalog/img-7065.jpg",
+              "image": "",
               "weight": 0.3
             },
             {
@@ -311,7 +311,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
-              "image": "/images/catalog/img-7065.jpg",
+              "image": "",
               "weight": 0.95
             },
             {
@@ -320,7 +320,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
-              "image": "/images/catalog/img-7065.jpg",
+              "image": "",
               "weight": 0.1
             },
             {
@@ -369,7 +369,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "LUX",
-              "image": "/images/catalog/img-7065.jpg"
+              "image": ""
             },
             {
               "name": "Dettol Proskin Aloe Vera & White Jasmine Hand Wash",
@@ -395,7 +395,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "KIREI KIREI",
-              "image": "/images/catalog/img-7066.jpg",
+              "image": "",
               "weight": 0.49,
               "bulkDealPrice": 59.5,
               "bulkDealQty": 2
@@ -442,7 +442,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "NIVEA",
-              "image": "/images/catalog/img-7066.jpg",
+              "image": "",
               "weight": 0.15
             },
             {
@@ -460,7 +460,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
-              "image": "/images/catalog/img-7066.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -478,7 +478,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
-              "image": "/images/catalog/img-7066.jpg",
+              "image": "",
               "weight": 0.3
             },
             {
@@ -514,7 +514,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "WATSONS",
-              "image": "/images/catalog/img-7066.jpg",
+              "image": "",
               "weight": 0.5,
               "bulkDealPrice": 18.0,
               "bulkDealQty": 2
@@ -586,7 +586,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DETTOL",
-              "image": "/images/catalog/img-7066.jpg",
+              "image": "",
               "weight": 0.95
             },
             {
@@ -604,7 +604,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
-              "image": "/images/catalog/img-7066.jpg"
+              "image": ""
             },
             {
               "name": "Beauty Nourishing + Lavender Twin Pack",
@@ -620,7 +620,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "DOVE",
-              "image": "/images/catalog/img-7066.jpg"
+              "image": ""
             },
             {
               "name": "Profresh Green Tea & Jasmine Body Wash Twin Pack",
@@ -689,7 +689,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Dettol",
-              "image": "/images/catalog/img-7099.jpg"
+              "image": ""
             },
             {
               "name": "Body wash/refill multipack",
@@ -705,7 +705,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "ecostore",
-              "image": "/images/catalog/img-7099.jpg"
+              "image": ""
             },
             {
               "name": "Pink personal-care multipack",
@@ -713,7 +713,7 @@
               "category": "Groceries",
               "subcategory": "Toiletries",
               "brand": "Dove",
-              "image": "/images/catalog/img-7099.jpg"
+              "image": ""
             },
             {
               "name": "Petit Handkerchief 18s",
@@ -1424,7 +1424,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Prima Taste",
-              "image": "/images/catalog/img-7053.jpg",
+              "image": "",
               "weight": 0.144,
               "bulkDealPrice": 54.0,
               "bulkDealQty": 2
@@ -1488,7 +1488,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
-              "image": "/images/catalog/img-7054.jpg",
+              "image": "",
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
             },
@@ -1508,7 +1508,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
-              "image": "/images/catalog/img-7054.jpg",
+              "image": "",
               "weight": 0.1,
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
@@ -1564,7 +1564,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nong Shim",
-              "image": "/images/catalog/img-7054.jpg"
+              "image": ""
             },
             {
               "name": "Gonghwachun Zajang Noodle Multi Pack",
@@ -1581,7 +1581,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Doll",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.105,
               "bulkDealPrice": 28.0,
               "bulkDealQty": 2
@@ -1610,7 +1610,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.111,
               "bulkDealPrice": 39.9,
               "bulkDealQty": 2
@@ -1621,7 +1621,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.135
             },
             {
@@ -1639,7 +1639,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Ottogi",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.111
             },
             {
@@ -1648,7 +1648,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nissin",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.098,
               "bulkDealPrice": 32.0,
               "bulkDealQty": 9
@@ -1659,7 +1659,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nissin",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.1,
               "bulkDealPrice": 32.0,
               "bulkDealQty": 9
@@ -1670,7 +1670,7 @@
               "category": "Groceries",
               "subcategory": "Instant Noodles",
               "brand": "Nissin",
-              "image": "/images/catalog/img-7055.jpg",
+              "image": "",
               "weight": 0.1,
               "bulkDealPrice": 32.0,
               "bulkDealQty": 9
@@ -1729,7 +1729,7 @@
               "price": 18.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "brand": "Hao Yi Shi",
               "weight": 0.25
             },
@@ -1738,7 +1738,7 @@
               "price": 18.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "brand": "Hao Yi Shi",
               "weight": 0.25
             },
@@ -1747,7 +1747,7 @@
               "price": 18.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "brand": "Hao Yi Shi",
               "weight": 0.25
             },
@@ -1756,7 +1756,7 @@
               "price": 18.0,
               "category": "Groceries",
               "subcategory": "Instant Noodles",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "brand": "Hao Yi Shi",
               "weight": 0.25
             }
@@ -1869,7 +1869,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
-              "image": "/images/catalog/img-7056.jpg"
+              "image": ""
             },
             {
               "name": "Centifloral Honey",
@@ -1877,7 +1877,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -1886,7 +1886,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -1895,7 +1895,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
-              "image": "/images/catalog/img-7056.jpg"
+              "image": ""
             },
             {
               "name": "Pure Clear Honey",
@@ -1903,7 +1903,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Essential Waitrose",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.454
             },
             {
@@ -1912,7 +1912,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Langnese",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.375
             },
             {
@@ -1921,7 +1921,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Naturohoney",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.375
             },
             {
@@ -1930,7 +1930,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -1939,7 +1939,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Select",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -1948,7 +1948,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Po Sang Yuen",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -1957,7 +1957,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Po Sang Yuen",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -1966,7 +1966,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.285
             },
             {
@@ -1975,7 +1975,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.285
             },
             {
@@ -1984,7 +1984,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.285
             },
             {
@@ -1993,7 +1993,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Food Nation",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.285
             },
             {
@@ -2002,7 +2002,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "St. Dalfour",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.284
             },
             {
@@ -2011,7 +2011,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.225
             },
             {
@@ -2020,7 +2020,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.225
             },
             {
@@ -2029,7 +2029,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.37
             },
             {
@@ -2038,7 +2038,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Bonne Maman",
-              "image": "/images/catalog/img-7056.jpg",
+              "image": "",
               "weight": 0.37
             },
             {
@@ -2047,7 +2047,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.34
             },
             {
@@ -2056,7 +2056,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.34
             },
             {
@@ -2074,7 +2074,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.51
             },
             {
@@ -2083,7 +2083,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.51
             },
             {
@@ -2092,7 +2092,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Skippy",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.462
             },
             {
@@ -2101,7 +2101,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "KARA",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.2
             },
             {
@@ -2110,7 +2110,7 @@
               "category": "Groceries",
               "subcategory": "Condiments",
               "brand": "Nutella",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.35
             },
             {
@@ -2200,7 +2200,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Ciao",
-              "image": "/images/catalog/img-7056.jpg"
+              "image": ""
             },
             {
               "name": "Sardines",
@@ -2208,7 +2208,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "BeF",
-              "image": "/images/catalog/img-7056.jpg"
+              "image": ""
             },
             {
               "name": "Creamy Chicken Mushroom Soup",
@@ -2216,7 +2216,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Campbell's",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.3
             },
             {
@@ -2225,7 +2225,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Campbell's",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.295
             },
             {
@@ -2243,7 +2243,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Smedley's",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.42
             },
             {
@@ -2261,7 +2261,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.19
             },
             {
@@ -2270,7 +2270,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Pou Yen",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.425
             },
             {
@@ -2279,7 +2279,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.19
             },
             {
@@ -2288,7 +2288,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.34,
               "bulkDealPrice": 13.8,
               "bulkDealQty": 2
@@ -2299,7 +2299,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.34,
               "bulkDealPrice": 13.8,
               "bulkDealQty": 2
@@ -2310,7 +2310,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.42,
               "bulkDealPrice": 21.0,
               "bulkDealQty": 2
@@ -2321,7 +2321,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.42,
               "bulkDealPrice": 21.0,
               "bulkDealQty": 2
@@ -2332,7 +2332,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Ciao",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -2341,7 +2341,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "S&W",
-              "image": "/images/catalog/img-7058.jpg"
+              "image": ""
             },
             {
               "name": "Mandarin Oranges",
@@ -2349,7 +2349,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Golden Crown",
-              "image": "/images/catalog/img-7058.jpg"
+              "image": ""
             },
             {
               "name": "Fresh Cut Pear Halves",
@@ -2357,7 +2357,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "bulkDealPrice": 40.0,
               "bulkDealQty": 2
             },
@@ -2367,7 +2367,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.42,
               "bulkDealPrice": 40.0,
               "bulkDealQty": 2
@@ -2378,7 +2378,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.234,
               "bulkDealPrice": 22.0,
               "bulkDealQty": 2
@@ -2389,7 +2389,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.836,
               "bulkDealPrice": 37.0,
               "bulkDealQty": 2
@@ -2400,7 +2400,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "weight": 0.825,
               "bulkDealPrice": 46.0,
               "bulkDealQty": 2
@@ -2411,7 +2411,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Del Monte",
-              "image": "/images/catalog/img-7058.jpg",
+              "image": "",
               "bulkDealPrice": 37.0,
               "bulkDealQty": 2
             },
@@ -2421,7 +2421,7 @@
               "category": "Groceries",
               "subcategory": "Canned Goods",
               "brand": "Ligo",
-              "image": "/images/catalog/img-7098.jpg"
+              "image": ""
             },
             {
               "name": "Luncheon Meat 340g",
@@ -2754,7 +2754,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
-              "image": "/images/catalog/img-7063.jpg",
+              "image": "",
               "weight": 0.052
             },
             {
@@ -2763,7 +2763,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
-              "image": "/images/catalog/img-7063.jpg",
+              "image": "",
               "weight": 0.055
             },
             {
@@ -2781,7 +2781,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
-              "image": "/images/catalog/img-7063.jpg",
+              "image": "",
               "weight": 0.055
             },
             {
@@ -2799,7 +2799,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
-              "image": "/images/catalog/img-7063.jpg"
+              "image": ""
             },
             {
               "name": "Caramel Latte Premium Mixes",
@@ -2807,7 +2807,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "STARBUCKS",
-              "image": "/images/catalog/img-7063.jpg"
+              "image": ""
             },
             {
               "name": "Drip On Variety Pack",
@@ -2815,7 +2815,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "KEY COFFEE",
-              "image": "/images/catalog/img-7063.jpg",
+              "image": "",
               "weight": 0.08
             },
             {
@@ -2824,7 +2824,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "KEY COFFEE",
-              "image": "/images/catalog/img-7063.jpg",
+              "image": "",
               "weight": 0.008
             },
             {
@@ -2841,7 +2841,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "MAXWELL",
-              "image": "/images/catalog/img-7063.jpg"
+              "image": ""
             },
             {
               "name": "Coffee Espresso [France]",
@@ -2849,7 +2849,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "CASINO",
-              "image": "/images/catalog/img-7063.jpg",
+              "image": "",
               "weight": 0.25,
               "bulkDealPrice": 118.0,
               "bulkDealQty": 2
@@ -2860,7 +2860,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "MAXWELL",
-              "image": "/images/catalog/img-7063.jpg"
+              "image": ""
             },
             {
               "name": "Coffee Mix Lite",
@@ -2868,7 +2868,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "MAXWELL",
-              "image": "/images/catalog/img-7063.jpg"
+              "image": ""
             },
             {
               "name": "NESCAFÉ 1+2 Rich Instant Coffee Mix",
@@ -2894,7 +2894,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
-              "image": "/images/catalog/img-7064.jpg"
+              "image": ""
             },
             {
               "name": "Nescafe 1+2 Original Stick 15gx42",
@@ -2902,7 +2902,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
-              "image": "/images/catalog/img-7064.jpg"
+              "image": ""
             },
             {
               "name": "1+2 Rich Instant Coffee Mix",
@@ -2928,7 +2928,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
-              "image": "/images/catalog/img-7064.jpg",
+              "image": "",
               "weight": 0.021
             },
             {
@@ -2937,7 +2937,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "NESCAFE",
-              "image": "/images/catalog/img-7064.jpg"
+              "image": ""
             },
             {
               "name": "3 In 1 Hazelnut White Coffee",
@@ -2945,7 +2945,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "OLD TOWN",
-              "image": "/images/catalog/img-7064.jpg",
+              "image": "",
               "bulkDealPrice": 56.0,
               "bulkDealQty": 2
             },
@@ -2955,7 +2955,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "OLD TOWN",
-              "image": "/images/catalog/img-7064.jpg",
+              "image": "",
               "bulkDealPrice": 56.0,
               "bulkDealQty": 2
             },
@@ -2965,7 +2965,7 @@
               "category": "Groceries",
               "subcategory": "Hot Drinks",
               "brand": "OLD TOWN",
-              "image": "/images/catalog/img-7064.jpg"
+              "image": ""
             }
           ]
         },
@@ -2978,7 +2978,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "OATSIDE",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -2987,7 +2987,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 0.18
             },
             {
@@ -2996,7 +2996,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 0.18
             },
             {
@@ -3005,7 +3005,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3014,7 +3014,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3023,7 +3023,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "GOODMATE",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3032,7 +3032,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "137 DEGREES",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3041,7 +3041,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "137 DEGREES",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3050,7 +3050,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "OATLY",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3068,7 +3068,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "OATLY",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3077,7 +3077,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "VITASOY",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -3086,7 +3086,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "BLUE DIAMOND",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 0.946
             },
             {
@@ -3095,7 +3095,7 @@
               "category": "Groceries",
               "subcategory": "Drinks",
               "brand": "BLUE DIAMOND",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 0.946
             },
             {
@@ -3168,7 +3168,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Baker's Choice",
-              "image": "/images/catalog/img-7059.jpg",
+              "image": "",
               "weight": 0.24
             },
             {
@@ -3186,7 +3186,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
-              "image": "/images/catalog/img-7059.jpg"
+              "image": ""
             },
             {
               "name": "Crustless Sandwich Bread 6s",
@@ -3210,7 +3210,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
-              "image": "/images/catalog/img-7059.jpg"
+              "image": ""
             },
             {
               "name": "Triple Cheese Sourdough Bagel",
@@ -3226,7 +3226,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
-              "image": "/images/catalog/img-7059.jpg"
+              "image": ""
             },
             {
               "name": "Apricot Rye Sourdough Toast",
@@ -3242,7 +3242,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
-              "image": "/images/catalog/img-7059.jpg"
+              "image": ""
             },
             {
               "name": "Soft Raisin Bread",
@@ -3250,7 +3250,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
-              "image": "/images/catalog/img-7059.jpg"
+              "image": ""
             },
             {
               "name": "Whole Wheat Sandwich Bread 8s",
@@ -3266,7 +3266,7 @@
               "category": "Groceries",
               "subcategory": "Bread & Bakery",
               "brand": "Select",
-              "image": "/images/catalog/img-7059.jpg"
+              "image": ""
             },
             {
               "name": "Sandwich Bread 8 slices",
@@ -3324,7 +3324,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Select",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.53
             },
             {
@@ -3333,7 +3333,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Robertsons",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.08
             },
             {
@@ -3342,7 +3342,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Robertsons",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.08
             },
             {
@@ -3351,7 +3351,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Robertsons",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.08
             },
             {
@@ -3405,7 +3405,7 @@
               "category": "Groceries",
               "subcategory": "Confectionary",
               "brand": "Yue Zhuan",
-              "image": "/images/catalog/img-7057.jpg",
+              "image": "",
               "weight": 0.22
             },
             {
@@ -3413,7 +3413,7 @@
               "price": 17.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Hi-Chew",
               "weight": 0.1
             },
@@ -3422,7 +3422,7 @@
               "price": 11.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Nimm2",
               "weight": 0.09
             },
@@ -3431,7 +3431,7 @@
               "price": 9.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Extra",
               "weight": 0.05
             },
@@ -3440,7 +3440,7 @@
               "price": 9.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Extra",
               "weight": 0.05
             },
@@ -3449,7 +3449,7 @@
               "price": 9.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Extra",
               "weight": 0.05
             },
@@ -3458,7 +3458,7 @@
               "price": 9.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Eclipse",
               "weight": 0.05
             },
@@ -3467,7 +3467,7 @@
               "price": 9.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-08.jpg",
+              "image": "",
               "brand": "Eclipse",
               "weight": 0.05
             },
@@ -3476,7 +3476,7 @@
               "price": 22.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-09.jpg",
+              "image": "",
               "brand": "Cadbury",
               "weight": 0.2
             },
@@ -3485,7 +3485,7 @@
               "price": 15.5,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-09.jpg",
+              "image": "",
               "brand": "Toblerone",
               "weight": 0.1
             },
@@ -3494,7 +3494,7 @@
               "price": 21.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-09.jpg",
+              "image": "",
               "brand": "Ritter Sport",
               "weight": 0.1
             },
@@ -3503,7 +3503,7 @@
               "price": 40.0,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-09.jpg",
+              "image": "",
               "brand": "Hershey's",
               "weight": 0.3
             },
@@ -3512,7 +3512,7 @@
               "price": 20.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-09.jpg",
+              "image": "",
               "brand": "KitKat",
               "weight": 0.2
             },
@@ -3521,7 +3521,7 @@
               "price": 34.1,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-09.jpg",
+              "image": "",
               "brand": "Maltesers",
               "weight": 0.2
             },
@@ -3530,7 +3530,7 @@
               "price": 94.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Maltesers",
               "weight": 0.465
             },
@@ -3539,7 +3539,7 @@
               "price": 20.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Meiji",
               "weight": 0.07
             },
@@ -3548,7 +3548,7 @@
               "price": 24.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Andes",
               "weight": 0.132
             },
@@ -3557,7 +3557,7 @@
               "price": 21.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Meiji",
               "weight": 0.074
             },
@@ -3566,7 +3566,7 @@
               "price": 25.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Meiji",
               "weight": 0.09
             },
@@ -3575,7 +3575,7 @@
               "price": 25.9,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Meiji",
               "weight": 0.088
             },
@@ -3584,7 +3584,7 @@
               "price": 10.5,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Kinder",
               "weight": 0.043
             },
@@ -3593,7 +3593,7 @@
               "price": 12.5,
               "category": "Groceries",
               "subcategory": "Confectionary",
-              "image": "/images/catalog/drive-shelf-10.jpg",
+              "image": "",
               "brand": "Kinder",
               "weight": 0.02
             },
@@ -4025,7 +4025,7 @@
               "category": "Groceries",
               "subcategory": "Household",
               "brand": "Walch",
-              "image": "/images/catalog/img-7099.jpg"
+              "image": ""
             },
             {
               "name": "Kitchen Towel 6 rolls",
@@ -4109,7 +4109,7 @@
               "category": "Groceries",
               "subcategory": "Sauces",
               "brand": "Barilla",
-              "image": "/images/catalog/img-7184.jpg",
+              "image": "",
               "weight": 0.19
             },
             {
@@ -4231,7 +4231,7 @@
               "price": 18.0,
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -4239,7 +4239,7 @@
               "price": 39.5,
               "category": "Groceries",
               "subcategory": "Rice & Noodles",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "weight": 0.5
             }
           ]
@@ -4305,7 +4305,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4314,7 +4314,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4323,7 +4323,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4332,7 +4332,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4341,7 +4341,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4350,7 +4350,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4359,7 +4359,7 @@
               "price": 28.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Lay's",
               "weight": 0.15
             },
@@ -4368,7 +4368,7 @@
               "price": 14.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-11.jpg",
+              "image": "",
               "brand": "Pringles",
               "weight": 0.11
             },
@@ -4377,7 +4377,7 @@
               "price": 13.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-12.jpg",
+              "image": "",
               "brand": "Calbee",
               "weight": 0.07
             },
@@ -4386,7 +4386,7 @@
               "price": 13.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-12.jpg",
+              "image": "",
               "brand": "Calbee",
               "weight": 0.07
             },
@@ -4395,7 +4395,7 @@
               "price": 13.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Calbee",
               "weight": 0.07
             },
@@ -4404,7 +4404,7 @@
               "price": 18.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Calbee",
               "weight": 0.1
             },
@@ -4413,7 +4413,7 @@
               "price": 13.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Calbee",
               "weight": 0.07
             },
@@ -4422,7 +4422,7 @@
               "price": 28.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Cheetos",
               "weight": 0.15
             },
@@ -4431,7 +4431,7 @@
               "price": 28.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Cheetos",
               "weight": 0.15
             },
@@ -4440,7 +4440,7 @@
               "price": 28.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Doritos",
               "weight": 0.15
             },
@@ -4449,7 +4449,7 @@
               "price": 28.0,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-13.jpg",
+              "image": "",
               "brand": "Doritos",
               "weight": 0.15
             },
@@ -4458,7 +4458,7 @@
               "price": 14.5,
               "category": "Groceries",
               "subcategory": "Chips",
-              "image": "/images/catalog/drive-shelf-12.jpg",
+              "image": "",
               "brand": "Calbee",
               "weight": 0.07
             },
@@ -4995,7 +4995,7 @@
               "price": 49.0,
               "category": "Groceries",
               "subcategory": "Crackers",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "Ritz",
               "weight": 0.4
             },
@@ -5004,7 +5004,7 @@
               "price": 24.5,
               "category": "Groceries",
               "subcategory": "Crackers",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "Ritz",
               "weight": 0.2
             },
@@ -5075,7 +5075,7 @@
               "category": "Groceries",
               "subcategory": "Snacks",
               "brand": "Select",
-              "image": "/images/catalog/img-7056.jpg"
+              "image": ""
             },
             {
               "name": "Almond Pepero 32g",
@@ -5263,7 +5263,7 @@
               "price": 23.5,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "McVitie's",
               "weight": 0.25
             },
@@ -5272,7 +5272,7 @@
               "price": 18.5,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "McVitie's",
               "weight": 0.2
             },
@@ -5281,7 +5281,7 @@
               "price": 18.5,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "McVitie's",
               "weight": 0.2
             },
@@ -5290,7 +5290,7 @@
               "price": 11.9,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "Oreo",
               "weight": 0.1
             },
@@ -5299,7 +5299,7 @@
               "price": 24.5,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "Oreo",
               "weight": 0.27
             },
@@ -5308,7 +5308,7 @@
               "price": 13.6,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "Munchy's",
               "weight": 0.15
             },
@@ -5317,7 +5317,7 @@
               "price": 36.9,
               "category": "Groceries",
               "subcategory": "Biscuits",
-              "image": "/images/catalog/drive-shelf-07.jpg",
+              "image": "",
               "brand": "Select",
               "weight": 0.5
             },
@@ -5738,7 +5738,7 @@
               "price": 32.0,
               "category": "Fresh Food",
               "subcategory": "Fruit & Berries",
-              "image": "/images/catalog/drive-shelf-05.jpg",
+              "image": "",
               "weight": 0.125
             }
           ]
@@ -5752,7 +5752,7 @@
               "category": "Fresh Food",
               "subcategory": "Beef",
               "brand": "Select",
-              "image": "/images/catalog/img-7185.jpg",
+              "image": "",
               "weight": 0.177
             },
             {
@@ -5785,7 +5785,7 @@
               "category": "Fresh Food",
               "subcategory": "Beef",
               "brand": "Select",
-              "image": "/images/catalog/img-7185.jpg",
+              "image": "",
               "weight": 0.177
             },
             {
@@ -5794,7 +5794,7 @@
               "category": "Fresh Food",
               "subcategory": "Beef",
               "brand": "Select",
-              "image": "/images/catalog/img-7185.jpg",
+              "image": "",
               "weight": 0.181
             },
             {
@@ -5803,7 +5803,7 @@
               "category": "Fresh Food",
               "subcategory": "Beef",
               "brand": "ang",
-              "image": "/images/catalog/img-7190.jpg",
+              "image": "",
               "weight": 0.23
             },
             {
@@ -5812,14 +5812,14 @@
               "category": "Fresh Food",
               "subcategory": "Beef",
               "brand": "ang",
-              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…610a8f-dc28-4f2a-a740-6b27134658e8.jpg?height=176"
+              "image": ""
             },
             {
               "name": "Beef Brisket Broth Meal Kit",
               "price": 39.9,
               "category": "Fresh Food",
               "subcategory": "Beef",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "weight": 0.6
             }
           ]
@@ -5848,7 +5848,7 @@
               "price": 25.0,
               "category": "Fresh Food",
               "subcategory": "Chicken",
-              "image": "/images/catalog/img-7076.jpg",
+              "image": "",
               "bulkDealPrice": 25.0,
               "bulkDealQty": 2
             },
@@ -5882,7 +5882,7 @@
               "category": "Fresh Food",
               "subcategory": "Chicken",
               "brand": "Select",
-              "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…5ca5b1-f802-4ad0-b9d7-06490939b5f7.jpg?height=176"
+              "image": ""
             },
             {
               "name": "Chicken dark meat/wing pieces",
@@ -5890,7 +5890,7 @@
               "category": "Fresh Food",
               "subcategory": "Chicken",
               "brand": "Select",
-              "image": "/images/catalog/img-7189.jpg"
+              "image": ""
             }
           ]
         },
@@ -5920,7 +5920,7 @@
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Samlip",
-              "image": "/images/catalog/img-7076.jpg",
+              "image": "",
               "weight": 0.35
             },
             {
@@ -5929,7 +5929,7 @@
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Samlip",
-              "image": "/images/catalog/img-7076.jpg",
+              "image": "",
               "weight": 0.35
             },
             {
@@ -5938,7 +5938,7 @@
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Samlip",
-              "image": "/images/catalog/img-7076.jpg",
+              "image": "",
               "weight": 0.35
             },
             {
@@ -5947,7 +5947,7 @@
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Morliny",
-              "image": "/images/catalog/img-7186.jpg"
+              "image": ""
             },
             {
               "name": "Sausage Basil",
@@ -5955,7 +5955,7 @@
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Samlip",
-              "image": "/images/catalog/img-7187.jpg",
+              "image": "",
               "weight": 0.35
             },
             {
@@ -5964,7 +5964,7 @@
               "category": "Fresh Food",
               "subcategory": "Pork",
               "brand": "Select",
-              "image": "/images/catalog/img-7195.jpg"
+              "image": ""
             }
           ]
         },
@@ -5977,7 +5977,7 @@
               "category": "Fresh Food",
               "subcategory": "Seafood",
               "brand": "Salmon Farm",
-              "image": "/images/catalog/img-7076.jpg",
+              "image": "",
               "weight": 0.1
             },
             {
@@ -5986,7 +5986,7 @@
               "category": "Fresh Food",
               "subcategory": "Seafood",
               "brand": "Select",
-              "image": "/images/catalog/img-7189.jpg",
+              "image": "",
               "weight": 1.13
             },
             {
@@ -6026,14 +6026,14 @@
               "price": 58.9,
               "category": "Fresh Food",
               "subcategory": "Others",
-              "image": "/images/catalog/img-7075.jpg"
+              "image": ""
             },
             {
               "name": "Mixed marinated meat tray with red pepper",
               "price": 58.9,
               "category": "Fresh Food",
               "subcategory": "Others",
-              "image": "/images/catalog/img-7077.jpg"
+              "image": ""
             },
             {
               "name": "Spaghetti with Meat in Tomato Sauce",
@@ -6050,7 +6050,7 @@
               "category": "Fresh Food",
               "subcategory": "Others",
               "brand": "Meat Zero",
-              "image": "/images/catalog/img-7194.jpg",
+              "image": "",
               "weight": 0.22
             },
             {
@@ -6058,7 +6058,7 @@
               "price": 20.0,
               "category": "Fresh Food",
               "subcategory": "Others",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "weight": 0.25
             }
           ]
@@ -6135,7 +6135,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 0.25
             },
             {
@@ -6153,7 +6153,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Black & White",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6171,7 +6171,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Select",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6180,7 +6180,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6189,7 +6189,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Harvey Fresh",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6198,7 +6198,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Daioni",
-              "image": "/images/catalog/img-7060.jpg",
+              "image": "",
               "weight": 1.0,
               "bulkDealPrice": 52.0,
               "bulkDealQty": 2
@@ -6209,7 +6209,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Devondale",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6218,7 +6218,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Devondale",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0,
               "bulkDealPrice": 38.0,
               "bulkDealQty": 2
@@ -6229,7 +6229,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6238,7 +6238,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6269,7 +6269,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Black & White",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6278,7 +6278,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Australia's Own",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6287,7 +6287,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Aus'Mania",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0,
               "bulkDealPrice": 26.0,
               "bulkDealQty": 2
@@ -6298,7 +6298,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Aus'Mania",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0,
               "bulkDealPrice": 26.0,
               "bulkDealQty": 2
@@ -6309,7 +6309,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 0.946,
               "bulkDealPrice": 42.0,
               "bulkDealQty": 3
@@ -6320,7 +6320,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 0.946,
               "bulkDealPrice": 42.0,
               "bulkDealQty": 3
@@ -6331,7 +6331,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Fred & Chloe",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0,
               "bulkDealPrice": 35.0,
               "bulkDealQty": 2
@@ -6342,7 +6342,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "MENGNIU",
-              "image": "/images/catalog/img-7061.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6378,7 +6378,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "MILK DELUXE",
-              "image": "/images/catalog/img-7062.jpg",
+              "image": "",
               "weight": 0.25
             },
             {
@@ -6387,7 +6387,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "VITA",
-              "image": "/images/catalog/img-7062.jpg",
+              "image": "",
               "weight": 0.236,
               "bulkDealPrice": 52.0,
               "bulkDealQty": 2
@@ -6398,7 +6398,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
-              "image": "/images/catalog/img-7062.jpg",
+              "image": "",
               "weight": 0.946,
               "bulkDealPrice": 126.0,
               "bulkDealQty": 3
@@ -6409,7 +6409,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Dutch Lady",
-              "image": "/images/catalog/img-7062.jpg",
+              "image": "",
               "weight": 0.946,
               "bulkDealPrice": 126.0,
               "bulkDealQty": 3
@@ -6420,7 +6420,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "President",
-              "image": "/images/catalog/img-7096.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -6429,7 +6429,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "President",
-              "image": "/images/catalog/img-7096.jpg",
+              "image": "",
               "weight": 0.2
             },
             {
@@ -6438,7 +6438,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Emmi",
-              "image": "/images/catalog/img-7096.jpg",
+              "image": "",
               "bulkDealPrice": 25.0,
               "bulkDealQty": 3
             },
@@ -6448,7 +6448,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Chobani",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Greek Yogurt, plain/other variant",
@@ -6464,7 +6464,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Meiji",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Yogurt, blue variant",
@@ -6472,7 +6472,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Yogurt, pink variant",
@@ -6480,7 +6480,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Pauls",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Yogurt",
@@ -6488,7 +6488,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Bulla",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Sour cream",
@@ -6496,7 +6496,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Daisy",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Spreadable butter",
@@ -6504,7 +6504,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Lurpak",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Spread, original/light variant",
@@ -6512,7 +6512,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Flora",
-              "image": "/images/catalog/img-7096.jpg"
+              "image": ""
             },
             {
               "name": "Cream cheese",
@@ -6520,7 +6520,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Philadelphia",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "String Cheese",
@@ -6528,7 +6528,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Crystal Farms",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Sliced cheese",
@@ -6536,7 +6536,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Chesdale",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Cheddar",
@@ -6544,7 +6544,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "President",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "The Laughing Cow cheese",
@@ -6552,7 +6552,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Laughing Cow",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "White Sharp Cheddar",
@@ -6560,7 +6560,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Crystal Farms",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Cheddar",
@@ -6568,7 +6568,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Crystal Farms",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Mozzarella",
@@ -6576,7 +6576,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Crystal Farms",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Parmesan",
@@ -6584,7 +6584,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Crystal Farms",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Butter",
@@ -6592,7 +6592,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "President",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Butter",
@@ -6600,7 +6600,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Westgold",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Butter",
@@ -6608,7 +6608,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Anchor",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Butter",
@@ -6616,7 +6616,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Daisy",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Spreadable butter",
@@ -6624,7 +6624,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Lurpak",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Original/Light spread",
@@ -6632,7 +6632,7 @@
               "category": "Fresh Food",
               "subcategory": "Dairy",
               "brand": "Flora",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             },
             {
               "name": "Japanese White Eggs 10s",
@@ -6683,14 +6683,14 @@
               "price": 0.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "Kiwifruit, loose",
               "price": 105.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/img-7070.jpg"
+              "image": ""
             },
             {
               "name": "Bananas, loose",
@@ -6704,7 +6704,7 @@
               "price": 21.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/img-7072.jpg"
+              "image": ""
             },
             {
               "name": "Lemons, loose",
@@ -6739,7 +6739,7 @@
               "price": 20.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/img-7072.jpg"
+              "image": ""
             },
             {
               "name": "Bananas, loose",
@@ -6754,7 +6754,7 @@
               "category": "Fresh Food",
               "subcategory": "Fruit",
               "brand": "Calypso",
-              "image": "/images/catalog/img-7090.jpg",
+              "image": "",
               "weight": 0.2
             },
             {
@@ -6763,7 +6763,7 @@
               "category": "Fresh Food",
               "subcategory": "Fruit",
               "brand": "CORE",
-              "image": "/images/catalog/img-7090.jpg"
+              "image": ""
             },
             {
               "name": "Whole watermelon",
@@ -6785,7 +6785,7 @@
               "category": "Fresh Food",
               "subcategory": "Fruit",
               "brand": "Calypso",
-              "image": "/images/catalog/img-7091.jpg",
+              "image": "",
               "weight": 0.2
             },
             {
@@ -6794,7 +6794,7 @@
               "category": "Fresh Food",
               "subcategory": "Fruit",
               "brand": "CORE",
-              "image": "/images/catalog/img-7091.jpg"
+              "image": ""
             },
             {
               "name": "Jumbo Blueberries",
@@ -6802,7 +6802,7 @@
               "category": "Fresh Food",
               "subcategory": "Fruit",
               "brand": "CORE",
-              "image": "/images/catalog/img-7092.jpg",
+              "image": "",
               "bulkDealPrice": 32.0,
               "bulkDealQty": 2
             },
@@ -6820,7 +6820,7 @@
               "price": 16.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-02.jpg",
+              "image": "",
               "brand": "PureSpect",
               "weight": 0.6
             },
@@ -6829,7 +6829,7 @@
               "price": 8.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-02.jpg",
+              "image": "",
               "brand": "Sunkist",
               "weight": 0.15
             },
@@ -6838,7 +6838,7 @@
               "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-02.jpg",
+              "image": "",
               "weight": 1.2
             },
             {
@@ -6846,7 +6846,7 @@
               "price": 15.8,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-02.jpg",
+              "image": "",
               "weight": 1.0
             },
             {
@@ -6854,7 +6854,7 @@
               "price": 16.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-03.jpg",
+              "image": "",
               "weight": 0.9
             },
             {
@@ -6862,7 +6862,7 @@
               "price": 12.5,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-03.jpg",
+              "image": "",
               "weight": 0.8
             },
             {
@@ -6870,7 +6870,7 @@
               "price": 21.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-03.jpg",
+              "image": "",
               "weight": 0.9
             },
             {
@@ -6878,7 +6878,7 @@
               "price": 26.8,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-03.jpg",
+              "image": "",
               "weight": 0.6
             },
             {
@@ -6886,7 +6886,7 @@
               "price": 48.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-03.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -6894,7 +6894,7 @@
               "price": 39.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-03.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -6902,7 +6902,7 @@
               "price": 24.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -6910,7 +6910,7 @@
               "price": 19.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "brand": "Disney",
               "weight": 0.4
             },
@@ -6919,7 +6919,7 @@
               "price": 88.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "weight": 0.5
             },
             {
@@ -6927,7 +6927,7 @@
               "price": 19.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "weight": 0.8
             },
             {
@@ -6935,7 +6935,7 @@
               "price": 22.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "weight": 1.5
             },
             {
@@ -6943,7 +6943,7 @@
               "price": 19.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "brand": "Viva",
               "weight": 0.8
             },
@@ -6952,7 +6952,7 @@
               "price": 35.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-04.jpg",
+              "image": "",
               "brand": "Tekasya",
               "weight": 0.5
             },
@@ -6961,7 +6961,7 @@
               "price": 19.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-05.jpg",
+              "image": "",
               "weight": 0.8
             },
             {
@@ -6969,7 +6969,7 @@
               "price": 25.0,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-05.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -6977,7 +6977,7 @@
               "price": 22.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-05.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -6985,7 +6985,7 @@
               "price": 19.9,
               "category": "Fresh Food",
               "subcategory": "Fruit",
-              "image": "/images/catalog/drive-shelf-05.jpg",
+              "image": "",
               "weight": 0.7
             }
           ]
@@ -7005,7 +7005,7 @@
               "price": 9.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "White mushrooms, packaged",
@@ -7019,28 +7019,28 @@
               "price": 12.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "Red vegetables, packaged",
               "price": 17.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "Cucumbers/green peppers, packaged",
               "price": 8.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "Radishes, packaged",
               "price": 10.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "Baby corn, packaged",
@@ -7068,7 +7068,7 @@
               "price": 7.9,
               "category": "Fresh Food",
               "subcategory": "Vegetables",
-              "image": "/images/catalog/img-7069.jpg"
+              "image": ""
             },
             {
               "name": "Bell peppers, packaged",
@@ -7122,7 +7122,7 @@
               "category": "Fresh Food",
               "subcategory": "Other",
               "brand": "Kraft",
-              "image": "/images/catalog/img-7097.jpg"
+              "image": ""
             }
           ]
         },
@@ -7182,7 +7182,7 @@
               "price": 22.0,
               "category": "Fresh Food",
               "subcategory": "Frozen Food",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "brand": "KERISOM",
               "weight": 0.3
             },
@@ -7191,7 +7191,7 @@
               "price": 39.9,
               "category": "Fresh Food",
               "subcategory": "Frozen Food",
-              "image": "/images/catalog/drive-shelf-01.jpg",
+              "image": "",
               "weight": 0.4
             },
             {
@@ -7199,7 +7199,7 @@
               "price": 45.0,
               "category": "Fresh Food",
               "subcategory": "Frozen Food",
-              "image": "/images/catalog/drive-shelf-06.jpg",
+              "image": "",
               "brand": "Ohayo",
               "weight": 0.2
             },
@@ -7208,7 +7208,7 @@
               "price": 28.0,
               "category": "Fresh Food",
               "subcategory": "Frozen Food",
-              "image": "/images/catalog/drive-shelf-06.jpg",
+              "image": "",
               "brand": "Ohayo",
               "weight": 0.15
             },
@@ -7217,7 +7217,7 @@
               "price": 28.0,
               "category": "Fresh Food",
               "subcategory": "Frozen Food",
-              "image": "/images/catalog/drive-shelf-06.jpg",
+              "image": "",
               "brand": "Ohayo",
               "weight": 0.15
             }

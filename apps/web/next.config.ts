@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@fusion-express/shared", "@fusion-express/ui"],
   distDir: process.env.VERCEL ? "../../.next" : ".next",
   images: {
+    // Bypass Vercel Image Optimization until quota is restored (remote
+    // medias.pns.hk / foodpanda URLs were returning HTTP 402).
+    // Local /images/* aisle assets remain fine either way; global
+    // unoptimized is the short-term fix while remotePatterns stay for
+    // when optimization is re-enabled.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

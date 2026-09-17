@@ -91,7 +91,10 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                 </svg>
               </Link>
             )}
-            <Link href={home} className="flex min-w-0 items-center gap-2">
+            <Link
+              href={runnerMode ? home : "/"}
+              className="flex min-w-0 items-center gap-2"
+            >
               <AppLogo size={44} className="h-11 w-11 shrink-0" />
               {runnerMode && (
                 <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
