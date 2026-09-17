@@ -18,6 +18,7 @@ export const AISLE_FIRESTORE_CATEGORIES: Record<string, string[]> = {
   tea: ["Tea", "tea"],
   toiletries: ["Toiletries", "toiletries"],
   "instant-noodles": ["Instant Noodles", "instant-noodles"],
+  "fruit-and-berries": ["Fruit & Berries", "fruit-and-berries"],
   condiments: ["Condiments", "condiments"],
   household: ["Household", "household", "Household Essentials"],
   "canned-goods": ["Canned Goods", "canned-goods"],

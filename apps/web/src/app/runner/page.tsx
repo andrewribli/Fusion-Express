@@ -3,22 +3,25 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { BootScreen } from "@/components/BootScreen";
 import { useUser } from "@/context/UserContext";
 
 export default function RunnerIndexPage() {
   const router = useRouter();
-  const { user, isReady, termsAccepted } = useUser();
+  const { user, isReady, bootError } = useUser();
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady || bootError) return;
     if (user?.isRunner) {
       router.replace("/runner/dashboard");
-    } else if (termsAccepted) {
-      router.replace("/runner/register");
     } else {
       router.replace("/runner/terms");
     }
-  }, [isReady, user, termsAccepted, router]);
+  }, [isReady, bootError, user, router]);
+
+  if (!isReady || bootError) {
+    return <BootScreen error={bootError} />;
+  }
 
   return (
     <LakersWallpaper>

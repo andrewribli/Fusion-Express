@@ -37,6 +37,8 @@ export const AISLE_IMAGES: Record<string, string> = {
   dairy: "/images/aisles/dairy-eggs.jpg",
   vegetables: "/images/aisles/fruit-veg.jpg",
   fruit: "/images/aisles/fruit-veg.jpg",
+  "fruit-and-berries": "/images/aisles/fruit-veg.jpg",
+  "frozen-food": "/images/aisles/frozen.jpg",
   "frozen-meat": "/images/aisles/frozen.jpg",
   "frozen-vegetables": "/images/aisles/frozen.jpg",
   "ice-cream": "/images/aisles/frozen.jpg",

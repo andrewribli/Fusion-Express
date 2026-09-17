@@ -3,27 +3,35 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-function env(name: string): string | undefined {
-  const fromProcess =
-    typeof process !== "undefined" ? process.env[name] : undefined;
-  return fromProcess || undefined;
-}
-
-/** Same Firebase project for Next (NEXT_PUBLIC_*) and Expo (EXPO_PUBLIC_*). */
-function firebaseEnv(suffix: string): string | undefined {
-  return (
-    env(`EXPO_PUBLIC_FIREBASE_${suffix}`) ??
-    env(`NEXT_PUBLIC_FIREBASE_${suffix}`)
-  );
+function readEnv(value: string | undefined): string | undefined {
+  return value || undefined;
 }
 
 const firebaseConfig = {
-  apiKey: firebaseEnv("API_KEY"),
-  authDomain: firebaseEnv("AUTH_DOMAIN"),
-  projectId: firebaseEnv("PROJECT_ID"),
-  storageBucket: firebaseEnv("STORAGE_BUCKET"),
-  messagingSenderId: firebaseEnv("MESSAGING_SENDER_ID"),
-  appId: firebaseEnv("APP_ID"),
+  apiKey: readEnv(
+    process.env.EXPO_PUBLIC_FIREBASE_API_KEY ??
+      process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  ),
+  authDomain: readEnv(
+    process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ??
+      process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  ),
+  projectId: readEnv(
+    process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ??
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  ),
+  storageBucket: readEnv(
+    process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ??
+      process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  ),
+  messagingSenderId: readEnv(
+    process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ??
+      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  ),
+  appId: readEnv(
+    process.env.EXPO_PUBLIC_FIREBASE_APP_ID ??
+      process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  ),
 };
 
 export function isFirebaseConfigured(): boolean {

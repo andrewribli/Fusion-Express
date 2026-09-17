@@ -81,7 +81,7 @@
   "Select Snackit": {
     "pnsName": "SEALECT Snackit - Italian Style",
     "pnsUrl": "/en/Snackit%20-%20Italian%20Style/p/BP_107986",
-    "price": 30.0
+    "price": 39.0
   },
   "Unknown packaged bakery product (bottom shelf, far left)": {
     "pnsName": "NOL Bath Ball - Kanahei's Bakery",
@@ -126,7 +126,7 @@
   "Dutch Lady Chocolate Milk Beverage": {
     "pnsName": "DUTCH LADY Chocolate Milk Beverage 4 X 110 Ml",
     "pnsUrl": "/en/Chocolate%20Milk%20Beverage%204%20X%20110%20Ml/p/BP_463122",
-    "price": 32.0,
+    "price": 16.0,
     "image": "https://medias.pns.hk/publishing/PNSHK-159169-front-prodcat.jpg?version=1765801817",
     "imageSource": "pns-cloud"
   },
@@ -138,7 +138,7 @@
   "OATLY Oat Drink Enriched": {
     "pnsName": "OATLY Oatly Oat Drink Enriched",
     "pnsUrl": "/en/Oatly%20Oat%20Drink%20Enriched/p/BP_497187",
-    "price": 25.0
+    "price": 28.0
   },
   "Unknown packaged dairy product (left-edge partial; koala graphic)": {
     "pnsName": "TEMPTATIONS Dairy 10s",
@@ -178,7 +178,7 @@
   "NESCAFÉ 1+2 Rich Instant Coffee Mix": {
     "pnsName": "NESCAFE 1+2 Rich Instant Coffee Mix",
     "pnsUrl": "/en/1%2B2%20Rich%20Instant%20Coffee%20Mix/p/BP_447349",
-    "price": 44.0,
+    "price": 42.9,
     "image": "https://medias.pns.hk/publishing/PNSHK-447349-front-prodcat.jpg?version=1750336017",
     "imageSource": "pns-cloud"
   },
@@ -288,7 +288,7 @@
   "Pork mince/ground pork": {
     "pnsName": "GULONG Pork Mince W/bean Paste",
     "pnsUrl": "/en/Pork%20Mince%20W%2Fbean%20Paste/p/BP_167504",
-    "price": 27.0,
+    "price": 15.0,
     "image": "https://medias.pns.hk/publishing/PNSHK-167504-front-prodcat.jpg",
     "imageSource": "pns-cloud"
   },
@@ -335,17 +335,17 @@
   "Samlip Sausage Original": {
     "pnsName": "SAMLIP Korean Sausage Original [ Korea](chilled 0-4°c)",
     "pnsUrl": "/en/Korean%20Sausage%20Original%20%5B%20Korea%5D%28chilled%200-4%C2%B0c%29/p/BP_12138",
-    "price": 49.9
+    "price": 44.9
   },
   "Samlip Sausage Smoked": {
     "pnsName": "SAMLIP Korean Sausage Smoke [ Korea](chilled 0-4°c)",
     "pnsUrl": "/en/Korean%20Sausage%20Smoke%20%5B%20Korea%5D%28chilled%200-4%C2%B0c%29/p/BP_12144",
-    "price": 49.9
+    "price": 44.9
   },
   "Samlip Sausage Basil": {
     "pnsName": "SAMLIP Korean Sausage Basil [ Korea](chilled 0-4°c)",
     "pnsUrl": "/en/Korean%20Sausage%20Basil%20%5B%20Korea%5D%28chilled%200-4%C2%B0c%29/p/BP_12146",
-    "price": 49.9
+    "price": 44.9
   },
   "Unknown clear/white frozen seafood facing": {
     "pnsName": "SEAFOOD SUMMIT Frozen Lyrate Hard Clam (msc) (frozen -18°c)",
@@ -446,19 +446,19 @@
   "Morliny Smoked Bacon": {
     "pnsName": "MORLINY Smoked Bacon [ Poland](chilled 0-4°c)",
     "pnsUrl": "/en/Smoked%20Bacon%20%20%5B%20Poland%5D%28chilled%200-4%C2%B0c%29/p/BP_94213",
-    "price": 43.9
+    "price": 50.0
   },
   "Ho e Sik Spaghetti of Clams in White Wine Sauce": {
     "pnsName": "HO E SIK Spaghetti With Clam In White Wine Sauce [ Hong Kong](frozen -18°c)",
     "pnsUrl": "/en/Spaghetti%20With%20Clam%20In%20White%20Wine%20Sauce%20%20%5B%20Hong%20Kong%5D%28frozen%20-18%C2%B0c%29/p/BP_137771",
-    "price": 37.0,
+    "price": 50.0,
     "image": "https://medias.pns.hk/publishing/PNSHK-137771-front-prodcat.jpg",
     "imageSource": "pns-cloud"
   },
   "Ho e Sik Spaghetti with Meat in Tomato Sauce": {
     "pnsName": "HO E SIK Spaghetti With Meat In Tomato Sauce [ Hong Kong](frozen -18°c)",
     "pnsUrl": "/en/Spaghetti%20With%20Meat%20In%20Tomato%20Sauce%20%20%5B%20Hong%20Kong%5D%28frozen%20-18%C2%B0c%29/p/BP_191412",
-    "price": 37.0,
+    "price": 50.0,
     "image": "https://medias.pns.hk/publishing/PNSHK-191412-front-prodcat.jpg",
     "imageSource": "pns-cloud"
   },
@@ -476,7 +476,10 @@
   },
   "Calbee BBQ Flavoured Wave Cut Potato Chips": {
     "image": "https://medias.pns.hk/publishing/PNSHK-302347-front-prodcat.jpg?version=1753273247",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "CALBEE Calbee Bbq Flavoured Potato Chips Wave Cut Potato Chips",
+    "pnsUrl": "/en/Calbee%20Bbq%20Flavoured%20Potato%20Chips%20%20Wave%20Cut%20Potato%20Chips/p/BP_302347",
+    "price": 50.0
   },
   "DE-MA-E Iccho Bar Noodle Kyushu Tonkotsu Flavour": {
     "image": "https://medias.pns.hk/publishing/PNSHK-418931-front-prodcat.jpg?version=1745842852",
@@ -488,11 +491,17 @@
   },
   "Calbee Blazin Hot Cheese Grill-a-corn": {
     "image": "https://medias.pns.hk/publishing/PNSHK-341122-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "CALBEE Blazin Hot Cheese Grill-a-corn",
+    "pnsUrl": "/en/Blazin%20Hot%20Cheese%20Grill-a-corn/p/BP_341122",
+    "price": 10.0
   },
   "Calbee Smoky Cheese Flavoured Grill A Corn": {
     "image": "https://medias.pns.hk/publishing/PNSHK-416088-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "CALBEE Smoky Cheese Flavoured Grill A Corn",
+    "pnsUrl": "/en/Smoky%20Cheese%20Flavoured%20Grill%20A%20Corn/p/BP_416088",
+    "price": 23.0
   },
   "BioKill Long Lasting Extra Insecticide": {
     "image": "https://medias.pns.hk/publishing/PNSHK-320597-front-prodcat.jpg",
@@ -716,7 +725,10 @@
   },
   "Mushroom Carbonara Mac": {
     "image": "https://medias.pns.hk/publishing/PNSHK-147989-front-prodcat.jpg?version=1733431914",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "PREGO Mushroom Carbonara Mac Instant Bowl",
+    "pnsUrl": "/en/Mushroom%20Carbonara%20Mac%20Instant%20Bowl/p/BP_147989",
+    "price": 15.0
   },
   "Japanese Red Bean Cooked Rice": {
     "image": "https://medias.pns.hk/publishing/PNSHK-162853-front-prodcat.jpg?version=1781699001",
@@ -732,35 +744,59 @@
   },
   "Cheese Bokki": {
     "image": "https://medias.pns.hk/publishing/PNSHK-376569-front-prodcat.jpg?version=1739276682",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "OTTOGI Cheese Bokki Bowl",
+    "pnsUrl": "/en/Cheese%20Bokki%20Bowl/p/BP_376875",
+    "price": 22.0
   },
   "Buldak Carbonara Hot Chicken Flavor": {
     "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Buldak Hot Chicken Sauce",
+    "pnsUrl": "/en/Buldak%20Hot%20Chicken%20Sauce/p/BP_411056",
+    "price": 39.9
   },
   "Buldak Hot Chicken Flavor": {
     "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Buldak Hot Chicken Sauce",
+    "pnsUrl": "/en/Buldak%20Hot%20Chicken%20Sauce/p/BP_411056",
+    "price": 39.9
   },
   "Buldak Hot Chicken Flavor Ramen Cheese": {
     "image": "https://medias.pns.hk/publishing/PNSHK-103906-front-prodcat.jpg?version=1752841624",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Hot Chicken Cheese Flv Ramen Multi (random Picking)",
+    "pnsUrl": "/en/Hot%20Chicken%20Cheese%20Flv%20Ramen%20Multi%20%28random%20Picking%29/p/BP_463169",
+    "price": 40.0
   },
   "Shin Ramyun Rose": {
     "image": "https://medias.pns.hk/publishing/PNSHK-162584-front-prodcat.jpg?version=1781180567",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Shin Ramen Rose Bowl",
+    "pnsUrl": "/en/Shin%20Ramen%20Rose%20Bowl/p/BP_162584",
+    "price": 24.0
   },
   "Korean Clay Pot Ramyun Bowl": {
     "image": "https://medias.pns.hk/publishing/PNSHK-105967-front-prodcat.jpg?version=1732703437",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Korean Clay Pot Ramyun",
+    "pnsUrl": "/en/Korean%20Clay%20Pot%20Ramyun/p/BP_105967",
+    "price": 39.0
   },
   "Shin Ramyun": {
     "image": "https://medias.pns.hk/publishing/PNSHK-158369-front-prodcat.jpg?version=1732748883",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Nong Shim Shin Ramyun 5p",
+    "pnsUrl": "/en/Nong%20Shim%20Shin%20Ramyun%205p%C2%A0%C2%A0%C2%A0/p/BP_158369",
+    "price": 39.0
   },
   "Saeng Saeng Bowl Udon": {
     "image": "https://medias.pns.hk/publishing/PNSHK-106926-front-prodcat.jpg?version=1732705638",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Seang Seang Bowl Udon",
+    "pnsUrl": "/en/Seang%20Seang%20Bowl%20Udon/p/BP_106926",
+    "price": 19.0
   },
   "Antibacterial hand wash": {
     "image": "https://medias.pns.hk/publishing/PNSHK-419771-front-prodcat.jpg",
@@ -772,19 +808,31 @@
   },
   "Knorr Q/S Macaroni Chicken Broth": {
     "image": "https://medias.pns.hk/publishing/PNSHK-109026-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "KNORR Q/s Macaroni Chicken Broth",
+    "pnsUrl": "/en/Q%2Fs%20Macaroni%20Chicken%20Broth/p/BP_109026",
+    "price": 13.0
   },
   "Knorr Q/S Macaroni Abalone & Chix": {
     "image": "https://medias.pns.hk/publishing/PNSHK-383614-front-prodcat.jpg?version=1732862597",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "KNORR Q/s Macaroni Abalone & Chix",
+    "pnsUrl": "/en/Q%2Fs%20Macaroni%20Abalone%20&%20Chix/p/BP_383614",
+    "price": 399.0
   },
   "Knorr Q/S Macaroni Pork Bone Broth": {
     "image": "https://medias.pns.hk/publishing/PNSHK-458544-front-prodcat.jpg?version=1732950984",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "KNORR Q/s Macaroni Pork Bone Broth",
+    "pnsUrl": "/en/Q%2Fs%20Macaroni%20Pork%20Bone%20Broth/p/BP_197493",
+    "price": 13.0
   },
   "Nong Shim Shin Ramyun": {
     "image": "https://medias.pns.hk/publishing/PNSHK-158369-front-prodcat.jpg?version=1732748883",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Nong Shim Shin Ramyun 5p",
+    "pnsUrl": "/en/Nong%20Shim%20Shin%20Ramyun%205p%C2%A0%C2%A0%C2%A0/p/BP_158369",
+    "price": 39.0
   },
   "Nissin Demae Iccho 5-Pack Sesame Oil Flavour": {
     "image": "https://images.openfoodfacts.org/images/products/000/002/084/2499/front_en.148.400.jpg",
@@ -796,11 +844,17 @@
   },
   "Fuku Superior Soup Instant Noodle": {
     "image": "https://medias.pns.hk/publishing/PNSHK-116117-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "FUKU Superior Soup Instant Noodle",
+    "pnsUrl": "/en/Superior%20Soup%20Instant%20Noodle/p/BP_116117",
+    "price": 9.0
   },
   "Fuku Superior Soup Instant Rice Noodle": {
     "image": "https://medias.pns.hk/publishing/PNSHK-181937-front-prodcat.jpg?version=1732752693",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "FUKU Superior Soup Instant Rice Noodle",
+    "pnsUrl": "/en/Superior%20Soup%20Instant%20Rice%20Noodle/p/BP_181937",
+    "price": 30.0
   },
   "Chewy Instant Rice Vermicelli Gold Medal Original": {
     "image": "https://images.openfoodfacts.org/images/products/611/124/534/3006/front_ar.14.400.jpg",
@@ -808,43 +862,73 @@
   },
   "Nong Shim Korean Clay Pot Ramyun": {
     "image": "https://medias.pns.hk/publishing/PNSHK-105967-front-prodcat.jpg?version=1732703437",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Korean Clay Pot Ramyun",
+    "pnsUrl": "/en/Korean%20Clay%20Pot%20Ramyun/p/BP_105967",
+    "price": 39.0
   },
   "Samyang Buldak Hot Chicken Flavor Ramen Multi": {
     "image": "https://medias.pns.hk/publishing/PNSHK-103906-front-prodcat.jpg?version=1752841624",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Hot Chicken Flavor Ramen Multi  (8pcs)",
+    "pnsUrl": "/en/Hot%20Chicken%20Flavor%20Ramen%20Multi%C2%A0%20%288pcs%29/p/BP_103906",
+    "price": 255.0
   },
   "Samyang Hotchicken Carbonara Flavor Ramen Multi": {
     "image": "https://medias.pns.hk/publishing/PNSHK-103932-front-prodcat.jpg?version=1752841356",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Hotchicken Carbonara Flv Ramen Multi  (8pcs)",
+    "pnsUrl": "/en/Hotchicken%20Carbonara%20Flv%20Ramen%20Multi%C2%A0%20%288pcs%29/p/BP_103932",
+    "price": 300.0
   },
   "Samyang Tangle Creamy Mushroom Instant Pasta": {
     "image": "https://medias.pns.hk/publishing/PNSHK-123814-front-prodcat.jpg?version=1751286260",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Tangle Creamy Mushroom Instant Pasta",
+    "pnsUrl": "/en/Tangle%20Creamy%20Mushroom%20Instant%20Pasta/p/BP_123814",
+    "price": 30.0
   },
   "Samyang Tangle Garlic Oil Instant Pasta": {
     "image": "https://medias.pns.hk/publishing/PNSHK-162582-front-prodcat.jpg?version=1781180487",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Tangle Garlic Oil Instant Pasta (random Picking)",
+    "pnsUrl": "/en/Tangle%20Garlic%20Oil%20Instant%20Pasta%20%28random%20Picking%29/p/BP_123743",
+    "price": 30.0
   },
   "Youus Omori Kimchi Jjigae Ramen": {
     "image": "https://medias.pns.hk/publishing/PNSHK-398504-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "GS RETAIL YOUUS Gs Retail Youusomori Kimchi Jjigae Ramen",
+    "pnsUrl": "/en/Gs%20Retail%20Youusomori%20Kimchi%20Jjigae%20Ramen/p/BP_398504",
+    "price": 58.0
   },
   "Youus Gonghwachun Zajang Noodle Multi Pack": {
     "image": "https://medias.pns.hk/publishing/PNSHK-398520-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "GS RETAIL YOUUS Gonghwachun Zajang Noodle Multi Pack",
+    "pnsUrl": "/en/Gonghwachun%20Zajang%20Noodle%20Multi%20Pack/p/BP_398520",
+    "price": 58.0
   },
   "Kiki Dry-Stirred Noodles with Scallion Oil": {
     "image": "https://medias.pns.hk/publishing/PNSHK-496948-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "KIKI Dry-stirred Noodles W/ Scallion Oil",
+    "pnsUrl": "/en/Dry-stirred%20Noodles%20W%2F%20Scallion%20Oil/p/BP_496948",
+    "price": 52.0
   },
   "Kiki Dry-Stirred Noodles with Sichuan Spices": {
     "image": "https://medias.pns.hk/publishing/PNSHK-496947-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "KIKI Dry-stirred Noodle W/ Sichuan Spices",
+    "pnsUrl": "/en/Dry-stirred%20Noodle%20W%2F%20Sichuan%20Spices/p/BP_496947",
+    "price": 52.0
   },
   "Ottogi Cheddar Cheese Stir-Fry Cheesy Ramen": {
     "image": "https://medias.pns.hk/publishing/PNSHK-139055-front-prodcat.jpg?version=1754536841",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "OTOKI Cheddar Cheese Stir-fry Cheesy Ramen",
+    "pnsUrl": "/en/Cheddar%20Cheese%20Stir-fry%20Cheesy%20Ramen/p/BP_139055",
+    "price": 33.0
   },
   "Skippy Peanut Butter W/ Choc Stripe": {
     "image": "https://medias.pns.hk/publishing/PNSHK-107885-front-prodcat.jpg",
@@ -852,23 +936,38 @@
   },
   "Nissin Retort Pouch Red Bean W Lotus Seeds Dessert": {
     "image": "https://medias.pns.hk/publishing/PNSHK-171100-front-prodcat.jpg?version=1732751558",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NISSIN RETORT POUCH Red Bean W Lotus Seeds Dessert",
+    "pnsUrl": "/en/Red%20Bean%20W%20Lotus%20Seeds%20Dessert/p/BP_171100",
+    "price": 17.0
   },
   "Nissin Retort Pouch Cha Cha Dessert": {
     "image": "https://medias.pns.hk/publishing/PNSHK-171095-front-prodcat.jpg?version=1732751564",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NISSIN RETORT POUCH Cha Cha Dessert",
+    "pnsUrl": "/en/Cha%20Cha%20Dessert/p/BP_171095",
+    "price": 17.0
   },
   "Nissin Retort Pouch Black Sesame Dessert": {
     "image": "https://medias.pns.hk/publishing/PNSHK-171101-front-prodcat.jpg?version=1732751569",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NISSIN RETORT POUCH Black Sesame Dessert",
+    "pnsUrl": "/en/Black%20Sesame%20Dessert/p/BP_171101",
+    "price": 17.0
   },
   "Yue Zhuan Red Bean With Tangerine Peel & Lotus Seeds Dessert": {
     "image": "https://medias.pns.hk/publishing/PNSHK-109185-front-prodcat.jpg?version=1732707815",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "YUE ZHUAN Red Bean With Tangerine Peel & Lotus Seed",
+    "pnsUrl": "/en/Red%20Bean%20With%20Tangerine%20Peel%20&%20Lotus%20Seed/p/BP_109185",
+    "price": 42.0
   },
   "Yue Zhuan Black Glutinous Rice With Taro & Coconut Milk": {
     "image": "https://medias.pns.hk/publishing/PNSHK-109184-front-prodcat.jpg?version=1732707850",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "YUE ZHUAN Black Glutinous Rice With Taro & Coco Milk",
+    "pnsUrl": "/en/Black%20Glutinous%20Rice%20With%20Taro%20&%20Coco%20Milk/p/BP_109184",
+    "price": 42.0
   },
   "Select Pieces & Stems Button Mushroom": {
     "image": "https://medias.pns.hk/publishing/PNSHK-459831-front-prodcat.jpg?version=1732927517",
@@ -908,23 +1007,38 @@
   },
   "OATLY Deluxe High-calcium Oat Drink": {
     "image": "https://medias.pns.hk/publishing/PNSHK-125261-front-prodcat.jpg?version=1749126124",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "OATLY Deluxe High-calcium Oat Drink",
+    "pnsUrl": "/en/Deluxe%20High-calcium%20Oat%20Drink/p/BP_125261",
+    "price": 28.0
   },
   "Select Australia 100% Full Cream Milk": {
     "image": "https://medias.pns.hk/publishing/PNSHK-419941-front-prodcat.jpg?version=1767886469",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SELECT Australia Full Cream Uht Milk",
+    "pnsUrl": "/en/Australia%20Full%20Cream%20Uht%20Milk/p/BP_419941",
+    "price": 15.0
   },
   "Emmi Swiss Premium Whole Milk": {
     "image": "https://medias.pns.hk/publishing/PNSHK-366223-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "EMMI Swiss Premium Whole Milk",
+    "pnsUrl": "/en/Swiss%20Premium%20Whole%20Milk/p/BP_366223",
+    "price": 12.5
   },
   "Emmi Swiss Premium Semi-Skimmed Milk": {
     "image": "https://medias.pns.hk/publishing/PNSHK-445810-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "EMMI Swiss Prem. Semi Skimmed Milk",
+    "pnsUrl": "/en/Swiss%20Prem.%20Semi%20Skimmed%20Milk/p/BP_445810",
+    "price": 29.9
   },
   "VITA Chocolate Milk Beverage": {
     "image": "https://medias.pns.hk/publishing/PNSHK-159169-front-prodcat.jpg?version=1765801817",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "VITA Chocolate Milk Beverage",
+    "pnsUrl": "/en/Chocolate%20Milk%20Beverage/p/BP_118210",
+    "price": 170.0
   },
   "Pauls Pure Milk UHT Export 4x3x1L HK": {
     "image": "https://medias.pns.hk/publishing/PNSHK-110103-front-prodcat.jpg",
@@ -936,7 +1050,10 @@
   },
   "Pauls High Calcium Low Fat Milk Beverage UHT Export 4x3x1L": {
     "image": "https://medias.pns.hk/publishing/PNSHK-182972-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "PAULS Pauls Hcal Lf Milk Bev Uht Exp 4x3x1l",
+    "pnsUrl": "/en/Pauls%20Hcal%20Lf%20Milk%20Bev%20Uht%20Exp%204x3x1l/p/BP_182972",
+    "price": 62.0
   },
   "Starbucks® Italian Style Roast By Nespresso (10 Caps)": {
     "image": "https://medias.pns.hk/publishing/PNSHK-139716-front-prodcat.jpg",
@@ -948,15 +1065,24 @@
   },
   "UCC Shokunin Drip Mild Blend (coffee)": {
     "image": "https://medias.pns.hk/publishing/PNSHK-114788-front-prodcat.jpg?version=1788351912",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "UCC Shokunin Drip Mild Blend (coffee)",
+    "pnsUrl": "/en/Shokunin%20Drip%20Mild%20Blend%20%28coffee%29/p/BP_114788",
+    "price": 35.0
   },
   "NESCAFE 1+2 Rich Instant Coffee Mix": {
     "image": "https://medias.pns.hk/publishing/PNSHK-447349-front-prodcat.jpg?version=1750336017",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NESCAFE 1+2 Rich Instant Coffee Mix",
+    "pnsUrl": "/en/1%2B2%20Rich%20Instant%20Coffee%20Mix/p/BP_447349",
+    "price": 42.9
   },
   "NESCAFE Prm White Coffee Original 17+3": {
     "image": "https://medias.pns.hk/publishing/PNSHK-454099-front-prodcat.jpg?version=1757507540",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NESCAFE Prm White Coffee Original 17+3",
+    "pnsUrl": "/en/Prm%20White%20Coffee%20Original%2017%2B3/p/BP_454099",
+    "price": 77.0
   },
   "NIVEA Invisible Black & White Power Spray": {
     "image": "https://medias.pns.hk/publishing/PNSHK-246325-front-prodcat.jpg",
@@ -1096,7 +1222,10 @@
   },
   "Baby corn, packaged": {
     "image": "https://medias.pns.hk/publishing/PNSHK-125838-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "Baby Corn [thailand] (chilled 0-4°c)",
+    "pnsUrl": "/en/Baby%20Corn%20%5Bthailand%5D%20%28chilled%200-4%C2%B0c%29/p/BP_55396",
+    "price": 17.9
   },
   "Leafy vegetables/cabbage, packaged": {
     "image": "https://images.openfoodfacts.org/images/products/081/007/555/3161/front_en.49.400.jpg",
@@ -1104,7 +1233,10 @@
   },
   "Carrots, packaged": {
     "image": "https://medias.pns.hk/publishing/PNSHK-108171-front-prodcat.jpg?version=1753273367",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "HIPP Hipp Organic Rice With Carrots And Veal 190g",
+    "pnsUrl": "/en/Hipp%20Organic%20Rice%20With%20Carrots%20And%20Veal%20190g/p/BP_288553",
+    "price": 29.8
   },
   "Bell peppers, packaged": {
     "image": "https://medias.pns.hk/publishing/PNSHK-40697-front-prodcat.jpg?version=1779107672",
@@ -1124,7 +1256,10 @@
   },
   "Dragon fruit": {
     "image": "https://medias.pns.hk/publishing/PNSHK-116679-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "Dragon Fruit (vietnam)",
+    "pnsUrl": "/en/Dragon%20Fruit%20%28vietnam%29/p/BP_68950",
+    "price": 21.0
   },
   "Avocados, loose": {
     "image": "https://medias.pns.hk/publishing/PNSHK-75516-front-prodcat.jpg?version=1781094653",
@@ -1132,11 +1267,17 @@
   },
   "Marinated pork tray": {
     "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "D.B.F Kariyudo - Pork Senior Cat Alu Tray (95g)- d.b.f",
+    "pnsUrl": "/en/Kariyudo%20-%20Pork%20Senior%20Cat%20Alu%20Tray%20%2895g%29-%20d.b.f/p/BP_6600001658",
+    "price": 18.5
   },
   "SELECT U.S.A. Grain Fed Hot Pot Beef": {
     "image": "https://medias.pns.hk/publishing/PNSHK-28389-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "SELECT Us Grain Fed Hot Pot Beef [ Usa](frozen -18°c)",
+    "pnsUrl": "/en/Us%20Grain%20Fed%20Hot%20Pot%20Beef%20%20%5B%20Usa%5D%28frozen%20-18%C2%B0c%29/p/BP_28389",
+    "price": 75.0
   },
   "Unknown Fish Noodle": {
     "image": "https://medias.pns.hk/publishing/PNSHK-102115-front-prodcat.jpg",
@@ -1148,11 +1289,17 @@
   },
   "Whole watermelon": {
     "image": "https://medias.pns.hk/publishing/PNSHK-162663-front-prodcat.jpg?version=1786710008",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "LOTTE Watermelon Bar Mp",
+    "pnsUrl": "/en/Watermelon%20Bar%20Mp/p/BP_426477",
+    "price": 64.0
   },
   "Whole melon": {
     "image": "https://medias.pns.hk/publishing/PNSHK-421138-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "NG FUNG Black Beauty Melon (china)",
+    "pnsUrl": "/en/Black%20Beauty%20Melon%20%28china%29/p/BP_74890",
+    "price": 22.0
   },
   "Unknown Golden peaches": {
     "image": "https://medias.pns.hk/publishing/PNSHK-151860-front-prodcat.jpg?version=1759234811",
@@ -1168,7 +1315,10 @@
   },
   "Chobani Greek Yogurt, plain/other variant": {
     "image": "https://medias.pns.hk/publishing/PNSHK-417462-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "CHOBANI Greek Yogurt - Mango",
+    "pnsUrl": "/en/Greek%20Yogurt%20-%20Mango/p/BP_149369",
+    "price": 45.0
   },
   "Unknown 100% Greek yogurt": {
     "image": "https://medias.pns.hk/publishing/PNSHK-149023-front-prodcat.jpg?version=1729513228",
@@ -1208,7 +1358,10 @@
   },
   "Frozen Peeled Whiteleg Shrimp Meat": {
     "image": "https://medias.pns.hk/publishing/PNSHK-46310-front-prodcat.jpg",
-    "imageSource": "pns-cloud"
+    "imageSource": "pns-cloud",
+    "pnsName": "GUOLIAN Frz Whiteleg Shrimp Meat 180g (frozen -18°c)",
+    "pnsUrl": "/en/Frz%20Whiteleg%20Shrimp%20Meat%20180g%20%28frozen%20-18%C2%B0c%29/p/BP_46310",
+    "price": 47.0
   },
   "Select Frozen Skin-On Atlantic Salmon Fillets (2pcs)": {
     "image": "https://images.openfoodfacts.org/images/products/000/002/093/3876/front_hr.28.400.jpg",
@@ -1217,7 +1370,1330 @@
   "Australian Striploin Steak": {
     "image": "https://medias.pns.hk/publishing/PNSHK-37401-front-prodcat.jpg?version=1770207746",
     "imageSource": "pns-cloud",
-    "price": 58,
-    "pnsBrand": "AMG"
+    "price": 58.0,
+    "pnsBrand": "AMG",
+    "pnsName": "AMG Australian Striploin [australia] (frozen -18°c)",
+    "pnsUrl": "/en/Australian%20Striploin%20%5Baustralia%5D%20%28frozen%20-18%C2%B0c%29/p/BP_37401"
+  },
+  "Instant Carbonara": {
+    "pnsName": "NISSIN Nupasta Carbonara Flavour Cup Noodle",
+    "pnsUrl": "/en/Nupasta%20Carbonara%20Flavour%20Cup%20Noodle/p/BP_383621",
+    "price": 27.0
+  },
+  "NUPasta Instant Carbonara": {
+    "pnsName": "NISSIN Nupasta Carbonara Flavour Cup Noodle",
+    "pnsUrl": "/en/Nupasta%20Carbonara%20Flavour%20Cup%20Noodle/p/BP_383621",
+    "price": 27.0
+  },
+  "Prego Mushroom Carbonara Mac": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-147989-front-prodcat.jpg?version=1733431914",
+    "imageSource": "pns-cloud",
+    "pnsName": "PREGO Mushroom Carbonara Mac Instant Bowl",
+    "pnsUrl": "/en/Mushroom%20Carbonara%20Mac%20Instant%20Bowl/p/BP_147989",
+    "price": 15.0
+  },
+  "Mac n Cheese": {
+    "pnsName": "PREGO Mac & Cheese Instant Bowl",
+    "pnsUrl": "/en/Mac%20&%20Cheese%20Instant%20Bowl/p/BP_147986",
+    "price": 15.0
+  },
+  "Prego Mac n Cheese": {
+    "pnsName": "PREGO Mac & Cheese Instant Bowl",
+    "pnsUrl": "/en/Mac%20&%20Cheese%20Instant%20Bowl/p/BP_147986",
+    "price": 15.0
+  },
+  "Ottogi Cheese Bokki": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-376569-front-prodcat.jpg?version=1739276682",
+    "imageSource": "pns-cloud",
+    "pnsName": "OTTOGI Cheese Bokki Bowl",
+    "pnsUrl": "/en/Cheese%20Bokki%20Bowl/p/BP_376875",
+    "price": 22.0
+  },
+  "Samyang Buldak Carbonara Hot Chicken Flavor": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Buldak Hot Chicken Sauce",
+    "pnsUrl": "/en/Buldak%20Hot%20Chicken%20Sauce/p/BP_411056",
+    "price": 39.9
+  },
+  "Samyang Buldak Hot Chicken Flavor": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Buldak Hot Chicken Sauce",
+    "pnsUrl": "/en/Buldak%20Hot%20Chicken%20Sauce/p/BP_411056",
+    "price": 39.9
+  },
+  "Samyang Buldak Hot Chicken Flavor Ramen Cheese": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-103906-front-prodcat.jpg?version=1752841624",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Hot Chicken Cheese Flv Ramen Multi (random Picking)",
+    "pnsUrl": "/en/Hot%20Chicken%20Cheese%20Flv%20Ramen%20Multi%20%28random%20Picking%29/p/BP_463169",
+    "price": 40.0
+  },
+  "Nongshim Shin Ramyun Rose": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-162584-front-prodcat.jpg?version=1781180567",
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Shin Ramen Rose Bowl",
+    "pnsUrl": "/en/Shin%20Ramen%20Rose%20Bowl/p/BP_162584",
+    "price": 24.0
+  },
+  "Nongshim Korean Clay Pot Ramyun Bowl": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-105967-front-prodcat.jpg?version=1732703437",
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Korean Clay Pot Ramyun",
+    "pnsUrl": "/en/Korean%20Clay%20Pot%20Ramyun/p/BP_105967",
+    "price": 39.0
+  },
+  "Nongshim Shin Ramyun": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-158369-front-prodcat.jpg?version=1732748883",
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Nong Shim Shin Ramyun 5p",
+    "pnsUrl": "/en/Nong%20Shim%20Shin%20Ramyun%205p%C2%A0%C2%A0%C2%A0/p/BP_158369",
+    "price": 39.0
+  },
+  "Nongshim Saeng Saeng Bowl Udon": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-106926-front-prodcat.jpg?version=1732705638",
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Seang Seang Bowl Udon",
+    "pnsUrl": "/en/Seang%20Seang%20Bowl%20Udon/p/BP_106926",
+    "price": 19.0
+  },
+  "Q/S Macaroni Chicken Broth": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-109026-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "KNORR Q/s Macaroni Chicken Broth",
+    "pnsUrl": "/en/Q%2Fs%20Macaroni%20Chicken%20Broth/p/BP_109026",
+    "price": 13.0
+  },
+  "Q/S Macaroni Abalone & Chix": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-383614-front-prodcat.jpg?version=1732862597",
+    "imageSource": "pns-cloud",
+    "pnsName": "KNORR Q/s Macaroni Abalone & Chix",
+    "pnsUrl": "/en/Q%2Fs%20Macaroni%20Abalone%20&%20Chix/p/BP_383614",
+    "price": 399.0
+  },
+  "Q/S Macaroni Pork Bone Broth": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-458544-front-prodcat.jpg?version=1732950984",
+    "imageSource": "pns-cloud",
+    "pnsName": "KNORR Q/s Macaroni Pork Bone Broth",
+    "pnsUrl": "/en/Q%2Fs%20Macaroni%20Pork%20Bone%20Broth/p/BP_197493",
+    "price": 13.0
+  },
+  "Laksa LaMian": {
+    "pnsName": "PRIMA TASTE Laksa La Mian",
+    "pnsUrl": "/en/Laksa%20La%20Mian/p/BP_358689",
+    "price": 35.0
+  },
+  "Prima Taste Laksa LaMian": {
+    "pnsName": "PRIMA TASTE Laksa La Mian",
+    "pnsUrl": "/en/Laksa%20La%20Mian/p/BP_358689",
+    "price": 35.0
+  },
+  "Superior Soup Instant Noodle": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-116117-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "FUKU Superior Soup Instant Noodle",
+    "pnsUrl": "/en/Superior%20Soup%20Instant%20Noodle/p/BP_116117",
+    "price": 9.0
+  },
+  "Superior Soup Instant Rice Noodle": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-181937-front-prodcat.jpg?version=1732752693",
+    "imageSource": "pns-cloud",
+    "pnsName": "FUKU Superior Soup Instant Rice Noodle",
+    "pnsUrl": "/en/Superior%20Soup%20Instant%20Rice%20Noodle/p/BP_181937",
+    "price": 30.0
+  },
+  "Shin Ramyun 5-Pack": {
+    "pnsName": "NONG SHIM Shin Kimchi Noodle (5 Packs)",
+    "pnsUrl": "/en/Shin%20Kimchi%20Noodle%20%285%20Packs%29/p/BP_138193",
+    "price": 42.9
+  },
+  "Nong Shim Shin Ramyun 5-Pack": {
+    "pnsName": "NONG SHIM Shin Kimchi Noodle (5 Packs)",
+    "pnsUrl": "/en/Shin%20Kimchi%20Noodle%20%285%20Packs%29/p/BP_138193",
+    "price": 42.9
+  },
+  "Korean Clay Pot Ramyun": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-105967-front-prodcat.jpg?version=1732703437",
+    "imageSource": "pns-cloud",
+    "pnsName": "NONG SHIM Korean Clay Pot Ramyun",
+    "pnsUrl": "/en/Korean%20Clay%20Pot%20Ramyun/p/BP_105967",
+    "price": 39.0
+  },
+  "Potato Noodle": {
+    "pnsName": "NONG SHIM Potato Pork Noodle",
+    "pnsUrl": "/en/Potato%20Pork%20Noodle/p/BP_190840",
+    "price": 39.0
+  },
+  "Nong Shim Potato Noodle": {
+    "pnsName": "NONG SHIM Potato Pork Noodle",
+    "pnsUrl": "/en/Potato%20Pork%20Noodle/p/BP_190840",
+    "price": 39.0
+  },
+  "Buldak Hot Chicken Flavor Ramen Multi": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-103906-front-prodcat.jpg?version=1752841624",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Hot Chicken Flavor Ramen Multi  (8pcs)",
+    "pnsUrl": "/en/Hot%20Chicken%20Flavor%20Ramen%20Multi%C2%A0%20%288pcs%29/p/BP_103906",
+    "price": 255.0
+  },
+  "Hotchicken Carbonara Flavor Ramen Multi": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-103932-front-prodcat.jpg?version=1752841356",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Hotchicken Carbonara Flv Ramen Multi  (8pcs)",
+    "pnsUrl": "/en/Hotchicken%20Carbonara%20Flv%20Ramen%20Multi%C2%A0%20%288pcs%29/p/BP_103932",
+    "price": 300.0
+  },
+  "Tangle Creamy Mushroom Instant Pasta": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-123814-front-prodcat.jpg?version=1751286260",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Tangle Creamy Mushroom Instant Pasta",
+    "pnsUrl": "/en/Tangle%20Creamy%20Mushroom%20Instant%20Pasta/p/BP_123814",
+    "price": 30.0
+  },
+  "Tangle Garlic Oil Instant Pasta": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-162582-front-prodcat.jpg?version=1781180487",
+    "imageSource": "pns-cloud",
+    "pnsName": "SAMYANG Tangle Garlic Oil Instant Pasta (random Picking)",
+    "pnsUrl": "/en/Tangle%20Garlic%20Oil%20Instant%20Pasta%20%28random%20Picking%29/p/BP_123743",
+    "price": 30.0
+  },
+  "Omori Kimchi Jjigae Ramen": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-398504-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "GS RETAIL YOUUS Gs Retail Youusomori Kimchi Jjigae Ramen",
+    "pnsUrl": "/en/Gs%20Retail%20Youusomori%20Kimchi%20Jjigae%20Ramen/p/BP_398504",
+    "price": 58.0
+  },
+  "Ansungtangmyun": {
+    "pnsName": "NONG SHIM Ansungtangmyun",
+    "pnsUrl": "/en/Ansungtangmyun/p/BP_106393",
+    "price": 32.0
+  },
+  "Nong Shim Ansungtangmyun": {
+    "pnsName": "NONG SHIM Ansungtangmyun",
+    "pnsUrl": "/en/Ansungtangmyun/p/BP_106393",
+    "price": 32.0
+  },
+  "Gonghwachun Zajang Noodle Multi Pack": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-398520-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "GS RETAIL YOUUS Gonghwachun Zajang Noodle Multi Pack",
+    "pnsUrl": "/en/Gonghwachun%20Zajang%20Noodle%20Multi%20Pack/p/BP_398520",
+    "price": 58.0
+  },
+  "Dry-Stirred Noodles with Scallion Oil": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-496948-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "KIKI Dry-stirred Noodles W/ Scallion Oil",
+    "pnsUrl": "/en/Dry-stirred%20Noodles%20W%2F%20Scallion%20Oil/p/BP_496948",
+    "price": 52.0
+  },
+  "Dry-Stirred Noodles with Sichuan Spices": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-496947-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "KIKI Dry-stirred Noodle W/ Sichuan Spices",
+    "pnsUrl": "/en/Dry-stirred%20Noodle%20W%2F%20Sichuan%20Spices/p/BP_496947",
+    "price": 52.0
+  },
+  "Cheese Ramen": {
+    "pnsName": "OTTOGI Real Cheese Ramen",
+    "pnsUrl": "/en/Real%20Cheese%20Ramen/p/BP_488811",
+    "price": 60.0
+  },
+  "Ottogi Cheese Ramen": {
+    "pnsName": "OTTOGI Real Cheese Ramen",
+    "pnsUrl": "/en/Real%20Cheese%20Ramen/p/BP_488811",
+    "price": 60.0
+  },
+  "Real Cheese Ramen": {
+    "pnsName": "OTTOGI Real Cheese Ramen",
+    "pnsUrl": "/en/Real%20Cheese%20Ramen/p/BP_488811",
+    "price": 60.0
+  },
+  "Ottogi Real Cheese Ramen": {
+    "pnsName": "OTTOGI Real Cheese Ramen",
+    "pnsUrl": "/en/Real%20Cheese%20Ramen/p/BP_488811",
+    "price": 60.0
+  },
+  "Cheddar Cheese Stir-Fry Cheesy Ramen": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-139055-front-prodcat.jpg?version=1754536841",
+    "imageSource": "pns-cloud",
+    "pnsName": "OTOKI Cheddar Cheese Stir-fry Cheesy Ramen",
+    "pnsUrl": "/en/Cheddar%20Cheese%20Stir-fry%20Cheesy%20Ramen/p/BP_139055",
+    "price": 33.0
+  },
+  "Spicy Cheese Ramen Noodle": {
+    "pnsName": "OTTOGI Spicy Cheese Ramen Noodle",
+    "pnsUrl": "/en/Spicy%20Cheese%20Ramen%20Noodle/p/BP_390832",
+    "price": 30.0
+  },
+  "Ottogi Spicy Cheese Ramen Noodle": {
+    "pnsName": "OTTOGI Spicy Cheese Ramen Noodle",
+    "pnsUrl": "/en/Spicy%20Cheese%20Ramen%20Noodle/p/BP_390832",
+    "price": 30.0
+  },
+  "® House Blend By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® House Blend By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20House%20Blend%20By%20Nespresso%20%2810%20Caps%29/p/BP_106615",
+    "price": 168.0
+  },
+  "STARBUCKS ® House Blend By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® House Blend By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20House%20Blend%20By%20Nespresso%20%2810%20Caps%29/p/BP_106615",
+    "price": 168.0
+  },
+  "® Caffè Verona™ By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Caffè Verona™ By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Caff%C3%A8%20Verona%E2%84%A2%20By%20Nespresso%20%2810%20Caps%29/p/BP_107070",
+    "price": 168.0
+  },
+  "STARBUCKS ® Caffè Verona™ By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Caffè Verona™ By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Caff%C3%A8%20Verona%E2%84%A2%20By%20Nespresso%20%2810%20Caps%29/p/BP_107070",
+    "price": 168.0
+  },
+  "® Italian Style Roast By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Italian Style Roast By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Italian%20Style%20Roast%20By%20Nespresso%20%2810%20Caps%29/p/BP_139716",
+    "price": 168.0
+  },
+  "STARBUCKS ® Italian Style Roast By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Italian Style Roast By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Italian%20Style%20Roast%20By%20Nespresso%20%2810%20Caps%29/p/BP_139716",
+    "price": 168.0
+  },
+  "® Espresso Roast By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Espresso Roast By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Espresso%20Roast%20By%20Nespresso%20%2810%20Caps%29/p/BP_106206",
+    "price": 168.0
+  },
+  "STARBUCKS ® Espresso Roast By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Espresso Roast By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Espresso%20Roast%20By%20Nespresso%20%2810%20Caps%29/p/BP_106206",
+    "price": 168.0
+  },
+  "® Single Origin Colombia By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Single Origin Colombia By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Single%20Origin%20Colombia%20By%20Nespresso%20%2810%20Caps%29/p/BP_106614",
+    "price": 168.0
+  },
+  "STARBUCKS ® Single Origin Colombia By Nespresso (10 Caps)": {
+    "pnsName": "STARBUCKS Starbucks® Single Origin Colombia By Nespresso (10 Caps)",
+    "pnsUrl": "/en/Starbucks%C2%AE%20Single%20Origin%20Colombia%20By%20Nespresso%20%2810%20Caps%29/p/BP_106614",
+    "price": 168.0
+  },
+  "Cappuccino Premium Mixes": {
+    "pnsName": "STARBUCKS Cappuccino Premium Mixes",
+    "pnsUrl": "/en/Cappuccino%20Premium%20Mixes/p/BP_401354",
+    "price": 22.9
+  },
+  "STARBUCKS Cappuccino Premium Mixes": {
+    "pnsName": "STARBUCKS Cappuccino Premium Mixes",
+    "pnsUrl": "/en/Cappuccino%20Premium%20Mixes/p/BP_401354",
+    "price": 22.9
+  },
+  "Caramel Latte Premium Mixes": {
+    "pnsName": "STARBUCKS Caramel Latte Premium Mixes",
+    "pnsUrl": "/en/Caramel%20Latte%20Premium%20Mixes/p/BP_401357",
+    "price": 22.9
+  },
+  "STARBUCKS Caramel Latte Premium Mixes": {
+    "pnsName": "STARBUCKS Caramel Latte Premium Mixes",
+    "pnsUrl": "/en/Caramel%20Latte%20Premium%20Mixes/p/BP_401357",
+    "price": 22.9
+  },
+  "Drip On Variety Pack": {
+    "pnsName": "KEY COFFEE Drip On Variety Pack",
+    "pnsUrl": "/en/Drip%20On%20Variety%20Pack/p/BP_481487",
+    "price": 50.0
+  },
+  "KEY COFFEE Drip On Variety Pack": {
+    "pnsName": "KEY COFFEE Drip On Variety Pack",
+    "pnsUrl": "/en/Drip%20On%20Variety%20Pack/p/BP_481487",
+    "price": 50.0
+  },
+  "Drip On Special Blend": {
+    "pnsName": "KEY COFFEE Drip On Special Blend",
+    "pnsUrl": "/en/Drip%20On%20Special%20Blend/p/BP_405198",
+    "price": 36.0
+  },
+  "KEY COFFEE Drip On Special Blend": {
+    "pnsName": "KEY COFFEE Drip On Special Blend",
+    "pnsUrl": "/en/Drip%20On%20Special%20Blend/p/BP_405198",
+    "price": 36.0
+  },
+  "Shokunin Drip Mild Blend (coffee)": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-114788-front-prodcat.jpg?version=1788351912",
+    "imageSource": "pns-cloud",
+    "pnsName": "UCC Shokunin Drip Mild Blend (coffee)",
+    "pnsUrl": "/en/Shokunin%20Drip%20Mild%20Blend%20%28coffee%29/p/BP_114788",
+    "price": 35.0
+  },
+  "Coffee Mix 3 In 1": {
+    "pnsName": "MAXWELL Coffee Mix 3 In 1",
+    "pnsUrl": "/en/Coffee%20Mix%203%20In%201/p/BP_112222",
+    "price": 50.0
+  },
+  "MAXWELL Coffee Mix 3 In 1": {
+    "pnsName": "MAXWELL Coffee Mix 3 In 1",
+    "pnsUrl": "/en/Coffee%20Mix%203%20In%201/p/BP_112222",
+    "price": 50.0
+  },
+  "Coffee Espresso [France]": {
+    "pnsName": "CASINO Coffee Espresso [ France]",
+    "pnsUrl": "/en/Coffee%20Espresso%20%20%5B%20France%5D/p/BP_382760",
+    "price": 118.0
+  },
+  "CASINO Coffee Espresso [France]": {
+    "pnsName": "CASINO Coffee Espresso [ France]",
+    "pnsUrl": "/en/Coffee%20Espresso%20%20%5B%20France%5D/p/BP_382760",
+    "price": 118.0
+  },
+  "3+1 Rich Coffee": {
+    "pnsName": "MAXWELL 3+1 Rich Coffee",
+    "pnsUrl": "/en/3%2B1%20Rich%20%20Coffee/p/BP_177437",
+    "price": 50.0
+  },
+  "Coffee Mix Lite": {
+    "pnsName": "MAXWELL Coffee Mix Lite",
+    "pnsUrl": "/en/Coffee%20Mix%20Lite/p/BP_128154",
+    "price": 50.0
+  },
+  "NESCAFE NESCAFÉ 1+2 Rich Instant Coffee Mix": {
+    "pnsName": "NESCAFE 1+2 Rich Instant Coffee Mix",
+    "pnsUrl": "/en/1%2B2%20Rich%20Instant%20Coffee%20Mix/p/BP_447349",
+    "price": 42.9,
+    "image": "https://medias.pns.hk/publishing/PNSHK-447349-front-prodcat.jpg?version=1750336017",
+    "imageSource": "pns-cloud"
+  },
+  "NESCAFE NESCAFÉ 1+2 Smooth Milky Mix": {
+    "pnsName": "NESCAFE 1+2 Smooth Milky Mix",
+    "pnsUrl": "/en/1%2B2%20Smooth%20Milky%20Mix/p/BP_433668",
+    "price": 50.0,
+    "image": "https://medias.pns.hk/publishing/PNSHK-433668-front-prodcat.jpg?version=1750335637",
+    "imageSource": "pns-cloud"
+  },
+  "1+2 Coffee": {
+    "pnsName": "NESCAFE 1+2 Coffee",
+    "pnsUrl": "/en/1%2B2%20Coffee/p/BP_433666",
+    "price": 50.0
+  },
+  "1+2 Rich Instant Coffee Mix": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-447349-front-prodcat.jpg?version=1750336017",
+    "imageSource": "pns-cloud",
+    "pnsName": "NESCAFE 1+2 Rich Instant Coffee Mix",
+    "pnsUrl": "/en/1%2B2%20Rich%20Instant%20Coffee%20Mix/p/BP_447349",
+    "price": 42.9
+  },
+  "Prm White Coffee Original 17+3": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-454099-front-prodcat.jpg?version=1757507540",
+    "imageSource": "pns-cloud",
+    "pnsName": "NESCAFE Prm White Coffee Original 17+3",
+    "pnsUrl": "/en/Prm%20White%20Coffee%20Original%2017%2B3/p/BP_454099",
+    "price": 77.0
+  },
+  "Prm White Coffee Unswt": {
+    "pnsName": "NESCAFE Prm White Coffee Unswt",
+    "pnsUrl": "/en/Prm%20White%20Coffee%20Unswt/p/BP_458636",
+    "price": 77.0
+  },
+  "NESCAFE Prm White Coffee Unswt": {
+    "pnsName": "NESCAFE Prm White Coffee Unswt",
+    "pnsUrl": "/en/Prm%20White%20Coffee%20Unswt/p/BP_458636",
+    "price": 77.0
+  },
+  "Cafe Viet": {
+    "pnsName": "NESCAFE Cafe Viet",
+    "pnsUrl": "/en/Cafe%20Viet/p/BP_479007",
+    "price": 55.0
+  },
+  "NESCAFE Cafe Viet": {
+    "pnsName": "NESCAFE Cafe Viet",
+    "pnsUrl": "/en/Cafe%20Viet/p/BP_479007",
+    "price": 55.0
+  },
+  "3 In 1 Hazelnut White Coffee": {
+    "pnsName": "OLD TOWN 3 In 1 Hazelnut White Coffee",
+    "pnsUrl": "/en/3%20In%201%20Hazelnut%20White%20Coffee/p/BP_433685",
+    "price": 39.9
+  },
+  "OLD TOWN 3 In 1 Hazelnut White Coffee": {
+    "pnsName": "OLD TOWN 3 In 1 Hazelnut White Coffee",
+    "pnsUrl": "/en/3%20In%201%20Hazelnut%20White%20Coffee/p/BP_433685",
+    "price": 39.9
+  },
+  "3 In 1 Classic White Coffee": {
+    "pnsName": "OLD TOWN 3 In 1 Classic White Coffee",
+    "pnsUrl": "/en/3%20In%201%20Classic%20White%20Coffee/p/BP_433683",
+    "price": 39.9
+  },
+  "OLD TOWN 3 In 1 Classic White Coffee": {
+    "pnsName": "OLD TOWN 3 In 1 Classic White Coffee",
+    "pnsUrl": "/en/3%20In%201%20Classic%20White%20Coffee/p/BP_433683",
+    "price": 39.9
+  },
+  "Oatmilk Barista Blend": {
+    "pnsName": "OATSIDE Oatmilk Barista Blend",
+    "pnsUrl": "/en/Oatmilk%20%20Barista%20Blend/p/BP_150254",
+    "price": 18.0
+  },
+  "OATSIDE Oatmilk Barista Blend": {
+    "pnsName": "OATSIDE Oatmilk Barista Blend",
+    "pnsUrl": "/en/Oatmilk%20%20Barista%20Blend/p/BP_150254",
+    "price": 18.0
+  },
+  "The Original Oatmilk": {
+    "pnsName": "GOODMATE The Original Oatmilk",
+    "pnsUrl": "/en/The%20Original%20Oatmilk/p/BP_402055",
+    "price": 20.0
+  },
+  "GOODMATE The Original Oatmilk": {
+    "pnsName": "GOODMATE The Original Oatmilk",
+    "pnsUrl": "/en/The%20Original%20Oatmilk/p/BP_402055",
+    "price": 20.0
+  },
+  "Chocolate Deluxe Oatmilk": {
+    "pnsName": "GOODMATE Chocolate Deluxe Oatmilk",
+    "pnsUrl": "/en/Chocolate%20Deluxe%20Oatmilk/p/BP_402060",
+    "price": 20.0
+  },
+  "GOODMATE Chocolate Deluxe Oatmilk": {
+    "pnsName": "GOODMATE Chocolate Deluxe Oatmilk",
+    "pnsUrl": "/en/Chocolate%20Deluxe%20Oatmilk/p/BP_402060",
+    "price": 20.0
+  },
+  "Zero Sugar Oatmilk": {
+    "pnsName": "GOODMATE Zero Sugar Oatmilk",
+    "pnsUrl": "/en/Zero%20Sugar%20Oatmilk/p/BP_402051",
+    "price": 28.0
+  },
+  "GOODMATE Zero Sugar Oatmilk": {
+    "pnsName": "GOODMATE Zero Sugar Oatmilk",
+    "pnsUrl": "/en/Zero%20Sugar%20Oatmilk/p/BP_402051",
+    "price": 28.0
+  },
+  "Almond Milk Original": {
+    "pnsName": "137 DEGREES Almond Milk Original",
+    "pnsUrl": "/en/Almond%20Milk%20Original/p/BP_409033",
+    "price": 42.9
+  },
+  "137 DEGREES Almond Milk Original": {
+    "pnsName": "137 DEGREES Almond Milk Original",
+    "pnsUrl": "/en/Almond%20Milk%20Original/p/BP_409033",
+    "price": 42.9
+  },
+  "Almond Milk Unsweetened": {
+    "pnsName": "137 DEGREES Almond Milk Unsweetened",
+    "pnsUrl": "/en/Almond%20Milk%20Unsweetened/p/BP_409034",
+    "price": 42.9
+  },
+  "137 DEGREES Almond Milk Unsweetened": {
+    "pnsName": "137 DEGREES Almond Milk Unsweetened",
+    "pnsUrl": "/en/Almond%20Milk%20Unsweetened/p/BP_409034",
+    "price": 42.9
+  },
+  "Barista Oat Drink": {
+    "pnsName": "OATLY Barista Oat Drink",
+    "pnsUrl": "/en/Barista%20Oat%20Drink/p/BP_340671",
+    "price": 25.0
+  },
+  "OATLY Barista Oat Drink": {
+    "pnsName": "OATLY Barista Oat Drink",
+    "pnsUrl": "/en/Barista%20Oat%20Drink/p/BP_340671",
+    "price": 25.0
+  },
+  "Deluxe High-calcium Oat Drink": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-125261-front-prodcat.jpg?version=1749126124",
+    "imageSource": "pns-cloud",
+    "pnsName": "OATLY Deluxe High-calcium Oat Drink",
+    "pnsUrl": "/en/Deluxe%20High-calcium%20Oat%20Drink/p/BP_125261",
+    "price": 28.0
+  },
+  "Oat Drink Enriched": {
+    "pnsName": "OATLY Oatly Oat Drink Enriched",
+    "pnsUrl": "/en/Oatly%20Oat%20Drink%20Enriched/p/BP_497187",
+    "price": 28.0
+  },
+  "Australia Soy Milk Original": {
+    "pnsName": "VITASOY CALCI PLUS Hi-cal High Protein Soya Milk",
+    "pnsUrl": "/en/Hi-cal%20High%20Protein%20Soya%20Milk/p/BP_441538",
+    "price": 52.0
+  },
+  "VITASOY Australia Soy Milk Original": {
+    "pnsName": "VITASOY CALCI PLUS Hi-cal High Protein Soya Milk",
+    "pnsUrl": "/en/Hi-cal%20High%20Protein%20Soya%20Milk/p/BP_441538",
+    "price": 52.0
+  },
+  "Almond Breeze Unsweetened (original)": {
+    "pnsName": "BLUE DIAMOND Almond Breeze Unsweetened (original)",
+    "pnsUrl": "/en/Almond%20Breeze%20Unsweetened%20%28original%29/p/BP_385806",
+    "price": 56.0
+  },
+  "BLUE DIAMOND Almond Breeze Unsweetened (original)": {
+    "pnsName": "BLUE DIAMOND Almond Breeze Unsweetened (original)",
+    "pnsUrl": "/en/Almond%20Breeze%20Unsweetened%20%28original%29/p/BP_385806",
+    "price": 56.0
+  },
+  "Almond Breeze (original)": {
+    "pnsName": "BLUE DIAMOND Almond Breeze (original)",
+    "pnsUrl": "/en/Almond%20Breeze%20%28original%29/p/BP_134992",
+    "price": 56.0
+  },
+  "BLUE DIAMOND Almond Breeze (original)": {
+    "pnsName": "BLUE DIAMOND Almond Breeze (original)",
+    "pnsUrl": "/en/Almond%20Breeze%20%28original%29/p/BP_134992",
+    "price": 56.0
+  },
+  "Chocolate Milk Beverage": {
+    "pnsName": "DUTCH LADY Chocolate Milk Beverage 4 X 110 Ml",
+    "pnsUrl": "/en/Chocolate%20Milk%20Beverage%204%20X%20110%20Ml/p/BP_463122",
+    "price": 16.0,
+    "image": "https://medias.pns.hk/publishing/PNSHK-159169-front-prodcat.jpg?version=1765801817",
+    "imageSource": "pns-cloud"
+  },
+  "Grass Jelly": {
+    "pnsName": "SELECT Grass Jelly",
+    "pnsUrl": "/en/Grass%20Jelly/p/BP_119660",
+    "price": 12.0
+  },
+  "Select Grass Jelly": {
+    "pnsName": "SELECT Grass Jelly",
+    "pnsUrl": "/en/Grass%20Jelly/p/BP_119660",
+    "price": 12.0
+  },
+  "Jelly Powder Pineapple Flavour": {
+    "pnsName": "ROBERTSONS Jelly Powder Mango Flavour",
+    "pnsUrl": "/en/Jelly%20Powder%20Mango%20Flavour/p/BP_117406",
+    "price": 16.0
+  },
+  "Robertsons Jelly Powder Pineapple Flavour": {
+    "pnsName": "ROBERTSONS Jelly Powder Mango Flavour",
+    "pnsUrl": "/en/Jelly%20Powder%20Mango%20Flavour/p/BP_117406",
+    "price": 16.0
+  },
+  "Jelly Powder Mango Flavour": {
+    "pnsName": "ROBERTSONS Jelly Powder Mango Flavour",
+    "pnsUrl": "/en/Jelly%20Powder%20Mango%20Flavour/p/BP_117406",
+    "price": 16.0
+  },
+  "Robertsons Jelly Powder Mango Flavour": {
+    "pnsName": "ROBERTSONS Jelly Powder Mango Flavour",
+    "pnsUrl": "/en/Jelly%20Powder%20Mango%20Flavour/p/BP_117406",
+    "price": 16.0
+  },
+  "Jelly Powder Strawberry Flavour": {
+    "pnsName": "ROBERTSONS Jelly Powder Mango Flavour",
+    "pnsUrl": "/en/Jelly%20Powder%20Mango%20Flavour/p/BP_117406",
+    "price": 16.0
+  },
+  "Robertsons Jelly Powder Strawberry Flavour": {
+    "pnsName": "ROBERTSONS Jelly Powder Mango Flavour",
+    "pnsUrl": "/en/Jelly%20Powder%20Mango%20Flavour/p/BP_117406",
+    "price": 16.0
+  },
+  "Retort Pouch Red Bean W Lotus Seeds Dessert": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-171100-front-prodcat.jpg?version=1732751558",
+    "imageSource": "pns-cloud",
+    "pnsName": "NISSIN RETORT POUCH Red Bean W Lotus Seeds Dessert",
+    "pnsUrl": "/en/Red%20Bean%20W%20Lotus%20Seeds%20Dessert/p/BP_171100",
+    "price": 17.0
+  },
+  "Retort Pouch Cha Cha Dessert": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-171095-front-prodcat.jpg?version=1732751564",
+    "imageSource": "pns-cloud",
+    "pnsName": "NISSIN RETORT POUCH Cha Cha Dessert",
+    "pnsUrl": "/en/Cha%20Cha%20Dessert/p/BP_171095",
+    "price": 17.0
+  },
+  "Retort Pouch Black Sesame Dessert": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-171101-front-prodcat.jpg?version=1732751569",
+    "imageSource": "pns-cloud",
+    "pnsName": "NISSIN RETORT POUCH Black Sesame Dessert",
+    "pnsUrl": "/en/Black%20Sesame%20Dessert/p/BP_171101",
+    "price": 17.0
+  },
+  "Red Bean With Tangerine Peel & Lotus Seeds Dessert": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-109185-front-prodcat.jpg?version=1732707815",
+    "imageSource": "pns-cloud",
+    "pnsName": "YUE ZHUAN Red Bean With Tangerine Peel & Lotus Seed",
+    "pnsUrl": "/en/Red%20Bean%20With%20Tangerine%20Peel%20&%20Lotus%20Seed/p/BP_109185",
+    "price": 42.0
+  },
+  "Black Glutinous Rice With Taro & Coconut Milk": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-109184-front-prodcat.jpg?version=1732707850",
+    "imageSource": "pns-cloud",
+    "pnsName": "YUE ZHUAN Black Glutinous Rice With Taro & Coco Milk",
+    "pnsUrl": "/en/Black%20Glutinous%20Rice%20With%20Taro%20&%20Coco%20Milk/p/BP_109184",
+    "price": 42.0
+  },
+  "Ground Black Sesame Dessert": {
+    "pnsName": "YUE ZHUAN Ground Black Sesame Dessert",
+    "pnsUrl": "/en/Ground%20Black%20Sesame%20Dessert/p/BP_109181",
+    "price": 42.0
+  },
+  "Yue Zhuan Ground Black Sesame Dessert": {
+    "pnsName": "YUE ZHUAN Ground Black Sesame Dessert",
+    "pnsUrl": "/en/Ground%20Black%20Sesame%20Dessert/p/BP_109181",
+    "price": 42.0
+  },
+  "BBQ Flavoured Wave Cut Potato Chips": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-302347-front-prodcat.jpg?version=1753273247",
+    "imageSource": "pns-cloud",
+    "pnsName": "CALBEE Calbee Bbq Flavoured Potato Chips Wave Cut Potato Chips",
+    "pnsUrl": "/en/Calbee%20Bbq%20Flavoured%20Potato%20Chips%20%20Wave%20Cut%20Potato%20Chips/p/BP_302347",
+    "price": 50.0
+  },
+  "Blazin Hot Cheese Grill-a-corn": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-341122-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "CALBEE Blazin Hot Cheese Grill-a-corn",
+    "pnsUrl": "/en/Blazin%20Hot%20Cheese%20Grill-a-corn/p/BP_341122",
+    "price": 10.0
+  },
+  "Smoky Cheese Flavoured Grill A Corn": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-416088-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "CALBEE Smoky Cheese Flavoured Grill A Corn",
+    "pnsUrl": "/en/Smoky%20Cheese%20Flavoured%20Grill%20A%20Corn/p/BP_416088",
+    "price": 23.0
+  },
+  "Soda Biscuit - Wasabi Flavor": {
+    "pnsName": "CEO High Calcium Soda Biscuit Wasabi",
+    "pnsUrl": "/en/High%20Calcium%20Soda%20Biscuit%20Wasabi/p/BP_390959",
+    "price": 32.0
+  },
+  "CEO House Soda Biscuit - Wasabi Flavor": {
+    "pnsName": "CEO High Calcium Soda Biscuit Wasabi",
+    "pnsUrl": "/en/High%20Calcium%20Soda%20Biscuit%20Wasabi/p/BP_390959",
+    "price": 32.0
+  },
+  "Egg Rolls": {
+    "pnsName": "IMPERIAL BANQUET Egg Roll",
+    "pnsUrl": "/en/Egg%20Roll/p/BP_423500",
+    "price": 40.0
+  },
+  "Imperial Banquet Egg Rolls": {
+    "pnsName": "IMPERIAL BANQUET Egg Roll",
+    "pnsUrl": "/en/Egg%20Roll/p/BP_423500",
+    "price": 40.0
+  },
+  "Snackit": {
+    "pnsName": "SEALECT Snackit - Italian Style",
+    "pnsUrl": "/en/Snackit%20-%20Italian%20Style/p/BP_107986",
+    "price": 39.0
+  },
+  "Marie Finger Biscuit": {
+    "pnsName": "MCVITIE'S Marie Finger Biscuit",
+    "pnsUrl": "/en/Marie%20Finger%20Biscuit/p/BP_115114",
+    "price": 22.9
+  },
+  "Mcvitie's Marie Finger Biscuit": {
+    "pnsName": "MCVITIE'S Marie Finger Biscuit",
+    "pnsUrl": "/en/Marie%20Finger%20Biscuit/p/BP_115114",
+    "price": 22.9
+  },
+  "U.S.A. Grain Fed Hot Pot Beef": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-28389-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "SELECT Us Grain Fed Hot Pot Beef [ Usa](frozen -18°c)",
+    "pnsUrl": "/en/Us%20Grain%20Fed%20Hot%20Pot%20Beef%20%20%5B%20Usa%5D%28frozen%20-18%C2%B0c%29/p/BP_28389",
+    "price": 75.0
+  },
+  "Aust Chilled Minced Beef": {
+    "pnsName": "SELECT Australia Minced Beef (chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Australia%20Minced%20Beef%20%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89260",
+    "price": 37.9
+  },
+  "Select Aust Chilled Minced Beef": {
+    "pnsName": "SELECT Australia Minced Beef (chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Australia%20Minced%20Beef%20%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89260",
+    "price": 37.9
+  },
+  "Aust Chilled Lean Beef": {
+    "pnsName": "SELECT Au Lean Beef(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Au%20Lean%20Beef%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89259",
+    "price": 41.9
+  },
+  "Select Aust Chilled Lean Beef": {
+    "pnsName": "SELECT Au Lean Beef(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Au%20Lean%20Beef%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89259",
+    "price": 41.9
+  },
+  "AMG Australian Striploin Steak": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-37401-front-prodcat.jpg?version=1770207746",
+    "imageSource": "pns-cloud",
+    "price": 58.0,
+    "pnsBrand": "AMG",
+    "pnsName": "AMG Australian Striploin [australia] (frozen -18°c)",
+    "pnsUrl": "/en/Australian%20Striploin%20%5Baustralia%5D%20%28frozen%20-18%C2%B0c%29/p/BP_37401"
+  },
+  "Select Chicken breast fillets": {
+    "pnsName": "ZEAL NZ Chicken Breast Fillets (125g)- Zeal",
+    "pnsUrl": "/en/NZ%20Chicken%20Breast%20Fillets%20%28125g%29-%20Zeal/p/BP_6600004817",
+    "price": 72.0,
+    "image": "https://images.openfoodfacts.org/images/products/505/477/514/7069/front_en.34.400.jpg",
+    "imageSource": "pns-cloud"
+  },
+  "Chicken dark meat/wing pieces": {
+    "pnsName": "SELECT Garlic  Chicken Mid Joint Wing(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Garlic%C2%A0%20Chicken%20Mid%20Joint%20Wing%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89378",
+    "price": 35.9
+  },
+  "Select Chicken dark meat/wing pieces": {
+    "pnsName": "SELECT Garlic  Chicken Mid Joint Wing(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Garlic%C2%A0%20Chicken%20Mid%20Joint%20Wing%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89378",
+    "price": 35.9
+  },
+  "Pork belly/sliced pork": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Select Pork belly/sliced pork": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Pork belly slices": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Select Pork belly slices": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Sliced pork/belly": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Select Sliced pork/belly": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Pork ribs/chunks": {
+    "pnsName": "SELECT Steamed Pork Ribs W/garlic Sau(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Steamed%20Pork%20Ribs%20W%2Fgarlic%20Sau%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89286",
+    "price": 38.9
+  },
+  "Select Pork ribs/chunks": {
+    "pnsName": "SELECT Steamed Pork Ribs W/garlic Sau(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Steamed%20Pork%20Ribs%20W%2Fgarlic%20Sau%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89286",
+    "price": 38.9
+  },
+  "Pork chunks": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Select Pork chunks": {
+    "pnsName": "SELECT Es Pork Belly Sukiyaki (thick Cut(chilled 0-4°c)",
+    "pnsUrl": "/en/Es%20Pork%20Belly%20Sukiyaki%20%28thick%20Cut%28chilled%200-4%C2%B0c%29/p/BP_89363",
+    "price": 39.9
+  },
+  "Select Ground pork/minced pork": {
+    "pnsName": "SELECT Spain Minced Pork(chilled 0-4°c) (stay Fresh For 2 Days, Including The Day Of Delivery)",
+    "pnsUrl": "/en/Spain%20Minced%20Pork%28chilled%200-4%C2%B0c%29%20%28stay%20Fresh%20For%202%20Days,%20Including%20The%20Day%20Of%20Delivery%29/p/BP_89353",
+    "price": 38.9,
+    "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg",
+    "imageSource": "pns-cloud"
+  },
+  "Sausage Original": {
+    "pnsName": "SAMLIP Korean Sausage Original [ Korea](chilled 0-4°c)",
+    "pnsUrl": "/en/Korean%20Sausage%20Original%20%5B%20Korea%5D%28chilled%200-4%C2%B0c%29/p/BP_12138",
+    "price": 44.9
+  },
+  "Sausage Smoked": {
+    "pnsName": "SAMLIP Korean Sausage Smoke [ Korea](chilled 0-4°c)",
+    "pnsUrl": "/en/Korean%20Sausage%20Smoke%20%5B%20Korea%5D%28chilled%200-4%C2%B0c%29/p/BP_12144",
+    "price": 44.9
+  },
+  "Sausage Basil": {
+    "pnsName": "SAMLIP Korean Sausage Basil [ Korea](chilled 0-4°c)",
+    "pnsUrl": "/en/Korean%20Sausage%20Basil%20%5B%20Korea%5D%28chilled%200-4%C2%B0c%29/p/BP_12146",
+    "price": 44.9
+  },
+  "Smoked Bacon": {
+    "pnsName": "MORLINY Smoked Bacon [ Poland](chilled 0-4°c)",
+    "pnsUrl": "/en/Smoked%20Bacon%20%20%5B%20Poland%5D%28chilled%200-4%C2%B0c%29/p/BP_94213",
+    "price": 50.0
+  },
+  "Pork Patties": {
+    "pnsName": "SELECT Pork Patties [ Usa](frozen -18°c)",
+    "pnsUrl": "/en/Pork%20Patties%20%20%5B%20Usa%5D%28frozen%20-18%C2%B0c%29/p/BP_454002",
+    "price": 27.0
+  },
+  "Select Pork Patties": {
+    "pnsName": "SELECT Pork Patties [ Usa](frozen -18°c)",
+    "pnsUrl": "/en/Pork%20Patties%20%20%5B%20Usa%5D%28frozen%20-18%C2%B0c%29/p/BP_454002",
+    "price": 27.0
+  },
+  "Classic smoked salmon": {
+    "pnsName": "SALMON FARM Smoked Salmon [ Norway](chilled 0-4°c)",
+    "pnsUrl": "/en/Smoked%20Salmon%20%20%5B%20Norway%5D%28chilled%200-4%C2%B0c%29/p/BP_48124",
+    "price": 110.0
+  },
+  "Salmon Farm Classic smoked salmon": {
+    "pnsName": "SALMON FARM Smoked Salmon [ Norway](chilled 0-4°c)",
+    "pnsUrl": "/en/Smoked%20Salmon%20%20%5B%20Norway%5D%28chilled%200-4%C2%B0c%29/p/BP_48124",
+    "price": 110.0
+  },
+  "Spaghetti of Clams in White Wine Sauce": {
+    "pnsName": "HO E SIK Spaghetti With Clam In White Wine Sauce [ Hong Kong](frozen -18°c)",
+    "pnsUrl": "/en/Spaghetti%20With%20Clam%20In%20White%20Wine%20Sauce%20%20%5B%20Hong%20Kong%5D%28frozen%20-18%C2%B0c%29/p/BP_137771",
+    "price": 50.0,
+    "image": "https://medias.pns.hk/publishing/PNSHK-137771-front-prodcat.jpg",
+    "imageSource": "pns-cloud"
+  },
+  "Spaghetti with Meat in Tomato Sauce": {
+    "pnsName": "HO E SIK Spaghetti With Meat In Tomato Sauce [ Hong Kong](frozen -18°c)",
+    "pnsUrl": "/en/Spaghetti%20With%20Meat%20In%20Tomato%20Sauce%20%20%5B%20Hong%20Kong%5D%28frozen%20-18%C2%B0c%29/p/BP_191412",
+    "price": 50.0,
+    "image": "https://medias.pns.hk/publishing/PNSHK-191412-front-prodcat.jpg",
+    "imageSource": "pns-cloud"
+  },
+  "Plant-Based Minced Meat": {
+    "pnsName": "MEAT ZERO Plant-based Minced Meat [ Thailand](frozen -18°c)",
+    "pnsUrl": "/en/Plant-based%20Minced%20Meat%20%20%5B%20Thailand%5D%28frozen%20-18%C2%B0c%29/p/BP_448736",
+    "price": 21.9
+  },
+  "Meat Zero Plant-Based Minced Meat": {
+    "pnsName": "MEAT ZERO Plant-based Minced Meat [ Thailand](frozen -18°c)",
+    "pnsUrl": "/en/Plant-based%20Minced%20Meat%20%20%5B%20Thailand%5D%28frozen%20-18%C2%B0c%29/p/BP_448736",
+    "price": 21.9
+  },
+  "Skimmed Milk": {
+    "pnsName": "PAULS Pauls Skimmed Milk Uht Export 12x1l",
+    "pnsUrl": "/en/Pauls%20Skimmed%20Milk%20Uht%20Export%2012x1l/p/BP_117156",
+    "price": 28.9
+  },
+  "Pure Milk": {
+    "pnsName": "PURE VITA Cs-4 & Tiger Milk Mushroom",
+    "pnsUrl": "en/Cs-4%20&%20Tiger%20Milk%20Mushroom/p/BP_819746",
+    "price": 199.0
+  },
+  "Black & White Pure Milk": {
+    "pnsName": "PURE VITA Cs-4 & Tiger Milk Mushroom",
+    "pnsUrl": "en/Cs-4%20&%20Tiger%20Milk%20Mushroom/p/BP_819746",
+    "price": 199.0
+  },
+  "Australia 100% Full Cream Milk": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-419941-front-prodcat.jpg?version=1767886469",
+    "imageSource": "pns-cloud",
+    "pnsName": "SELECT Australia Full Cream Uht Milk",
+    "pnsUrl": "/en/Australia%20Full%20Cream%20Uht%20Milk/p/BP_419941",
+    "price": 15.0
+  },
+  "Australia Skimmed Milk": {
+    "pnsName": "SELECT Australia Skim Uht Milk",
+    "pnsUrl": "/en/Australia%20Skim%20Uht%20Milk/p/BP_419943",
+    "price": 15.0
+  },
+  "Select Australia Skimmed Milk": {
+    "pnsName": "SELECT Australia Skim Uht Milk",
+    "pnsUrl": "/en/Australia%20Skim%20Uht%20Milk/p/BP_419943",
+    "price": 15.0
+  },
+  "Organic Pure Milk": {
+    "pnsName": "DUTCH LADY Organic Pure Milk 1l",
+    "pnsUrl": "/en/Organic%20Pure%20Milk%201l/p/BP_378817",
+    "price": 35.0
+  },
+  "Dutch Lady Organic Pure Milk": {
+    "pnsName": "DUTCH LADY Organic Pure Milk 1l",
+    "pnsUrl": "/en/Organic%20Pure%20Milk%201l/p/BP_378817",
+    "price": 35.0
+  },
+  "Full Cream Milk Lactose Free": {
+    "pnsName": "HARVEY FRESH Uht Full Cream Milk",
+    "pnsUrl": "/en/Uht%20Full%20Cream%20Milk/p/BP_199429",
+    "price": 21.5
+  },
+  "Harvey Fresh Full Cream Milk Lactose Free": {
+    "pnsName": "HARVEY FRESH Uht Full Cream Milk",
+    "pnsUrl": "/en/Uht%20Full%20Cream%20Milk/p/BP_199429",
+    "price": 21.5
+  },
+  "Organic Whole Milk": {
+    "pnsName": "DAIONI Organic Whole Milk",
+    "pnsUrl": "/en/Organic%20Whole%20Milk/p/BP_445582",
+    "price": 52.0
+  },
+  "Daioni Organic Whole Milk": {
+    "pnsName": "DAIONI Organic Whole Milk",
+    "pnsUrl": "/en/Organic%20Whole%20Milk/p/BP_445582",
+    "price": 52.0
+  },
+  "Full Cream UHT Milk": {
+    "pnsName": "AUS'MANIA Full Cream Uht Milk",
+    "pnsUrl": "/en/Full%20Cream%20Uht%20%20Milk/p/BP_130572",
+    "price": 26.0
+  },
+  "Devondale Full Cream UHT Milk": {
+    "pnsName": "AUS'MANIA Full Cream Uht Milk",
+    "pnsUrl": "/en/Full%20Cream%20Uht%20%20Milk/p/BP_130572",
+    "price": 26.0
+  },
+  "Skim UHT Milk (Extra Light)": {
+    "pnsName": "DEVONDALE Skim Uht Milk",
+    "pnsUrl": "/en/Skim%20Uht%20Milk/p/BP_127129",
+    "price": 38.0
+  },
+  "Devondale Skim UHT Milk (Extra Light)": {
+    "pnsName": "DEVONDALE Skim Uht Milk",
+    "pnsUrl": "/en/Skim%20Uht%20Milk/p/BP_127129",
+    "price": 38.0
+  },
+  "Pure Full Cream Milk": {
+    "pnsName": "PAULS Farmhouse Gold4.5 Full Cream Milk",
+    "pnsUrl": "/en/Farmhouse%20Gold4.5%20Full%20Cream%20Milk/p/BP_499841",
+    "price": 25.0
+  },
+  "Pauls Pure Full Cream Milk": {
+    "pnsName": "PAULS Farmhouse Gold4.5 Full Cream Milk",
+    "pnsUrl": "/en/Farmhouse%20Gold4.5%20Full%20Cream%20Milk/p/BP_499841",
+    "price": 25.0
+  },
+  "Swiss Premium Whole Milk": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-366223-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "EMMI Swiss Premium Whole Milk",
+    "pnsUrl": "/en/Swiss%20Premium%20Whole%20Milk/p/BP_366223",
+    "price": 12.5
+  },
+  "Swiss Premium Semi-Skimmed Milk": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-445810-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "EMMI Swiss Prem. Semi Skimmed Milk",
+    "pnsUrl": "/en/Swiss%20Prem.%20Semi%20Skimmed%20Milk/p/BP_445810",
+    "price": 29.9
+  },
+  "A2 Protein Full Cream Milk": {
+    "pnsName": "AUSTRALIA'S OWN A2 Uht Full Cream Milk",
+    "pnsUrl": "/en/A2%20Uht%20Full%20Cream%20Milk/p/BP_140922",
+    "price": 20.0
+  },
+  "Australia's Own A2 Protein Full Cream Milk": {
+    "pnsName": "AUSTRALIA'S OWN A2 Uht Full Cream Milk",
+    "pnsUrl": "/en/A2%20Uht%20Full%20Cream%20Milk/p/BP_140922",
+    "price": 20.0
+  },
+  "Aus'Mania Full Cream UHT Milk": {
+    "pnsName": "AUS'MANIA Full Cream Uht Milk",
+    "pnsUrl": "/en/Full%20Cream%20Uht%20%20Milk/p/BP_130572",
+    "price": 26.0
+  },
+  "Skim UHT Milk": {
+    "pnsName": "AUS'MANIA Skim Uht Milk",
+    "pnsUrl": "/en/Skim%20Uht%20Milk/p/BP_130573",
+    "price": 26.0
+  },
+  "Aus'Mania Skim UHT Milk": {
+    "pnsName": "AUS'MANIA Skim Uht Milk",
+    "pnsUrl": "/en/Skim%20Uht%20Milk/p/BP_130573",
+    "price": 26.0
+  },
+  "Original Milk Beverage": {
+    "pnsName": "DUTCH LADY Original Milk Beverage 946 Ml",
+    "pnsUrl": "/en/Original%20Milk%20Beverage%20946%20Ml/p/BP_393483",
+    "price": 236.0
+  },
+  "Dutch Lady Original Milk Beverage": {
+    "pnsName": "DUTCH LADY Original Milk Beverage 946 Ml",
+    "pnsUrl": "/en/Original%20Milk%20Beverage%20946%20Ml/p/BP_393483",
+    "price": 236.0
+  },
+  "High Calcium Low Fat Milk Beverage UHT Export 4x3x1L": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-182972-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "PAULS Pauls Hcal Lf Milk Bev Uht Exp 4x3x1l",
+    "pnsUrl": "/en/Pauls%20Hcal%20Lf%20Milk%20Bev%20Uht%20Exp%204x3x1l/p/BP_182972",
+    "price": 62.0
+  },
+  "MILK DELUXE Pure Milk": {
+    "pnsName": "PURE VITA Cs-4 & Tiger Milk Mushroom",
+    "pnsUrl": "en/Cs-4%20&%20Tiger%20Milk%20Mushroom/p/BP_819746",
+    "price": 199.0
+  },
+  "VITA Pure Milk": {
+    "pnsName": "PURE VITA Cs-4 & Tiger Milk Mushroom",
+    "pnsUrl": "en/Cs-4%20&%20Tiger%20Milk%20Mushroom/p/BP_819746",
+    "price": 199.0
+  },
+  "Purefarm Original Milk": {
+    "pnsName": "DUTCH LADY Purefarm Original Milk",
+    "pnsUrl": "/en/Purefarm%20Original%20Milk/p/BP_463125",
+    "price": 46.0
+  },
+  "Dutch Lady Purefarm Original Milk": {
+    "pnsName": "DUTCH LADY Purefarm Original Milk",
+    "pnsUrl": "/en/Purefarm%20Original%20Milk/p/BP_463125",
+    "price": 46.0
+  },
+  "Purefarm Hi-cal Less Fat Milk": {
+    "pnsName": "DUTCH LADY Purefarm Hi-cal Less Fat Milk",
+    "pnsUrl": "/en/Purefarm%20Hi-cal%20Less%20Fat%20Milk/p/BP_491776",
+    "price": 46.0
+  },
+  "Dutch Lady Purefarm Hi-cal Less Fat Milk": {
+    "pnsName": "DUTCH LADY Purefarm Hi-cal Less Fat Milk",
+    "pnsUrl": "/en/Purefarm%20Hi-cal%20Less%20Fat%20Milk/p/BP_491776",
+    "price": 46.0
+  },
+  "Whipping Cream": {
+    "pnsName": "PRESIDENT Uht Whipping Cream [ France](chilled 0-4°c)",
+    "pnsUrl": "/en/Uht%20Whipping%20Cream%20%20%5B%20France%5D%28chilled%200-4%C2%B0c%29/p/BP_133620",
+    "price": 125.0
+  },
+  "President Whipping Cream": {
+    "pnsName": "PRESIDENT Uht Whipping Cream [ France](chilled 0-4°c)",
+    "pnsUrl": "/en/Uht%20Whipping%20Cream%20%20%5B%20France%5D%28chilled%200-4%C2%B0c%29/p/BP_133620",
+    "price": 125.0
+  },
+  "Light Cream": {
+    "pnsName": "PRESIDENT Uht Light Cream(chilled 0-4°c)",
+    "pnsUrl": "/en/Uht%20Light%20Cream%28chilled%200-4%C2%B0c%29/p/BP_169456",
+    "price": 64.0
+  },
+  "President Light Cream": {
+    "pnsName": "PRESIDENT Uht Light Cream(chilled 0-4°c)",
+    "pnsUrl": "/en/Uht%20Light%20Cream%28chilled%200-4%C2%B0c%29/p/BP_169456",
+    "price": 64.0
+  },
+  "Yogurt, variant 1": {
+    "pnsName": "EMMI Yogurt Low Fat Mango [ Switzerland](chilled 0-4°c)",
+    "pnsUrl": "/en/Yogurt%20Low%20Fat%20Mango%20%20%5B%20Switzerland%5D%28chilled%200-4%C2%B0c%29/p/BP_195622",
+    "price": 32.0
+  },
+  "Emmi Yogurt, variant 1": {
+    "pnsName": "EMMI Yogurt Low Fat Mango [ Switzerland](chilled 0-4°c)",
+    "pnsUrl": "/en/Yogurt%20Low%20Fat%20Mango%20%20%5B%20Switzerland%5D%28chilled%200-4%C2%B0c%29/p/BP_195622",
+    "price": 32.0
+  },
+  "Greek Yogurt, blueberry": {
+    "pnsName": "CHOBANI Greek Yogurt - Blueberry [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Greek%20Yogurt%20-%20Blueberry%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_391636",
+    "price": 45.0
+  },
+  "Chobani Greek Yogurt, blueberry": {
+    "pnsName": "CHOBANI Greek Yogurt - Blueberry [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Greek%20Yogurt%20-%20Blueberry%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_391636",
+    "price": 45.0
+  },
+  "Greek Yogurt, plain/other variant": {
+    "image": "https://medias.pns.hk/publishing/PNSHK-417462-front-prodcat.jpg",
+    "imageSource": "pns-cloud",
+    "pnsName": "CHOBANI Greek Yogurt - Mango",
+    "pnsUrl": "/en/Greek%20Yogurt%20-%20Mango/p/BP_149369",
+    "price": 45.0
+  },
+  "Probiotic yogurt": {
+    "pnsName": "MEIJI Greek Style  Natural  Yogurt(chilled 0-4°c)",
+    "pnsUrl": "/en/Greek%20Style%C2%A0%20Natural%C2%A0%20Yogurt%28chilled%200-4%C2%B0c%29/p/BP_149021",
+    "price": 35.0
+  },
+  "Meiji Probiotic yogurt": {
+    "pnsName": "MEIJI Greek Style  Natural  Yogurt(chilled 0-4°c)",
+    "pnsUrl": "/en/Greek%20Style%C2%A0%20Natural%C2%A0%20Yogurt%28chilled%200-4%C2%B0c%29/p/BP_149021",
+    "price": 35.0
+  },
+  "Yogurt, blue variant": {
+    "pnsName": "PAULS Natural Set Yogurt(chilled 0-4°c)",
+    "pnsUrl": "/en/Natural%20Set%20Yogurt%28chilled%200-4%C2%B0c%29/p/BP_401364",
+    "price": 24.0
+  },
+  "Pauls Yogurt, blue variant": {
+    "pnsName": "PAULS Natural Set Yogurt(chilled 0-4°c)",
+    "pnsUrl": "/en/Natural%20Set%20Yogurt%28chilled%200-4%C2%B0c%29/p/BP_401364",
+    "price": 24.0
+  },
+  "Yogurt, pink variant": {
+    "pnsName": "PAULS Natural Set Yogurt(chilled 0-4°c)",
+    "pnsUrl": "/en/Natural%20Set%20Yogurt%28chilled%200-4%C2%B0c%29/p/BP_401364",
+    "price": 24.0
+  },
+  "Pauls Yogurt, pink variant": {
+    "pnsName": "PAULS Natural Set Yogurt(chilled 0-4°c)",
+    "pnsUrl": "/en/Natural%20Set%20Yogurt%28chilled%200-4%C2%B0c%29/p/BP_401364",
+    "price": 24.0
+  },
+  "Yogurt": {
+    "pnsName": "BULLA Greek Style Natural Yoghurt [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Greek%20Style%20Natural%20Yoghurt%20%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_375521",
+    "price": 69.9
+  },
+  "Bulla Yogurt": {
+    "pnsName": "BULLA Greek Style Natural Yoghurt [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Greek%20Style%20Natural%20Yoghurt%20%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_375521",
+    "price": 69.9
+  },
+  "Sour cream": {
+    "pnsName": "LAY'S Lay's Swt Sour Cream Flv Chp",
+    "pnsUrl": "/en/Lay's%20Swt%20Sour%20Cream%20Flv%20Chp/p/BP_163526",
+    "price": 22.0
+  },
+  "Daisy Sour cream": {
+    "pnsName": "LAY'S Lay's Swt Sour Cream Flv Chp",
+    "pnsUrl": "/en/Lay's%20Swt%20Sour%20Cream%20Flv%20Chp/p/BP_163526",
+    "price": 22.0
+  },
+  "Spreadable butter": {
+    "pnsName": "LURPAK Organic Spreadable Butter (chilled 0-4°c)",
+    "pnsUrl": "/en/Organic%20Spreadable%20Butter%20%28chilled%200-4%C2%B0c%29/p/BP_459345",
+    "price": 71.0
+  },
+  "Lurpak Spreadable butter": {
+    "pnsName": "LURPAK Organic Spreadable Butter (chilled 0-4°c)",
+    "pnsUrl": "/en/Organic%20Spreadable%20Butter%20%28chilled%200-4%C2%B0c%29/p/BP_459345",
+    "price": 71.0
+  },
+  "Spread, original/light variant": {
+    "pnsName": "FLORA Light Spread [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Light%20Spread%20%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_131422",
+    "price": 40.0
+  },
+  "Flora Spread, original/light variant": {
+    "pnsName": "FLORA Light Spread [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Light%20Spread%20%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_131422",
+    "price": 40.0
+  },
+  "Cream cheese": {
+    "pnsName": "PHILADELPHIA Cream Cheese - Regular(chilled 0-4°c)",
+    "pnsUrl": "/en/Cream%20Cheese%20-%20Regular%28chilled%200-4%C2%B0c%29/p/BP_449958",
+    "price": 28.5
+  },
+  "Philadelphia Cream cheese": {
+    "pnsName": "PHILADELPHIA Cream Cheese - Regular(chilled 0-4°c)",
+    "pnsUrl": "/en/Cream%20Cheese%20-%20Regular%28chilled%200-4%C2%B0c%29/p/BP_449958",
+    "price": 28.5
+  },
+  "String Cheese": {
+    "pnsName": "CRYSTAL FARMS Mozzarella String Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mozzarella%20String%20Cheese%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_380394",
+    "price": 52.0
+  },
+  "Crystal Farms String Cheese": {
+    "pnsName": "CRYSTAL FARMS Mozzarella String Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mozzarella%20String%20Cheese%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_380394",
+    "price": 52.0
+  },
+  "Cheddar": {
+    "pnsName": "CRYSTAL FARMS Mild Cheddar Block Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mild%20Cheddar%20Block%20Cheese%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_127964",
+    "price": 35.0
+  },
+  "President Cheddar": {
+    "pnsName": "CRYSTAL FARMS Mild Cheddar Block Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mild%20Cheddar%20Block%20Cheese%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_127964",
+    "price": 35.0
+  },
+  "The Laughing Cow cheese": {
+    "pnsName": "LAUGHING COW Cheese Dippers [ France](chilled 0-4°c)",
+    "pnsUrl": "/en/Cheese%20Dippers%20%20%5B%20France%5D%28chilled%200-4%C2%B0c%29/p/BP_135804",
+    "price": 52.0
+  },
+  "Laughing Cow The Laughing Cow cheese": {
+    "pnsName": "LAUGHING COW Cheese Dippers [ France](chilled 0-4°c)",
+    "pnsUrl": "/en/Cheese%20Dippers%20%20%5B%20France%5D%28chilled%200-4%C2%B0c%29/p/BP_135804",
+    "price": 52.0
+  },
+  "White Sharp Cheddar": {
+    "pnsName": "CRYSTAL FARMS White Sharp Cheddar Cheese [ United States](chilled 0-4°c)",
+    "pnsUrl": "/en/White%20Sharp%20Cheddar%20Cheese%20%5B%20United%20States%5D%28chilled%200-4%C2%B0c%29/p/BP_433565",
+    "price": 75.0
+  },
+  "Crystal Farms White Sharp Cheddar": {
+    "pnsName": "CRYSTAL FARMS White Sharp Cheddar Cheese [ United States](chilled 0-4°c)",
+    "pnsUrl": "/en/White%20Sharp%20Cheddar%20Cheese%20%5B%20United%20States%5D%28chilled%200-4%C2%B0c%29/p/BP_433565",
+    "price": 75.0
+  },
+  "Crystal Farms Cheddar": {
+    "pnsName": "CRYSTAL FARMS Mild Cheddar Block Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mild%20Cheddar%20Block%20Cheese%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_127964",
+    "price": 35.0
+  },
+  "Mozzarella": {
+    "pnsName": "CRYSTAL FARMS Mozzarella Block Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mozzarella%20Block%20Cheese%20%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_127871",
+    "price": 35.0
+  },
+  "Crystal Farms Mozzarella": {
+    "pnsName": "CRYSTAL FARMS Mozzarella Block Cheese [ Usa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Mozzarella%20Block%20Cheese%20%20%5B%20Usa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_127871",
+    "price": 35.0
+  },
+  "Parmesan": {
+    "pnsName": "CRYSTAL FARMS Shredded parmesan [ United States](chilled 0-4°c)",
+    "pnsUrl": "/en/Shredded%C2%A0parmesan%20%5B%20United%20States%5D%28chilled%200-4%C2%B0c%29/p/BP_106146",
+    "price": 75.0
+  },
+  "Crystal Farms Parmesan": {
+    "pnsName": "CRYSTAL FARMS Shredded parmesan [ United States](chilled 0-4°c)",
+    "pnsUrl": "/en/Shredded%C2%A0parmesan%20%5B%20United%20States%5D%28chilled%200-4%C2%B0c%29/p/BP_106146",
+    "price": 75.0
+  },
+  "Butter": {
+    "pnsName": "DAISY Unsalted Butter",
+    "pnsUrl": "/en/Unsalted%20Butter/p/BP_442606",
+    "price": 40.0
+  },
+  "President Butter": {
+    "pnsName": "DAISY Unsalted Butter",
+    "pnsUrl": "/en/Unsalted%20Butter/p/BP_442606",
+    "price": 40.0
+  },
+  "Westgold Butter": {
+    "pnsName": "DAISY Unsalted Butter",
+    "pnsUrl": "/en/Unsalted%20Butter/p/BP_442606",
+    "price": 40.0
+  },
+  "Anchor Butter": {
+    "pnsName": "DAISY Unsalted Butter",
+    "pnsUrl": "/en/Unsalted%20Butter/p/BP_442606",
+    "price": 40.0
+  },
+  "Daisy Butter": {
+    "pnsName": "DAISY Unsalted Butter",
+    "pnsUrl": "/en/Unsalted%20Butter/p/BP_442606",
+    "price": 40.0
+  },
+  "Original/Light spread": {
+    "pnsName": "FLORA Light Spread [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Light%20Spread%20%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_131422",
+    "price": 40.0
+  },
+  "Flora Original/Light spread": {
+    "pnsName": "FLORA Light Spread [ Australia](chilled 0-4°c)",
+    "pnsUrl": "/en/Light%20Spread%20%20%5B%20Australia%5D%28chilled%200-4%C2%B0c%29/p/BP_131422",
+    "price": 40.0
+  },
+  "Jumbo Blueberries": {
+    "pnsName": "CORE Large Blueberry [south Africa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Large%20Blueberry%20%5Bsouth%20Africa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_28457",
+    "price": 18.0
+  },
+  "CORE Jumbo Blueberries": {
+    "pnsName": "CORE Large Blueberry [south Africa] (chilled 0-4°c)",
+    "pnsUrl": "/en/Large%20Blueberry%20%5Bsouth%20Africa%5D%20%28chilled%200-4%C2%B0c%29/p/BP_28457",
+    "price": 18.0
+  },
+  "Eggplant, packaged": {
+    "pnsName": "MR. VEGETABLE Eggplant",
+    "pnsUrl": "/en/Eggplant/p/BP_64218",
+    "price": 7.9
+  },
+  "Singles": {
+    "pnsName": "KRAFT Regular Singles Cheese 6 Pcs(chilled 0-4°c)",
+    "pnsUrl": "/en/Regular%20Singles%20Cheese%206%20Pcs%28chilled%200-4%C2%B0c%29/p/BP_185812",
+    "price": 24.9
+  },
+  "Kraft Singles": {
+    "pnsName": "KRAFT Regular Singles Cheese 6 Pcs(chilled 0-4°c)",
+    "pnsUrl": "/en/Regular%20Singles%20Cheese%206%20Pcs%28chilled%200-4%C2%B0c%29/p/BP_185812",
+    "price": 24.9
   }
 }

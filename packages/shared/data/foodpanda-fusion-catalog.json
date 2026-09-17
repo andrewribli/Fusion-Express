@@ -714,6 +714,34 @@
               "subcategory": "Toiletries",
               "brand": "Dove",
               "image": "/images/catalog/img-7099.jpg"
+            },
+            {
+              "name": "Petit Handkerchief 18s",
+              "price": 26.9,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-199406-front-prodcat.jpg?version=1785241278",
+              "pnsCode": "BP_199406",
+              "brand": "Tempo"
+            },
+            {
+              "name": "Toothpaste 75g",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110794-front-prodcat.jpg",
+              "pnsCode": "BP_110794",
+              "brand": "Darlie",
+              "weight": 0.075
+            },
+            {
+              "name": "Golden Supreme Facial Tissue 6s",
+              "price": 27.0,
+              "category": "Groceries",
+              "subcategory": "Toiletries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-345666-front-prodcat.jpg?version=1732835816",
+              "pnsCode": "BP_345666",
+              "brand": "Vinda"
             }
           ]
         },
@@ -1161,12 +1189,50 @@
               "brand": "Taikoo",
               "image": "https://medias.pns.hk/publishing/PNSHK-144975-front-prodcat.jpg",
               "weight": 0.38
+            },
+            {
+              "name": "Seasoning 200ml",
+              "price": 16.5,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "image": "https://medias.pns.hk/publishing/PNSHK-106250-front-prodcat.jpg",
+              "pnsCode": "BP_106250",
+              "brand": "Maggi",
+              "weight": 0.2
+            },
+            {
+              "name": "Black Bean Garlic Sauce 226g",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Seasonings",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111962-front-prodcat.jpg",
+              "pnsCode": "BP_111962",
+              "brand": "Lee Kum Kee",
+              "weight": 0.226
             }
           ]
         },
         {
           "name": "Instant Noodles",
           "items": [
+            {
+              "name": "Indomie Mi Goreng Original Flavor 5x85g",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Indomie",
+              "image": "https://medias.pns.hk/publishing/PNSHK-417130-front-prodcat.jpg",
+              "weight": 0.425
+            },
+            {
+              "name": "Indomie Soto Mie Flavour Soup Instant Noodle 5x75g",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "brand": "Indomie",
+              "image": "https://medias.pns.hk/publishing/PNSHK-366719-front-prodcat.jpg",
+              "weight": 0.375
+            },
             {
               "name": "Instant Carbonara",
               "price": 13.0,
@@ -1617,6 +1683,82 @@
               "brand": "Fuku",
               "image": "https://medias.pns.hk/publishing/PNSHK-116117-front-prodcat.jpg",
               "weight": 0.09
+            },
+            {
+              "name": "Cup Noodle - Spicy Beef 75g",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157732-front-prodcat.jpg?version=1732763635",
+              "pnsCode": "BP_157732",
+              "brand": "Nissin",
+              "weight": 0.075
+            },
+            {
+              "name": "Cup Noodles - Seafood 72g",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-110653-front-prodcat.jpg?version=1732715691",
+              "pnsCode": "BP_110653",
+              "brand": "Nissin",
+              "weight": 0.072
+            },
+            {
+              "name": "Cup Noodles - Spicy Seafood 75g",
+              "price": 9.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-118681-front-prodcat.jpg?version=1732721376",
+              "pnsCode": "BP_118681",
+              "brand": "Nissin",
+              "weight": 0.075
+            },
+            {
+              "name": "Big Cup Noodles - Seafood 100g",
+              "price": 13.5,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-369506-front-prodcat.jpg?version=1732856367",
+              "pnsCode": "BP_369506",
+              "brand": "Nissin",
+              "weight": 0.1
+            },
+            {
+              "name": "Creamy Mushroom Spaghetti",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "brand": "Hao Yi Shi",
+              "weight": 0.25
+            },
+            {
+              "name": "Scallion Oil Noodles",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "brand": "Hao Yi Shi",
+              "weight": 0.25
+            },
+            {
+              "name": "White Sauce Mushroom Noodles",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "brand": "Hao Yi Shi",
+              "weight": 0.25
+            },
+            {
+              "name": "Satay Beef Noodles",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Instant Noodles",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "brand": "Hao Yi Shi",
+              "weight": 0.25
             }
           ]
         },
@@ -1970,6 +2112,26 @@
               "brand": "Nutella",
               "image": "/images/catalog/img-7057.jpg",
               "weight": 0.35
+            },
+            {
+              "name": "Mayonnaise 300g",
+              "price": 30.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "image": "https://medias.pns.hk/publishing/PNSHK-184830-front-prodcat.jpg?version=1747398121",
+              "pnsCode": "BP_184830",
+              "brand": "Kewpie",
+              "weight": 0.3
+            },
+            {
+              "name": "Sriracha Sauce 256ml",
+              "price": 27.0,
+              "category": "Groceries",
+              "subcategory": "Condiments",
+              "image": "https://medias.pns.hk/publishing/PNSHK-410779-front-prodcat.jpg",
+              "pnsCode": "BP_410779",
+              "brand": "Tabasco",
+              "weight": 0.256
             }
           ]
         },
@@ -2260,6 +2422,46 @@
               "subcategory": "Canned Goods",
               "brand": "Ligo",
               "image": "/images/catalog/img-7098.jpg"
+            },
+            {
+              "name": "Luncheon Meat 340g",
+              "price": 24.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "image": "https://medias.pns.hk/publishing/PNSHK-387188-front-prodcat.jpg?version=1733366648",
+              "pnsCode": "BP_387188",
+              "brand": "Sajo",
+              "weight": 0.34
+            },
+            {
+              "name": "Chopped Ham and Pork 340g",
+              "price": 34.9,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "image": "https://medias.pns.hk/publishing/PNSHK-437381-front-prodcat.jpg?version=1732906589",
+              "pnsCode": "BP_437381",
+              "brand": "Imperial Banquet",
+              "weight": 0.34
+            },
+            {
+              "name": "Spiced Pork Cubes 142g",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "image": "https://medias.pns.hk/publishing/PNSHK-486179-front-prodcat.jpg?version=1733290111",
+              "pnsCode": "BP_486179",
+              "brand": "Imperial Banquet",
+              "weight": 0.142
+            },
+            {
+              "name": "Sliced Pork in Sichuan Style 198g",
+              "price": 17.0,
+              "category": "Groceries",
+              "subcategory": "Canned Goods",
+              "image": "https://medias.pns.hk/publishing/PNSHK-442448-front-prodcat.jpg?version=1732929127",
+              "pnsCode": "BP_442448",
+              "brand": "Imperial Banquet",
+              "weight": 0.198
             }
           ]
         },
@@ -2904,6 +3106,56 @@
               "brand": "VITA",
               "image": "https://medias.pns.hk/publishing/PNSHK-159169-front-prodcat.jpg?version=1765801817",
               "weight": 1.0
+            },
+            {
+              "name": "Original Coca-Cola 8 x 330ml",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-114639-front-prodcat.jpg?version=1787921184",
+              "pnsCode": "BP_114639",
+              "brand": "Coca-Cola",
+              "weight": 2.64
+            },
+            {
+              "name": "Sprite Lemon-Lime Soda 500ml",
+              "price": 10.5,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-185771-front-prodcat.jpg?version=1788351854",
+              "pnsCode": "BP_185771",
+              "brand": "Sprite",
+              "weight": 0.5
+            },
+            {
+              "name": "Ion Supply Drink 500ml",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-125853-front-prodcat.jpg",
+              "pnsCode": "BP_125853",
+              "brand": "Pocari",
+              "weight": 0.5
+            },
+            {
+              "name": "Vita Lemon Tea 250ml x 6",
+              "price": 25.0,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-185711-front-prodcat.jpg?version=1744374427",
+              "pnsCode": "BP_185711",
+              "brand": "Vita",
+              "weight": 1.5
+            },
+            {
+              "name": "Watsons Distilled Water 280ml",
+              "price": 4.5,
+              "category": "Groceries",
+              "subcategory": "Drinks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157910-front-prodcat.jpg?version=1758111739",
+              "pnsCode": "BP_157910",
+              "brand": "Watsons",
+              "weight": 0.28
             }
           ]
         },
@@ -3015,6 +3267,51 @@
               "subcategory": "Bread & Bakery",
               "brand": "Select",
               "image": "/images/catalog/img-7059.jpg"
+            },
+            {
+              "name": "Sandwich Bread 8 slices",
+              "price": 13.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120029-front-prodcat.jpg?version=1745497326",
+              "pnsCode": "BP_120029",
+              "brand": "Garden"
+            },
+            {
+              "name": "Life Bread Protein 14 slices",
+              "price": 18.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "image": "https://medias.pns.hk/publishing/PNSHK-129496-front-prodcat.jpg?version=1745498050",
+              "pnsCode": "BP_129496",
+              "brand": "Garden"
+            },
+            {
+              "name": "Life Bread 14 slices",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120007-front-prodcat.jpg?version=1745497491",
+              "pnsCode": "BP_120007",
+              "brand": "Garden"
+            },
+            {
+              "name": "Life Bread Wheat 14 slices",
+              "price": 18.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120008-front-prodcat.jpg?version=1745497529",
+              "pnsCode": "BP_120008",
+              "brand": "Garden"
+            },
+            {
+              "name": "Crustless Sandwich Bread 6 slices",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Bread & Bakery",
+              "image": "https://medias.pns.hk/publishing/PNSHK-185784-front-prodcat.jpg?version=1745583843",
+              "pnsCode": "BP_185784",
+              "brand": "Garden"
             }
           ]
         },
@@ -3110,6 +3407,195 @@
               "brand": "Yue Zhuan",
               "image": "/images/catalog/img-7057.jpg",
               "weight": 0.22
+            },
+            {
+              "name": "Fruit Mix Chews",
+              "price": 17.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Hi-Chew",
+              "weight": 0.1
+            },
+            {
+              "name": "Smilegummi Sour",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Nimm2",
+              "weight": 0.09
+            },
+            {
+              "name": "Sugarfree Gum Peppermint",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Extra",
+              "weight": 0.05
+            },
+            {
+              "name": "Sugarfree Gum Spearmint",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Extra",
+              "weight": 0.05
+            },
+            {
+              "name": "Sugarfree Gum Strawberry",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Extra",
+              "weight": 0.05
+            },
+            {
+              "name": "Chewy Mints Peppermint",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Eclipse",
+              "weight": 0.05
+            },
+            {
+              "name": "Chewy Mints Spearmint",
+              "price": 9.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-08.jpg",
+              "brand": "Eclipse",
+              "weight": 0.05
+            },
+            {
+              "name": "Dairy Milk Chocolate Bar",
+              "price": 22.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-09.jpg",
+              "brand": "Cadbury",
+              "weight": 0.2
+            },
+            {
+              "name": "Milk Chocolate",
+              "price": 15.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-09.jpg",
+              "brand": "Toblerone",
+              "weight": 0.1
+            },
+            {
+              "name": "Chocolate Bar Assorted",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-09.jpg",
+              "brand": "Ritter Sport",
+              "weight": 0.1
+            },
+            {
+              "name": "Kisses Sharing Bag",
+              "price": 40.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-09.jpg",
+              "brand": "Hershey's",
+              "weight": 0.3
+            },
+            {
+              "name": "2-Finger Multipack",
+              "price": 20.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-09.jpg",
+              "brand": "KitKat",
+              "weight": 0.2
+            },
+            {
+              "name": "Sharing Bag",
+              "price": 34.1,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-09.jpg",
+              "brand": "Maltesers",
+              "weight": 0.2
+            },
+            {
+              "name": "Party Bucket 465g",
+              "price": 94.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Maltesers",
+              "weight": 0.465
+            },
+            {
+              "name": "Apollo Strawberry Chocolate",
+              "price": 20.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Meiji",
+              "weight": 0.07
+            },
+            {
+              "name": "Creme de Menthe Thins",
+              "price": 24.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Andes",
+              "weight": 0.132
+            },
+            {
+              "name": "Kinoko no Yama",
+              "price": 21.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Meiji",
+              "weight": 0.074
+            },
+            {
+              "name": "Macadamia Chocolate",
+              "price": 25.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Meiji",
+              "weight": 0.09
+            },
+            {
+              "name": "Almond Chocolate",
+              "price": 25.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Meiji",
+              "weight": 0.088
+            },
+            {
+              "name": "Bueno",
+              "price": 10.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Kinder",
+              "weight": 0.043
+            },
+            {
+              "name": "Joy Egg",
+              "price": 12.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "image": "/images/catalog/drive-shelf-10.jpg",
+              "brand": "Kinder",
+              "weight": 0.02
             }
           ]
         },
@@ -3189,6 +3675,15 @@
               "subcategory": "Household",
               "brand": "Walch",
               "image": "/images/catalog/img-7099.jpg"
+            },
+            {
+              "name": "Kitchen Towel 6 rolls",
+              "price": 34.0,
+              "category": "Groceries",
+              "subcategory": "Household",
+              "image": "https://medias.pns.hk/publishing/PNSHK-426508-front-prodcat.jpg?version=1741782759",
+              "pnsCode": "BP_426508",
+              "brand": "Vinda"
             }
           ]
         },
@@ -3265,6 +3760,16 @@
               "brand": "Barilla",
               "image": "/images/catalog/img-7184.jpg",
               "weight": 0.19
+            },
+            {
+              "name": "Seasoned Soy Sauce for Seafood 410ml",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Sauces",
+              "image": "https://medias.pns.hk/publishing/PNSHK-152023-front-prodcat.jpg",
+              "pnsCode": "BP_152023",
+              "brand": "Lee Kum Kee",
+              "weight": 0.41
             }
           ]
         },
@@ -3319,6 +3824,292 @@
               "brand": "Golden Elephant",
               "image": "https://medias.pns.hk/publishing/PNSHK-496556-front-prodcat.jpg?version=1733286893",
               "weight": 0.17
+            },
+            {
+              "name": "Premium Thai Fragrant Rice 8kg",
+              "price": 105.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-174238-front-prodcat.jpg?version=1732766510",
+              "pnsCode": "BP_174238",
+              "brand": "Imperial Banquet",
+              "weight": 8.0
+            },
+            {
+              "name": "Pearl Rice 5kg",
+              "price": 63.5,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-103396-front-prodcat.jpg?version=1732700826",
+              "pnsCode": "BP_103396",
+              "brand": "Imperial Banquet",
+              "weight": 5.0
+            },
+            {
+              "name": "Shanghai Noodles 340g",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-114080-front-prodcat.jpg",
+              "pnsCode": "BP_114080",
+              "brand": "Sau Tao",
+              "weight": 0.34
+            },
+            {
+              "name": "Sichuan Noodles 340g",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-377093-front-prodcat.jpg?version=1732860359",
+              "pnsCode": "BP_377093",
+              "brand": "Select",
+              "weight": 0.34
+            },
+            {
+              "name": "Guo Qiao Rice Vermicelli 200g x 3",
+              "price": 27.8,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-380686-front-prodcat.jpg?version=1732843514",
+              "pnsCode": "BP_380686",
+              "brand": "Select",
+              "weight": 0.6
+            },
+            {
+              "name": "Fresh Udon Pack",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "weight": 0.4
+            },
+            {
+              "name": "Inaniwa Style Udon",
+              "price": 39.5,
+              "category": "Groceries",
+              "subcategory": "Rice & Noodles",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "weight": 0.5
+            }
+          ]
+        },
+        {
+          "name": "Chips",
+          "items": [
+            {
+              "name": "BBQ Flavoured Wave Cut Potato Chips",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-302347-front-prodcat.jpg?version=1753273247",
+              "weight": 0.192,
+              "bulkDealPrice": 48.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Blazin Hot Cheese Grill-a-corn",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-341122-front-prodcat.jpg",
+              "weight": 0.063,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Smoky Cheese Flavoured Grill A Corn",
+              "price": 10.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-416088-front-prodcat.jpg",
+              "weight": 0.08,
+              "bulkDealPrice": 15.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Ethnicans Potato Chips 25g",
+              "price": 7.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "https://medias.pns.hk/publishing/PNSHK-128088-front-prodcat.jpg?version=1732737806",
+              "pnsCode": "BP_128088",
+              "brand": "Calbee",
+              "weight": 0.025
+            },
+            {
+              "name": "Hot & Spicy Potato Chips 55g",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "https://medias.pns.hk/publishing/PNSHK-128089-front-prodcat.jpg?version=1760098849",
+              "pnsCode": "BP_128089",
+              "brand": "Calbee",
+              "weight": 0.055
+            },
+            {
+              "name": "Sour Cream & Onion Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Classic Salted Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Korean Roasted Chicken Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Salted Egg Yolk Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Grilled Squid Sweet & Sour Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Barbecue Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Honey Butter Potato Chips",
+              "price": 28.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Lay's",
+              "weight": 0.15
+            },
+            {
+              "name": "Sour Cream & Onion",
+              "price": 14.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-11.jpg",
+              "brand": "Pringles",
+              "weight": 0.11
+            },
+            {
+              "name": "Curry Beef Brisket Potato Chips",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-12.jpg",
+              "brand": "Calbee",
+              "weight": 0.07
+            },
+            {
+              "name": "Typhoon Shelter Fried Crab Potato Chips",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-12.jpg",
+              "brand": "Calbee",
+              "weight": 0.07
+            },
+            {
+              "name": "Hot & Spicy Potato Chips",
+              "price": 13.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Calbee",
+              "weight": 0.07
+            },
+            {
+              "name": "Prawn Crackers",
+              "price": 18.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Calbee",
+              "weight": 0.1
+            },
+            {
+              "name": "Pizza Potato Chips",
+              "price": 13.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Calbee",
+              "weight": 0.07
+            },
+            {
+              "name": "Crunchy Cheese",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Cheetos",
+              "weight": 0.15
+            },
+            {
+              "name": "Flamin' Hot",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Cheetos",
+              "weight": 0.15
+            },
+            {
+              "name": "Nacho Cheese",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Doritos",
+              "weight": 0.15
+            },
+            {
+              "name": "Roasted Corn",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-13.jpg",
+              "brand": "Doritos",
+              "weight": 0.15
+            },
+            {
+              "name": "Calbee Honey Butter Potato Chips",
+              "price": 14.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "image": "/images/catalog/drive-shelf-12.jpg",
+              "brand": "Calbee",
+              "weight": 0.07
             }
           ]
         },
@@ -3376,6 +4167,24 @@
               "weight": 0.27,
               "bulkDealPrice": 27.0,
               "bulkDealQty": 4
+            },
+            {
+              "name": "Cheese Sandwiches Promo Pack",
+              "price": 49.0,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "Ritz",
+              "weight": 0.4
+            },
+            {
+              "name": "Lemon Sandwich Crackers",
+              "price": 24.5,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "Ritz",
+              "weight": 0.2
             }
           ]
         },
@@ -3551,6 +4360,54 @@
               "imagePns": "https://medias.pns.hk/publishing/PNSHK-302347-front-prodcat.jpg?version=1753273247",
               "pnsUrl": "https://www.pns.hk/en/search?q=Calbee%20BBQ%20Wave%20Cut",
               "pnsCode": "PNSHK-302347"
+            },
+            {
+              "name": "Egg Rolls",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Imperial Banquet",
+              "weight": 0.15,
+              "bulkDealPrice": 26.0,
+              "bulkDealQty": 2
+            },
+            {
+              "name": "Snackit",
+              "price": 30.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Select",
+              "image": "/images/catalog/img-7056.jpg"
+            },
+            {
+              "name": "Almond Pepero 32g",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-105651-front-prodcat.jpg?version=1732701583",
+              "pnsCode": "BP_105651",
+              "brand": "Lotte",
+              "weight": 0.032
+            },
+            {
+              "name": "Vanilla Cookies 236g",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-161007-front-prodcat.jpg?version=1773318011",
+              "pnsCode": "BP_161007",
+              "brand": "Oreo",
+              "weight": 0.236
+            },
+            {
+              "name": "Seasoned Seaweed Original 4g x 3",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "image": "https://medias.pns.hk/publishing/PNSHK-476755-front-prodcat.jpg?version=1785241544",
+              "pnsCode": "BP_476755",
+              "brand": "Kimnori",
+              "weight": 0.012
             }
           ]
         },
@@ -3566,6 +4423,69 @@
               "weight": 0.2,
               "bulkDealPrice": 33.0,
               "bulkDealQty": 2
+            },
+            {
+              "name": "Ginger Nuts",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "McVitie's",
+              "weight": 0.25
+            },
+            {
+              "name": "Go Ahead Crispy Slices Apple",
+              "price": 18.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "McVitie's",
+              "weight": 0.2
+            },
+            {
+              "name": "Go Ahead Crispy Slices Forest Fruit",
+              "price": 18.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "McVitie's",
+              "weight": 0.2
+            },
+            {
+              "name": "Mini Oreo",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "Oreo",
+              "weight": 0.1
+            },
+            {
+              "name": "Oreo Sandwich Cookies",
+              "price": 24.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "Oreo",
+              "weight": 0.27
+            },
+            {
+              "name": "Le-mond Lemon Puff",
+              "price": 13.6,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "Munchy's",
+              "weight": 0.15
+            },
+            {
+              "name": "Assorted Biscuits",
+              "price": 36.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "image": "/images/catalog/drive-shelf-07.jpg",
+              "brand": "Select",
+              "weight": 0.5
             }
           ]
         },
@@ -3602,8 +4522,80 @@
       "name": "Fresh Food",
       "subcategories": [
         {
+          "name": "Fruit & Berries",
+          "items": [
+            {
+              "name": "Large Blueberries [Peru]",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "brand": "Driscoll's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-75447-front-prodcat.jpg",
+              "weight": 0.17
+            },
+            {
+              "name": "Blueberries 125g",
+              "price": 16.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-29524-front-prodcat.jpg",
+              "weight": 0.125
+            },
+            {
+              "name": "Blueberry Tube",
+              "price": 28.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-83483-front-prodcat.jpg",
+              "weight": 0.125
+            },
+            {
+              "name": "Blueberry Jumbo Tube [Zimbabwe / South Africa]",
+              "price": 34.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "brand": "Driscoll's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-75447-front-prodcat.jpg",
+              "weight": 0.2
+            },
+            {
+              "name": "Strawberry 250g",
+              "price": 29.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-39342-front-prodcat.jpg",
+              "weight": 0.25
+            },
+            {
+              "name": "Strawberry 330g (Korea)",
+              "price": 58.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "image": "https://medias.pns.hk/publishing/PNSHK-78079-front-prodcat.jpg",
+              "weight": 0.33
+            },
+            {
+              "name": "Blueberries Pack",
+              "price": 32.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit & Berries",
+              "image": "/images/catalog/drive-shelf-05.jpg",
+              "weight": 0.125
+            }
+          ]
+        },
+        {
           "name": "Beef",
           "items": [
+            {
+              "name": "Chilled Minced Beef",
+              "price": 36.9,
+              "category": "Fresh Food",
+              "subcategory": "Beef",
+              "brand": "Select",
+              "image": "/images/catalog/img-7185.jpg",
+              "weight": 0.177
+            },
             {
               "name": "U.S.A. Grain Fed Hot Pot Beef",
               "price": 49.9,
@@ -3662,6 +4654,14 @@
               "subcategory": "Beef",
               "brand": "ang",
               "image": "https://foodpanda.dhmedia.io/image/darkstores/nv-g…610a8f-dc28-4f2a-a740-6b27134658e8.jpg?height=176"
+            },
+            {
+              "name": "Beef Brisket Broth Meal Kit",
+              "price": 39.9,
+              "category": "Fresh Food",
+              "subcategory": "Beef",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "weight": 0.6
             }
           ]
         },
@@ -3893,12 +4893,83 @@
               "brand": "Meat Zero",
               "image": "/images/catalog/img-7194.jpg",
               "weight": 0.22
+            },
+            {
+              "name": "Sous Vide Confit Duck Leg",
+              "price": 20.0,
+              "category": "Fresh Food",
+              "subcategory": "Others",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "weight": 0.25
             }
           ]
         },
         {
           "name": "Dairy",
           "items": [
+            {
+              "name": "Purefarm Original Full Cream Milk Beverage 225ml x 6",
+              "price": 36.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Dutch Lady",
+              "image": "https://medias.pns.hk/publishing/PNSHK-463118-front-prodcat.jpg",
+              "weight": 1.35
+            },
+            {
+              "name": "Fresh Milk Full Cream 1.89L",
+              "price": 43.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Greenfields",
+              "image": "https://medias.pns.hk/publishing/PNSHK-490083-front-prodcat.jpg",
+              "weight": 1.89
+            },
+            {
+              "name": "Creamy Aus Style Yoghurt Natural 160g",
+              "price": 16.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Bulla",
+              "image": "https://medias.pns.hk/publishing/PNSHK-311777-front-prodcat.jpg",
+              "weight": 0.16
+            },
+            {
+              "name": "Creamy Aus Style Yoghurt Strawberry 160g",
+              "price": 16.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Bulla",
+              "image": "https://medias.pns.hk/publishing/PNSHK-311730-front-prodcat.jpg",
+              "weight": 0.16
+            },
+            {
+              "name": "Creamy Aus Style Yoghurt Vanilla 160g",
+              "price": 16.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Bulla",
+              "image": "https://medias.pns.hk/publishing/PNSHK-311773-front-prodcat.jpg",
+              "weight": 0.16
+            },
+            {
+              "name": "Greek Style Natural Yoghurt 1kg",
+              "price": 69.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Bulla",
+              "image": "https://medias.pns.hk/publishing/PNSHK-375521-front-prodcat.jpg",
+              "weight": 1.0
+            },
+            {
+              "name": "Greek Strained Yogurt 150g",
+              "price": 26.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "brand": "Athina",
+              "image": "https://medias.pns.hk/publishing/PNSHK-455671-front-prodcat.jpg",
+              "weight": 0.15
+            },
             {
               "name": "Skimmed Milk",
               "price": 28.9,
@@ -4403,6 +5474,45 @@
               "subcategory": "Dairy",
               "brand": "Flora",
               "image": "/images/catalog/img-7097.jpg"
+            },
+            {
+              "name": "Japanese White Eggs 10s",
+              "price": 32.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-359118-front-prodcat.jpg",
+              "pnsCode": "BP_359118",
+              "brand": "Shin Kigen Ran"
+            },
+            {
+              "name": "Probiotic Drink 5 x 100ml",
+              "price": 15.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-190742-front-prodcat.jpg",
+              "pnsCode": "BP_190742",
+              "brand": "Yakult",
+              "weight": 0.5
+            },
+            {
+              "name": "Specially Select 3.6 Milk 1L",
+              "price": 33.0,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-194697-front-prodcat.jpg?version=1724070021",
+              "pnsCode": "BP_194697",
+              "brand": "Hokkaido",
+              "weight": 1.0
+            },
+            {
+              "name": "Low Sugar High Fibre Probiotic Drink 5 x 100ml",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Dairy",
+              "image": "https://medias.pns.hk/publishing/PNSHK-495608-front-prodcat.jpg?version=1736252661",
+              "pnsCode": "BP_495608",
+              "brand": "Yakult",
+              "weight": 0.5
             }
           ]
         },
@@ -4536,6 +5646,188 @@
               "image": "/images/catalog/img-7092.jpg",
               "bulkDealPrice": 32.0,
               "bulkDealQty": 2
+            },
+            {
+              "name": "Fuji Apple",
+              "price": 5.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "https://medias.pns.hk/publishing/PNSHK-37157-front-prodcat.jpg",
+              "pnsCode": "BP_37157",
+              "brand": "Yuan Xiang"
+            },
+            {
+              "name": "USA Oranges 3pcs",
+              "price": 16.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-02.jpg",
+              "brand": "PureSpect",
+              "weight": 0.6
+            },
+            {
+              "name": "Lemons",
+              "price": 8.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-02.jpg",
+              "brand": "Sunkist",
+              "weight": 0.15
+            },
+            {
+              "name": "Fresh Pineapple",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-02.jpg",
+              "weight": 1.2
+            },
+            {
+              "name": "Honey Pomelo",
+              "price": 15.8,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-02.jpg",
+              "weight": 1.0
+            },
+            {
+              "name": "Dragon Fruit 3pcs",
+              "price": 16.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-03.jpg",
+              "weight": 0.9
+            },
+            {
+              "name": "Crystal Pear 5pcs",
+              "price": 12.5,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-03.jpg",
+              "weight": 0.8
+            },
+            {
+              "name": "Mango 3pcs",
+              "price": 21.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-03.jpg",
+              "weight": 0.9
+            },
+            {
+              "name": "Avocado 3pcs",
+              "price": 26.8,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-03.jpg",
+              "weight": 0.6
+            },
+            {
+              "name": "Kiwifruit 5pcs",
+              "price": 48.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-03.jpg",
+              "weight": 0.5
+            },
+            {
+              "name": "Kiwifruit Pack",
+              "price": 39.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-03.jpg",
+              "weight": 0.5
+            },
+            {
+              "name": "Golden Flat Peaches Box",
+              "price": 24.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "weight": 0.5
+            },
+            {
+              "name": "Honey Peaches Box",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "brand": "Disney",
+              "weight": 0.4
+            },
+            {
+              "name": "Japanese Peaches 2pcs",
+              "price": 88.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "weight": 0.5
+            },
+            {
+              "name": "Papaya",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "weight": 0.8
+            },
+            {
+              "name": "Mini Watermelon",
+              "price": 22.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "weight": 1.5
+            },
+            {
+              "name": "Young Coconut Ready-to-Drink",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "brand": "Viva",
+              "weight": 0.8
+            },
+            {
+              "name": "Purple Grapes Pack",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-04.jpg",
+              "brand": "Tekasya",
+              "weight": 0.5
+            },
+            {
+              "name": "Persimmons 6pcs",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-05.jpg",
+              "weight": 0.8
+            },
+            {
+              "name": "Shine Muscat Grapes Pack",
+              "price": 25.0,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-05.jpg",
+              "weight": 0.4
+            },
+            {
+              "name": "Golden Honey Peach 2pcs",
+              "price": 22.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-05.jpg",
+              "weight": 0.4
+            },
+            {
+              "name": "Fuji Apple 4pcs Pack",
+              "price": 19.9,
+              "category": "Fresh Food",
+              "subcategory": "Fruit",
+              "image": "/images/catalog/drive-shelf-05.jpg",
+              "weight": 0.7
             }
           ]
         },
@@ -4632,6 +5924,33 @@
               "category": "Fresh Food",
               "subcategory": "Vegetables",
               "image": "https://images.openfoodfacts.org/images/products/325/622/380/0287/front_fr.23.400.jpg"
+            },
+            {
+              "name": "Prepack Tomatoes",
+              "price": 9.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "image": "https://medias.pns.hk/publishing/PNSHK-55421-front-prodcat.jpg",
+              "pnsCode": "BP_55421",
+              "brand": "Mr. Vegetable"
+            },
+            {
+              "name": "Broccoli",
+              "price": 6.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "image": "https://medias.pns.hk/publishing/PNSHK-45554-front-prodcat.jpg",
+              "pnsCode": "BP_45554"
+            },
+            {
+              "name": "Prepack Carrots 1kg",
+              "price": 10.9,
+              "category": "Fresh Food",
+              "subcategory": "Vegetables",
+              "image": "https://medias.pns.hk/publishing/PNSHK-05279-front-prodcat.jpg?version=1732698459",
+              "pnsCode": "BP_05279",
+              "brand": "Mr. Vegetable",
+              "weight": 1.0
             }
           ]
         },
@@ -4645,6 +5964,103 @@
               "subcategory": "Other",
               "brand": "Kraft",
               "image": "/images/catalog/img-7097.jpg"
+            }
+          ]
+        },
+        {
+          "name": "Frozen Food",
+          "items": [
+            {
+              "name": "Shrimp Shao Mai 10s",
+              "price": 20.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120886-front-prodcat.jpg",
+              "pnsCode": "BP_120886",
+              "brand": "Doll"
+            },
+            {
+              "name": "Xiao Long Bao 480g",
+              "price": 35.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "https://medias.pns.hk/publishing/PNSHK-303049-front-prodcat.jpg",
+              "pnsCode": "BP_303049",
+              "brand": "Select",
+              "weight": 0.48
+            },
+            {
+              "name": "Juicy Steamed Dumplings 150g",
+              "price": 19.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "https://medias.pns.hk/publishing/PNSHK-396480-front-prodcat.jpg?version=1748002910",
+              "pnsCode": "BP_396480",
+              "brand": "Pulmuone",
+              "weight": 0.15
+            },
+            {
+              "name": "Mixed Vegetables 500g",
+              "price": 40.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "https://medias.pns.hk/publishing/PNSHK-131022-front-prodcat.jpg",
+              "pnsCode": "BP_131022",
+              "brand": "Select",
+              "weight": 0.5
+            },
+            {
+              "name": "Chocolate Twist Cone Multipack 3s",
+              "price": 60.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "https://medias.pns.hk/publishing/PNSHK-394558-front-prodcat.jpg?version=1756729824",
+              "pnsCode": "BP_394558",
+              "brand": "Dreyer's"
+            },
+            {
+              "name": "Crab Sauce Noodles",
+              "price": 22.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "brand": "KERISOM",
+              "weight": 0.3
+            },
+            {
+              "name": "Frozen Pizza",
+              "price": 39.9,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "/images/catalog/drive-shelf-01.jpg",
+              "weight": 0.4
+            },
+            {
+              "name": "Brulee Ice Cream",
+              "price": 45.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "/images/catalog/drive-shelf-06.jpg",
+              "brand": "Ohayo",
+              "weight": 0.2
+            },
+            {
+              "name": "Jersey Soft Serve Melon",
+              "price": 28.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "/images/catalog/drive-shelf-06.jpg",
+              "brand": "Ohayo",
+              "weight": 0.15
+            },
+            {
+              "name": "Jersey Soft Serve Vanilla",
+              "price": 28.0,
+              "category": "Fresh Food",
+              "subcategory": "Frozen Food",
+              "image": "/images/catalog/drive-shelf-06.jpg",
+              "brand": "Ohayo",
+              "weight": 0.15
             }
           ]
         }

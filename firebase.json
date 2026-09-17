@@ -15,7 +15,9 @@
       "servecart.vercel.app",
       "gracerun.vercel.app",
       "fusion-express-blush.vercel.app",
-      "staging-servecart.vercel.app"
+      "staging-servecart.vercel.app",
+      "gracerun.fit",
+      "www.gracerun.fit"
     ]
   },
   "storage": {

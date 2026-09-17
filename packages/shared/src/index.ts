@@ -2,6 +2,7 @@ export * from "./app-env";
 export * from "./delivery";
 export * from "./omit-undefined";
 export * from "./types";
+export * from "./roles";
 export * from "./pricing";
 export * from "./constants";
 export * from "./custom-item";

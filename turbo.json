@@ -1,5 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "NEXT_PUBLIC_APP_ENV",
+    "RESEND_API_KEY",
+    "RESEND_FROM",
+    "OTP_SECRET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

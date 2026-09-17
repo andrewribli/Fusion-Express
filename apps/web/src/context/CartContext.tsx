@@ -20,7 +20,7 @@ interface CartContextValue {
   sessionId: string;
   itemCount: number;
   subtotal: number;
-  addItem: (item: MenuItem) => void;
+  addItem: (item: MenuItem, quantity?: number) => void;
   removeItem: (itemId: string) => void;
   setQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -64,15 +64,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, sessionId]);
 
-  const addItem = useCallback((item: MenuItem) => {
+  const addItem = useCallback((item: MenuItem, quantity = 1) => {
+    const addBy = Math.max(1, quantity);
     setItems((prev) => {
       const existing = prev.find((c) => c.item.id === item.id);
       if (existing) {
         return prev.map((c) =>
-          c.item.id === item.id ? { ...c, quantity: c.quantity + 1 } : c,
+          c.item.id === item.id
+            ? { ...c, quantity: c.quantity + addBy }
+            : c,
         );
       }
-      return [...prev, { item, quantity: 1 }];
+      return [...prev, { item, quantity: addBy }];
     });
   }, []);
 

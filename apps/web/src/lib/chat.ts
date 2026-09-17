@@ -134,8 +134,13 @@ export function isOwnChatMessage(
   return ids.includes(message.senderId);
 }
 
+/**
+ * Mirrors the chat security rules: the customer and the assigned runner only.
+ * Any other runner used to pass this check, but the rules now reject their
+ * reads, so the panel must not be offered to them.
+ */
 export function canAccessOrderChat(
-  order: { customerId: string; runnerId?: string },
+  order: { customerId: string; runnerId?: string; runnerUid?: string },
   user: {
     uid?: string;
     studentId: string;
@@ -147,7 +152,7 @@ export function canAccessOrderChat(
     (user.uid && order.customerId === user.uid) ||
     order.customerId === user.studentId;
   if (customerMatch) return true;
-  if (user.isRunner) return true;
+  if (order.runnerUid && user.uid && order.runnerUid === user.uid) return true;
   if (order.runnerId && user.runnerId && order.runnerId === user.runnerId) {
     return true;
   }

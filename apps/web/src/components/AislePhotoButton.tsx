@@ -23,33 +23,33 @@ export function AislePhotoButton({
   return (
     <Link
       href={href}
-      className={`group relative flex overflow-hidden rounded-2xl shadow-lg transition-transform active:scale-[0.98] ${
-        compact
-          ? "min-h-[160px] md:min-h-[190px]"
-          : "min-h-[220px] md:min-h-[280px]"
+      className={`group relative block w-full overflow-hidden rounded-xl shadow-md transition-transform active:scale-[0.98] ${
+        compact ? "aspect-[3/4] max-h-[200px]" : "aspect-[4/5] min-h-[220px]"
       }`}
     >
       <Image
         src={imageSrc}
         alt={imageAlt}
         fill
-        className="object-cover transition-transform duration-300 group-hover:scale-105"
+        className="object-cover"
         sizes="(min-width: 768px) 40vw, 50vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10" />
-      <div className="relative z-10 mt-auto flex w-full flex-col p-4 text-white">
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+        aria-hidden
+      />
+      <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col p-3 text-white">
         {sideLabel && (
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-white/80">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-white/90">
             {sideLabel}
           </p>
         )}
-        <h2 className="text-base font-bold leading-snug md:text-lg">{title}</h2>
+        <h2 className="text-sm font-bold leading-snug sm:text-base">{title}</h2>
         {subtitle && (
-          <p className="mt-0.5 text-[11px] text-white/85">{subtitle}</p>
+          <p className="mt-0.5 line-clamp-2 text-[11px] text-white/90">{subtitle}</p>
         )}
-        {!compact && (
-          <span className="mt-2 text-xs font-semibold">Browse →</span>
-        )}
+        <span className="mt-1.5 text-xs font-semibold text-white">Browse →</span>
       </div>
     </Link>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import {
   buildFelixSuggestedCart,
@@ -12,7 +11,6 @@ import { formatSaleLabel } from "@/lib/pricing";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 
 export function FelixOrderCard() {
-  const router = useRouter();
   const { replaceCart } = useCart();
   const cart = useMemo(() => buildFelixSuggestedCart(), []);
   const description = useMemo(() => describeFelixOrder(cart), [cart]);
@@ -27,11 +25,10 @@ export function FelixOrderCard() {
 
   function handleOrder() {
     replaceCart(cart);
-    router.push("/cart");
   }
 
   return (
-    <section className="mb-6 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm">
+    <section className="mb-6 rounded-2xl border border-amber-200 bg-white bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
         Popular order
       </p>
@@ -41,15 +38,14 @@ export function FelixOrderCard() {
         <p className="mt-1 text-xs font-medium text-fusion-red">Deal: {saleLabel}</p>
       )}
       <p className="mt-2 text-sm text-gray-500">
-        + ${fee.deliveryFee} delivery · est. total ${subtotal + fee.deliveryFee} (prices
-        not accurate yet)
+        + ${fee.deliveryFee} delivery · total ${subtotal + fee.deliveryFee}
       </p>
       <button
         type="button"
         onClick={handleOrder}
         className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white"
       >
-        Add to Cart &amp; Checkout
+        Add this order
       </button>
     </section>
   );

@@ -15,18 +15,20 @@ export function CollegeSelect({
   onChange,
   required = true,
   id = "college",
+  showPricing = true,
 }: {
   value: string;
   onChange: (college: string) => void;
   required?: boolean;
   id?: string;
+  showPricing?: boolean;
 }) {
   const zone = value ? getDeliveryZone(value) : null;
 
   return (
     <div>
       <label htmlFor={id} className="block text-xs font-medium text-gray-600">
-        College / dorm (distance zone)
+        {showPricing ? "College / dorm (distance zone)" : "College / dorm"}
       </label>
       <select
         id={id}
@@ -41,13 +43,16 @@ export function CollegeSelect({
           const extra = ZONE_DISTANCE_SURCHARGE[z];
           return (
             <option key={name} value={name}>
-              {name} — Zone {z}
-              {extra > 0 ? ` (+$${extra})` : " (+$0 nearby)"}
+              {showPricing
+                ? `${name} — Zone ${z}${
+                    extra > 0 ? ` (+$${extra})` : " (+$0 nearby)"
+                  }`
+                : name}
             </option>
           );
         })}
       </select>
-      {zone && (
+      {showPricing && zone && (
         <p className="mt-1 text-xs text-gray-500">
           Zone {zone}: {ZONE_LABELS[zone]}
           {ZONE_DISTANCE_SURCHARGE[zone] > 0

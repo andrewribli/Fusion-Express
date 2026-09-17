@@ -1,28 +1,83 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { BootScreen } from "@/components/BootScreen";
 import { useUser } from "@/context/UserContext";
+import { roleAllowsCustomer, roleAllowsRunner } from "@/lib/roles";
+
+function loginNext(pathname: string, search: string): string {
+  const path = `${pathname}${search}`;
+  if (pathname === "/login") return "/";
+  return `/login?next=${encodeURIComponent(path)}`;
+}
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { user, isReady } = useUser();
+  const { user, isReady, bootError } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (isReady && !user) {
-      router.replace("/");
+    if (isReady && !user && !bootError) {
+      router.replace(loginNext(window.location.pathname, window.location.search));
     }
-  }, [user, isReady, router]);
+  }, [user, isReady, bootError, router]);
 
-  if (!isReady) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-gray-500">
-        Loading…
-      </div>
-    );
+  if (!isReady || (bootError && !user)) {
+    return <BootScreen error={bootError} />;
   }
 
   if (!user) return null;
 
+  return <>{children}</>;
+}
+
+/** Signed-in customer or dual-role account. Runner-only users are sent to runner home. */
+export function RequireCustomer({ children }: { children: React.ReactNode }) {
+  const { user, isReady, bootError, role, setMode } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isReady || bootError) return;
+    if (!user) {
+      router.replace(loginNext(window.location.pathname, window.location.search));
+      return;
+    }
+    if (!roleAllowsCustomer(role)) {
+      router.replace("/runner/dashboard");
+      return;
+    }
+    setMode("customer");
+  }, [user, isReady, bootError, role, router, setMode]);
+
+  if (!isReady || (bootError && !user)) {
+    return <BootScreen error={bootError} />;
+  }
+  if (!user || !roleAllowsCustomer(role)) return null;
+  return <>{children}</>;
+}
+
+/** Signed-in runner or dual-role account. Customers are sent to the shop. */
+export function RequireRunner({ children }: { children: React.ReactNode }) {
+  const { user, isReady, bootError, role, setMode } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!isReady || bootError) return;
+    if (!user) {
+      router.replace(loginNext(window.location.pathname, window.location.search));
+      return;
+    }
+    if (!roleAllowsRunner(role)) {
+      router.replace("/");
+      return;
+    }
+    setMode("runner");
+  }, [user, isReady, bootError, role, router, setMode, pathname]);
+
+  if (!isReady || (bootError && !user)) {
+    return <BootScreen error={bootError} />;
+  }
+  if (!user || !roleAllowsRunner(role)) return null;
   return <>{children}</>;
 }

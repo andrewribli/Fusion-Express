@@ -9,15 +9,26 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { RatingModal } from "@/components/RatingModal";
-import { RequireAuth } from "@/components/RequireAuth";
+import { RunnerLocationMap } from "@/components/RunnerLocationMap";
+import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
+import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
-import { formatEta, getEstimatedDeliveryTime } from "@/lib/constants";
-import { cancelOrder, fetchOrder } from "@/lib/orders";
+import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
+import { CustomerPayPanel } from "@/components/CustomerPayPanel";
+import { cancelOrder, fetchOrder, approvePriceIncrease, markCustomerPaid } from "@/lib/orders";
+import {
+  customerAmountDue,
+  groceryAmountDue,
+  hasConfirmedGroceryTotal,
+} from "@/lib/order-status";
+import { OrderProofPhotos } from "@/components/CustomerPayPanel";
+import { notifyOrderStatus as notifyOrderStatusEmail } from "@/lib/notify-email";
 import {
   notifyOrderStatus,
   requestNotificationPermission,
 } from "@/lib/notifications";
+import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import type { Order } from "@/lib/types";
 
 function TrackContent() {
@@ -30,8 +41,11 @@ function TrackContent() {
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [priceActing, setPriceActing] = useState(false);
+  const [markingPaid, setMarkingPaid] = useState(false);
   const [rated, setRated] = useState(false);
   const lastStatus = useRef<string | null>(null);
+  useDeadlineWatch(order ? [order] : []);
 
   const lookup = useCallback(async (id: string) => {
     if (!id.trim()) return;
@@ -63,11 +77,29 @@ function TrackContent() {
     await lookup(query);
   }
 
+  async function handleApprovePrice() {
+    if (!order || !user) return;
+    setPriceActing(true);
+    try {
+      await approvePriceIncrease(order.id, getUserAccountId(user));
+      await lookup(order.id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not approve");
+    } finally {
+      setPriceActing(false);
+    }
+  }
+
   async function handleCancel() {
     if (!order || !user) return;
     setCancelling(true);
     try {
       await cancelOrder(order.id, getUserAccountId(user));
+      void notifyOrderStatusEmail({
+        customerEmail: user.email ?? order.customerEmail,
+        orderId: order.id,
+        status: "cancelled",
+      });
       await lookup(order.id);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Could not cancel");
@@ -75,10 +107,6 @@ function TrackContent() {
       setCancelling(false);
     }
   }
-
-  const eta =
-    order?.estimatedDeliveryAt ??
-    (order ? getEstimatedDeliveryTime(order.createdAt) : null);
 
   return (
     <main className="mx-auto max-w-[480px] px-4 py-4">
@@ -107,24 +135,13 @@ function TrackContent() {
 
       {order && (
         <div className="mt-6 space-y-4">
+          <GuestAccountPrompt />
+
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-gray-500">Order ID</p>
-                <p className="text-lg font-bold text-fusion-red">{order.id}</p>
-              </div>
-              {eta && order.status !== "delivered" && order.status !== "cancelled" && (
-                <div className="rounded-xl bg-red-50 px-3 py-1.5 text-right">
-                  <p className="text-[10px] text-gray-500">ETA</p>
-                  <p className="text-sm font-bold text-fusion-red">
-                    {formatEta(eta)}
-                  </p>
-                </div>
-              )}
-            </div>
+            <CustomerOrderHeading order={order} />
 
             <p className="mt-2 text-sm text-gray-700">
-              {formatDeliveryAddress(order.college, order.hall, order.roomNumber)}
+              {formatDeliveryAddress(order.college, order.hall)}
             </p>
             <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
 
@@ -143,15 +160,37 @@ function TrackContent() {
               {order.items.map((item) => (
                 <li key={item.itemId} className="flex justify-between">
                   <span>{item.quantity}× {item.name}</span>
-                  <span>${item.price * item.quantity}</span>
+                  <span>
+                    ${((item.actualPrice ?? item.price) * item.quantity).toFixed(1)}
+                    {item.actualPrice != null && item.actualPrice !== item.price && (
+                      <span className="ml-1 text-[11px] text-gray-400">
+                        (was ${item.price * item.quantity})
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-2 space-y-0.5 border-t border-gray-100 pt-2 text-sm">
+            <div className="mt-2 space-y-1.5 border-t border-gray-100 pt-2 text-sm">
               <div className="flex justify-between text-gray-600">
-                <span>Subtotal</span>
+                <span>Estimated Subtotal</span>
                 <span>${order.subtotal}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-gray-600">
+                  Exact subtotal
+                  <span className="mt-0.5 block text-[11px] font-normal text-gray-400">
+                    To be confirmed by runner
+                  </span>
+                </span>
+                {hasConfirmedGroceryTotal(order) ? (
+                  <span className="shrink-0 font-medium text-gray-900">
+                    ${groceryAmountDue(order)}
+                  </span>
+                ) : (
+                  <span className="shrink-0 text-gray-400">Pending</span>
+                )}
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Delivery</span>
@@ -164,10 +203,67 @@ function TrackContent() {
                 </div>
               )}
               <div className="flex justify-between font-bold">
-                <span>Total</span>
+                <span>App estimate</span>
                 <span>${order.total}</span>
               </div>
+              {hasConfirmedGroceryTotal(order) && (
+                <div className="flex justify-between font-bold text-[#ED1C24]">
+                  <span>Total to pay</span>
+                  <span>${customerAmountDue(order)}</span>
+                </div>
+              )}
             </div>
+
+            {order.priceAdjustmentStatus === "refund_pending" && (
+              <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-800">
+                Fusion prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
+                estimate. You will be refunded ${order.refundAmount} within 3–5 business
+                days via PayMe/FPS.
+              </p>
+            )}
+            {order.priceAdjustmentStatus === "refunded" && (
+              <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-800">
+                Refund of ${order.refundAmount} has been marked complete.
+              </p>
+            )}
+            {order.priceAdjustmentStatus === "pending_customer" &&
+              user &&
+              getUserAccountId(user) === order.customerId && (
+                <div className="mt-3 space-y-2 rounded-xl bg-amber-50 px-3 py-3">
+                  <p className="text-xs text-amber-900">
+                    Fusion prices are higher than the app estimate. New total $
+                    {order.actualSubtotal != null
+                      ? order.actualSubtotal + order.deliveryFee + (order.tip ?? 0)
+                      : order.total}
+                    . Approve to continue, or cancel for a full refund of anything already
+                    paid.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={priceActing}
+                      onClick={() => void handleApprovePrice()}
+                      className="flex-1 rounded-xl bg-[#ED1C24] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                    >
+                      {priceActing ? "Saving…" : "Approve new total"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={cancelling}
+                      onClick={() => void handleCancel()}
+                      className="flex-1 rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
+                    >
+                      Cancel order
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            {(order.status === "accepted" || order.status === "purchased") && (
+              <div className="mt-3">
+                <RunnerLocationMap location={order.runnerLocation} />
+              </div>
+            )}
 
             {order.status === "pending" && (
               <button
@@ -180,28 +276,51 @@ function TrackContent() {
               </button>
             )}
 
-            {order.deliveryPhotoUrl && order.status === "delivered" && (
-              <div className="mt-3">
-                <p className="text-xs font-medium text-gray-500">Delivery proof</p>
-                {order.deliveryPhotoUrl.startsWith("mock://") ? (
-                  <p className="mt-1 text-xs text-gray-400">Photo uploaded ✓</p>
-                ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={order.deliveryPhotoUrl}
-                    alt="Delivery proof"
-                    className="mt-2 max-h-48 w-full rounded-xl object-cover"
-                  />
-                )}
-              </div>
-            )}
+            <OrderProofPhotos order={order} />
           </div>
+
+          {user &&
+            getUserAccountId(user) === order.customerId &&
+            (order.status === "delivered" || order.status === "runner_paid") && (
+              <CustomerPayPanel
+                order={order}
+                marking={markingPaid}
+                onMarkPaid={() => {
+                  void (async () => {
+                    setMarkingPaid(true);
+                    try {
+                      await markCustomerPaid(order.id, getUserAccountId(user));
+                      await lookup(order.id);
+                    } catch (err) {
+                      alert(err instanceof Error ? err.message : "Could not mark paid");
+                    } finally {
+                      setMarkingPaid(false);
+                    }
+                  })();
+                }}
+              />
+            )}
+
+          {order.status === "customer_paid" && (
+            <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-800">
+              You marked this order paid
+              {order.customerPaidAt
+                ? ` at ${order.customerPaidAt.toLocaleTimeString("en-HK", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`
+                : ""}
+              .
+            </p>
+          )}
 
           <OrderProgressBar status={order.status} />
 
           <OrderChatPanel order={order} compact />
 
-          {order.status === "delivered" &&
+          {(order.status === "delivered" ||
+            order.status === "runner_paid" ||
+            order.status === "customer_paid") &&
             !order.runnerRating &&
             !rated &&
             user &&
@@ -227,15 +346,15 @@ function TrackContent() {
 
 export default function TrackPage() {
   return (
-    <RequireAuth>
+    <RequireCustomer>
       <AppShell>
         <LakersWallpaper>
-          <AppHeader showBack backHref="/home" title="Track Order" />
+          <AppHeader showBack backHref="/" title="Track Order" />
           <Suspense fallback={<p className="p-4 text-sm text-lakers-gold">Loading…</p>}>
             <TrackContent />
           </Suspense>
         </LakersWallpaper>
       </AppShell>
-    </RequireAuth>
+    </RequireCustomer>
   );
 }

@@ -99,11 +99,11 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
                 className={`flex ${isMine ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-                    isMine
-                      ? "bg-fusion-red text-white"
-                      : "bg-gray-100 text-gray-900"
-                  }`}
+                  className="max-w-[80%] rounded-2xl px-3 py-2"
+                  style={{
+                    backgroundColor: isMine ? "#FDB927" : "#2a2a2a",
+                    color: isMine ? "#111827" : "#ffffff",
+                  }}
                 >
                   <p className="text-[10px] font-medium opacity-80">
                     {msg.senderName} · {formatMessageTime(msg.timestamp)}

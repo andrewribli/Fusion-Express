@@ -1,35 +1,37 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { isOverOrderLimit } from "@/lib/constants";
+import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 
 export function OrderActionBar() {
+  const router = useRouter();
   const { itemCount, subtotal, items } = useCart();
   const { user } = useUser();
   const fee = calculateDeliveryFee({
     weightKg: cartTotalWeightKg(items),
     college: user?.college ?? "",
   });
+  const overLimit = isOverOrderLimit(subtotal);
+
+  if (itemCount === 0) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-16 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:bottom-0">
-      <div className="mx-auto flex max-w-7xl gap-3">
-        <Link
-          href="/cart"
-          className="flex-1 rounded-xl border-2 border-gray-300 py-3 text-center text-sm font-semibold text-gray-800"
+    <div className="pointer-events-none fixed inset-x-0 bottom-[4.25rem] z-40 px-3 md:bottom-4 xl:hidden">
+      <div className="pointer-events-auto mx-auto flex max-w-lg flex-col gap-1.5">
+        <OrderLimitNotice subtotal={subtotal} />
+        <button
+          type="button"
+          disabled={overLimit}
+          onClick={() => router.push("/checkout")}
+          className="flex min-h-11 w-full items-center justify-center rounded-full px-4 text-sm font-bold text-white shadow-lg disabled:opacity-50"
+          style={{ backgroundColor: "#ED1C24" }}
         >
-          Go back to your order
-          {itemCount > 0 ? ` (${itemCount})` : ""}
-        </Link>
-        <Link
-          href={itemCount > 0 ? "/checkout" : "/cart"}
-          className="flex-1 rounded-xl bg-fusion-red py-3 text-center text-sm font-semibold text-white"
-        >
-          Complete your order
-          {itemCount > 0 ? ` · $${subtotal + fee.deliveryFee}` : ""}
-        </Link>
+          {`Checkout · $${subtotal + fee.deliveryFee}`}
+        </button>
       </div>
     </div>
   );

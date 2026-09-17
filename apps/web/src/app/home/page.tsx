@@ -1,7 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { HomeLanding } from "@/components/HomeLanding";
-
-export default function HomePage() {
-  return <HomeLanding />;
+export default function HomeRedirect() {
+  redirect("/");
 }

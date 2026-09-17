@@ -8,12 +8,14 @@ export function popularCapForAisle(aisleId: string): number {
 }
 
 const POPULAR_BRANDS =
-  /\b(nissin|demae|shin|indomie|meiji|nestle|vitasoy|kowloon|calbee|oreo|kitkat|coca|coke|sprite|pocari|chobani|doll|wanchai|bibigo|barilla|pampers|whisper|skippy|lurpak|trappist|dutch lady|pauls)\b/i;
+  /\b(nissin|demae|shin|indomie|meiji|nestle|vitasoy|kowloon|calbee|oreo|kitkat|coca|coke|sprite|pocari|chobani|doll|wanchai|bibigo|barilla|pampers|whisper|skippy|lurpak|trappist|dutch lady|pauls|greenfields|bulla|driscoll|athina)\b/i;
 
 export function popularityScore(item: MenuItem): number {
   let score = Math.max(0, 8000 - item.sortOrder);
   if (item.image) score += 2500;
-  if (POPULAR_BRANDS.test(item.name)) score += 600;
+  if (POPULAR_BRANDS.test(item.name) || POPULAR_BRANDS.test(item.itemNote ?? "")) {
+    score += 600;
+  }
   return score;
 }
 

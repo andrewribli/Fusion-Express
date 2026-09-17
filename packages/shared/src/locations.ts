@@ -1,8 +1,38 @@
 export const CUHK_COLLEGE_HALLS = {
-  "Shaw College": ["Sun Chui", "Sun Tak", "Sun Hing", "Sun King"],
-  "United College": ["Adam Schall", "William M.W. Mong", "Wu Chung", "Y.C. Liang"],
-  "Chung Chi College": ["Ming Hua", "Ying Lin", "Wen Lin", "Siu Kwan"],
-  "New Asia College": ["Ch'ien Mu", "Henry Chan", "Tang Chun", "Fang Cheng"],
+  "Shaw College": ["Kuo Mou Hall", "Student Hostel II"],
+  "United College": [
+    "Adam Schall",
+    "Bethlehem Hall",
+    "William M.W. Mong",
+    "Wu Chung",
+    "Y.C. Liang",
+  ],
+  "Chung Chi College": [
+    "Ming Hua",
+    "Ying Lin",
+    "Wen Lin",
+    "Siu Kwan",
+    "Madam S.H. Ho Hall",
+  ],
+  "New Asia College": [
+    "Chih Hsing Hall",
+    "Xuesi Hall",
+    "Grace Tien Hall",
+    "Daisy Li Hall",
+    "Mei Yun Tan",
+  ],
+  "S.H. Ho College (SHHO)": ["Ho Tim Hall", "Lee Quo Wei Hall"],
+  "Morningside College": ["Hostel 1", "Hostel 2"],
+  "C.W. Chu College": [
+    "Ina Chan Ho Building",
+    "Feng Yu Building",
+    "David & Marina Chu Building",
+  ],
+  "Wu Yee Sun College (WYS)": ["East Block", "West Block"],
+  "Lee Woo Sing College (LWS)": [
+    "Dorothy and Ti-Hua KOO Building",
+    "North Block",
+  ],
   "International House (I-House)": [
     "I-House 1",
     "I-House 2",
@@ -29,11 +59,6 @@ export function getLobbyForHall(hall: string): string {
 export function formatDeliveryAddress(
   college: string,
   hall: string,
-  roomNumber?: string,
 ): string {
-  const parts = [college, hall];
-  if (roomNumber?.trim()) {
-    parts.push(`Room ${roomNumber.trim()}`);
-  }
-  return parts.join(" → ");
+  return [college, hall].filter(Boolean).join(" → ");
 }

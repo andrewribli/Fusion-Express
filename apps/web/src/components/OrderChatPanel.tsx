@@ -76,7 +76,8 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
 
   const senderId = getUserAccountId(user);
   const senderName = user.fullName;
-  const otherParty = user.isRunner ? "customer" : "runner";
+  const viewingAsCustomer = order.customerId === senderId;
+  const otherParty = viewingAsCustomer ? "runner" : "customer";
   const chatLabel =
     unread > 0
       ? `${unread} new message${unread === 1 ? "" : "s"} from ${otherParty}`
@@ -119,15 +120,16 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
 
   return (
     <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-gray-100 bg-red-50 px-4 py-2">
-        <p className="text-sm font-semibold text-gray-900">
+      <div className="flex items-center justify-between border-b border-white/10 bg-[#1e1e1e] px-4 py-2">
+        <p className="text-sm font-semibold text-white">
           Chat with {otherParty}
         </p>
         {compact && (
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="text-xs text-gray-500"
+            className="text-xs font-semibold text-[#f5f5f5]"
+            style={{ color: "#f5f5f5" }}
           >
             Minimize
           </button>
@@ -148,9 +150,11 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
                 className={`flex ${isMine ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                    isMine ? "bg-fusion-red text-white" : "bg-gray-100"
-                  }`}
+                  className="max-w-[85%] rounded-2xl px-3 py-2 text-sm"
+                  style={{
+                    backgroundColor: isMine ? "#FDB927" : "#2a2a2a",
+                    color: isMine ? "#111827" : "#ffffff",
+                  }}
                 >
                   <p className="text-[10px] opacity-75">
                     {msg.senderName} · {formatMessageTime(msg.timestamp)}

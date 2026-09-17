@@ -18,6 +18,7 @@
     "./auth": "./src/auth.ts",
     "./cuhk-email": "./src/cuhk-email.ts",
     "./types": "./src/types.ts",
+    "./roles": "./src/roles.ts",
     "./locations": "./src/locations.ts",
     "./mock-orders": "./src/mock-orders.ts",
     "./data/foodpanda-fusion-catalog.json": "./data/foodpanda-fusion-catalog.json",

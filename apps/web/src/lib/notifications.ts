@@ -1,9 +1,11 @@
 import type { OrderStatus } from "@/lib/types";
 
 const STATUS_MESSAGES: Partial<Record<OrderStatus, string>> = {
-  assigned: "A runner has accepted your order!",
-  picked: "Your groceries have been picked up and are on the way.",
-  delivered: "Your order has been delivered. Enjoy!",
+  accepted: "A runner has accepted your order!",
+  purchased: "Your groceries have been paid for at Fusion and are on the way.",
+  delivered: "Your order has been delivered. Pay GraceRun within 24 hours.",
+  runner_paid: "GraceRun reimbursed the runner.",
+  customer_paid: "Thanks — you marked this order as paid.",
 };
 
 export async function requestNotificationPermission(): Promise<boolean> {
@@ -26,9 +28,9 @@ export function notifyOrderStatus(
   const body = STATUS_MESSAGES[status];
   if (!body) return;
 
-  new Notification("Fusion Express", {
+  new Notification("GraceRun", {
     body: `${orderId}: ${body}`,
-    icon: "/images/fusion-express-logo.png",
+    icon: "/images/gracerun-icon.png",
     tag: `order-${orderId}-${status}`,
   });
 }

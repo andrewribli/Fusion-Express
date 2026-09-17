@@ -117,6 +117,17 @@ service cloud.firestore {
       allow update, delete: if signedIn() && resource.data.uid == uid();
     }
 
+    // Guest checkout resolves phone → email before Auth; same pattern as usernames.
+    match /phones/{phone} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.email is string
+        && request.resource.data.phone is string;
+      allow update, delete: if signedIn() && resource.data.uid == uid();
+    }
+
     // ------------------------------------------------------------------ users
 
     /** customer | runner | both — anything else is rejected outright. */
@@ -179,6 +190,13 @@ service cloud.firestore {
         && request.resource.data.subtotal is number
         && request.resource.data.subtotal <= 200;
 
+      allow update: if isOrderCustomer(resource.data)
+        && resource.data.status in ['delivered', 'runner_paid']
+        && changedKeys().hasOnly([
+          'customerDeadline', 'customerOverdueAt', 'customerWarningCount',
+          'customerReminderSentAt', 'adminMissedNotifiedAt', 'updatedAt'
+        ]);
+
       // Customers may cancel, approve a price increase, and rate. Anything
       // outside these key sets — including who the order belongs to — is fixed.
       allow update: if isOrderCustomer(resource.data) && (
@@ -211,7 +229,8 @@ service cloud.firestore {
         && resource.data.customerId != uid()
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
-          'acceptedAt', 'runnerPaymentMethod', 'runnerPaymentId', 'runnerEmail'
+          'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
+          'runnerPaymentId', 'runnerEmail'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
         && request.resource.data.runnerUid == uid();
@@ -225,14 +244,20 @@ service cloud.firestore {
           'deliveryPhotoUrl', 'runnerNote', 'runnerName', 'runnerLocation',
           'items', 'estimatedSubtotal', 'actualSubtotal', 'priceDifference',
           'priceAdjustmentStatus', 'refundAmount', 'subtotal', 'total',
-          'tillPricesSubmittedAt'
+          'tillPricesSubmittedAt', 'runnerDeadline', 'customerDeadline',
+          'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
+          'adminMissedNotifiedAt'
         ])
         && request.resource.data.status != 'pending';
 
       allow update: if isAdmin()
         && changedKeys().hasOnly([
           'priceAdjustmentStatus', 'refundedAt', 'updatedAt',
-          'status', 'runnerPaidAt', 'adminVerified', 'customerNameOnReceipt'
+          'status', 'runnerPaidAt', 'adminVerified', 'customerNameOnReceipt',
+          'runnerDeadline', 'customerDeadline', 'runnerWarningCount',
+          'customerWarningCount', 'runnerExpiredAt', 'customerOverdueAt',
+          'runnerReminderSentAt', 'customerReminderSentAt',
+          'adminMissedNotifiedAt', 'lastEscalatedAt'
         ]);
 
       allow delete: if false;
@@ -269,8 +294,10 @@ service cloud.firestore {
     match /feedback/{id} {
       function feedbackCreate() {
         let data = request.resource.data;
-        return data.keys().hasAll(['userId', 'message', 'createdAt', 'status'])
-          && data.userId is string
+        return signedIn()
+          && data.keys().hasAll(['userId', 'message', 'createdAt', 'status'])
+          && data.keys().hasOnly(['userId', 'message', 'createdAt', 'status', 'userName'])
+          && data.userId == uid()
           && data.userId.size() > 0
           && data.userId.size() < 128
           && data.message is string
@@ -278,11 +305,7 @@ service cloud.firestore {
           && data.message.size() <= 2000
           && data.createdAt is timestamp
           && data.status == 'unread'
-          && (!('userName' in data) || (data.userName is string && data.userName.size() < 120))
-          && (
-            (signedIn() && data.userId == uid())
-            || data.userId == 'anonymous'
-          );
+          && (!('userName' in data) || (data.userName is string && data.userName.size() < 120));
       }
 
       allow create: if feedbackCreate();
@@ -291,6 +314,25 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status in ['unread', 'read', 'resolved'];
       allow delete: if isAdmin();
+    }
+
+    // User ↔ admin support chat (payments, receipts, disputes).
+    match /supportChats/{userId} {
+      allow get: if signedIn() && (uid() == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if signedIn() && (uid() == userId || isAdmin());
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow get, list: if signedIn() && (uid() == userId || isAdmin());
+        allow create: if signedIn()
+          && (uid() == userId || isAdmin())
+          && request.resource.data.senderId == uid()
+          && request.resource.data.message is string
+          && request.resource.data.message.size() > 0
+          && request.resource.data.message.size() <= 2000;
+        allow update, delete: if false;
+      }
     }
 
     // ------------------------------------------------- staging (*_test) twins
@@ -319,6 +361,16 @@ service cloud.firestore {
       allow update, delete: if signedIn() && resource.data.uid == uid();
     }
 
+    match /phones_test/{phone} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.email is string
+        && request.resource.data.phone is string;
+      allow update, delete: if signedIn() && resource.data.uid == uid();
+    }
+
     match /users_test/{userId} {
       allow read, write: if signedIn();
     }
@@ -337,11 +389,19 @@ service cloud.firestore {
 
     match /feedback_test/{id} {
       allow create: if signedIn()
+        && request.resource.data.userId == uid()
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
         && request.resource.data.message.size() <= 2000
         && request.resource.data.status == 'unread';
       allow get, list, update, delete: if isAdmin();
+    }
+
+    match /supportChats_test/{userId} {
+      allow read, write: if signedIn();
+      match /messages/{messageId} {
+        allow read, write: if signedIn();
+      }
     }
   }
 }

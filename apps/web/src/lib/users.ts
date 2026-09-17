@@ -1,6 +1,7 @@
 import type { UserProfile } from "@/context/UserContext";
 import { omitUndefined } from "@/lib/omit-undefined";
 import { collectionName } from "@/lib/constants";
+import { normalizeRole, isUserRole } from "@/lib/roles";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, getDoc, getDocs, collection, setDoc, Timestamp, deleteField } from "firebase/firestore";
 
@@ -24,6 +25,8 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
     hall: String(data.hall ?? ""),
     roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
     phone: data.phone ? String(data.phone) : undefined,
+    isGuest: Boolean(data.isGuest),
+    role: normalizeRole(data.role, Boolean(data.isRunner)),
     isRunner: Boolean(data.isRunner),
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
     runnerPaymentMethod: data.runnerPaymentMethod as UserProfile["runnerPaymentMethod"],
@@ -35,6 +38,7 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         ? (data.termsAcceptedAt as Timestamp).toDate().toISOString()
         : String(data.termsAcceptedAt)
       : undefined,
+    photoURL: data.photoURL ? String(data.photoURL) : undefined,
     cuhkEmail: data.cuhkEmail ? String(data.cuhkEmail) : undefined,
     cuhkVerifiedAt: data.cuhkVerifiedAt
       ? typeof data.cuhkVerifiedAt === "object" &&
@@ -51,12 +55,18 @@ export async function fetchUserProfile(uid: string): Promise<UserProfile | null>
   try {
     const snap = await getDoc(doc(getDb(), USERS_COLLECTION, uid));
     if (!snap.exists()) return null;
-    return parseUserDoc(uid, snap.data() as Record<string, unknown>);
+    const data = snap.data() as Record<string, unknown>;
+    const profile = parseUserDoc(uid, data);
+    if (!isUserRole(data.role)) {
+      void updateUserProfileDoc(uid, { role: profile.role });
+    }
+    return profile;
   } catch {
     return null;
   }
 }
 
+/** Admin-only: security rules reject listing /users for everyone else. */
 export async function fetchAllUsers(): Promise<UserProfile[]> {
   if (!isFirebaseConfigured()) return [];
   const snap = await getDocs(collection(getDb(), USERS_COLLECTION));
