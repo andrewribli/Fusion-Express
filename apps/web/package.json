@@ -14,6 +14,8 @@
     "@fusion-express/shared": "*",
     "@fusion-express/ui": "*",
     "firebase": "^12.17.1",
+    "firebase-admin": "^14.2.0",
+    "jose": "4.15.9",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -26,7 +28,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
-    "firebase-admin": "^14.2.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5"
