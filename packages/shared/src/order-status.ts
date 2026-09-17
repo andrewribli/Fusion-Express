@@ -56,13 +56,31 @@ export function isActiveRunnerStatus(status: OrderStatus): boolean {
   return status === "accepted" || status === "purchased";
 }
 
-/** Customer still needs to follow the order (including pay after delivery). */
+/**
+ * Customer still needs to follow the order (including pay after delivery).
+ * Used for track badges / payment-due UI — not for the new-order placement cap.
+ */
 export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
   return (
     status === "pending" ||
     status === "accepted" ||
     status === "purchased" ||
     status === "delivered"
+  );
+}
+
+/**
+ * In-flight delivery only. Payment-due (`delivered` / `runner_paid`) orders
+ * show banners but must not block placing new grocery orders — otherwise
+ * unpaid delivered tickets permanently hit MAX_ACTIVE_CUSTOMER_ORDERS.
+ */
+export function countsTowardCustomerOrderPlacementCap(
+  status: OrderStatus,
+): boolean {
+  return (
+    status === "pending" ||
+    status === "accepted" ||
+    status === "purchased"
   );
 }
 

@@ -128,6 +128,7 @@ export {
   normalizeOrderStatus,
   isActiveRunnerStatus,
   isActiveCustomerOrderStatus,
+  countsTowardCustomerOrderPlacementCap,
   MAX_ACTIVE_CUSTOMER_ORDERS,
   ACTIVE_ORDER_LIMIT_MESSAGE,
   formatOrderPlacedAt,
