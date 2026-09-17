@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CuhkEmailOtp } from "@/components/CuhkEmailOtp";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
@@ -187,9 +188,11 @@ export default function LoginPage() {
     }
   }
 
+  // Already signed in — never leave people stuck on the auth form.
   useEffect(() => {
-    if (user) router.replace(postLoginPath(role));
-  }, [user, role, router]);
+    if (!isReady || !user) return;
+    router.replace("/");
+  }, [user, isReady, router]);
 
   if (!isReady) {
     return <BootScreen error={bootError} />;
@@ -205,10 +208,41 @@ export default function LoginPage() {
 
   return (
     <LakersWallpaper>
-      <main className="mx-auto max-w-[480px] px-4 py-8">
+      <main className="mx-auto max-w-[480px] px-4 py-6">
         <div className="rounded-2xl bg-white/95 p-5 shadow-lg ring-2 ring-lakers-gold">
-        <div className="mb-6 text-center">
-          <AppLogo size={160} className="mx-auto h-40 w-40" priority />
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#1a1a1a] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-black"
+            aria-label="Back to homepage"
+          >
+            <span aria-hidden className="text-base leading-none">
+              ←
+            </span>
+            Back
+          </Link>
+          <Link
+            href="/"
+            className="text-xs font-semibold text-[#ED1C24] underline underline-offset-2"
+          >
+            Home
+          </Link>
+        </div>
+
+        <div className="mb-5 text-center">
+          <AppLogo size={120} className="mx-auto h-28 w-28" priority />
+        </div>
+
+        <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
+          >
+            Continue as Guest
+          </Link>
+          <p className="mt-2 text-xs leading-snug text-gray-700">
+            Browse without signing in — order with just dorm, lobby, and phone.
+          </p>
         </div>
 
         {role === "customer" && (
@@ -483,7 +517,19 @@ export default function LoginPage() {
           </form>
         )}
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <div className="mt-6 border-t border-gray-100 pt-5 text-center">
+          <p className="text-sm text-gray-600">
+            Don&apos;t want an account right now?{" "}
+            <Link
+              href="/"
+              className="font-bold text-[#ED1C24] underline underline-offset-2"
+            >
+              Browse without signing in
+            </Link>
+          </p>
+        </div>
+
+        <p className="mt-5 text-center text-xs text-gray-400">
           {demoAuth
             ? "Demo session only — close this tab and the account is gone."
             : firebaseEnabled
