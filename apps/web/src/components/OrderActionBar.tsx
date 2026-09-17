@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { useUser } from "@/context/UserContext";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
@@ -10,10 +9,11 @@ import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 export function OrderActionBar() {
   const router = useRouter();
   const { itemCount, subtotal, items } = useCart();
-  const { user } = useUser();
   const fee = calculateDeliveryFee({
     weightKg: cartTotalWeightKg(items),
-    college: user?.college ?? "",
+    // Fee is finalized at checkout from the address entered there — do not
+    // use a stale profile college for guests / profile-refactored accounts.
+    college: "",
   });
   const overLimit = isOverOrderLimit(subtotal);
 
@@ -30,7 +30,7 @@ export function OrderActionBar() {
           className="flex min-h-11 w-full items-center justify-center rounded-full px-4 text-sm font-bold text-white shadow-lg disabled:opacity-50"
           style={{ backgroundColor: "#ED1C24" }}
         >
-          {`Checkout · $${subtotal + fee.deliveryFee}`}
+          {`Continue to checkout · $${subtotal + fee.deliveryFee}`}
         </button>
       </div>
     </div>
