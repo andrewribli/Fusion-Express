@@ -10,6 +10,7 @@ import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { RatingModal } from "@/components/RatingModal";
 import { RunnerLocationMap } from "@/components/RunnerLocationMap";
+import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
@@ -134,6 +135,8 @@ function TrackContent() {
 
       {order && (
         <div className="mt-6 space-y-4">
+          <GuestAccountPrompt />
+
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <CustomerOrderHeading order={order} />
 

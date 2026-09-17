@@ -211,6 +211,17 @@ export default function LoginPage() {
           <AppLogo size={160} className="mx-auto h-40 w-40" priority />
         </div>
 
+        {role === "customer" && (
+          <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
+            Ordering groceries?{" "}
+            <a href="/" className="font-semibold text-[#ED1C24] underline">
+              Shop now
+            </a>{" "}
+            and check out with just dorm, lobby, and phone — no sign-up required.
+            Runners still need a full verified account.
+          </p>
+        )}
+
         {!firebaseEnabled && !demoAuth && (
           <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
             Dev mode: Firebase not configured. Create account saves locally only.

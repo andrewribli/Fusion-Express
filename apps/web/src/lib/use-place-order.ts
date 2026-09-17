@@ -17,10 +17,11 @@ import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import type { CustomerPaymentMethod } from "@/lib/payment-method";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
+import { normalizePhone, validatePhone } from "@/lib/auth";
 
 export function usePlaceOrder() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, ensureGuestCheckout } = useUser();
   const { items, sessionId, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,19 +33,55 @@ export function usePlaceOrder() {
       paymentMethod: CustomerPaymentMethod;
       customerNote?: string;
       tip?: number;
+      /** Required for guests; optional when already signed in with a saved phone. */
+      phone?: string;
     }) => {
-      if (!user) {
-        router.push("/login?next=/");
-        return;
-      }
       if (!opts.college || !opts.hall || items.length === 0) {
         setError("Add items and choose your college and hall first.");
+        return;
+      }
+
+      const phone = (opts.phone ?? user?.phone ?? "").trim();
+      const phoneErr = validatePhone(phone);
+      if (phoneErr) {
+        setError(phoneErr);
         return;
       }
 
       setLoading(true);
       setError("");
       await requestNotificationPermission();
+
+      let customer = user;
+      try {
+        // Guests (and signed-in users missing a phone) get a phone-backed account.
+        if (
+          !customer?.uid ||
+          customer.isGuest ||
+          !customer.phone ||
+          normalizePhone(customer.phone) !== normalizePhone(phone)
+        ) {
+          customer = await ensureGuestCheckout({
+            phone,
+            college: opts.college,
+            hall: opts.hall,
+          });
+        }
+      } catch (err) {
+        setLoading(false);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Could not start guest checkout. Try again.",
+        );
+        return;
+      }
+
+      if (!customer?.uid) {
+        setLoading(false);
+        setError("Could not create your account. Try again.");
+        return;
+      }
 
       const orderItems = items.map(({ item, quantity }) => ({
         itemId: item.id,
@@ -58,6 +95,7 @@ export function usePlaceOrder() {
         0,
       );
       if (isOverOrderLimit(orderSubtotal)) {
+        setLoading(false);
         setError(ORDER_LIMIT_MESSAGE);
         return;
       }
@@ -68,13 +106,18 @@ export function usePlaceOrder() {
       const tipAmount = opts.tip ?? 0;
       const total = orderSubtotal + fee.deliveryFee + tipAmount;
       const estimatedDeliveryAt = getEstimatedDeliveryTime();
+      const digits = normalizePhone(phone);
 
       try {
         const orderId = await createOrder({
           sessionId,
-          customerId: getUserAccountId(user),
-          customerName: user.fullName,
-          customerEmail: user.email,
+          customerId: getUserAccountId(customer),
+          customerName:
+            customer.fullName?.trim() && customer.fullName !== "Guest"
+              ? customer.fullName
+              : `Guest ${digits.slice(-4)}`,
+          customerEmail: customer.email,
+          customerPhone: digits,
           items: orderItems,
           status: "pending",
           college: opts.college,
@@ -105,7 +148,7 @@ export function usePlaceOrder() {
         });
 
         void notifyOrderPlaced({
-          customerEmail: user.email,
+          customerEmail: customer.email,
           orderId,
           items: orderItems.map((item) => ({
             name: item.name,
@@ -116,7 +159,8 @@ export function usePlaceOrder() {
         });
 
         clearCart();
-        router.push(`/track?orderId=${orderId}`);
+        const guestFlag = customer.isGuest ? "&guest=1" : "";
+        router.push(`/track?orderId=${orderId}${guestFlag}`);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Could not place order. Try again.",
@@ -125,7 +169,7 @@ export function usePlaceOrder() {
         setLoading(false);
       }
     },
-    [clearCart, items, router, sessionId, user],
+    [clearCart, ensureGuestCheckout, items, router, sessionId, user],
   );
 
   return { placeOrder, loading, error, setError };

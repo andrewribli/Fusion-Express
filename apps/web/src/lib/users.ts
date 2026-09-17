@@ -25,6 +25,7 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
     hall: String(data.hall ?? ""),
     roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
     phone: data.phone ? String(data.phone) : undefined,
+    isGuest: Boolean(data.isGuest),
     role: normalizeRole(data.role, Boolean(data.isRunner)),
     isRunner: Boolean(data.isRunner),
     runnerId: data.runnerId ? String(data.runnerId) : undefined,

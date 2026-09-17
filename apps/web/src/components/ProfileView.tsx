@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
+import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { ModeSwitchButton } from "@/components/ModeSwitchButton";
 import { useUser } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
@@ -19,6 +20,7 @@ export function ProfileView() {
   const demoAuth = useDemoAuth();
   const [changeOpen, setChangeOpen] = useState(false);
   const canChangePassword = firebaseEnabled && !demoAuth && Boolean(user?.email);
+  const isGuest = Boolean(user?.isGuest);
 
   useEffect(() => {
     if (!canChangePassword) return;
@@ -31,24 +33,41 @@ export function ProfileView() {
         <LakersWallpaper>
           <AppHeader title="Profile" />
 
-          <main className="mx-auto max-w-[480px] px-4 py-6">
+          <main id="account" className="mx-auto max-w-[480px] px-4 py-6">
+            {isGuest && (
+              <div className="mb-4">
+                <GuestAccountPrompt />
+              </div>
+            )}
+
             <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-500">Account</h2>
-              <p className="mt-2 text-lg font-bold text-gray-900">{user?.fullName}</p>
+              <p className="mt-2 text-lg font-bold text-gray-900">
+                {isGuest ? "Guest account" : user?.fullName}
+              </p>
               {user?.chineseName?.trim() ? (
                 <p className="text-sm text-gray-600">{user.chineseName}</p>
               ) : null}
-              {user?.email && (
+              {user?.email && !isGuest && (
                 <p className="text-sm text-gray-600">{user.email}</p>
               )}
-              <p className="mt-2 text-sm text-gray-600">SID: {user?.studentId}</p>
-              {user?.username && (
+              {user?.phone && (
+                <p className="mt-2 text-sm text-gray-600">Phone: {user.phone}</p>
+              )}
+              {!isGuest && user?.studentId ? (
+                <p className="mt-2 text-sm text-gray-600">SID: {user.studentId}</p>
+              ) : null}
+              {user?.username && !isGuest && (
                 <p className="text-sm text-gray-600">@{user.username}</p>
               )}
-              {user?.phone && (
-                <p className="text-sm text-gray-600">Phone: {user.phone}</p>
+              {isGuest && (
+                <p className="mt-2 text-xs text-gray-500">
+                  You checked out with your phone. Set a password above to sign
+                  in on other devices. Full email sign-up stays available for
+                  runners.
+                </p>
               )}
-              {canChangePassword && (
+              {canChangePassword && !isGuest && (
                 <button
                   type="button"
                   onClick={() => setChangeOpen(true)}

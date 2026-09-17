@@ -41,6 +41,8 @@ export interface UserProfile {
   hall: string;
   roomNumber?: string;
   phone?: string;
+  /** True when the account was created via guest checkout (phone only). */
+  isGuest?: boolean;
   /** Which experiences this account signed up for. */
   role?: UserRole;
   isRunner?: boolean;
@@ -85,6 +87,15 @@ interface UserContextValue {
     profile: Omit<UserProfile, "uid" | "username">,
   ) => Promise<void>;
   signIn: (emailOrUsername: string, password: string) => Promise<void>;
+  /**
+   * Create or resume a guest customer account from a phone number so checkout
+   * can write Firestore orders without the full sign-up form.
+   */
+  ensureGuestCheckout: (opts: {
+    phone: string;
+    college: string;
+    hall: string;
+  }) => Promise<UserProfile>;
   logout: () => Promise<void>;
   updateProfile: (profile: UserProfile) => void;
   acceptRunnerTerms: () => void;
@@ -371,7 +382,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
           stored &&
           demoPassword === password &&
           (stored.username?.toLowerCase() === identifier ||
-            stored.email?.toLowerCase() === identifier);
+            stored.email?.toLowerCase() === identifier ||
+            stored.phone?.replace(/\D/g, "") === identifier.replace(/\D/g, ""));
         if (!matches) {
           throw new Error(
             "No demo account in this tab. Create an account — it is not saved to the database.",
@@ -384,6 +396,98 @@ export function UserProvider({ children }: { children: ReactNode }) {
       await signInWithUsername(emailOrUsername, password);
     },
     [persist],
+  );
+
+  const ensureGuestCheckout = useCallback(
+    async (opts: { phone: string; college: string; hall: string }) => {
+      const { ensureGuestAuthForPhone, normalizePhone, validatePhone, phoneToEmail } =
+        await import("@/lib/auth");
+      const phoneErr = validatePhone(opts.phone);
+      if (phoneErr) throw new Error(phoneErr);
+      if (!opts.college.trim() || !opts.hall.trim()) {
+        throw new Error("Choose your college and hall");
+      }
+      const digits = normalizePhone(opts.phone);
+
+      // Already signed in as this phone — just refresh delivery fields.
+      if (
+        user?.phone &&
+        normalizePhone(user.phone) === digits &&
+        user.uid
+      ) {
+        const updated: UserProfile = {
+          ...user,
+          college: opts.college,
+          hall: opts.hall,
+          phone: digits,
+          isGuest: user.isGuest ?? true,
+          role: normalizeRole(user.role, Boolean(user.isRunner)),
+        };
+        persist(updated);
+        if (user.uid && firebaseEnabled && !isDemoAuth()) {
+          void updateUserProfileDoc(user.uid, {
+            college: opts.college,
+            hall: opts.hall,
+            phone: digits,
+          });
+        }
+        return updated;
+      }
+
+      if (isDemoAuth() || !firebaseEnabled) {
+        const demoProfile: UserProfile = {
+          uid: `guest_${digits}`,
+          username: `phone_${digits}`,
+          email: phoneToEmail(digits),
+          fullName: "Guest",
+          chineseName: "",
+          studentId: "",
+          college: opts.college,
+          hall: opts.hall,
+          phone: digits,
+          isGuest: true,
+          role: "customer",
+        };
+        persist(demoProfile);
+        return demoProfile;
+      }
+
+      const auth = await ensureGuestAuthForPhone(digits);
+      const existing = await fetchUserProfile(auth.uid);
+      const profile: UserProfile = existing
+        ? {
+            ...existing,
+            college: opts.college || existing.college,
+            hall: opts.hall || existing.hall,
+            phone: digits,
+            isGuest: existing.isGuest ?? true,
+            role: normalizeRole(existing.role, Boolean(existing.isRunner)),
+          }
+        : await createUserProfile(auth.uid, {
+            username: `phone_${digits}`,
+            email: auth.email,
+            fullName: "Guest",
+            chineseName: "",
+            studentId: "",
+            college: opts.college,
+            hall: opts.hall,
+            phone: digits,
+            isGuest: true,
+            role: "customer",
+          });
+
+      if (existing) {
+        await updateUserProfileDoc(auth.uid, {
+          college: profile.college,
+          hall: profile.hall,
+          phone: digits,
+          isGuest: profile.isGuest,
+        });
+      }
+      persist(profile);
+      return profile;
+    },
+    [firebaseEnabled, persist, user],
   );
 
   const logout = useCallback(async () => {
@@ -488,6 +592,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       login,
       signUp,
       signIn,
+      ensureGuestCheckout,
       logout,
       updateProfile,
       acceptRunnerTerms,
@@ -507,6 +612,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       login,
       signUp,
       signIn,
+      ensureGuestCheckout,
       logout,
       updateProfile,
       acceptRunnerTerms,

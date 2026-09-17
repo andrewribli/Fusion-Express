@@ -119,6 +119,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerId: String(data.customerId ?? data.sessionId ?? ""),
     customerName: data.customerName ? String(data.customerName) : undefined,
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
+    customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
     items: parseItems(data.items),
     status: normalizeOrderStatus(String(data.status ?? "pending")),
     college: String(data.college ?? ""),
