@@ -103,28 +103,127 @@ async function emailRegisteredViaRest(email: string): Promise<boolean | null> {
   }
 }
 
-/** Prefer Auth; fall back to Firestore /users, then Identity Toolkit REST. */
+/** Prefer Auth; also treat Firestore profile / username maps as registered. */
 export async function emailIsRegistered(email: string): Promise<boolean | null> {
   const authHit = await emailHasAuthAccount(email);
-  if (authHit !== null) return authHit;
+  if (authHit === true) return true;
 
+  const profileHit = await emailHasFirestoreProfile(email);
+  if (profileHit === true) return true;
+  if (profileHit === false && authHit === false) return false;
+  if (profileHit === false && authHit === null) {
+    return emailRegisteredViaRest(email);
+  }
+  // profileHit null (no admin db) — fall through
+  if (authHit === false) return false;
+  return emailRegisteredViaRest(email);
+}
+
+async function emailHasFirestoreProfile(email: string): Promise<boolean | null> {
   const db = getAdminDb();
-  if (db) {
-    const snap = await db
-      .collection(collectionName("users"))
+  if (!db) return null;
+  try {
+    const users = collectionName("users");
+    const byEmail = await db
+      .collection(users)
       .where("email", "==", email)
       .limit(1)
       .get();
-    if (!snap.empty) return true;
-    const cuhk = await db
-      .collection(collectionName("users"))
+    if (!byEmail.empty) return true;
+    const byCuhk = await db
+      .collection(users)
       .where("cuhkEmail", "==", email)
       .limit(1)
       .get();
-    if (!cuhk.empty) return true;
+    if (!byCuhk.empty) return true;
+
+    const usernames = collectionName("usernames");
+    const byUsernameEmail = await db
+      .collection(usernames)
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+    return !byUsernameEmail.empty;
+  } catch (err) {
+    console.error("emailHasFirestoreProfile failed", err);
+    return null;
+  }
+}
+
+/**
+ * Resolve the Auth uid to update for a CUHK email.
+ * Handles legacy accounts where Auth email was a synthetic username address
+ * but the profile / usernames map stores the real CUHK email — and prefers
+ * the newest username mapping when duplicates exist.
+ */
+export async function resolveAuthUidForEmail(
+  email: string,
+): Promise<string | null> {
+  const auth = getAdminAuth();
+  if (auth) {
+    try {
+      const user = await auth.getUserByEmail(email);
+      return user.uid;
+    } catch (err) {
+      const code =
+        err && typeof err === "object" && "code" in err
+          ? String((err as { code: string }).code)
+          : "";
+      if (code !== "auth/user-not-found") {
+        console.error("resolveAuthUidForEmail auth lookup failed", err);
+      }
+    }
   }
 
-  return emailRegisteredViaRest(email);
+  const db = getAdminDb();
+  if (!db) return null;
+
+  const usernames = collectionName("usernames");
+  try {
+    const mapped = await db
+      .collection(usernames)
+      .where("email", "==", email)
+      .get();
+    if (!mapped.empty) {
+      const sorted = [...mapped.docs].sort((a, b) => {
+        const at = a.createTime?.toMillis?.() ?? 0;
+        const bt = b.createTime?.toMillis?.() ?? 0;
+        return bt - at;
+      });
+      if (sorted.length > 1) {
+        console.warn(
+          `Multiple username maps for ${email}; using newest (${sorted[0].id})`,
+          sorted.map((d) => d.id),
+        );
+      }
+      const uid = String(sorted[0].data().uid ?? "");
+      if (uid) return uid;
+    }
+  } catch (err) {
+    console.error("resolveAuthUidForEmail usernames query failed", err);
+  }
+
+  const users = collectionName("users");
+  try {
+    for (const field of ["email", "cuhkEmail"] as const) {
+      const snap = await db
+        .collection(users)
+        .where(field, "==", email)
+        .limit(5)
+        .get();
+      if (snap.empty) continue;
+      const sorted = [...snap.docs].sort((a, b) => {
+        const at = a.updateTime?.toMillis?.() ?? 0;
+        const bt = b.updateTime?.toMillis?.() ?? 0;
+        return bt - at;
+      });
+      return sorted[0].id;
+    }
+  } catch (err) {
+    console.error("resolveAuthUidForEmail users query failed", err);
+  }
+
+  return null;
 }
 
 export type AlertRecipient = {
@@ -161,6 +260,9 @@ export async function updateAuthPassword(
   if (!auth) {
     throw new Error("Password reset is not configured on the server.");
   }
-  const user = await auth.getUserByEmail(email);
-  await auth.updateUser(user.uid, { password: newPassword });
+  const uid = await resolveAuthUidForEmail(email);
+  if (!uid) {
+    throw new Error("No account found with this email.");
+  }
+  await auth.updateUser(uid, { password: newPassword });
 }
