@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
+  Image,
+  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -14,7 +16,15 @@ import {
   updateOrderStatus,
   uploadDeliveryPhoto,
 } from "@fusion-express/shared/orders";
+import { resolveProductImageUrl } from "@fusion-express/shared/products";
+import { resolveProductImage } from "@fusion-express/shared/resolve-image";
 import type { Order } from "@fusion-express/shared/types";
+
+function lineImage(item: { itemId: string; name: string }): string {
+  return resolveProductImageUrl(
+    resolveProductImage({ id: item.itemId, name: item.name }) ?? "",
+  );
+}
 
 export default function RunnerScreen() {
   const [runnerId, setRunnerId] = useState("mobile-runner");
@@ -22,6 +32,7 @@ export default function RunnerScreen() {
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
   const [error, setError] = useState("");
+  const [zoom, setZoom] = useState<{ uri: string; alt: string } | null>(null);
 
   const refresh = useCallback(async () => {
     setError("");
@@ -51,7 +62,7 @@ export default function RunnerScreen() {
   }
 
   async function onPicked(orderId: string) {
-    await updateOrderStatus(orderId, "picked");
+    await updateOrderStatus(orderId, "purchased");
     await refresh();
   }
 
@@ -110,7 +121,35 @@ export default function RunnerScreen() {
         <View key={order.id} className="mb-3 rounded-2xl border border-gray-200 p-4">
           <Text className="font-bold">{order.id}</Text>
           <Text className="text-sm text-gray-600">{order.status}</Text>
-          {order.status === "assigned" ? (
+          {order.items.map((item) => {
+            const uri = lineImage(item);
+            return (
+              <Pressable
+                key={`${item.itemId}-${item.name}`}
+                className="mt-2 flex-row items-center gap-3"
+                onPress={() => {
+                  if (uri) setZoom({ uri, alt: item.name });
+                }}
+              >
+                {uri ? (
+                  <Image
+                    source={{ uri }}
+                    className="h-16 w-16 rounded-lg bg-white"
+                    resizeMode="contain"
+                    accessibilityLabel={item.name}
+                  />
+                ) : (
+                  <View className="h-16 w-16 items-center justify-center rounded-lg bg-gray-100">
+                    <Text className="text-[10px] text-gray-500">No photo</Text>
+                  </View>
+                )}
+                <Text className="flex-1 text-sm text-gray-800">
+                  {item.quantity}× {item.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+          {order.status === "accepted" ? (
             <Pressable
               className="mt-2 rounded-xl border border-fusion py-2"
               onPress={() => void onPicked(order.id)}
@@ -120,7 +159,7 @@ export default function RunnerScreen() {
               </Text>
             </Pressable>
           ) : null}
-          {order.status === "picked" ? (
+          {order.status === "purchased" ? (
             <Pressable
               className="mt-2 rounded-xl bg-fusion py-2"
               onPress={() => void onDelivered(order.id)}
@@ -132,6 +171,21 @@ export default function RunnerScreen() {
           ) : null}
         </View>
       ))}
+      <Modal visible={Boolean(zoom)} transparent animationType="fade">
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/80 px-4"
+          onPress={() => setZoom(null)}
+        >
+          {zoom ? (
+            <Image
+              source={{ uri: zoom.uri }}
+              className="h-4/5 w-full"
+              resizeMode="contain"
+              accessibilityLabel={zoom.alt}
+            />
+          ) : null}
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 }

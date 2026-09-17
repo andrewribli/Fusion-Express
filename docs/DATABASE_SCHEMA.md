@@ -21,6 +21,24 @@ Pre-populated catalog of Fusion supermarket items.
 
 ---
 
+### `users`
+
+Account profiles. Delivery address lives on each **order**, not on the user.
+
+| Field       | Type      | Required | Description |
+|-------------|-----------|----------|-------------|
+| `uid`       | string    | yes      | Firebase Auth uid (also the document ID) |
+| `fullName`  | string    | yes      | Display name |
+| `email`     | string    | yes      | CUHK email used to sign in |
+| `phone`     | string    | no       | Contact number |
+| `isRunner`  | boolean   | yes      | Runner access |
+| `isGuest`   | boolean   | yes      | Guest checkout account |
+| `createdAt` | Timestamp | yes      | Account created |
+
+Removed from new writes: `username`, `college`, `hall`, `roomNumber`.
+
+---
+
 ### `orders`
 
 Customer grocery delivery orders.
@@ -81,7 +99,32 @@ Simple runner registry. MVP uses session-based runner login with a shared PIN.
 
 ---
 
-## Session Model (no user accounts)
+### `messages`
+
+Direct admin ↔ user inbox (also shown in Chat with Admin).
+
+| Field      | Type      | Required | Description |
+|------------|-----------|----------|-------------|
+| `userId`   | string    | yes      | Auth uid of the student the thread belongs to |
+| `senderId` | string    | yes      | Admin or user auth uid |
+| `message`  | string    | yes      | Body, max 2000 chars |
+| `createdAt`| Timestamp | yes      | |
+| `read`     | boolean   | yes      | Unread until the other party opens the thread |
+
+### `paymentSubmissions`
+
+Customer PayMe/FPS screenshot dropbox.
+
+| Field           | Type      | Required | Description |
+|-----------------|-----------|----------|-------------|
+| `orderId`       | string    | yes      | Orders doc id |
+| `userId`        | string    | yes      | Customer auth uid |
+| `screenshotUrl` | string    | yes      | Firebase Storage download URL |
+| `note`          | string    | yes      | Optional; empty string allowed |
+| `status`        | string    | yes      | `pending` \| `confirmed` \| `rejected` |
+| `submittedAt`   | Timestamp | yes      | |
+
+---
 
 | Role     | Storage        | Key                    |
 |----------|----------------|------------------------|

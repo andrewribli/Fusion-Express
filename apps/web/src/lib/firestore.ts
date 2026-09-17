@@ -29,7 +29,7 @@ export const AISLE_FIRESTORE_CATEGORIES: Record<string, string[]> = {
   crackers: ["Crackers", "crackers"],
   biscuits: ["Biscuits", "biscuits"],
   "cleaning-supplies": ["Cleaning Supplies", "cleaning-supplies"],
-  snacks: ["Snacks", "snacks"],
+  snacks: ["Snacks", "snacks", "Chips", "chips", "Biscuits", "biscuits", "Crackers", "crackers", "Confectionary", "confectionary"],
   other: ["Other", "other"],
 };
 
@@ -68,9 +68,19 @@ export function productBelongsToAisle(
     allowed.add(menuCat);
   }
 
-  if (allowed.has(cat)) return true;
-
+  const snackHub = new Set([
+    "snacks",
+    "chips",
+    "biscuits",
+    "crackers",
+    "confectionary",
+  ]);
   const sub = item.subcategory ? categorySlug(item.subcategory) : "";
+  if (aisleId === "snacks" && (snackHub.has(cat) || snackHub.has(sub))) {
+    return true;
+  }
+
+  if (allowed.has(cat)) return true;
   return sub === aisleId;
 }
 

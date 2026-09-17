@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Fusion Express",
+    "name": "GraceRun",
     "slug": "fusion-express",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,7 +12,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Fusion Express uses photos for delivery proof."
+          "photosPermission": "GraceRun uses photos for delivery proof."
         }
       ]
     ],

@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import {
-  sendSupportMessage,
-  subscribeSupportMessages,
-} from "@/lib/support-chat";
-import type { ChatMessage } from "@/lib/types";
+  fetchUnreadForUser,
+  markThreadRead,
+  sendDirectMessage,
+  subscribeDirectMessages,
+} from "@/lib/direct-messages";
+import type { DirectMessage } from "@/lib/direct-messages";
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
@@ -29,10 +31,11 @@ export function AdminSupportChat({
   const { user, mode } = useUser();
   const { itemCount } = useCart();
   const [open, setOpen] = useState(Boolean(forceOpen));
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [unread, setUnread] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -45,9 +48,23 @@ export function AdminSupportChat({
   }, [open, onOpenChange]);
 
   useEffect(() => {
-    if (!user?.uid || !open) return;
-    return subscribeSupportMessages(user.uid, setMessages);
+    if (!user?.uid) return;
+    const uid = user.uid;
+    if (open) {
+      return subscribeDirectMessages(uid, setMessages);
+    }
+    void fetchUnreadForUser(uid).then(setUnread).catch(() => undefined);
+    const interval = setInterval(() => {
+      void fetchUnreadForUser(uid).then(setUnread).catch(() => undefined);
+    }, 15000);
+    return () => clearInterval(interval);
   }, [user?.uid, open]);
+
+  useEffect(() => {
+    if (!open || !user?.uid) return;
+    void markThreadRead({ userId: user.uid, readerId: user.uid });
+    setUnread(0);
+  }, [open, user?.uid, messages.length]);
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -81,11 +98,9 @@ export function AdminSupportChat({
     setError("");
     setSending(true);
     try {
-      await sendSupportMessage({
+      await sendDirectMessage({
         userId: user.uid,
-        userName: user.fullName || user.username || "User",
         senderId: user.uid,
-        senderName: user.fullName || "You",
         message: text,
       });
       setText("");
@@ -158,7 +173,7 @@ export function AdminSupportChat({
                   >
                     {!mine && (
                       <p className="mb-0.5 text-[10px] font-semibold opacity-70">
-                        {msg.senderName || "Admin"}
+                        Admin
                       </p>
                     )}
                     <p className="whitespace-pre-wrap break-words">{msg.message}</p>
@@ -167,7 +182,7 @@ export function AdminSupportChat({
                         mine ? "text-white/70" : "text-gray-400"
                       }`}
                     >
-                      {formatTime(msg.timestamp)}
+                      {formatTime(msg.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -208,7 +223,7 @@ export function AdminSupportChat({
             style={{ backgroundColor: "#1d1160" }}
           >
             <span>Chat with Admin</span>
-            <span className="text-lakers-gold">Open →</span>
+            <span className="text-[#ED1C24]">Open →</span>
           </button>
         ) : (
           panel
@@ -230,13 +245,18 @@ export function AdminSupportChat({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg"
+          className="relative flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg"
           style={{ backgroundColor: mode === "runner" ? "#1d1160" : "#ED1C24" }}
           aria-label="Chat with Admin"
         >
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden>
             <path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8.4L4 20.4V6a2 2 0 0 1 2-2Zm2 4v2h12V8H6Zm0 4v2h8v-2H6Z" />
           </svg>
+          {unread > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold text-gray-900">
+              {unread}
+            </span>
+          )}
         </button>
       )}
     </div>

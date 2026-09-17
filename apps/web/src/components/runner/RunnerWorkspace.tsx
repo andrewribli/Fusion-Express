@@ -35,10 +35,12 @@ import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import { compressImage } from "@/lib/compress-image";
 import { notifyOrderStatus } from "@/lib/notify-email";
 import { fetchRunner, findRunnerForUser } from "@/lib/runners";
+import { ownerPaymentDetails } from "@/lib/owner-payment";
 import {
   EXPIRED_DELIVERIES_NOTICE,
   formatExpiredAgo,
   isRunnerDeliveryExpired,
+  customerAmountDue,
   runnerEarningsForOrder,
   runnerExpiredAtOf,
   runnerWarningTotal,
@@ -511,6 +513,11 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         customerEmail: confirmOrder.customerEmail,
         orderId: confirmOrder.id,
         status: "accepted",
+        runnerEmail: user.email,
+        runnerName: user.fullName,
+        customerName: confirmOrder.customerName,
+        deliveryLocation: `${formatDeliveryAddress(confirmOrder.college, confirmOrder.hall)} · Lobby: ${confirmOrder.lobbyPoint}`,
+        estimate: confirmOrder.total,
       });
       await refresh();
     } catch (err) {
@@ -773,10 +780,26 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       );
 
       if (order) {
+        const owner = ownerPaymentDetails();
+        const runnerPay = [
+          order.runnerPaymentMethod ?? user?.runnerPaymentMethod ?? "",
+          order.runnerPaymentId ?? user?.runnerPaymentId ?? "",
+        ]
+          .filter(Boolean)
+          .join(" ");
         void notifyOrderStatus({
           customerEmail: order.customerEmail,
           orderId,
           status: "delivered",
+          customerName: order.customerName,
+          total: customerAmountDue({
+            ...order,
+            finalTotal,
+            amountPaidByRunner: finalTotal,
+          }),
+          paymentInfo:
+            runnerPay ||
+            (owner.id ? `${owner.method} ${owner.id}` : user?.phone ?? ""),
         });
       }
       delete progressRef.current[orderId];
@@ -813,15 +836,15 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
               view === "deliveries" ? "max-w-[480px] lg:max-w-5xl" : "max-w-[480px]"
             }`}
           >
-            <div className="grid grid-cols-2 gap-1 rounded-xl bg-black/30 p-1 ring-1 ring-lakers-gold/40 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4">
               {VIEW_NAV.map((item) => (
                 <Link
                   key={item.view}
                   href={item.href}
                   className={`rounded-lg px-1 py-2.5 text-center text-xs font-semibold leading-tight transition-colors ${
                     view === item.view
-                      ? "bg-lakers-gold text-lakers-navy shadow-sm"
-                      : "text-white/70"
+                      ? "bg-[#ED1C24] text-white shadow-sm"
+                      : "text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   {item.label}
@@ -839,7 +862,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
             )}
 
             {loading && (
-              <p className="mt-4 text-sm text-lakers-gold">Loading…</p>
+              <p className="mt-4 text-sm text-gray-500">Loading…</p>
             )}
 
             {!loading && tab === "available" && (
@@ -937,8 +960,8 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
 
             {!loading && tab === "completed" && (
               <section className="mt-4 space-y-4">
-                <div className="rounded-2xl bg-gradient-to-br from-lakers-purple to-lakers-navy p-5 text-white shadow-md ring-2 ring-lakers-gold">
-                  <p className="text-sm text-lakers-gold">Total Earned</p>
+                <div className="rounded-2xl bg-[#ED1C24] p-5 text-white shadow-md">
+                  <p className="text-sm text-white/80">Total Earned</p>
                   <p className="mt-1 text-3xl font-bold">
                     ${runnerProfile?.totalEarned ?? totalFromDeliveries}
                   </p>

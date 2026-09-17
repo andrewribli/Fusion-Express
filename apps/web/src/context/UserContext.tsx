@@ -32,20 +32,14 @@ import {
 
 export interface UserProfile {
   uid?: string;
-  username?: string;
   email?: string;
   fullName: string;
-  chineseName: string;
-  studentId: string;
-  college: string;
-  hall: string;
-  roomNumber?: string;
   phone?: string;
-  /** True when the account was created via guest checkout (phone only). */
+  isRunner?: boolean;
   isGuest?: boolean;
+  createdAt?: string;
   /** Which experiences this account signed up for. */
   role?: UserRole;
-  isRunner?: boolean;
   runnerId?: string;
   runnerPaymentMethod?: "PayMe" | "FPS";
   runnerPaymentId?: string;
@@ -53,6 +47,13 @@ export interface UserProfile {
   cuhkEmail?: string;
   cuhkVerifiedAt?: string;
   photoURL?: string;
+  /** Legacy fields kept for old Firestore docs; not written on new signups. */
+  username?: string;
+  chineseName?: string;
+  studentId?: string;
+  college?: string;
+  hall?: string;
+  roomNumber?: string;
 }
 
 const USER_STORAGE_KEY = "fusion_user_profile";
@@ -82,15 +83,10 @@ interface UserContextValue {
   /** @deprecated use signUp/signIn — kept for offline dev fallback */
   login: (profile: UserProfile) => void;
   signUp: (
-    username: string,
     password: string,
-    profile: Omit<UserProfile, "uid" | "username">,
+    profile: Pick<UserProfile, "fullName" | "email"> & Partial<UserProfile>,
   ) => Promise<void>;
-  signIn: (emailOrUsername: string, password: string) => Promise<void>;
-  /**
-   * Create or resume a guest customer account from a phone number so checkout
-   * can write Firestore orders without the full sign-up form.
-   */
+  signIn: (email: string, password: string) => Promise<void>;
   ensureGuestCheckout: (opts: {
     phone: string;
     college: string;
@@ -284,14 +280,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
               if (cancelled) return;
               setUser(hydrated);
               cacheProfile(hydrated);
-              if (hydrated.uid && hydrated.username && hydrated.email) {
-                const { saveUsernameLogin } = await import("@/lib/auth");
-                void saveUsernameLogin(
-                  hydrated.username,
-                  hydrated.email,
-                  hydrated.uid,
-                );
-              }
               if (hydrated.isRunner || hydrated.termsAcceptedAt) {
                 profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
                 setTermsAccepted(true);
@@ -335,37 +323,36 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(
     async (
-      username: string,
       password: string,
-      profile: Omit<UserProfile, "uid" | "username">,
+      profile: Pick<UserProfile, "fullName" | "email"> & Partial<UserProfile>,
     ) => {
       if (isDemoAuth()) {
         const demoProfile: UserProfile = {
           ...profile,
           uid: `demo_${crypto.randomUUID()}`,
-          username,
+          fullName: profile.fullName,
+          email: profile.email,
+          isGuest: false,
+          isRunner: false,
+          createdAt: new Date().toISOString(),
         };
         profileStore()?.setItem(DEMO_PASSWORD_KEY, password);
         persist(demoProfile);
         return;
       }
-      const {
-        assertUsernameAvailable,
-        signUpWithEmail,
-        saveUsernameLogin,
-        validateEmail,
-      } = await import("@/lib/auth");
+      const { signUpWithEmail, validateEmail } = await import("@/lib/auth");
       if (!profile.email) {
         throw new Error("Email is required");
       }
       const emailErr = validateEmail(profile.email);
       if (emailErr) throw new Error(emailErr);
-      await assertUsernameAvailable(username);
       const firebaseUser = await signUpWithEmail(profile.email, password);
-      await saveUsernameLogin(username, profile.email, firebaseUser.uid);
       const fullProfile = await createUserProfile(firebaseUser.uid, {
-        ...profile,
-        username,
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone,
+        isGuest: false,
+        isRunner: false,
       });
       persist(fullProfile);
     },
@@ -373,17 +360,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const signIn = useCallback(
-    async (emailOrUsername: string, password: string) => {
+    async (email: string, password: string) => {
       if (isDemoAuth()) {
         const stored = loadUser();
         const demoPassword = profileStore()?.getItem(DEMO_PASSWORD_KEY);
-        const identifier = emailOrUsername.trim().toLowerCase();
+        const identifier = email.trim().toLowerCase();
         const matches =
           stored &&
           demoPassword === password &&
-          (stored.username?.toLowerCase() === identifier ||
-            stored.email?.toLowerCase() === identifier ||
-            stored.phone?.replace(/\D/g, "") === identifier.replace(/\D/g, ""));
+          stored.email?.toLowerCase() === identifier;
         if (!matches) {
           throw new Error(
             "No demo account in this tab. Create an account — it is not saved to the database.",
@@ -392,8 +377,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         persist(stored);
         return;
       }
-      const { signInWithUsername } = await import("@/lib/auth");
-      await signInWithUsername(emailOrUsername, password);
+      const { signInWithEmail } = await import("@/lib/auth");
+      await signInWithEmail(email, password);
     },
     [persist],
   );
@@ -409,27 +394,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       const digits = normalizePhone(opts.phone);
 
-      // Already signed in as this phone — just refresh delivery fields.
-      if (
-        user?.phone &&
-        normalizePhone(user.phone) === digits &&
-        user.uid
-      ) {
+      if (user?.phone && normalizePhone(user.phone) === digits && user.uid) {
         const updated: UserProfile = {
           ...user,
-          college: opts.college,
-          hall: opts.hall,
           phone: digits,
           isGuest: user.isGuest ?? true,
           role: normalizeRole(user.role, Boolean(user.isRunner)),
         };
         persist(updated);
         if (user.uid && firebaseEnabled && !isDemoAuth()) {
-          void updateUserProfileDoc(user.uid, {
-            college: opts.college,
-            hall: opts.hall,
-            phone: digits,
-          });
+          void updateUserProfileDoc(user.uid, { phone: digits });
         }
         return updated;
       }
@@ -437,16 +411,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (isDemoAuth() || !firebaseEnabled) {
         const demoProfile: UserProfile = {
           uid: `guest_${digits}`,
-          username: `phone_${digits}`,
           email: phoneToEmail(digits),
           fullName: "Guest",
-          chineseName: "",
-          studentId: "",
-          college: opts.college,
-          hall: opts.hall,
           phone: digits,
           isGuest: true,
+          isRunner: false,
           role: "customer",
+          createdAt: new Date().toISOString(),
         };
         persist(demoProfile);
         return demoProfile;
@@ -457,29 +428,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const profile: UserProfile = existing
         ? {
             ...existing,
-            college: opts.college || existing.college,
-            hall: opts.hall || existing.hall,
             phone: digits,
             isGuest: existing.isGuest ?? true,
             role: normalizeRole(existing.role, Boolean(existing.isRunner)),
           }
         : await createUserProfile(auth.uid, {
-            username: `phone_${digits}`,
             email: auth.email,
             fullName: "Guest",
-            chineseName: "",
-            studentId: "",
-            college: opts.college,
-            hall: opts.hall,
             phone: digits,
             isGuest: true,
-            role: "customer",
+            isRunner: false,
           });
 
       if (existing) {
         await updateUserProfileDoc(auth.uid, {
-          college: profile.college,
-          hall: profile.hall,
           phone: digits,
           isGuest: profile.isGuest,
         });
@@ -631,5 +593,5 @@ export function useUser() {
 
 /** Canonical customer/runner identity for orders & chat */
 export function getUserAccountId(user: UserProfile): string {
-  return user.uid ?? user.studentId;
+  return user.uid ?? user.email ?? user.studentId ?? "";
 }

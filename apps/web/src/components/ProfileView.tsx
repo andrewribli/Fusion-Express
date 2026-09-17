@@ -42,30 +42,12 @@ export function ProfileView() {
 
             <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-500">Account</h2>
-              <p className="mt-2 text-lg font-bold text-gray-900">
-                {isGuest ? "Guest account" : user?.fullName}
-              </p>
-              {user?.chineseName?.trim() ? (
-                <p className="text-sm text-gray-600">{user.chineseName}</p>
-              ) : null}
-              {user?.email && !isGuest && (
+              <p className="mt-2 text-lg font-bold text-gray-900">{user?.fullName}</p>
+              {user?.email && (
                 <p className="text-sm text-gray-600">{user.email}</p>
               )}
               {user?.phone && (
-                <p className="mt-2 text-sm text-gray-600">Phone: {user.phone}</p>
-              )}
-              {!isGuest && user?.studentId ? (
-                <p className="mt-2 text-sm text-gray-600">SID: {user.studentId}</p>
-              ) : null}
-              {user?.username && !isGuest && (
-                <p className="text-sm text-gray-600">@{user.username}</p>
-              )}
-              {isGuest && (
-                <p className="mt-2 text-xs text-gray-500">
-                  You checked out with your phone. Set a password above to sign
-                  in on other devices. Full email sign-up stays available for
-                  runners.
-                </p>
+                <p className="text-sm text-gray-600">Phone: {user.phone}</p>
               )}
               {canChangePassword && !isGuest && (
                 <button
@@ -90,15 +72,9 @@ export function ProfileView() {
               </p>
               {canSwitchModes && (
                 <div className="mt-3">
-                  <ModeSwitchButton className="w-full rounded-xl bg-lakers-navy py-3 text-sm font-semibold text-lakers-gold" />
+                  <ModeSwitchButton className="w-full rounded-xl bg-[#ED1C24] py-3 text-sm font-semibold text-white" />
                 </div>
               )}
-            </section>
-
-            <section className="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-gray-500">Delivery Address</h2>
-              <p className="mt-2 text-sm text-gray-800">{user?.college}</p>
-              <p className="text-sm text-gray-800">{user?.hall}</p>
             </section>
 
             {user?.isRunner && mode === "runner" ? (

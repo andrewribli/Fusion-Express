@@ -1123,6 +1123,15 @@ export async function markCustomerPaid(
   await updateOrderStatus(orderId, "customer_paid");
 }
 
+export async function confirmCustomerPayment(orderId: string): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "delivered" && order.status !== "runner_paid") {
+    throw new Error("Payment can be confirmed after delivery.");
+  }
+  await updateOrderStatus(orderId, "customer_paid");
+}
+
 export async function verifyAdminDelivery(
   orderId: string,
   opts: { customerNameOnReceipt: boolean },

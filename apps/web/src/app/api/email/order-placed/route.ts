@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   FUSION_PICKUP_LOCATION,
+  sendAdminNewOrderNotice,
   sendNonRunnerOrderNudge,
   sendOrderConfirmation,
   sendRunnerNotification,
@@ -37,6 +38,9 @@ export async function POST(request: Request) {
     orderId?: string;
     items?: OrderEmailItem[];
     total?: number;
+    customerName?: string;
+    deliveryLocation?: string;
+    skipRosterAlerts?: boolean;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -54,50 +58,66 @@ export async function POST(request: Request) {
   const customerEmail = body.customerEmail?.trim().toLowerCase();
 
   try {
+    try {
+      await sendAdminNewOrderNotice({
+        customerName: body.customerName ?? "",
+        items,
+        deliveryLocation: body.deliveryLocation ?? "",
+        total,
+        orderId,
+      });
+    } catch (err) {
+      console.error("admin new-order notice failed after retry", err);
+    }
+
     if (customerEmail) {
       await sendOrderConfirmation(customerEmail, orderId, items, total);
     }
 
-    const recipients = await listUserAlertRecipients();
-    const envRunners = (process.env.RUNNER_ALERT_EMAIL ?? "")
-      .split(",")
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean);
+    let alerted = 0;
+    if (!body.skipRosterAlerts) {
+      const recipients = await listUserAlertRecipients();
+      const envRunners = (process.env.RUNNER_ALERT_EMAIL ?? "")
+        .split(",")
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean);
 
-    const byEmail = new Map<
-      string,
-      { email: string; isRunner: boolean }
-    >();
-    for (const r of recipients) {
-      if (customerEmail && r.email === customerEmail) continue;
-      byEmail.set(r.email, r);
-    }
-    for (const email of envRunners) {
-      if (customerEmail && email === customerEmail) continue;
-      const existing = byEmail.get(email);
-      byEmail.set(email, {
-        email,
-        isRunner: existing?.isRunner ?? true,
-      });
-    }
-
-    await mapPool([...byEmail.values()], 5, async (person) => {
-      if (person.isRunner) {
-        await sendRunnerNotification(
-          person.email,
-          orderId,
-          FUSION_PICKUP_LOCATION,
-        );
-      } else {
-        await sendNonRunnerOrderNudge(
-          person.email,
-          orderId,
-          FUSION_PICKUP_LOCATION,
-        );
+      const byEmail = new Map<
+        string,
+        { email: string; isRunner: boolean }
+      >();
+      for (const r of recipients) {
+        if (customerEmail && r.email === customerEmail) continue;
+        byEmail.set(r.email, r);
       }
-    });
+      for (const email of envRunners) {
+        if (customerEmail && email === customerEmail) continue;
+        const existing = byEmail.get(email);
+        byEmail.set(email, {
+          email,
+          isRunner: existing?.isRunner ?? true,
+        });
+      }
 
-    return NextResponse.json({ ok: true, alerted: byEmail.size });
+      await mapPool([...byEmail.values()], 5, async (person) => {
+        if (person.isRunner) {
+          await sendRunnerNotification(
+            person.email,
+            orderId,
+            FUSION_PICKUP_LOCATION,
+          );
+        } else {
+          await sendNonRunnerOrderNudge(
+            person.email,
+            orderId,
+            FUSION_PICKUP_LOCATION,
+          );
+        }
+      });
+      alerted = byEmail.size;
+    }
+
+    return NextResponse.json({ ok: true, alerted });
   } catch (err) {
     console.error("order-placed email failed", err);
     return NextResponse.json(

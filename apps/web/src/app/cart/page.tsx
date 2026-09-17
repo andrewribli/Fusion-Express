@@ -42,7 +42,7 @@ export default function CartPage() {
   const weightKg = cartTotalWeightKg(items);
   const fee = calculateDeliveryFee({
     weightKg,
-    college: user?.college ?? "",
+    college: "",
   });
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
@@ -155,11 +155,9 @@ export default function CartPage() {
                       </span>
                     </div>
                     <DeliveryFeeBreakdown breakdown={fee} />
-                    {!user?.college && (
-                      <p className="text-xs text-gray-500">
-                        Distance uses your profile college. Change it at checkout.
+                    <p className="text-xs text-gray-500">
+                        Delivery fee is confirmed at checkout from your hall.
                       </p>
-                    )}
                     <div
                       className={`flex justify-between pt-2 text-base font-bold ${
                         overLimit ? "text-[#ED1C24]" : "text-gray-900"
@@ -198,15 +196,15 @@ export default function CartPage() {
                   type="button"
                   disabled={overLimit}
                   onClick={() => {
-                    // Guests and signed-in users both finish on checkout so we
-                    // can collect phone / dorm / lobby in one place.
+                    if (!user) {
+                      router.push("/login?next=/checkout");
+                      return;
+                    }
                     router.push("/checkout");
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"
                 >
-                  {user
-                    ? `Checkout · ${paymentMethod}`
-                    : "Checkout — no account needed"}
+                  {user ? "Continue to checkout" : "Sign in to checkout"}
                 </button>
 
                 <button

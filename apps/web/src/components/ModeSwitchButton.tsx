@@ -37,8 +37,8 @@ export function ModeSwitchButton({
       className={
         className ||
         (mode === "runner"
-          ? "rounded-full bg-lakers-gold px-2.5 py-1.5 text-xs font-semibold text-lakers-navy"
-          : "rounded-full bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-fusion-red")
+          ? "rounded-full bg-[#ED1C24] px-2.5 py-1.5 text-xs font-semibold text-white"
+          : "rounded-full bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-[#ED1C24]")
       }
     >
       {text}

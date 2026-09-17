@@ -43,7 +43,6 @@ export function BottomNav() {
   useModeSync();
 
   const chromeMode = navModeForPath(pathname, mode);
-  const runnerMode = chromeMode === "runner";
 
   useEffect(() => {
     const runnerUid = user?.isRunner ? user.uid : undefined;
@@ -83,17 +82,10 @@ export function BottomNav() {
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 border-t md:hidden"
-      style={
-        runnerMode
-          ? {
-              backgroundColor: "#1d1160",
-              borderColor: "rgba(253,185,39,0.35)",
-            }
-          : {
-              backgroundColor: "#ffffff",
-              borderColor: "#e5e7eb",
-            }
-      }
+      style={{
+        backgroundColor: "#ffffff",
+        borderColor: "#e5e7eb",
+      }}
     >
       <div className="mx-auto flex max-w-[480px]">
         {tabs.map((tab) => {
@@ -107,13 +99,7 @@ export function BottomNav() {
                 : tab.href === "/cart"
                   ? itemCount
                   : 0;
-          const color = active
-            ? runnerMode
-              ? "#FDB927"
-              : "#ED1C24"
-            : runnerMode
-              ? "rgba(255,255,255,0.7)"
-              : "#6b7280";
+          const color = active ? "#ED1C24" : "#6b7280";
           return (
             <Link
               key={`${chromeMode}-${tab.label}-${tab.href}`}
@@ -134,7 +120,7 @@ export function BottomNav() {
                 <span
                   aria-hidden
                   className="absolute inset-x-6 top-0 h-0.5 rounded-full"
-                  style={{ backgroundColor: runnerMode ? "#FDB927" : "#ED1C24" }}
+                  style={{ backgroundColor: "#ED1C24" }}
                 />
               ) : null}
               <span className="relative">
@@ -142,11 +128,7 @@ export function BottomNav() {
                 {badge > 0 && (
                   <span
                     className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold"
-                    style={
-                      runnerMode
-                        ? { backgroundColor: "#FDB927", color: "#1d1160" }
-                        : { backgroundColor: "#ED1C24", color: "#ffffff" }
-                    }
+                    style={{ backgroundColor: "#ED1C24", color: "#ffffff" }}
                   >
                     {badge > 9 ? "9+" : badge}
                   </span>

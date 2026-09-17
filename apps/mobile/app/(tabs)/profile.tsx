@@ -1,30 +1,31 @@
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import {
-  signInWithUsername,
+  signInWithEmail,
   signOutUser,
+  validateEmail,
   validatePassword,
-  validateUsername,
 } from "@fusion-express/shared/auth";
 
 export default function ProfileScreen() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [signedIn, setSignedIn] = useState(false);
 
   async function onSignIn() {
     setMessage("");
-    const userErr = validateUsername(username);
+    const emailErr = validateEmail(email);
     const passErr = validatePassword(password);
-    if (userErr || passErr) {
-      setMessage(userErr ?? passErr ?? "");
+    if (emailErr || passErr) {
+      setMessage(emailErr ?? passErr ?? "");
       return;
     }
     try {
-      await signInWithUsername(username, password);
+      await signInWithEmail(email, password);
       setSignedIn(true);
-      setMessage(`Signed in as ${username}`);
+      setMessage(`Signed in as ${email.trim().toLowerCase()}`);
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Sign in failed");
     }
@@ -40,22 +41,33 @@ export default function ProfileScreen() {
     <View className="flex-1 bg-white px-4 pt-6">
       <Text className="text-xl font-bold">Profile</Text>
       <Text className="mt-1 text-sm text-gray-500">
-        Same username as the website (not an email).
+        Sign in with your CUHK email.
       </Text>
       <TextInput
         className="mt-6 rounded-xl border border-gray-200 px-4 py-3"
-        placeholder="Username"
+        placeholder="1155xxxxxx@link.cuhk.edu.hk"
         autoCapitalize="none"
-        value={username}
-        onChangeText={setUsername}
+        keyboardType="email-address"
+        value={email}
+        onChangeText={setEmail}
       />
-      <TextInput
-        className="mt-3 rounded-xl border border-gray-200 px-4 py-3"
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      <View className="mt-3 flex-row items-center rounded-xl border border-gray-200">
+        <TextInput
+          className="flex-1 px-4 py-3"
+          placeholder="Password"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+          className="px-3 py-3"
+          onPress={() => setShowPassword((v) => !v)}
+        >
+          <Text className="text-lg">{showPassword ? "🙈" : "👁"}</Text>
+        </Pressable>
+      </View>
       {message ? (
         <Text className="mt-3 text-sm text-gray-700">{message}</Text>
       ) : null}

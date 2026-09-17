@@ -21,7 +21,7 @@ export default function CheckoutScreen() {
   const { items, subtotal, sessionId, clearCart } = useCart();
   const [college, setCollege] = useState<CuhkCollege>(CUHK_COLLEGES[0]);
   const [hall, setHall] = useState(getHallsForCollege(CUHK_COLLEGES[0])[0]);
-  const [room, setRoom] = useState("");
+  const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -56,10 +56,10 @@ export default function CheckoutScreen() {
         status: "pending",
         college,
         hall,
-        roomNumber: room.trim() || undefined,
         lobbyPoint: getLobbyForHall(hall),
         zone: fee.zone,
         totalWeight: fee.weightKg,
+        customerNote: note.trim() || "None for now",
         subtotal: items.reduce(
           (sum, line) => sum + lineTotal(line.item, line.quantity),
           0,
@@ -108,16 +108,16 @@ export default function CheckoutScreen() {
         </Pressable>
       ))}
 
-      <Text className="mt-4 font-semibold">Room (optional)</Text>
+      <Text className="mt-4 font-semibold">Notes for the courier (optional)</Text>
       <TextInput
         className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
-        value={room}
-        onChangeText={setRoom}
-        placeholder="e.g. 301"
+        value={note}
+        onChangeText={setNote}
+        placeholder="e.g. Room 301, leave at the lobby desk"
       />
 
       <Text className="mt-4 text-sm text-gray-600">
-        {formatDeliveryAddress(college, hall, room || undefined)}
+        {formatDeliveryAddress(college, hall)}
       </Text>
       <Text className="mt-1 text-sm text-gray-600">
         Zone {fee.zone} · delivery ${fee.deliveryFee} · total ${total}

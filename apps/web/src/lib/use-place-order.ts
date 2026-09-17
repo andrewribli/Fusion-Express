@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
-import { getLobbyForHall } from "@/data/cuhk-locations";
+import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 import {
   getEstimatedDeliveryTime,
@@ -108,6 +108,8 @@ export function usePlaceOrder() {
       const estimatedDeliveryAt = getEstimatedDeliveryTime();
       const digits = normalizePhone(phone);
 
+      const lobbyPoint = getLobbyForHall(opts.hall);
+
       try {
         const orderId = await createOrder({
           sessionId,
@@ -122,7 +124,7 @@ export function usePlaceOrder() {
           status: "pending",
           college: opts.college,
           hall: opts.hall,
-          lobbyPoint: getLobbyForHall(opts.hall),
+          lobbyPoint,
           zone: fee.zone,
           totalWeight: fee.weightKg,
           customerNote: resolveSpecialInstructions(
@@ -156,6 +158,8 @@ export function usePlaceOrder() {
             price: item.price,
           })),
           total,
+          customerName: user.fullName,
+          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
 
         clearCart();

@@ -6,11 +6,15 @@ type OrderEmailItem = {
 
 async function postJson(url: string, body: unknown): Promise<void> {
   try {
-    await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error("Email notify failed", url, res.status, text);
+    }
   } catch (err) {
     console.error("Email notify failed", url, err);
   }
@@ -26,12 +30,28 @@ export async function notifyOrderPlaced(opts: {
   orderId: string;
   items: OrderEmailItem[];
   total: number;
+  customerName?: string;
+  deliveryLocation?: string;
 }): Promise<void> {
   await postJson("/api/email/order-placed", {
     customerEmail: opts.customerEmail,
     orderId: opts.orderId,
     items: opts.items,
     total: opts.total,
+    customerName: opts.customerName,
+    deliveryLocation: opts.deliveryLocation,
+  });
+}
+
+export async function notifyNewUser(opts: {
+  fullName: string;
+  email?: string;
+  isRunner?: boolean;
+}): Promise<void> {
+  await postJson("/api/email/signup", {
+    fullName: opts.fullName,
+    email: opts.email,
+    isRunner: opts.isRunner,
   });
 }
 
@@ -44,14 +64,28 @@ export async function notifyOrderStatus(opts: {
   extraEmails?: string[];
   orderId: string;
   status: string;
+  customerName?: string;
+  total?: number;
+  paymentInfo?: string;
+  runnerEmail?: string;
+  runnerName?: string;
+  deliveryLocation?: string;
+  estimate?: number;
 }): Promise<void> {
   const extras = (opts.extraEmails ?? []).filter(Boolean);
-  if (!opts.customerEmail && extras.length === 0) return;
+  if (!opts.customerEmail && extras.length === 0 && !opts.runnerEmail) return;
   await postJson("/api/email/status", {
     customerEmail: opts.customerEmail,
     extraEmails: extras,
     orderId: opts.orderId,
     status: opts.status,
+    customerName: opts.customerName,
+    total: opts.total,
+    paymentInfo: opts.paymentInfo,
+    runnerEmail: opts.runnerEmail,
+    runnerName: opts.runnerName,
+    deliveryLocation: opts.deliveryLocation,
+    estimate: opts.estimate,
   });
 }
 

@@ -124,7 +124,7 @@ export function isOwnChatMessage(
   message: ChatMessage,
   user: {
     uid?: string;
-    studentId: string;
+    studentId?: string;
     runnerId?: string;
   },
 ): boolean {
@@ -143,7 +143,7 @@ export function canAccessOrderChat(
   order: { customerId: string; runnerId?: string; runnerUid?: string },
   user: {
     uid?: string;
-    studentId: string;
+    studentId?: string;
     runnerId?: string;
     isRunner?: boolean;
   },

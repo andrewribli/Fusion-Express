@@ -257,7 +257,8 @@ service cloud.firestore {
           'runnerDeadline', 'customerDeadline', 'runnerWarningCount',
           'customerWarningCount', 'runnerExpiredAt', 'customerOverdueAt',
           'runnerReminderSentAt', 'customerReminderSentAt',
-          'adminMissedNotifiedAt', 'lastEscalatedAt'
+          'adminMissedNotifiedAt', 'lastEscalatedAt',
+          'customerPaidAt', 'paymentReceived'
         ]);
 
       allow delete: if false;
@@ -335,6 +336,66 @@ service cloud.firestore {
       }
     }
 
+    // Direct admin ↔ user messages (in-app inbox).
+    match /messages/{messageId} {
+      function messageCreate() {
+        let data = request.resource.data;
+        return signedIn()
+          && data.keys().hasOnly(['userId', 'senderId', 'message', 'createdAt', 'read'])
+          && data.senderId == uid()
+          && data.userId is string
+          && data.userId.size() > 0
+          && data.userId.size() < 128
+          && (data.userId == uid() || isAdmin())
+          && data.message is string
+          && data.message.size() > 0
+          && data.message.size() <= 2000
+          && data.createdAt is timestamp
+          && data.read is bool
+          && data.read == false;
+      }
+
+      allow create: if messageCreate();
+      allow get, list: if signedIn() && (resource.data.userId == uid() || isAdmin());
+      allow update: if signedIn()
+        && (resource.data.userId == uid() || isAdmin())
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
+      allow delete: if false;
+    }
+
+    // Customer PayMe/FPS screenshots for admin review.
+    match /paymentSubmissions/{id} {
+      function paymentCreate() {
+        let data = request.resource.data;
+        return signedIn()
+          && data.keys().hasOnly([
+            'orderId', 'userId', 'screenshotUrl', 'note', 'status', 'submittedAt'
+          ])
+          && data.userId == uid()
+          && data.orderId is string
+          && data.orderId.size() > 0
+          && data.orderId.size() < 80
+          && isOrderCustomer(order(data.orderId))
+          && order(data.orderId).status in ['delivered', 'runner_paid']
+          && data.screenshotUrl is string
+          && data.screenshotUrl.size() > 8
+          && data.screenshotUrl.size() < 2000
+          && data.note is string
+          && data.note.size() <= 500
+          && data.status == 'pending'
+          && data.submittedAt is timestamp;
+      }
+
+      allow create: if paymentCreate();
+      allow get, list: if isAdmin()
+        || (signedIn() && resource.data.userId == uid());
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['pending', 'confirmed', 'rejected'];
+      allow delete: if false;
+    }
+
     // ------------------------------------------------- staging (*_test) twins
 
     // Preview deploys point at these collections and hold throwaway data only.
@@ -402,6 +463,14 @@ service cloud.firestore {
       match /messages/{messageId} {
         allow read, write: if signedIn();
       }
+    }
+
+    match /messages_test/{messageId} {
+      allow read, write: if signedIn();
+    }
+
+    match /paymentSubmissions_test/{id} {
+      allow read, write: if signedIn();
     }
   }
 }

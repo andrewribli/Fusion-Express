@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useUser, type UserProfile } from "@/context/UserContext";
-import { useTheme } from "@/lib/theme";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 
 function initials(user: UserProfile): string {
@@ -15,7 +14,7 @@ function initials(user: UserProfile): string {
   if (parts.length === 1 && parts[0].length >= 2) {
     return parts[0].slice(0, 2).toUpperCase();
   }
-  const handle = (user.username || user.studentId || "").replace(/[^a-zA-Z0-9]/g, "");
+  const handle = (user.email || "").replace(/[^a-zA-Z0-9]/g, "");
   if (handle.length >= 2) return handle.slice(0, 2).toUpperCase();
   if (handle.length === 1) return handle.toUpperCase();
   return "";
@@ -66,49 +65,10 @@ function HeaderAvatar({
   );
 }
 
-function ThemeToggleRow() {
-  const { theme, toggleTheme } = useTheme();
-  const dark = theme === "dark";
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={toggleTheme}
-      className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-    >
-      <span>{dark ? "Dark Mode" : "Lite Mode"}</span>
-      <span
-        className={`relative h-5 w-9 rounded-full ${dark ? "bg-[#ED1C24]" : "bg-gray-300"}`}
-        aria-hidden
-      >
-        <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow ${
-            dark ? "right-0.5" : "left-0.5"
-          }`}
-        />
-      </span>
-    </button>
-  );
-}
-
-function ThemeToggleChip({ className = "" }: { className?: string }) {
-  const { theme, toggleTheme } = useTheme();
-  return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className={`rounded-full border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 hover:border-[#ED1C24] ${className}`}
-      aria-label={theme === "dark" ? "Switch to Lite Mode" : "Switch to Dark Mode"}
-    >
-      {theme === "dark" ? "Dark" : "Lite"}
-    </button>
-  );
-}
-
 export function AccountMenu({
-  hideThemeChip = false,
+  hideThemeChip: _hideThemeChip = false,
 }: {
-  /** Home header is tight on mobile — keep theme toggle inside the menu only. */
+  /** Unused — colorways are unified to the homepage. */
   hideThemeChip?: boolean;
 }) {
   const { user, logout } = useUser();
@@ -140,7 +100,6 @@ export function AccountMenu({
   if (!user) {
     return (
       <div className="flex items-center gap-1.5">
-        {!hideThemeChip && <ThemeToggleChip className="hidden sm:inline-flex" />}
         <Link
           href="/login"
           aria-label="Sign in"
@@ -182,7 +141,6 @@ export function AccountMenu({
           <MenuLink href="/profile" onClick={() => setOpen(false)}>
             Profile Settings
           </MenuLink>
-          <ThemeToggleRow />
           <button
             type="button"
             role="menuitem"

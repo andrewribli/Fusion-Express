@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0c0716;
+  --background: #f3f4f6;
   --foreground: #111827;
-  --fusion-red: #fdb927;
-  --lakers-gold: #fdb927;
-  --lakers-purple: #552583;
-  --lakers-navy: #1d1160;
+  --fusion-red: #ed1c24;
+  --lakers-gold: #ed1c24;
+  --lakers-purple: #ed1c24;
+  --lakers-navy: #111827;
   --bg-color: #f3f4f6;
   --text-color: #111827;
   --card-bg: #ffffff;
@@ -32,9 +32,10 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Current shop look — white cards on the purple wallpaper. */
-body.lite-mode {
-  --bg-color: #ffffff;
+/* Homepage colorway — lite and dark are the same. */
+body.lite-mode,
+body.dark-mode {
+  --bg-color: #f3f4f6;
   --text-color: #111827;
   --card-bg: #ffffff;
   --input-bg: #ffffff;
@@ -42,95 +43,9 @@ body.lite-mode {
   --border-color: #e5e7eb;
   --hover-bg: #f9fafb;
   --foreground: #111827;
+  --background: #f3f4f6;
+  color: #111827;
   color-scheme: light;
-}
-
-/* Default. */
-body.dark-mode {
-  --bg-color: #121212;
-  --text-color: #f5f5f5;
-  --card-bg: #1e1e1e;
-  --input-bg: #2a2a2a;
-  --muted-text: #c4c4c4;
-  --border-color: #3a3a3a;
-  --hover-bg: #2a2a2a;
-  --foreground: #f5f5f5;
-  color: var(--text-color);
-  color-scheme: dark;
-}
-
-body.dark-mode .bg-white,
-body.dark-mode .bg-white\/95,
-body.dark-mode .bg-white\/90 {
-  background-color: var(--card-bg) !important;
-}
-
-body.dark-mode .bg-gray-50,
-body.dark-mode .hover\:bg-gray-50:hover,
-body.dark-mode .hover\:bg-gray-100:hover {
-  background-color: var(--hover-bg) !important;
-}
-
-body.dark-mode .bg-red-50 {
-  background-color: rgba(237, 28, 36, 0.16) !important;
-}
-
-body.dark-mode .text-gray-900,
-body.dark-mode .text-gray-800,
-body.dark-mode .text-gray-700 {
-  color: var(--text-color) !important;
-}
-
-body.dark-mode .text-gray-600,
-body.dark-mode .text-gray-500,
-body.dark-mode .text-gray-400 {
-  color: var(--muted-text) !important;
-}
-
-body.dark-mode .border-gray-50,
-body.dark-mode .border-gray-100,
-body.dark-mode .border-gray-200,
-body.dark-mode .border-gray-300 {
-  border-color: var(--border-color) !important;
-}
-
-body.dark-mode input:not([type="checkbox"]):not([type="radio"]),
-body.dark-mode textarea,
-body.dark-mode select {
-  background-color: var(--input-bg) !important;
-  color: var(--text-color) !important;
-  border-color: var(--border-color) !important;
-}
-
-body.dark-mode input::placeholder,
-body.dark-mode textarea::placeholder {
-  color: #9ca3af !important;
-}
-
-body.dark-mode header.bg-white\/95,
-body.dark-mode header.border-gray-100 {
-  background-color: #161616 !important;
-  border-color: #2f2f2f !important;
-}
-
-body.dark-mode img[alt="GraceRun"] {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 0 14px rgba(253, 185, 39, 0.35);
-}
-
-body.dark-mode .from-amber-50 {
-  --tw-gradient-from: #2a2418 !important;
-}
-
-body.dark-mode .to-white {
-  --tw-gradient-to: #1e1e1e !important;
-}
-
-body.dark-mode .border-amber-200 {
-  border-color: #4a3f24 !important;
-}
-
-body.dark-mode .text-amber-700 {
-  color: #fbbf24 !important;
 }
 
 .scrollbar-hide {

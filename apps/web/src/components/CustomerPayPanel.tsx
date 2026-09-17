@@ -1,30 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
 import {
   CUSTOMER_PAY_REMINDER_MS,
   customerAmountDue,
 } from "@/lib/order-status";
 import { ownerPaymentDetails } from "@/lib/owner-payment";
+import { fetchPaymentSubmissionForOrder } from "@/lib/payment-submissions";
 import type { Order } from "@/lib/types";
 
 export function CustomerPayPanel({
   order,
-  onMarkPaid,
-  marking,
+  userId,
 }: {
   order: Order;
-  onMarkPaid: () => void;
-  marking: boolean;
+  userId?: string;
 }) {
   const [now, setNow] = useState(() => Date.now());
   const [showDetails, setShowDetails] = useState(false);
+  const [status, setStatus] = useState<"none" | "pending" | "rejected" | "confirmed">(
+    "none",
+  );
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 60_000);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      if (!userId) return;
+      try {
+        const row = await fetchPaymentSubmissionForOrder(order.id, userId);
+        if (cancelled) return;
+        if (!row) setStatus("none");
+        else setStatus(row.status);
+      } catch {
+        if (!cancelled) setStatus("none");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [order.id, userId]);
 
   if (order.status !== "delivered" && order.status !== "runner_paid") {
     return null;
@@ -54,9 +75,9 @@ export function CustomerPayPanel({
       <button
         type="button"
         onClick={() => setShowDetails(true)}
-        className="mt-3 w-full rounded-xl bg-[#ED1C24] py-3 text-sm font-bold text-white"
+        className="mt-3 w-full rounded-xl border-2 border-[#ED1C24] py-3 text-sm font-bold text-[#ED1C24]"
       >
-        Pay Now
+        PayMe / FPS details
       </button>
 
       {showDetails && (
@@ -72,19 +93,23 @@ export function CustomerPayPanel({
             </p>
           )}
           <p className="mt-2 text-xs text-gray-600">
-            Send ${due} to GraceRun, then tap Mark as Paid.
+            Send ${due} to GraceRun, then submit a screenshot of the transfer.
           </p>
         </div>
       )}
 
-      <button
-        type="button"
-        disabled={marking}
-        onClick={onMarkPaid}
-        className="mt-2 w-full rounded-xl border-2 border-[#ED1C24] py-3 text-sm font-bold text-[#ED1C24] disabled:opacity-60"
-      >
-        {marking ? "Saving…" : "Mark as Paid"}
-      </button>
+      {status === "pending" ? (
+        <p className="mt-3 rounded-xl bg-white px-3 py-2 text-sm text-gray-700">
+          Screenshot submitted — waiting for GraceRun to confirm.
+        </p>
+      ) : (
+        <Link
+          href={`/pay/${encodeURIComponent(order.id)}`}
+          className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#ED1C24] py-3 text-sm font-bold text-white"
+        >
+          {status === "rejected" ? "Resubmit Payment" : "Submit Payment"}
+        </Link>
+      )}
     </section>
   );
 }

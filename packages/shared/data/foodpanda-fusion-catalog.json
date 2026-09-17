@@ -3596,6 +3596,357 @@
               "image": "/images/catalog/drive-shelf-10.jpg",
               "brand": "Kinder",
               "weight": 0.02
+            },
+            {
+              "name": "M&M's Peanut Stand Up Pouch",
+              "price": 27.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-128390-front-prodcat.jpg?version=1732739344",
+              "pnsCode": "BP_128390"
+            },
+            {
+              "name": "M&M's Milk Stand Up Pouch",
+              "price": 27.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-128389-front-prodcat.jpg?version=1732739339",
+              "pnsCode": "BP_128389"
+            },
+            {
+              "name": "M&M's Crispy Choco Funsize",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-341358-front-prodcat.jpg?version=1761827006",
+              "pnsCode": "BP_341358"
+            },
+            {
+              "name": "M&M's Peanut Choco Funsize",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-188743-front-prodcat.jpg?version=1761913287",
+              "pnsCode": "BP_188743"
+            },
+            {
+              "name": "M&M's Milk Chocolate Bottle",
+              "price": 26.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-351934-front-prodcat.jpg?version=1732826392",
+              "pnsCode": "BP_351934"
+            },
+            {
+              "name": "M&M's Peanut Chocolate Bottle",
+              "price": 26.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-351956-front-prodcat.jpg?version=1732826426",
+              "pnsCode": "BP_351956"
+            },
+            {
+              "name": "M&M's Peanut Chocolate",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109252-front-prodcat.jpg?version=1761826917",
+              "pnsCode": "BP_109252"
+            },
+            {
+              "name": "M&M's Milk Chocolate",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111602-front-prodcat.jpg?version=1761826860",
+              "pnsCode": "BP_111602"
+            },
+            {
+              "name": "M&M's Mini Tube",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-155612-front-prodcat.jpg?version=1732747839",
+              "pnsCode": "BP_155612"
+            },
+            {
+              "name": "M&M's Milk Choco Funsize",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-188742-front-prodcat.jpg?version=1761826838",
+              "pnsCode": "BP_188742"
+            },
+            {
+              "name": "M&M's Crispy Chocolate",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "M&M's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-147697-front-prodcat.jpg?version=1761826945",
+              "pnsCode": "BP_147697"
+            },
+            {
+              "name": "KitKat Kit Kat Mini Chocolate Sharing Bag",
+              "price": 34.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-307035-front-prodcat.jpg?version=1732823126",
+              "pnsCode": "BP_307035"
+            },
+            {
+              "name": "KitKat 4 Finger Chocolate",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-307033-front-prodcat.jpg",
+              "pnsCode": "BP_307033"
+            },
+            {
+              "name": "KitKat 4 Finger Dark Chocolate",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-307034-front-prodcat.jpg?version=1771849217",
+              "pnsCode": "BP_307034"
+            },
+            {
+              "name": "KitKat Classic Tablet",
+              "price": 18.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-401520-front-prodcat.jpg?version=1751545218",
+              "pnsCode": "BP_401520"
+            },
+            {
+              "name": "KitKat Chunky Lotus",
+              "price": 8.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-401534-front-prodcat.jpg?version=1744374657",
+              "pnsCode": "BP_401534"
+            },
+            {
+              "name": "KitKat Chunky Peanut Butter",
+              "price": 8.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-480035-front-prodcat.jpg?version=1744374935",
+              "pnsCode": "BP_480035"
+            },
+            {
+              "name": "Kitkat Milo Chunky",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-146252-front-prodcat.jpg?version=1772886009",
+              "pnsCode": "BP_146252"
+            },
+            {
+              "name": "KitKat Milo Chocolate Sharing Bag",
+              "price": 37.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-381071-front-prodcat.jpg?version=1758802807",
+              "pnsCode": "BP_381071"
+            },
+            {
+              "name": "KitKat Mini Matcha Chocolate Sharepack (jp)",
+              "price": 37.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-141092-front-prodcat.jpg?version=1757680423",
+              "pnsCode": "BP_141092"
+            },
+            {
+              "name": "KitKat Mini Dark Chocolate Sharepack (jp)",
+              "price": 37.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-141091-front-prodcat.jpg?version=1773923241",
+              "pnsCode": "BP_141091"
+            },
+            {
+              "name": "KitKat Mini Milk Chocolate Sharepack (jp)",
+              "price": 37.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-141090-front-prodcat.jpg?version=1757679798",
+              "pnsCode": "BP_141090"
+            },
+            {
+              "name": "KitKat 72% High Cacao Chocolate Sharing Bag",
+              "price": 37.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120255-front-prodcat.jpg?version=1757938850",
+              "pnsCode": "BP_120255"
+            },
+            {
+              "name": "KitKat Mini Mix Sharing Bag Chocolate",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "KitKat",
+              "image": "https://medias.pns.hk/publishing/PNSHK-149011-front-prodcat.jpg?version=1733448069",
+              "pnsCode": "BP_149011"
+            },
+            {
+              "name": "Snickers Almond Dark Bar",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Snickers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-130646-front-prodcat.jpg?version=1732742291",
+              "pnsCode": "BP_130646"
+            },
+            {
+              "name": "Snickers Strawberry Flavour Funsize",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Snickers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-154792-front-prodcat.jpg?version=1767702690",
+              "pnsCode": "BP_154792"
+            },
+            {
+              "name": "Snickers Bar Funsize",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Snickers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-112417-front-prodcat.jpg?version=1732717462",
+              "pnsCode": "BP_112417"
+            },
+            {
+              "name": "Snickers Peanut Chocolate Bar",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Snickers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-112416-front-prodcat.jpg?version=1743510134",
+              "pnsCode": "BP_112416"
+            },
+            {
+              "name": "Twix Chocolate Bar (random Packaging)",
+              "price": 11.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Twix",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109727-front-prodcat.jpg?version=1782822098",
+              "pnsCode": "BP_109727"
+            },
+            {
+              "name": "Maltesers Dark Funsize",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Maltesers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-465336-front-prodcat.jpg?version=1732930508",
+              "pnsCode": "BP_465336"
+            },
+            {
+              "name": "Maltesers Milk Chocolate",
+              "price": 13.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Maltesers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101791-front-prodcat.jpg?version=1732700019",
+              "pnsCode": "BP_101791"
+            },
+            {
+              "name": "Maltesers Choc Grocery Bag",
+              "price": 30.5,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Maltesers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-109728-front-prodcat.jpg?version=1732713351",
+              "pnsCode": "BP_109728"
+            },
+            {
+              "name": "Maltesers Milk Funsize Chocolate",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Maltesers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-157683-front-prodcat.jpg?version=1732763561",
+              "pnsCode": "BP_157683"
+            },
+            {
+              "name": "Maltesers Dark Chocolate",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Maltesers",
+              "image": "https://medias.pns.hk/publishing/PNSHK-141537-front-prodcat.jpg?version=1732743125",
+              "pnsCode": "BP_141537"
+            },
+            {
+              "name": "Skittles Yogurt Candy Bag",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Skittles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102150-front-prodcat.jpg?version=1732699498",
+              "pnsCode": "BP_102150"
+            },
+            {
+              "name": "Skittles Gummies Yogurt Fruit Flav",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Skittles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115110-front-prodcat.jpg?version=1756729210",
+              "pnsCode": "BP_115110"
+            },
+            {
+              "name": "Skittles Original Flavour Candies",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Skittles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-336869-front-prodcat.jpg?version=1732833279",
+              "pnsCode": "BP_336869"
+            },
+            {
+              "name": "Skittles Sour Flavour Candies",
+              "price": 8.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Skittles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-427584-front-prodcat.jpg?version=1732917084",
+              "pnsCode": "BP_427584"
+            },
+            {
+              "name": "Skittles Gummies Colourful Fruit Flav",
+              "price": 11.0,
+              "category": "Groceries",
+              "subcategory": "Confectionary",
+              "brand": "Skittles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115109-front-prodcat.jpg?version=1756729204",
+              "pnsCode": "BP_115109"
             }
           ]
         },
@@ -4110,6 +4461,477 @@
               "image": "/images/catalog/drive-shelf-12.jpg",
               "brand": "Calbee",
               "weight": 0.07
+            },
+            {
+              "name": "Lay's Regular Flv Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120236-front-prodcat.jpg?version=1782735805",
+              "pnsCode": "BP_120236"
+            },
+            {
+              "name": "Lay's Truffle Flavored Potato Chips",
+              "price": 7.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115282-front-prodcat.jpg",
+              "pnsCode": "BP_115282"
+            },
+            {
+              "name": "Lay's Sweet Heat Barbecue",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-341729-front-prodcat.jpg",
+              "pnsCode": "BP_341729"
+            },
+            {
+              "name": "Lay's Sc & Onion Flv Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120241-front-prodcat.jpg?version=1782735783",
+              "pnsCode": "BP_120241"
+            },
+            {
+              "name": "Lay's Honey Bbq Flv Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448769-front-prodcat.jpg?version=1732936253",
+              "pnsCode": "BP_448769"
+            },
+            {
+              "name": "Lay's Bbq Flv Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120237-front-prodcat.jpg?version=1782735687",
+              "pnsCode": "BP_120237"
+            },
+            {
+              "name": "Lay's Kyushu Seaweed Flv Potato Chips",
+              "price": 15.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-341732-front-prodcat.jpg?version=1732820051",
+              "pnsCode": "BP_341732"
+            },
+            {
+              "name": "Lay's Salt N Vineger Flv Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120239-front-prodcat.jpg",
+              "pnsCode": "BP_120239"
+            },
+            {
+              "name": "Lay's Cheddar & Sco Flv Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120240-front-prodcat.jpg",
+              "pnsCode": "BP_120240"
+            },
+            {
+              "name": "Lay's Hot&spicy Flavored Potato Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Lay's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-115393-front-prodcat.jpg?version=1732716959",
+              "pnsCode": "BP_115393"
+            },
+            {
+              "name": "Doritos Nac Chesse Flv Tortilla Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120226-front-prodcat.jpg?version=1732729896",
+              "pnsCode": "BP_120226"
+            },
+            {
+              "name": "Doritos Spicier Nacho Flv Tortilla Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120227-front-prodcat.jpg?version=1732730241",
+              "pnsCode": "BP_120227"
+            },
+            {
+              "name": "Doritos Nacho Cheese Flv Tortilla Chips",
+              "price": 12.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120231-front-prodcat.jpg?version=1732730246",
+              "pnsCode": "BP_120231"
+            },
+            {
+              "name": "Doritos Roasted Corn Flavored Tortilla Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120332-front-prodcat.jpg?version=1761308556",
+              "pnsCode": "BP_120332"
+            },
+            {
+              "name": "Doritos Smoking Bbq",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-123170-front-prodcat.jpg?version=1759753212",
+              "pnsCode": "BP_123170"
+            },
+            {
+              "name": "Doritos Taco Flavored Tortilla Chips",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120331-front-prodcat.jpg?version=1761308572",
+              "pnsCode": "BP_120331"
+            },
+            {
+              "name": "Doritos Coriander Flavored Tortilla Chips",
+              "price": 22.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-163330-front-prodcat.jpg?version=1781698958",
+              "pnsCode": "BP_163330"
+            },
+            {
+              "name": "Doritos Century Egg Flavored Tortilla Chips",
+              "price": 22.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-163324-front-prodcat.jpg?version=1781698884",
+              "pnsCode": "BP_163324"
+            },
+            {
+              "name": "Doritos Spicier Nacho",
+              "price": 7.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Doritos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111153-front-prodcat.jpg",
+              "pnsCode": "BP_111153"
+            },
+            {
+              "name": "Pringles Original Flv Potato Chips",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448372-front-prodcat.jpg?version=1732915637",
+              "pnsCode": "BP_448372"
+            },
+            {
+              "name": "Pringles Cheese Flv Potato Chips",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448370-front-prodcat.jpg?version=1732915626",
+              "pnsCode": "BP_448370"
+            },
+            {
+              "name": "Pringles Sour Cream&onion Flv Potato Chips",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448371-front-prodcat.jpg?version=1732915632",
+              "pnsCode": "BP_448371"
+            },
+            {
+              "name": "Pringles Pizza Flv Potato Chips",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448369-front-prodcat.jpg?version=1732915621",
+              "pnsCode": "BP_448369"
+            },
+            {
+              "name": "Pringles Sour Cream&onion Flv Pot Crps (us Ver)",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-111212-front-prodcat.jpg?version=1758025261",
+              "pnsCode": "BP_111212"
+            },
+            {
+              "name": "Pringles Salt & Vinegar Flv Pot Crps (us Ver)",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-436261-front-prodcat.jpg?version=1758030017",
+              "pnsCode": "BP_436261"
+            },
+            {
+              "name": "Pringles Classic Cheesy Lasagna Flv P.c",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-163241-front-prodcat.jpg?version=1782303820",
+              "pnsCode": "BP_163241"
+            },
+            {
+              "name": "Pringles Truffle & Sea Salt Flv P.c",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-163240-front-prodcat.jpg?version=1782303882",
+              "pnsCode": "BP_163240"
+            },
+            {
+              "name": "Pringles Hot & Spicy Flv Potato Chips",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448373-front-prodcat.jpg?version=1719346868",
+              "pnsCode": "BP_448373"
+            },
+            {
+              "name": "Pringles Grilled Bbq Flv Potato Chips",
+              "price": 19.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Pringles",
+              "image": "https://medias.pns.hk/publishing/PNSHK-448374-front-prodcat.jpg",
+              "pnsCode": "BP_448374"
+            },
+            {
+              "name": "Cheetos Crunchy Cheese",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Cheetos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120221-front-prodcat.jpg?version=1719317879",
+              "pnsCode": "BP_120221"
+            },
+            {
+              "name": "Cheetos Jumbo Puff",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Cheetos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-336045-front-prodcat.jpg?version=1732833074",
+              "pnsCode": "BP_336045"
+            },
+            {
+              "name": "Cheetos Crunchy Flaming Hot",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Cheetos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120220-front-prodcat.jpg",
+              "pnsCode": "BP_120220"
+            },
+            {
+              "name": "Cheetos Crunchy Cheddar Jalapeno",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Cheetos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120222-front-prodcat.jpg",
+              "pnsCode": "BP_120222"
+            },
+            {
+              "name": "Cheetos Crispy Strips Cheese Flavor",
+              "price": 7.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Cheetos",
+              "image": "https://medias.pns.hk/publishing/PNSHK-399650-front-prodcat.jpg",
+              "pnsCode": "BP_399650"
+            },
+            {
+              "name": "Calbee Potato Crisps",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162387-front-prodcat.jpg",
+              "pnsCode": "BP_162387"
+            },
+            {
+              "name": "Calbee Potato Chips Original",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-129729-front-prodcat.jpg?version=1732733368",
+              "pnsCode": "BP_129729"
+            },
+            {
+              "name": "Calbee Potato Chips Curry",
+              "price": 7.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-119585-front-prodcat.jpg",
+              "pnsCode": "BP_119585"
+            },
+            {
+              "name": "Calbee Potato Chips Seaweed",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-119207-front-prodcat.jpg",
+              "pnsCode": "BP_119207"
+            },
+            {
+              "name": "Calbee Potato Chips Pizza",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-125075-front-prodcat.jpg?version=1732727242",
+              "pnsCode": "BP_125075"
+            },
+            {
+              "name": "Calbee Potato Chips-bbq",
+              "price": 7.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-121425-front-prodcat.jpg",
+              "pnsCode": "BP_121425"
+            },
+            {
+              "name": "Calbee Potato Chips Spicy Pizza",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-353988-front-prodcat.jpg",
+              "pnsCode": "BP_353988"
+            },
+            {
+              "name": "Calbee Potato Crisps Continual 4 Pack",
+              "price": 17.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-481555-front-prodcat.jpg",
+              "pnsCode": "BP_481555"
+            },
+            {
+              "name": "Calbee Bbq Flavoured Potato Chips 55g",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-121424-front-prodcat.jpg?version=1732729184",
+              "pnsCode": "BP_121424",
+              "weight": 0.055
+            },
+            {
+              "name": "Calbee Bbq Flavoured Potato Chips 105g",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-126070-front-prodcat.jpg?version=1732729358",
+              "pnsCode": "BP_126070",
+              "weight": 0.105
+            },
+            {
+              "name": "Calbee Bbq Flavoured Potato Chips Wave Cut Potato Chips",
+              "price": 36.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-302347-front-prodcat.jpg?version=1753273247",
+              "pnsCode": "BP_302347"
+            },
+            {
+              "name": "Calbee Hot & Spicy Flavoured Potato Chips 105g",
+              "price": 22.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-119989-front-prodcat.jpg?version=1732723910",
+              "pnsCode": "BP_119989",
+              "weight": 0.105
+            },
+            {
+              "name": "Calbee Okonomiy Potato Chips",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-301405-front-prodcat.jpg?version=1732801747",
+              "pnsCode": "BP_301405"
+            },
+            {
+              "name": "Ritz Toasted Chips Original",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-468177-front-prodcat.jpg",
+              "pnsCode": "BP_468177"
+            },
+            {
+              "name": "Ritz Toasted Chips Cheddar",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-468180-front-prodcat.jpg?version=1720705208",
+              "pnsCode": "BP_468180"
+            },
+            {
+              "name": "Ritz Toasted Chips Sour Cream & Onion",
+              "price": 32.0,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-468184-front-prodcat.jpg?version=1732934117",
+              "pnsCode": "BP_468184"
+            },
+            {
+              "name": "Popchips Bbq Potato",
+              "price": 36.5,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Popchips",
+              "image": "https://medias.pns.hk/publishing/PNSHK-411106-front-prodcat.jpg?version=1776778953",
+              "pnsCode": "BP_411106"
+            },
+            {
+              "name": "Orion O! Karto Potato Chips (chili Flavour)",
+              "price": 20.9,
+              "category": "Groceries",
+              "subcategory": "Chips",
+              "brand": "Orion",
+              "image": "https://medias.pns.hk/publishing/PNSHK-333194-front-prodcat.jpg",
+              "pnsCode": "BP_333194"
             }
           ]
         },
@@ -4185,6 +5007,52 @@
               "image": "/images/catalog/drive-shelf-07.jpg",
               "brand": "Ritz",
               "weight": 0.2
+            },
+            {
+              "name": "Ritz Cheese Mp 243g",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-388906-front-prodcat.jpg?version=1723124408",
+              "pnsCode": "BP_388906",
+              "weight": 0.243
+            },
+            {
+              "name": "Ritz Cheese Sandwich",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-126869-front-prodcat.jpg",
+              "pnsCode": "BP_126869"
+            },
+            {
+              "name": "Ritz Lemon Sandwich",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-364327-front-prodcat.jpg",
+              "pnsCode": "BP_364327"
+            },
+            {
+              "name": "Ritz Cheese Sandwich Biscuit",
+              "price": 12.9,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-120333-front-prodcat.jpg",
+              "pnsCode": "BP_120333"
+            },
+            {
+              "name": "Ritz Tray Cheese Value Pack",
+              "price": 47.0,
+              "category": "Groceries",
+              "subcategory": "Crackers",
+              "brand": "Ritz",
+              "image": "https://medias.pns.hk/publishing/PNSHK-130650-front-prodcat.jpg?version=1784043164",
+              "pnsCode": "BP_130650"
             }
           ]
         },
@@ -4238,6 +5106,142 @@
               "pnsCode": "BP_476755",
               "brand": "Kimnori",
               "weight": 0.012
+            },
+            {
+              "name": "Lotte Pepero - White Choco Cookie",
+              "price": 11.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Lotte",
+              "image": "https://medias.pns.hk/publishing/PNSHK-436159-front-prodcat.jpg?version=1733978113",
+              "pnsCode": "BP_436159"
+            },
+            {
+              "name": "Mamee Snack Noodles 5's",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Mamee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-137402-front-prodcat.jpg?version=1734006042",
+              "pnsCode": "BP_137402"
+            },
+            {
+              "name": "Calbee Vegetable Fries 4p",
+              "price": 17.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-302473-front-prodcat.jpg?version=1760962919",
+              "pnsCode": "BP_302473"
+            },
+            {
+              "name": "Calbee Vegetable Fries",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-162389-front-prodcat.jpg",
+              "pnsCode": "BP_162389"
+            },
+            {
+              "name": "Kashi Honpo Original Potato Sticks",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Kashi Honpo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-440598-front-prodcat.jpg",
+              "pnsCode": "BP_440598"
+            },
+            {
+              "name": "Kashi Honpo Tomato Flavoured Potato Sticks",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Kashi Honpo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-440600-front-prodcat.jpg",
+              "pnsCode": "BP_440600"
+            },
+            {
+              "name": "Calbee Tomato Flv Vegetable Fries",
+              "price": 9.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-128655-front-prodcat.jpg?version=1752582043",
+              "pnsCode": "BP_128655"
+            },
+            {
+              "name": "Calbee Jagabee Potato Stick Hot & Spicy Flv",
+              "price": 28.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-107981-front-prodcat.jpg?version=1732706405",
+              "pnsCode": "BP_107981"
+            },
+            {
+              "name": "Calbee Jagabee Bbq Potato Stick",
+              "price": 28.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116771-front-prodcat.jpg",
+              "pnsCode": "BP_116771"
+            },
+            {
+              "name": "Calbee Jagabee P.stick(bbq Flv)continual 4p",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-406618-front-prodcat.jpg",
+              "pnsCode": "BP_406618"
+            },
+            {
+              "name": "Calbee Jagabee Truffle & Black Pepper Flv",
+              "price": 23.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-468900-front-prodcat.jpg?version=1751458998",
+              "pnsCode": "BP_468900"
+            },
+            {
+              "name": "Calbee Jagabee (honey & Butter Flv) Sp",
+              "price": 23.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-399886-front-prodcat.jpg?version=1751458949",
+              "pnsCode": "BP_399886"
+            },
+            {
+              "name": "Calbee Jagabee Seaweed Standing Pouch",
+              "price": 28.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-438298-front-prodcat.jpg?version=1784291541",
+              "pnsCode": "BP_438298"
+            },
+            {
+              "name": "Calbee Jagabee P.stick(honey &butter Flv)4p",
+              "price": 21.0,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-408894-front-prodcat.jpg",
+              "pnsCode": "BP_408894"
+            },
+            {
+              "name": "Calbee Jagabee Potato Sticks (original Favoured) Standing Pouch 90g (18g X 5)",
+              "price": 28.9,
+              "category": "Groceries",
+              "subcategory": "Snacks",
+              "brand": "Calbee",
+              "image": "https://medias.pns.hk/publishing/PNSHK-320392-front-prodcat.jpg",
+              "pnsCode": "BP_320392",
+              "weight": 0.09
             }
           ]
         },
@@ -4316,6 +5320,331 @@
               "image": "/images/catalog/drive-shelf-07.jpg",
               "brand": "Select",
               "weight": 0.5
+            },
+            {
+              "name": "Oreo Bonus Pack",
+              "price": 28.0,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-485738-front-prodcat.jpg?version=1778675776",
+              "pnsCode": "BP_485738"
+            },
+            {
+              "name": "Oreo Tray Chocolate Cookies",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-159489-front-prodcat.jpg?version=1769689359",
+              "pnsCode": "BP_159489"
+            },
+            {
+              "name": "Oreo Tray Mil Sweet Cookies",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-101715-front-prodcat.jpg?version=1732699309",
+              "pnsCode": "BP_101715"
+            },
+            {
+              "name": "Oreo Van Mini Pouch Cookies",
+              "price": 10.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/345161_front20241203-nIlMUAxB-prodcat.jpg?version=1733797291",
+              "pnsCode": "BP_345161"
+            },
+            {
+              "name": "Oreo Van Mini Box Cookies",
+              "price": 19.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-458246-front-prodcat.jpg",
+              "pnsCode": "BP_458246"
+            },
+            {
+              "name": "Oreo Tray D&w Chocolate Cookies",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-479002-front-prodcat.jpg?version=1770016833",
+              "pnsCode": "BP_479002"
+            },
+            {
+              "name": "Oreo Vanilla Slug Cookies",
+              "price": 16.0,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-161006-front-prodcat.jpg?version=1773318012",
+              "pnsCode": "BP_161006"
+            },
+            {
+              "name": "Oreo Tray Strawberry Cookies",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Oreo",
+              "image": "https://medias.pns.hk/publishing/PNSHK-321505-front-prodcat.jpg?version=1773318016",
+              "pnsCode": "BP_321505"
+            },
+            {
+              "name": "YBC Noir Black Cocoa Sandwich Biscuit 4p",
+              "price": 15.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "YBC",
+              "image": "https://medias.pns.hk/publishing/PNSHK-496537-front-prodcat.jpg",
+              "pnsCode": "BP_496537"
+            },
+            {
+              "name": "Mcvitie's Digestive Biscuits 500g",
+              "price": 20.0,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-158098-front-prodcat.jpg",
+              "pnsCode": "BP_158098",
+              "weight": 0.5
+            },
+            {
+              "name": "McVitie's Goahead Yogurt Breaks Strawberry",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-490211-front-prodcat.jpg?version=1750241071",
+              "pnsCode": "BP_490211"
+            },
+            {
+              "name": "McVitie's Light Digestive",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-118047-front-prodcat.jpg?version=1732720033",
+              "pnsCode": "BP_118047"
+            },
+            {
+              "name": "McVitie's Digestive Biscuits",
+              "price": 23.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-100678-front-prodcat.jpg?version=1732699091",
+              "pnsCode": "BP_100678"
+            },
+            {
+              "name": "McVitie's Milk Chocolate Digestive",
+              "price": 36.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-325466-front-prodcat.jpg?version=1761222071",
+              "pnsCode": "BP_325466"
+            },
+            {
+              "name": "McVitie's Plain Chocolate Digestive",
+              "price": 36.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-325467-front-prodcat.jpg?version=1761222076",
+              "pnsCode": "BP_325467"
+            },
+            {
+              "name": "McVitie's To Go Digestive Milk Chocolate",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-483131-front-prodcat.jpg",
+              "pnsCode": "BP_483131"
+            },
+            {
+              "name": "McVitie's To Go Digestive Original",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-483130-front-prodcat.jpg",
+              "pnsCode": "BP_483130"
+            },
+            {
+              "name": "McVitie's Ginger Biscuit",
+              "price": 22.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-161199-front-prodcat.jpg?version=1784118280",
+              "pnsCode": "BP_161199"
+            },
+            {
+              "name": "McVitie's Mini Cheddars Original",
+              "price": 25.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-153435-front-prodcat.jpg?version=1775650870",
+              "pnsCode": "BP_153435"
+            },
+            {
+              "name": "McVitie's Digestive Oat",
+              "price": 27.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-116926-front-prodcat.jpg",
+              "pnsCode": "BP_116926"
+            },
+            {
+              "name": "McVitie's Digestive Bar Original Mp",
+              "price": 24.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-444646-front-prodcat.jpg",
+              "pnsCode": "BP_444646"
+            },
+            {
+              "name": "McVitie's Digestive Bar Chocolate Mp",
+              "price": 24.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-444647-front-prodcat.jpg",
+              "pnsCode": "BP_444647"
+            },
+            {
+              "name": "McVitie's Go Ahead Forest Fruit Biscuit",
+              "price": 17.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-385133-front-prodcat.jpg",
+              "pnsCode": "BP_385133"
+            },
+            {
+              "name": "McVitie's Go Ahead Apple Sultana Biscuit",
+              "price": 17.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-107590-front-prodcat.jpg",
+              "pnsCode": "BP_107590"
+            },
+            {
+              "name": "McVitie's Goahead Yogurt Breaks Forest Fruit",
+              "price": 29.9,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-490212-front-prodcat.jpg?version=1750241036",
+              "pnsCode": "BP_490212"
+            },
+            {
+              "name": "McVitie's To Go Oat Crunch",
+              "price": 5.0,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "McVitie's",
+              "image": "https://medias.pns.hk/publishing/PNSHK-497454-front-prodcat.jpg",
+              "pnsCode": "BP_497454"
+            },
+            {
+              "name": "Loacker Minis Cremkakao",
+              "price": 46.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-137874-front-prodcat.jpg",
+              "pnsCode": "BP_137874"
+            },
+            {
+              "name": "Loacker Minis Napolitaner",
+              "price": 46.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-137873-front-prodcat.jpg",
+              "pnsCode": "BP_137873"
+            },
+            {
+              "name": "Loacker Quadratini Tiramisu Wafer",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-195716-front-prodcat.jpg?version=1732779684",
+              "pnsCode": "BP_195716"
+            },
+            {
+              "name": "Loacker Quad Double Chocolate",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-413057-front-prodcat.jpg",
+              "pnsCode": "BP_413057"
+            },
+            {
+              "name": "Loacker Quad Peanut Butter Wafer",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-102092-front-prodcat.jpg",
+              "pnsCode": "BP_102092"
+            },
+            {
+              "name": "Loacker Quadratini Kakao Wafer",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-153977-front-prodcat.jpg?version=1732747508",
+              "pnsCode": "BP_153977"
+            },
+            {
+              "name": "Loacker Quadratini Napolitans Wafer",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-151992-front-prodcat.jpg?version=1732760814",
+              "pnsCode": "BP_151992"
+            },
+            {
+              "name": "Loacker Quadratini Vanilla Wafer",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-472980-front-prodcat.jpg?version=1732937565",
+              "pnsCode": "BP_472980"
+            },
+            {
+              "name": "Loacker Quad Strawberry",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-163622-front-prodcat.jpg?version=1785119042",
+              "pnsCode": "BP_163622"
+            },
+            {
+              "name": "Loacker Quadratini Dark Chocolate Wafer",
+              "price": 47.5,
+              "category": "Groceries",
+              "subcategory": "Biscuits",
+              "brand": "Loacker",
+              "image": "https://medias.pns.hk/publishing/PNSHK-472978-front-prodcat.jpg?version=1733379794",
+              "pnsCode": "BP_472978"
             }
           ]
         },

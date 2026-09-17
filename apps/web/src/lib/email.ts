@@ -324,3 +324,310 @@ export async function sendDeadlineNotice(
   });
   if (error) throw new Error(error.message);
 }
+
+const BROADCAST_FROM = "GraceRun <hello@gracerun.fit>";
+const BROADCAST_REPLY_TO = "andrew.ribli@gmail.com";
+
+function helloFrom(): string {
+  return process.env.RESEND_BROADCAST_FROM?.trim() || BROADCAST_FROM;
+}
+
+function formatHk(amount: number): string {
+  const rounded = Math.round(amount * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+const DEFAULT_ADMIN_OPS_EMAIL = "1155233599@link.cuhk.edu.hk";
+
+export function adminOpsEmails(): string[] {
+  const extras = (process.env.OWNER_ALERT_EMAIL ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  return [...new Set([DEFAULT_ADMIN_OPS_EMAIL.toLowerCase(), ...extras])];
+}
+
+async function sendFromHello(opts: {
+  to: string;
+  subject: string;
+  body: string;
+}): Promise<void> {
+  const html = brandedBroadcastEmail({
+    preheader: opts.subject,
+    heading: opts.subject,
+    bodyHtml: bodyTextToHtml(opts.body),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject: opts.subject,
+    html,
+    text: `${opts.body}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+async function sendReliably(
+  label: string,
+  fn: () => Promise<void>,
+): Promise<void> {
+  try {
+    await fn();
+  } catch (err) {
+    console.error(`${label} failed, retrying once`, err);
+    await fn();
+  }
+}
+
+export async function sendAdminNewOrderNotice(opts: {
+  customerName: string;
+  items: OrderEmailItem[];
+  deliveryLocation: string;
+  total: number;
+  orderId: string;
+}): Promise<void> {
+  const customerName = opts.customerName.trim() || "Customer";
+  const itemList =
+    opts.items
+      .map((item) => `${item.quantity}× ${item.name}`)
+      .join(", ") || "—";
+  const subject = `New GraceRun Order — ${customerName}`;
+  const body = `Hey Andrew,
+
+A new order has been placed on GraceRun.
+
+Customer: ${customerName}
+Items: ${itemList}
+Dorm/Lobby: ${opts.deliveryLocation.trim() || "—"}
+Estimated Total: HK$${formatHk(opts.total)}
+Order ID: ${opts.orderId}
+
+Check the admin dashboard for details.`;
+  await Promise.all(
+    adminOpsEmails().map((to) =>
+      sendReliably(`admin new-order ${to}`, () =>
+        sendFromHello({ to, subject, body }),
+      ),
+    ),
+  );
+}
+
+export async function sendAdminNewUserNotice(opts: {
+  fullName: string;
+  email: string;
+  collegeHall: string;
+  isRunner: boolean;
+}): Promise<void> {
+  const fullName = opts.fullName.trim() || "New user";
+  const subject = `New GraceRun User — ${fullName}`;
+  const body = `Hey Andrew,
+
+A new user just registered on GraceRun.
+
+Name: ${fullName}
+Email: ${opts.email.trim() || "—"}
+Is Runner: ${opts.isRunner ? "Yes" : "No"}
+
+Check the admin dashboard for details.`;
+  await Promise.all(
+    adminOpsEmails().map((to) =>
+      sendReliably(`admin new-user ${to}`, () =>
+        sendFromHello({ to, subject, body }),
+      ),
+    ),
+  );
+}
+
+export async function sendCustomerPaymentReminder(opts: {
+  to: string;
+  customerName: string;
+  total: number;
+  paymentInfo: string;
+}): Promise<void> {
+  const name = opts.customerName.trim() || "there";
+  const paymentInfo = opts.paymentInfo.trim() || "See the GraceRun app";
+  const subject = "Your GraceRun order has arrived — pay within 24 hours";
+  const body = `Hey ${name},
+
+Your GraceRun order has been delivered to your dorm lobby! 🎉
+
+You now have 24 hours to complete your payment. Please pay via PayMe or FPS to the account provided in the app.
+
+Order Total: HK$${formatHk(opts.total)}
+Runner's PayMe/FPS: ${paymentInfo}
+
+If you've already paid, you can ignore this email.
+
+Thanks for using GraceRun!
+— Andrew`;
+  const html = brandedBroadcastEmail({
+    preheader: subject,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(body),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${body}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendRunnerPickupReminder(opts: {
+  to: string;
+  runnerName: string;
+  orderId: string;
+  customerName: string;
+  deliveryLocation: string;
+  estimate: number;
+}): Promise<void> {
+  const runnerName = opts.runnerName.trim() || "there";
+  const customerName = opts.customerName.trim() || "Customer";
+  const subject = "New order accepted — pick up within 3 hours";
+  const body = `Hey ${runnerName},
+
+You've accepted a new GraceRun order. You have 3 hours to pick up the groceries and complete the delivery.
+
+Order ID: ${opts.orderId}
+Customer: ${customerName}
+Delivery Location: ${opts.deliveryLocation}
+Estimated Total: HK$${formatHk(opts.estimate)}
+
+Please upload your receipt and bank statement before marking as delivered.
+
+Thanks for running with GraceRun!
+— Andrew`;
+  const html = brandedBroadcastEmail({
+    preheader: subject,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(body),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${body}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+function bodyTextToHtml(body: string): string {
+  const paragraphs = body
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+  if (paragraphs.length === 0) {
+    return `<p style="margin:0;font-size:14px;color:#111827;"></p>`;
+  }
+  return paragraphs
+    .map((block) => {
+      const withBreaks = escapeHtml(block).replaceAll("\n", "<br />");
+      return `<p style="margin:0 0 14px;font-size:14px;line-height:1.55;color:#111827;">${withBreaks}</p>`;
+    })
+    .join("");
+}
+
+function brandedBroadcastEmail(opts: {
+  preheader: string;
+  heading: string;
+  bodyHtml: string;
+}): string {
+  const heading = escapeHtml(opts.heading);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${heading}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+  <span style="display:none;max-height:0;overflow:hidden;">${escapeHtml(opts.preheader)}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
+          <tr>
+            <td style="background:${ACCENT};padding:18px 24px;">
+              <p style="margin:0;font-size:20px;font-weight:700;color:#ffffff;">GraceRun</p>
+              <p style="margin:4px 0 0;font-size:12px;color:#ffd6d9;">Groceries. Delivered with grace.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <h1 style="margin:0 0 16px;font-size:20px;color:#111827;">${heading}</h1>
+              ${opts.bodyHtml}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 24px 24px;border-top:1px solid #f3f4f6;">
+              <p style="margin:0;font-size:12px;color:#6b7280;">${escapeHtml(FOOTER)}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+/** Individual admin broadcast (no BCC). Reply-to goes to the owner inbox. */
+export async function sendDirectAdminEmail(
+  to: string,
+  recipientName: string,
+  body: string,
+): Promise<void> {
+  const name = recipientName.trim() || "there";
+  const trimmed = body.trim();
+  if (!trimmed) throw new Error("Message is required");
+  const subject = "Message from GraceRun";
+  const full = `Hey ${name},
+
+${trimmed}
+
+Thanks for using GraceRun!
+— Andrew`;
+  const html = brandedBroadcastEmail({
+    preheader: subject,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(full),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to,
+    replyTo: BROADCAST_REPLY_TO,
+    subject,
+    html,
+    text: `${full}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendAdminBroadcast(
+  to: string,
+  subject: string,
+  body: string,
+): Promise<void> {
+  const trimmedSubject = subject.trim();
+  const trimmedBody = body.trim();
+  if (!trimmedSubject || !trimmedBody) {
+    throw new Error("Subject and body are required");
+  }
+  const html = brandedBroadcastEmail({
+    preheader: trimmedSubject,
+    heading: trimmedSubject,
+    bodyHtml: bodyTextToHtml(trimmedBody),
+  });
+  const { error } = await getResend().emails.send({
+    from: process.env.RESEND_BROADCAST_FROM?.trim() || BROADCAST_FROM,
+    to,
+    replyTo: BROADCAST_REPLY_TO,
+    subject: trimmedSubject,
+    html,
+    text: `${trimmedBody}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}

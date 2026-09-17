@@ -8,7 +8,6 @@ import {
   type App,
   type ServiceAccount,
 } from "firebase-admin/app";
-import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { collectionName } from "@/lib/constants";
 
@@ -52,30 +51,17 @@ function getAdminApp(): App | null {
   return initializeApp({ credential: cert(account) });
 }
 
-export function getAdminAuth(): Auth | null {
-  const app = getAdminApp();
-  return app ? getAuth(app) : null;
-}
-
 export function getAdminDb(): Firestore | null {
   const app = getAdminApp();
   return app ? getFirestore(app) : null;
 }
 
-export async function emailHasAuthAccount(email: string): Promise<boolean | null> {
-  const auth = getAdminAuth();
-  if (!auth) return null;
-  try {
-    await auth.getUserByEmail(email);
-    return true;
-  } catch (err) {
-    const code =
-      err && typeof err === "object" && "code" in err
-        ? String((err as { code: string }).code)
-        : "";
-    if (code === "auth/user-not-found") return false;
-    console.error("emailHasAuthAccount failed", err);
-    return null;
+export class AdminAuthError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "AdminAuthError";
+    this.status = status;
   }
 }
 
@@ -90,7 +76,7 @@ async function emailRegisteredViaRest(email: string): Promise<boolean | null> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           identifier: email,
-          continueUri: process.env.NEXT_PUBLIC_APP_ORIGIN ?? "https://gracerun.fit",
+          continueUri: process.env.NEXT_PUBLIC_APP_ORIGIN ?? "https://www.gracerun.fit",
         }),
       },
     );
@@ -103,76 +89,26 @@ async function emailRegisteredViaRest(email: string): Promise<boolean | null> {
   }
 }
 
-/** Prefer Auth; also treat Firestore profile / username maps as registered. */
+/** Firestore /users, then Identity Toolkit REST. Avoid firebase-admin/auth (jose ESM crash on Vercel). */
 export async function emailIsRegistered(email: string): Promise<boolean | null> {
-  const authHit = await emailHasAuthAccount(email);
-  if (authHit === true) return true;
-
-  const profileHit = await emailHasFirestoreProfile(email);
-  if (profileHit === true) return true;
-  if (profileHit === false && authHit === false) return false;
-  if (profileHit === false && authHit === null) {
-    return emailRegisteredViaRest(email);
-  }
-  // profileHit null (no admin db) — fall through
-  if (authHit === false) return false;
-  return emailRegisteredViaRest(email);
-}
-
-async function emailHasFirestoreProfile(email: string): Promise<boolean | null> {
-  const db = getAdminDb();
-  if (!db) return null;
   try {
-    const users = collectionName("users");
-    const byEmail = await db
-      .collection(users)
-      .where("email", "==", email)
-      .limit(1)
-      .get();
-    if (!byEmail.empty) return true;
-    const byCuhk = await db
-      .collection(users)
-      .where("cuhkEmail", "==", email)
-      .limit(1)
-      .get();
-    if (!byCuhk.empty) return true;
-
-    const usernames = collectionName("usernames");
-    const byUsernameEmail = await db
-      .collection(usernames)
-      .where("email", "==", email)
-      .limit(1)
-      .get();
-    return !byUsernameEmail.empty;
-  } catch (err) {
-    console.error("emailHasFirestoreProfile failed", err);
-    return null;
-  }
-}
-
-/**
- * Resolve the Auth uid to update for a CUHK email.
- * Handles legacy accounts where Auth email was a synthetic username address
- * but the profile / usernames map stores the real CUHK email — and prefers
- * the newest username mapping when duplicates exist.
- */
-export async function resolveAuthUidForEmail(
-  email: string,
-): Promise<string | null> {
-  const auth = getAdminAuth();
-  if (auth) {
-    try {
-      const user = await auth.getUserByEmail(email);
-      return user.uid;
-    } catch (err) {
-      const code =
-        err && typeof err === "object" && "code" in err
-          ? String((err as { code: string }).code)
-          : "";
-      if (code !== "auth/user-not-found") {
-        console.error("resolveAuthUidForEmail auth lookup failed", err);
-      }
+    const db = getAdminDb();
+    if (db) {
+      const snap = await db
+        .collection(collectionName("users"))
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+      if (!snap.empty) return true;
+      const cuhk = await db
+        .collection(collectionName("users"))
+        .where("cuhkEmail", "==", email)
+        .limit(1)
+        .get();
+      if (!cuhk.empty) return true;
     }
+  } catch (err) {
+    console.error("emailIsRegistered firestore failed", err);
   }
 
   const db = getAdminDb();
@@ -231,14 +167,54 @@ export type AlertRecipient = {
   isRunner: boolean;
 };
 
+export type BroadcastGroup = "new_users" | "runners" | "long_term";
+
+export type BroadcastRecipient = {
+  email: string;
+  isRunner: boolean;
+  createdAt: Date | null;
+};
+
+function createdAtFromData(data: Record<string, unknown>): Date | null {
+  const raw = data.createdAt;
+  if (raw == null) return null;
+  if (
+    typeof raw === "object" &&
+    "toDate" in raw &&
+    typeof (raw as { toDate: unknown }).toDate === "function"
+  ) {
+    try {
+      return (raw as { toDate: () => Date }).toDate();
+    } catch {
+      return null;
+    }
+  }
+  if (raw instanceof Date) return raw;
+  if (typeof raw === "string" || typeof raw === "number") {
+    const d = new Date(raw);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
 export async function listUserAlertRecipients(): Promise<AlertRecipient[]> {
+  const recipients = await listBroadcastRecipients();
+  return recipients.map(({ email, isRunner }) => ({ email, isRunner }));
+}
+
+export async function listBroadcastRecipients(
+  idToken?: string,
+): Promise<BroadcastRecipient[]> {
+  if (idToken) {
+    return listBroadcastRecipientsViaRest(idToken);
+  }
   const db = getAdminDb();
   if (!db) return [];
   const snap = await db.collection(collectionName("users")).get();
-  const out: AlertRecipient[] = [];
+  const out: BroadcastRecipient[] = [];
   const seen = new Set<string>();
-  for (const doc of snap.docs) {
-    const data = doc.data();
+  for (const docSnap of snap.docs) {
+    const data = docSnap.data() as Record<string, unknown>;
     const email = String(data.email ?? data.cuhkEmail ?? "")
       .trim()
       .toLowerCase();
@@ -247,206 +223,194 @@ export async function listUserAlertRecipients(): Promise<AlertRecipient[]> {
     out.push({
       email,
       isRunner: Boolean(data.isRunner) || Boolean(data.runnerId),
+      createdAt: createdAtFromData(data),
     });
   }
   return out;
 }
 
-export async function updateAuthPassword(
-  email: string,
-  newPassword: string,
-): Promise<void> {
-  const auth = getAdminAuth();
-  if (!auth) {
-    throw new Error("Password reset is not configured on the server.");
+function firestoreDocumentsUrl(): string {
+  const project = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim();
+  if (!project) {
+    throw new AdminAuthError("NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set.", 503);
   }
-  const uid = await resolveAuthUidForEmail(email);
-  if (!uid) {
-    throw new Error("No account found with this email.");
+  return `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents`;
+}
+
+function restString(
+  fields: Record<string, { stringValue?: string }> | undefined,
+  key: string,
+): string {
+  return String(fields?.[key]?.stringValue ?? "").trim();
+}
+
+function restBool(
+  fields: Record<string, { booleanValue?: boolean; stringValue?: string }> | undefined,
+  key: string,
+): boolean {
+  const f = fields?.[key];
+  if (!f) return false;
+  if (typeof f.booleanValue === "boolean") return f.booleanValue;
+  return Boolean(f.stringValue);
+}
+
+function restTimestamp(
+  fields: Record<string, { timestampValue?: string }> | undefined,
+  key: string,
+): Date | null {
+  const raw = fields?.[key]?.timestampValue;
+  if (!raw) return null;
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+async function listBroadcastRecipientsViaRest(
+  idToken: string,
+): Promise<BroadcastRecipient[]> {
+  const base = firestoreDocumentsUrl();
+  const collection = collectionName("users");
+  const out: BroadcastRecipient[] = [];
+  const seen = new Set<string>();
+  let pageToken = "";
+
+  for (let i = 0; i < 40; i++) {
+    const url = new URL(`${base}/${collection}`);
+    url.searchParams.set("pageSize", "300");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${idToken}` },
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("list users via REST failed", res.status, text.slice(0, 400));
+      throw new AdminAuthError("Could not load users from Firestore.", 502);
+    }
+    const data = (await res.json()) as {
+      documents?: {
+        fields?: Record<
+          string,
+          {
+            stringValue?: string;
+            booleanValue?: boolean;
+            timestampValue?: string;
+          }
+        >;
+      }[];
+      nextPageToken?: string;
+    };
+    for (const doc of data.documents ?? []) {
+      const fields = doc.fields;
+      const email = (
+        restString(fields, "email") || restString(fields, "cuhkEmail")
+      ).toLowerCase();
+      if (!email.includes("@") || seen.has(email)) continue;
+      seen.add(email);
+      out.push({
+        email,
+        isRunner:
+          restBool(fields, "isRunner") || Boolean(restString(fields, "runnerId")),
+        createdAt: restTimestamp(fields, "createdAt"),
+      });
+    }
+    if (!data.nextPageToken) break;
+    pageToken = data.nextPageToken;
   }
 
-  // Always set the password on the resolved uid. Also sync the Auth email to
-  // the CUHK address from the username/profile map — legacy accounts often
-  // Auth as username@fusion-express.app while the map stores the real email,
-  // which breaks both login and reset until Auth is updated.
-  try {
-    await auth.updateUser(uid, {
-      password: newPassword,
-      email,
-      emailVerified: true,
-    });
-  } catch (err) {
-    const code =
-      err && typeof err === "object" && "code" in err
-        ? String((err as { code: string }).code)
-        : "";
-    if (code.includes("email-already-exists")) {
-      // Another Auth user already owns this email — still reset password on
-      // the mapped uid so username login can work after a synthetic-email fall back.
-      await auth.updateUser(uid, { password: newPassword });
-      return;
-    }
-    throw err;
+  return out;
+}
+
+/** Verify Firebase ID token and that `/admins/{uid}` exists. */
+export async function requireAdminFromRequest(
+  request: Request,
+): Promise<{ uid: string; email: string | null; idToken: string }> {
+  const header = request.headers.get("authorization") ?? "";
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  if (!match) {
+    throw new AdminAuthError("Missing Authorization bearer token.", 401);
   }
+  const idToken = match[1]!;
+
+  const decoded = await verifyIdTokenViaRest(idToken);
+  if (!decoded) {
+    throw new AdminAuthError("Invalid or expired auth token.", 401);
+  }
+
+  const res = await fetch(
+    `${firestoreDocumentsUrl()}/admins/${encodeURIComponent(decoded.uid)}`,
+    { headers: { Authorization: `Bearer ${idToken}` } },
+  );
+  if (res.status === 404 || res.status === 403) {
+    throw new AdminAuthError("Admin access only.", 403);
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("admin doc REST failed", res.status, text.slice(0, 400));
+    throw new AdminAuthError("Could not verify admin access.", 502);
+  }
+
+  return {
+    uid: decoded.uid,
+    email: decoded.email,
+    idToken,
+  };
+}
+
+export function filterBroadcastRecipients(
+  recipients: BroadcastRecipient[],
+  group: BroadcastGroup,
+  now = new Date(),
+): BroadcastRecipient[] {
+  const msDay = 24 * 60 * 60 * 1000;
+  if (group === "runners") {
+    return recipients.filter((r) => r.isRunner);
+  }
+  if (group === "new_users") {
+    const cutoff = now.getTime() - 7 * msDay;
+    return recipients.filter(
+      (r) => r.createdAt != null && r.createdAt.getTime() >= cutoff,
+    );
+  }
+  const cutoff = now.getTime() - 30 * msDay;
+  return recipients.filter(
+    (r) => r.createdAt != null && r.createdAt.getTime() < cutoff,
+  );
 }
 
 /**
- * Point Firebase Auth at the CUHK email stored on the username/profile map.
- * Used by admins to repair accounts that can no longer sign in or reset.
+ * Verify a Firebase ID token without loading `firebase-admin/auth`.
+ * Admin Auth pulls in jwks-rsa/jose, which currently breaks on Vercel
+ * (ERR_REQUIRE_ESM). Identity Toolkit REST works with the public API key.
  */
-export async function repairAuthEmailForUid(uid: string): Promise<{
-  uid: string;
-  email: string;
-  username?: string;
-  previousAuthEmail?: string;
-}> {
-  const auth = getAdminAuth();
-  const db = getAdminDb();
-  if (!auth || !db) {
-    throw new Error("Admin repair is not configured on the server.");
-  }
-
-  const trimmedUid = uid.trim();
-  if (!trimmedUid) throw new Error("Missing uid");
-
-  let email = "";
-  let username: string | undefined;
-
-  const usernamesCol = collectionName("usernames");
-  const mapped = await db
-    .collection(usernamesCol)
-    .where("uid", "==", trimmedUid)
-    .limit(5)
-    .get();
-  if (!mapped.empty) {
-    const doc = mapped.docs[0];
-    username = doc.id;
-    email = String(doc.data().email ?? "")
-      .trim()
-      .toLowerCase();
-  }
-
-  if (!email.includes("@")) {
-    const profile = await db
-      .collection(collectionName("users"))
-      .doc(trimmedUid)
-      .get();
-    if (profile.exists) {
-      const data = profile.data() ?? {};
-      email = String(data.email ?? data.cuhkEmail ?? "")
-        .trim()
-        .toLowerCase();
-      if (!username && data.username) username = String(data.username);
-    }
-  }
-
-  if (!email.includes("@")) {
-    throw new Error("No CUHK email found on this account to repair.");
-  }
-
-  let previousAuthEmail: string | undefined;
-  try {
-    const existing = await auth.getUser(trimmedUid);
-    previousAuthEmail = existing.email ?? undefined;
-  } catch (err) {
-    const code =
-      err && typeof err === "object" && "code" in err
-        ? String((err as { code: string }).code)
-        : "";
-    if (code === "auth/user-not-found") {
-      throw new Error(
-        "Auth user is missing for this profile. Ask them to create a new account.",
-      );
-    }
-    throw err;
-  }
-
-  if (previousAuthEmail?.toLowerCase() !== email) {
-    await auth.updateUser(trimmedUid, {
-      email,
-      emailVerified: true,
-    });
-  }
-
-  return { uid: trimmedUid, email, username, previousAuthEmail };
-}
-
-/** Verify a browser ID token belongs to an /admins/{uid} document. */
-export async function verifyAdminIdToken(
-  idToken: string | null | undefined,
-): Promise<{ uid: string } | null> {
-  if (!idToken) return null;
-  const auth = getAdminAuth();
-  const db = getAdminDb();
-  if (!auth || !db) return null;
-  try {
-    const decoded = await auth.verifyIdToken(idToken);
-    const adminSnap = await db.collection("admins").doc(decoded.uid).get();
-    if (!adminSnap.exists) return null;
-    return { uid: decoded.uid };
-  } catch (err) {
-    console.error("verifyAdminIdToken failed", err);
+async function verifyIdTokenViaRest(
+  idToken: string,
+): Promise<{ uid: string; email: string | null } | null> {
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim();
+  if (!apiKey) {
+    console.error("NEXT_PUBLIC_FIREBASE_API_KEY is not set");
     return null;
   }
-}
-
-/**
- * Permanently remove an account: Auth user, users/{uid}, and any username
- * maps pointing at that uid (and exact username doc when provided).
- */
-export async function deleteUserAccount(opts: {
-  uid: string;
-  username?: string;
-}): Promise<{ deletedAuth: boolean; deletedProfile: boolean; deletedUsernames: string[] }> {
-  const auth = getAdminAuth();
-  const db = getAdminDb();
-  if (!auth || !db) {
-    throw new Error("Admin delete is not configured on the server.");
-  }
-
-  const uid = opts.uid.trim();
-  if (!uid) throw new Error("Missing uid");
-
-  let deletedAuth = false;
   try {
-    await auth.deleteUser(uid);
-    deletedAuth = true;
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      users?: { localId?: string; email?: string }[];
+    };
+    const user = data.users?.[0];
+    const uid = user?.localId?.trim();
+    if (!uid) return null;
+    return {
+      uid,
+      email: user?.email?.trim().toLowerCase() || null,
+    };
   } catch (err) {
-    const code =
-      err && typeof err === "object" && "code" in err
-        ? String((err as { code: string }).code)
-        : "";
-    if (code !== "auth/user-not-found") throw err;
+    console.error("verifyIdTokenViaRest failed", err);
+    return null;
   }
-
-  const usersCol = collectionName("users");
-  const profileRef = db.collection(usersCol).doc(uid);
-  const profileSnap = await profileRef.get();
-  let deletedProfile = false;
-  if (profileSnap.exists) {
-    await profileRef.delete();
-    deletedProfile = true;
-  }
-
-  const usernamesCol = collectionName("usernames");
-  const deletedUsernames: string[] = [];
-  const username = opts.username?.trim().toLowerCase();
-  if (username) {
-    const ref = db.collection(usernamesCol).doc(username);
-    const snap = await ref.get();
-    if (snap.exists) {
-      await ref.delete();
-      deletedUsernames.push(username);
-    }
-  }
-
-  // Clean any other username maps that still point at this uid.
-  const mapped = await db.collection(usernamesCol).where("uid", "==", uid).get();
-  for (const doc of mapped.docs) {
-    if (deletedUsernames.includes(doc.id)) continue;
-    await doc.ref.delete();
-    deletedUsernames.push(doc.id);
-  }
-
-  return { deletedAuth, deletedProfile, deletedUsernames };
 }

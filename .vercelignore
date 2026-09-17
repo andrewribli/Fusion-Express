@@ -13,8 +13,19 @@ firebase-service-account.json
 next-env.d.ts
 scripts/__pycache__
 *.zip
+*.exe
+*.crdownload
+*.pdf
+tmp/
 FoodPanda Data2.txt
 FoodPanda Fusion Data.txt
 Product List Catalog.xlsx
 06_large_demo_dataset.sql
 scripts/_image_misses.txt
+Grok_Bot*
+GraceRun Logo.png
+Reply Letter.pdf
+SC-554-0803.pdf
+# Local CLI uploads cap at 100MB; these shelf photos are already on prior
+# production deploys / git. Exclude so messaging and other code can ship.
+apps/web/public/images/catalog

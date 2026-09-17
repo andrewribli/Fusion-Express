@@ -7,6 +7,7 @@ import { FileDropzone } from "@/components/FileDropzone";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
+import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
 
 const STEPS = [
@@ -144,13 +145,7 @@ export function RunnerDeliveryFlow({
                   </p>
                 )}
               </div>
-              <ul className="space-y-1 text-[#f5f5f5]">
-                {order.items.map((item) => (
-                  <li key={item.itemId}>
-                    {item.quantity}× {item.name}
-                  </li>
-                ))}
-              </ul>
+              <RunnerOrderItemList items={order.items} dark />
               <p className="rounded-xl bg-[#2a2418] px-3 py-2 text-[#f5e6c8]">
                 {resolveSpecialInstructions(order.customerNote)}
               </p>

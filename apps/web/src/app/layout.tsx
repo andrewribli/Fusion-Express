@@ -40,11 +40,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geist.variable} h-full`}>
-      <body className="dark-mode min-h-full bg-lakers-navy font-sans text-gray-900 antialiased">
+      <body className="lite-mode min-h-full bg-[#f3f4f6] font-sans text-gray-900 antialiased">
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('gracerun-theme');if(t==='lite'){document.body.classList.remove('dark-mode');document.body.classList.add('lite-mode');}}catch(e){}",
+              "try{document.body.classList.remove('dark-mode');document.body.classList.add('lite-mode');}catch(e){}",
           }}
         />
         <ThemeProvider>

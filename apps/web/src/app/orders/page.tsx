@@ -85,12 +85,12 @@ export default function OrdersPage() {
   return (
     <RequireAuth>
       <AppShell>
-        <PageWallpaper src={BG_ORDERS} alt="" overlayClassName="bg-lakers-navy/60">
+        <PageWallpaper src={BG_ORDERS} alt="" overlayClassName="bg-white/75">
           <AppHeader title="Order History" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4">
             {loading ? (
-              <p className="text-sm text-lakers-gold">Loading orders…</p>
+              <p className="text-sm text-gray-500">Loading orders…</p>
             ) : error ? (
               <p className="rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>
             ) : orders.length === 0 ? (
@@ -110,7 +110,7 @@ export default function OrdersPage() {
                     <Link href={`/track?orderId=${order.id}`}>
                       <div className="flex items-start justify-between gap-3">
                         <CustomerOrderHeading order={order} />
-                        <span className="shrink-0 rounded-full bg-lakers-gold/20 px-2 py-0.5 text-xs font-medium text-lakers-purple">
+                        <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-[#ED1C24]">
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
                       </div>
@@ -133,6 +133,15 @@ export default function OrdersPage() {
                         >
                           {cancellingId === order.id ? "Cancelling…" : "Cancel"}
                         </button>
+                      )}
+                      {(order.status === "delivered" ||
+                        order.status === "runner_paid") && (
+                        <Link
+                          href={`/pay/${encodeURIComponent(order.id)}`}
+                          className="flex-1 rounded-xl bg-[#ED1C24] py-2 text-center text-xs font-semibold text-white"
+                        >
+                          Submit Payment
+                        </Link>
                       )}
                       {(order.status === "delivered" || order.status === "cancelled") && (
                         <button

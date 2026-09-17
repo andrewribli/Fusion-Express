@@ -22,7 +22,7 @@ export default function RunnerRegisterRedirectPage() {
 
   return (
     <LakersWallpaper>
-      <div className="flex min-h-screen items-center justify-center text-sm font-medium text-lakers-gold">
+      <div className="flex min-h-screen items-center justify-center text-sm font-medium text-gray-500">
         Loading…
       </div>
     </LakersWallpaper>

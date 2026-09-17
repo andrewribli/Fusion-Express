@@ -6,9 +6,9 @@ import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
-import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import type { UserProfile } from "@/context/UserContext";
-import { getAuthClient } from "@/lib/firebase";
+import { AdminUserChatModal } from "@/components/AdminUserChatModal";
+import { fetchUnreadReplyCounts } from "@/lib/direct-messages";
 import { fetchAllUsers } from "@/lib/users";
 
 function cell(value: string | undefined): string {
@@ -20,94 +20,40 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [deletingUid, setDeletingUid] = useState<string | null>(null);
-  const [repairingUid, setRepairingUid] = useState<string | null>(null);
-  const [actionMsg, setActionMsg] = useState("");
-
-  async function loadUsers() {
-    setLoading(true);
-    setError("");
-    try {
-      const rows = await fetchAllUsers();
-      setUsers(rows);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load users.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [unread, setUnread] = useState<Record<string, number>>({});
+  const [chatUser, setChatUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    void loadUsers();
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rows = await fetchAllUsers();
+        if (!cancelled) setUsers(rows);
+        try {
+          const counts = await fetchUnreadReplyCounts();
+          if (!cancelled) setUnread(counts);
+        } catch {
+          // Chat badges are optional if indexes are still building.
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load users.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  async function handleRepair(user: UserProfile) {
-    if (!user.uid) return;
-    const label = user.username || user.email || user.uid;
-    setRepairingUid(user.uid);
-    setActionMsg("");
-    setError("");
-    try {
-      const token = await getAuthClient().currentUser?.getIdToken();
-      if (!token) throw new Error("Please sign in again as an admin.");
-      const res = await fetch("/api/admin/users/repair-auth-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ uid: user.uid }),
-      });
-      const data = (await res.json()) as {
-        error?: string;
-        email?: string;
-        previousAuthEmail?: string;
-      };
-      if (!res.ok) throw new Error(data.error ?? "Could not repair account");
-      setActionMsg(
-        data.previousAuthEmail && data.previousAuthEmail !== data.email
-          ? `Repaired ${label}: Auth email ${data.previousAuthEmail} → ${data.email}. They can use Forgot password now.`
-          : `Repaired ${label}: Auth email is ${data.email}. They can use Forgot password now.`,
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not repair account.");
-    } finally {
-      setRepairingUid(null);
-    }
-  }
-
-  async function handleDelete(user: UserProfile) {
-    if (!user.uid) return;
-    const label = user.username || user.email || user.uid;
-    const ok = window.confirm(
-      `Delete account “${label}”?\n\nThis removes Auth, the users profile, and username maps. Cannot be undone.`,
-    );
-    if (!ok) return;
-
-    setDeletingUid(user.uid);
-    setActionMsg("");
-    setError("");
-    try {
-      const token = await getAuthClient().currentUser?.getIdToken();
-      if (!token) throw new Error("Please sign in again as an admin.");
-      const res = await fetch("/api/admin/users/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ uid: user.uid, username: user.username }),
-      });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Could not delete account");
-      setActionMsg(`Deleted ${label}.`);
-      setUsers((prev) => prev.filter((u) => u.uid !== user.uid));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete account.");
-    } finally {
-      setDeletingUid(null);
-    }
-  }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void fetchUnreadReplyCounts().then(setUnread).catch(() => undefined);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <RequireAdmin>
@@ -128,6 +74,10 @@ export default function AdminUsersPage() {
                   Runner payouts
                 </Link>
                 {" · "}
+                <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
+                  Messaging
+                </Link>
+                {" · "}
                 <Link href="/admin/refunds" className="font-medium text-[#ED1C24] underline">
                   Pending Fusion price refunds
                 </Link>
@@ -138,6 +88,10 @@ export default function AdminUsersPage() {
                 {" · "}
                 <Link href="/admin/support" className="font-medium text-[#ED1C24] underline">
                   Support chat
+                </Link>
+                {" · "}
+                <Link href="/admin/payments" className="font-medium text-[#ED1C24] underline">
+                  Payment submissions
                 </Link>
                 {" · "}
                 <Link href="/admin/warnings" className="font-medium text-[#ED1C24] underline">
@@ -166,49 +120,48 @@ export default function AdminUsersPage() {
                     <thead>
                       <tr className="border-b border-gray-200 text-xs font-semibold uppercase tracking-wide text-gray-500">
                         <th className="whitespace-nowrap py-2 pr-4">Full name</th>
-                        <th className="whitespace-nowrap py-2 pr-4">Username</th>
                         <th className="whitespace-nowrap py-2 pr-4">Email</th>
-                        <th className="whitespace-nowrap py-2 pr-4">College / hall</th>
-                        <th className="whitespace-nowrap py-2 pr-4">Room number</th>
-                        <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
-                        <th className="whitespace-nowrap py-2 pr-4">CUHK verified</th>
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
-                        <th className="whitespace-nowrap py-2 pr-4">Student ID</th>
-                        <th className="whitespace-nowrap py-2">Actions</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Guest</th>
+                        <th className="whitespace-nowrap py-2">Message</th>
                       </tr>
                     </thead>
                     <tbody>
                       {users.map((u) => (
                         <tr
-                          key={u.uid ?? u.username ?? u.studentId}
+                          key={u.uid ?? u.email ?? u.fullName}
                           className="border-b border-gray-100 last:border-0"
                         >
                           <td className="whitespace-nowrap py-2.5 pr-4 font-medium text-gray-900">
                             {cell(u.fullName)}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
-                            {cell(u.username)}
-                          </td>
-                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.email)}
-                          </td>
-                          <td className="py-2.5 pr-4 text-gray-700">
-                            {cell(formatDeliveryAddress(u.college, u.hall))}
-                          </td>
-                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
-                            {cell(u.roomNumber)}
-                          </td>
-                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
-                            {u.isRunner ? "Yes" : "No"}
-                          </td>
-                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
-                            {u.cuhkVerifiedAt ? "Yes" : "No"}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.phone)}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
-                            {cell(u.studentId)}
+                            {u.isRunner ? "Yes" : "No"}
+                          </td>
+                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
+                            {u.isGuest ? "Yes" : "No"}
+                          </td>
+                          <td className="whitespace-nowrap py-2.5">
+                            <button
+                              type="button"
+                              onClick={() => setChatUser(u)}
+                              disabled={!u.uid}
+                              className="relative rounded-lg bg-[#ED1C24] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
+                            >
+                              Message
+                              {u.uid && (unread[u.uid] ?? 0) > 0 ? (
+                                <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold text-gray-900">
+                                  {unread[u.uid]}
+                                </span>
+                              ) : null}
+                            </button>
                           </td>
                           <td className="whitespace-nowrap py-2.5">
                             <div className="flex flex-wrap gap-1.5">
@@ -240,6 +193,15 @@ export default function AdminUsersPage() {
           </main>
         </LakersWallpaper>
       </AppShell>
+      {chatUser && (
+        <AdminUserChatModal
+          target={chatUser}
+          onClose={() => {
+            setChatUser(null);
+            void fetchUnreadReplyCounts().then(setUnread).catch(() => undefined);
+          }}
+        />
+      )}
     </RequireAdmin>
   );
 }

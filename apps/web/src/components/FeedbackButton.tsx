@@ -42,7 +42,7 @@ export function FeedbackButton() {
     try {
       await submitFeedback({
         userId: user?.uid,
-        userName: user?.fullName || user?.username,
+        userName: user?.fullName,
         message,
       });
       setMessage("");

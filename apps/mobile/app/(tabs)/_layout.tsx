@@ -9,7 +9,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 12 },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="index" options={{ title: "Shop Now" }} />
       <Tabs.Screen name="orders" options={{ title: "Orders" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
       <Tabs.Screen name="runner" options={{ title: "Runner" }} />

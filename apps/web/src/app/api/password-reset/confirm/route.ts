@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
-import { updateAuthPassword } from "@/lib/firebase-admin";
+import { updateAuthPassword } from "@/lib/firebase-admin-auth";
 import {
   jsonError,
   otpCookieOptions,
