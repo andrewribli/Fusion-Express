@@ -1,25 +1,75 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
-  fetchOrdersByIds,
-  getOrderHistoryIds,
+  fetchOrdersByCustomer,
   ORDER_STATUS_LABELS,
 } from "@fusion-express/shared";
 import type { Order } from "@fusion-express/shared/types";
+import { useAuth } from "../../src/auth";
 
 export default function OrdersScreen() {
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!user) {
+      setOrders([]);
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      setOrders(await fetchOrdersByCustomer(user.uid));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load orders");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    void fetchOrdersByIds(getOrderHistoryIds()).then(setOrders);
-  }, []);
+    void load();
+  }, [load]);
+
+  if (authLoading) {
+    return (
+      <View className="flex-1 bg-white px-4 pt-4">
+        <Text className="text-gray-500">Loading…</Text>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <View className="flex-1 bg-white px-4 pt-4">
+        <Text className="mb-3 text-xl font-bold">Your orders</Text>
+        <Text className="text-gray-500">
+          Sign in on the Profile tab to see orders tied to your account.
+        </Text>
+        <Text className="mt-2 text-sm text-gray-400">
+          Guest checkout orders appear after you place them with the same phone
+          on this device (you stay signed in as the guest account).
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView className="flex-1 bg-white px-4 pt-4">
-      <Text className="mb-3 text-xl font-bold">Your orders</Text>
-      {orders.length === 0 ? (
-        <Text className="text-gray-500">No orders on this device yet.</Text>
+      <View className="mb-3 flex-row items-center justify-between">
+        <Text className="text-xl font-bold">Your orders</Text>
+        <Pressable onPress={() => void load()}>
+          <Text className="text-sm font-semibold text-fusion">Refresh</Text>
+        </Pressable>
+      </View>
+      {error ? <Text className="mb-2 text-sm text-red-600">{error}</Text> : null}
+      {loading ? (
+        <Text className="text-gray-500">Loading…</Text>
+      ) : orders.length === 0 ? (
+        <Text className="text-gray-500">No orders for this account yet.</Text>
       ) : (
         orders.map((order) => (
           <Link key={order.id} href={`/track?orderId=${order.id}`} asChild>
