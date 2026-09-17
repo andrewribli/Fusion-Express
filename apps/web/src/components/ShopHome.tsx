@@ -143,7 +143,7 @@ function HomeSearchBar({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
-          placeholder="Search Fusion"
+          placeholder="Search products"
           className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
           style={{ backgroundColor: "transparent", color: "#111111" }}
           autoComplete="off"
@@ -402,6 +402,7 @@ export function ShopHome() {
                       <Link
                         key={cat.id}
                         href={cat.href}
+                        onClick={() => setSearch("")}
                         className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
                       >
                         <span

@@ -29,15 +29,28 @@ export function formatEta(date: Date): string {
 
 /** Chat available once order is placed (prototype: coordinate anytime) */
 export function isChatActive(status: string): boolean {
+  const normalized = (() => {
+    switch (status) {
+      case "runner_assigned":
+      case "assigned":
+        return "accepted";
+      case "picked_up":
+      case "picked":
+        return "purchased";
+      case "completed":
+        return "runner_paid";
+      case "paid":
+        return "customer_paid";
+      default:
+        return status;
+    }
+  })();
   return (
-    status === "pending" ||
-    status === "accepted" ||
-    status === "assigned" ||
-    status === "purchased" ||
-    status === "picked" ||
-    status === "delivered" ||
-    status === "runner_paid" ||
-    status === "paid"
+    normalized === "pending" ||
+    normalized === "accepted" ||
+    normalized === "purchased" ||
+    normalized === "delivered" ||
+    normalized === "runner_paid"
   );
 }
 
