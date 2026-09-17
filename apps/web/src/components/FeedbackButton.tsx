@@ -2,17 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { feedbackErrorMessage, submitFeedback } from "@/lib/feedback";
 
 export function FeedbackButton() {
   const { user } = useUser();
+  const { itemCount } = useCart();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+
+  const onCart = pathname.startsWith("/cart") || pathname.startsWith("/checkout");
+  const fabBottom =
+    onCart || itemCount > 0
+      ? "bottom-[11.5rem] md:bottom-6"
+      : "bottom-28 md:bottom-6";
 
   useEffect(() => {
     if (!open) return;
@@ -61,7 +71,7 @@ export function FeedbackButton() {
   return (
     <div
       ref={rootRef}
-      className="fixed bottom-28 right-3 z-40 md:bottom-6 md:right-6"
+      className={`fixed right-3 z-40 md:right-6 ${fabBottom}`}
     >
       {open ? (
         <form

@@ -39,6 +39,7 @@ export default function LoginPage() {
     signIn,
     bootError,
     setMode: setAppMode,
+    startGuestBrowse,
   } = useUser();
   const demoAuth = useDemoAuth();
 
@@ -53,6 +54,12 @@ export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [cuhkVerified, setCuhkVerified] = useState(false);
+
+  function continueAsGuest() {
+    startGuestBrowse();
+    setAppMode("customer");
+    router.push("/");
+  }
 
   function switchMode(next: Mode) {
     setMode(next);
@@ -224,36 +231,35 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="mb-4 text-center">
+        <div className="mb-5 text-center">
           <AppLogo size={96} className="mx-auto h-24 w-24" priority />
         </div>
 
-        <div className="mb-5 text-center">
-          <AppLogo size={120} className="mx-auto h-28 w-28" priority />
-        </div>
-
         <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={continueAsGuest}
             className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
           >
             Continue as Guest
-          </Link>
+          </button>
           <p className="mt-2 text-xs leading-snug text-gray-700">
             Browse without signing in — order with just dorm, lobby, and phone.
           </p>
         </div>
 
-        {role === "customer" && (
-          <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
-            Ordering groceries?{" "}
-            <a href="/" className="font-semibold text-[#ED1C24] underline">
-              Shop now
-            </a>{" "}
-            and check out with just dorm, lobby, and phone — no sign-up required.
-            Runners still need a full verified account.
-          </p>
-        )}
+        <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
+          Ordering groceries?{" "}
+          <button
+            type="button"
+            onClick={continueAsGuest}
+            className="font-semibold text-[#ED1C24] underline"
+          >
+            Shop now
+          </button>{" "}
+          and check out with just dorm, lobby, and phone — no sign-up required.
+          Runners still need a full verified account.
+        </p>
 
         {!firebaseEnabled && !demoAuth && (
           <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
@@ -337,12 +343,13 @@ export default function LoginPage() {
               {loading ? "Signing in…" : "Sign In"}
             </button>
             <div className="rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
-              <Link
-                href="/"
+              <button
+                type="button"
+                onClick={continueAsGuest}
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
               >
                 Continue as Guest
-              </Link>
+              </button>
               <p className="mt-2 text-xs leading-snug text-gray-700">
                 Browse without signing in — order with just dorm, lobby, and phone.
               </p>
