@@ -266,3 +266,83 @@ export async function updateAuthPassword(
   }
   await auth.updateUser(uid, { password: newPassword });
 }
+
+/** Verify a browser ID token belongs to an /admins/{uid} document. */
+export async function verifyAdminIdToken(
+  idToken: string | null | undefined,
+): Promise<{ uid: string } | null> {
+  if (!idToken) return null;
+  const auth = getAdminAuth();
+  const db = getAdminDb();
+  if (!auth || !db) return null;
+  try {
+    const decoded = await auth.verifyIdToken(idToken);
+    const adminSnap = await db.collection("admins").doc(decoded.uid).get();
+    if (!adminSnap.exists) return null;
+    return { uid: decoded.uid };
+  } catch (err) {
+    console.error("verifyAdminIdToken failed", err);
+    return null;
+  }
+}
+
+/**
+ * Permanently remove an account: Auth user, users/{uid}, and any username
+ * maps pointing at that uid (and exact username doc when provided).
+ */
+export async function deleteUserAccount(opts: {
+  uid: string;
+  username?: string;
+}): Promise<{ deletedAuth: boolean; deletedProfile: boolean; deletedUsernames: string[] }> {
+  const auth = getAdminAuth();
+  const db = getAdminDb();
+  if (!auth || !db) {
+    throw new Error("Admin delete is not configured on the server.");
+  }
+
+  const uid = opts.uid.trim();
+  if (!uid) throw new Error("Missing uid");
+
+  let deletedAuth = false;
+  try {
+    await auth.deleteUser(uid);
+    deletedAuth = true;
+  } catch (err) {
+    const code =
+      err && typeof err === "object" && "code" in err
+        ? String((err as { code: string }).code)
+        : "";
+    if (code !== "auth/user-not-found") throw err;
+  }
+
+  const usersCol = collectionName("users");
+  const profileRef = db.collection(usersCol).doc(uid);
+  const profileSnap = await profileRef.get();
+  let deletedProfile = false;
+  if (profileSnap.exists) {
+    await profileRef.delete();
+    deletedProfile = true;
+  }
+
+  const usernamesCol = collectionName("usernames");
+  const deletedUsernames: string[] = [];
+  const username = opts.username?.trim().toLowerCase();
+  if (username) {
+    const ref = db.collection(usernamesCol).doc(username);
+    const snap = await ref.get();
+    if (snap.exists) {
+      await ref.delete();
+      deletedUsernames.push(username);
+    }
+  }
+
+  // Clean any other username maps that still point at this uid.
+  const mapped = await db.collection(usernamesCol).where("uid", "==", uid).get();
+  for (const doc of mapped.docs) {
+    if (deletedUsernames.includes(doc.id)) continue;
+    await doc.ref.delete();
+    deletedUsernames.push(doc.id);
+  }
+
+  return { deletedAuth, deletedProfile, deletedUsernames };
+}
