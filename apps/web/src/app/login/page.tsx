@@ -55,6 +55,7 @@ export default function LoginPage() {
     signIn,
     bootError,
     setMode: setAppMode,
+    startGuestBrowse,
   } = useUser();
   const { itemCount } = useCart();
   const demoAuth = useDemoAuth();
@@ -72,6 +73,12 @@ export default function LoginPage() {
   const [cuhkVerified, setCuhkVerified] = useState(false);
   /** Email that passed OTP — must match the address registered at submit. */
   const [verifiedEmail, setVerifiedEmail] = useState("");
+
+  function continueAsGuest() {
+    startGuestBrowse();
+    setAppMode("customer");
+    router.push(guestContinuePath(itemCount));
+  }
 
   function switchMode(next: Mode) {
     setMode(next);
@@ -247,14 +254,14 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="mb-4 text-center">
+        <div className="mb-5 text-center">
           <AppLogo size={96} className="mx-auto h-24 w-24" priority />
         </div>
 
         <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
           <button
             type="button"
-            onClick={() => router.push(guestContinuePath(itemCount))}
+            onClick={continueAsGuest}
             className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
           >
             {itemCount > 0 ? "Continue as Guest · Checkout" : "Continue as Guest"}
@@ -269,7 +276,7 @@ export default function LoginPage() {
           Ordering groceries?{" "}
           <button
             type="button"
-            onClick={() => router.push(guestContinuePath(itemCount))}
+            onClick={continueAsGuest}
             className="font-semibold text-[#ED1C24] underline"
           >
             Shop now as guest
@@ -362,7 +369,7 @@ export default function LoginPage() {
             <div className="rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
               <button
                 type="button"
-                onClick={() => router.push(guestContinuePath(itemCount))}
+                onClick={continueAsGuest}
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
               >
                 {itemCount > 0

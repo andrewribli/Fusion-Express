@@ -60,6 +60,7 @@ const USER_STORAGE_KEY = "fusion_user_profile";
 const TERMS_ACCEPTED_KEY = "fusion_runner_terms_accepted";
 const DEMO_PASSWORD_KEY = "fusion_demo_password";
 const APP_MODE_KEY = "fusion_app_mode";
+const GUEST_BROWSE_KEY = "fusion_guest_browse";
 
 function profileStore(): Storage | null {
   if (typeof window === "undefined") return null;
@@ -92,6 +93,10 @@ interface UserContextValue {
     college: string;
     hall: string;
   }) => Promise<UserProfile>;
+  /** Enter guest browse mode (no account) — shop + checkout without forced login. */
+  startGuestBrowse: () => void;
+  /** True after Continue as Guest until a real sign-in/sign-up. */
+  isGuestBrowsing: boolean;
   logout: () => Promise<void>;
   updateProfile: (profile: UserProfile) => void;
   acceptRunnerTerms: () => void;
@@ -119,6 +124,19 @@ function loadTermsAccepted(): boolean {
   const store = profileStore();
   if (!store) return false;
   return store.getItem(TERMS_ACCEPTED_KEY) === "true";
+}
+
+function loadGuestBrowse(): boolean {
+  const store = profileStore();
+  if (!store) return false;
+  return store.getItem(GUEST_BROWSE_KEY) === "1";
+}
+
+function setGuestBrowseFlag(on: boolean) {
+  const store = profileStore();
+  if (!store) return;
+  if (on) store.setItem(GUEST_BROWSE_KEY, "1");
+  else store.removeItem(GUEST_BROWSE_KEY);
 }
 
 function loadSavedMode(): AppMode | null {
@@ -203,11 +221,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [bootError, setBootError] = useState<string | null>(null);
   const [savedMode, setSavedMode] = useState<AppMode | null>(null);
+  const [isGuestBrowsing, setIsGuestBrowsing] = useState(false);
   const firebaseEnabled = isFirebaseConfigured();
 
   useEffect(() => {
     setTermsAccepted(loadTermsAccepted());
     setSavedMode(loadSavedMode());
+    setIsGuestBrowsing(loadGuestBrowse());
 
     if (!firebaseEnabled) {
       if (isLiveHost()) {
@@ -255,8 +275,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
           if (!firebaseUser) {
             setUser(null);
             cacheProfile(null);
+            // Keep guest-browse flag so Continue as Guest survives auth null.
             return;
           }
+
+          setGuestBrowseFlag(false);
+          setIsGuestBrowsing(false);
 
           const cached = loadUser();
           if (cached?.uid === firebaseUser.uid) {
@@ -314,6 +338,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const persist = useCallback((profile: UserProfile | null) => {
     cacheProfile(profile);
     setUser(profile);
+    if (profile && !profile.isGuest) {
+      setGuestBrowseFlag(false);
+      setIsGuestBrowsing(false);
+    }
+  }, []);
+
+  const startGuestBrowse = useCallback(() => {
+    setGuestBrowseFlag(true);
+    setIsGuestBrowsing(true);
+    profileStore()?.setItem(APP_MODE_KEY, "customer");
+    setSavedMode("customer");
   }, []);
 
   const login = useCallback(
@@ -462,6 +497,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     profileStore()?.removeItem(TERMS_ACCEPTED_KEY);
     profileStore()?.removeItem(DEMO_PASSWORD_KEY);
     profileStore()?.removeItem(APP_MODE_KEY);
+    setGuestBrowseFlag(false);
+    setIsGuestBrowsing(false);
     setTermsAccepted(false);
     setSavedMode(null);
   }, [firebaseEnabled, persist]);
@@ -557,6 +594,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       signUp,
       signIn,
       ensureGuestCheckout,
+      startGuestBrowse,
+      isGuestBrowsing,
       logout,
       updateProfile,
       acceptRunnerTerms,
@@ -577,6 +616,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       signUp,
       signIn,
       ensureGuestCheckout,
+      startGuestBrowse,
+      isGuestBrowsing,
       logout,
       updateProfile,
       acceptRunnerTerms,

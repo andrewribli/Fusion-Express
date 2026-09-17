@@ -151,7 +151,7 @@ function HomeSearchBar({
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
           style={{ color: "#555555" }}
           aria-label="Scan or upload a product photo"
         >
@@ -167,7 +167,7 @@ function HomeSearchBar({
         <button
           type="button"
           onClick={() => inputRef.current?.focus()}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
           style={{ backgroundColor: "#ff6a00" }}
           aria-label="Search"
         >
@@ -319,7 +319,12 @@ export function ShopHome() {
       <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
         <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
           <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
-            <Link href="/" className="hidden shrink-0 sm:block">
+            <Link
+              href="/"
+              onClick={() => setSearch("")}
+              className="hidden shrink-0 sm:block"
+              aria-label="GraceRun home"
+            >
               <span className="text-base font-extrabold tracking-tight text-white">
                 GraceRun
               </span>
@@ -409,7 +414,10 @@ export function ShopHome() {
                       <button
                         key={cat.id}
                         type="button"
-                        onClick={openManualItem}
+                        onClick={() => {
+                          setSearch("");
+                          openManualItem();
+                        }}
                         className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
                       >
                         <span

@@ -58,7 +58,7 @@ export default function CartPage() {
       <LakersWallpaper>
           <AppHeader showBack backHref="/" title="Your Cart" />
 
-          <main className="mx-auto max-w-[480px] px-4 py-4">
+          <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
             {items.length === 0 ? (
               <div>
                 <div className="rounded-2xl border border-gray-100 bg-white px-6 py-12 text-center shadow-sm">
@@ -120,21 +120,31 @@ export default function CartPage() {
                           Remove
                         </button>
                       </div>
-                      <div className="mt-3 flex items-center justify-between rounded-xl bg-red-50 px-3 py-2">
+                      <div
+                        className="mt-3 flex items-center justify-between rounded-xl px-3 py-2"
+                        style={{ backgroundColor: "#ffffff", border: "1px solid #fecaca" }}
+                      >
                         <button
                           type="button"
                           onClick={() => setQuantity(item.id, quantity - 1)}
-                          className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-lg font-bold text-fusion-red"
+                          className="flex h-11 w-11 items-center justify-center rounded-lg text-lg font-bold"
+                          style={{ backgroundColor: "#f3f4f6", color: "#ED1C24" }}
+                          aria-label="Decrease quantity"
                         >
                           −
                         </button>
-                        <span className="min-w-7 text-center text-base font-bold tabular-nums text-[#111827]">
+                        <span
+                          className="min-w-8 text-center text-base font-extrabold tabular-nums"
+                          style={{ color: "#111111" }}
+                        >
                           {quantity}
                         </span>
                         <button
                           type="button"
                           onClick={() => setQuantity(item.id, quantity + 1)}
-                          className="flex h-10 w-10 items-center justify-center rounded-lg bg-fusion-red text-lg font-bold text-white"
+                          className="flex h-11 w-11 items-center justify-center rounded-lg text-lg font-bold text-white"
+                          style={{ backgroundColor: "#ED1C24" }}
+                          aria-label="Increase quantity"
                         >
                           +
                         </button>
@@ -202,9 +212,7 @@ export default function CartPage() {
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"
                 >
-                  {user
-                    ? "Continue to checkout"
-                    : "Checkout — no account needed"}
+                  {user ? "Continue to checkout" : "Checkout — no account needed"}
                 </button>
 
                 <button

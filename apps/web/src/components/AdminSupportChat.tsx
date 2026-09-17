@@ -232,10 +232,14 @@ export function AdminSupportChat({
     );
   }
 
+  const onCartOrCheckout =
+    pathname.startsWith("/cart") || pathname.startsWith("/checkout");
   const fabBottom =
-    itemCount > 0 && mode !== "runner"
-      ? "bottom-[9.75rem] md:bottom-6"
-      : "bottom-28 md:bottom-6";
+    mode === "runner"
+      ? "bottom-28 md:bottom-6"
+      : onCartOrCheckout || itemCount > 0
+        ? "bottom-[11.5rem] md:bottom-6"
+        : "bottom-28 md:bottom-6";
 
   return (
     <div ref={rootRef} className={`fixed right-3 z-40 md:right-6 ${fabBottom}`}>

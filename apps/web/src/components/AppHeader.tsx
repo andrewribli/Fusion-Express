@@ -94,6 +94,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
             <Link
               href={runnerMode ? home : "/"}
               className="flex min-w-0 items-center gap-2"
+              aria-label="GraceRun home"
             >
               <AppLogo size={44} className="h-11 w-11 shrink-0" />
               {runnerMode && (
