@@ -131,7 +131,27 @@ export async function signInWithUsername(
   username: string,
   password: string,
 ): Promise<User> {
-  return signInWithEmail(await resolveSignInEmail(username), password);
+  const trimmed = username.trim();
+  if (trimmed.includes("@")) {
+    return signInWithEmail(trimmed.toLowerCase(), password);
+  }
+
+  const resolved = await resolveSignInEmail(trimmed);
+  try {
+    return await signInWithEmail(resolved, password);
+  } catch (primaryErr) {
+    // Legacy accounts may still authenticate as username@fusion-express.app
+    // even though the usernames map stores their CUHK email.
+    const legacy = usernameToEmail(trimmed);
+    if (legacy !== resolved.toLowerCase()) {
+      try {
+        return await signInWithEmail(legacy, password);
+      } catch {
+        // Prefer the original error from the mapped email attempt.
+      }
+    }
+    throw primaryErr;
+  }
 }
 
 export async function sendPasswordReset(identifier: string): Promise<void> {

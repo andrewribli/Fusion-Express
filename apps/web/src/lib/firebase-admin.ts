@@ -264,7 +264,111 @@ export async function updateAuthPassword(
   if (!uid) {
     throw new Error("No account found with this email.");
   }
-  await auth.updateUser(uid, { password: newPassword });
+
+  // Always set the password on the resolved uid. Also sync the Auth email to
+  // the CUHK address from the username/profile map — legacy accounts often
+  // Auth as username@fusion-express.app while the map stores the real email,
+  // which breaks both login and reset until Auth is updated.
+  try {
+    await auth.updateUser(uid, {
+      password: newPassword,
+      email,
+      emailVerified: true,
+    });
+  } catch (err) {
+    const code =
+      err && typeof err === "object" && "code" in err
+        ? String((err as { code: string }).code)
+        : "";
+    if (code.includes("email-already-exists")) {
+      // Another Auth user already owns this email — still reset password on
+      // the mapped uid so username login can work after a synthetic-email fall back.
+      await auth.updateUser(uid, { password: newPassword });
+      return;
+    }
+    throw err;
+  }
+}
+
+/**
+ * Point Firebase Auth at the CUHK email stored on the username/profile map.
+ * Used by admins to repair accounts that can no longer sign in or reset.
+ */
+export async function repairAuthEmailForUid(uid: string): Promise<{
+  uid: string;
+  email: string;
+  username?: string;
+  previousAuthEmail?: string;
+}> {
+  const auth = getAdminAuth();
+  const db = getAdminDb();
+  if (!auth || !db) {
+    throw new Error("Admin repair is not configured on the server.");
+  }
+
+  const trimmedUid = uid.trim();
+  if (!trimmedUid) throw new Error("Missing uid");
+
+  let email = "";
+  let username: string | undefined;
+
+  const usernamesCol = collectionName("usernames");
+  const mapped = await db
+    .collection(usernamesCol)
+    .where("uid", "==", trimmedUid)
+    .limit(5)
+    .get();
+  if (!mapped.empty) {
+    const doc = mapped.docs[0];
+    username = doc.id;
+    email = String(doc.data().email ?? "")
+      .trim()
+      .toLowerCase();
+  }
+
+  if (!email.includes("@")) {
+    const profile = await db
+      .collection(collectionName("users"))
+      .doc(trimmedUid)
+      .get();
+    if (profile.exists) {
+      const data = profile.data() ?? {};
+      email = String(data.email ?? data.cuhkEmail ?? "")
+        .trim()
+        .toLowerCase();
+      if (!username && data.username) username = String(data.username);
+    }
+  }
+
+  if (!email.includes("@")) {
+    throw new Error("No CUHK email found on this account to repair.");
+  }
+
+  let previousAuthEmail: string | undefined;
+  try {
+    const existing = await auth.getUser(trimmedUid);
+    previousAuthEmail = existing.email ?? undefined;
+  } catch (err) {
+    const code =
+      err && typeof err === "object" && "code" in err
+        ? String((err as { code: string }).code)
+        : "";
+    if (code === "auth/user-not-found") {
+      throw new Error(
+        "Auth user is missing for this profile. Ask them to create a new account.",
+      );
+    }
+    throw err;
+  }
+
+  if (previousAuthEmail?.toLowerCase() !== email) {
+    await auth.updateUser(trimmedUid, {
+      email,
+      emailVerified: true,
+    });
+  }
+
+  return { uid: trimmedUid, email, username, previousAuthEmail };
 }
 
 /** Verify a browser ID token belongs to an /admins/{uid} document. */

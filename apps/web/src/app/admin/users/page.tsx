@@ -21,6 +21,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingUid, setDeletingUid] = useState<string | null>(null);
+  const [repairingUid, setRepairingUid] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState("");
 
   async function loadUsers() {
@@ -39,6 +40,41 @@ export default function AdminUsersPage() {
   useEffect(() => {
     void loadUsers();
   }, []);
+
+  async function handleRepair(user: UserProfile) {
+    if (!user.uid) return;
+    const label = user.username || user.email || user.uid;
+    setRepairingUid(user.uid);
+    setActionMsg("");
+    setError("");
+    try {
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Please sign in again as an admin.");
+      const res = await fetch("/api/admin/users/repair-auth-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid: user.uid }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        email?: string;
+        previousAuthEmail?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Could not repair account");
+      setActionMsg(
+        data.previousAuthEmail && data.previousAuthEmail !== data.email
+          ? `Repaired ${label}: Auth email ${data.previousAuthEmail} → ${data.email}. They can use Forgot password now.`
+          : `Repaired ${label}: Auth email is ${data.email}. They can use Forgot password now.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not repair account.");
+    } finally {
+      setRepairingUid(null);
+    }
+  }
 
   async function handleDelete(user: UserProfile) {
     if (!user.uid) return;
@@ -175,14 +211,24 @@ export default function AdminUsersPage() {
                             {cell(u.studentId)}
                           </td>
                           <td className="whitespace-nowrap py-2.5">
-                            <button
-                              type="button"
-                              disabled={!u.uid || deletingUid === u.uid}
-                              onClick={() => void handleDelete(u)}
-                              className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
-                            >
-                              {deletingUid === u.uid ? "Deleting…" : "Delete"}
-                            </button>
+                            <div className="flex flex-wrap gap-1.5">
+                              <button
+                                type="button"
+                                disabled={!u.uid || repairingUid === u.uid}
+                                onClick={() => void handleRepair(u)}
+                                className="rounded-lg border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50"
+                              >
+                                {repairingUid === u.uid ? "Fixing…" : "Fix login"}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={!u.uid || deletingUid === u.uid}
+                                onClick={() => void handleDelete(u)}
+                                className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              >
+                                {deletingUid === u.uid ? "Deleting…" : "Delete"}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
