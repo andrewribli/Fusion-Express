@@ -12,6 +12,7 @@ import { LegalLink } from "@/components/LegalLink";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
+import { friendlyAuthError } from "@/lib/auth-errors";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { BootScreen } from "@/components/BootScreen";
 
@@ -53,11 +54,18 @@ export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [cuhkVerified, setCuhkVerified] = useState(false);
+  /** Email that passed OTP — must match the address registered at submit. */
+  const [verifiedEmail, setVerifiedEmail] = useState("");
 
   function switchMode(next: Mode) {
     setMode(next);
     setError("");
     setSignupStep(1);
+    setCuhkVerified(false);
+    setVerifiedEmail("");
+    setAgreedToTerms(false);
+    setPassword("");
+    setConfirmPassword("");
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -81,13 +89,7 @@ export default function LoginPage() {
         setError("Live login requires Firebase. Add env vars to .env.local.");
       }
     } catch (err) {
-      setError(
-        err instanceof Error && err.message.includes("invalid-credential")
-          ? "Wrong email or password"
-          : err instanceof Error
-            ? err.message
-            : "Sign in failed",
-      );
+      setError(friendlyAuthError(err, "Sign in failed"));
     } finally {
       setLoading(false);
     }
@@ -121,7 +123,8 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const emailErr = validateEmail(email);
+    const registeringEmail = email.trim().toLowerCase();
+    const emailErr = validateEmail(registeringEmail);
     const passErr = validatePassword(password);
     if (!fullName.trim()) {
       setError("Enter your full name");
@@ -143,8 +146,17 @@ export default function LoginPage() {
       setSignupStep(3);
       return;
     }
-    if (!cuhkVerified) {
+    if (!cuhkVerified || !verifiedEmail) {
       setError("Verify your CUHK email before creating an account");
+      setSignupStep(3);
+      return;
+    }
+    if (registeringEmail !== verifiedEmail.trim().toLowerCase()) {
+      setError(
+        "Email changed after verification. Verify the email you want to register.",
+      );
+      setCuhkVerified(false);
+      setVerifiedEmail("");
       setSignupStep(3);
       return;
     }
@@ -156,10 +168,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const profile = {
-        email: email.trim().toLowerCase(),
+        email: registeringEmail,
         fullName: fullName.trim(),
         isGuest: false,
         isRunner: false,
+        cuhkEmail: registeringEmail,
+        cuhkVerifiedAt: new Date().toISOString(),
       };
 
       if (firebaseEnabled || demoAuth) {
@@ -170,14 +184,7 @@ export default function LoginPage() {
       setAppMode("customer");
       router.push(postLoginPath());
     } catch (err) {
-      setError(
-        err instanceof Error &&
-          /email-already-in-use|already exists|already in use/i.test(err.message)
-          ? "Account already exists"
-          : err instanceof Error
-            ? err.message
-            : "Sign up failed",
-      );
+      setError(friendlyAuthError(err, "Sign up failed"));
     } finally {
       setLoading(false);
     }
@@ -228,10 +235,6 @@ export default function LoginPage() {
           <AppLogo size={96} className="mx-auto h-24 w-24" priority />
         </div>
 
-        <div className="mb-5 text-center">
-          <AppLogo size={120} className="mx-auto h-28 w-28" priority />
-        </div>
-
         <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
           <Link
             href="/"
@@ -244,16 +247,14 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {role === "customer" && (
-          <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
-            Ordering groceries?{" "}
-            <a href="/" className="font-semibold text-[#ED1C24] underline">
-              Shop now
-            </a>{" "}
-            and check out with just dorm, lobby, and phone — no sign-up required.
-            Runners still need a full verified account.
-          </p>
-        )}
+        <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
+          Ordering groceries?{" "}
+          <a href="/" className="font-semibold text-[#ED1C24] underline">
+            Shop now
+          </a>{" "}
+          and check out with just dorm, lobby, and phone — no sign-up required.
+          Runners still need a full verified account.
+        </p>
 
         {!firebaseEnabled && !demoAuth && (
           <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
@@ -421,7 +422,9 @@ export default function LoginPage() {
                   verified={cuhkVerified}
                   hint="Use your @link.cuhk.edu.hk email. We send a one-time code to verify you are a CUHK student."
                   onVerified={(cuhkEmail) => {
-                    setEmail(cuhkEmail);
+                    const normalized = cuhkEmail.trim().toLowerCase();
+                    setEmail(normalized);
+                    setVerifiedEmail(normalized);
                     setCuhkVerified(true);
                     setError("");
                   }}
@@ -487,6 +490,8 @@ export default function LoginPage() {
               : "Local dev mode — configure Firebase for live accounts."}
         </p>
 
+        {/* Follow-up: gate createUser via /api/signup/complete using SIGNUP_SESSION_COOKIE. */}
+
         </div>
       </main>
       <SiteFooter />
@@ -498,3 +503,4 @@ export default function LoginPage() {
     </LakersWallpaper>
   );
 }
+
