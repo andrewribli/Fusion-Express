@@ -17,6 +17,9 @@
   "devDependencies": {
     "turbo": "^2.5.4"
   },
+  "overrides": {
+    "jose": "4.15.9"
+  },
   "engines": {
     "node": ">=20"
   },
