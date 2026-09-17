@@ -226,6 +226,7 @@ export function ShopHome() {
   const { addItem, itemCount } = useCart();
   const { user, setMode, canRunnerMode } = useUser();
   const { openManualItem } = useManualItemModal();
+  const [guestBrowse, setGuestBrowse] = useState(false);
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -254,6 +255,15 @@ export function ShopHome() {
   useEffect(() => {
     document.title = "Shop Now — GraceRun";
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      setGuestBrowse(false);
+      return;
+    }
+    const q = new URLSearchParams(window.location.search);
+    setGuestBrowse(q.get("guest") === "1" || q.get("guest") === "true");
+  }, [user]);
 
   useEffect(() => {
     let cancelled = false;
@@ -368,6 +378,24 @@ export function ShopHome() {
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-0 pb-36 sm:px-4">
+          {guestBrowse && (
+            <div className="mx-3 mt-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800 sm:mx-0">
+              <p className="font-semibold text-gray-900">Ordering as guest</p>
+              <p className="mt-0.5 text-xs text-gray-600">
+                Add items, then checkout with dorm, lobby, and phone — no account
+                required. We create your guest profile when you place the order.
+              </p>
+              {itemCount > 0 && (
+                <Link
+                  href="/checkout"
+                  className="mt-2 inline-flex text-xs font-bold text-[#ED1C24] underline"
+                >
+                  Continue to checkout ({itemCount} item
+                  {itemCount === 1 ? "" : "s"})
+                </Link>
+              )}
+            </div>
+          )}
           <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
             <div className="min-w-0 space-y-4">
               <section

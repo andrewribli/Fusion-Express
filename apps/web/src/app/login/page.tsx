@@ -10,6 +10,7 @@ import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { PasswordInput } from "@/components/PasswordInput";
 import { LegalLink } from "@/components/LegalLink";
 import { SiteFooter } from "@/components/SiteFooter";
+import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
 import { friendlyAuthError } from "@/lib/auth-errors";
@@ -22,11 +23,25 @@ const inputClassName =
 type Mode = "signin" | "signup";
 type SignupStep = 1 | 2 | 3;
 
-function postLoginPath(): string {
-  if (typeof window === "undefined") return "/";
+function safeNextPath(): string | null {
+  if (typeof window === "undefined") return null;
   const next = new URLSearchParams(window.location.search).get("next");
-  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
-  return "/";
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return null;
+  if (next.startsWith("/login") || next.startsWith("/signin")) return null;
+  return next;
+}
+
+function postLoginPath(): string {
+  return safeNextPath() ?? "/";
+}
+
+/**
+ * Guest browse/order path: honor ?next= (e.g. /checkout), else cart → checkout,
+ * else shop with guest=1. Phone + dorm are collected at checkout via
+ * ensureGuestCheckout — guests never need an account first.
+ */
+function guestContinuePath(itemCount: number): string {
+  return safeNextPath() ?? (itemCount > 0 ? "/checkout" : "/?guest=1");
 }
 
 export default function LoginPage() {
@@ -41,6 +56,7 @@ export default function LoginPage() {
     bootError,
     setMode: setAppMode,
   } = useUser();
+  const { itemCount } = useCart();
   const demoAuth = useDemoAuth();
 
   const [mode, setMode] = useState<Mode>("signin");
@@ -236,22 +252,28 @@ export default function LoginPage() {
         </div>
 
         <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => router.push(guestContinuePath(itemCount))}
             className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
           >
-            Continue as Guest
-          </Link>
+            {itemCount > 0 ? "Continue as Guest · Checkout" : "Continue as Guest"}
+          </button>
           <p className="mt-2 text-xs leading-snug text-gray-700">
-            Browse without signing in — order with just dorm, lobby, and phone.
+            Browse and order without signing in — checkout only needs dorm,
+            lobby, and phone.
           </p>
         </div>
 
         <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
           Ordering groceries?{" "}
-          <a href="/" className="font-semibold text-[#ED1C24] underline">
-            Shop now
-          </a>{" "}
+          <button
+            type="button"
+            onClick={() => router.push(guestContinuePath(itemCount))}
+            className="font-semibold text-[#ED1C24] underline"
+          >
+            Shop now as guest
+          </button>{" "}
           and check out with just dorm, lobby, and phone — no sign-up required.
           Runners still need a full verified account.
         </p>
@@ -338,14 +360,18 @@ export default function LoginPage() {
               {loading ? "Signing in…" : "Sign In"}
             </button>
             <div className="rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
-              <Link
-                href="/"
+              <button
+                type="button"
+                onClick={() => router.push(guestContinuePath(itemCount))}
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
               >
-                Continue as Guest
-              </Link>
+                {itemCount > 0
+                  ? "Continue as Guest · Checkout"
+                  : "Continue as Guest"}
+              </button>
               <p className="mt-2 text-xs leading-snug text-gray-700">
-                Browse without signing in — order with just dorm, lobby, and phone.
+                Browse and order without signing in — checkout only needs dorm,
+                lobby, and phone.
               </p>
             </div>
           </form>
