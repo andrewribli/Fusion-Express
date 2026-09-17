@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CuhkEmailOtp } from "@/components/CuhkEmailOtp";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
@@ -187,9 +188,11 @@ export default function LoginPage() {
     }
   }
 
+  // Already signed in — never leave people stuck on the auth form.
   useEffect(() => {
-    if (user) router.replace(postLoginPath(role));
-  }, [user, role, router]);
+    if (!isReady || !user) return;
+    router.replace("/");
+  }, [user, isReady, router]);
 
   if (!isReady) {
     return <BootScreen error={bootError} />;
@@ -206,6 +209,15 @@ export default function LoginPage() {
   return (
     <LakersWallpaper>
       <main className="mx-auto max-w-[480px] px-4 py-8">
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-full bg-lakers-navy/80 px-3 py-2 text-sm font-semibold text-lakers-gold ring-1 ring-lakers-gold/50 transition hover:bg-lakers-navy hover:ring-lakers-gold"
+          >
+            <span aria-hidden>←</span>
+            Back
+          </Link>
+        </div>
         <div className="rounded-2xl bg-white/95 p-5 shadow-lg ring-2 ring-lakers-gold">
         <div className="mb-6 text-center">
           <AppLogo size={160} className="mx-auto h-40 w-40" priority />
@@ -472,7 +484,19 @@ export default function LoginPage() {
           </form>
         )}
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <div className="mt-6 border-t border-gray-100 pt-5 text-center">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#ED1C24] px-5 py-2.5 text-sm font-bold text-[#ED1C24] transition hover:bg-red-50"
+          >
+            Continue as Guest
+          </Link>
+          <p className="mt-2 text-xs text-gray-500">
+            Browse without signing in — order with just dorm, lobby, and phone.
+          </p>
+        </div>
+
+        <p className="mt-5 text-center text-xs text-gray-400">
           {demoAuth
             ? "Demo session only — close this tab and the account is gone."
             : firebaseEnabled
