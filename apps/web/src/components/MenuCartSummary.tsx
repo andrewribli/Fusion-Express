@@ -41,10 +41,7 @@ export function MenuCartSummary() {
 
   function goCheckout() {
     if (itemCount === 0) return;
-    if (!user) {
-      router.push("/login?next=/checkout");
-      return;
-    }
+    // Guests finish on checkout (phone + dorm + lobby) — no login required.
     router.push("/checkout");
   }
 
@@ -100,6 +97,7 @@ export function MenuCartSummary() {
               ))}
             </ul>
           )}
+        </div>
 
         <div className="space-y-3 border-t border-gray-100 p-3">
           <PaymentMethodPicker value={paymentMethod} onChange={choosePayment} />
@@ -128,7 +126,7 @@ export function MenuCartSummary() {
             onClick={goCheckout}
             className="block w-full rounded-xl bg-[#ED1C24] py-3 text-center text-sm font-bold text-white disabled:bg-gray-100 disabled:text-gray-400"
           >
-            {!user ? "Sign in to checkout" : "Continue to checkout"}
+            {user ? "Continue to checkout" : "Checkout — no account needed"}
           </button>
           <p className="text-[10px] leading-snug text-gray-500">
             Pay with {paymentMethod} after delivery. Completing an order agrees to

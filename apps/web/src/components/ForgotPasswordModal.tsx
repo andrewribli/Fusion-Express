@@ -60,8 +60,8 @@ export function ForgotPasswordModal({
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
 
-  // Only reset form state when the modal opens — not when loading flips,
-  // or typing in the parent login field overwrites the reset email mid-send.
+  // Only reset form state when the modal opens or the seed email changes —
+  // not when loading flips (that used to wipe the flow mid-request).
   useEffect(() => {
     if (!open) return;
     setStep("email");
@@ -83,9 +83,9 @@ export function ForgotPasswordModal({
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-    // intentionally omit loading / onClose — reset only on open + seed value
+    // intentionally omit onClose — reset only on open + seed value
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, initialEmail]);
 
   if (!open) return null;
 

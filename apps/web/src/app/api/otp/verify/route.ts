@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
 import {
   issueResetSessionCookie,
+  issueSignupSessionCookie,
   jsonError,
   OTP_COOKIE,
   otpCookieOptions,
   type OtpPurpose,
   RESET_SESSION_COOKIE,
+  SIGNUP_SESSION_COOKIE,
   verifyOtpCookie,
 } from "@/lib/otp-server";
 
@@ -45,6 +47,14 @@ export async function POST(request: NextRequest) {
     response.cookies.set(
       RESET_SESSION_COOKIE,
       issueResetSessionCookie(email),
+      otpCookieOptions(),
+    );
+  } else {
+    // Foundation for a future /api/signup/complete gate. Client still
+    // re-checks verifiedEmail before createUserWithEmailAndPassword.
+    response.cookies.set(
+      SIGNUP_SESSION_COOKIE,
+      issueSignupSessionCookie(email),
       otpCookieOptions(),
     );
   }

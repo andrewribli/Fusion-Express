@@ -56,7 +56,7 @@ export default function CheckoutPage() {
   }, [user, phone]);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
-  const tipAmount = customTip ? Number(customTip) || 0 : tip;
+  const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const fee = useMemo(
     () => calculateDeliveryFee({ weightKg, college }),

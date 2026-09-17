@@ -76,6 +76,8 @@ export function verifyOtpCookie(
 }
 
 export const RESET_SESSION_COOKIE = "gr_pw_reset";
+/** Set after signup OTP verify. Full create-user gate via API is follow-up. */
+export const SIGNUP_SESSION_COOKIE = "gr_signup_ok";
 
 export function issueResetSessionCookie(email: string): string {
   const expires = Date.now() + TTL_MS;
@@ -95,6 +97,31 @@ export function verifyResetSessionCookie(
   }
   const expected = hmac(
     `${normalizeEmail(email)}|reset-ok|${expires}`,
+  );
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+export function issueSignupSessionCookie(email: string): string {
+  const expires = Date.now() + TTL_MS;
+  const payload = `${normalizeEmail(email)}|signup-ok|${expires}`;
+  return `${expires}.${hmac(payload)}`;
+}
+
+export function verifySignupSessionCookie(
+  cookie: string | undefined,
+  email: string,
+): boolean {
+  if (!cookie) return false;
+  const [expiresRaw, sig] = cookie.split(".");
+  const expires = Number(expiresRaw);
+  if (!expiresRaw || !sig || Number.isNaN(expires) || Date.now() > expires) {
+    return false;
+  }
+  const expected = hmac(
+    `${normalizeEmail(email)}|signup-ok|${expires}`,
   );
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
