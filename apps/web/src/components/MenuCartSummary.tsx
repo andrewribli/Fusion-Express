@@ -100,6 +100,7 @@ export function MenuCartSummary() {
               ))}
             </ul>
           )}
+        </div>
 
         <div className="space-y-3 border-t border-gray-100 p-3">
           <PaymentMethodPicker value={paymentMethod} onChange={choosePayment} />
