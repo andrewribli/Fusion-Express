@@ -37,10 +37,7 @@ export async function POST(request: NextRequest) {
     await updateAuthPassword(email, password);
   } catch (err) {
     console.error("password reset failed", err);
-    return jsonError(
-      err instanceof Error ? err.message : "Could not update password.",
-      502,
-    );
+    return jsonError("Could not update password.", 502);
   }
 
   const response = NextResponse.json({ ok: true });
