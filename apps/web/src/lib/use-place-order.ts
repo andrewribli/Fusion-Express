@@ -150,8 +150,7 @@ export function usePlaceOrder() {
             price: item.price,
           })),
           total,
-          customerName,
-          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
+          customerName,          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
 
         clearCart();
