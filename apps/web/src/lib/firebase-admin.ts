@@ -91,18 +91,20 @@ async function emailRegisteredViaRest(email: string): Promise<boolean | null> {
 
 /** Firestore /users, then Identity Toolkit REST. Avoid firebase-admin/auth (jose ESM crash on Vercel). */
 export async function emailIsRegistered(email: string): Promise<boolean | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized.includes("@")) return false;
   try {
     const db = getAdminDb();
     if (db) {
       const snap = await db
         .collection(collectionName("users"))
-        .where("email", "==", email)
+        .where("email", "==", normalized)
         .limit(1)
         .get();
       if (!snap.empty) return true;
       const cuhk = await db
         .collection(collectionName("users"))
-        .where("cuhkEmail", "==", email)
+        .where("cuhkEmail", "==", normalized)
         .limit(1)
         .get();
       if (!cuhk.empty) return true;
@@ -111,6 +113,17 @@ export async function emailIsRegistered(email: string): Promise<boolean | null> 
     console.error("emailIsRegistered firestore failed", err);
   }
 
+  return emailRegisteredViaRest(normalized);
+}
+
+/**
+ * Resolve an email to an Auth uid via usernames / users maps (Admin SDK).
+ * Returns null when unknown or Admin is unavailable.
+ */
+export async function resolveAuthUidForEmail(
+  email: string,
+): Promise<string | null> {
+  const normalized = email.trim().toLowerCase();
   const db = getAdminDb();
   if (!db) return null;
 
@@ -118,7 +131,7 @@ export async function emailIsRegistered(email: string): Promise<boolean | null> 
   try {
     const mapped = await db
       .collection(usernames)
-      .where("email", "==", email)
+      .where("email", "==", normalized)
       .get();
     if (!mapped.empty) {
       const sorted = [...mapped.docs].sort((a, b) => {
@@ -128,7 +141,7 @@ export async function emailIsRegistered(email: string): Promise<boolean | null> 
       });
       if (sorted.length > 1) {
         console.warn(
-          `Multiple username maps for ${email}; using newest (${sorted[0].id})`,
+          `Multiple username maps for ${normalized}; using newest (${sorted[0].id})`,
           sorted.map((d) => d.id),
         );
       }
@@ -144,7 +157,7 @@ export async function emailIsRegistered(email: string): Promise<boolean | null> 
     for (const field of ["email", "cuhkEmail"] as const) {
       const snap = await db
         .collection(users)
-        .where(field, "==", email)
+        .where(field, "==", normalized)
         .limit(5)
         .get();
       if (snap.empty) continue;
@@ -319,10 +332,20 @@ async function listBroadcastRecipientsViaRest(
   return out;
 }
 
-/** Verify Firebase ID token and that `/admins/{uid}` exists. */
-export async function requireAdminFromRequest(
+export type AuthedRequest = {
+  uid: string;
+  email: string | null;
+  idToken: string;
+};
+
+/**
+ * Verify Firebase ID token from Authorization: Bearer.
+ * Uses Identity Toolkit accounts:lookup (avoids firebase-admin/auth jose ESM crash).
+ * Fails closed when the API key is missing or the token is invalid.
+ */
+export async function requireAuthFromRequest(
   request: Request,
-): Promise<{ uid: string; email: string | null; idToken: string }> {
+): Promise<AuthedRequest> {
   const header = request.headers.get("authorization") ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(header.trim());
   if (!match) {
@@ -335,24 +358,221 @@ export async function requireAdminFromRequest(
     throw new AdminAuthError("Invalid or expired auth token.", 401);
   }
 
-  const res = await fetch(
-    `${firestoreDocumentsUrl()}/admins/${encodeURIComponent(decoded.uid)}`,
-    { headers: { Authorization: `Bearer ${idToken}` } },
-  );
-  if (res.status === 404 || res.status === 403) {
-    throw new AdminAuthError("Admin access only.", 403);
-  }
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("admin doc REST failed", res.status, text.slice(0, 400));
-    throw new AdminAuthError("Could not verify admin access.", 502);
-  }
-
   return {
     uid: decoded.uid,
     email: decoded.email,
     idToken,
   };
+}
+
+export async function callerIsAdmin(
+  uid: string,
+  idToken: string,
+): Promise<boolean> {
+  const res = await fetch(
+    `${firestoreDocumentsUrl()}/admins/${encodeURIComponent(uid)}`,
+    { headers: { Authorization: `Bearer ${idToken}` } },
+  );
+  if (res.status === 404 || res.status === 403) return false;
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("admin doc REST failed", res.status, text.slice(0, 400));
+    throw new AdminAuthError("Could not verify admin access.", 502);
+  }
+  return true;
+}
+
+/** Verify Firebase ID token and that `/admins/{uid}` exists. */
+export async function requireAdminFromRequest(
+  request: Request,
+): Promise<AuthedRequest> {
+  const auth = await requireAuthFromRequest(request);
+  const ok = await callerIsAdmin(auth.uid, auth.idToken);
+  if (!ok) {
+    throw new AdminAuthError("Admin access only.", 403);
+  }
+  return auth;
+}
+
+export type OrderEmailFields = {
+  id: string;
+  customerId: string;
+  customerEmail: string;
+  customerName: string;
+  runnerUid: string;
+  runnerId: string;
+  runnerEmail: string;
+  runnerName: string;
+  runnerPaymentMethod: string;
+  runnerPaymentId: string;
+  status: string;
+  total: number;
+  finalTotal: number;
+  amountPaidByRunner: number;
+  deliveryLocation: string;
+  items: { name: string; quantity: number; price: number }[];
+};
+
+function restNumber(
+  fields: Record<string, { integerValue?: string; doubleValue?: number }> | undefined,
+  key: string,
+): number {
+  const f = fields?.[key];
+  if (!f) return 0;
+  if (typeof f.doubleValue === "number") return f.doubleValue;
+  if (f.integerValue != null) return Number(f.integerValue) || 0;
+  return 0;
+}
+
+function orderFieldsFromAdminData(
+  id: string,
+  data: Record<string, unknown>,
+): OrderEmailFields {
+  const itemsRaw = Array.isArray(data.items) ? data.items : [];
+  const items = itemsRaw.map((row) => {
+    const item = (row ?? {}) as Record<string, unknown>;
+    return {
+      name: String(item.name ?? ""),
+      quantity: Number(item.quantity ?? 0) || 0,
+      price: Number(item.price ?? 0) || 0,
+    };
+  });
+  const college = String(data.college ?? "");
+  const hall = String(data.hall ?? "");
+  const lobby = String(data.lobbyPoint ?? "");
+  return {
+    id,
+    customerId: String(data.customerId ?? data.sessionId ?? ""),
+    customerEmail: String(data.customerEmail ?? "")
+      .trim()
+      .toLowerCase(),
+    customerName: String(data.customerName ?? ""),
+    runnerUid: String(data.runnerUid ?? ""),
+    runnerId: String(data.runnerId ?? ""),
+    runnerEmail: String(data.runnerEmail ?? "")
+      .trim()
+      .toLowerCase(),
+    runnerName: String(data.runnerName ?? ""),
+    runnerPaymentMethod: String(data.runnerPaymentMethod ?? ""),
+    runnerPaymentId: String(data.runnerPaymentId ?? ""),
+    status: String(data.status ?? ""),
+    total: Number(data.total ?? 0) || 0,
+    finalTotal: Number(data.finalTotal ?? 0) || 0,
+    amountPaidByRunner: Number(data.amountPaidByRunner ?? 0) || 0,
+    deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    items,
+  };
+}
+
+/** Load an order for email routes via Admin SDK, else Firestore REST with the caller token. */
+export async function fetchOrderForEmail(
+  orderId: string,
+  idToken: string,
+): Promise<OrderEmailFields | null> {
+  const safeId = orderId.trim();
+  if (!safeId || safeId.length > 128) return null;
+
+  const db = getAdminDb();
+  if (db) {
+    try {
+      const snap = await db
+        .collection(collectionName("orders"))
+        .doc(safeId)
+        .get();
+      if (!snap.exists) return null;
+      return orderFieldsFromAdminData(
+        snap.id,
+        snap.data() as Record<string, unknown>,
+      );
+    } catch (err) {
+      console.error("fetchOrderForEmail admin failed", err);
+    }
+  }
+
+  const collection = collectionName("orders");
+  const res = await fetch(
+    `${firestoreDocumentsUrl()}/${collection}/${encodeURIComponent(safeId)}`,
+    { headers: { Authorization: `Bearer ${idToken}` } },
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("fetchOrderForEmail REST failed", res.status, text.slice(0, 400));
+    throw new AdminAuthError("Could not load order.", 502);
+  }
+  const data = (await res.json()) as {
+    fields?: Record<
+      string,
+      {
+        stringValue?: string;
+        integerValue?: string;
+        doubleValue?: number;
+        arrayValue?: {
+          values?: {
+            mapValue?: {
+              fields?: Record<
+                string,
+                {
+                  stringValue?: string;
+                  integerValue?: string;
+                  doubleValue?: number;
+                }
+              >;
+            };
+          }[];
+        };
+      }
+    >;
+  };
+  const fields = data.fields;
+  const itemValues = fields?.items?.arrayValue?.values ?? [];
+  const items = itemValues.map((v) => {
+    const f = v.mapValue?.fields;
+    return {
+      name: restString(f, "name"),
+      quantity: restNumber(f, "quantity"),
+      price: restNumber(f, "price"),
+    };
+  });
+  const college = restString(fields, "college");
+  const hall = restString(fields, "hall");
+  const lobby = restString(fields, "lobbyPoint");
+  return {
+    id: safeId,
+    customerId:
+      restString(fields, "customerId") || restString(fields, "sessionId"),
+    customerEmail: restString(fields, "customerEmail").toLowerCase(),
+    customerName: restString(fields, "customerName"),
+    runnerUid: restString(fields, "runnerUid"),
+    runnerId: restString(fields, "runnerId"),
+    runnerEmail: restString(fields, "runnerEmail").toLowerCase(),
+    runnerName: restString(fields, "runnerName"),
+    runnerPaymentMethod: restString(fields, "runnerPaymentMethod"),
+    runnerPaymentId: restString(fields, "runnerPaymentId"),
+    status: restString(fields, "status"),
+    total: restNumber(fields, "total"),
+    finalTotal: restNumber(fields, "finalTotal"),
+    amountPaidByRunner: restNumber(fields, "amountPaidByRunner"),
+    deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    items,
+  };
+}
+
+export function paymentInfoFromOrder(order: OrderEmailFields): string {
+  const method = order.runnerPaymentMethod.trim();
+  const id = order.runnerPaymentId.trim();
+  if (method && id) return `${method} ${id}`;
+  return "";
+}
+
+export async function assertOrderPartyOrAdmin(
+  auth: AuthedRequest,
+  order: OrderEmailFields,
+): Promise<void> {
+  if (order.customerId && order.customerId === auth.uid) return;
+  if (order.runnerUid && order.runnerUid === auth.uid) return;
+  if (await callerIsAdmin(auth.uid, auth.idToken)) return;
+  throw new AdminAuthError("Not allowed for this order.", 403);
 }
 
 export function filterBroadcastRecipients(

@@ -8,8 +8,12 @@ import {
   OTP_COOKIE,
   otpCookieOptions,
   otpFromAddress,
+  OtpConfigError,
+  requireOtpSecret,
+  resetOtpFailures,
   type OtpPurpose,
 } from "@/lib/otp-server";
+import { clientIp, consumeRateLimit } from "@/lib/rate-limit";
 
 type ServiceAccount = {
   client_email?: string;
@@ -90,12 +94,14 @@ async function emailRegisteredViaAdmin(email: string): Promise<boolean | null> {
   }
 }
 
-async function emailAlreadyRegistered(email: string): Promise<boolean | null> {
-  return emailRegisteredViaAdmin(email);
-}
+const SEND_EMAIL_LIMIT = 5;
+const SEND_IP_LIMIT = 15;
+const SEND_WINDOW_MS = 15 * 60 * 1000;
 
 export async function POST(request: Request) {
   try {
+    requireOtpSecret();
+
     let body: { email?: string; purpose?: string };
     try {
       body = (await request.json()) as { email?: string; purpose?: string };
@@ -111,80 +117,111 @@ export async function POST(request: Request) {
     const purpose: OtpPurpose =
       body.purpose === "reset" ? "reset" : "signup";
 
-    const registered = await emailAlreadyRegistered(email);
+    const ip = clientIp(request);
+    if (
+      !consumeRateLimit(`otp-send:ip:${ip}`, SEND_IP_LIMIT, SEND_WINDOW_MS) ||
+      !consumeRateLimit(`otp-send:email:${email}`, SEND_EMAIL_LIMIT, SEND_WINDOW_MS)
+    ) {
+      return jsonError("Too many requests. Try again later.", 429);
+    }
+
+    const registered = await emailRegisteredViaAdmin(email);
+
+    // Signup: keep 409 when the account already exists (product requirement),
+    // but rate-limit hard above so enumeration is expensive.
     if (purpose === "signup" && registered === true) {
       return jsonError("Account already exists", 409);
     }
-    if (purpose === "reset") {
-      if (registered === false) {
-        return jsonError("No account found with this email.", 404);
-      }
-      if (registered === null) {
-        return jsonError(
-          "Could not verify this email right now. Try again in a moment.",
-          503,
-        );
-      }
+
+    // Reset: always return the same success shape whether or not the account
+    // exists. Only send mail when the account is known to exist.
+    const shouldSend =
+      purpose === "signup" || registered === true;
+
+    if (purpose === "reset" && registered === null) {
+      // Cannot verify existence — do not leak, and do not send.
+      // Still return generic success so clients cannot probe Admin outages.
+      return NextResponse.json({
+        ok: true,
+        purpose,
+      });
     }
 
     const code = generateOtpCode();
     const apiKey = process.env.RESEND_API_KEY;
     const from = otpFromAddress();
 
-    if (apiKey) {
-      const subject =
-        purpose === "reset"
-          ? "Your GraceRun password reset code"
-          : "Your GraceRun verification code";
-      const text =
-        purpose === "reset"
-          ? `Your GraceRun password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
-          : `Your GraceRun CUHK verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
+    if (shouldSend) {
+      if (apiKey) {
+        const subject =
+          purpose === "reset"
+            ? "Your GraceRun password reset code"
+            : "Your GraceRun verification code";
+        const text =
+          purpose === "reset"
+            ? `Your GraceRun password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
+            : `Your GraceRun CUHK verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
 
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [email],
-          subject,
-          text,
-        }),
-      });
-      if (!res.ok) {
-        const detail = await res.text();
-        console.error("Resend send failed", res.status, detail);
-        const blocked =
-          res.status === 403 ||
-          /only send testing emails|verify a domain/i.test(detail);
-        return jsonError(
-          blocked
-            ? "Could not send to this address yet. Add a verified domain, then set RESEND_FROM to GraceRun <verify@gracerun.fit>."
-            : "Could not send the verification email. Try again.",
-          502,
-        );
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from,
+            to: [email],
+            subject,
+            text,
+          }),
+        });
+        if (!res.ok) {
+          const detail = await res.text();
+          console.error("Resend send failed", res.status, detail);
+          const blocked =
+            res.status === 403 ||
+            /only send testing emails|verify a domain/i.test(detail);
+          return jsonError(
+            blocked
+              ? "Could not send to this address yet. Add a verified domain, then set RESEND_FROM to GraceRun <verify@gracerun.fit>."
+              : "Could not send the verification email. Try again.",
+            502,
+          );
+        }
+      } else if (process.env.NODE_ENV === "production") {
+        return jsonError("Email sending is not configured.", 503);
+      } else {
+        console.info(`[OTP:${purpose}] ${email} → ${code}`);
       }
-    } else if (process.env.NODE_ENV === "production") {
-      return jsonError("Email sending is not configured.", 503);
-    } else {
-      console.info(`[OTP:${purpose}] ${email} → ${code}`);
+
+      await resetOtpFailures(email, purpose);
+
+      const response = NextResponse.json({
+        ok: true,
+        purpose,
+        // Never return a cookie for reset when we did not actually issue a code
+        // for a missing account — handled below for the no-send path.
+        devCode:
+          apiKey || process.env.NODE_ENV === "production" ? undefined : code,
+      });
+      response.cookies.set(
+        OTP_COOKIE,
+        issueOtpCookie(email, code, purpose),
+        otpCookieOptions(),
+      );
+      return response;
     }
 
-    const response = NextResponse.json({
+    // Reset for unknown email: generic success, no cookie, no email.
+    return NextResponse.json({
       ok: true,
       purpose,
-      devCode: apiKey || process.env.NODE_ENV === "production" ? undefined : code,
     });
-    response.cookies.set(
-      OTP_COOKIE,
-      issueOtpCookie(email, code, purpose),
-      otpCookieOptions(),
-    );
-    return response;
   } catch (err) {
+    if (err instanceof OtpConfigError) {
+      console.error(err.message);
+      return jsonError("Verification is not configured.", 500);
+    }
     console.error("otp send failed", err);
     return jsonError("Could not send code", 500);
   }

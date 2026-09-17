@@ -95,7 +95,7 @@ export async function createUserProfile(
     fullName: profile.fullName,
     email: profile.email?.trim().toLowerCase(),
     phone: profile.phone,
-    isRunner: Boolean(profile.isRunner),
+    isRunner: false,
     isGuest: Boolean(profile.isGuest),
     createdAt: Timestamp.fromDate(now),
     updatedAt: Timestamp.fromDate(now),
@@ -112,7 +112,7 @@ export async function createUserProfile(
     fullName: profile.fullName,
     email: profile.email,
     phone: profile.phone,
-    isRunner: Boolean(profile.isRunner),
+    isRunner: false,
     isGuest: Boolean(profile.isGuest),
     createdAt: now.toISOString(),
   };

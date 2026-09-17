@@ -4,11 +4,23 @@ import { updateAuthPassword } from "@/lib/firebase-admin-auth";
 import {
   jsonError,
   otpCookieOptions,
+  OtpConfigError,
+  requireOtpSecret,
   RESET_SESSION_COOKIE,
   verifyResetSessionCookie,
 } from "@/lib/otp-server";
 
 export async function POST(request: NextRequest) {
+  try {
+    requireOtpSecret();
+  } catch (err) {
+    if (err instanceof OtpConfigError) {
+      console.error(err.message);
+      return jsonError("Password reset is not configured.", 500);
+    }
+    throw err;
+  }
+
   let body: { email?: string; password?: string };
   try {
     body = (await request.json()) as { email?: string; password?: string };
@@ -25,8 +37,18 @@ export async function POST(request: NextRequest) {
     return jsonError("Password must be at least 6 characters", 400);
   }
 
-  const session = request.cookies.get(RESET_SESSION_COOKIE)?.value;
-  if (!verifyResetSessionCookie(session, email)) {
+  let sessionOk = false;
+  try {
+    const session = request.cookies.get(RESET_SESSION_COOKIE)?.value;
+    sessionOk = verifyResetSessionCookie(session, email);
+  } catch (err) {
+    if (err instanceof OtpConfigError) {
+      console.error(err.message);
+      return jsonError("Password reset is not configured.", 500);
+    }
+    throw err;
+  }
+  if (!sessionOk) {
     return jsonError(
       "Reset session expired. Request a new verification code.",
       401,
