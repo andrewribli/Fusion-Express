@@ -208,19 +208,41 @@ export default function LoginPage() {
 
   return (
     <LakersWallpaper>
-      <main className="mx-auto max-w-[480px] px-4 py-8">
-        <div className="mb-4">
+      <main className="mx-auto max-w-[480px] px-4 py-6">
+        <div className="rounded-2xl bg-white/95 p-5 shadow-lg ring-2 ring-lakers-gold">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-full bg-lakers-navy/80 px-3 py-2 text-sm font-semibold text-lakers-gold ring-1 ring-lakers-gold/50 transition hover:bg-lakers-navy hover:ring-lakers-gold"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#1a1a1a] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-black"
+            aria-label="Back to homepage"
           >
-            <span aria-hidden>←</span>
+            <span aria-hidden className="text-base leading-none">
+              ←
+            </span>
             Back
           </Link>
+          <Link
+            href="/"
+            className="text-xs font-semibold text-[#ED1C24] underline underline-offset-2"
+          >
+            Home
+          </Link>
         </div>
-        <div className="rounded-2xl bg-white/95 p-5 shadow-lg ring-2 ring-lakers-gold">
-        <div className="mb-6 text-center">
-          <AppLogo size={160} className="mx-auto h-40 w-40" priority />
+
+        <div className="mb-5 text-center">
+          <AppLogo size={120} className="mx-auto h-28 w-28" priority />
+        </div>
+
+        <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
+          >
+            Continue as Guest
+          </Link>
+          <p className="mt-2 text-xs leading-snug text-gray-700">
+            Browse without signing in — order with just dorm, lobby, and phone.
+          </p>
         </div>
 
         {!firebaseEnabled && !demoAuth && (
@@ -485,14 +507,14 @@ export default function LoginPage() {
         )}
 
         <div className="mt-6 border-t border-gray-100 pt-5 text-center">
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#ED1C24] px-5 py-2.5 text-sm font-bold text-[#ED1C24] transition hover:bg-red-50"
-          >
-            Continue as Guest
-          </Link>
-          <p className="mt-2 text-xs text-gray-500">
-            Browse without signing in — order with just dorm, lobby, and phone.
+          <p className="text-sm text-gray-600">
+            Don&apos;t want an account right now?{" "}
+            <Link
+              href="/"
+              className="font-bold text-[#ED1C24] underline underline-offset-2"
+            >
+              Browse without signing in
+            </Link>
           </p>
         </div>
 
