@@ -9,6 +9,7 @@ import { RequireAdmin } from "@/components/RequireAdmin";
 import type { UserProfile } from "@/context/UserContext";
 import { AdminUserChatModal } from "@/components/AdminUserChatModal";
 import { fetchUnreadReplyCounts } from "@/lib/direct-messages";
+import { getAuthClient } from "@/lib/firebase";
 import { fetchAllUsers } from "@/lib/users";
 
 function cell(value: string | undefined): string {
@@ -22,6 +23,9 @@ export default function AdminUsersPage() {
   const [error, setError] = useState("");
   const [unread, setUnread] = useState<Record<string, number>>({});
   const [chatUser, setChatUser] = useState<UserProfile | null>(null);
+  const [deletingUid, setDeletingUid] = useState<string | null>(null);
+  const [repairingUid, setRepairingUid] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +58,74 @@ export default function AdminUsersPage() {
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  async function handleRepair(user: UserProfile) {
+    if (!user.uid) return;
+    const label = user.username || user.email || user.uid;
+    setRepairingUid(user.uid);
+    setActionMsg("");
+    setError("");
+    try {
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Please sign in again as an admin.");
+      const res = await fetch("/api/admin/users/repair-auth-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid: user.uid }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        email?: string;
+        previousAuthEmail?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Could not repair account");
+      setActionMsg(
+        data.previousAuthEmail && data.previousAuthEmail !== data.email
+          ? `Repaired ${label}: Auth email ${data.previousAuthEmail} → ${data.email}. They can use Forgot password now.`
+          : `Repaired ${label}: Auth email is ${data.email}. They can use Forgot password now.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not repair account.");
+    } finally {
+      setRepairingUid(null);
+    }
+  }
+
+  async function handleDelete(user: UserProfile) {
+    if (!user.uid) return;
+    const label = user.username || user.email || user.uid;
+    const ok = window.confirm(
+      `Delete account “${label}”?\n\nThis removes Auth, the users profile, and username maps. Cannot be undone.`,
+    );
+    if (!ok) return;
+
+    setDeletingUid(user.uid);
+    setActionMsg("");
+    setError("");
+    try {
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Please sign in again as an admin.");
+      const res = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid: user.uid, username: user.username }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Could not delete account");
+      setActionMsg(`Deleted ${label}.`);
+      setUsers((prev) => prev.filter((u) => u.uid !== user.uid));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete account.");
+    } finally {
+      setDeletingUid(null);
+    }
+  }
 
   return (
     <RequireAdmin>
@@ -124,7 +196,8 @@ export default function AdminUsersPage() {
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
                         <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
                         <th className="whitespace-nowrap py-2 pr-4">Guest</th>
-                        <th className="whitespace-nowrap py-2">Message</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Message</th>
+                        <th className="whitespace-nowrap py-2">Actions</th>
                       </tr>
                     </thead>
                     <tbody>

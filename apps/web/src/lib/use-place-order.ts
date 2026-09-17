@@ -158,7 +158,7 @@ export function usePlaceOrder() {
             price: item.price,
           })),
           total,
-          customerName: user.fullName,
+          customerName: customer.fullName,
           deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
 
