@@ -5,9 +5,14 @@ import {
   sendNonRunnerOrderNudge,
   sendOrderConfirmation,
   sendRunnerNotification,
-  type OrderEmailItem,
 } from "@/lib/email";
-import { listUserAlertRecipients } from "@/lib/firebase-admin";
+import {
+  AdminAuthError,
+  callerIsAdmin,
+  fetchOrderForEmail,
+  listUserAlertRecipients,
+  requireAuthFromRequest,
+} from "@/lib/firebase-admin";
 
 async function mapPool<T>(
   items: T[],
@@ -33,13 +38,18 @@ async function mapPool<T>(
 }
 
 export async function POST(request: Request) {
+  let auth;
+  try {
+    auth = await requireAuthFromRequest(request);
+  } catch (err) {
+    if (err instanceof AdminAuthError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let body: {
-    customerEmail?: string;
     orderId?: string;
-    items?: OrderEmailItem[];
-    total?: number;
-    customerName?: string;
-    deliveryLocation?: string;
     skipRosterAlerts?: boolean;
   };
   try {
@@ -53,25 +63,41 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "orderId is required" }, { status: 400 });
   }
 
-  const items = Array.isArray(body.items) ? body.items : [];
-  const total = Number(body.total ?? 0);
-  const customerEmail = body.customerEmail?.trim().toLowerCase();
-
   try {
+    const order = await fetchOrderForEmail(orderId, auth.idToken);
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const isCustomer = order.customerId === auth.uid;
+    const isAdminUser = !isCustomer
+      ? await callerIsAdmin(auth.uid, auth.idToken)
+      : false;
+    if (!isCustomer && !isAdminUser) {
+      return NextResponse.json(
+        { error: "Not allowed for this order." },
+        { status: 403 },
+      );
+    }
+
+    const items = order.items;
+    const total = order.total || order.finalTotal || 0;
+    const customerEmail = order.customerEmail;
+
     try {
       await sendAdminNewOrderNotice({
-        customerName: body.customerName ?? "",
+        customerName: order.customerName,
         items,
-        deliveryLocation: body.deliveryLocation ?? "",
+        deliveryLocation: order.deliveryLocation,
         total,
-        orderId,
+        orderId: order.id,
       });
     } catch (err) {
       console.error("admin new-order notice failed after retry", err);
     }
 
     if (customerEmail) {
-      await sendOrderConfirmation(customerEmail, orderId, items, total);
+      await sendOrderConfirmation(customerEmail, order.id, items, total);
     }
 
     let alerted = 0;
@@ -103,13 +129,13 @@ export async function POST(request: Request) {
         if (person.isRunner) {
           await sendRunnerNotification(
             person.email,
-            orderId,
+            order.id,
             FUSION_PICKUP_LOCATION,
           );
         } else {
           await sendNonRunnerOrderNudge(
             person.email,
-            orderId,
+            order.id,
             FUSION_PICKUP_LOCATION,
           );
         }
@@ -119,6 +145,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, alerted });
   } catch (err) {
+    if (err instanceof AdminAuthError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
     console.error("order-placed email failed", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Could not send email" },

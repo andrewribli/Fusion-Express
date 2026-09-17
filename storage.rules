@@ -1,9 +1,45 @@
 rules_version = '2';
+
+/**
+ * GraceRun Cloud Storage rules.
+ *
+ * Default deny: only the path prefixes below are reachable. There is no
+ * catch-all `/{allPaths=**}` open-read rule.
+ */
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isImageUnder10mb() {
+      return request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /delivery-proofs/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /receipts/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /bank-statements/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    // Path embeds the uploader uid so Storage can enforce ownership without
+    // a Firestore get. Admin review uses a signed-in admin session (Storage
+    // has no cheap admin-collection check here).
+    match /payment-submissions/{userId}/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && request.auth.uid == userId
+        && isImageUnder10mb();
     }
   }
 }

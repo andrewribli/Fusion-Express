@@ -136,11 +136,83 @@ service cloud.firestore {
         || request.resource.data.role in ['customer', 'runner', 'both'];
     }
 
+    /**
+     * Profile fields clients may write. Privilege flags (isRunner / runnerId)
+     * are allowed only under the constraints in userCreateOk / userUpdateOk —
+     * never as free-form self-grant.
+     */
+    function userKeysAllowed() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'fullName', 'email', 'phone', 'isGuest', 'createdAt', 'updatedAt',
+        'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
+        'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
+        'runnerPaymentMethod', 'runnerPaymentId',
+        'isRunner', 'runnerId'
+      ]);
+    }
+
+    function ownsRunnerDoc(runnerDocId) {
+      return runnerDocId is string
+        && runnerDocId.size() > 0
+        && runnerDocId.size() < 128
+        && exists(/databases/$(database)/documents/runners/$(runnerDocId))
+        && get(/databases/$(database)/documents/runners/$(runnerDocId))
+          .data.get('uid', '') == uid();
+    }
+
+    /** isRunner may only flip to true when runnerId points at the caller's runners doc. */
+    function runnerFlagsOk() {
+      let data = request.resource.data;
+      let runnerTrue = data.get('isRunner', false) == true;
+      let hasRunnerId = 'runnerId' in data && data.runnerId is string && data.runnerId.size() > 0;
+      return (!runnerTrue || (hasRunnerId && ownsRunnerDoc(data.runnerId)))
+        && (!hasRunnerId || ownsRunnerDoc(data.runnerId));
+    }
+
+    function userCreateOk(userId) {
+      let data = request.resource.data;
+      return signedIn()
+        && uid() == userId
+        && userKeysAllowed()
+        && roleIsValid()
+        && data.get('uid', uid()) == uid()
+        && data.get('isRunner', false) == false
+        && !('runnerId' in data);
+    }
+
+    function userUpdateOk(userId) {
+      let keys = changedKeys();
+      return signedIn()
+        && uid() == userId
+        && userKeysAllowed()
+        && roleIsValid()
+        && request.resource.data.get('uid', uid()) == uid()
+        && (
+          !keys.hasAny(['isRunner', 'runnerId'])
+          || runnerFlagsOk()
+        )
+        // Never let a client point runnerId at someone else's runners doc.
+        && (
+          !keys.hasAny(['runnerId'])
+          || !('runnerId' in request.resource.data)
+          || ownsRunnerDoc(request.resource.data.runnerId)
+        )
+        && (
+          !keys.hasAny(['isRunner'])
+          || request.resource.data.get('isRunner', false) == false
+          || (
+            request.resource.data.get('isRunner', false) == true
+            && 'runnerId' in request.resource.data
+            && ownsRunnerDoc(request.resource.data.runnerId)
+          )
+        );
+    }
+
     match /users/{userId} {
       allow get: if signedIn() && (uid() == userId || isAdmin());
       allow list: if isAdmin();
-      allow create: if signedIn() && uid() == userId && roleIsValid();
-      allow update: if signedIn() && uid() == userId && roleIsValid();
+      allow create: if userCreateOk(userId);
+      allow update: if userUpdateOk(userId);
       allow delete: if false;
     }
 
@@ -274,6 +346,7 @@ service cloud.firestore {
     }
 
     // Order chat is between the customer and the assigned runner only.
+    // senderId must be the Auth uid — no studentId / runnerDocId spoofing.
     match /chats/{orderId}/messages/{messageId} {
       allow get, list: if isOrderCustomer(order(orderId))
         || isOrderRunner(order(orderId))
@@ -281,9 +354,7 @@ service cloud.firestore {
       allow create: if (
           isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
         )
-        && request.resource.data.senderId in [
-          uid(), myRunnerDocId(), profile().get('studentId', '')
-        ];
+        && request.resource.data.senderId == uid();
       allow update, delete: if false;
     }
 

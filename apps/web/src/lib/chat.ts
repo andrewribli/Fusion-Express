@@ -128,10 +128,13 @@ export function isOwnChatMessage(
     runnerId?: string;
   },
 ): boolean {
-  const ids = [user.uid, user.studentId, user.runnerId].filter(
+  // New messages must use Auth uid. Keep legacy studentId/runnerId matches
+  // so older bubbles still render as "own".
+  if (user.uid && message.senderId === user.uid) return true;
+  const legacy = [user.studentId, user.runnerId].filter(
     (id): id is string => Boolean(id),
   );
-  return ids.includes(message.senderId);
+  return legacy.includes(message.senderId);
 }
 
 /**
