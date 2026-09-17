@@ -8,6 +8,7 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import type { UserProfile } from "@/context/UserContext";
+import { getAuthClient } from "@/lib/firebase";
 import { fetchAllUsers } from "@/lib/users";
 
 function cell(value: string | undefined): string {
@@ -19,25 +20,94 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingUid, setDeletingUid] = useState<string | null>(null);
+  const [repairingUid, setRepairingUid] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState("");
+
+  async function loadUsers() {
+    setLoading(true);
+    setError("");
+    try {
+      const rows = await fetchAllUsers();
+      setUsers(rows);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load users.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const rows = await fetchAllUsers();
-        if (!cancelled) setUsers(rows);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Could not load users.");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    void loadUsers();
   }, []);
+
+  async function handleRepair(user: UserProfile) {
+    if (!user.uid) return;
+    const label = user.username || user.email || user.uid;
+    setRepairingUid(user.uid);
+    setActionMsg("");
+    setError("");
+    try {
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Please sign in again as an admin.");
+      const res = await fetch("/api/admin/users/repair-auth-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid: user.uid }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        email?: string;
+        previousAuthEmail?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Could not repair account");
+      setActionMsg(
+        data.previousAuthEmail && data.previousAuthEmail !== data.email
+          ? `Repaired ${label}: Auth email ${data.previousAuthEmail} → ${data.email}. They can use Forgot password now.`
+          : `Repaired ${label}: Auth email is ${data.email}. They can use Forgot password now.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not repair account.");
+    } finally {
+      setRepairingUid(null);
+    }
+  }
+
+  async function handleDelete(user: UserProfile) {
+    if (!user.uid) return;
+    const label = user.username || user.email || user.uid;
+    const ok = window.confirm(
+      `Delete account “${label}”?\n\nThis removes Auth, the users profile, and username maps. Cannot be undone.`,
+    );
+    if (!ok) return;
+
+    setDeletingUid(user.uid);
+    setActionMsg("");
+    setError("");
+    try {
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Please sign in again as an admin.");
+      const res = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid: user.uid, username: user.username }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Could not delete account");
+      setActionMsg(`Deleted ${label}.`);
+      setUsers((prev) => prev.filter((u) => u.uid !== user.uid));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete account.");
+    } finally {
+      setDeletingUid(null);
+    }
+  }
 
   return (
     <RequireAdmin>
@@ -65,6 +135,7 @@ export default function AdminUsersPage() {
                 <Link href="/admin/feedback" className="font-medium text-[#ED1C24] underline">
                   Feedback
                 </Link>
+                {" · "}
                 <Link href="/admin/support" className="font-medium text-[#ED1C24] underline">
                   Support chat
                 </Link>
@@ -74,13 +145,22 @@ export default function AdminUsersPage() {
                 </Link>
               </p>
 
+              {actionMsg && (
+                <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
+                  {actionMsg}
+                </p>
+              )}
               {error && (
                 <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
                 </p>
               )}
 
-              {!loading && !error && (
+              {!loading && users.length === 0 && !error && (
+                <p className="mt-4 text-sm text-gray-600">No accounts found.</p>
+              )}
+
+              {!loading && users.length > 0 && (
                 <div className="mt-4 overflow-x-auto">
                   <table className="min-w-full text-left text-sm">
                     <thead>
@@ -93,7 +173,8 @@ export default function AdminUsersPage() {
                         <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
                         <th className="whitespace-nowrap py-2 pr-4">CUHK verified</th>
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
-                        <th className="whitespace-nowrap py-2">Student ID</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Student ID</th>
+                        <th className="whitespace-nowrap py-2">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -126,8 +207,28 @@ export default function AdminUsersPage() {
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.phone)}
                           </td>
-                          <td className="whitespace-nowrap py-2.5 text-gray-700">
+                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.studentId)}
+                          </td>
+                          <td className="whitespace-nowrap py-2.5">
+                            <div className="flex flex-wrap gap-1.5">
+                              <button
+                                type="button"
+                                disabled={!u.uid || repairingUid === u.uid}
+                                onClick={() => void handleRepair(u)}
+                                className="rounded-lg border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50"
+                              >
+                                {repairingUid === u.uid ? "Fixing…" : "Fix login"}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={!u.uid || deletingUid === u.uid}
+                                onClick={() => void handleDelete(u)}
+                                className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              >
+                                {deletingUid === u.uid ? "Deleting…" : "Delete"}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

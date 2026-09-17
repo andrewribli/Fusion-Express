@@ -1,9 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { validateEmail, validatePassword } from "@/lib/auth";
+import { doc, getDoc } from "firebase/firestore";
+import {
+  normalizeUsername,
+  validateEmail,
+  validatePassword,
+} from "@/lib/auth";
+import { collectionName } from "@/lib/constants";
+import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 
 type Step = "email" | "code" | "password" | "done";
+
+/** Resolve a username to the CUHK email stored on the usernames map. */
+async function resolveResetEmail(identifier: string): Promise<string> {
+  const trimmed = identifier.trim().toLowerCase();
+  if (!trimmed) {
+    throw new Error("Enter your CUHK email or username");
+  }
+  if (trimmed.includes("@")) {
+    const emailErr = validateEmail(trimmed);
+    if (emailErr) throw new Error(emailErr);
+    return trimmed;
+  }
+
+  if (!isFirebaseConfigured()) {
+    throw new Error("Enter your full CUHK email (@link.cuhk.edu.hk)");
+  }
+
+  const snap = await getDoc(
+    doc(getDb(), collectionName("usernames"), normalizeUsername(trimmed)),
+  );
+  const mapped = snap.exists() ? snap.data().email : undefined;
+  if (typeof mapped === "string" && mapped.includes("@")) {
+    const email = mapped.trim().toLowerCase();
+    const emailErr = validateEmail(email);
+    if (emailErr) throw new Error(emailErr);
+    return email;
+  }
+  throw new Error("No account found with this username.");
+}
 
 export function ForgotPasswordModal({
   open,
@@ -15,6 +51,7 @@ export function ForgotPasswordModal({
   initialEmail?: string;
 }) {
   const [step, setStep] = useState<Step>("email");
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -23,10 +60,13 @@ export function ForgotPasswordModal({
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
 
+  // Only reset form state when the modal opens — not when loading flips,
+  // or typing in the parent login field overwrites the reset email mid-send.
   useEffect(() => {
     if (!open) return;
     setStep("email");
-    setEmail(initialEmail.trim());
+    setIdentifier(initialEmail.trim());
+    setEmail("");
     setCode("");
     setPassword("");
     setConfirm("");
@@ -36,42 +76,40 @@ export function ForgotPasswordModal({
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !loading) onClose();
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, loading, onClose, initialEmail]);
+    // intentionally omit loading / onClose — reset only on open + seed value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   if (!open) return null;
 
   async function sendCode() {
     setError("");
-    const trimmed = email.trim().toLowerCase();
-    const emailErr = validateEmail(trimmed);
-    if (emailErr) {
-      setError(emailErr);
-      return;
-    }
     setLoading(true);
     try {
+      const resolved = await resolveResetEmail(identifier);
       const res = await fetch("/api/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed, purpose: "reset" }),
+        body: JSON.stringify({ email: resolved, purpose: "reset" }),
       });
       const data = (await res.json()) as { error?: string; devCode?: string };
       if (!res.ok) {
         setError(data.error ?? "Could not send code");
         return;
       }
-      setEmail(trimmed);
+      setEmail(resolved);
+      setIdentifier(resolved);
       setDevCode(data.devCode ?? "");
       setStep("code");
-    } catch {
-      setError("Could not send code");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send code");
     } finally {
       setLoading(false);
     }
@@ -164,26 +202,31 @@ export function ForgotPasswordModal({
             className="mt-3 space-y-4"
           >
             <p className="text-sm text-gray-600">
-              Enter your CUHK (@link.cuhk.edu.hk) email. We&apos;ll send a
-              GraceRun verification code right away.
+              Enter your CUHK email (@link.cuhk.edu.hk) or username. We&apos;ll
+              send a GraceRun verification code right away.
             </p>
             <div>
-              <label htmlFor="reset-email" className="block text-xs font-medium text-gray-600">
-                Email
+              <label
+                htmlFor="reset-email"
+                className="block text-xs font-medium text-gray-600"
+              >
+                Email or username
               </label>
               <input
                 id="reset-email"
-                type="email"
+                type="text"
                 required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="1155xxxxxx@link.cuhk.edu.hk"
+                autoComplete="username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="1155xxxxxx@link.cuhk.edu.hk or username"
                 className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-[#ED1C24] focus:outline-none focus:ring-2 focus:ring-[#ED1C24]/20"
               />
             </div>
             {error && (
-              <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+              <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+                {error}
+              </p>
             )}
             <div className="flex gap-3">
               <button
@@ -219,14 +262,18 @@ export function ForgotPasswordModal({
               autoComplete="one-time-code"
               required
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) =>
+                setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
               className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm tracking-widest"
             />
             {devCode && (
               <p className="text-xs text-amber-700">Dev code: {devCode}</p>
             )}
             {error && (
-              <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+              <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+                {error}
+              </p>
             )}
             <div className="flex gap-3">
               <button
@@ -274,7 +321,9 @@ export function ForgotPasswordModal({
               className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm"
             />
             {error && (
-              <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+              <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+                {error}
+              </p>
             )}
             <button
               type="submit"
