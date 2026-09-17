@@ -1,6 +1,12 @@
 export const CUHK_COLLEGE_HALLS = {
   "Shaw College": ["Kuo Mou Hall", "Student Hostel II"],
-  "United College": ["Adam Schall", "William M.W. Mong", "Wu Chung", "Y.C. Liang"],
+  "United College": [
+    "Adam Schall",
+    "Bethlehem Hall",
+    "William M.W. Mong",
+    "Wu Chung",
+    "Y.C. Liang",
+  ],
   "Chung Chi College": [
     "Ming Hua",
     "Ying Lin",
