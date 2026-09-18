@@ -70,6 +70,9 @@ export default function AisleItemsPage({
   useEffect(() => {
     if (!section || !aisle) return;
 
+    setSearch("");
+    setSubFilter(null);
+
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -101,6 +104,7 @@ export default function AisleItemsPage({
   }, [section, aisleId, aisle]);
 
   useEffect(() => {
+    setSearch("");
     setSubFilter(null);
     setOffersOnly(false);
     setSortMode("popular");
@@ -204,7 +208,6 @@ export default function AisleItemsPage({
             </div>
 
             <div className="relative mt-4">
-              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-gray-50 to-transparent" />
               <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <label className="relative shrink-0">
                   <span className="sr-only">Sort</span>

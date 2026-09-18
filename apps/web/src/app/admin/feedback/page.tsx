@@ -82,6 +82,10 @@ export default function AdminFeedbackPage() {
                   Users
                 </Link>
                 {" · "}
+                <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
+                  Messaging
+                </Link>
+                {" · "}
                 <Link href="/admin/payouts" className="font-medium text-[#ED1C24] underline">
                   Runner payouts
                 </Link>

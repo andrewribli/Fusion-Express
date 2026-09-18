@@ -124,33 +124,38 @@ export function isOwnChatMessage(
   message: ChatMessage,
   user: {
     uid?: string;
-    studentId: string;
+    studentId?: string;
     runnerId?: string;
   },
 ): boolean {
-  const ids = [user.uid, user.studentId, user.runnerId].filter(
+  // New messages must use Auth uid. Keep legacy studentId/runnerId matches
+  // so older bubbles still render as "own".
+  if (user.uid && message.senderId === user.uid) return true;
+  const legacy = [user.studentId, user.runnerId].filter(
     (id): id is string => Boolean(id),
   );
-  return ids.includes(message.senderId);
+  return legacy.includes(message.senderId);
 }
 
 /**
  * Mirrors the chat security rules: the customer and the assigned runner only.
  * Any other runner used to pass this check, but the rules now reject their
  * reads, so the panel must not be offered to them.
+ *
+ * studentId remains a legacy customerId fallback for older orders only.
  */
 export function canAccessOrderChat(
   order: { customerId: string; runnerId?: string; runnerUid?: string },
   user: {
     uid?: string;
-    studentId: string;
+    studentId?: string;
     runnerId?: string;
     isRunner?: boolean;
   },
 ): boolean {
   const customerMatch =
     (user.uid && order.customerId === user.uid) ||
-    order.customerId === user.studentId;
+    Boolean(user.studentId && order.customerId === user.studentId);
   if (customerMatch) return true;
   if (order.runnerUid && user.uid && order.runnerUid === user.uid) return true;
   if (order.runnerId && user.runnerId && order.runnerId === user.runnerId) {

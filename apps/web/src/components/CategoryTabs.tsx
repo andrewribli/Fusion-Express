@@ -31,7 +31,6 @@ export function CategoryTabs({
 
   return (
     <nav aria-label="Aisle categories" className="relative">
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-gray-50 to-transparent" />
       <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <li className="shrink-0">
           <Link

@@ -143,7 +143,7 @@ function HomeSearchBar({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
-          placeholder="Search Fusion"
+          placeholder="Search products"
           className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
           style={{ backgroundColor: "transparent", color: "#111111" }}
           autoComplete="off"
@@ -151,7 +151,7 @@ function HomeSearchBar({
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
           style={{ color: "#555555" }}
           aria-label="Scan or upload a product photo"
         >
@@ -167,7 +167,7 @@ function HomeSearchBar({
         <button
           type="button"
           onClick={() => inputRef.current?.focus()}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
           style={{ backgroundColor: "#ff6a00" }}
           aria-label="Search"
         >
@@ -226,6 +226,7 @@ export function ShopHome() {
   const { addItem, itemCount } = useCart();
   const { user, setMode, canRunnerMode } = useUser();
   const { openManualItem } = useManualItemModal();
+  const [guestBrowse, setGuestBrowse] = useState(false);
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -254,6 +255,15 @@ export function ShopHome() {
   useEffect(() => {
     document.title = "Shop Now — GraceRun";
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      setGuestBrowse(false);
+      return;
+    }
+    const q = new URLSearchParams(window.location.search);
+    setGuestBrowse(q.get("guest") === "1" || q.get("guest") === "true");
+  }, [user]);
 
   useEffect(() => {
     let cancelled = false;
@@ -309,7 +319,12 @@ export function ShopHome() {
       <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
         <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
           <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
-            <Link href="/" className="hidden shrink-0 sm:block">
+            <Link
+              href="/"
+              onClick={() => setSearch("")}
+              className="hidden shrink-0 sm:block"
+              aria-label="GraceRun home"
+            >
               <span className="text-base font-extrabold tracking-tight text-white">
                 GraceRun
               </span>
@@ -368,6 +383,24 @@ export function ShopHome() {
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-0 pb-36 sm:px-4">
+          {guestBrowse && (
+            <div className="mx-3 mt-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800 sm:mx-0">
+              <p className="font-semibold text-gray-900">Ordering as guest</p>
+              <p className="mt-0.5 text-xs text-gray-600">
+                Add items, then checkout with dorm, lobby, and phone — no account
+                required. We create your guest profile when you place the order.
+              </p>
+              {itemCount > 0 && (
+                <Link
+                  href="/checkout"
+                  className="mt-2 inline-flex text-xs font-bold text-[#ED1C24] underline"
+                >
+                  Continue to checkout ({itemCount} item
+                  {itemCount === 1 ? "" : "s"})
+                </Link>
+              )}
+            </div>
+          )}
           <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
             <div className="min-w-0 space-y-4">
               <section
@@ -381,7 +414,10 @@ export function ShopHome() {
                       <button
                         key={cat.id}
                         type="button"
-                        onClick={openManualItem}
+                        onClick={() => {
+                          setSearch("");
+                          openManualItem();
+                        }}
                         className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
                       >
                         <span
@@ -402,6 +438,7 @@ export function ShopHome() {
                       <Link
                         key={cat.id}
                         href={cat.href}
+                        onClick={() => setSearch("")}
                         className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
                       >
                         <span

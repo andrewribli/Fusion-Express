@@ -4,9 +4,9 @@ import { Pressable, Text, View } from "react-native";
 export default function HomeScreen() {
   return (
     <View className="flex-1 bg-white px-6 pt-8">
-      <Text className="text-3xl font-bold text-fusion">Fusion Express</Text>
+      <Text className="text-3xl font-bold text-fusion">GraceRun</Text>
       <Text className="mt-2 text-base text-gray-600">
-        Groceries from Fusion to your CUHK lobby.
+        Groceries. Delivered with grace.
       </Text>
 
       <Link href="/menu" asChild>

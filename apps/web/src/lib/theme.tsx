@@ -21,18 +21,18 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
+  theme: "lite",
   setTheme: () => {},
   toggleTheme: () => {},
 });
 
-export function applyThemeClass(theme: AppTheme) {
+export function applyThemeClass(_theme: AppTheme) {
   document.body.classList.remove("dark-mode", "lite-mode");
-  document.body.classList.add(theme === "lite" ? "lite-mode" : "dark-mode");
+  document.body.classList.add("lite-mode");
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<AppTheme>("dark");
+  const [theme, setThemeState] = useState<AppTheme>("lite");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);

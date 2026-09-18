@@ -10,7 +10,6 @@ import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { isOverOrderLimit } from "@/lib/constants";
 import { homeForMode, isTabActive, runnerEntryHref, tabsForMode, type NavTab } from "@/lib/nav";
-import { useTheme } from "@/lib/theme";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 import { navModeForPath, useModeSync } from "@/lib/use-mode-sync";
@@ -20,33 +19,6 @@ interface AppHeaderProps {
   backHref?: string;
   /** Kept so existing pages still compile; brand name is always GraceRun. */
   title?: string;
-}
-
-function ThemeToggleButton({ runnerMode }: { runnerMode: boolean }) {
-  const { theme, toggleTheme } = useTheme();
-  const dark = theme === "dark";
-  return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-        runnerMode
-          ? "bg-white/15 text-lakers-gold hover:bg-white/25"
-          : "bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]"
-      }`}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-    >
-      {dark ? (
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
-          <path d="M12 4.5a1 1 0 0 1 1 1V7a1 1 0 1 1-2 0V5.5a1 1 0 0 1 1-1Zm0 11a1 1 0 0 1 1 1V19a1 1 0 1 1-2 0v-2.5a1 1 0 0 1 1-1Zm7.5-4.5a1 1 0 0 1-1 1H17a1 1 0 1 1 0-2h1.5a1 1 0 0 1 1 1ZM8 12a1 1 0 0 1-1 1H5.5a1 1 0 1 1 0-2H7a1 1 0 0 1 1 1Zm8.95 4.95a1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06a1 1 0 0 1 1.41 0ZM9.52 6.64a1 1 0 0 1 0 1.41L8.46 9.11A1 1 0 0 1 7.05 7.7l1.06-1.06a1 1 0 0 1 1.41 0Zm8.49-1.06a1 1 0 0 1 0 1.41l-1.06 1.06A1 1 0 1 1 15.54 6.64l1.06-1.06a1 1 0 0 1 1.41 0ZM9.52 15.54a1 1 0 0 1 0 1.41L8.46 18a1 1 0 1 1-1.41-1.41l1.06-1.06a1 1 0 0 1 1.41 0ZM12 8.5A3.5 3.5 0 1 1 8.5 12 3.5 3.5 0 0 1 12 8.5Z" />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
-          <path d="M16.5 13.5A6.5 6.5 0 0 1 10 6.9a.75.75 0 0 0-.95-1 8 8 0 1 0 9.55 9.55.75.75 0 0 0-1-.95 6.47 6.47 0 0 1-1.1-.99Z" />
-        </svg>
-      )}
-    </button>
-  );
 }
 
 export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
@@ -69,12 +41,8 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const navLink = (active: boolean) =>
     `hidden h-11 w-11 items-center justify-center rounded-full md:inline-flex ${
       active
-        ? runnerMode
-          ? "bg-white/15 text-lakers-gold"
-          : "bg-red-50 text-[#ED1C24]"
-        : runnerMode
-          ? "text-white/75 hover:bg-white/10 hover:text-lakers-gold"
-          : "text-gray-600 hover:bg-gray-100 hover:text-[#ED1C24]"
+        ? "bg-red-50 text-[#ED1C24]"
+        : "text-gray-600 hover:bg-gray-100 hover:text-[#ED1C24]"
     }`;
 
   function onTabClick(tab: NavTab, event: React.MouseEvent) {
@@ -103,23 +71,13 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   return (
     <>
       {runnerMode && <RunnerModeBanner />}
-      <header
-        className={`sticky top-0 z-50 overflow-visible border-b shadow-sm backdrop-blur ${
-          runnerMode
-            ? "border-lakers-gold/40 bg-lakers-navy/95"
-            : "border-gray-100 bg-white/95"
-        }`}
-      >
+      <header className="sticky top-0 z-50 overflow-visible border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2">
             {showBack && (
               <Link
                 href={backHref ?? home}
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-                  runnerMode
-                    ? "bg-white/15 text-lakers-gold"
-                    : "bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]"
-                }`}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]"
                 aria-label="Go back"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -133,20 +91,20 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                 </svg>
               </Link>
             )}
-            <Link href={home} className="flex min-w-0 items-center gap-2">
+            <Link
+              href={runnerMode ? home : "/"}
+              className="flex min-w-0 items-center gap-2"
+              aria-label="GraceRun home"
+            >
               <AppLogo size={44} className="h-11 w-11 shrink-0" />
               {runnerMode && (
-                <span className="block text-[10px] font-semibold uppercase tracking-wide text-white/60">
+                <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
                   Runner
                 </span>
               )}
             </Link>
             <span
-              className={`hidden max-w-44 truncate rounded-full px-2.5 py-1 text-[11px] font-semibold sm:block ${
-                runnerMode
-                  ? "bg-white/10 text-white/80"
-                  : "bg-red-50 text-[#ED1C24]"
-              }`}
+              className="hidden max-w-44 truncate rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-[#ED1C24] sm:block"
               aria-label={`Current page: ${pageLabel}`}
             >
               {pageLabel}
@@ -154,7 +112,6 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
           </div>
 
           <nav className="flex shrink-0 items-center gap-1.5">
-            <ThemeToggleButton runnerMode={runnerMode} />
             {!runnerMode ? (
               <Link
                 href={runnerEntryHref({
@@ -172,7 +129,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               <Link
                 href="/"
                 onClick={() => setMode("customer")}
-                className="hidden min-h-11 items-center rounded-full bg-lakers-gold px-3 py-2 text-xs font-bold text-lakers-navy shadow-sm hover:brightness-105 sm:inline-flex"
+                className="hidden min-h-11 items-center rounded-full bg-[#ED1C24] px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#c9171e] sm:inline-flex"
               >
                 Switch to Customer
               </Link>

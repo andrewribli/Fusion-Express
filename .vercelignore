@@ -13,8 +13,21 @@ firebase-service-account.json
 next-env.d.ts
 scripts/__pycache__
 *.zip
+*.exe
+*.crdownload
+*.pdf
+tmp/
 FoodPanda Data2.txt
 FoodPanda Fusion Data.txt
 Product List Catalog.xlsx
 06_large_demo_dataset.sql
 scripts/_image_misses.txt
+Grok_Bot*
+GraceRun Logo.png
+Reply Letter.pdf
+SC-554-0803.pdf
+# Local CLI uploads cap at 100MB; shelf photos (~170MB+) must be uploaded to
+# Blob/CDN separately — do not ship apps/web/public/images/catalog in deploys.
+# Catalog JSON no longer references /images/catalog/* (cleared to empty so the
+# app falls back to remote/override/aisle images).
+apps/web/public/images/catalog

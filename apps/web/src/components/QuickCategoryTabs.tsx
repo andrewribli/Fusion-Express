@@ -19,7 +19,6 @@ export function QuickCategoryTabs({ className = "" }: { className?: string }) {
 
   return (
     <nav aria-label="Shop by category" className={`relative ${className}`}>
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-gray-50 to-transparent" />
       <ul className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {QUICK_CATEGORIES.map((category) => {
           const active = pathname === category.href;

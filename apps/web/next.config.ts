@@ -2,8 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@fusion-express/shared", "@fusion-express/ui"],
+  // Keep Admin SDK + jwks-rsa/jose out of the Turbopack/webpack server bundle.
+  // Bundling them caused ERR_REQUIRE_ESM (CJS require of ESM-only jose@6).
+  serverExternalPackages: ["firebase-admin", "jose", "jwks-rsa"],
   distDir: process.env.VERCEL ? "../../.next" : ".next",
   images: {
+    // Bypass Vercel Image Optimization until quota is restored (remote
+    // medias.pns.hk / foodpanda URLs were returning HTTP 402).
+    // Local /images/* aisle assets remain fine either way; global
+    // unoptimized is the short-term fix while remotePatterns stay for
+    // when optimization is re-enabled.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

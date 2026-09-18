@@ -3,8 +3,8 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { useUser, getUserAccountId } from "@/context/UserContext";
-import { getLobbyForHall } from "@/data/cuhk-locations";
+import { useUser } from "@/context/UserContext";
+import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 import {
   getEstimatedDeliveryTime,
@@ -12,6 +12,7 @@ import {
   ORDER_LIMIT_MESSAGE,
   resolveSpecialInstructions,
 } from "@/lib/constants";
+import { friendlyPlaceOrderError } from "@/lib/auth-errors";
 import { notifyOrderPlaced } from "@/lib/notify-email";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
@@ -50,10 +51,11 @@ export function usePlaceOrder() {
 
       setLoading(true);
       setError("");
-      await requestNotificationPermission();
 
-      let customer = user;
       try {
+        await requestNotificationPermission();
+
+        let customer = user;
         // Guests (and signed-in users missing a phone) get a phone-backed account.
         if (
           !customer?.uid ||
@@ -67,62 +69,54 @@ export function usePlaceOrder() {
             hall: opts.hall,
           });
         }
-      } catch (err) {
-        setLoading(false);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Could not start guest checkout. Try again.",
+
+        if (!customer?.uid) {
+          setError("Could not create your account. Try again.");
+          return;
+        }
+
+        const orderItems = items.map(({ item, quantity }) => ({
+          itemId: item.id,
+          name: item.name,
+          price: getUnitPrice(item),
+          quantity,
+          weightKg: item.weightKg,
+        }));
+        const orderSubtotal = items.reduce(
+          (sum, line) => sum + lineTotal(line.item, line.quantity),
+          0,
         );
-        return;
-      }
+        if (isOverOrderLimit(orderSubtotal)) {
+          setError(ORDER_LIMIT_MESSAGE);
+          return;
+        }
+        const fee = calculateDeliveryFee({
+          weightKg: cartTotalWeightKg(items),
+          college: opts.college,
+        });
+        // Reject negative tips; clamp rather than blocking submit.
+        const tipAmount = Math.max(0, opts.tip ?? 0);
+        const total = orderSubtotal + fee.deliveryFee + tipAmount;
+        const estimatedDeliveryAt = getEstimatedDeliveryTime();
+        const digits = normalizePhone(phone);
+        const lobbyPoint = getLobbyForHall(opts.hall);
+        const customerName =
+          customer.fullName?.trim() && customer.fullName !== "Guest"
+            ? customer.fullName
+            : `Guest ${digits.slice(-4)}`;
 
-      if (!customer?.uid) {
-        setLoading(false);
-        setError("Could not create your account. Try again.");
-        return;
-      }
-
-      const orderItems = items.map(({ item, quantity }) => ({
-        itemId: item.id,
-        name: item.name,
-        price: getUnitPrice(item),
-        quantity,
-        weightKg: item.weightKg,
-      }));
-      const orderSubtotal = items.reduce(
-        (sum, line) => sum + lineTotal(line.item, line.quantity),
-        0,
-      );
-      if (isOverOrderLimit(orderSubtotal)) {
-        setLoading(false);
-        setError(ORDER_LIMIT_MESSAGE);
-        return;
-      }
-      const fee = calculateDeliveryFee({
-        weightKg: cartTotalWeightKg(items),
-        college: opts.college,
-      });
-      const tipAmount = opts.tip ?? 0;
-      const total = orderSubtotal + fee.deliveryFee + tipAmount;
-      const estimatedDeliveryAt = getEstimatedDeliveryTime();
-      const digits = normalizePhone(phone);
-
-      try {
         const orderId = await createOrder({
           sessionId,
-          customerId: getUserAccountId(customer),
-          customerName:
-            customer.fullName?.trim() && customer.fullName !== "Guest"
-              ? customer.fullName
-              : `Guest ${digits.slice(-4)}`,
+          // New orders always key on Auth uid (never studentId/email fallback).
+          customerId: customer.uid,
+          customerName,
           customerEmail: customer.email,
           customerPhone: digits,
           items: orderItems,
           status: "pending",
           college: opts.college,
           hall: opts.hall,
-          lobbyPoint: getLobbyForHall(opts.hall),
+          lobbyPoint,
           zone: fee.zone,
           totalWeight: fee.weightKg,
           customerNote: resolveSpecialInstructions(
@@ -156,15 +150,14 @@ export function usePlaceOrder() {
             price: item.price,
           })),
           total,
+          customerName,          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
 
         clearCart();
         const guestFlag = customer.isGuest ? "&guest=1" : "";
         router.push(`/track?orderId=${orderId}${guestFlag}`);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Could not place order. Try again.",
-        );
+        setError(friendlyPlaceOrderError(err));
       } finally {
         setLoading(false);
       }

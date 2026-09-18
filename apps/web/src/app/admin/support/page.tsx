@@ -8,12 +8,14 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import { useUser } from "@/context/UserContext";
 import {
-  fetchSupportThreads,
-  sendSupportMessage,
-  subscribeSupportMessages,
-  type SupportThread,
-} from "@/lib/support-chat";
-import type { ChatMessage } from "@/lib/types";
+  fetchDirectThreads,
+  markThreadRead,
+  sendDirectMessage,
+  subscribeDirectMessages,
+  type DirectMessage,
+  type DirectThread,
+} from "@/lib/direct-messages";
+import { fetchAllUsers } from "@/lib/users";
 
 function formatTime(date: Date): string {
   return date.toLocaleString("en-HK", {
@@ -26,9 +28,10 @@ function formatTime(date: Date): string {
 
 export default function AdminSupportPage() {
   const { user } = useUser();
-  const [threads, setThreads] = useState<SupportThread[]>([]);
+  const [threads, setThreads] = useState<DirectThread[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -39,8 +42,17 @@ export default function AdminSupportPage() {
     let cancelled = false;
     void (async () => {
       try {
-        const rows = await fetchSupportThreads();
-        if (!cancelled) setThreads(rows);
+        const [rows, users] = await Promise.all([
+          fetchDirectThreads(),
+          fetchAllUsers().catch(() => []),
+        ]);
+        if (cancelled) return;
+        setThreads(rows);
+        const map: Record<string, string> = {};
+        for (const u of users) {
+          if (u.uid) map[u.uid] = u.fullName || u.email || u.uid;
+        }
+        setNames(map);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Could not load chats.");
@@ -50,7 +62,7 @@ export default function AdminSupportPage() {
       }
     })();
     const interval = setInterval(() => {
-      void fetchSupportThreads().then(setThreads).catch(() => undefined);
+      void fetchDirectThreads().then(setThreads).catch(() => undefined);
     }, 12000);
     return () => {
       cancelled = true;
@@ -60,14 +72,17 @@ export default function AdminSupportPage() {
 
   useEffect(() => {
     if (!selectedId) return;
-    return subscribeSupportMessages(selectedId, setMessages);
+    return subscribeDirectMessages(selectedId, setMessages);
   }, [selectedId]);
+
+  useEffect(() => {
+    if (!selectedId || !user?.uid) return;
+    void markThreadRead({ userId: selectedId, readerId: user.uid });
+  }, [selectedId, user?.uid, messages.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selectedId]);
-
-  const selected = threads.find((t) => t.userId === selectedId);
 
   async function reply(event: React.FormEvent) {
     event.preventDefault();
@@ -75,17 +90,13 @@ export default function AdminSupportPage() {
     setSending(true);
     setError("");
     try {
-      await sendSupportMessage({
+      await sendDirectMessage({
         userId: selectedId,
-        userName: selected?.userName || selectedId,
         senderId: user.uid,
-        senderName: "Admin",
         message: text,
-        asAdmin: true,
       });
       setText("");
-      const rows = await fetchSupportThreads();
-      setThreads(rows);
+      setThreads(await fetchDirectThreads());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send.");
     } finally {
@@ -103,11 +114,11 @@ export default function AdminSupportPage() {
               <Link href="/admin/users" className="font-medium text-[#ED1C24] underline">
                 Users
               </Link>
-              <Link href="/admin/feedback" className="font-medium text-[#ED1C24] underline">
-                Feedback
+              <Link href="/admin/payments" className="font-medium text-[#ED1C24] underline">
+                Payment submissions
               </Link>
-              <Link href="/admin/payouts" className="font-medium text-[#ED1C24] underline">
-                Payouts
+              <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
+                Broadcasts
               </Link>
             </div>
             {error && (
@@ -123,7 +134,9 @@ export default function AdminSupportPage() {
                 {loading ? (
                   <p className="px-4 py-6 text-sm text-gray-500">Loading…</p>
                 ) : threads.length === 0 ? (
-                  <p className="px-4 py-6 text-sm text-gray-500">No chats yet.</p>
+                  <p className="px-4 py-6 text-sm text-gray-500">
+                    No chats yet. Open a user from the Users page to start one.
+                  </p>
                 ) : (
                   <ul className="max-h-[70vh] overflow-y-auto">
                     {threads.map((thread) => (
@@ -131,19 +144,24 @@ export default function AdminSupportPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedId(thread.userId)}
-                          className={`w-full border-b border-gray-50 px-4 py-3 text-left hover:bg-red-50 ${
+                          className={`relative w-full border-b border-gray-50 px-4 py-3 text-left hover:bg-red-50 ${
                             selectedId === thread.userId ? "bg-red-50" : ""
                           }`}
                         >
                           <p className="truncate text-sm font-semibold text-gray-900">
-                            {thread.userName}
+                            {names[thread.userId] || thread.userId}
                           </p>
                           <p className="truncate text-xs text-gray-500">
                             {thread.lastMessage}
                           </p>
                           <p className="mt-0.5 text-[10px] text-gray-400">
-                            {formatTime(thread.lastMessageAt)}
+                            {formatTime(thread.lastAt)}
                           </p>
+                          {thread.unreadFromUser > 0 && (
+                            <span className="absolute right-3 top-3 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ED1C24] px-1 text-[10px] font-bold text-white">
+                              {thread.unreadFromUser}
+                            </span>
+                          )}
                         </button>
                       </li>
                     ))}
@@ -160,13 +178,13 @@ export default function AdminSupportPage() {
                   <>
                     <div className="border-b border-gray-100 px-4 py-3">
                       <p className="font-bold text-gray-900">
-                        {selected?.userName || selectedId}
+                        {names[selectedId] || selectedId}
                       </p>
                       <p className="text-xs text-gray-500">{selectedId}</p>
                     </div>
                     <div className="flex-1 space-y-2 overflow-y-auto bg-gray-50 px-3 py-3">
                       {messages.map((msg) => {
-                        const mine = msg.senderName === "Admin" || msg.senderId === user?.uid;
+                        const mine = msg.senderId === user?.uid;
                         return (
                           <div
                             key={msg.id}
@@ -179,9 +197,6 @@ export default function AdminSupportPage() {
                                   : "bg-white text-gray-900 shadow-sm"
                               }`}
                             >
-                              <p className="mb-0.5 text-[10px] font-semibold opacity-70">
-                                {msg.senderName}
-                              </p>
                               <p className="whitespace-pre-wrap break-words">
                                 {msg.message}
                               </p>

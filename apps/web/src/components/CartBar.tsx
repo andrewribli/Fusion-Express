@@ -2,18 +2,16 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { useUser } from "@/context/UserContext";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 
 export function CartBar() {
   const { itemCount, subtotal, items } = useCart();
-  const { user } = useUser();
 
   if (itemCount === 0) return null;
 
   const fee = calculateDeliveryFee({
     weightKg: cartTotalWeightKg(items),
-    college: user?.college ?? "",
+    college: "",
   });
   const total = subtotal + fee.deliveryFee;
 
@@ -28,7 +26,7 @@ export function CartBar() {
         </div>
         <Link
           href="/checkout"
-          className="rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-lakers-navy transition-colors hover:bg-white"
+          className="rounded-xl bg-[#ED1C24] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#c9171e]"
         >
           Checkout
         </Link>

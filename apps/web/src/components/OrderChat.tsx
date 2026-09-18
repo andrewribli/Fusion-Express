@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useUser, getUserAccountId } from "@/context/UserContext";
+import { useUser } from "@/context/UserContext";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
@@ -61,11 +61,12 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
     );
   }
 
-  const senderId = getUserAccountId(user);
+  const senderId = user.uid;
+  if (!senderId) return null;
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || !senderId) return;
     setSending(true);
     setError("");
     try {

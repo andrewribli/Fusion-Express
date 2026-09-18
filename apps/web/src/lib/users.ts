@@ -8,7 +8,6 @@ import { doc, getDoc, getDocs, collection, setDoc, Timestamp, deleteField } from
 const USERS_COLLECTION = collectionName("users");
 
 export type UserProfileDoc = UserProfile & {
-  username: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -16,18 +15,20 @@ export type UserProfileDoc = UserProfile & {
 function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
   return {
     uid,
-    username: String(data.username ?? ""),
     email: data.email ? String(data.email) : undefined,
     fullName: String(data.fullName ?? ""),
-    chineseName: String(data.chineseName ?? ""),
-    studentId: String(data.studentId ?? ""),
-    college: String(data.college ?? ""),
-    hall: String(data.hall ?? ""),
-    roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
     phone: data.phone ? String(data.phone) : undefined,
-    isGuest: Boolean(data.isGuest),
-    role: normalizeRole(data.role, Boolean(data.isRunner)),
     isRunner: Boolean(data.isRunner),
+    isGuest: Boolean(data.isGuest),
+    createdAt:
+      data.createdAt &&
+      typeof data.createdAt === "object" &&
+      "toDate" in data.createdAt
+        ? (data.createdAt as Timestamp).toDate().toISOString()
+        : data.createdAt
+          ? String(data.createdAt)
+          : undefined,
+    role: normalizeRole(data.role, Boolean(data.isRunner)),
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
     runnerPaymentMethod: data.runnerPaymentMethod as UserProfile["runnerPaymentMethod"],
     runnerPaymentId: data.runnerPaymentId ? String(data.runnerPaymentId) : undefined,
@@ -47,6 +48,12 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         ? (data.cuhkVerifiedAt as Timestamp).toDate().toISOString()
         : String(data.cuhkVerifiedAt)
       : undefined,
+    username: data.username ? String(data.username) : undefined,
+    chineseName: data.chineseName ? String(data.chineseName) : undefined,
+    studentId: data.studentId ? String(data.studentId) : undefined,
+    college: data.college ? String(data.college) : undefined,
+    hall: data.hall ? String(data.hall) : undefined,
+    roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
   };
 }
 
@@ -80,22 +87,35 @@ export async function fetchAllUsers(): Promise<UserProfile[]> {
 
 export async function createUserProfile(
   uid: string,
-  profile: Omit<UserProfile, "uid"> & { username: string },
+  profile: Pick<UserProfile, "fullName"> & Partial<UserProfile>,
 ): Promise<UserProfile> {
   const now = new Date();
+  const payload = {
+    uid,
+    fullName: profile.fullName,
+    email: profile.email?.trim().toLowerCase(),
+    phone: profile.phone,
+    isRunner: false,
+    isGuest: Boolean(profile.isGuest),
+    createdAt: Timestamp.fromDate(now),
+    updatedAt: Timestamp.fromDate(now),
+  };
   if (isFirebaseConfigured()) {
     await setDoc(
       doc(getDb(), USERS_COLLECTION, uid),
-      omitUndefined({
-        ...profile,
-        uid,
-        createdAt: Timestamp.fromDate(now),
-        updatedAt: Timestamp.fromDate(now),
-      } as Record<string, unknown>),
+      omitUndefined(payload as Record<string, unknown>),
     );
   }
 
-  return { ...profile, uid };
+  return {
+    uid,
+    fullName: profile.fullName,
+    email: profile.email,
+    phone: profile.phone,
+    isRunner: false,
+    isGuest: Boolean(profile.isGuest),
+    createdAt: now.toISOString(),
+  };
 }
 
 export async function updateUserProfileDoc(

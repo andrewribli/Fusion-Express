@@ -3,6 +3,7 @@ import { calculateDeliveryFee } from "@/lib/delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { runnerEarningsForOrder } from "@/lib/order-status";
+import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
 
 function formatKg(kg: number): string {
@@ -33,30 +34,9 @@ export function RunnerOrderDetails({
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
           Items
         </h3>
-        <ul className="mt-2 divide-y divide-gray-100">
-          {order.items.map((item) => {
-            const kg = lineWeight(item);
-            return (
-              <li
-                key={`${item.itemId}-${item.name}`}
-                className="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {item.quantity}× {item.name}
-                  </p>
-                  {kg != null && (
-                    <p className="text-xs text-gray-500">
-                      {item.weightKg != null && item.quantity > 1
-                        ? `${formatKg(item.weightKg)} each · ${formatKg(kg)} total`
-                        : formatKg(kg)}
-                    </p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="mt-2">
+          <RunnerOrderItemList items={order.items} />
+        </div>
         {computedWeight > 0 && (
           <p className="mt-2 text-xs text-gray-500">
             Order weight: {formatKg(computedWeight)}

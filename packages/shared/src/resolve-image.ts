@@ -8,8 +8,9 @@ export function upscaleRetailImage(url: string): string {
     url.includes("foodpanda.dhmedia.io") ||
     url.includes("images.deliveryhero.io")
   ) {
-    if (url.includes("height=")) return url.replace(/height=\d+/, "height=640");
-    return `${url}${url.includes("?") ? "&" : "?"}height=640`;
+    // Thumb-sized requests; 640 was oversized for product cards.
+    if (url.includes("height=")) return url.replace(/height=\d+/, "height=200");
+    return `${url}${url.includes("?") ? "&" : "?"}height=200`;
   }
   return url;
 }
@@ -34,13 +35,19 @@ export function resolveProductImage(item: {
   image?: string;
   category?: string;
 }): string | undefined {
-  if (item.image?.startsWith("/images/catalog/")) {
-    return item.image;
-  }
+  // /images/catalog/* is excluded from Vercel deploys (~170MB+). Do not
+  // prefer those paths — fall through to overrides / remote / aisle fallback.
+  const localCatalog =
+    item.image?.startsWith("/images/catalog/") === true
+      ? undefined
+      : item.image;
   const named = item.name ? byName[item.name] : undefined;
-  if (named) return named;
-  if (item.image && !isGenericImageUrl(item.image)) {
-    return upscaleRetailImage(item.image);
+  if (named && !named.startsWith("/images/catalog/") && !isGenericImageUrl(named)) {
+    return upscaleRetailImage(named);
+  }
+  if (named && !named.startsWith("/images/catalog/")) return named;
+  if (localCatalog && !isGenericImageUrl(localCatalog)) {
+    return upscaleRetailImage(localCatalog);
   }
   if (item.id) {
     const mapped = PRODUCT_IMAGES[item.id];

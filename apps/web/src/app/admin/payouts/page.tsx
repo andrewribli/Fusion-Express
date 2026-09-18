@@ -116,6 +116,14 @@ export default function AdminPayoutsPage() {
                   Users
                 </Link>
                 {" · "}
+                <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
+                  Messaging
+                </Link>
+                {" · "}
+                <Link href="/admin/payments" className="font-medium text-[#ED1C24] underline">
+                  Payment submissions
+                </Link>
+                {" · "}
                 <Link href="/admin/refunds" className="font-medium text-[#ED1C24] underline">
                   Refunds
                 </Link>

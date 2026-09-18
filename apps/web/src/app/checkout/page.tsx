@@ -39,8 +39,8 @@ export default function CheckoutPage() {
   const { items, subtotal } = useCart();
   const { placeOrder, loading, error: placeError } = usePlaceOrder();
 
-  const [college, setCollege] = useState(user?.college ?? "");
-  const [hall, setHall] = useState(user?.hall ?? "");
+  const [college, setCollege] = useState("");
+  const [hall, setHall] = useState("");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
@@ -52,17 +52,15 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (user?.college && !college) setCollege(user.college);
-    if (user?.hall && !hall) setHall(user.hall);
     if (user?.phone && !phone) setPhone(user.phone);
-  }, [user, college, hall, phone]);
+  }, [user, phone]);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
-  const tipAmount = customTip ? Number(customTip) || 0 : tip;
+  const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college: college || user?.college || "" }),
-    [weightKg, college, user?.college],
+    () => calculateDeliveryFee({ weightKg, college }),
+    [weightKg, college],
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);

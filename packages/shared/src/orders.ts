@@ -17,6 +17,7 @@ import {
   CUSTOMER_DEADLINE_REMINDER_MS,
   CUSTOMER_PAY_WINDOW_MS,
   customerDeadlineOf,
+  countsTowardCustomerOrderPlacementCap,
   isActiveCustomerOrderStatus,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
@@ -261,8 +262,11 @@ export async function createOrder(
     throw new Error(ORDER_LIMIT_MESSAGE);
   }
   if (order.customerId) {
-    const active = await fetchActiveCustomerOrders(order.customerId);
-    if (active.length >= MAX_ACTIVE_CUSTOMER_ORDERS) {
+    // Placement cap: in-flight delivery only (pending|accepted|purchased).
+    // Delivered / runner_paid still need payment UI but must not lock out
+    // new grocery orders when paymentReceived stays false.
+    const inFlight = await fetchInFlightCustomerOrders(order.customerId);
+    if (inFlight.length >= MAX_ACTIVE_CUSTOMER_ORDERS) {
       throw new Error(ACTIVE_ORDER_LIMIT_MESSAGE);
     }
   }
@@ -421,6 +425,16 @@ export async function fetchActiveCustomerOrders(
 ): Promise<Order[]> {
   const orders = await fetchOrdersByCustomer(customerId);
   return orders.filter((order) => isActiveCustomerOrderStatus(order.status));
+}
+
+/** Orders that count toward MAX_ACTIVE_CUSTOMER_ORDERS on place. */
+export async function fetchInFlightCustomerOrders(
+  customerId: string,
+): Promise<Order[]> {
+  const orders = await fetchOrdersByCustomer(customerId);
+  return orders.filter((order) =>
+    countsTowardCustomerOrderPlacementCap(order.status),
+  );
 }
 
 export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
@@ -1119,6 +1133,15 @@ export async function markCustomerPaid(
   if (order.customerId !== customerId) throw new Error("Not authorized");
   if (order.status !== "delivered" && order.status !== "runner_paid") {
     throw new Error("You can mark paid after delivery.");
+  }
+  await updateOrderStatus(orderId, "customer_paid");
+}
+
+export async function confirmCustomerPayment(orderId: string): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "delivered" && order.status !== "runner_paid") {
+    throw new Error("Payment can be confirmed after delivery.");
   }
   await updateOrderStatus(orderId, "customer_paid");
 }

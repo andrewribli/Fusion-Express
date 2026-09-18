@@ -15,13 +15,29 @@ import {
 import { createOrder } from "@fusion-express/shared/orders";
 import { getEstimatedDeliveryTime } from "@fusion-express/shared";
 import { getUnitPrice, lineTotal } from "@fusion-express/shared";
+import {
+  normalizePhone,
+  validatePhone,
+} from "@fusion-express/shared/auth";
+import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
 
 export default function CheckoutScreen() {
   const { items, subtotal, sessionId, clearCart } = useCart();
-  const [college, setCollege] = useState<CuhkCollege>(CUHK_COLLEGES[0]);
-  const [hall, setHall] = useState(getHallsForCollege(CUHK_COLLEGES[0])[0]);
-  const [room, setRoom] = useState("");
+  const { profile, user, ensureCheckoutAuth } = useAuth();
+  const initialCollege: CuhkCollege =
+    profile?.college && CUHK_COLLEGES.includes(profile.college as CuhkCollege)
+      ? (profile.college as CuhkCollege)
+      : CUHK_COLLEGES[0];
+  const [college, setCollege] = useState<CuhkCollege>(initialCollege);
+  const [hall, setHall] = useState(() => {
+    const halls = getHallsForCollege(initialCollege);
+    if (profile?.hall && halls.includes(profile.hall)) return profile.hall;
+    return halls[0];
+  });
+  const [phone, setPhone] = useState(profile?.phone ?? "");
+  const [customerName, setCustomerName] = useState(profile?.fullName ?? "");
+  const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -42,10 +58,25 @@ export default function CheckoutScreen() {
     setLoading(true);
     setError("");
     try {
+      const phoneErr = validatePhone(phone);
+      if (phoneErr) throw new Error(phoneErr);
+      if (!college || !hall) {
+        throw new Error("Choose your college and hall");
+      }
+
+      const auth = await ensureCheckoutAuth(phone);
+      const digits = normalizePhone(phone);
+      const name =
+        customerName.trim() ||
+        profile?.fullName?.trim() ||
+        (auth.isGuest ? `Guest ${digits.slice(-4)}` : "Mobile customer");
+
       const orderId = await createOrder({
         sessionId,
-        customerId: sessionId,
-        customerName: "Mobile customer",
+        customerId: auth.uid,
+        customerName: name,
+        customerEmail: auth.email || user?.email || undefined,
+        customerPhone: digits,
         items: items.map(({ item, quantity }) => ({
           itemId: item.id,
           name: item.name,
@@ -56,10 +87,10 @@ export default function CheckoutScreen() {
         status: "pending",
         college,
         hall,
-        roomNumber: room.trim() || undefined,
         lobbyPoint: getLobbyForHall(hall),
         zone: fee.zone,
         totalWeight: fee.weightKg,
+        customerNote: note.trim() || "None for now",
         subtotal: items.reduce(
           (sum, line) => sum + lineTotal(line.item, line.quantity),
           0,
@@ -80,7 +111,29 @@ export default function CheckoutScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white px-4 pt-4">
-      <Text className="font-semibold">College / zone</Text>
+      <Text className="font-semibold">Your name</Text>
+      <TextInput
+        className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
+        value={customerName}
+        onChangeText={setCustomerName}
+        placeholder="Name for the runner"
+        autoCapitalize="words"
+      />
+
+      <Text className="mt-4 font-semibold">Phone</Text>
+      <Text className="mt-1 text-xs text-gray-500">
+        Required so the runner can reach you. Guests are signed in with this
+        number for Firestore order rules.
+      </Text>
+      <TextInput
+        className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
+        value={phone}
+        onChangeText={setPhone}
+        placeholder="e.g. 9123 4567"
+        keyboardType="phone-pad"
+      />
+
+      <Text className="mt-4 font-semibold">College / zone</Text>
       {CUHK_COLLEGES.map((name) => (
         <Pressable
           key={name}
@@ -108,20 +161,29 @@ export default function CheckoutScreen() {
         </Pressable>
       ))}
 
-      <Text className="mt-4 font-semibold">Room (optional)</Text>
+      <Text className="mt-4 font-semibold">Notes for the courier (optional)</Text>
       <TextInput
         className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
-        value={room}
-        onChangeText={setRoom}
-        placeholder="e.g. 301"
+        value={note}
+        onChangeText={setNote}
+        placeholder="e.g. Room 301, leave at the lobby desk"
       />
 
       <Text className="mt-4 text-sm text-gray-600">
-        {formatDeliveryAddress(college, hall, room || undefined)}
+        {formatDeliveryAddress(college, hall)}
       </Text>
       <Text className="mt-1 text-sm text-gray-600">
         Zone {fee.zone} · delivery ${fee.deliveryFee} · total ${total}
       </Text>
+      {user ? (
+        <Text className="mt-1 text-xs text-gray-500">
+          Signed in as {user.email ?? user.uid}
+        </Text>
+      ) : (
+        <Text className="mt-1 text-xs text-gray-500">
+          Not signed in — checkout will create a guest account from your phone.
+        </Text>
+      )}
       {error ? <Text className="mt-2 text-red-600">{error}</Text> : null}
 
       <Pressable

@@ -16,7 +16,7 @@ import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
 import { CustomerPayPanel } from "@/components/CustomerPayPanel";
-import { cancelOrder, fetchOrder, approvePriceIncrease, markCustomerPaid } from "@/lib/orders";
+import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
 import {
   customerAmountDue,
   groceryAmountDue,
@@ -42,7 +42,6 @@ function TrackContent() {
   const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [priceActing, setPriceActing] = useState(false);
-  const [markingPaid, setMarkingPaid] = useState(false);
   const [rated, setRated] = useState(false);
   const lastStatus = useRef<string | null>(null);
   useDeadlineWatch(order ? [order] : []);
@@ -284,26 +283,13 @@ function TrackContent() {
             (order.status === "delivered" || order.status === "runner_paid") && (
               <CustomerPayPanel
                 order={order}
-                marking={markingPaid}
-                onMarkPaid={() => {
-                  void (async () => {
-                    setMarkingPaid(true);
-                    try {
-                      await markCustomerPaid(order.id, getUserAccountId(user));
-                      await lookup(order.id);
-                    } catch (err) {
-                      alert(err instanceof Error ? err.message : "Could not mark paid");
-                    } finally {
-                      setMarkingPaid(false);
-                    }
-                  })();
-                }}
+                userId={user.uid}
               />
             )}
 
           {order.status === "customer_paid" && (
             <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-800">
-              You marked this order paid
+              This order is marked paid
               {order.customerPaidAt
                 ? ` at ${order.customerPaidAt.toLocaleTimeString("en-HK", {
                     hour: "2-digit",
@@ -350,7 +336,7 @@ export default function TrackPage() {
       <AppShell>
         <LakersWallpaper>
           <AppHeader showBack backHref="/" title="Track Order" />
-          <Suspense fallback={<p className="p-4 text-sm text-lakers-gold">Loading…</p>}>
+          <Suspense fallback={<p className="p-4 text-sm text-gray-500">Loading…</p>}>
             <TrackContent />
           </Suspense>
         </LakersWallpaper>

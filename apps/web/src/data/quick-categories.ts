@@ -32,6 +32,20 @@ export const QUICK_CATEGORIES: QuickCategory[] = [
     emoji: "🍪",
   },
   {
+    id: "chips",
+    label: "Chips",
+    href: "/browse/dry/chips",
+    image: AISLE_IMAGES.chips,
+    emoji: "🍟",
+  },
+  {
+    id: "biscuits",
+    label: "Biscuits",
+    href: "/browse/dry/biscuits",
+    image: AISLE_IMAGES.biscuits ?? AISLE_IMAGES.snacks,
+    emoji: "🍪",
+  },
+  {
     id: "toiletries",
     label: "Toiletries",
     href: "/browse/dry/toiletries",

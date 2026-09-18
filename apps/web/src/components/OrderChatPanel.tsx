@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useUser, getUserAccountId } from "@/context/UserContext";
+import { useUser } from "@/context/UserContext";
 import { isChatActive } from "@/lib/constants";
 import {
   canAccessOrderChat,
@@ -34,7 +34,7 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const chatActive = isChatActive(order.status);
-  const accountId = user ? getUserAccountId(user) : "";
+  const accountId = user?.uid ?? "";
 
   useEffect(() => {
     if (!chatActive) return;
@@ -74,9 +74,9 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   if (!user || !chatActive) return null;
   if (!canAccessOrderChat(order, user)) return null;
 
-  const senderId = getUserAccountId(user);
+  const senderId = user.uid ?? "";
   const senderName = user.fullName;
-  const viewingAsCustomer = order.customerId === senderId;
+  const viewingAsCustomer = Boolean(user.uid && order.customerId === user.uid);
   const otherParty = viewingAsCustomer ? "runner" : "customer";
   const chatLabel =
     unread > 0
@@ -85,7 +85,7 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || !senderId) return;
     setSendError("");
     try {
       await sendChatMessage(order.id, senderId, senderName, text);

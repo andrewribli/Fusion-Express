@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CustomItemCard } from "@/components/CustomItemCard";
-import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { PreviousOrderChecklist } from "@/components/PreviousOrderChecklist";
 import { useCart } from "@/context/CartContext";
@@ -22,22 +21,15 @@ export function MenuCartSummary() {
   const router = useRouter();
   const { user } = useUser();
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
-  const [college, setCollege] = useState(user?.college ?? "");
-  const [hall, setHall] = useState(user?.hall ?? "");
   const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
 
   useEffect(() => {
     setPaymentMethod(loadPaymentMethod());
   }, []);
 
-  useEffect(() => {
-    if (user?.college) setCollege(user.college);
-    if (user?.hall) setHall(user.hall);
-  }, [user?.college, user?.hall]);
-
   const fee = calculateDeliveryFee({
     weightKg: cartTotalWeightKg(items),
-    college: college || user?.college || "",
+    college: "",
   });
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
@@ -45,6 +37,12 @@ export function MenuCartSummary() {
   function choosePayment(method: CustomerPaymentMethod) {
     setPaymentMethod(method);
     savePaymentMethod(method);
+  }
+
+  function goCheckout() {
+    if (itemCount === 0) return;
+    // Guests finish on checkout (phone + dorm + lobby) — no login required.
+    router.push("/checkout");
   }
 
   return (
@@ -99,16 +97,9 @@ export function MenuCartSummary() {
               ))}
             </ul>
           )}
+        </div>
 
-          <DeliveryAddressFields
-            college={college}
-            hall={hall}
-            onCollegeChange={setCollege}
-            onHallChange={setHall}
-            required={false}
-            showPricing={false}
-          />
-
+        <div className="space-y-3 border-t border-gray-100 p-3">
           <PaymentMethodPicker value={paymentMethod} onChange={choosePayment} />
 
           <div className="flex justify-between text-xs text-gray-600">
@@ -125,14 +116,17 @@ export function MenuCartSummary() {
             <span>Total w/ delivery</span>
             <span>${total}</span>
           </div>
+          <p className="text-[10px] leading-snug text-gray-500">
+            Hall and delivery fee are confirmed at checkout.
+          </p>
           <OrderLimitNotice subtotal={subtotal} />
           <button
             type="button"
             disabled={overLimit || itemCount === 0}
-            onClick={() => router.push("/checkout")}
+            onClick={goCheckout}
             className="block w-full rounded-xl bg-[#ED1C24] py-3 text-center text-sm font-bold text-white disabled:bg-gray-100 disabled:text-gray-400"
           >
-            {user ? `Checkout · ${paymentMethod}` : "Checkout — no account needed"}
+            {user ? "Continue to checkout" : "Checkout — no account needed"}
           </button>
           <p className="text-[10px] leading-snug text-gray-500">
             Pay with {paymentMethod} after delivery. Completing an order agrees to

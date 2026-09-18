@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { isCuhkStudentEmail, validateCuhkStudentEmail } from "@/lib/constants";
 
+function existingAccountMessage(status: number, message: string): string | null {
+  if (
+    status === 409 ||
+    /already in use|already exists|email-already-in-use/i.test(message)
+  ) {
+    return "Account already exists";
+  }
+  return null;
+}
+
 export function CuhkEmailOtp({
   initialEmail = "",
   verified,
@@ -35,9 +45,21 @@ export function CuhkEmailOtp({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose: "signup" }),
       });
-      const data = (await res.json()) as { error?: string; devCode?: string };
+      let data: { error?: string; message?: string; devCode?: string } = {};
+      try {
+        data = (await res.json()) as typeof data;
+      } catch {
+        setError(
+          res.status === 409 ? "Account already exists" : "Could not send code",
+        );
+        return;
+      }
       if (!res.ok) {
-        setError(data.error ?? "Could not send code");
+        const raw = data.error ?? data.message ?? "";
+        setError(
+          existingAccountMessage(res.status, raw) ??
+            (raw || "Could not send code"),
+        );
         return;
       }
       setSent(true);
@@ -89,7 +111,7 @@ export function CuhkEmailOtp({
       <div className="mt-3 space-y-3">
         <div>
           <label className="block text-xs font-medium text-gray-600">
-            CUHK email
+            Email
           </label>
           <input
             type="email"
@@ -144,7 +166,7 @@ export function CuhkEmailOtp({
             ? "Please wait…"
             : sent
               ? "Verify code"
-              : "Send verification code"}
+              : "Send Verification Code"}
         </button>
         {sent && (
           <button

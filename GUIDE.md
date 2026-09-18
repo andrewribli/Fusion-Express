@@ -2,7 +2,7 @@
 
 CUHK dorm grocery delivery prototype. A customer (Felix) opens a link, creates an account, orders from Fusion supermarket, and a runner (you) accepts the order and chats with them.
 
-**Live site:** https://fusion-express-blush.vercel.app  
+**Live site:** https://gracerun.vercel.app (https://servecart.vercel.app redirects here)  
 **Firebase project:** `fusion-express-6a438` (Google account `andrew.ribli@gmail.com`)  
 **Local folder:** `C:\Users\Andrew\Projects\fusion-express`
 
@@ -40,7 +40,7 @@ Open **http://localhost:3000**
 
 ### 3. Try a customer + runner locally
 
-1. Create account `felix` (or any username + password, 6+ characters).
+1. Create account with your CUHK email and a password (6+ characters).
 2. Home → **Make an Order** → pick items or “Popular requests”.
 3. Cart → checkout → confirm.
 4. In another browser / incognito: create `andrew` → Become a Runner → dashboard → accept Felix’s order → chat.
@@ -53,9 +53,9 @@ Default runner PIN (if used later): `runner2026`.
 
 The live site is a **Next.js app on Vercel**. Each deploy runs `npm run build` in the cloud, then serves the result at:
 
-https://fusion-express-blush.vercel.app
+https://gracerun.vercel.app
 
-That URL is already allowed as a Firebase Auth domain.
+That URL is already allowed as a Firebase Auth domain. https://servecart.vercel.app 301-redirects to it.
 
 Redeploy from this folder (Vercel CLI is already logged in on this PC):
 
@@ -76,7 +76,7 @@ There is **no GitHub remote** yet. Auto-deploy-on-push is not set up. Every live
 
 ### Logged out (`/`)
 
-Sign in or create account (username + password). Profile fields on signup: name, SID, college / hall / room.
+Sign in or create account (CUHK email + password). Delivery address is collected at checkout, not on the profile.
 
 ### Home (`/` when logged in, and `/home`)
 
@@ -213,7 +213,7 @@ Never commit `.env.local` or `firebase-service-account.json`.
 
 ## Customer / runner cheat sheet
 
-**Send Felix:** https://fusion-express-blush.vercel.app  
+**Send Felix:** https://gracerun.vercel.app  
 
 1. Create Account → fill hall.  
 2. Make an Order → add items (or Popular requests / Shin Ramyun).  

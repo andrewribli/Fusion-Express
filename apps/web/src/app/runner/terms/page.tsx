@@ -127,16 +127,15 @@ export default function RunnerTermsPage() {
       const paymentId =
         user.runnerPaymentId ||
         user.phone?.trim() ||
-        user.studentId.trim() ||
         user.email ||
         user.uid;
       const runnerId = await registerRunner({
         uid: user.uid,
         fullName: user.fullName.trim() || "Runner",
-        studentId: user.studentId.trim() || user.uid.slice(0, 8),
+        studentId: user.studentId?.trim() || user.uid.slice(0, 8),
         phone: user.phone?.trim() || paymentId,
-        college: user.college,
-        hall: user.hall,
+        college: user.college ?? "",
+        hall: user.hall ?? "",
         paymentMethod: user.runnerPaymentMethod ?? "PayMe",
         paymentId,
       });

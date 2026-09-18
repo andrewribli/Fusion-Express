@@ -2,7 +2,7 @@ import { LegalLink } from "@/components/LegalLink";
 
 export function SiteFooter({
   className = "",
-  light = false,
+  light = true,
 }: {
   className?: string;
   light?: boolean;
