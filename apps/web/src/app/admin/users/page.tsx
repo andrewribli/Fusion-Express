@@ -76,11 +76,20 @@ export default function AdminUsersPage() {
         },
         body: JSON.stringify({ uid: user.uid }),
       });
-      const data = (await res.json()) as {
+      let data: {
         error?: string;
         email?: string;
         previousAuthEmail?: string;
-      };
+      } = {};
+      try {
+        data = (await res.json()) as typeof data;
+      } catch {
+        throw new Error(
+          res.status === 500
+            ? "Server failed to load admin Auth (try again). If it keeps failing, redeploy."
+            : `Could not repair account (HTTP ${res.status}).`,
+        );
+      }
       if (!res.ok) throw new Error(data.error ?? "Could not repair account");
       setActionMsg(
         data.previousAuthEmail && data.previousAuthEmail !== data.email
