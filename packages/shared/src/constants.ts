@@ -72,7 +72,7 @@ export const PAYMENT_FLOW_STEPS = [
   "You pay nothing now. Order first — app prices are estimates.",
   "A runner accepts, buys the groceries, and enters the receipt total.",
   "They deliver to your lobby.",
-  "You then pay the exact receipt total plus delivery via FPS or PayMe.",
+  "You then pay the exact receipt total plus delivery via card, FPS, or PayMe.",
 ] as const;
 
 /** Fusion pickup hours. Runners shop then deliver to hall lobbies. */

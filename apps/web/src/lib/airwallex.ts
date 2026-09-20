@@ -128,7 +128,8 @@ function splitName(fullName?: string): { firstName?: string; lastName?: string }
 
 /**
  * Create an Airwallex Payment Intent for an order.
- * Returns client_secret so the browser can open Hosted Payment Page (FPS / PayMe).
+ * Returns client_secret so the browser can open Hosted Payment Page with
+ * every method activated on the merchant account (cards, FPS, PayMe, …).
  */
 export async function createPaymentIntent(
   orderId: string,
@@ -165,10 +166,8 @@ export async function createPaymentIntent(
     currency: currency.toUpperCase(),
     merchant_order_id: orderId,
     return_url: returnUrl,
-    // Prefer local HK wallets on Hosted Payment Page when enabled on the account.
     metadata: {
       gracerun_order_id: orderId,
-      preferred_methods: "fps,payme",
     },
     ...(customerInfo.email || names.first_name || customerInfo.phone
       ? {

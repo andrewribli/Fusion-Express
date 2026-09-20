@@ -37,7 +37,7 @@ function postLoginPath(): string {
 
 /**
  * Guest browse/order path: honor ?next= (e.g. /checkout), else cart → checkout,
- * else shop with guest=1. Name, dorm, and lobby are collected at checkout.
+ * else shop with guest=1. Dorm and lobby are collected at checkout.
  * ensureGuestCheckout — guests never need an account first.
  */
 function guestContinuePath(itemCount: number): string {
@@ -267,8 +267,8 @@ export default function LoginPage() {
             {itemCount > 0 ? "Continue as Guest · Checkout" : "Continue as Guest"}
           </button>
           <p className="mt-2 text-xs leading-snug text-gray-700">
-            Browse and order without signing in — checkout only needs your name,
-            dorm, and lobby.
+            Browse and order without signing in — checkout only needs your
+            dorm and lobby.
           </p>
         </div>
 
@@ -281,7 +281,7 @@ export default function LoginPage() {
           >
             Shop now as guest
           </button>{" "}
-          and check out with just your name, dorm, and lobby — no sign-up required.
+          and check out with just your dorm and lobby — no sign-up required.
           Runners still need a full verified account.
         </p>
 
@@ -377,8 +377,8 @@ export default function LoginPage() {
                   : "Continue as Guest"}
               </button>
               <p className="mt-2 text-xs leading-snug text-gray-700">
-                Browse and order without signing in — checkout only needs your name,
-                dorm, and lobby.
+                Browse and order without signing in — checkout only needs your
+                dorm and lobby.
               </p>
             </div>
           </form>

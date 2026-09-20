@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * Redirect to Airwallex Hosted Payment Page (supports FPS + PayMe when enabled).
- * Loads Airwallex.js from CDN so we don't hard-depend on their npm package.
+ * Redirect to Airwallex Hosted Payment Page.
+ * Omitting `methods` shows every payment method activated on the Airwallex
+ * account for this currency (cards, FPS, PayMe, etc.).
  */
 export async function redirectToAirwallexCheckout(opts: {
   intentId: string;
@@ -25,9 +26,8 @@ export async function redirectToAirwallexCheckout(opts: {
     intent_id: opts.intentId,
     client_secret: opts.clientSecret,
     currency: opts.currency,
+    country_code: "HK",
     successUrl: opts.successUrl,
-    // Prefer local wallets when the account has them enabled.
-    methods: ["fps", "payme"],
   });
 }
 

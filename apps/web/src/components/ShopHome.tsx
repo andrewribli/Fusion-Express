@@ -387,7 +387,7 @@ export function ShopHome() {
             <div className="mx-3 mt-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800 sm:mx-0">
               <p className="font-semibold text-gray-900">Ordering as guest</p>
               <p className="mt-0.5 text-xs text-gray-600">
-                Add items, then checkout with your name, dorm, and lobby — no account
+                Add items, then checkout with your dorm and lobby — no account
                 required. We create your guest profile when you place the order.
               </p>
               {itemCount > 0 && (

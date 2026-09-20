@@ -16,7 +16,6 @@ import { friendlyPlaceOrderError } from "@/lib/auth-errors";
 import { notifyOrderPlaced } from "@/lib/notify-email";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
-import type { CustomerPaymentMethod } from "@/lib/payment-method";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 
 export function usePlaceOrder() {
@@ -30,21 +29,18 @@ export function usePlaceOrder() {
     async (opts: {
       college: string;
       hall: string;
-      paymentMethod: CustomerPaymentMethod;
       customerNote?: string;
       tip?: number;
-      fullName?: string;
     }) => {
       if (!opts.college || !opts.hall || items.length === 0) {
         setError("Add items and choose your college and hall first.");
         return;
       }
 
-      const fullName = (opts.fullName ?? user?.fullName ?? "").trim();
-      if (!fullName) {
-        setError("Enter your full name");
-        return;
-      }
+      const fullName =
+        user?.fullName && user.fullName !== "Guest"
+          ? user.fullName.trim()
+          : "Guest";
 
       setLoading(true);
       setError("");
@@ -119,7 +115,6 @@ export function usePlaceOrder() {
           tip: tipAmount || undefined,
           total,
           paymentReceived: false,
-          paymentMethod: opts.paymentMethod,
           fusionPaidByPlatform: false,
           estimatedDeliveryAt,
         });

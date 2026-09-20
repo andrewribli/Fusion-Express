@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
@@ -24,11 +23,6 @@ import {
   DEFAULT_SPECIAL_INSTRUCTIONS,
 } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
@@ -40,23 +34,9 @@ export default function CheckoutPage() {
 
   const [college, setCollege] = useState("");
   const [hall, setHall] = useState("");
-  const [fullName, setFullName] = useState(
-    user?.fullName && user.fullName !== "Guest" ? user.fullName : "",
-  );
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
-
-  useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
-
-  useEffect(() => {
-    if (user?.fullName && user.fullName !== "Guest" && !fullName) {
-      setFullName(user.fullName);
-    }
-  }, [user, fullName]);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
@@ -67,8 +47,7 @@ export default function CheckoutPage() {
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
-  const nameOk = fullName.trim().length > 0;
-  const canSubmit = Boolean(college && hall && nameOk && !overLimit);
+  const canSubmit = Boolean(college && hall && !overLimit);
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
@@ -81,8 +60,6 @@ export default function CheckoutPage() {
     void placeOrder({
       college,
       hall,
-      fullName: fullName.trim(),
-      paymentMethod,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
     });
@@ -122,7 +99,7 @@ export default function CheckoutPage() {
         <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
           {!user && (
             <div className="mb-4 rounded-xl border border-lakers-gold/40 bg-lakers-navy/80 px-4 py-3 text-sm text-lakers-gold">
-              No account needed. Enter your name, dorm, and lobby — we&apos;ll
+              No account needed. Enter your dorm and lobby — we&apos;ll
               save the order when you submit.{" "}
               <Link href="/login?next=/checkout" className="underline">
                 Already have an account? Sign in
@@ -157,9 +134,6 @@ export default function CheckoutPage() {
                   <div>
                     <p className="font-medium">{address}</p>
                     <p className="text-xs text-gray-500">Lobby: {lobby}</p>
-                    {nameOk && (
-                      <p className="text-xs text-gray-500">{fullName.trim()}</p>
-                    )}
                   </div>
                   <button
                     type="button"
@@ -214,7 +188,7 @@ export default function CheckoutPage() {
             >
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <p className="mt-1 text-xs text-gray-500">
-                Name, dorm (college + hall), and lobby. No phone number.
+                Dorm (college + hall) and lobby. No phone number.
               </p>
               <div className="mt-3">
                 <DeliveryAddressFields
@@ -235,27 +209,6 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               ) : null}
-              <div className="mt-3">
-                <label
-                  htmlFor="customer-name"
-                  className="block text-xs font-medium text-gray-600"
-                >
-                  Full name
-                </label>
-                <input
-                  id="customer-name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Felix Wong"
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  The runner writes this name on the Fusion receipt.
-                </p>
-              </div>
               <div className="mt-3">
                 <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
                   Special instructions
@@ -307,21 +260,9 @@ export default function CheckoutPage() {
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
               <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
               <p className="mt-1 text-sm font-semibold text-blue-900">
-                No payment now. You pay the exact receipt total with FPS or PayMe
-                after the runner delivers.
+                No payment now. You pay the exact receipt total with card, FPS,
+                or PayMe after the runner delivers.
               </p>
-              <div className="mt-3 rounded-xl bg-white p-3">
-                <PaymentMethodPicker
-                  value={paymentMethod}
-                  onChange={(method) => {
-                    setPaymentMethod(method);
-                    savePaymentMethod(method);
-                  }}
-                />
-                <p className="mt-2 text-xs text-gray-500">
-                  Preferred wallet when you pay after delivery.
-                </p>
-              </div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-blue-800">
                 {PAYMENT_FLOW_STEPS.map((step) => (
                   <li key={step}>{step}</li>
@@ -343,15 +284,13 @@ export default function CheckoutPage() {
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
                 >
                   <span>
-                    {loading ? "Placing…" : `Complete Order · ${paymentMethod}`}
+                    {loading ? "Placing…" : "Complete Order"}
                   </span>
                   <span className="text-sm font-normal">· ${total}</span>
                 </button>
                 {!canSubmit && (
                   <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
-                    {!college || !hall
-                      ? "Choose your college and hall to continue."
-                      : "Enter your full name to continue."}
+                    Choose your college and hall to continue.
                   </p>
                 )}
               </div>

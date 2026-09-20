@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { AppHeader } from "@/components/AppHeader";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
@@ -24,21 +22,11 @@ import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
-
-  useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
   const weightKg = cartTotalWeightKg(items);
   const fee = calculateDeliveryFee({
     weightKg,
@@ -190,15 +178,6 @@ export default function CartPage() {
 
                 <CustomItemCard className="mt-4" />
 
-                <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <PaymentMethodPicker
-                    value={paymentMethod}
-                    onChange={(method) => {
-                      setPaymentMethod(method);
-                      savePaymentMethod(method);
-                    }}
-                  />
-                </div>
                 <div className="mt-2">
                   <OrderLimitNotice subtotal={subtotal} />
                 </div>
@@ -207,7 +186,7 @@ export default function CartPage() {
                   disabled={overLimit}
                   onClick={() => {
                     // Guests and signed-in users both finish on checkout so we
-                    // can collect name / dorm / lobby in one place.
+                    // can collect dorm / lobby in one place.
                     router.push("/checkout");
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"

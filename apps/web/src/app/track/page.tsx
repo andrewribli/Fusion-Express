@@ -273,7 +273,7 @@ function TrackContent() {
               <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-800">
                 Fusion prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
                 estimate. You will be refunded ${order.refundAmount} within 3–5 business
-                days via PayMe/FPS.
+                days via card, PayMe, or FPS.
               </p>
             )}
             {order.priceAdjustmentStatus === "refunded" && (

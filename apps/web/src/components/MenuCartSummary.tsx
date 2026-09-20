@@ -1,18 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CustomItemCard } from "@/components/CustomItemCard";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { PreviousOrderChecklist } from "@/components/PreviousOrderChecklist";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
 import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
@@ -21,11 +14,6 @@ export function MenuCartSummary() {
   const router = useRouter();
   const { user } = useUser();
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
-
-  useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
 
   const fee = calculateDeliveryFee({
     weightKg: cartTotalWeightKg(items),
@@ -34,14 +22,9 @@ export function MenuCartSummary() {
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
 
-  function choosePayment(method: CustomerPaymentMethod) {
-    setPaymentMethod(method);
-    savePaymentMethod(method);
-  }
-
   function goCheckout() {
     if (itemCount === 0) return;
-    // Guests finish on checkout (name + dorm + lobby) — no login required.
+    // Guests finish on checkout (dorm + lobby) — no login required.
     router.push("/checkout");
   }
 
@@ -100,8 +83,6 @@ export function MenuCartSummary() {
         </div>
 
         <div className="space-y-3 border-t border-gray-100 p-3">
-          <PaymentMethodPicker value={paymentMethod} onChange={choosePayment} />
-
           <div className="flex justify-between text-xs text-gray-600">
             <span>Subtotal</span>
             <span className={overLimit ? "font-bold text-[#ED1C24]" : undefined}>
@@ -129,8 +110,7 @@ export function MenuCartSummary() {
             {user ? "Continue to checkout" : "Checkout — no account needed"}
           </button>
           <p className="text-[10px] leading-snug text-gray-500">
-            Pay with {paymentMethod} after delivery. Completing an order agrees to
-            our Terms.
+            Pay after delivery. Completing an order agrees to our Terms.
           </p>
         </div>
       </section>
