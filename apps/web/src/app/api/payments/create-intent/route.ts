@@ -5,17 +5,16 @@ import {
   getAirwallexEnv,
 } from "@/lib/airwallex";
 import {
-  AdminAuthError,
-  getAdminDb,
-  requireAuthFromRequest,
-} from "@/lib/firebase-admin";
-import { collectionName } from "@/lib/constants";
+  getOrderRest,
+  patchOrderRest,
+  requireAuthRest,
+  RestAuthError,
+} from "@/lib/firestore-rest";
 
 export const runtime = "nodejs";
 
 type Body = {
   orderId?: string;
-  /** Optional override — defaults to order.total */
   amount?: number;
   currency?: string;
 };
@@ -23,9 +22,9 @@ type Body = {
 export async function POST(request: NextRequest) {
   let auth;
   try {
-    auth = await requireAuthFromRequest(request);
+    auth = await requireAuthRest(request);
   } catch (err) {
-    if (err instanceof AdminAuthError) {
+    if (err instanceof RestAuthError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -43,20 +42,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "orderId is required" }, { status: 400 });
   }
 
-  const db = getAdminDb();
-  if (!db) {
-    return NextResponse.json(
-      { error: "Server payment config missing." },
-      { status: 503 },
-    );
-  }
-
   try {
-    const snap = await db.collection(collectionName("orders")).doc(orderId).get();
-    if (!snap.exists) {
+    const order = await getOrderRest(orderId);
+    if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    const order = snap.data() as Record<string, unknown>;
     if (String(order.customerId ?? "") !== auth.uid) {
       return NextResponse.json({ error: "Not your order." }, { status: 403 });
     }
@@ -101,7 +91,7 @@ export async function POST(request: NextRequest) {
       { returnUrl },
     );
 
-    await snap.ref.update({
+    await patchOrderRest(orderId, {
       airwallexPaymentIntentId: intent.id,
       awaitingOnlinePayment: true,
       paymentProvider: "airwallex",

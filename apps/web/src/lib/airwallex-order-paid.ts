@@ -6,8 +6,11 @@ import {
   sendOrderConfirmation,
   sendRunnerNotification,
 } from "@/lib/email";
-import { collectionName } from "@/lib/constants";
-import { getAdminDb, listUserAlertRecipients } from "@/lib/firebase-admin";
+import {
+  getOrderRest,
+  listUserAlertRecipientsRest,
+  patchOrderRest,
+} from "@/lib/firestore-rest";
 
 async function mapPool<T>(
   items: T[],
@@ -40,24 +43,25 @@ export async function markOrderPaidFromAirwallex(opts: {
   currency: string;
   webhookEventId?: string | null;
 }): Promise<{ updated: boolean; notified: boolean; prevStatus: string }> {
-  const db = getAdminDb();
-  if (!db) throw new Error("Firestore unavailable");
+  const data = await getOrderRest(opts.orderId);
+  if (!data) throw new Error("Order not found");
 
-  const ref = db.collection(collectionName("orders")).doc(opts.orderId);
-  const snap = await ref.get();
-  if (!snap.exists) throw new Error("Order not found");
-
-  const data = snap.data() as Record<string, unknown>;
   const prevStatus = String(data.status ?? "");
   const alreadyPaid =
     data.paymentReceived === true ||
-    ["paid", "customer_paid", "completed", "accepted", "purchased", "delivered", "runner_paid"].includes(
-      prevStatus,
-    );
+    [
+      "paid",
+      "customer_paid",
+      "completed",
+      "accepted",
+      "purchased",
+      "delivered",
+      "runner_paid",
+    ].includes(prevStatus);
 
   const now = new Date();
   if (!alreadyPaid || prevStatus === "pending") {
-    await ref.update({
+    await patchOrderRest(opts.orderId, {
       status: "paid",
       paymentReceived: true,
       awaitingOnlinePayment: false,
@@ -112,7 +116,7 @@ export async function markOrderPaidFromAirwallex(opts: {
       }
     }
 
-    const recipients = await listUserAlertRecipients();
+    const recipients = await listUserAlertRecipientsRest();
     const envRunners = (process.env.RUNNER_ALERT_EMAIL ?? "")
       .split(",")
       .map((email) => email.trim().toLowerCase())
@@ -145,7 +149,10 @@ export async function markOrderPaidFromAirwallex(opts: {
       }
     });
 
-    await ref.update({ airwallexPaidNotifiedAt: now, updatedAt: now });
+    await patchOrderRest(opts.orderId, {
+      airwallexPaidNotifiedAt: now,
+      updatedAt: now,
+    });
     notified = true;
   }
 

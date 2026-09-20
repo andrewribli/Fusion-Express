@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { retrievePaymentIntent } from "@/lib/airwallex";
 import { markOrderPaidFromAirwallex } from "@/lib/airwallex-order-paid";
-import { collectionName } from "@/lib/constants";
 import {
-  AdminAuthError,
-  getAdminDb,
-  requireAuthFromRequest,
-} from "@/lib/firebase-admin";
+  getOrderRest,
+  requireAuthRest,
+  RestAuthError,
+} from "@/lib/firestore-rest";
 
 export const runtime = "nodejs";
 
@@ -17,9 +16,9 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   let auth;
   try {
-    auth = await requireAuthFromRequest(request);
+    auth = await requireAuthRest(request);
   } catch (err) {
-    if (err instanceof AdminAuthError) {
+    if (err instanceof RestAuthError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,56 +36,57 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "orderId is required" }, { status: 400 });
   }
 
-  const db = getAdminDb();
-  if (!db) {
-    return NextResponse.json({ error: "Firestore unavailable" }, { status: 503 });
-  }
-
-  const snap = await db.collection(collectionName("orders")).doc(orderId).get();
-  if (!snap.exists) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
-  }
-
-  const data = snap.data() as Record<string, unknown>;
-  if (String(data.customerId ?? "") !== auth.uid) {
-    return NextResponse.json({ error: "Not your order." }, { status: 403 });
-  }
-
-  const status = String(data.status ?? "");
-  if (
-    data.paymentReceived === true ||
-    status === "paid" ||
-    status === "completed" ||
-    status === "customer_paid"
-  ) {
-    return NextResponse.json({ ok: true, status, alreadyPaid: true, paid: true });
-  }
-
-  const intentId = String(data.airwallexPaymentIntentId ?? "").trim();
-  if (!intentId) {
-    return NextResponse.json(
-      { error: "No Airwallex payment intent on this order." },
-      { status: 409 },
-    );
-  }
-
-  let intent;
   try {
-    intent = await retrievePaymentIntent(intentId);
-  } catch (err) {
-    console.error("confirm retrievePaymentIntent failed", err);
-    return NextResponse.json({ error: "Could not verify payment." }, { status: 502 });
-  }
+    const data = await getOrderRest(orderId);
+    if (!data) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    if (String(data.customerId ?? "") !== auth.uid) {
+      return NextResponse.json({ error: "Not your order." }, { status: 403 });
+    }
 
-  if (String(intent.status).toUpperCase() !== "SUCCEEDED") {
-    return NextResponse.json({
-      ok: false,
-      status: intent.status,
-      paid: false,
-    });
-  }
+    const status = String(data.status ?? "");
+    if (
+      data.paymentReceived === true ||
+      status === "paid" ||
+      status === "completed" ||
+      status === "customer_paid"
+    ) {
+      return NextResponse.json({
+        ok: true,
+        status,
+        alreadyPaid: true,
+        paid: true,
+      });
+    }
 
-  try {
+    const intentId = String(data.airwallexPaymentIntentId ?? "").trim();
+    if (!intentId) {
+      return NextResponse.json(
+        { error: "No Airwallex payment intent on this order." },
+        { status: 409 },
+      );
+    }
+
+    let intent;
+    try {
+      intent = await retrievePaymentIntent(intentId);
+    } catch (err) {
+      console.error("confirm retrievePaymentIntent failed", err);
+      return NextResponse.json(
+        { error: "Could not verify payment." },
+        { status: 502 },
+      );
+    }
+
+    if (String(intent.status).toUpperCase() !== "SUCCEEDED") {
+      return NextResponse.json({
+        ok: false,
+        status: intent.status,
+        paid: false,
+      });
+    }
+
     await markOrderPaidFromAirwallex({
       orderId,
       intentId,
