@@ -19,6 +19,7 @@ import {
   customerDeadlineOf,
   countsTowardCustomerOrderPlacementCap,
   isActiveCustomerOrderStatus,
+  isClaimableOrderStatus,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
   MAX_ACTIVE_CUSTOMER_ORDERS,
@@ -140,6 +141,23 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     total: Number(data.total ?? 0),
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
+    paymentProvider: data.paymentProvider
+      ? String(data.paymentProvider)
+      : undefined,
+    awaitingOnlinePayment:
+      data.awaitingOnlinePayment != null
+        ? Boolean(data.awaitingOnlinePayment)
+        : undefined,
+    airwallexPaymentIntentId: data.airwallexPaymentIntentId
+      ? String(data.airwallexPaymentIntentId)
+      : undefined,
+    airwallexPaidAmount:
+      data.airwallexPaidAmount != null
+        ? Number(data.airwallexPaidAmount)
+        : undefined,
+    airwallexPaidCurrency: data.airwallexPaidCurrency
+      ? String(data.airwallexPaidCurrency)
+      : undefined,
     finalTotal: data.finalTotal != null ? Number(data.finalTotal) : undefined,
     amountPaidByRunner:
       data.amountPaidByRunner != null
@@ -373,15 +391,25 @@ export async function fetchPendingOrders(
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
+      // Paid (Airwallex) orders are claimable. Legacy unpaid pending (no online
+      // checkout) stay claimable so older tickets are not stranded.
       const snap = await getDocs(
         query(
           collection(getDb(), ORDERS_COLLECTION),
-          where("status", "==", "pending"),
+          where("status", "in", ["paid", "pending"]),
           orderBy("createdAt", "desc"),
           limit(ORDER_PAGE_SIZE),
         ),
       );
-      return filterOwnOrders(parseSnapshotDocs(snap.docs), excludeCustomerId);
+      const orders = parseSnapshotDocs(snap.docs).filter((order) => {
+        if (isClaimableOrderStatus(order.status)) return true;
+        return (
+          order.status === "pending" &&
+          !order.awaitingOnlinePayment &&
+          !order.airwallexPaymentIntentId
+        );
+      });
+      return filterOwnOrders(orders, excludeCustomerId);
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
       throw err instanceof Error
@@ -514,7 +542,12 @@ export async function acceptOrder(
       if (order.customerId === runnerUid) {
         throw new SelfPickupError();
       }
-      if (order.status !== "pending") {
+      const claimable =
+        isClaimableOrderStatus(order.status) ||
+        (order.status === "pending" &&
+          !order.awaitingOnlinePayment &&
+          !order.airwallexPaymentIntentId);
+      if (!claimable) {
         if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
         throw new OrderAlreadyTakenError();
       }
@@ -539,7 +572,12 @@ export async function acceptOrder(
   if (order.customerId === runnerUid) {
     throw new SelfPickupError();
   }
-  if (order.status !== "pending") {
+  const claimable =
+    isClaimableOrderStatus(order.status) ||
+    (order.status === "pending" &&
+      !order.awaitingOnlinePayment &&
+      !order.airwallexPaymentIntentId);
+  if (!claimable) {
     if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
     throw new OrderAlreadyTakenError();
   }
@@ -598,12 +636,17 @@ export async function updateOrderStatus(
           new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS),
         );
       }
-      if (status === "customer_paid") {
+      if (status === "paid" || status === "customer_paid") {
         updates.customerPaidAt = Timestamp.fromDate(now);
         updates.paymentReceived = true;
+        updates.awaitingOnlinePayment = false;
       }
       if (status === "runner_paid") {
         updates.runnerPaidAt = Timestamp.fromDate(now);
+      }
+      if (status === "completed") {
+        updates.runnerPaidAt = updates.runnerPaidAt ?? Timestamp.fromDate(now);
+        updates.paymentReceived = true;
       }
       if (extras?.runnerName) updates.runnerName = extras.runnerName;
       if (extras?.runnerId) updates.runnerId = extras.runnerId;
@@ -645,11 +688,16 @@ export async function updateOrderStatus(
       order.pickedUpAt = now;
     }
     if (status === "delivered") order.deliveredAt = now;
-    if (status === "customer_paid") {
+    if (status === "paid" || status === "customer_paid") {
       order.customerPaidAt = now;
       order.paymentReceived = true;
+      order.awaitingOnlinePayment = false;
     }
     if (status === "runner_paid") order.runnerPaidAt = now;
+    if (status === "completed") {
+      order.runnerPaidAt = order.runnerPaidAt ?? now;
+      order.paymentReceived = true;
+    }
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
     if (extras?.runnerUid) order.runnerUid = extras.runnerUid;
@@ -1169,7 +1217,11 @@ export async function markRunnerPayout(orderId: string): Promise<void> {
   if (order.status !== "delivered") {
     throw new Error("Pay the runner after they mark delivered.");
   }
-  await updateOrderStatus(orderId, "runner_paid");
+  // Prepaid online orders finish at completed after the runner is reimbursed.
+  await updateOrderStatus(
+    orderId,
+    order.paymentReceived ? "completed" : "runner_paid",
+  );
 }
 
 export async function fetchOrdersAwaitingPayout(): Promise<Order[]> {

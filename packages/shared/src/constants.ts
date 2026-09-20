@@ -69,10 +69,10 @@ export const PRICES_DISCLAIMER =
 export const CUSTOM_ITEM_DEFAULT_WEIGHT_KG = 1;
 
 export const PAYMENT_FLOW_STEPS = [
-  "You pay nothing now. Order first, pay after delivery.",
+  "Pay now with FPS or PayMe via Airwallex (secure hosted checkout).",
+  "Once payment confirms, runners can accept your order.",
   "The runner pays Fusion at the till, then delivers to your lobby.",
-  "GraceRun reimburses the runner right after delivery.",
-  "You pay GraceRun the receipt total plus delivery (PayMe or FPS) within 24 hours.",
+  "GraceRun reimburses the runner after delivery. You're already paid up.",
 ] as const;
 
 /** Fusion pickup hours. Runners shop then deliver to hall lobbies. */

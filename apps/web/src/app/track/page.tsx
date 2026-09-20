@@ -21,6 +21,7 @@ import {
   customerAmountDue,
   groceryAmountDue,
   hasConfirmedGroceryTotal,
+  isCustomerPaymentOpen,
 } from "@/lib/order-status";
 import { OrderProofPhotos } from "@/components/CustomerPayPanel";
 import { notifyOrderStatus as notifyOrderStatusEmail } from "@/lib/notify-email";
@@ -30,7 +31,23 @@ import {
 } from "@/lib/notifications";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import type { Order } from "@/lib/types";
+import { redirectToAirwallexCheckout } from "@/lib/airwallex-checkout";
+import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 
+async function paymentAuthHeaders(): Promise<HeadersInit> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (!isFirebaseConfigured()) return headers;
+  const current = getAuthClient().currentUser;
+  if (!current) return headers;
+  try {
+    headers.Authorization = `Bearer ${await current.getIdToken()}`;
+  } catch {
+    /* ignore */
+  }
+  return headers;
+}
 function TrackContent() {
   const searchParams = useSearchParams();
   const { user } = useUser();
@@ -104,6 +121,51 @@ function TrackContent() {
       alert(err instanceof Error ? err.message : "Could not cancel");
     } finally {
       setCancelling(false);
+    }
+  }
+
+  const [paying, setPaying] = useState(false);
+
+  async function handleResumePayment() {
+    if (!order) return;
+    setPaying(true);
+    try {
+      const res = await fetch("/api/payments/create-intent", {
+        method: "POST",
+        headers: await paymentAuthHeaders(),
+        body: JSON.stringify({
+          orderId: order.id,
+          amount: order.total,
+          currency: "HKD",
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        intentId?: string;
+        clientSecret?: string;
+        currency?: string;
+        env?: "demo" | "prod";
+        alreadyPaid?: boolean;
+      };
+      if (data.alreadyPaid) {
+        await lookup(order.id);
+        return;
+      }
+      if (!res.ok || !data.intentId || !data.clientSecret || !data.env) {
+        throw new Error(data.error ?? "Could not start payment.");
+      }
+      const successUrl = `${window.location.origin}/checkout/payment-return?orderId=${encodeURIComponent(order.id)}`;
+      await redirectToAirwallexCheckout({
+        intentId: data.intentId,
+        clientSecret: data.clientSecret,
+        currency: data.currency ?? "HKD",
+        env: data.env,
+        successUrl,
+      });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not open Airwallex.");
+    } finally {
+      setPaying(false);
     }
   }
 
@@ -265,14 +327,24 @@ function TrackContent() {
             )}
 
             {order.status === "pending" && (
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={cancelling}
-                className="mt-3 w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
-              >
-                {cancelling ? "Cancelling…" : "Cancel Order"}
-              </button>
+              <div className="mt-3 space-y-2">
+                <button
+                  type="button"
+                  disabled={paying}
+                  onClick={() => void handleResumePayment()}
+                  className="w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {paying ? "Opening Airwallex…" : "Pay now with FPS / PayMe"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
+                >
+                  {cancelling ? "Cancelling…" : "Cancel Order"}
+                </button>
+              </div>
             )}
 
             <OrderProofPhotos order={order} />
@@ -280,14 +352,16 @@ function TrackContent() {
 
           {user &&
             getUserAccountId(user) === order.customerId &&
-            (order.status === "delivered" || order.status === "runner_paid") && (
+            isCustomerPaymentOpen(order.status, order) && (
               <CustomerPayPanel
                 order={order}
                 userId={user.uid}
               />
             )}
 
-          {order.status === "customer_paid" && (
+          {(order.status === "paid" ||
+            order.status === "customer_paid" ||
+            order.status === "completed") && (
             <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-800">
               This order is marked paid
               {order.customerPaidAt
@@ -306,7 +380,8 @@ function TrackContent() {
 
           {(order.status === "delivered" ||
             order.status === "runner_paid" ||
-            order.status === "customer_paid") &&
+            order.status === "customer_paid" ||
+            order.status === "completed") &&
             !order.runnerRating &&
             !rated &&
             user &&

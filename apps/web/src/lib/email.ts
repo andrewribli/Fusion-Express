@@ -111,8 +111,12 @@ function itemsTable(items: OrderEmailItem[]): string {
 
 const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   pending: {
-    heading: "We received your order",
-    body: "A runner will pick it up from Fusion soon.",
+    heading: "Finish payment to confirm your order",
+    body: "Complete FPS or PayMe checkout so runners can pick up your order.",
+  },
+  paid: {
+    heading: "Payment received",
+    body: "Your order is paid. A runner will accept it soon.",
   },
   accepted: {
     heading: "A runner accepted your order",
@@ -124,11 +128,15 @@ const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   },
   delivered: {
     heading: "Order delivered — receipt ready",
-    body: "The runner uploaded the Fusion receipt. Reimburse them via PayMe/FPS, then mark runner paid. The customer should pay GraceRun within 24 hours.",
+    body: "The runner uploaded the Fusion receipt. Reimburse them via PayMe/FPS, then mark runner paid.",
   },
   runner_paid: {
     heading: "GraceRun reimbursed you",
     body: "The owner marked your grocery spend and delivery fee as paid.",
+  },
+  completed: {
+    heading: "Order complete",
+    body: "Thanks for ordering with GraceRun.",
   },
   customer_paid: {
     heading: "Payment received",

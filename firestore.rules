@@ -242,16 +242,15 @@ service cloud.firestore {
     // ----------------------------------------------------------------- orders
 
     match /orders/{orderId} {
-      // A runner has to read a pending order to decide whether to accept it,
-      // which also covers the transaction read inside acceptOrder().
+      // Runners browse claimable orders (paid via Airwallex, or legacy pending).
       allow get: if isOrderCustomer(resource.data)
         || isOrderRunner(resource.data)
-        || (isRunner() && resource.data.status == 'pending')
+        || (isRunner() && resource.data.status in ['pending', 'paid'])
         || isAdmin();
 
       allow list: if resource.data.customerId == uid()
         || resource.data.runnerUid == uid()
-        || (isRunner() && resource.data.status == 'pending')
+        || (isRunner() && resource.data.status in ['pending', 'paid'])
         || isAdmin();
 
       allow create: if signedIn()
@@ -289,15 +288,14 @@ service cloud.firestore {
           && changedKeys().hasOnly([
             'status', 'customerPaidAt', 'paymentReceived', 'updatedAt'
           ])
-          && request.resource.data.status in ['customer_paid', 'paid']
+          && request.resource.data.status in ['customer_paid', 'paid', 'completed']
           && request.resource.data.paymentReceived == true
         )
       );
 
-      // Claiming an unassigned order. Self-pickup is blocked here as well as
-      // in the client so it cannot be bypassed.
+      // Claiming a paid (or legacy unpaid pending) order.
       allow update: if isRunner()
-        && resource.data.status == 'pending'
+        && resource.data.status in ['pending', 'paid']
         && resource.data.customerId != uid()
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
@@ -320,7 +318,7 @@ service cloud.firestore {
           'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
           'adminMissedNotifiedAt'
         ])
-        && request.resource.data.status != 'pending';
+        && !(request.resource.data.status in ['pending', 'paid']);
 
       allow update: if isAdmin()
         && changedKeys().hasOnly([
@@ -330,7 +328,10 @@ service cloud.firestore {
           'customerWarningCount', 'runnerExpiredAt', 'customerOverdueAt',
           'runnerReminderSentAt', 'customerReminderSentAt',
           'adminMissedNotifiedAt', 'lastEscalatedAt',
-          'customerPaidAt', 'paymentReceived'
+          'customerPaidAt', 'paymentReceived', 'awaitingOnlinePayment',
+          'airwallexPaymentIntentId', 'airwallexPaidAmount',
+          'airwallexPaidCurrency', 'airwallexWebhookEventId',
+          'airwallexPaidNotifiedAt', 'paymentProvider'
         ]);
 
       allow delete: if false;

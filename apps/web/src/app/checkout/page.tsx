@@ -305,8 +305,8 @@ export default function CheckoutPage() {
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
               <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
               <p className="mt-1 text-sm font-semibold text-blue-900">
-                PayMe is pre-selected. You pay after delivery when the runner
-                shares the details.
+                Pay now with FPS or PayMe on Airwallex&apos;s secure checkout.
+                Runners only see your order after payment confirms.
               </p>
               <div className="mt-3 rounded-xl bg-white p-3">
                 <PaymentMethodPicker
@@ -316,6 +316,9 @@ export default function CheckoutPage() {
                     savePaymentMethod(method);
                   }}
                 />
+                <p className="mt-2 text-xs text-gray-500">
+                  Preferred wallet on Airwallex Hosted Payment Page.
+                </p>
               </div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-blue-800">
                 {PAYMENT_FLOW_STEPS.map((step) => (
@@ -338,7 +341,7 @@ export default function CheckoutPage() {
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
                 >
                   <span>
-                    {loading ? "Placing…" : `Complete Order · ${paymentMethod}`}
+                    {loading ? "Redirecting to pay…" : `Pay with ${paymentMethod}`}
                   </span>
                   <span className="text-sm font-normal">· ${total}</span>
                 </button>

@@ -13,12 +13,28 @@ import {
   resolveSpecialInstructions,
 } from "@/lib/constants";
 import { friendlyPlaceOrderError } from "@/lib/auth-errors";
-import { notifyOrderPlaced } from "@/lib/notify-email";
+import { redirectToAirwallexCheckout } from "@/lib/airwallex-checkout";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import type { CustomerPaymentMethod } from "@/lib/payment-method";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import { normalizePhone, validatePhone } from "@/lib/auth";
+import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
+
+async function authHeaders(): Promise<HeadersInit> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (!isFirebaseConfigured()) return headers;
+  const user = getAuthClient().currentUser;
+  if (!user) return headers;
+  try {
+    headers.Authorization = `Bearer ${await user.getIdToken()}`;
+  } catch (err) {
+    console.error("Could not get ID token for payment intent", err);
+  }
+  return headers;
+}
 
 export function usePlaceOrder() {
   const router = useRouter();
@@ -137,25 +153,52 @@ export function usePlaceOrder() {
           total,
           paymentReceived: false,
           paymentMethod: opts.paymentMethod,
+          paymentProvider: "airwallex",
+          awaitingOnlinePayment: true,
           fusionPaidByPlatform: false,
           estimatedDeliveryAt,
         });
 
-        void notifyOrderPlaced({
-          customerEmail: customer.email,
-          orderId,
-          items: orderItems.map((item) => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          total,
-          customerName,          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
+        const intentRes = await fetch("/api/payments/create-intent", {
+          method: "POST",
+          headers: await authHeaders(),
+          body: JSON.stringify({ orderId, amount: total, currency: "HKD" }),
         });
+        const intentData = (await intentRes.json().catch(() => ({}))) as {
+          error?: string;
+          intentId?: string;
+          clientSecret?: string;
+          currency?: string;
+          env?: "demo" | "prod";
+        };
+        if (
+          !intentRes.ok ||
+          !intentData.intentId ||
+          !intentData.clientSecret ||
+          !intentData.env
+        ) {
+          throw new Error(
+            intentData.error ??
+              "Could not start Airwallex checkout. Your order was saved — open Track to retry payment.",
+          );
+        }
 
         clearCart();
         const guestFlag = customer.isGuest ? "&guest=1" : "";
-        router.push(`/track?orderId=${orderId}${guestFlag}`);
+        const successUrl = `${window.location.origin}/checkout/payment-return?orderId=${encodeURIComponent(orderId)}${guestFlag}`;
+
+        try {
+          await redirectToAirwallexCheckout({
+            intentId: intentData.intentId,
+            clientSecret: intentData.clientSecret,
+            currency: intentData.currency ?? "HKD",
+            env: intentData.env,
+            successUrl,
+          });
+        } catch (redirectErr) {
+          console.error("Airwallex redirect failed", redirectErr);
+          router.push(`/track?orderId=${orderId}${guestFlag}&pay=1`);
+        }
       } catch (err) {
         setError(friendlyPlaceOrderError(err));
       } finally {

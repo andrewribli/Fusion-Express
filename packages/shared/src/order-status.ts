@@ -1,9 +1,11 @@
 export const ORDER_STATUSES = [
   "pending",
+  "paid",
   "accepted",
   "purchased",
   "delivered",
   "runner_paid",
+  "completed",
   "customer_paid",
   "cancelled",
 ] as const;
@@ -11,11 +13,13 @@ export const ORDER_STATUSES = [
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: "Pending",
+  pending: "Awaiting payment",
+  paid: "Paid",
   accepted: "Accepted",
   purchased: "Purchased",
-  delivered: "Pending payout",
+  delivered: "Delivered",
   runner_paid: "Runner paid",
+  completed: "Completed",
   customer_paid: "Customer paid",
   cancelled: "Cancelled",
 };
@@ -29,25 +33,30 @@ export function normalizeOrderStatus(status: string): OrderStatus {
     case "picked_up":
     case "picked":
       return "purchased";
-    case "completed":
-      return "runner_paid";
-    case "paid":
-      return "customer_paid";
+    // Legacy docs sometimes stored "completed" for runner reimbursed.
+    // New flow uses completed as the terminal state after runner_paid.
+    case "complete":
+      return "completed";
     default:
       return status as OrderStatus;
   }
 }
 
 export const TRACKING_STEPS: { status: OrderStatus; label: string }[] = [
-  { status: "pending", label: "Pending" },
+  { status: "pending", label: "Awaiting payment" },
+  { status: "paid", label: "Paid" },
   { status: "accepted", label: "Accepted" },
   { status: "purchased", label: "Purchased" },
   { status: "delivered", label: "Delivered" },
   { status: "runner_paid", label: "Runner reimbursed" },
-  { status: "customer_paid", label: "You paid GraceRun" },
+  { status: "completed", label: "Completed" },
 ];
 
 export function getStepIndex(status: OrderStatus): number {
+  if (status === "customer_paid") {
+    // Legacy post-delivery payment ≈ completed for the progress bar.
+    return TRACKING_STEPS.findIndex((s) => s.status === "completed");
+  }
   const idx = TRACKING_STEPS.findIndex((s) => s.status === status);
   return idx === -1 ? 0 : idx;
 }
@@ -57,12 +66,13 @@ export function isActiveRunnerStatus(status: OrderStatus): boolean {
 }
 
 /**
- * Customer still needs to follow the order (including pay after delivery).
- * Used for track badges / payment-due UI — not for the new-order placement cap.
+ * Customer still needs to follow the order.
+ * Used for track badges — not for the new-order placement cap.
  */
 export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
   return (
     status === "pending" ||
+    status === "paid" ||
     status === "accepted" ||
     status === "purchased" ||
     status === "delivered"
@@ -70,15 +80,15 @@ export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
 }
 
 /**
- * In-flight delivery only. Payment-due (`delivered` / `runner_paid`) orders
- * show banners but must not block placing new grocery orders — otherwise
- * unpaid delivered tickets permanently hit MAX_ACTIVE_CUSTOMER_ORDERS.
+ * In-flight delivery + unpaid checkout. Payment-due delivered tickets must not
+ * permanently block new grocery orders.
  */
 export function countsTowardCustomerOrderPlacementCap(
   status: OrderStatus,
 ): boolean {
   return (
     status === "pending" ||
+    status === "paid" ||
     status === "accepted" ||
     status === "purchased"
   );
@@ -160,7 +170,7 @@ export function runnerReimburseTotal(order: {
 export function adminPayoutLabel(status: OrderStatus): string {
   if (status === "delivered") return "pending_payout";
   if (status === "runner_paid") return "runner_paid";
-  if (status === "customer_paid") return "customer_paid";
+  if (status === "customer_paid" || status === "completed") return "customer_paid";
   return status;
 }
 
@@ -272,6 +282,21 @@ export function runnerWarningTotal(
   }, 0);
 }
 
-export function isCustomerPaymentOpen(status: OrderStatus): boolean {
+/** Post-delivery PayMe/FPS UI — skipped when the customer already paid online. */
+export function isCustomerPaymentOpen(
+  status: OrderStatus,
+  order?: { paymentReceived?: boolean; paymentProvider?: string },
+): boolean {
+  if (order?.paymentReceived && order.paymentProvider === "airwallex") {
+    return false;
+  }
+  if (status === "paid" || status === "completed" || status === "customer_paid") {
+    return false;
+  }
   return status === "delivered" || status === "runner_paid";
+}
+
+/** Orders runners may claim from the available board. */
+export function isClaimableOrderStatus(status: OrderStatus): boolean {
+  return status === "paid";
 }

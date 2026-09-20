@@ -155,6 +155,7 @@ export {
   formatExpiredAgo,
   runnerWarningTotal,
   isCustomerPaymentOpen,
+  isClaimableOrderStatus,
 } from "./order-status";
 
 
@@ -209,6 +210,13 @@ export interface Order {
   total: number;
   paymentReceived: boolean;
   paymentMethod?: "PayMe" | "FPS";
+  /** Online checkout provider (e.g. airwallex). */
+  paymentProvider?: "airwallex" | string;
+  /** True while the customer still owes Airwallex for this order. */
+  awaitingOnlinePayment?: boolean;
+  airwallexPaymentIntentId?: string;
+  airwallexPaidAmount?: number;
+  airwallexPaidCurrency?: string;
   /** Grocery receipt total the runner spent at Fusion. */
   finalTotal?: number;
   amountPaidByRunner?: number;
