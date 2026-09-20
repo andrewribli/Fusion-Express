@@ -94,9 +94,12 @@ export async function createUserProfile(
     uid,
     fullName: profile.fullName,
     email: profile.email?.trim().toLowerCase(),
-    phone: profile.phone,
+    // Phone is runner-only. Customers and guests omit it.
+    phone: profile.isRunner ? profile.phone : undefined,
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
+    college: profile.college,
+    hall: profile.hall,
     createdAt: Timestamp.fromDate(now),
     updatedAt: Timestamp.fromDate(now),
   };

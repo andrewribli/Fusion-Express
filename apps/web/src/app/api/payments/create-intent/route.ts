@@ -4,6 +4,7 @@ import {
   createPaymentIntent,
   getAirwallexEnv,
 } from "@/lib/airwallex";
+import { customerAmountDue, hasConfirmedGroceryTotal } from "@/lib/order-status";
 import {
   getOrderRest,
   patchOrderRest,
@@ -13,11 +14,11 @@ import {
 
 export const runtime = "nodejs";
 
-type Body = {
-  orderId?: string;
-  amount?: number;
-  currency?: string;
-};
+function num(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const n = Number(value);
+  return Number.isFinite(n) && value !== "" && value != null ? n : undefined;
+}
 
 export async function POST(request: NextRequest) {
   let auth;
@@ -30,9 +31,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: Body;
+  let body: { orderId?: string };
   try {
-    body = (await request.json()) as Body;
+    body = (await request.json()) as { orderId?: string };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -52,35 +53,57 @@ export async function POST(request: NextRequest) {
     }
 
     const status = String(order.status ?? "");
-    if (status === "paid" || status === "customer_paid" || status === "completed") {
+    if (
+      status === "paid" ||
+      status === "customer_paid" ||
+      status === "runner_paid" ||
+      status === "completed" ||
+      order.paymentReceived === true
+    ) {
       return NextResponse.json(
         { error: "This order is already paid.", alreadyPaid: true },
         { status: 409 },
       );
     }
-    if (status !== "pending") {
+    if (status !== "delivered") {
       return NextResponse.json(
-        { error: `Cannot pay an order in status "${status}".` },
+        { error: "You can pay after the runner marks the order delivered." },
         { status: 409 },
       );
     }
 
-    const amount =
-      typeof body.amount === "number" && body.amount > 0
-        ? body.amount
-        : Number(order.total ?? 0);
-    if (!(amount > 0)) {
-      return NextResponse.json({ error: "Invalid order amount." }, { status: 400 });
+    const grocery = {
+      amountPaidByRunner: num(order.amountPaidByRunner),
+      finalTotal: num(order.finalTotal),
+      actualSubtotal: num(order.actualSubtotal),
+      subtotal: num(order.subtotal) ?? 0,
+    };
+    if (!hasConfirmedGroceryTotal(grocery)) {
+      return NextResponse.json(
+        {
+          error:
+            "The receipt total is not in yet. Wait for the runner to upload it.",
+        },
+        { status: 409 },
+      );
     }
 
-    const currency = (body.currency ?? "HKD").toUpperCase();
+    const amount = customerAmountDue({
+      ...grocery,
+      deliveryFee: num(order.deliveryFee) ?? 0,
+      tip: num(order.tip),
+    });
+    if (!(amount > 0)) {
+      return NextResponse.json({ error: "Invalid receipt total." }, { status: 400 });
+    }
+
     const origin = new URL(request.url).origin;
     const returnUrl = `${origin}/checkout/payment-return?orderId=${encodeURIComponent(orderId)}`;
 
     const intent = await createPaymentIntent(
       orderId,
       amount,
-      currency,
+      "HKD",
       {
         email: typeof order.customerEmail === "string" ? order.customerEmail : undefined,
         fullName:

@@ -96,9 +96,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, status: "paid", paid: true });
   } catch (err) {
     console.error("confirm mark paid failed", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Could not mark paid." },
-      { status: 502 },
-    );
+    const message = err instanceof Error ? err.message : "Could not mark paid.";
+    const status = message.includes("Refusing to mark paid") ? 409 : 502;
+    return NextResponse.json({ error: message }, { status });
   }
 }

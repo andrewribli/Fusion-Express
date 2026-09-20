@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   reauthenticateWithCredential,
   sendPasswordResetEmail,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   updatePassword,
@@ -89,6 +90,37 @@ function randomGuestPassword(): string {
   const bytes = new Uint8Array(18);
   crypto.getRandomValues(bytes);
   return `Gr!${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * Guest checkout without a phone. Reuses the current Auth user, otherwise
+ * signs in anonymously. If anonymous auth is disabled, falls back to a
+ * one-off synthetic email so the order can still be written.
+ */
+export async function ensureGuestSession(): Promise<{
+  uid: string;
+  email?: string;
+}> {
+  if (!isFirebaseConfigured()) {
+    return { uid: `guest_${Date.now()}` };
+  }
+
+  const current = getAuthClient().currentUser;
+  if (current) {
+    return { uid: current.uid, email: current.email ?? undefined };
+  }
+
+  try {
+    const cred = await signInAnonymously(getAuthClient());
+    return { uid: cred.user.uid, email: cred.user.email ?? undefined };
+  } catch {
+    const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    const email = `guest_${id}@${EMAIL_DOMAIN}`;
+    const password = randomGuestPassword();
+    const user = await signUpWithSyntheticEmail(email, password);
+    storeGuestTempPassword(id, password);
+    return { uid: user.uid, email };
+  }
 }
 
 export function validateUsername(username: string): string | null {

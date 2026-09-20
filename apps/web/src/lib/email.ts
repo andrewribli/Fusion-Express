@@ -111,12 +111,12 @@ function itemsTable(items: OrderEmailItem[]): string {
 
 const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   pending: {
-    heading: "Finish payment to confirm your order",
-    body: "Complete FPS or PayMe checkout so runners can pick up your order.",
+    heading: "We received your order",
+    body: "A runner can accept it now. You pay the exact receipt total after delivery.",
   },
   paid: {
     heading: "Payment received",
-    body: "Your order is paid. A runner will accept it soon.",
+    body: "Thanks — GraceRun has your payment for this delivery.",
   },
   accepted: {
     heading: "A runner accepted your order",

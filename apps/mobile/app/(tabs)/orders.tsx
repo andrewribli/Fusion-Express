@@ -50,8 +50,7 @@ export default function OrdersScreen() {
           Sign in on the Profile tab to see orders tied to your account.
         </Text>
         <Text className="mt-2 text-sm text-gray-400">
-          Guest checkout orders appear after you place them with the same phone
-          on this device (you stay signed in as the guest account).
+          Guest checkout orders stay on this device after you place them.
         </Text>
       </View>
     );

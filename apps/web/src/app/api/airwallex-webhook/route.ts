@@ -104,7 +104,11 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("markOrderPaidFromAirwallex failed", err);
     const message = err instanceof Error ? err.message : "Update failed";
-    const status = message === "Order not found" ? 404 : 502;
+    const status = message.includes("Refusing to mark paid")
+      ? 409
+      : message === "Order not found"
+        ? 404
+        : 502;
     return NextResponse.json({ error: message }, { status });
   }
 }

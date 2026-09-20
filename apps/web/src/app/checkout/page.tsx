@@ -32,7 +32,6 @@ import {
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
-import { validatePhone } from "@/lib/auth";
 
 export default function CheckoutPage() {
   const { user } = useUser();
@@ -41,7 +40,9 @@ export default function CheckoutPage() {
 
   const [college, setCollege] = useState("");
   const [hall, setHall] = useState("");
-  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [fullName, setFullName] = useState(
+    user?.fullName && user.fullName !== "Guest" ? user.fullName : "",
+  );
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
@@ -52,8 +53,10 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (user?.phone && !phone) setPhone(user.phone);
-  }, [user, phone]);
+    if (user?.fullName && user.fullName !== "Guest" && !fullName) {
+      setFullName(user.fullName);
+    }
+  }, [user, fullName]);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
@@ -64,8 +67,8 @@ export default function CheckoutPage() {
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
-  const phoneOk = !validatePhone(phone);
-  const canSubmit = Boolean(college && hall && phoneOk && !overLimit);
+  const nameOk = fullName.trim().length > 0;
+  const canSubmit = Boolean(college && hall && nameOk && !overLimit);
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
@@ -78,7 +81,7 @@ export default function CheckoutPage() {
     void placeOrder({
       college,
       hall,
-      phone,
+      fullName: fullName.trim(),
       paymentMethod,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
@@ -119,8 +122,8 @@ export default function CheckoutPage() {
         <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
           {!user && (
             <div className="mb-4 rounded-xl border border-lakers-gold/40 bg-lakers-navy/80 px-4 py-3 text-sm text-lakers-gold">
-              No account needed. Enter your dorm, lobby, and phone — we&apos;ll
-              create your account when you order.{" "}
+              No account needed. Enter your name, dorm, and lobby — we&apos;ll
+              save the order when you submit.{" "}
               <Link href="/login?next=/checkout" className="underline">
                 Already have an account? Sign in
               </Link>
@@ -154,8 +157,8 @@ export default function CheckoutPage() {
                   <div>
                     <p className="font-medium">{address}</p>
                     <p className="text-xs text-gray-500">Lobby: {lobby}</p>
-                    {phoneOk && (
-                      <p className="text-xs text-gray-500">Phone: {phone}</p>
+                    {nameOk && (
+                      <p className="text-xs text-gray-500">{fullName.trim()}</p>
                     )}
                   </div>
                   <button
@@ -211,7 +214,7 @@ export default function CheckoutPage() {
             >
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <p className="mt-1 text-xs text-gray-500">
-                Only three things we need: dorm (college + hall), lobby, and phone.
+                Name, dorm (college + hall), and lobby. No phone number.
               </p>
               <div className="mt-3">
                 <DeliveryAddressFields
@@ -234,24 +237,23 @@ export default function CheckoutPage() {
               ) : null}
               <div className="mt-3">
                 <label
-                  htmlFor="guest-phone"
+                  htmlFor="customer-name"
                   className="block text-xs font-medium text-gray-600"
                 >
-                  Phone number
+                  Full name
                 </label>
                 <input
-                  id="guest-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
+                  id="customer-name"
+                  type="text"
+                  autoComplete="name"
                   required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="e.g. 9123 4567"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. Felix Wong"
                   className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Used to create your account and for the runner to reach you.
+                  The runner writes this name on the Fusion receipt.
                 </p>
               </div>
               <div className="mt-3">
@@ -305,8 +307,8 @@ export default function CheckoutPage() {
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
               <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
               <p className="mt-1 text-sm font-semibold text-blue-900">
-                Pay now with FPS or PayMe on Airwallex&apos;s secure checkout.
-                Runners only see your order after payment confirms.
+                No payment now. You pay the exact receipt total with FPS or PayMe
+                after the runner delivers.
               </p>
               <div className="mt-3 rounded-xl bg-white p-3">
                 <PaymentMethodPicker
@@ -317,7 +319,7 @@ export default function CheckoutPage() {
                   }}
                 />
                 <p className="mt-2 text-xs text-gray-500">
-                  Preferred wallet on Airwallex Hosted Payment Page.
+                  Preferred wallet when you pay after delivery.
                 </p>
               </div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-blue-800">
@@ -341,7 +343,7 @@ export default function CheckoutPage() {
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
                 >
                   <span>
-                    {loading ? "Redirecting to pay…" : `Pay with ${paymentMethod}`}
+                    {loading ? "Placing…" : `Complete Order · ${paymentMethod}`}
                   </span>
                   <span className="text-sm font-normal">· ${total}</span>
                 </button>
@@ -349,7 +351,7 @@ export default function CheckoutPage() {
                   <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
                     {!college || !hall
                       ? "Choose your college and hall to continue."
-                      : "Enter a valid phone number to continue."}
+                      : "Enter your full name to continue."}
                   </p>
                 )}
               </div>

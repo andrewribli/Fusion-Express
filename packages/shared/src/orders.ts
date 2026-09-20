@@ -396,20 +396,12 @@ export async function fetchPendingOrders(
       const snap = await getDocs(
         query(
           collection(getDb(), ORDERS_COLLECTION),
-          where("status", "in", ["paid", "pending"]),
+          where("status", "==", "pending"),
           orderBy("createdAt", "desc"),
           limit(ORDER_PAGE_SIZE),
         ),
       );
-      const orders = parseSnapshotDocs(snap.docs).filter((order) => {
-        if (isClaimableOrderStatus(order.status)) return true;
-        return (
-          order.status === "pending" &&
-          !order.awaitingOnlinePayment &&
-          !order.airwallexPaymentIntentId
-        );
-      });
-      return filterOwnOrders(orders, excludeCustomerId);
+      return filterOwnOrders(parseSnapshotDocs(snap.docs), excludeCustomerId);
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
       throw err instanceof Error
@@ -542,12 +534,7 @@ export async function acceptOrder(
       if (order.customerId === runnerUid) {
         throw new SelfPickupError();
       }
-      const claimable =
-        isClaimableOrderStatus(order.status) ||
-        (order.status === "pending" &&
-          !order.awaitingOnlinePayment &&
-          !order.airwallexPaymentIntentId);
-      if (!claimable) {
+      if (!isClaimableOrderStatus(order.status)) {
         if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
         throw new OrderAlreadyTakenError();
       }
@@ -572,12 +559,7 @@ export async function acceptOrder(
   if (order.customerId === runnerUid) {
     throw new SelfPickupError();
   }
-  const claimable =
-    isClaimableOrderStatus(order.status) ||
-    (order.status === "pending" &&
-      !order.awaitingOnlinePayment &&
-      !order.airwallexPaymentIntentId);
-  if (!claimable) {
+  if (!isClaimableOrderStatus(order.status)) {
     if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
     throw new OrderAlreadyTakenError();
   }
@@ -1214,14 +1196,11 @@ export async function verifyAdminDelivery(
 export async function markRunnerPayout(orderId: string): Promise<void> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== "delivered") {
-    throw new Error("Pay the runner after they mark delivered.");
+  if (order.status !== "paid" && order.status !== "customer_paid") {
+    throw new Error("Reimburse the runner after the customer has paid.");
   }
-  // Prepaid online orders finish at completed after the runner is reimbursed.
-  await updateOrderStatus(
-    orderId,
-    order.paymentReceived ? "completed" : "runner_paid",
-  );
+  await updateOrderStatus(orderId, "runner_paid");
+  await updateOrderStatus(orderId, "completed");
 }
 
 export async function fetchOrdersAwaitingPayout(): Promise<Order[]> {

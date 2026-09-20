@@ -46,7 +46,7 @@ export function ProfileView() {
               {user?.email && (
                 <p className="text-sm text-gray-600">{user.email}</p>
               )}
-              {user?.phone && (
+              {user?.isRunner && user.phone && (
                 <p className="text-sm text-gray-600">Phone: {user.phone}</p>
               )}
               {canChangePassword && !isGuest && (

@@ -41,7 +41,7 @@ export function MenuCartSummary() {
 
   function goCheckout() {
     if (itemCount === 0) return;
-    // Guests finish on checkout (phone + dorm + lobby) — no login required.
+    // Guests finish on checkout (name + dorm + lobby) — no login required.
     router.push("/checkout");
   }
 

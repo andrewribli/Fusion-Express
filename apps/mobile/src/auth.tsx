@@ -10,11 +10,9 @@ import {
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import {
-  ensureGuestAuthForPhone,
-  normalizePhone,
+  ensureGuestSession,
   signInWithEmail,
   signOutUser,
-  validatePhone,
 } from "@fusion-express/shared/auth";
 import { collectionName } from "@fusion-express/shared/app-env";
 import {
@@ -44,9 +42,9 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   /**
    * Ensures the device has a Firebase Auth uid for checkout.
-   * Signed-in CUHK users keep their uid; guests get a phone-backed account.
+   * Signed-in users keep their uid; guests get an anonymous session.
    */
-  ensureCheckoutAuth: (phone: string) => Promise<{
+  ensureCheckoutAuth: () => Promise<{
     uid: string;
     email: string;
     isGuest: boolean;
@@ -163,31 +161,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   }, []);
 
-  const ensureCheckoutAuth = useCallback(
-    async (phone: string) => {
-      const phoneErr = validatePhone(phone);
-      if (phoneErr) throw new Error(phoneErr);
-      const digits = normalizePhone(phone);
-
-      const current = getAuthClient().currentUser;
-      if (current && !/^phone_\d+@fusion-express\.app$/i.test(current.email ?? "")) {
-        return {
-          uid: current.uid,
-          email: current.email ?? "",
-          isGuest: false,
-        };
-      }
-
-      ensureGuestPasswordStorage();
-      const guest = await ensureGuestAuthForPhone(digits);
+  const ensureCheckoutAuth = useCallback(async () => {
+    const current = getAuthClient().currentUser;
+    if (current && !current.isAnonymous) {
       return {
-        uid: guest.uid,
-        email: guest.email,
-        isGuest: true,
+        uid: current.uid,
+        email: current.email ?? "",
+        isGuest: false,
       };
-    },
-    [],
-  );
+    }
+    const guest = await ensureGuestSession();
+    return {
+      uid: guest.uid,
+      email: guest.email ?? "",
+      isGuest: true,
+    };
+  }, []);
 
   const value = useMemo(
     () => ({

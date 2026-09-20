@@ -13,28 +13,11 @@ import {
   resolveSpecialInstructions,
 } from "@/lib/constants";
 import { friendlyPlaceOrderError } from "@/lib/auth-errors";
-import { redirectToAirwallexCheckout } from "@/lib/airwallex-checkout";
+import { notifyOrderPlaced } from "@/lib/notify-email";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import type { CustomerPaymentMethod } from "@/lib/payment-method";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
-import { normalizePhone, validatePhone } from "@/lib/auth";
-import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
-
-async function authHeaders(): Promise<HeadersInit> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (!isFirebaseConfigured()) return headers;
-  const user = getAuthClient().currentUser;
-  if (!user) return headers;
-  try {
-    headers.Authorization = `Bearer ${await user.getIdToken()}`;
-  } catch (err) {
-    console.error("Could not get ID token for payment intent", err);
-  }
-  return headers;
-}
 
 export function usePlaceOrder() {
   const router = useRouter();
@@ -50,18 +33,16 @@ export function usePlaceOrder() {
       paymentMethod: CustomerPaymentMethod;
       customerNote?: string;
       tip?: number;
-      /** Required for guests; optional when already signed in with a saved phone. */
-      phone?: string;
+      fullName?: string;
     }) => {
       if (!opts.college || !opts.hall || items.length === 0) {
         setError("Add items and choose your college and hall first.");
         return;
       }
 
-      const phone = (opts.phone ?? user?.phone ?? "").trim();
-      const phoneErr = validatePhone(phone);
-      if (phoneErr) {
-        setError(phoneErr);
+      const fullName = (opts.fullName ?? user?.fullName ?? "").trim();
+      if (!fullName) {
+        setError("Enter your full name");
         return;
       }
 
@@ -71,20 +52,11 @@ export function usePlaceOrder() {
       try {
         await requestNotificationPermission();
 
-        let customer = user;
-        // Guests (and signed-in users missing a phone) get a phone-backed account.
-        if (
-          !customer?.uid ||
-          customer.isGuest ||
-          !customer.phone ||
-          normalizePhone(customer.phone) !== normalizePhone(phone)
-        ) {
-          customer = await ensureGuestCheckout({
-            phone,
-            college: opts.college,
-            hall: opts.hall,
-          });
-        }
+        const customer = await ensureGuestCheckout({
+          fullName,
+          college: opts.college,
+          hall: opts.hall,
+        });
 
         if (!customer?.uid) {
           setError("Could not create your account. Try again.");
@@ -114,12 +86,8 @@ export function usePlaceOrder() {
         const tipAmount = Math.max(0, opts.tip ?? 0);
         const total = orderSubtotal + fee.deliveryFee + tipAmount;
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
-        const digits = normalizePhone(phone);
         const lobbyPoint = getLobbyForHall(opts.hall);
-        const customerName =
-          customer.fullName?.trim() && customer.fullName !== "Guest"
-            ? customer.fullName
-            : `Guest ${digits.slice(-4)}`;
+        const customerName = customer.fullName.trim();
 
         const orderId = await createOrder({
           sessionId,
@@ -127,7 +95,6 @@ export function usePlaceOrder() {
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
-          customerPhone: digits,
           items: orderItems,
           status: "pending",
           college: opts.college,
@@ -153,52 +120,26 @@ export function usePlaceOrder() {
           total,
           paymentReceived: false,
           paymentMethod: opts.paymentMethod,
-          paymentProvider: "airwallex",
-          awaitingOnlinePayment: true,
           fusionPaidByPlatform: false,
           estimatedDeliveryAt,
         });
 
-        const intentRes = await fetch("/api/payments/create-intent", {
-          method: "POST",
-          headers: await authHeaders(),
-          body: JSON.stringify({ orderId, amount: total, currency: "HKD" }),
+        void notifyOrderPlaced({
+          customerEmail: customer.email,
+          orderId,
+          items: orderItems.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total,
+          customerName,
+          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
-        const intentData = (await intentRes.json().catch(() => ({}))) as {
-          error?: string;
-          intentId?: string;
-          clientSecret?: string;
-          currency?: string;
-          env?: "demo" | "prod";
-        };
-        if (
-          !intentRes.ok ||
-          !intentData.intentId ||
-          !intentData.clientSecret ||
-          !intentData.env
-        ) {
-          throw new Error(
-            intentData.error ??
-              "Could not start Airwallex checkout. Your order was saved — open Track to retry payment.",
-          );
-        }
 
         clearCart();
         const guestFlag = customer.isGuest ? "&guest=1" : "";
-        const successUrl = `${window.location.origin}/checkout/payment-return?orderId=${encodeURIComponent(orderId)}${guestFlag}`;
-
-        try {
-          await redirectToAirwallexCheckout({
-            intentId: intentData.intentId,
-            clientSecret: intentData.clientSecret,
-            currency: intentData.currency ?? "HKD",
-            env: intentData.env,
-            successUrl,
-          });
-        } catch (redirectErr) {
-          console.error("Airwallex redirect failed", redirectErr);
-          router.push(`/track?orderId=${orderId}${guestFlag}&pay=1`);
-        }
+        router.push(`/track?orderId=${orderId}${guestFlag}`);
       } catch (err) {
         setError(friendlyPlaceOrderError(err));
       } finally {

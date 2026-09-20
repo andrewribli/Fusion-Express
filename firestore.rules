@@ -169,12 +169,22 @@ service cloud.firestore {
         && (!hasRunnerId || ownsRunnerDoc(data.runnerId));
     }
 
+    /** Customers and guests may omit phone. Runners must store one. */
+    function phoneOkForRole() {
+      return request.resource.data.get('isRunner', false) != true
+        || (
+          request.resource.data.phone is string
+          && request.resource.data.phone.size() >= 8
+        );
+    }
+
     function userCreateOk(userId) {
       let data = request.resource.data;
       return signedIn()
         && uid() == userId
         && userKeysAllowed()
         && roleIsValid()
+        && phoneOkForRole()
         && data.get('uid', uid()) == uid()
         && data.get('isRunner', false) == false
         && !('runnerId' in data);
@@ -205,7 +215,8 @@ service cloud.firestore {
             && 'runnerId' in request.resource.data
             && ownsRunnerDoc(request.resource.data.runnerId)
           )
-        );
+        )
+        && phoneOkForRole();
     }
 
     match /users/{userId} {
@@ -231,7 +242,10 @@ service cloud.firestore {
         || isAdmin()
       );
       allow list: if resource.data.uid == uid();
-      allow create: if signedIn() && request.resource.data.uid == uid();
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 8;
       allow update: if signedIn() && (
         resource.data.get('uid', '') == uid()
         || myRunnerDocId() == runnerId

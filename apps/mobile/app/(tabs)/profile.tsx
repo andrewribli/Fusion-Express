@@ -64,7 +64,7 @@ export default function ProfileScreen() {
           {profile?.fullName ? (
             <Text className="mt-1 text-sm text-gray-600">{profile.fullName}</Text>
           ) : null}
-          {profile?.phone ? (
+          {profile?.isRunner && profile.phone ? (
             <Text className="mt-1 text-sm text-gray-600">{profile.phone}</Text>
           ) : null}
           {profile?.isRunner ? (

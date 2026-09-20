@@ -60,6 +60,10 @@ function pickRunnerForUser(
 export async function registerRunner(
   input: RunnerRegistrationInput,
 ): Promise<string> {
+  const { validatePhone, normalizePhone } = await import("@/lib/auth");
+  const phoneErr = validatePhone(input.phone);
+  if (phoneErr) throw new Error(phoneErr);
+  const phone = normalizePhone(input.phone);
   if (isDemoAuth()) {
     return `demo-runner-${Date.now()}`;
   }
@@ -72,6 +76,7 @@ export async function registerRunner(
   const now = new Date();
   const payload = {
     ...input,
+    phone,
     termsAcceptedAt: now,
     active: true,
     totalEarned: 0,

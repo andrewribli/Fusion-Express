@@ -1,11 +1,11 @@
 import type { OrderStatus } from "@/lib/types";
 
 const STATUS_MESSAGES: Partial<Record<OrderStatus, string>> = {
-  pending: "Order placed — complete payment so a runner can accept it.",
-  paid: "Payment received. Waiting for a runner to accept.",
+  pending: "Order placed. A runner can accept it now.",
+  paid: "Payment received. GraceRun will reimburse the runner.",
   accepted: "A runner has accepted your order!",
   purchased: "Your groceries have been paid for at Fusion and are on the way.",
-  delivered: "Your order has been delivered.",
+  delivered: "Delivered. Pay the receipt total with FPS or PayMe.",
   runner_paid: "GraceRun reimbursed the runner.",
   completed: "Order complete. Thanks for using GraceRun.",
   customer_paid: "Thanks — you marked this order as paid.",

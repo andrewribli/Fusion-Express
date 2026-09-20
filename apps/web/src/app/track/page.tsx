@@ -15,13 +15,11 @@ import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
-import { CustomerPayPanel } from "@/components/CustomerPayPanel";
 import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
 import {
   customerAmountDue,
   groceryAmountDue,
   hasConfirmedGroceryTotal,
-  isCustomerPaymentOpen,
 } from "@/lib/order-status";
 import { OrderProofPhotos } from "@/components/CustomerPayPanel";
 import { notifyOrderStatus as notifyOrderStatusEmail } from "@/lib/notify-email";
@@ -133,11 +131,7 @@ function TrackContent() {
       const res = await fetch("/api/payments/create-intent", {
         method: "POST",
         headers: await paymentAuthHeaders(),
-        body: JSON.stringify({
-          orderId: order.id,
-          amount: order.total,
-          currency: "HKD",
-        }),
+        body: JSON.stringify({ orderId: order.id }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -327,40 +321,44 @@ function TrackContent() {
             )}
 
             {order.status === "pending" && (
-              <div className="mt-3 space-y-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="mt-3 w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
+              >
+                {cancelling ? "Cancelling…" : "Cancel Order"}
+              </button>
+            )}
+
+            {order.status === "delivered" &&
+              !order.paymentReceived &&
+              hasConfirmedGroceryTotal(order) && (
                 <button
                   type="button"
                   disabled={paying}
                   onClick={() => void handleResumePayment()}
-                  className="w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-60"
                 >
-                  {paying ? "Opening Airwallex…" : "Pay now with FPS / PayMe"}
+                  {paying
+                    ? "Opening Airwallex…"
+                    : `Pay now · $${customerAmountDue(order)}`}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
-                >
-                  {cancelling ? "Cancelling…" : "Cancel Order"}
-                </button>
-              </div>
+              )}
+
+            {order.status === "delivered" && !hasConfirmedGroceryTotal(order) && (
+              <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                Waiting for the runner to enter the Fusion receipt total. You pay
+                that exact amount after it is in.
+              </p>
             )}
 
             <OrderProofPhotos order={order} />
           </div>
 
-          {user &&
-            getUserAccountId(user) === order.customerId &&
-            isCustomerPaymentOpen(order.status, order) && (
-              <CustomerPayPanel
-                order={order}
-                userId={user.uid}
-              />
-            )}
-
           {(order.status === "paid" ||
             order.status === "customer_paid" ||
+            order.status === "runner_paid" ||
             order.status === "completed") && (
             <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-800">
               This order is marked paid

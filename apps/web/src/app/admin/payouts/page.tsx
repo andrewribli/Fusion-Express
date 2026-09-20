@@ -186,7 +186,7 @@ export default function AdminPayoutsPage() {
                           <Proof url={order.receiptUrl} label="Receipt" />
                           <Proof url={order.bankStatementUrl} label="Bank statement" />
                         </div>
-                        {order.status === "delivered" && (
+                        {(order.status === "paid" || order.status === "customer_paid") && (
                           <>
                             <label className="mt-3 flex items-start gap-2 text-xs font-semibold text-gray-800">
                               <input

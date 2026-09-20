@@ -8,6 +8,8 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
 import { registerRunner } from "@/lib/runners";
+import { normalizePhone, validatePhone } from "@/lib/auth";
+import { updateUserProfileDoc } from "@/lib/users";
 
 const SECTIONS = [
   {
@@ -90,9 +92,10 @@ const SECTIONS = [
 
 export default function RunnerTermsPage() {
   const router = useRouter();
-  const { user, isReady, setRunnerRegistered, setMode } = useUser();
+  const { user, isReady, setRunnerRegistered, setMode, updateProfile } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [phone, setPhone] = useState(user?.phone ?? "");
 
   useEffect(() => {
     if (!isReady) return;
@@ -121,19 +124,25 @@ export default function RunnerTermsPage() {
       setError("Add your student ID on Profile before becoming a runner.");
       return;
     }
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) {
+      setError(phoneErr);
+      return;
+    }
+    const digits = normalizePhone(phone);
     setError("");
     setLoading(true);
     try {
+      await updateUserProfileDoc(user.uid, { phone: digits });
+      updateProfile({ ...user, phone: digits });
       const paymentId =
         user.runnerPaymentId ||
-        user.phone?.trim() ||
-        user.email ||
-        user.uid;
+        digits;
       const runnerId = await registerRunner({
         uid: user.uid,
         fullName: user.fullName.trim() || "Runner",
         studentId: user.studentId?.trim() || user.uid.slice(0, 8),
-        phone: user.phone?.trim() || paymentId,
+        phone: digits,
         college: user.college ?? "",
         hall: user.hall ?? "",
         paymentMethod: user.runnerPaymentMethod ?? "PayMe",
@@ -186,6 +195,25 @@ export default function RunnerTermsPage() {
               {error}
             </p>
           )}
+          <div className="mt-6">
+            <label htmlFor="runner-phone" className="block text-xs font-medium text-gray-600">
+              Phone number
+            </label>
+            <input
+              id="runner-phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g. 9123 4567"
+              className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Required for runners. We use it for payouts and to reach you about orders.
+            </p>
+          </div>
           </div>
 
           <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white p-4 md:static md:mt-10 md:border-0 md:p-0">

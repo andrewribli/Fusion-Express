@@ -15,10 +15,6 @@ import {
 import { createOrder } from "@fusion-express/shared/orders";
 import { getEstimatedDeliveryTime } from "@fusion-express/shared";
 import { getUnitPrice, lineTotal } from "@fusion-express/shared";
-import {
-  normalizePhone,
-  validatePhone,
-} from "@fusion-express/shared/auth";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
 
@@ -35,7 +31,6 @@ export default function CheckoutScreen() {
     if (profile?.hall && halls.includes(profile.hall)) return profile.hall;
     return halls[0];
   });
-  const [phone, setPhone] = useState(profile?.phone ?? "");
   const [customerName, setCustomerName] = useState(profile?.fullName ?? "");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
@@ -58,25 +53,21 @@ export default function CheckoutScreen() {
     setLoading(true);
     setError("");
     try {
-      const phoneErr = validatePhone(phone);
-      if (phoneErr) throw new Error(phoneErr);
+      if (!customerName.trim()) {
+        throw new Error("Enter your full name");
+      }
       if (!college || !hall) {
         throw new Error("Choose your college and hall");
       }
 
-      const auth = await ensureCheckoutAuth(phone);
-      const digits = normalizePhone(phone);
-      const name =
-        customerName.trim() ||
-        profile?.fullName?.trim() ||
-        (auth.isGuest ? `Guest ${digits.slice(-4)}` : "Mobile customer");
+      const auth = await ensureCheckoutAuth();
+      const name = customerName.trim();
 
       const orderId = await createOrder({
         sessionId,
         customerId: auth.uid,
         customerName: name,
         customerEmail: auth.email || user?.email || undefined,
-        customerPhone: digits,
         items: items.map(({ item, quantity }) => ({
           itemId: item.id,
           name: item.name,
@@ -118,19 +109,6 @@ export default function CheckoutScreen() {
         onChangeText={setCustomerName}
         placeholder="Name for the runner"
         autoCapitalize="words"
-      />
-
-      <Text className="mt-4 font-semibold">Phone</Text>
-      <Text className="mt-1 text-xs text-gray-500">
-        Required so the runner can reach you. Guests are signed in with this
-        number for Firestore order rules.
-      </Text>
-      <TextInput
-        className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
-        value={phone}
-        onChangeText={setPhone}
-        placeholder="e.g. 9123 4567"
-        keyboardType="phone-pad"
       />
 
       <Text className="mt-4 font-semibold">College / zone</Text>
@@ -181,7 +159,7 @@ export default function CheckoutScreen() {
         </Text>
       ) : (
         <Text className="mt-1 text-xs text-gray-500">
-          Not signed in — checkout will create a guest account from your phone.
+          Not signed in — checkout creates a guest session. No phone number needed.
         </Text>
       )}
       {error ? <Text className="mt-2 text-red-600">{error}</Text> : null}

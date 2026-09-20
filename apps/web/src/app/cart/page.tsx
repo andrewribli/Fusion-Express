@@ -207,7 +207,7 @@ export default function CartPage() {
                   disabled={overLimit}
                   onClick={() => {
                     // Guests and signed-in users both finish on checkout so we
-                    // can collect phone / dorm / lobby in one place.
+                    // can collect name / dorm / lobby in one place.
                     router.push("/checkout");
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"

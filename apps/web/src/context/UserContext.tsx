@@ -89,7 +89,7 @@ interface UserContextValue {
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   ensureGuestCheckout: (opts: {
-    phone: string;
+    fullName: string;
     college: string;
     hall: string;
   }) => Promise<UserProfile>;
@@ -385,7 +385,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const fullProfile = await createUserProfile(firebaseUser.uid, {
         fullName: profile.fullName,
         email: profile.email,
-        phone: profile.phone,
         cuhkEmail: profile.cuhkEmail ?? profile.email,
         cuhkVerifiedAt: profile.cuhkVerifiedAt ?? new Date().toISOString(),
         isGuest: false,
@@ -421,65 +420,74 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const ensureGuestCheckout = useCallback(
-    async (opts: { phone: string; college: string; hall: string }) => {
-      const { ensureGuestAuthForPhone, normalizePhone, validatePhone, phoneToEmail } =
-        await import("@/lib/auth");
-      const phoneErr = validatePhone(opts.phone);
-      if (phoneErr) throw new Error(phoneErr);
+    async (opts: { fullName: string; college: string; hall: string }) => {
+      const name = opts.fullName.trim();
+      if (!name) throw new Error("Enter your full name");
       if (!opts.college.trim() || !opts.hall.trim()) {
         throw new Error("Choose your college and hall");
       }
-      const digits = normalizePhone(opts.phone);
 
-      if (user?.phone && normalizePhone(user.phone) === digits && user.uid) {
+      if (user?.uid) {
         const updated: UserProfile = {
           ...user,
-          phone: digits,
-          isGuest: user.isGuest ?? true,
+          fullName: name,
+          college: opts.college,
+          hall: opts.hall,
+          isGuest: user.isGuest ?? false,
           role: normalizeRole(user.role, Boolean(user.isRunner)),
         };
         persist(updated);
-        if (user.uid && firebaseEnabled && !isDemoAuth()) {
-          void updateUserProfileDoc(user.uid, { phone: digits });
+        if (firebaseEnabled && !isDemoAuth()) {
+          void updateUserProfileDoc(user.uid, {
+            fullName: name,
+            college: opts.college,
+            hall: opts.hall,
+          });
         }
         return updated;
       }
 
       if (isDemoAuth() || !firebaseEnabled) {
         const demoProfile: UserProfile = {
-          uid: `guest_${digits}`,
-          email: phoneToEmail(digits),
-          fullName: "Guest",
-          phone: digits,
+          uid: `guest_${Date.now()}`,
+          fullName: name,
           isGuest: true,
           isRunner: false,
           role: "customer",
+          college: opts.college,
+          hall: opts.hall,
           createdAt: new Date().toISOString(),
         };
         persist(demoProfile);
         return demoProfile;
       }
 
-      const auth = await ensureGuestAuthForPhone(digits);
+      const { ensureGuestSession } = await import("@/lib/auth");
+      const auth = await ensureGuestSession();
       const existing = await fetchUserProfile(auth.uid);
       const profile: UserProfile = existing
         ? {
             ...existing,
-            phone: digits,
+            fullName: name,
+            college: opts.college,
+            hall: opts.hall,
             isGuest: existing.isGuest ?? true,
             role: normalizeRole(existing.role, Boolean(existing.isRunner)),
           }
         : await createUserProfile(auth.uid, {
             email: auth.email,
-            fullName: "Guest",
-            phone: digits,
+            fullName: name,
             isGuest: true,
             isRunner: false,
+            college: opts.college,
+            hall: opts.hall,
           });
 
       if (existing) {
         await updateUserProfileDoc(auth.uid, {
-          phone: digits,
+          fullName: name,
+          college: opts.college,
+          hall: opts.hall,
           isGuest: profile.isGuest,
         });
       }
