@@ -33,7 +33,6 @@ interface CartContextValue {
   sessionId: string;
   fusion: ShopCartBucket;
   canteen: ShopCartBucket;
-  /** Active shop for this subtree (defaults to fusion). */
   shopKind: ShopKind;
 }
 
@@ -50,12 +49,10 @@ function loadSessionId(): string {
   return id;
 }
 
-function loadCart(kind: ShopKind): CartItem[] {
-  if (typeof window === "undefined") return [];
+function readCartBucket(kind: ShopKind): CartItem[] {
   try {
     const raw = localStorage.getItem(SHOP_CART_STORAGE_KEY[kind]);
     const parsed = raw ? (JSON.parse(raw) as CartItem[]) : [];
-    // Hard filter: never let the wrong shop's SKUs live in this bucket.
     return parsed.filter((line) => {
       const id = line.item?.id ?? "";
       const isCanteen = id.startsWith("canteen:");
@@ -66,39 +63,75 @@ function loadCart(kind: ShopKind): CartItem[] {
   }
 }
 
+/** Split legacy mixed fusion_cart into two buckets once. */
+function migrateLegacyMixedCart() {
+  try {
+    const legacyRaw = localStorage.getItem(SHOP_CART_STORAGE_KEY.fusion);
+    if (!legacyRaw) return;
+    const legacy = JSON.parse(legacyRaw) as CartItem[];
+    const canteenBits = legacy.filter((line) =>
+      line.item?.id?.startsWith("canteen:"),
+    );
+    if (canteenBits.length === 0) return;
+    const fusionBits = legacy.filter(
+      (line) => !line.item?.id?.startsWith("canteen:"),
+    );
+    const existingCanteen = localStorage.getItem(SHOP_CART_STORAGE_KEY.canteen);
+    if (!existingCanteen || existingCanteen === "[]") {
+      localStorage.setItem(
+        SHOP_CART_STORAGE_KEY.canteen,
+        JSON.stringify(canteenBits),
+      );
+    }
+    localStorage.setItem(
+      SHOP_CART_STORAGE_KEY.fusion,
+      JSON.stringify(fusionBits),
+    );
+  } catch {
+    // ignore
+  }
+}
+
 function useShopCartState(kind: ShopKind, sessionId: string): ShopCartBucket {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setItems(loadCart(kind));
+    if (kind === "canteen") migrateLegacyMixedCart();
+    setItems(readCartBucket(kind));
+    setReady(true);
   }, [kind]);
 
   useEffect(() => {
-    if (!sessionId) return;
+    // Skip the empty pre-hydration write that races Strict Mode remounts.
+    if (!sessionId || !ready) return;
     localStorage.setItem(SHOP_CART_STORAGE_KEY[kind], JSON.stringify(items));
-  }, [items, kind, sessionId]);
+  }, [items, kind, sessionId, ready]);
 
-  const addItem = useCallback((item: MenuItem, quantity = 1) => {
-    const isCanteen = item.id.startsWith("canteen:");
-    if (kind === "canteen" ? !isCanteen : isCanteen) {
-      console.warn(
-        `[cart] refused to add ${item.id} to ${kind} cart — shop kinds must stay separate`,
-      );
-      return;
-    }
-    const addBy = Math.max(1, quantity);
-    setItems((prev) => {
-      const existing = prev.find((c) => c.item.id === item.id);
-      if (existing) {
-        return prev.map((c) =>
-          c.item.id === item.id
-            ? { ...c, quantity: c.quantity + addBy }
-            : c,
+  const addItem = useCallback(
+    (item: MenuItem, quantity = 1) => {
+      const isCanteen = item.id.startsWith("canteen:");
+      if (kind === "canteen" ? !isCanteen : isCanteen) {
+        console.warn(
+          `[cart] refused to add ${item.id} to ${kind} cart — shop kinds must stay separate`,
         );
+        return;
       }
-      return [...prev, { item, quantity: addBy }];
-    });
-  }, [kind]);
+      const addBy = Math.max(1, quantity);
+      setItems((prev) => {
+        const existing = prev.find((c) => c.item.id === item.id);
+        if (existing) {
+          return prev.map((c) =>
+            c.item.id === item.id
+              ? { ...c, quantity: c.quantity + addBy }
+              : c,
+          );
+        }
+        return [...prev, { item, quantity: addBy }];
+      });
+    },
+    [kind],
+  );
 
   const removeItem = useCallback((itemId: string) => {
     setItems((prev) => prev.filter((c) => c.item.id !== itemId));
