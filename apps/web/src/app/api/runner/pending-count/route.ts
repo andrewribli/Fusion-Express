@@ -2,8 +2,21 @@ import { NextResponse } from "next/server";
 import { collectionName } from "@/lib/constants";
 import { adminAccessToken } from "@/lib/firestore-rest";
 
+export type PendingQueueItem = {
+  id: string;
+  college: string;
+  hall: string;
+};
+
+function fieldString(
+  fields: Record<string, { stringValue?: string }> | undefined,
+  key: string,
+): string {
+  return String(fields?.[key]?.stringValue ?? "").trim();
+}
+
 /**
- * Pending-queue count for the header bell.
+ * Pending-queue count + summaries for the header bell dropdown.
  * Uses Firestore REST (not firebase-admin) to avoid the jose ESM crash on Vercel.
  * Public so customers can see available deliveries without runner list rules.
  */
@@ -11,7 +24,7 @@ export async function GET() {
   try {
     const ctx = await adminAccessToken();
     if (!ctx) {
-      return NextResponse.json({ count: 0 });
+      return NextResponse.json({ count: 0, orders: [] as PendingQueueItem[] });
     }
 
     const col = collectionName("orders");
@@ -33,7 +46,7 @@ export async function GET() {
                 value: { stringValue: "pending" },
               },
             },
-            limit: 100,
+            limit: 40,
           },
         }),
       },
@@ -45,29 +58,39 @@ export async function GET() {
         res.status,
         (await res.text()).slice(0, 400),
       );
-      return NextResponse.json({ count: 0 });
+      return NextResponse.json({ count: 0, orders: [] as PendingQueueItem[] });
     }
 
     const rows = (await res.json()) as {
       document?: {
-        fields?: {
-          runnerId?: { stringValue?: string };
-          runnerUid?: { stringValue?: string };
-        };
+        name?: string;
+        fields?: Record<
+          string,
+          { stringValue?: string }
+        >;
       };
     }[];
 
-    const count = rows.filter((row) => {
+    const orders: PendingQueueItem[] = [];
+    for (const row of rows) {
       const fields = row.document?.fields;
-      if (!fields) return false;
-      const runnerId = fields.runnerId?.stringValue?.trim();
-      const runnerUid = fields.runnerUid?.stringValue?.trim();
-      return !runnerId && !runnerUid;
-    }).length;
+      if (!fields) continue;
+      const runnerId = fieldString(fields, "runnerId");
+      const runnerUid = fieldString(fields, "runnerUid");
+      if (runnerId || runnerUid) continue;
+      const name = row.document?.name ?? "";
+      const id = name.split("/").pop()?.trim() || fieldString(fields, "id");
+      if (!id) continue;
+      orders.push({
+        id,
+        college: fieldString(fields, "college"),
+        hall: fieldString(fields, "hall"),
+      });
+    }
 
-    return NextResponse.json({ count });
+    return NextResponse.json({ count: orders.length, orders });
   } catch (err) {
     console.error("[pending-count] failed", err);
-    return NextResponse.json({ count: 0 });
+    return NextResponse.json({ count: 0, orders: [] as PendingQueueItem[] });
   }
 }
