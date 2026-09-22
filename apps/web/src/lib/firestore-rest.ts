@@ -225,6 +225,91 @@ export async function getOrderRest(
   return decodeFields(data.fields);
 }
 
+export type OrderEmailFields = {
+  id: string;
+  customerId: string;
+  customerEmail: string;
+  customerName: string;
+  runnerUid: string;
+  runnerId: string;
+  runnerEmail: string;
+  runnerName: string;
+  runnerPaymentMethod: string;
+  runnerPaymentId: string;
+  status: string;
+  total: number;
+  finalTotal: number;
+  amountPaidByRunner: number;
+  deliveryLocation: string;
+  items: { name: string; quantity: number; price: number }[];
+};
+
+export function orderEmailFieldsFromData(
+  id: string,
+  data: Record<string, unknown>,
+): OrderEmailFields {
+  const itemsRaw = Array.isArray(data.items) ? data.items : [];
+  const items = itemsRaw.map((row) => {
+    const item = (row ?? {}) as Record<string, unknown>;
+    return {
+      name: String(item.name ?? ""),
+      quantity: Number(item.quantity ?? 0) || 0,
+      price: Number(item.price ?? 0) || 0,
+    };
+  });
+  const college = String(data.college ?? "");
+  const hall = String(data.hall ?? "");
+  const lobby = String(data.lobbyPoint ?? "");
+  return {
+    id,
+    customerId: String(data.customerId ?? data.sessionId ?? ""),
+    customerEmail: String(data.customerEmail ?? "")
+      .trim()
+      .toLowerCase(),
+    customerName: String(data.customerName ?? ""),
+    runnerUid: String(data.runnerUid ?? ""),
+    runnerId: String(data.runnerId ?? ""),
+    runnerEmail: String(data.runnerEmail ?? "")
+      .trim()
+      .toLowerCase(),
+    runnerName: String(data.runnerName ?? ""),
+    runnerPaymentMethod: String(data.runnerPaymentMethod ?? ""),
+    runnerPaymentId: String(data.runnerPaymentId ?? ""),
+    status: String(data.status ?? ""),
+    total: Number(data.total ?? 0) || 0,
+    finalTotal: Number(data.finalTotal ?? 0) || 0,
+    amountPaidByRunner: Number(data.amountPaidByRunner ?? 0) || 0,
+    deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    items,
+  };
+}
+
+export async function fetchOrderForEmailRest(
+  orderId: string,
+): Promise<OrderEmailFields | null> {
+  const safeId = orderId.trim();
+  if (!safeId || safeId.length > 128) return null;
+  const data = await getOrderRest(safeId);
+  if (!data) return null;
+  return orderEmailFieldsFromData(safeId, data);
+}
+
+export async function isAdminUidRest(uid: string): Promise<boolean> {
+  const ctx = await adminAccessToken();
+  if (!ctx) return false;
+  const res = await fetch(
+    `${documentsUrl(ctx.project)}/admins/${encodeURIComponent(uid)}`,
+    { headers: { Authorization: `Bearer ${ctx.token}` } },
+  );
+  if (res.status === 404 || res.status === 403) return false;
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("isAdminUidRest failed", res.status, text.slice(0, 400));
+    throw new RestAuthError("Could not verify admin access.", 502);
+  }
+  return true;
+}
+
 export async function patchOrderRest(
   orderId: string,
   updates: Record<string, unknown>,
@@ -260,6 +345,119 @@ export async function patchOrderRest(
     console.error("patchOrderRest failed", res.status, text.slice(0, 400));
     throw new Error("Could not update order.");
   }
+}
+
+export type BroadcastGroup =
+  | "everyone"
+  | "new_users"
+  | "runners"
+  | "long_term";
+
+export type BroadcastRecipient = {
+  email: string;
+  name: string;
+  isRunner: boolean;
+  createdAt: Date | null;
+};
+
+/** Verify the caller and that `/admins/{uid}` exists. No Admin SDK. */
+export async function requireAdminRest(request: Request): Promise<RestAuthed> {
+  const auth = await requireAuthRest(request);
+  const ctx = await adminAccessToken();
+  if (!ctx) {
+    throw new RestAuthError("Could not verify admin access.", 503);
+  }
+  const res = await fetch(
+    `${documentsUrl(ctx.project)}/admins/${encodeURIComponent(auth.uid)}`,
+    { headers: { Authorization: `Bearer ${ctx.token}` } },
+  );
+  if (res.status === 404) {
+    throw new RestAuthError("Admin access only.", 403);
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("requireAdminRest failed", res.status, text.slice(0, 400));
+    throw new RestAuthError("Could not verify admin access.", 502);
+  }
+  return auth;
+}
+
+export async function listBroadcastRecipientsRest(): Promise<
+  BroadcastRecipient[]
+> {
+  const ctx = await adminAccessToken();
+  if (!ctx) {
+    throw new RestAuthError("Could not load users from Firestore.", 503);
+  }
+  const col = collectionName("users");
+  const out: BroadcastRecipient[] = [];
+  const seen = new Set<string>();
+  let pageToken = "";
+
+  for (let i = 0; i < 40; i++) {
+    const url = new URL(`${documentsUrl(ctx.project)}/${col}`);
+    url.searchParams.set("pageSize", "300");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${ctx.token}` },
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(
+        "listBroadcastRecipientsRest failed",
+        res.status,
+        text.slice(0, 400),
+      );
+      throw new RestAuthError("Could not load users from Firestore.", 502);
+    }
+    const data = (await res.json()) as {
+      documents?: { fields?: Record<string, FirestoreValue> }[];
+      nextPageToken?: string;
+    };
+    for (const doc of data.documents ?? []) {
+      const fields = decodeFields(doc.fields);
+      const email = String(fields.email ?? fields.cuhkEmail ?? "")
+        .trim()
+        .toLowerCase();
+      if (!email.includes("@") || seen.has(email)) continue;
+      seen.add(email);
+      const created = fields.createdAt;
+      out.push({
+        email,
+        name: String(fields.fullName ?? fields.name ?? "").trim(),
+        isRunner: Boolean(fields.isRunner) || Boolean(fields.runnerId),
+        createdAt: created instanceof Date ? created : null,
+      });
+    }
+    if (!data.nextPageToken) break;
+    pageToken = data.nextPageToken;
+  }
+
+  return out;
+}
+
+export function filterBroadcastRecipients(
+  recipients: BroadcastRecipient[],
+  group: BroadcastGroup,
+  now = new Date(),
+): BroadcastRecipient[] {
+  const msDay = 24 * 60 * 60 * 1000;
+  if (group === "everyone") {
+    return recipients.filter((r) => !r.email.endsWith("@fusion-express.app"));
+  }
+  if (group === "runners") {
+    return recipients.filter((r) => r.isRunner);
+  }
+  if (group === "new_users") {
+    const cutoff = now.getTime() - 7 * msDay;
+    return recipients.filter(
+      (r) => r.createdAt != null && r.createdAt.getTime() >= cutoff,
+    );
+  }
+  const cutoff = now.getTime() - 30 * msDay;
+  return recipients.filter(
+    (r) => r.createdAt != null && r.createdAt.getTime() < cutoff,
+  );
 }
 
 export async function listUserAlertRecipientsRest(): Promise<

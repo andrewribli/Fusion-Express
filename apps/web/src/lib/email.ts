@@ -345,14 +345,22 @@ function formatHk(amount: number): string {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
-const DEFAULT_ADMIN_OPS_EMAIL = "1155233599@link.cuhk.edu.hk";
+const DEFAULT_ADMIN_OPS_EMAILS = [
+  "andrew.ribli@gmail.com",
+  "1155233599@link.cuhk.edu.hk",
+];
 
 export function adminOpsEmails(): string[] {
   const extras = (process.env.OWNER_ALERT_EMAIL ?? "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
-  return [...new Set([DEFAULT_ADMIN_OPS_EMAIL.toLowerCase(), ...extras])];
+  return [
+    ...new Set([
+      ...DEFAULT_ADMIN_OPS_EMAILS.map((email) => email.toLowerCase()),
+      ...extras,
+    ]),
+  ];
 }
 
 async function sendFromHello(opts: {

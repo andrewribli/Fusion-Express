@@ -19,13 +19,13 @@ import {
   acceptOrder,
   awaitingCustomerPriceApproval,
   fetchDeliveredOrdersByRunner,
-  fetchPendingOrders,
   fetchRunnerOrders,
   markDeliveredWithTotal,
   markPurchased,
   OrderAlreadyTakenError,
   saveRunnerDeliveryProgress,
   SelfPickupError,
+  subscribePendingOrders,
   updateRunnerLocation,
   uploadBankStatementPhoto,
   uploadDeliveryPhoto,
@@ -385,15 +385,13 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
 
       // Runner order queries filter on the auth uid, not the /runners doc id.
       const runnerUid = user.uid;
-      const [p, a, d, r] = await Promise.all([
-        fetchPendingOrders(getUserAccountId(user)),
+      const [a, d, r] = await Promise.all([
         runnerUid ? fetchRunnerOrders(runnerUid) : Promise.resolve([]),
         runnerUid
           ? fetchDeliveredOrdersByRunner(runnerUid)
           : Promise.resolve([]),
         runnerId ? fetchRunner(runnerId) : Promise.resolve(null),
       ]);
-      setPending(p);
       setActive(
         a.map((order) => {
           const local = progressRef.current[order.id];
@@ -454,6 +452,29 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       cancelled = true;
     };
   }, [user, router, refresh, setRunnerRegistered]);
+
+  useEffect(() => {
+    if (!user?.isRunner) {
+      setPending([]);
+      return;
+    }
+    return subscribePendingOrders(
+      (orders) => {
+        setPending(orders);
+        if (initialLoad.current) {
+          setLoading(false);
+          initialLoad.current = false;
+        }
+      },
+      {
+        excludeCustomerId: getUserAccountId(user),
+        onError: (err) => {
+          setLoadError(err.message || "Could not load available orders.");
+          setPending([]);
+        },
+      },
+    );
+  }, [user]);
 
   const activeIds = openDeliveries.map((o) => o.id).join(",");
   useEffect(() => {

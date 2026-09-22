@@ -34,16 +34,18 @@ export function MenuCartSummary() {
         className="shop-surface overflow-hidden rounded-2xl border border-gray-100 shadow-lg"
         style={{ backgroundColor: "#ffffff" }}
       >
-        <div className="flex items-center justify-between bg-[#ED1C24] px-4 py-3 text-white">
-          <h2 className="text-sm font-bold">Your order</h2>
-          <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold">
+        <div className="border-b border-gray-100 px-4 py-3">
+          <h2 className="text-sm font-bold text-gray-900">Your cart</h2>
+          <p className="text-xs text-gray-500">
             {itemCount} item{itemCount === 1 ? "" : "s"}
-          </span>
+          </p>
         </div>
 
         <div className="space-y-3 p-4">
           {items.length === 0 ? (
-            <p className="text-sm text-gray-500">Your cart is empty.</p>
+            <p className="py-6 text-center text-sm text-gray-500">
+              Start adding items to your cart.
+            </p>
           ) : (
             <ul className="max-h-48 space-y-2 overflow-y-auto">
               {items.map(({ item, quantity }) => (
@@ -94,7 +96,7 @@ export function MenuCartSummary() {
               overLimit ? "text-[#ED1C24]" : "text-gray-900"
             }`}
           >
-            <span>Total w/ delivery</span>
+            <span>Total (incl. fees)</span>
             <span>${total}</span>
           </div>
           <p className="text-[10px] leading-snug text-gray-500">
@@ -107,7 +109,7 @@ export function MenuCartSummary() {
             onClick={goCheckout}
             className="block w-full rounded-xl bg-[#ED1C24] py-3 text-center text-sm font-bold text-white disabled:bg-gray-100 disabled:text-gray-400"
           >
-            {user ? "Continue to checkout" : "Checkout — no account needed"}
+            Go to checkout
           </button>
           <p className="text-[10px] leading-snug text-gray-500">
             Pay after delivery. Completing an order agrees to our Terms.

@@ -150,15 +150,18 @@ export default function AdminUsersPage() {
                   ? "Loading…"
                   : `${users.length} account${users.length === 1 ? "" : "s"}, sorted by name`}
               </p>
-              <p className="mt-2 text-sm">
-                <Link href="/admin/payouts" className="font-medium text-[#ED1C24] underline">
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  href="/admin/messaging"
+                  className="inline-flex min-h-11 items-center rounded-xl bg-[#ED1C24] px-4 py-2.5 text-sm font-bold text-white"
+                >
+                  Send email
+                </Link>
+                <Link href="/admin/payouts" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-800">
                   Runner payouts
                 </Link>
-                {" · "}
-                <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
-                  Messaging
-                </Link>
-                {" · "}
+              </div>
+              <p className="mt-3 text-sm">
                 <Link href="/admin/refunds" className="font-medium text-[#ED1C24] underline">
                   Pending Fusion price refunds
                 </Link>

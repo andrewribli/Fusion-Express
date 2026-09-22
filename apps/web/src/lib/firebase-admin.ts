@@ -245,7 +245,7 @@ export type AlertRecipient = {
   isRunner: boolean;
 };
 
-export type BroadcastGroup = "new_users" | "runners" | "long_term";
+export type BroadcastGroup = "everyone" | "new_users" | "runners" | "long_term";
 
 export type BroadcastRecipient = {
   email: string;
@@ -748,6 +748,9 @@ export function filterBroadcastRecipients(
   now = new Date(),
 ): BroadcastRecipient[] {
   const msDay = 24 * 60 * 60 * 1000;
+  if (group === "everyone") {
+    return recipients.filter((r) => !r.email.endsWith("@fusion-express.app"));
+  }
   if (group === "runners") {
     return recipients.filter((r) => r.isRunner);
   }

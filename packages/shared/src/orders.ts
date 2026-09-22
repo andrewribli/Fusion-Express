@@ -37,6 +37,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   runTransaction,
@@ -401,7 +402,10 @@ export async function fetchPendingOrders(
           limit(ORDER_PAGE_SIZE),
         ),
       );
-      return filterOwnOrders(parseSnapshotDocs(snap.docs), excludeCustomerId);
+      return filterOwnOrders(
+        parseSnapshotDocs(snap.docs).filter((o) => !o.runnerId),
+        excludeCustomerId,
+      );
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
       throw err instanceof Error
@@ -410,7 +414,70 @@ export async function fetchPendingOrders(
     }
   }
 
-  return filterOwnOrders(getMockPendingOrders(), excludeCustomerId);
+  return filterOwnOrders(
+    getMockPendingOrders().filter((o) => !o.runnerId),
+    excludeCustomerId,
+  );
+}
+
+/**
+ * Live pending job-board feed for runners. Matches the same scoped query as
+ * `fetchPendingOrders` (rules require `status == 'pending'` for list). Unassigned
+ * orders are filtered client-side (`runnerId` null/missing) so we stay within
+ * the existing composite index.
+ */
+export function subscribePendingOrders(
+  onOrders: (orders: Order[]) => void,
+  options?: {
+    excludeCustomerId?: string;
+    onError?: (err: Error) => void;
+  },
+): () => void {
+  const emit = (orders: Order[]) => {
+    onOrders(
+      filterOwnOrders(
+        orders.filter((o) => !o.runnerId),
+        options?.excludeCustomerId,
+      ),
+    );
+  };
+
+  if (isFirebaseConfigured()) {
+    try {
+      const q = query(
+        collection(getDb(), ORDERS_COLLECTION),
+        where("status", "==", "pending"),
+        orderBy("createdAt", "desc"),
+        limit(ORDER_PAGE_SIZE),
+      );
+      return onSnapshot(
+        q,
+        (snap) => {
+          emit(parseSnapshotDocs(snap.docs));
+        },
+        (err) => {
+          console.error("subscribePendingOrders Firestore failed", err);
+          options?.onError?.(
+            err instanceof Error ? err : new Error(String(err)),
+          );
+          onOrders([]);
+        },
+      );
+    } catch (err) {
+      console.error("subscribePendingOrders setup failed", err);
+      options?.onError?.(
+        err instanceof Error ? err : new Error(String(err)),
+      );
+      onOrders([]);
+      return () => undefined;
+    }
+  }
+
+  emit(getMockPendingOrders());
+  const interval = setInterval(() => {
+    emit(getMockPendingOrders());
+  }, 3000);
+  return () => clearInterval(interval);
 }
 
 /** Order history for the signed-in customer, keyed on their auth uid. */

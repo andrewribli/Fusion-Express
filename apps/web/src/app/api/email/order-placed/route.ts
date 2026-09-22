@@ -7,12 +7,15 @@ import {
   sendRunnerNotification,
 } from "@/lib/email";
 import {
-  AdminAuthError,
-  callerIsAdmin,
-  fetchOrderForEmail,
-  listUserAlertRecipients,
-  requireAuthFromRequest,
-} from "@/lib/firebase-admin";
+  fetchOrderForEmailRest,
+  isAdminUidRest,
+  listUserAlertRecipientsRest,
+  requireAuthRest,
+  RestAuthError,
+} from "@/lib/firestore-rest";
+import { notifyOwnerWhatsAppNewOrder } from "@/lib/whatsapp";
+
+export const runtime = "nodejs";
 
 async function mapPool<T>(
   items: T[],
@@ -40,9 +43,9 @@ async function mapPool<T>(
 export async function POST(request: Request) {
   let auth;
   try {
-    auth = await requireAuthFromRequest(request);
+    auth = await requireAuthRest(request);
   } catch (err) {
-    if (err instanceof AdminAuthError) {
+    if (err instanceof RestAuthError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -64,15 +67,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order = await fetchOrderForEmail(orderId, auth.idToken);
+    const order = await fetchOrderForEmailRest(orderId);
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     const isCustomer = order.customerId === auth.uid;
-    const isAdminUser = !isCustomer
-      ? await callerIsAdmin(auth.uid, auth.idToken)
-      : false;
+    const isAdminUser = !isCustomer ? await isAdminUidRest(auth.uid) : false;
     if (!isCustomer && !isAdminUser) {
       return NextResponse.json(
         { error: "Not allowed for this order." },
@@ -96,13 +97,28 @@ export async function POST(request: Request) {
       console.error("admin new-order notice failed after retry", err);
     }
 
+    try {
+      const wa = await notifyOwnerWhatsAppNewOrder({
+        customerName: order.customerName,
+        items,
+        deliveryLocation: order.deliveryLocation,
+        total,
+        orderId: order.id,
+      });
+      if (!wa.sent && wa.skipped) {
+        console.info("owner WhatsApp skipped:", wa.skipped);
+      }
+    } catch (err) {
+      console.error("owner WhatsApp new-order failed", err);
+    }
+
     if (customerEmail) {
       await sendOrderConfirmation(customerEmail, order.id, items, total);
     }
 
     let alerted = 0;
     if (!body.skipRosterAlerts) {
-      const recipients = await listUserAlertRecipients();
+      const recipients = await listUserAlertRecipientsRest();
       const envRunners = (process.env.RUNNER_ALERT_EMAIL ?? "")
         .split(",")
         .map((email) => email.trim().toLowerCase())
@@ -145,7 +161,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, alerted });
   } catch (err) {
-    if (err instanceof AdminAuthError) {
+    if (err instanceof RestAuthError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error("order-placed email failed", err);
