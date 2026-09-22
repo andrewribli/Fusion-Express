@@ -1,0 +1,41 @@
+import {
+  UC_MEAL_PERIODS,
+  type MealPeriod,
+} from "@/data/canteen/uc-menu";
+
+const BF_OPEN_MIN = 7 * 60 + 30;
+const BF_CLOSE_MIN = 21 * 60;
+
+function hktMinutes(now = new Date()): number {
+  const hkt = new Date(
+    now.toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" }),
+  );
+  return hkt.getHours() * 60 + hkt.getMinutes();
+}
+
+export function isBfCanteenOpen(now = new Date()): boolean {
+  const m = hktMinutes(now);
+  return m >= BF_OPEN_MIN && m < BF_CLOSE_MIN;
+}
+
+export function getCurrentUcPeriod(now = new Date()): MealPeriod | null {
+  const m = hktMinutes(now);
+  for (const [id, slot] of Object.entries(UC_MEAL_PERIODS) as Array<
+    [MealPeriod, (typeof UC_MEAL_PERIODS)[MealPeriod]]
+  >) {
+    if (m >= slot.startMin && m < slot.endMin) return id;
+  }
+  return null;
+}
+
+export function getNextUcOpeningLabel(now = new Date()): string {
+  const m = hktMinutes(now);
+  const order: MealPeriod[] = ["breakfast", "lunch", "tea", "dinner"];
+  for (const id of order) {
+    const slot = UC_MEAL_PERIODS[id];
+    if (m < slot.startMin) {
+      return `${slot.start} (${slot.label})`;
+    }
+  }
+  return "9:00 AM tomorrow (Breakfast)";
+}

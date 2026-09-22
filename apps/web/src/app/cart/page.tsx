@@ -18,23 +18,21 @@ import {
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { lineTotal } from "@/lib/pricing";
 import { formatMenuPrice } from "@/lib/types";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
+import { isCanteenCart } from "@/lib/canteen/cart";
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const weightKg = cartTotalWeightKg(items);
-  const fee = calculateDeliveryFee({
-    weightKg,
-    college: "",
-  });
+  const fee = resolveOrderDeliveryFee(items, "");
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
+  const shopHref = isCanteenCart(items) ? "/canteen" : "/fusion";
 
   function handleCancelOrder() {
     clearCart();

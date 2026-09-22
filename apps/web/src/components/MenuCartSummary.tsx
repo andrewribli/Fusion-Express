@@ -5,7 +5,7 @@ import { CustomItemCard } from "@/components/CustomItemCard";
 import { PreviousOrderChecklist } from "@/components/PreviousOrderChecklist";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
@@ -15,10 +15,7 @@ export function MenuCartSummary() {
   const { user } = useUser();
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
 
-  const fee = calculateDeliveryFee({
-    weightKg: cartTotalWeightKg(items),
-    college: "",
-  });
+  const fee = resolveOrderDeliveryFee(items, "");
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
 

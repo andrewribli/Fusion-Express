@@ -24,7 +24,7 @@ export interface NavTab {
 }
 
 export const CUSTOMER_TABS: NavTab[] = [
-  { href: "/", label: "Home", iconId: "home", match: ["/", "/home"] },
+  { href: "/", label: "Home", iconId: "home", match: ["/", "/home", "/fusion", "/canteen"] },
   { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
     href: "#runner",
@@ -79,6 +79,8 @@ export function isShopPath(pathname: string): boolean {
   return (
     pathname === "/" ||
     pathname === "/home" ||
+    pathname === "/fusion" ||
+    pathname.startsWith("/canteen") ||
     pathname.startsWith("/browse") ||
     pathname.startsWith("/menu") ||
     pathname.startsWith("/cart") ||

@@ -2,17 +2,14 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 
 export function CartBar() {
   const { itemCount, subtotal, items } = useCart();
 
   if (itemCount === 0) return null;
 
-  const fee = calculateDeliveryFee({
-    weightKg: cartTotalWeightKg(items),
-    college: "",
-  });
+  const fee = resolveOrderDeliveryFee(items, "");
   const total = subtotal + fee.deliveryFee;
 
   return (

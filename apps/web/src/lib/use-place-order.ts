@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import {
   getEstimatedDeliveryTime,
   isOverOrderLimit,
@@ -74,10 +74,7 @@ export function usePlaceOrder() {
           setError(ORDER_LIMIT_MESSAGE);
           return;
         }
-        const fee = calculateDeliveryFee({
-          weightKg: cartTotalWeightKg(items),
-          college: opts.college,
-        });
+        const fee = resolveOrderDeliveryFee(items, opts.college);
         // Reject negative tips; clamp rather than blocking submit.
         const tipAmount = Math.max(0, opts.tip ?? 0);
         const total = orderSubtotal + fee.deliveryFee + tipAmount;

@@ -1,10 +1,10 @@
 "use client";
 
-import { CampusSelector } from "@/components/CampusSelector";
+import { ShopHome } from "@/components/ShopHome";
 import { BootScreen } from "@/components/BootScreen";
 import { useUser } from "@/context/UserContext";
 
-export default function RootPage() {
+export default function FusionPage() {
   const { isReady, bootError, user } = useUser();
 
   if (!isReady) {
@@ -14,5 +14,5 @@ export default function RootPage() {
     return <BootScreen error={bootError} />;
   }
 
-  return <CampusSelector />;
+  return <ShopHome />;
 }

@@ -24,7 +24,7 @@ import {
 } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { usePlaceOrder } from "@/lib/use-place-order";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 
 export default function CheckoutPage() {
@@ -40,10 +40,9 @@ export default function CheckoutPage() {
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
-  const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college }),
-    [weightKg, college],
+    () => resolveOrderDeliveryFee(items, college),
+    [items, college],
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);

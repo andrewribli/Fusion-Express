@@ -2,19 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 
 export function OrderActionBar() {
   const router = useRouter();
   const { itemCount, subtotal, items } = useCart();
-  const fee = calculateDeliveryFee({
-    weightKg: cartTotalWeightKg(items),
-    // Fee is finalized at checkout from the address entered there — do not
-    // use a stale profile college for guests / profile-refactored accounts.
-    college: "",
-  });
+  const fee = resolveOrderDeliveryFee(items, "");
   const overLimit = isOverOrderLimit(subtotal);
 
   if (itemCount === 0) return null;
