@@ -228,25 +228,49 @@ function TrackContent() {
             </ul>
 
             <div className="mt-2 space-y-1.5 border-t border-gray-100 pt-2 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>Estimated Subtotal</span>
-                <span>${order.subtotal}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-gray-600">
-                  Exact subtotal
-                  <span className="mt-0.5 block text-[11px] font-normal text-gray-400">
-                    To be confirmed by runner
-                  </span>
-                </span>
-                {hasConfirmedGroceryTotal(order) ? (
-                  <span className="shrink-0 font-medium text-gray-900">
-                    ${groceryAmountDue(order)}
-                  </span>
-                ) : (
-                  <span className="shrink-0 text-gray-400">Pending</span>
-                )}
-              </div>
+              {(() => {
+                const isCanteen =
+                  order.orderChannel === "canteen" ||
+                  order.items.some((i) => i.itemId.startsWith("canteen:"));
+                const foodBeforeDiscount =
+                  order.discountApplied && (order.discountAmount ?? 0) > 0
+                    ? (order.estimatedSubtotal ??
+                        order.subtotal + (order.discountAmount ?? 0))
+                    : order.subtotal;
+                return (
+                  <>
+                    <div className="flex justify-between text-gray-600">
+                      <span>{isCanteen ? "Food subtotal" : "Estimated Subtotal"}</span>
+                      <span>${foodBeforeDiscount}</span>
+                    </div>
+                    {order.discountApplied && (order.discountAmount ?? 0) > 0 && (
+                      <div className="flex justify-between font-medium text-emerald-700">
+                        <span>College Discount (10%)</span>
+                        <span>
+                          −HK${Number(order.discountAmount).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    {!isCanteen && (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-gray-600">
+                          Exact subtotal
+                          <span className="mt-0.5 block text-[11px] font-normal text-gray-400">
+                            To be confirmed by runner
+                          </span>
+                        </span>
+                        {hasConfirmedGroceryTotal(order) ? (
+                          <span className="shrink-0 font-medium text-gray-900">
+                            ${groceryAmountDue(order)}
+                          </span>
+                        ) : (
+                          <span className="shrink-0 text-gray-400">Pending</span>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               <div className="flex justify-between text-gray-600">
                 <span>Delivery</span>
                 <span>${order.deliveryFee}</span>

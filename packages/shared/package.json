@@ -17,6 +17,7 @@
     "./firebase": "./src/firebase.ts",
     "./auth": "./src/auth.ts",
     "./cuhk-email": "./src/cuhk-email.ts",
+    "./canteen-college": "./src/canteen-college.ts",
     "./types": "./src/types.ts",
     "./roles": "./src/roles.ts",
     "./locations": "./src/locations.ts",

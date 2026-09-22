@@ -398,6 +398,38 @@ export async function deleteAdminDocumentRest(
   }
 }
 
+/** Create a document with an auto-generated id via Admin REST. Returns the id. */
+export async function createAdminDocumentRest(
+  col: string,
+  data: Record<string, unknown>,
+): Promise<string> {
+  const ctx = await adminAccessToken();
+  if (!ctx) throw new Error("Firestore unavailable (missing service account).");
+  const fields: Record<string, FirestoreValue> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) continue;
+    fields[key] = encodeValue(value);
+  }
+  const res = await fetch(`${documentsUrl(ctx.project)}/${col}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${ctx.token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("createAdminDocumentRest failed", res.status, text.slice(0, 400));
+    throw new Error(`Could not create ${col} document.`);
+  }
+  const body = (await res.json()) as { name?: string };
+  const name = body.name ?? "";
+  const id = name.split("/").pop();
+  if (!id) throw new Error(`Could not create ${col} document.`);
+  return id;
+}
+
 export type BroadcastGroup =
   | "everyone"
   | "new_users"

@@ -132,6 +132,9 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
     orderChannel,
+    canteenRestaurantId: data.canteenRestaurantId
+      ? String(data.canteenRestaurantId)
+      : undefined,
     items,
     status: normalizeOrderStatus(String(data.status ?? "pending")),
     college: String(data.college ?? ""),
@@ -149,6 +152,12 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     deliveryFee: Number(data.deliveryFee ?? 10),
     tip: data.tip != null ? Number(data.tip) : undefined,
     total: Number(data.total ?? 0),
+    discountApplied:
+      data.discountApplied != null ? Boolean(data.discountApplied) : undefined,
+    discountAmount:
+      data.discountAmount != null ? Number(data.discountAmount) : undefined,
+    runnerCollege: data.runnerCollege ? String(data.runnerCollege) : undefined,
+    canteenCollege: data.canteenCollege ? String(data.canteenCollege) : undefined,
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
     paymentProvider: data.paymentProvider
@@ -586,6 +595,8 @@ export async function fetchDeliveredOrdersByRunner(
  * @param runnerId doc id in /runners
  * @param runnerUid auth uid of the runner; stored so security rules and the
  *   runner's own order queries can match on request.auth.uid
+ * @param payment optional PayMe/FPS + email denormalized onto the order
+ * @param discount optional same-college canteen discount applied at accept
  */
 export async function acceptOrder(
   orderId: string,
@@ -593,6 +604,14 @@ export async function acceptOrder(
   runnerName: string,
   runnerUid: string,
   payment?: { method: "PayMe" | "FPS"; id: string; email?: string },
+  discount?: {
+    discountApplied: boolean;
+    discountAmount: number;
+    runnerCollege?: string;
+    canteenCollege?: string;
+    subtotal: number;
+    total: number;
+  },
 ): Promise<void> {
   const now = new Date();
   const paymentFields = omitUndefined({
@@ -600,6 +619,16 @@ export async function acceptOrder(
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
   });
+  const discountFields = discount
+    ? omitUndefined({
+        discountApplied: discount.discountApplied,
+        discountAmount: discount.discountAmount,
+        runnerCollege: discount.runnerCollege,
+        canteenCollege: discount.canteenCollege,
+        subtotal: discount.subtotal,
+        total: discount.total,
+      })
+    : {};
   if (isFirebaseConfigured()) {
     const db = getDb();
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
@@ -625,6 +654,7 @@ export async function acceptOrder(
         ),
         updatedAt: Timestamp.fromDate(now),
         ...paymentFields,
+        ...discountFields,
       });
     });
     return;
@@ -646,6 +676,16 @@ export async function acceptOrder(
     runnerPaymentMethod: payment?.method,
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
+    ...(discount
+      ? {
+          discountApplied: discount.discountApplied,
+          discountAmount: discount.discountAmount,
+          runnerCollege: discount.runnerCollege,
+          canteenCollege: discount.canteenCollege,
+          subtotal: discount.subtotal,
+          total: discount.total,
+        }
+      : {}),
   });
 }
 
@@ -667,6 +707,12 @@ export async function updateOrderStatus(
       | "runnerPaymentMethod"
       | "runnerPaymentId"
       | "runnerEmail"
+      | "discountApplied"
+      | "discountAmount"
+      | "runnerCollege"
+      | "canteenCollege"
+      | "subtotal"
+      | "total"
     >
   >,
 ): Promise<void> {
@@ -726,6 +772,16 @@ export async function updateOrderStatus(
       if (extras?.runnerPaymentId) {
         updates.runnerPaymentId = extras.runnerPaymentId;
       }
+      if (extras?.discountApplied != null) {
+        updates.discountApplied = extras.discountApplied;
+      }
+      if (extras?.discountAmount != null) {
+        updates.discountAmount = extras.discountAmount;
+      }
+      if (extras?.runnerCollege) updates.runnerCollege = extras.runnerCollege;
+      if (extras?.canteenCollege) updates.canteenCollege = extras.canteenCollege;
+      if (extras?.subtotal != null) updates.subtotal = extras.subtotal;
+      if (extras?.total != null) updates.total = extras.total;
       await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined(updates));
       return;
     } catch (err) {
@@ -772,6 +828,16 @@ export async function updateOrderStatus(
       order.runnerPaymentMethod = extras.runnerPaymentMethod;
     }
     if (extras?.runnerPaymentId) order.runnerPaymentId = extras.runnerPaymentId;
+    if (extras?.discountApplied != null) {
+      order.discountApplied = extras.discountApplied;
+    }
+    if (extras?.discountAmount != null) {
+      order.discountAmount = extras.discountAmount;
+    }
+    if (extras?.runnerCollege) order.runnerCollege = extras.runnerCollege;
+    if (extras?.canteenCollege) order.canteenCollege = extras.canteenCollege;
+    if (extras?.subtotal != null) order.subtotal = extras.subtotal;
+    if (extras?.total != null) order.total = extras.total;
   }
 }
 
@@ -1110,6 +1176,28 @@ export async function markPurchased(
   await updateOrderStatus(orderId, "purchased", {
     receiptUrl: opts.receiptUrl,
     bankStatementUrl: opts.bankStatementUrl,
+  });
+}
+
+/** Canteen pickup: no Fusion receipt — just mark purchased / picked up. */
+export async function markCanteenPickedUp(orderId: string): Promise<void> {
+  await updateOrderStatus(orderId, "purchased");
+}
+
+/** Canteen deliver: fixed menu total (already discounted) + optional lobby photo. */
+export async function markCanteenDelivered(
+  orderId: string,
+  opts: { finalTotal: number; deliveryPhotoUrl?: string },
+): Promise<void> {
+  if (!(opts.finalTotal > 0)) {
+    throw new Error("Enter the canteen order total.");
+  }
+  const amount = round2(opts.finalTotal);
+  await updateOrderStatus(orderId, "delivered", {
+    finalTotal: amount,
+    amountPaidByRunner: amount,
+    deliveryPhotoUrl: opts.deliveryPhotoUrl,
+    runnerVerified: true,
   });
 }
 

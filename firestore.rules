@@ -103,6 +103,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Canteen / cafe catalog (seeded via Admin SDK). Public read for browse.
+    match /canteens/{canteenId} {
+      allow get, list: if true;
+      allow write: if false;
+
+      match /items/{itemId} {
+        allow get, list: if true;
+        allow write: if false;
+      }
+    }
+
     // -------------------------------------------------------------- usernames
 
     // Sign-in resolves a username to an email before the user is authenticated,
@@ -314,7 +325,9 @@ service cloud.firestore {
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
           'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
-          'runnerPaymentId', 'runnerEmail'
+          'runnerPaymentId', 'runnerEmail',
+          'discountApplied', 'discountAmount', 'runnerCollege',
+          'canteenCollege', 'subtotal', 'total'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
         && request.resource.data.runnerUid == uid();
@@ -330,7 +343,8 @@ service cloud.firestore {
           'priceAdjustmentStatus', 'refundAmount', 'subtotal', 'total',
           'tillPricesSubmittedAt', 'runnerDeadline', 'customerDeadline',
           'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
-          'adminMissedNotifiedAt'
+          'adminMissedNotifiedAt',
+          'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege'
         ])
         && !(request.resource.data.status in ['pending', 'paid']);
 
@@ -357,6 +371,18 @@ service cloud.firestore {
       allow list: if isAdmin();
       allow create: if signedIn() && request.resource.data.customerId == uid();
       allow update: if signedIn() && resource.data.customerId == uid();
+      allow delete: if false;
+    }
+
+    // Customer in-app bell. Created server-side (Admin REST); customers mark read.
+    match /notifications/{notifId} {
+      allow get: if signedIn() && resource.data.userId == uid();
+      allow list: if signedIn() && resource.data.userId == uid();
+      allow create: if false;
+      allow update: if signedIn()
+        && resource.data.userId == uid()
+        && changedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
       allow delete: if false;
     }
 
@@ -527,6 +553,10 @@ service cloud.firestore {
     }
 
     match /orders_test/{orderId} {
+      allow read, write: if signedIn();
+    }
+
+    match /notifications_test/{notifId} {
       allow read, write: if signedIn();
     }
 

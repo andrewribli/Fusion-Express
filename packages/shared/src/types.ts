@@ -198,6 +198,8 @@ export interface Order {
   customerPhone?: string;
   /** Storefront channel that placed the order (Fusion grocery vs campus canteen). */
   orderChannel?: OrderChannel;
+  /** Canteen restaurant slug (e.g. uc-canteen) when orderChannel is canteen. */
+  canteenRestaurantId?: string;
   items: OrderItem[];
   status: OrderStatus;
   college: string;
@@ -212,6 +214,14 @@ export interface Order {
   deliveryFee: number;
   tip?: number;
   total: number;
+  /** True when a same-college runner unlocked the 10% canteen food discount. */
+  discountApplied?: boolean;
+  /** HK$ amount subtracted from canteen food subtotal (not delivery). */
+  discountAmount?: number;
+  /** Normalized college id of the assigned runner (e.g. UC). */
+  runnerCollege?: string;
+  /** Normalized college id of the canteen (e.g. UC). */
+  canteenCollege?: string;
   paymentReceived: boolean;
   paymentMethod?: "PayMe" | "FPS";
   /** Online checkout provider (e.g. airwallex). */

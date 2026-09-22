@@ -11,7 +11,16 @@ import {
   MENU as BF_MENU,
   type MenuCategory,
 } from "@/data/canteen/bf-menu";
-import { getRestaurant, RESTAURANTS } from "@/data/canteen/restaurants";
+import {
+  getRestaurant,
+  RESTAURANTS,
+  type Restaurant,
+} from "@/data/canteen/restaurants";
+import {
+  getSimpleMenu,
+  isSimpleMenuRestaurant,
+  type SimpleMenuItem,
+} from "@/data/canteen/simple-menu";
 import {
   UC_MEAL_PERIODS,
   groupByCategory,
@@ -22,9 +31,11 @@ import {
   getCurrentUcPeriod,
   getNextUcOpeningLabel,
   isBfCanteenOpen,
+  isSimpleCanteenOpen,
 } from "@/lib/canteen/hours";
 import {
   toCartMenuItemFromBf,
+  toCartMenuItemFromSimple,
   toCartMenuItemFromUc,
 } from "@/lib/canteen/cart";
 import type { MenuItem } from "@/lib/types";
@@ -32,6 +43,10 @@ import type { MenuItem } from "@/lib/types";
 const SLUG_ALIASES: Record<string, string> = {
   "united-college": "uc-canteen",
   uc: "uc-canteen",
+  "shho-canteen": "sh-ho-canteen",
+  "sh-ho": "sh-ho-canteen",
+  "paper-coffee": "paper-and-coffee",
+  "cu-café": "cu-cafe",
 };
 
 const BF_FILTERS: Array<"all" | MenuCategory> = [
@@ -41,6 +56,8 @@ const BF_FILTERS: Array<"all" | MenuCategory> = [
   "drinks",
   "dessert",
 ];
+
+type SimpleRestaurantId = "cu-cafe" | "sh-ho-canteen" | "paper-and-coffee";
 
 export default function CanteenSlugPage() {
   const params = useParams<{ slug: string }>();
@@ -64,6 +81,12 @@ export default function CanteenSlugPage() {
     if (restaurant.id === "uc-canteen") {
       return ucItemsForPeriod(getCurrentUcPeriod()).map((item) =>
         toCartMenuItemFromUc(item, "uc-canteen"),
+      );
+    }
+    if (isSimpleMenuRestaurant(restaurant.id)) {
+      const menu = getSimpleMenu(restaurant.id) ?? [];
+      return menu.map((item) =>
+        toCartMenuItemFromSimple(item, restaurant.id as SimpleRestaurantId),
       );
     }
     return [];
@@ -138,6 +161,8 @@ export default function CanteenSlugPage() {
         <BfMenu search={search} />
       ) : restaurant.id === "uc-canteen" ? (
         <UcMenu search={search} />
+      ) : isSimpleMenuRestaurant(restaurant.id) ? (
+        <SimpleMenuView restaurant={restaurant} search={search} />
       ) : (
         <StubMenu
           name={restaurant.name}
@@ -177,6 +202,99 @@ function StubMenu({
           Browse UC Canteen (live menu)
         </Link>
       </div>
+    </>
+  );
+}
+
+function SimpleMenuView({
+  restaurant,
+  search,
+}: {
+  restaurant: Restaurant;
+  search: string;
+}) {
+  const restaurantId = restaurant.id as SimpleRestaurantId;
+  const [filter, setFilter] = useState<"all" | MenuCategory>("all");
+  const open = isSimpleCanteenOpen(restaurantId) ?? false;
+  const menu = getSimpleMenu(restaurantId) ?? [];
+
+  const items = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list: SimpleMenuItem[] =
+      filter === "all" ? menu : menu.filter((i) => i.category === filter);
+    if (q) {
+      list = list.filter(
+        (i) =>
+          i.name.toLowerCase().includes(q) ||
+          (i.description ?? "").toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [filter, menu, search]);
+
+  const usedCategories = useMemo(() => {
+    const set = new Set(menu.map((i) => i.category));
+    return BF_FILTERS.filter((id) => id === "all" || set.has(id));
+  }, [menu]);
+
+  return (
+    <>
+      <h1 className="text-2xl font-extrabold text-gray-900">{restaurant.name}</h1>
+      {restaurant.location ? (
+        <p className="mt-1 text-sm font-medium text-gray-700">
+          {restaurant.location}
+        </p>
+      ) : null}
+      <p className="mt-1 text-sm text-gray-600">{restaurant.blurb}</p>
+      <div
+        className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+          open
+            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+            : "border-amber-200 bg-amber-50 text-amber-900"
+        }`}
+      >
+        {open
+          ? `Open now · ${restaurant.hoursLabel} (HKT)`
+          : `Closed · ${restaurant.hoursLabel} (HKT)`}
+      </div>
+      <div className="mt-4">
+        <CollegeDiscountBanner restaurantId={restaurantId} />
+      </div>
+      <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
+        {usedCategories.map((id) => {
+          const label = id === "all" ? "All" : CATEGORY_LABELS[id];
+          const active = filter === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setFilter(id)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                active
+                  ? "bg-[#ED1C24] text-white"
+                  : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <section className="mt-4 space-y-3" aria-label="Canteen menu">
+        {items.map((item) => (
+          <CanteenMenuCard
+            key={item.id}
+            kind="simple"
+            item={item}
+            restaurantId={restaurantId}
+          />
+        ))}
+        {items.length === 0 ? (
+          <p className="py-8 text-center text-sm text-gray-500">
+            No matching items.
+          </p>
+        ) : null}
+      </section>
     </>
   );
 }

@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
+import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
+import { useUser } from "@/context/UserContext";
 
 export function RunnerAcceptConfirmModal({
   order,
@@ -15,6 +18,7 @@ export function RunnerAcceptConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { user } = useUser();
   useEffect(() => {
     if (!order) return;
     const prev = document.body.style.overflow;
@@ -32,6 +36,7 @@ export function RunnerAcceptConfirmModal({
   if (!order) return null;
 
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+  const isCanteen = resolveOrderChannel(order) === "canteen";
 
   return (
     <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/60 p-4 sm:items-center">
@@ -45,9 +50,16 @@ export function RunnerAcceptConfirmModal({
           Are you sure you want to accept this order?
         </h2>
         <p className="mt-2 text-sm text-gray-600">
-          You pick up at Fusion without paying — GraceRun settles the grocery bill.
-          Then deliver to the lobby and take a photo.
+          {isCanteen
+            ? "Pick up at the canteen, then deliver to the lobby and take a photo."
+            : "You pick up at Fusion without paying — GraceRun settles the grocery bill. Then deliver to the lobby and take a photo."}
         </p>
+        <div className="mt-3">
+          <CollegeDiscountRunnerBadge
+            order={order}
+            runnerCollege={user?.college}
+          />
+        </div>
         <div className="mt-4 rounded-xl bg-gray-50 px-3 py-3 text-sm text-gray-700">
           <p className="font-medium text-gray-900">
             {formatDeliveryAddress(order.college, order.hall)}

@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
+import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { runnerEntryHref } from "@/lib/nav";
@@ -255,6 +256,7 @@ export function ShopLayout({
             </Link>
 
             <RunnerQueueBell />
+            <CustomerNotificationBell />
 
             <Link
               href="/cart"

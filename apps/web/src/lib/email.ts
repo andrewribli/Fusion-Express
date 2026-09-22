@@ -530,6 +530,64 @@ Thanks for running with GraceRun!
   if (error) throw new Error(error.message);
 }
 
+export async function sendCanteenPickedUpEmail(opts: {
+  to: string;
+  orderId: string;
+  canteenName: string;
+}): Promise<void> {
+  const canteenName = opts.canteenName.trim() || "the canteen";
+  const message = `Your runner just picked up your order from ${canteenName}.`;
+  const subject = "Your order has been picked up!";
+  const trackUrl = orderTrackUrl(opts.orderId);
+  const html = brandedEmail({
+    preheader: message,
+    heading: subject,
+    trackUrl,
+    bodyHtml: `
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">Order number</p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(opts.orderId)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(message)}</p>
+    `,
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${message}\nOrder ${opts.orderId}\nTrack: ${trackUrl}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendCollegeDiscountEmail(opts: {
+  to: string;
+  orderId: string;
+  collegeLabel: string;
+}): Promise<void> {
+  const college = opts.collegeLabel.trim() || "your college";
+  const message = `Discount received! Your runner is from ${college}, so you got 10% off your canteen order.`;
+  const subject = "You got a 10% discount!";
+  const trackUrl = orderTrackUrl(opts.orderId);
+  const html = brandedEmail({
+    preheader: message,
+    heading: subject,
+    trackUrl,
+    bodyHtml: `
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">Order number</p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(opts.orderId)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(message)}</p>
+    `,
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${message}\nOrder ${opts.orderId}\nTrack: ${trackUrl}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
 function bodyTextToHtml(body: string): string {
   const paragraphs = body
     .split(/\n{2,}/)

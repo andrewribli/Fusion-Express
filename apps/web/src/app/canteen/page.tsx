@@ -112,6 +112,9 @@ export default function CanteenIndexPage() {
                   <p className="mt-1 text-sm leading-relaxed text-gray-600">
                     {r.blurb}
                   </p>
+                  {r.location ? (
+                    <p className="mt-1.5 text-xs text-gray-500">{r.location}</p>
+                  ) : null}
                   <p className="mt-2 text-xs text-gray-500">
                     {r.hoursLabel} · HK${r.deliveryFee} delivery
                   </p>

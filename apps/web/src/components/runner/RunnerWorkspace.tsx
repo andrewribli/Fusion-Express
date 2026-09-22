@@ -12,8 +12,10 @@ import { RunnerAcceptConfirmModal } from "@/components/RunnerAcceptConfirmModal"
 import { RunnerOrderDetails } from "@/components/RunnerOrderDetails";
 import { RunnerOrderPreviewModal } from "@/components/RunnerOrderPreviewModal";
 import { RunnerDeliveryFlow } from "@/components/runner/RunnerDeliveryFlow";
+import { CanteenDeliveryFlow } from "@/components/runner/CanteenDeliveryFlow";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
-import { OrderChannelBadge } from "@/components/OrderChannelBadge";
+import { OrderChannelBadge, resolveOrderChannel } from "@/components/OrderChannelBadge";
+import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import {
@@ -21,6 +23,8 @@ import {
   awaitingCustomerPriceApproval,
   fetchDeliveredOrdersByRunner,
   fetchRunnerOrders,
+  markCanteenDelivered,
+  markCanteenPickedUp,
   markDeliveredWithTotal,
   markPurchased,
   OrderAlreadyTakenError,
@@ -32,9 +36,11 @@ import {
   uploadDeliveryPhoto,
   uploadReceiptPhoto,
 } from "@/lib/orders";
+import { buildAcceptDiscount } from "@/lib/canteen-discount";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import { compressImage } from "@/lib/compress-image";
 import { notifyOrderStatus } from "@/lib/notify-email";
+import { notifyCanteenEvent } from "@/lib/notify-canteen";
 import { fetchRunner, findRunnerForUser } from "@/lib/runners";
 import { ownerPaymentDetails } from "@/lib/owner-payment";
 import {
@@ -171,10 +177,12 @@ function ExpiredDeliveriesColumn({
 
 function AvailableOrderCard({
   order,
+  runnerCollege,
   onViewDetails,
   onAccept,
 }: {
   order: Order;
+  runnerCollege?: string | null;
   onViewDetails: () => void;
   onAccept: () => void;
 }) {
@@ -195,6 +203,9 @@ function AvailableOrderCard({
         {formatDeliveryAddress(order.college, order.hall)}
       </p>
       <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
+      <div className="mt-2">
+        <CollegeDiscountRunnerBadge order={order} runnerCollege={runnerCollege} />
+      </div>
       <ul className="mt-2 space-y-0.5 text-sm text-gray-600">
         {preview.map((item) => (
           <li key={item.itemId}>
@@ -521,6 +532,9 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     setAccepting(true);
     setAcceptError("");
     try {
+      const runnerCollege =
+        runnerProfile?.college || user.college || undefined;
+      const discount = buildAcceptDiscount(confirmOrder, runnerCollege);
       await acceptOrder(
         confirmOrder.id,
         found.id,
@@ -531,6 +545,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           id: user.runnerPaymentId ?? user.phone ?? "",
           email: user.email,
         },
+        discount,
       );
       setConfirmOrder(null);
       router.push("/runner/deliveries");
@@ -542,8 +557,14 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         runnerName: user.fullName,
         customerName: confirmOrder.customerName,
         deliveryLocation: `${formatDeliveryAddress(confirmOrder.college, confirmOrder.hall)} · Lobby: ${confirmOrder.lobbyPoint}`,
-        estimate: confirmOrder.total,
+        estimate: discount?.total ?? confirmOrder.total,
       });
+      if (discount?.discountApplied) {
+        void notifyCanteenEvent({
+          orderId: confirmOrder.id,
+          event: "discount_received",
+        });
+      }
       await refresh();
     } catch (err) {
       if (err instanceof SelfPickupError || err instanceof OrderAlreadyTakenError) {
@@ -842,6 +863,108 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     }
   }
 
+  async function handleCanteenPickedUp(orderId: string): Promise<boolean> {
+    const order = orderWithProgress(orderId);
+    if (!order) return false;
+    if (order.status === "purchased" || order.status === "delivered") return true;
+    setPurchasingId(orderId);
+    setDeliverError("");
+    try {
+      await withTimeout(markCanteenPickedUp(orderId), 15000, "Mark picked up");
+      patchActiveOrder(orderId, { status: "purchased" });
+      void notifyCanteenEvent({ orderId, event: "picked_up" });
+      void refresh();
+      return true;
+    } catch (err) {
+      console.error("Canteen pick up failed", err);
+      setDeliverError(
+        err instanceof Error ? err.message : "Could not mark as picked up.",
+      );
+      return false;
+    } finally {
+      setPurchasingId("");
+    }
+  }
+
+  async function handleCanteenDelivered(orderId: string): Promise<boolean> {
+    const order = orderWithProgress(orderId);
+    if (!order) return false;
+    setDeliverError("");
+    let deliveryPhotoUrl =
+      order.deliveryPhotoUrl ?? progressRef.current[orderId]?.deliveryPhotoUrl;
+    const file = photoFiles[orderId];
+    if (!deliveryPhotoUrl && !file) {
+      setDeliverError("A lobby photo is required before you mark delivered.");
+      return false;
+    }
+
+    setPurchasingId(orderId);
+    try {
+      if (!deliveryPhotoUrl && file) {
+        const compressed = await withTimeout(
+          compressImage(file),
+          20000,
+          "Photo compress",
+        );
+        deliveryPhotoUrl = await withTimeout(
+          uploadDeliveryPhoto(orderId, compressed),
+          45000,
+          "Lobby photo upload",
+        );
+        await saveRunnerDeliveryProgress(orderId, { deliveryPhotoUrl });
+        patchActiveOrder(orderId, { deliveryPhotoUrl });
+      }
+      if (!deliveryPhotoUrl) {
+        setDeliverError("Missing lobby photo. Re-upload and try again.");
+        return false;
+      }
+
+      const finalTotal = order.subtotal;
+      await withTimeout(
+        markCanteenDelivered(orderId, {
+          finalTotal,
+          deliveryPhotoUrl,
+        }),
+        20000,
+        "Mark delivered",
+      );
+
+      const owner = ownerPaymentDetails();
+      const runnerPay = [
+        order.runnerPaymentMethod ?? user?.runnerPaymentMethod ?? "",
+        order.runnerPaymentId ?? user?.runnerPaymentId ?? "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      void notifyOrderStatus({
+        customerEmail: order.customerEmail,
+        orderId,
+        status: "delivered",
+        customerName: order.customerName,
+        total: customerAmountDue({
+          ...order,
+          finalTotal,
+          amountPaidByRunner: finalTotal,
+        }),
+        paymentInfo:
+          runnerPay ||
+          (owner.id ? `${owner.method} ${owner.id}` : user?.phone ?? ""),
+      });
+      delete progressRef.current[orderId];
+      setFlowOrderId(null);
+      void refresh();
+      return true;
+    } catch (err) {
+      console.error("Canteen deliver failed", err);
+      setDeliverError(
+        err instanceof Error ? err.message : "Could not mark as delivered.",
+      );
+      return false;
+    } finally {
+      setPurchasingId("");
+    }
+  }
+
   const flowOrder =
     openDeliveries.find((order) => order.id === flowOrderId) ?? null;
 
@@ -909,6 +1032,9 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                       <AvailableOrderCard
                         key={order.id}
                         order={order}
+                        runnerCollege={
+                          runnerProfile?.college || user?.college
+                        }
                         onViewDetails={() => setPreviewOrder(order)}
                         onAccept={() => requestAccept(order)}
                       />
@@ -952,6 +1078,16 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                           </p>
                         </div>
                         <DeadlineBanner order={order} party="runner" />
+                        <div className="mt-2">
+                          <CollegeDiscountRunnerBadge
+                            order={order}
+                            runnerCollege={
+                              order.runnerCollege ||
+                              runnerProfile?.college ||
+                              user?.college
+                            }
+                          />
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
@@ -960,7 +1096,11 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                           }}
                           className="mt-3 min-h-12 w-full rounded-xl bg-[#ED1C24] text-sm font-bold text-white"
                         >
-                          {order.status === "purchased" ? "Continue delivery" : "Start order"}
+                          {order.status === "purchased"
+                            ? "Continue delivery"
+                            : resolveOrderChannel(order) === "canteen"
+                              ? "Pick up order"
+                              : "Start order"}
                         </button>
                       </li>
                     ))}
@@ -1048,36 +1188,53 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           previewOrder ? () => requestAccept(previewOrder) : undefined
         }
       />
-      {flowOrder && (
-        <RunnerDeliveryFlow
-          order={orderWithProgress(flowOrder.id) ?? flowOrder}
-          receiptFile={receiptFiles[flowOrder.id]}
-          bankFile={bankFiles[flowOrder.id]}
-          photoFile={photoFiles[flowOrder.id]}
-          finalTotal={
-            finalTotals[flowOrder.id] ??
-            (flowOrder.finalTotal != null ? String(flowOrder.finalTotal) : "")
-          }
-          bagConfirmed={Boolean(
-            bagConfirmed[flowOrder.id] || flowOrder.runnerVerified,
-          )}
-          busy={purchasingId === flowOrder.id}
-          uploading={uploading}
-          error={deliverError}
-          onReceipt={(file) => void handleReceiptUpload(flowOrder.id, file)}
-          onBank={(file) => void handleBankUpload(flowOrder.id, file)}
-          onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
-          onFinalTotal={(value) => handleFinalTotalChange(flowOrder.id, value)}
-          onBagConfirmed={(value) =>
-            void handleBagConfirmed(flowOrder.id, value)
-          }
-          onDelivered={() => handleDelivered(flowOrder.id)}
-          onClose={() => {
-            setDeliverError("");
-            setFlowOrderId(null);
-          }}
-        />
-      )}
+      {flowOrder &&
+        (resolveOrderChannel(flowOrder) === "canteen" ? (
+          <CanteenDeliveryFlow
+            order={orderWithProgress(flowOrder.id) ?? flowOrder}
+            runnerCollege={runnerProfile?.college || user?.college}
+            photoFile={photoFiles[flowOrder.id]}
+            busy={purchasingId === flowOrder.id}
+            uploading={uploading === "photo" ? "photo" : ""}
+            error={deliverError}
+            onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
+            onPickedUp={() => handleCanteenPickedUp(flowOrder.id)}
+            onDelivered={() => handleCanteenDelivered(flowOrder.id)}
+            onClose={() => {
+              setDeliverError("");
+              setFlowOrderId(null);
+            }}
+          />
+        ) : (
+          <RunnerDeliveryFlow
+            order={orderWithProgress(flowOrder.id) ?? flowOrder}
+            receiptFile={receiptFiles[flowOrder.id]}
+            bankFile={bankFiles[flowOrder.id]}
+            photoFile={photoFiles[flowOrder.id]}
+            finalTotal={
+              finalTotals[flowOrder.id] ??
+              (flowOrder.finalTotal != null ? String(flowOrder.finalTotal) : "")
+            }
+            bagConfirmed={Boolean(
+              bagConfirmed[flowOrder.id] || flowOrder.runnerVerified,
+            )}
+            busy={purchasingId === flowOrder.id}
+            uploading={uploading}
+            error={deliverError}
+            onReceipt={(file) => void handleReceiptUpload(flowOrder.id, file)}
+            onBank={(file) => void handleBankUpload(flowOrder.id, file)}
+            onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
+            onFinalTotal={(value) => handleFinalTotalChange(flowOrder.id, value)}
+            onBagConfirmed={(value) =>
+              void handleBagConfirmed(flowOrder.id, value)
+            }
+            onDelivered={() => handleDelivered(flowOrder.id)}
+            onClose={() => {
+              setDeliverError("");
+              setFlowOrderId(null);
+            }}
+          />
+        ))}
       <RunnerAcceptConfirmModal
         order={confirmOrder}
         loading={accepting}

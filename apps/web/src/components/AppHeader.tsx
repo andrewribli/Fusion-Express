@@ -7,6 +7,7 @@ import { AppLogo } from "@/components/AppLogo";
 import { NavIcon } from "@/components/NavIcon";
 import { RunnerModeBanner } from "@/components/RunnerModeBanner";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
+import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { isOverOrderLimit } from "@/lib/constants";
@@ -135,7 +136,12 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                 Switch to Customer
               </Link>
             )}
-            {!runnerMode && <RunnerQueueBell className="h-11 w-11 rounded-full" />}
+            {!runnerMode && (
+              <>
+                <RunnerQueueBell className="h-11 w-11 rounded-full" />
+                <CustomerNotificationBell className="h-11 w-11 rounded-full" />
+              </>
+            )}
             {tabs
               .filter(
                 (tab) =>

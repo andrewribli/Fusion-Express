@@ -14,8 +14,12 @@ import {
 } from "@/lib/constants";
 import { friendlyPlaceOrderError } from "@/lib/auth-errors";
 import { notifyOrderPlaced } from "@/lib/notify-email";
-import { requestNotificationPermission } from "@/lib/notifications";
+import {
+  canteenCollegeForRestaurant,
+  restaurantIdFromOrderItems,
+} from "@/data/canteen/colleges";
 import { isCanteenCart } from "@/lib/canteen/cart";
+import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 
@@ -82,6 +86,15 @@ export function usePlaceOrder() {
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
         const lobbyPoint = getLobbyForHall(opts.hall);
         const customerName = customer.fullName.trim();
+        const canteen = isCanteenCart(items);
+        const restaurantId = canteen
+          ? restaurantIdFromOrderItems(
+              orderItems.map((item) => ({ itemId: item.itemId })),
+            )
+          : null;
+        const canteenCollege = canteen
+          ? canteenCollegeForRestaurant(restaurantId) ?? undefined
+          : undefined;
 
         const orderId = await createOrder({
           sessionId,
@@ -89,7 +102,9 @@ export function usePlaceOrder() {
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
-          orderChannel: isCanteenCart(items) ? "canteen" : "fusion",
+          orderChannel: canteen ? "canteen" : "fusion",
+          canteenRestaurantId: restaurantId ?? undefined,
+          canteenCollege,
           items: orderItems,
           status: "pending",
           college: opts.college,

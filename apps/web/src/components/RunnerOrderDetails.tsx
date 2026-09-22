@@ -4,6 +4,8 @@ import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
+import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
+import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
 
 function formatKg(kg: number): string {
@@ -13,10 +15,13 @@ function formatKg(kg: number): string {
 export function RunnerOrderDetails({
   order,
   showEarnings = true,
+  runnerCollege,
 }: {
   order: Order;
   showEarnings?: boolean;
+  runnerCollege?: string | null;
 }) {
+  const isCanteen = resolveOrderChannel(order) === "canteen";
   const lineWeight = (item: Order["items"][number]) =>
     item.weightKg != null ? item.weightKg * item.quantity : undefined;
   const computedWeight =
@@ -30,6 +35,10 @@ export function RunnerOrderDetails({
 
   return (
     <div className="space-y-4 text-sm">
+      <CollegeDiscountRunnerBadge
+        order={order}
+        runnerCollege={order.runnerCollege || runnerCollege}
+      />
       <section>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
           Items
@@ -78,30 +87,47 @@ export function RunnerOrderDetails({
 
       <section className="rounded-xl bg-amber-50 px-3 py-3">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-800">
-          Estimated grocery cost
+          {isCanteen ? "Canteen food total" : "Estimated grocery cost"}
         </h3>
         <p className="mt-1 text-lg font-bold text-gray-900">${order.subtotal}</p>
+        {order.discountApplied && (order.discountAmount ?? 0) > 0 && (
+          <p className="mt-1 text-xs font-semibold text-emerald-800">
+            College Discount (10%): −HK$
+            {Number(order.discountAmount).toFixed(2)}
+          </p>
+        )}
         <p className="text-xs text-amber-900">
-          Pay this at Fusion <span className="font-bold">yourself first</span>.
-          GraceRun reimburses you after delivery. Write the customer&apos;s full
-          name on the receipt.
+          {isCanteen ? (
+            "Pay this at the canteen counter, then deliver to the lobby."
+          ) : (
+            <>
+              Pay this at Fusion <span className="font-bold">yourself first</span>.
+              GraceRun reimburses you after delivery. Write the customer&apos;s
+              full name on the receipt.
+            </>
+          )}
         </p>
         {order.finalTotal != null && (
           <p className="mt-2 text-sm font-semibold text-gray-900">
             Receipt total entered: ${order.finalTotal}
           </p>
         )}
-        <div className="mt-3 rounded-xl border-2 border-[#ED1C24] bg-[#FFF3CD] px-3.5 py-3">
-          <p className="text-[15px] font-bold leading-snug text-[#7A1F1F]">
-            Upon delivery to the customer&apos;s dorm:{" "}
-            <span className="font-semibold">
-              Ensure you attach the original Fusion receipt with the{" "}
-              <span className="underline">customer&apos;s full name written on it</span>,
-              along with a copy of your <span className="underline">bank statement</span>{" "}
-              (for reimbursement). Do not leave the order without these documents.
-            </span>
-          </p>
-        </div>
+        {!isCanteen && (
+          <div className="mt-3 rounded-xl border-2 border-[#ED1C24] bg-[#FFF3CD] px-3.5 py-3">
+            <p className="text-[15px] font-bold leading-snug text-[#7A1F1F]">
+              Upon delivery to the customer&apos;s dorm:{" "}
+              <span className="font-semibold">
+                Ensure you attach the original Fusion receipt with the{" "}
+                <span className="underline">
+                  customer&apos;s full name written on it
+                </span>
+                , along with a copy of your{" "}
+                <span className="underline">bank statement</span> (for
+                reimbursement). Do not leave the order without these documents.
+              </span>
+            </p>
+          </div>
+        )}
       </section>
 
       <section>
@@ -118,9 +144,7 @@ export function RunnerOrderDetails({
         )}
         {showEarnings && (
           <div className="mt-3 rounded-xl bg-[#ED1C24]/10 px-3 py-2">
-            <p className="text-xs text-gray-600">
-              You will receive
-            </p>
+            <p className="text-xs text-gray-600">You will receive</p>
             <p className="text-lg font-bold text-[#ED1C24]">${earn}</p>
             {(order.tip ?? 0) > 0 && (
               <p className="text-xs text-gray-600">

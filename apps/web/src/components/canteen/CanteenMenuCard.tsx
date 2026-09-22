@@ -4,28 +4,44 @@ import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { formatHkd } from "@/data/canteen/bf-menu";
 import type { MenuItem as BfItem } from "@/data/canteen/bf-menu";
+import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 import type { UcMenuItem } from "@/data/canteen/uc-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
 import {
   toCartMenuItemFromBf,
+  toCartMenuItemFromSimple,
   toCartMenuItemFromUc,
 } from "@/lib/canteen/cart";
 
 type Props =
   | { kind: "bf"; item: BfItem; restaurantId: "benjamin-franklin" }
-  | { kind: "uc"; item: UcMenuItem; restaurantId: "uc-canteen" };
+  | { kind: "uc"; item: UcMenuItem; restaurantId: "uc-canteen" }
+  | {
+      kind: "simple";
+      item: SimpleMenuItem;
+      restaurantId: "cu-cafe" | "sh-ho-canteen" | "paper-and-coffee";
+    };
 
 export function CanteenMenuCard(props: Props) {
   const { items, addItem, setQuantity } = useCart();
   const cartItem =
     props.kind === "bf"
       ? toCartMenuItemFromBf(props.item, props.restaurantId)
-      : toCartMenuItemFromUc(props.item, props.restaurantId);
+      : props.kind === "uc"
+        ? toCartMenuItemFromUc(props.item, props.restaurantId)
+        : toCartMenuItemFromSimple(props.item, props.restaurantId);
   const qty = items.find((c) => c.item.id === cartItem.id)?.quantity ?? 0;
   const name = props.item.name;
   const nameZh = props.kind === "uc" ? props.item.nameZh : undefined;
-  const description = props.item.description;
-  const image = props.kind === "bf" ? props.item.image : undefined;
+  const description =
+    props.kind === "uc" || props.kind === "bf" || props.kind === "simple"
+      ? props.item.description
+      : undefined;
+  const image =
+    props.kind === "bf" || props.kind === "simple"
+      ? props.item.image
+      : undefined;
+  const signature = props.kind === "simple" ? props.item.signature : false;
   const restaurantId: RestaurantId = props.restaurantId;
 
   return (
@@ -48,9 +64,16 @@ export function CanteenMenuCard(props: Props) {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold leading-snug text-gray-900">
-              {name}
-            </h3>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h3 className="text-sm font-semibold leading-snug text-gray-900">
+                {name}
+              </h3>
+              {signature ? (
+                <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
+                  Signature
+                </span>
+              ) : null}
+            </div>
             {nameZh ? (
               <p className="mt-0.5 text-xs text-gray-500">{nameZh}</p>
             ) : null}

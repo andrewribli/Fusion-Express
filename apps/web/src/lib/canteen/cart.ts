@@ -1,5 +1,6 @@
 import type { CartItem, MenuItem } from "@/lib/types";
 import type { MenuItem as BfItem } from "@/data/canteen/bf-menu";
+import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 import type { UcMenuItem } from "@/data/canteen/uc-menu";
 import {
   CANTEEN_DELIVERY_FEE,
@@ -51,6 +52,26 @@ export function toCartMenuItemFromUc(
     category: "other",
     price: item.price,
     unit: "each",
+    priceType: "fixed",
+    runnerInputsPrice: false,
+    inStock: true,
+    sortOrder: 0,
+    weightKg: 0.4,
+    itemNote: item.description,
+  };
+}
+
+export function toCartMenuItemFromSimple(
+  item: SimpleMenuItem,
+  restaurantId: RestaurantId,
+): MenuItem {
+  return {
+    id: `${PREFIX}${restaurantId}:${item.id}`,
+    name: item.name,
+    category: "other",
+    price: item.price,
+    unit: "each",
+    image: item.image,
     priceType: "fixed",
     runnerInputsPrice: false,
     inStock: true,
