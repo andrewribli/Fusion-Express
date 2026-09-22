@@ -314,9 +314,40 @@ export async function patchOrderRest(
   orderId: string,
   updates: Record<string, unknown>,
 ): Promise<void> {
+  await patchAdminDocumentRest(collectionName("orders"), orderId, updates);
+}
+
+/** Read a document via Admin REST (no firebase-admin / jose). */
+export async function getAdminDocumentRest(
+  col: string,
+  docId: string,
+): Promise<Record<string, unknown> | null> {
+  const ctx = await adminAccessToken();
+  if (!ctx) return null;
+  const res = await fetch(
+    `${documentsUrl(ctx.project)}/${col}/${encodeURIComponent(docId)}`,
+    { headers: { Authorization: `Bearer ${ctx.token}` } },
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("getAdminDocumentRest failed", res.status, text.slice(0, 400));
+    throw new Error(`Could not load ${col}/${docId}.`);
+  }
+  const data = (await res.json()) as {
+    fields?: Record<string, FirestoreValue>;
+  };
+  return decodeFields(data.fields);
+}
+
+/** Create/merge fields on a document via Admin REST. */
+export async function patchAdminDocumentRest(
+  col: string,
+  docId: string,
+  updates: Record<string, unknown>,
+): Promise<void> {
   const ctx = await adminAccessToken();
   if (!ctx) throw new Error("Firestore unavailable (missing service account).");
-  const col = collectionName("orders");
   const fieldPaths = Object.keys(updates).filter((k) => updates[k] !== undefined);
   if (fieldPaths.length === 0) return;
 
@@ -326,7 +357,7 @@ export async function patchOrderRest(
   }
 
   const url = new URL(
-    `${documentsUrl(ctx.project)}/${col}/${encodeURIComponent(orderId)}`,
+    `${documentsUrl(ctx.project)}/${col}/${encodeURIComponent(docId)}`,
   );
   for (const path of fieldPaths) {
     url.searchParams.append("updateMask.fieldPaths", path);
@@ -342,8 +373,28 @@ export async function patchOrderRest(
   });
   if (!res.ok) {
     const text = await res.text();
-    console.error("patchOrderRest failed", res.status, text.slice(0, 400));
-    throw new Error("Could not update order.");
+    console.error("patchAdminDocumentRest failed", res.status, text.slice(0, 400));
+    throw new Error(`Could not update ${col}/${docId}.`);
+  }
+}
+
+export async function deleteAdminDocumentRest(
+  col: string,
+  docId: string,
+): Promise<void> {
+  const ctx = await adminAccessToken();
+  if (!ctx) return;
+  const res = await fetch(
+    `${documentsUrl(ctx.project)}/${col}/${encodeURIComponent(docId)}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${ctx.token}` },
+    },
+  );
+  if (res.status === 404) return;
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("deleteAdminDocumentRest failed", res.status, text.slice(0, 400));
   }
 }
 

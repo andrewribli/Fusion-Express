@@ -15,6 +15,7 @@ import {
 import { friendlyPlaceOrderError } from "@/lib/auth-errors";
 import { notifyOrderPlaced } from "@/lib/notify-email";
 import { requestNotificationPermission } from "@/lib/notifications";
+import { isCanteenCart } from "@/lib/canteen/cart";
 import { createOrder } from "@/lib/orders";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 
@@ -88,6 +89,7 @@ export function usePlaceOrder() {
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
+          orderChannel: isCanteenCart(items) ? "canteen" : "fusion",
           items: orderItems,
           status: "pending",
           college: opts.college,

@@ -182,6 +182,8 @@ export interface RunnerLocation {
   updatedAt: Date;
 }
 
+export type OrderChannel = "fusion" | "canteen";
+
 export interface Order {
   id: string;
   sessionId: string;
@@ -194,6 +196,8 @@ export interface Order {
   customerEmail?: string;
   /** Customer mobile for runner contact / guest checkout identity. */
   customerPhone?: string;
+  /** Storefront channel that placed the order (Fusion grocery vs campus canteen). */
+  orderChannel?: OrderChannel;
   items: OrderItem[];
   status: OrderStatus;
   college: string;

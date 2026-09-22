@@ -1,98 +1,129 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CanteenChrome } from "@/components/canteen/CanteenChrome";
+import { ShopLayout } from "@/components/ShopLayout";
 import { getCollege } from "@/data/canteen/colleges";
 import { RESTAURANTS } from "@/data/canteen/restaurants";
-import { useCart } from "@/context/CartContext";
+import type { MenuItem } from "@/lib/types";
 
 export default function CanteenIndexPage() {
-  const { itemCount, subtotal } = useCart();
+  const [search, setSearch] = useState("");
+
+  const searchProducts = useMemo<MenuItem[]>(
+    () =>
+      RESTAURANTS.filter((r) => r.menuReady).map((r) => ({
+        id: `canteen-nav:${r.id}`,
+        name: r.name,
+        category: "other",
+        price: r.deliveryFee,
+        unit: "each",
+        priceType: "fixed",
+        runnerInputsPrice: false,
+        inStock: true,
+        sortOrder: 0,
+        weightKg: 0,
+      })),
+    [],
+  );
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return RESTAURANTS;
+    return RESTAURANTS.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q) ||
+        r.shortName.toLowerCase().includes(q) ||
+        r.blurb.toLowerCase().includes(q),
+    );
+  }, [search]);
+
+  const sidebar = (
+    <nav className="px-2 py-2">
+      {RESTAURANTS.map((r) => (
+        <Link
+          key={r.id}
+          href={`/canteen/${r.id}`}
+          className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+        >
+          {r.shortName}
+          {!r.menuReady ? (
+            <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
+              Soon
+            </span>
+          ) : null}
+        </Link>
+      ))}
+    </nav>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] pb-28 text-white">
-      <CanteenChrome backHref="/" backLabel="Home" subtitle="Canteen" />
+    <ShopLayout
+      deliveryLabel="Deliver to CUHK hall lobby · Canteen"
+      searchProducts={searchProducts}
+      search={search}
+      onSearchChange={setSearch}
+      onSearchSelect={(item) => {
+        const id = item.id.replace(/^canteen-nav:/, "");
+        if (id) window.location.href = `/canteen/${id}`;
+      }}
+      searchPlaceholder="Search canteens"
+      sidebar={sidebar}
+      mobileSidebarTitle="Canteens"
+      cartChannel="canteen"
+    >
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ED1C24]">
+          CUHK canteens
+        </p>
+        <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-gray-900">
+          GraceRun Canteen
+        </h1>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
+          Your canteen favorites, delivered to your dorm lobby. Flat delivery
+          HK$10 · 10% college canteen discount when your runner matches.
+        </p>
+      </div>
 
-      <main className="mx-auto max-w-lg px-4 pt-5">
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#1a1010] via-[#121212] to-[#0d0d0d] p-5">
-          <div
-            className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#ED1C24]/20 blur-3xl"
-            aria-hidden
-          />
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ED1C24]">
-            CUHK canteens
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight">
-            GraceRun Canteen
-          </h1>
-          <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-400">
-            Your canteen favorites, delivered to your dorm lobby.
-          </p>
-          <p className="mt-3 text-xs text-zinc-500">
-            Flat delivery HK$10 · dorm lobby only · 10% college canteen discount
-            when your runner matches
-          </p>
-        </div>
-
-        <h2 className="mt-7 text-sm font-semibold uppercase tracking-wide text-zinc-500">
-          Restaurants
-        </h2>
-        <div className="mt-3 space-y-3">
-          {RESTAURANTS.map((r) => {
-            const college = getCollege(r.collegeId);
-            return (
-              <Link
-                key={r.id}
-                href={`/canteen/${r.id}`}
-                className="block rounded-xl border border-white/10 bg-[#161616] p-4 transition hover:border-[#ED1C24]/50 hover:bg-[#1a1212]"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-base font-bold text-white">{r.name}</p>
-                      {college ? (
-                        <span className="rounded-md bg-[#ED1C24]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
-                          {college.shortName} · 10% off
-                        </span>
-                      ) : null}
-                      {!r.menuReady ? (
-                        <span className="rounded-md bg-zinc-700/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-zinc-300">
-                          Soon
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-sm leading-relaxed text-zinc-400">
-                      {r.blurb}
-                    </p>
-                    <p className="mt-2 text-xs text-zinc-500">
-                      {r.hoursLabel} · HK${r.deliveryFee} delivery
-                    </p>
-                  </div>
-                  <span className="shrink-0 rounded-lg bg-[#ED1C24] px-3 py-1.5 text-xs font-semibold text-white">
-                    {r.menuReady ? "Menu" : "Soon"}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </main>
-
-      {itemCount > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0c0c0c]/95 p-3 backdrop-blur">
-          <div className="mx-auto max-w-lg">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {filtered.map((r) => {
+          const college = r.collegeId ? getCollege(r.collegeId) : undefined;
+          return (
             <Link
-              href="/cart"
-              className="flex w-full items-center justify-between rounded-xl bg-[#ED1C24] px-4 py-3.5 text-sm font-semibold text-white"
+              key={r.id}
+              href={`/canteen/${r.id}`}
+              className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[#ED1C24]/40 hover:shadow-md"
             >
-              <span>
-                View cart · {itemCount} item{itemCount === 1 ? "" : "s"}
-              </span>
-              <span>HK${subtotal.toFixed(subtotal % 1 === 0 ? 0 : 1)}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-base font-bold text-gray-900">{r.name}</p>
+                    {college ? (
+                      <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
+                        {college.shortName} · 10% off
+                      </span>
+                    ) : null}
+                    {!r.menuReady ? (
+                      <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+                        Soon
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                    {r.blurb}
+                  </p>
+                  <p className="mt-2 text-xs text-gray-500">
+                    {r.hoursLabel} · HK${r.deliveryFee} delivery
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-lg bg-[#ED1C24] px-3 py-1.5 text-xs font-semibold text-white">
+                  {r.menuReady ? "Menu" : "Soon"}
+                </span>
+              </div>
             </Link>
-          </div>
-        </div>
-      ) : null}
-    </div>
+          );
+        })}
+      </div>
+    </ShopLayout>
   );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import {
@@ -100,7 +101,10 @@ export default function AdminRefundsPage() {
                       className="rounded-xl border border-gray-100 p-4 text-sm"
                     >
                       <div className="flex justify-between gap-3">
-                        <p className="font-bold text-gray-900">{order.id}</p>
+                        <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                          {order.id}
+                          <OrderChannelBadge order={order} />
+                        </p>
                         <p className="font-semibold text-green-700">
                           Refund ${order.refundAmount}
                         </p>

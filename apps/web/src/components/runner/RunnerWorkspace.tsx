@@ -13,6 +13,7 @@ import { RunnerOrderDetails } from "@/components/RunnerOrderDetails";
 import { RunnerOrderPreviewModal } from "@/components/RunnerOrderPreviewModal";
 import { RunnerDeliveryFlow } from "@/components/runner/RunnerDeliveryFlow";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
+import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import {
@@ -184,7 +185,10 @@ function AvailableOrderCard({
   return (
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex justify-between gap-3">
-        <p className="font-bold text-gray-900">{order.id}</p>
+        <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+          {order.id}
+          <OrderChannelBadge order={order} />
+        </p>
         <p className="shrink-0 text-xs text-gray-500">{formatTime(order.createdAt)}</p>
       </div>
       <p className="mt-2 text-sm font-medium text-gray-800">

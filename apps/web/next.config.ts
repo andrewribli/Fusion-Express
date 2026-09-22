@@ -6,6 +6,15 @@ const nextConfig: NextConfig = {
   // Bundling them caused ERR_REQUIRE_ESM (CJS require of ESM-only jose@6).
   serverExternalPackages: ["firebase-admin", "jose", "jwks-rsa"],
   distDir: process.env.VERCEL ? "../../.next" : ".next",
+  async redirects() {
+    return [
+      {
+        source: "/canteen/united-college",
+        destination: "/canteen/uc-canteen",
+        permanent: false,
+      },
+    ];
+  },
   images: {
     // Bypass Vercel Image Optimization until quota is restored (remote
     // medias.pns.hk / foodpanda URLs were returning HTTP 402).

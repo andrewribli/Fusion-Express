@@ -39,9 +39,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
   } else if (process.env.VERCEL_ENV === "production") {
-    console.error("AIRWALLEX_WEBHOOK_SECRET is not set");
+    console.error(
+      "AIRWALLEX_WEBHOOK_SECRET is not set. Add it in Vercel → Project → Settings → Environment Variables (Production), then redeploy. Value comes from the Airwallex Dashboard webhook signing secret.",
+    );
     return NextResponse.json(
-      { error: "Webhook secret not configured" },
+      {
+        error: "Webhook secret not configured",
+        env: "AIRWALLEX_WEBHOOK_SECRET",
+        hint: "Set AIRWALLEX_WEBHOOK_SECRET on the Vercel Production environment to the Airwallex webhook signing secret, then redeploy.",
+      },
       { status: 503 },
     );
   }

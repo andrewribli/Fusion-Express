@@ -4,15 +4,17 @@ import { useRouter } from "next/navigation";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { PreviousOrderChecklist } from "@/components/PreviousOrderChecklist";
 import { useCart } from "@/context/CartContext";
-import { useUser } from "@/context/UserContext";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 
-export function MenuCartSummary() {
+export function MenuCartSummary({
+  channel = "fusion",
+}: {
+  channel?: "fusion" | "canteen";
+}) {
   const router = useRouter();
-  const { user } = useUser();
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
 
   const fee = resolveOrderDeliveryFee(items, "");
@@ -35,6 +37,7 @@ export function MenuCartSummary() {
           <h2 className="text-sm font-bold text-gray-900">Your cart</h2>
           <p className="text-xs text-gray-500">
             {itemCount} item{itemCount === 1 ? "" : "s"}
+            {channel === "canteen" ? " · Canteen" : ""}
           </p>
         </div>
 
@@ -114,8 +117,8 @@ export function MenuCartSummary() {
         </div>
       </section>
 
-      <PreviousOrderChecklist />
-      <CustomItemCard />
+      <PreviousOrderChecklist channel={channel} />
+      {channel === "fusion" ? <CustomItemCard /> : null}
     </aside>
   );
 }

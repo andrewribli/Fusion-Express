@@ -29,9 +29,9 @@ export function CanteenMenuCard(props: Props) {
   const restaurantId: RestaurantId = props.restaurantId;
 
   return (
-    <article className="flex gap-3 rounded-xl border border-white/10 bg-[#161616] p-3">
+    <article className="flex gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
       {image ? (
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-zinc-800">
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50">
           <Image
             src={image}
             alt={name}
@@ -41,18 +41,18 @@ export function CanteenMenuCard(props: Props) {
           />
         </div>
       ) : (
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#2a1515] to-[#1a1a1a] text-xl font-bold text-[#ED1C24]/80">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-50 to-gray-50 text-xl font-bold text-[#ED1C24]/80">
           {name.slice(0, 1)}
         </div>
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold leading-snug text-white">
+            <h3 className="text-sm font-semibold leading-snug text-gray-900">
               {name}
             </h3>
             {nameZh ? (
-              <p className="mt-0.5 text-xs text-zinc-500">{nameZh}</p>
+              <p className="mt-0.5 text-xs text-gray-500">{nameZh}</p>
             ) : null}
           </div>
           <p className="shrink-0 text-sm font-bold text-[#ED1C24]">
@@ -60,7 +60,7 @@ export function CanteenMenuCard(props: Props) {
           </p>
         </div>
         {description ? (
-          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-zinc-400">
+          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-gray-500">
             {description}
           </p>
         ) : null}
@@ -75,23 +75,23 @@ export function CanteenMenuCard(props: Props) {
               +
             </button>
           ) : (
-            <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-black/30 px-1 py-0.5">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-1 py-0.5">
               <button
                 type="button"
                 aria-label={`Decrease ${name}`}
                 onClick={() => setQuantity(cartItem.id, qty - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-white hover:bg-white/10"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-800 hover:bg-white"
               >
                 −
               </button>
-              <span className="min-w-5 text-center text-sm font-semibold text-white">
+              <span className="min-w-5 text-center text-sm font-semibold text-gray-900">
                 {qty}
               </span>
               <button
                 type="button"
                 aria-label={`Increase ${name}`}
                 onClick={() => addItem(cartItem)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-white hover:bg-white/10"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-800 hover:bg-white"
               >
                 +
               </button>

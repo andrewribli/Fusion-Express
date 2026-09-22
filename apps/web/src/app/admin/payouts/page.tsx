@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import {
   fetchAdminReviewOrders,
@@ -161,7 +162,10 @@ export default function AdminPayoutsPage() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                              {order.id}
+                              <OrderChannelBadge order={order} />
+                            </p>
                             <p className="text-xs text-gray-500">
                               {order.runnerName ?? "Runner"} ·{" "}
                               {adminPayoutLabel(order.status)}

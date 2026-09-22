@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import {
   escalateDeadlineWarning,
@@ -139,7 +140,10 @@ export default function AdminWarningsPage() {
                             key={`r-${order.id}`}
                             className="rounded-2xl border border-gray-100 bg-white p-4"
                           >
-                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                              {order.id}
+                              <OrderChannelBadge order={order} />
+                            </p>
                             <p className="mt-1 text-xs text-gray-500">
                               {order.runnerName ?? "Runner"} · expired{" "}
                               {formatWhen(order.runnerExpiredAt)} · warnings{" "}
@@ -175,7 +179,10 @@ export default function AdminWarningsPage() {
                             key={`c-${order.id}`}
                             className="rounded-2xl border border-gray-100 bg-white p-4"
                           >
-                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                              {order.id}
+                              <OrderChannelBadge order={order} />
+                            </p>
                             <p className="mt-1 text-xs text-gray-500">
                               {order.customerName ?? "Customer"} · overdue{" "}
                               {formatWhen(order.customerOverdueAt)} · warnings{" "}
