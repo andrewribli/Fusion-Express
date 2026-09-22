@@ -29,6 +29,7 @@ const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "New Asia College": 3,
   "International House (I-House)": 3,
   "Postgraduate Halls (PGH)": 3,
+  "Campus Facilities": 1,
 };
 
 export function getDeliveryZone(college: string): DeliveryZone {

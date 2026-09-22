@@ -54,7 +54,7 @@ export default function CartPage() {
                     href="/"
                     className="mt-4 inline-block rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-white"
                   >
-                    Start Shopping
+                    Choose Fusion or Canteen
                   </Link>
                 </div>
                 <ProductSearchPanel

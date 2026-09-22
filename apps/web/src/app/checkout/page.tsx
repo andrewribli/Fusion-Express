@@ -26,6 +26,7 @@ import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import { isCanteenCart } from "@/lib/canteen/cart";
 
 export default function CheckoutPage() {
   const { user } = useUser();
@@ -47,6 +48,7 @@ export default function CheckoutPage() {
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(college && hall && !overLimit);
+  const shopHref = isCanteenCart(items) ? "/canteen" : "/fusion";
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
@@ -80,8 +82,8 @@ export default function CheckoutPage() {
             />
             <CustomItemCard className="mt-4" />
             <p className="mt-4 text-center">
-              <Link href="/" className="text-lakers-gold underline">
-                Go shopping
+              <Link href={shopHref} className="text-lakers-gold underline">
+                Keep shopping
               </Link>
             </p>
           </main>

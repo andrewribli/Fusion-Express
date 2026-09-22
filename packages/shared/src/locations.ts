@@ -41,6 +41,8 @@ export const CUHK_COLLEGE_HALLS = {
     "I-House 5",
   ],
   "Postgraduate Halls (PGH)": ["PGH 1", "PGH 2", "PGH 3", "PGH 4"],
+  /** Non-hall campus drop-off (central campus, near Fusion / Chung Chi). */
+  "Campus Facilities": ["University Library"],
 } as const;
 
 export type CuhkCollege = keyof typeof CUHK_COLLEGE_HALLS;
@@ -51,8 +53,9 @@ export function getHallsForCollege(college: CuhkCollege): readonly string[] {
   return CUHK_COLLEGE_HALLS[college];
 }
 
-/** Runner delivers to the hall lobby */
+/** Runner delivers to the hall lobby (or library entrance). */
 export function getLobbyForHall(hall: string): string {
+  if (hall === "University Library") return "University Library entrance";
   return `${hall} lobby`;
 }
 
