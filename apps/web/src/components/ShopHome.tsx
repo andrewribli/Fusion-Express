@@ -329,6 +329,12 @@ export function ShopHome() {
                 GraceRun
               </span>
             </Link>
+            <Link
+              href="/"
+              className="hidden rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:inline"
+            >
+              Fusion
+            </Link>
             <HomeSearchBar
               products={products}
               value={search}

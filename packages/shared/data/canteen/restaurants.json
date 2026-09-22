@@ -1,0 +1,52 @@
+[
+  {
+    "id": "benjamin-franklin",
+    "name": "Benjamin Franklin Canteen",
+    "shortName": "Benjamin Franklin",
+    "blurb": "Campus canteen classics to your dorm lobby.",
+    "hoursLabel": "7:30 AM – 9:00 PM",
+    "deliveryFee": 10,
+    "collegeId": null,
+    "menuReady": true
+  },
+  {
+    "id": "uc-canteen",
+    "name": "UC Canteen",
+    "shortName": "UC Canteen",
+    "blurb": "United College canteen — breakfast to dinner by time zone.",
+    "hoursLabel": "9:00 AM – 8:30 PM (by meal period)",
+    "deliveryFee": 10,
+    "collegeId": "UC",
+    "menuReady": true
+  },
+  {
+    "id": "na-canteen",
+    "name": "NA Canteen",
+    "shortName": "NA Canteen",
+    "blurb": "New Asia College canteen — college discount when an NA runner picks up.",
+    "hoursLabel": "Coming soon",
+    "deliveryFee": 10,
+    "collegeId": "NA",
+    "menuReady": false
+  },
+  {
+    "id": "cc-canteen",
+    "name": "CC Canteen",
+    "shortName": "CC Canteen",
+    "blurb": "Chung Chi College canteen — college discount when a CC runner picks up.",
+    "hoursLabel": "Coming soon",
+    "deliveryFee": 10,
+    "collegeId": "CC",
+    "menuReady": false
+  },
+  {
+    "id": "shaw-canteen",
+    "name": "Shaw Canteen",
+    "shortName": "Shaw Canteen",
+    "blurb": "Shaw College canteen — college discount when a Shaw runner picks up.",
+    "hoursLabel": "Coming soon",
+    "deliveryFee": 10,
+    "collegeId": "Shaw",
+    "menuReady": false
+  }
+]

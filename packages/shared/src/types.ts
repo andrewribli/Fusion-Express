@@ -1,4 +1,7 @@
 import type { OrderStatus } from "./order-status";
+import type { ShopKind } from "./shop-kind";
+
+export type { ShopKind } from "./shop-kind";
 
 export const MENU_CATEGORIES = [
   "seasonings",
@@ -193,6 +196,14 @@ export interface Order {
   customerEmail?: string;
   /** Customer mobile for runner contact / guest checkout identity. */
   customerPhone?: string;
+  /**
+   * Fusion grocery vs campus canteen. Kept separate so carts/checkouts never
+   * mix pickup locations or fee rules.
+   */
+  shopKind?: ShopKind;
+  /** Canteen restaurant id when shopKind is canteen. */
+  canteenId?: string;
+  canteenName?: string;
   items: OrderItem[];
   status: OrderStatus;
   college: string;

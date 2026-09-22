@@ -50,13 +50,13 @@ export default function CartPage() {
 
   function handleCancelOrder() {
     clearCart();
-    router.push("/");
+    router.push("/fusion");
   }
 
   return (
     <AppShell>
       <LakersWallpaper>
-          <AppHeader showBack backHref="/" title="Your Cart" />
+          <AppHeader showBack backHref="/fusion" title="Fusion cart" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
             {items.length === 0 ? (
@@ -65,11 +65,18 @@ export default function CartPage() {
                   <p className="text-4xl">🛒</p>
                   <p className="mt-3 text-sm text-gray-600">Your cart is empty.</p>
                   <Link
-                    href="/"
+                    href="/fusion"
                     className="mt-4 inline-block rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-white"
                   >
-                    Start Shopping
+                    Shop Fusion
                   </Link>
+                  <p className="mt-3 text-xs text-gray-500">
+                    Canteen food uses a separate cart —{" "}
+                    <Link href="/canteen" className="underline">
+                      browse canteens
+                    </Link>
+                    .
+                  </p>
                 </div>
                 <ProductSearchPanel
                   className="mt-4"

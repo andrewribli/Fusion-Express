@@ -19,11 +19,20 @@ import { createOrder } from "@/lib/orders";
 import type { CustomerPaymentMethod } from "@/lib/payment-method";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import { normalizePhone, validatePhone } from "@/lib/auth";
+import {
+  CANTEEN_DELIVERY_FEE,
+  getRestaurant,
+} from "@fusion-express/shared/canteen";
+import {
+  parseCanteenItemId,
+  type ShopKind,
+} from "@fusion-express/shared/shop-kind";
 
-export function usePlaceOrder() {
+export function usePlaceOrder(forcedShopKind?: ShopKind) {
   const router = useRouter();
   const { user, ensureGuestCheckout } = useUser();
-  const { items, sessionId, clearCart } = useCart();
+  const { items, sessionId, clearCart, shopKind: cartShopKind } = useCart();
+  const shopKind = forcedShopKind ?? cartShopKind;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,6 +51,28 @@ export function usePlaceOrder() {
         return;
       }
 
+      // Guardrail: never place a mixed or wrong-shop order from this cart.
+      const hasCanteen = items.some((line) =>
+        line.item.id.startsWith("canteen:"),
+      );
+      const hasFusion = items.some(
+        (line) => !line.item.id.startsWith("canteen:"),
+      );
+      if (hasCanteen && hasFusion) {
+        setError(
+          "Fusion groceries and canteen food can’t be in the same order. Clear one cart and try again.",
+        );
+        return;
+      }
+      if (shopKind === "fusion" && hasCanteen) {
+        setError("This is Fusion checkout — remove canteen items first.");
+        return;
+      }
+      if (shopKind === "canteen" && hasFusion) {
+        setError("This is canteen checkout — remove Fusion grocery items first.");
+        return;
+      }
+
       const phone = (opts.phone ?? user?.phone ?? "").trim();
       const phoneErr = validatePhone(phone);
       if (phoneErr) {
@@ -56,7 +87,6 @@ export function usePlaceOrder() {
         await requestNotificationPermission();
 
         let customer = user;
-        // Guests (and signed-in users missing a phone) get a phone-backed account.
         if (
           !customer?.uid ||
           customer.isGuest ||
@@ -90,11 +120,24 @@ export function usePlaceOrder() {
           setError(ORDER_LIMIT_MESSAGE);
           return;
         }
-        const fee = calculateDeliveryFee({
-          weightKg: cartTotalWeightKg(items),
-          college: opts.college,
-        });
-        // Reject negative tips; clamp rather than blocking submit.
+
+        const weightKg = cartTotalWeightKg(items);
+        const fee =
+          shopKind === "canteen"
+            ? {
+                baseFee: CANTEEN_DELIVERY_FEE,
+                weightKg,
+                extraKg: 0,
+                weightSurcharge: 0,
+                zone: 1 as const,
+                distanceSurcharge: 0,
+                deliveryFee: CANTEEN_DELIVERY_FEE,
+              }
+            : calculateDeliveryFee({
+                weightKg,
+                college: opts.college,
+              });
+
         const tipAmount = Math.max(0, opts.tip ?? 0);
         const total = orderSubtotal + fee.deliveryFee + tipAmount;
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
@@ -105,13 +148,32 @@ export function usePlaceOrder() {
             ? customer.fullName
             : `Guest ${digits.slice(-4)}`;
 
+        const canteenIds = new Set(
+          items
+            .map((line) => parseCanteenItemId(line.item.id)?.restaurantId)
+            .filter((id): id is string => Boolean(id)),
+        );
+        if (shopKind === "canteen" && canteenIds.size > 1) {
+          setError(
+            "One canteen per order — clear items from the other canteen first.",
+          );
+          return;
+        }
+        const canteenId =
+          shopKind === "canteen" ? [...canteenIds][0] : undefined;
+        const canteenName = canteenId
+          ? getRestaurant(canteenId)?.name
+          : undefined;
+
         const orderId = await createOrder({
           sessionId,
-          // New orders always key on Auth uid (never studentId/email fallback).
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
           customerPhone: digits,
+          shopKind,
+          canteenId,
+          canteenName,
           items: orderItems,
           status: "pending",
           college: opts.college,
@@ -122,6 +184,9 @@ export function usePlaceOrder() {
           customerNote: resolveSpecialInstructions(
             [
               opts.customerNote?.trim(),
+              shopKind === "canteen" && canteenName
+                ? `Pickup: ${canteenName}`
+                : "",
               ...new Set(
                 items
                   .map(({ item }) => item.itemNote)
@@ -150,7 +215,8 @@ export function usePlaceOrder() {
             price: item.price,
           })),
           total,
-          customerName,          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
+          customerName,
+          deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
 
         clearCart();
@@ -162,8 +228,16 @@ export function usePlaceOrder() {
         setLoading(false);
       }
     },
-    [clearCart, ensureGuestCheckout, items, router, sessionId, user],
+    [
+      clearCart,
+      ensureGuestCheckout,
+      items,
+      router,
+      sessionId,
+      shopKind,
+      user,
+    ],
   );
 
-  return { placeOrder, loading, error, setError };
+  return { placeOrder, loading, error, setError, shopKind };
 }

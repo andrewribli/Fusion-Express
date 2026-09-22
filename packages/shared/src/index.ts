@@ -14,3 +14,5 @@ export * from "./resolve-image";
 export * from "./product-text";
 export * from "./orders";
 export * from "./cuhk-email";
+export * from "./shop-kind";
+export * from "./canteen";

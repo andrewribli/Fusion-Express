@@ -227,6 +227,16 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
       ? toDate(data.customerApprovedPriceAt)
       : undefined,
     fusionPaidByPlatform: data.fusionPaidByPlatform !== false,
+    shopKind:
+      data.shopKind === "canteen" || data.shopKind === "fusion"
+        ? data.shopKind
+        : data.canteenId
+          ? "canteen"
+          : "fusion",
+    canteenId:
+      typeof data.canteenId === "string" ? data.canteenId : undefined,
+    canteenName:
+      typeof data.canteenName === "string" ? data.canteenName : undefined,
     runnerLocation:
       loc && typeof loc.lat === "number" && typeof loc.lng === "number"
         ? {
