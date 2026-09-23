@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
         destination: "/canteen/uc-canteen",
         permanent: false,
       },
+      { source: "/taste", destination: "/cityu/taste", permanent: false },
     ];
   },
   images: {

@@ -1,6 +1,7 @@
 import { createSign } from "crypto";
 import { NextResponse } from "next/server";
 import {
+  campusConfig,
   detectCampusFromEmail,
   isAnyCampusEmail,
   normalizeEmail,
@@ -172,14 +173,16 @@ export async function POST(request: Request) {
 
     if (shouldSend) {
       if (apiKey) {
+        const brand = campus === "cityu" ? campusConfig.cityu.brandLabel : "GraceRun";
+        const campusName = campusConfig[campus].name;
         const subject =
           purpose === "reset"
-            ? "Your GraceRun password reset code"
-            : "Your GraceRun verification code";
+            ? `Your ${brand} password reset code`
+            : `Your ${brand} verification code`;
         const text =
           purpose === "reset"
-            ? `Your GraceRun password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
-            : `Your GraceRun CUHK verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
+            ? `Your ${brand} password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
+            : `Your ${brand} ${campusName} verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
 
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",

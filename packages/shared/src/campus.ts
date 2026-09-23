@@ -53,7 +53,7 @@ export const campusConfig: Record<CampusId, CampusConfig> = {
     supermarket: "Taste",
     supermarketLocation: "Festival Walk",
     groceryChannel: "taste",
-    groceryPath: "/taste",
+    groceryPath: "/cityu/taste",
     channelHomePath: "/cityu",
     tagline: "Groceries from Taste to your CityU dorm lobby.",
     emailDomains: ["cityu.edu.hk", "my.cityu.edu.hk"],

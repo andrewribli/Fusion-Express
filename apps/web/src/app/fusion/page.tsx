@@ -16,7 +16,7 @@ export default function FusionPage() {
   useEffect(() => {
     if (!isReady) return;
     if (otherCampus) {
-      router.replace("/taste");
+      router.replace("/cityu/taste");
       return;
     }
     setCampus("cuhk");
