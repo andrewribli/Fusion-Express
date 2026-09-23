@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Ptero">
+  <rect width="32" height="32" rx="6" fill="#0a0a0a"/>
+  <path fill="#7a8f7a" d="M22 8c-1.2 0-2.4.4-3.2 1.2L16 12l2.5 1.5c.8-.9 2-1.5 3.3-1.5 1.1 0 2.1.4 2.8 1.1L26 11c-.9-1.8-2.8-3-4-3z"/>
+  <path fill="#f5f0e8" d="M8 14h16v12H8z"/>
+  <path fill="#c4a574" d="M14 12h4v3h-4z"/>
+  <path fill="#7a8f7a" d="M12 22c2-3 4-4 4-4s2 1 4 4v2H12z"/>
+</svg>

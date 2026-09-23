@@ -1,0 +1,18 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "gracerun-cityu.vercel.app" }],
+      "destination": "https://ptero-cityu.vercel.app/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "gracerun-cityu-fusion-1468.vercel.app" }
+      ],
+      "destination": "https://ptero-cityu.vercel.app/:path*",
+      "permanent": true
+    }
+  ]
+}

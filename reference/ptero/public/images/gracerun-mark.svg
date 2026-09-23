@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="GraceRun">
+  <rect width="128" height="128" fill="#ED1C24"/>
+  <g transform="translate(64 58) rotate(14)">
+    <path
+      d="M-15-6c0-17 7-23 15-23s15 6 15 23"
+      fill="none"
+      stroke="#fff"
+      stroke-width="7"
+      stroke-linecap="round"
+    />
+    <path
+      fill="#fff"
+      d="M-31-4h62l-6 42c-2 12-10 18-21 18H-4c-11 0-19-6-21-18z"
+    />
+    <g fill="#fff">
+      <rect x="-20" y="50" width="11" height="28" rx="5.5" transform="rotate(46 -14.5 64)"/>
+      <rect x="8" y="48" width="11" height="30" rx="5.5" transform="rotate(-34 13.5 63)"/>
+    </g>
+  </g>
+</svg>
