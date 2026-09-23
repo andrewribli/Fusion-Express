@@ -65,6 +65,13 @@ export default function LoginPage() {
   const demoAuth = useDemoAuth();
 
   const [mode, setMode] = useState<Mode>("signin");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("mode") === "signup") {
+      setMode("signup");
+    }
+  }, []);
   const [signupStep, setSignupStep] = useState<SignupStep>(1);
   const [signupCampus, setSignupCampus] = useState<CampusId | null>(null);
   const [email, setEmail] = useState("");
