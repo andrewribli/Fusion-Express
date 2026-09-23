@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ShopLayout } from "@/components/ShopLayout";
 import { getCollege } from "@/data/canteen/colleges";
@@ -95,29 +96,42 @@ export default function CanteenIndexPage() {
               className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[#ED1C24]/40 hover:shadow-md"
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-bold text-gray-900">{r.name}</p>
-                    {college ? (
-                      <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
-                        {college.shortName} · 10% off
-                      </span>
-                    ) : null}
-                    {!r.menuReady ? (
-                      <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
-                        Soon
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                    {r.blurb}
-                  </p>
-                  {r.location ? (
-                    <p className="mt-1.5 text-xs text-gray-500">{r.location}</p>
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  {r.logoSrc ? (
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-50 ring-1 ring-gray-100">
+                      <Image
+                        src={r.logoSrc}
+                        alt=""
+                        fill
+                        sizes="48px"
+                        className="object-contain p-1"
+                      />
+                    </div>
                   ) : null}
-                  <p className="mt-2 text-xs text-gray-500">
-                    {r.hoursLabel} · HK${r.deliveryFee} delivery
-                  </p>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-base font-bold text-gray-900">{r.name}</p>
+                      {college ? (
+                        <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
+                          {college.shortName} · 10% off
+                        </span>
+                      ) : null}
+                      {!r.menuReady ? (
+                        <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+                          Soon
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                      {r.blurb}
+                    </p>
+                    {r.location ? (
+                      <p className="mt-1.5 text-xs text-gray-500">{r.location}</p>
+                    ) : null}
+                    <p className="mt-2 text-xs text-gray-500">
+                      {r.hoursLabel} · HK${r.deliveryFee} delivery
+                    </p>
+                  </div>
                 </div>
                 <span className="shrink-0 rounded-lg bg-[#ED1C24] px-3 py-1.5 text-xs font-semibold text-white">
                   {r.menuReady ? "Menu" : "Soon"}

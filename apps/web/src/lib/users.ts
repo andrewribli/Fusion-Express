@@ -40,6 +40,10 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         : String(data.termsAcceptedAt)
       : undefined,
     photoURL: data.photoURL ? String(data.photoURL) : undefined,
+    campus:
+      data.campus === "cuhk" || data.campus === "cityu"
+        ? data.campus
+        : undefined,
     cuhkEmail: data.cuhkEmail ? String(data.cuhkEmail) : undefined,
     cuhkVerifiedAt: data.cuhkVerifiedAt
       ? typeof data.cuhkVerifiedAt === "object" &&
@@ -98,8 +102,11 @@ export async function createUserProfile(
     phone: profile.isRunner ? profile.phone : undefined,
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
+    campus: profile.campus,
     college: profile.college,
     hall: profile.hall,
+    cuhkEmail: profile.cuhkEmail,
+    cuhkVerifiedAt: profile.cuhkVerifiedAt,
     createdAt: Timestamp.fromDate(now),
     updatedAt: Timestamp.fromDate(now),
   };
@@ -117,6 +124,11 @@ export async function createUserProfile(
     phone: profile.phone,
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
+    campus: profile.campus,
+    college: profile.college,
+    hall: profile.hall,
+    cuhkEmail: profile.cuhkEmail,
+    cuhkVerifiedAt: profile.cuhkVerifiedAt,
     createdAt: now.toISOString(),
   };
 }

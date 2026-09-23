@@ -23,9 +23,9 @@ export const UC_MEAL_PERIODS: Record<
 > = {
   breakfast: {
     label: "Breakfast",
-    start: "9:00 AM",
+    start: "7:30 AM",
     end: "11:00 AM",
-    startMin: 9 * 60,
+    startMin: 7 * 60 + 30,
     endMin: 11 * 60,
   },
   lunch: {
@@ -45,9 +45,9 @@ export const UC_MEAL_PERIODS: Record<
   dinner: {
     label: "Dinner",
     start: "5:00 PM",
-    end: "8:30 PM",
+    end: "7:30 PM",
     startMin: 17 * 60,
-    endMin: 20 * 60 + 30,
+    endMin: 19 * 60 + 30,
   },
 };
 

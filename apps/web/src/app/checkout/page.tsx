@@ -1,18 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { CampusPickerCards } from "@/components/CampusPickerCards";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { lineTotal } from "@/lib/pricing";
-import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
+import {
+  formatDeliveryAddress,
+  getLobbyForHall,
+} from "@/data/cuhk-locations";
 import {
   ESTIMATED_DELIVERY_MINUTES,
   getEstimatedDeliveryTime,
@@ -27,38 +32,66 @@ import { usePlaceOrder } from "@/lib/use-place-order";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { isCanteenCart } from "@/lib/canteen/cart";
+import type { CampusId } from "@fusion-express/shared/campus";
 
 export default function CheckoutPage() {
   const { user } = useUser();
+  const { setCampus } = useCampus();
   const { items, subtotal } = useCart();
   const { placeOrder, loading, error: placeError } = usePlaceOrder();
 
+  /** Signed-in campus from signup — not a homepage picker. */
+  const lockedCampus: CampusId | null =
+    user?.campus === "cuhk" || user?.campus === "cityu" ? user.campus : null;
+  /** Guests pick campus here before dorms. */
+  const [guestCampus, setGuestCampus] = useState<CampusId | null>(null);
   const [college, setCollege] = useState("");
   const [hall, setHall] = useState("");
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
 
+  useEffect(() => {
+    if (lockedCampus) {
+      setCampus(lockedCampus);
+      setGuestCampus(null);
+    }
+  }, [lockedCampus, setCampus]);
+
+  const campus = lockedCampus ?? guestCampus;
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const fee = useMemo(
-    () => resolveOrderDeliveryFee(items, college),
-    [items, college],
+    () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk"),
+    [items, college, campus],
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
-  const canSubmit = Boolean(college && hall && !overLimit);
-  const shopHref = isCanteenCart(items) ? "/canteen" : "/fusion";
+  const canSubmit = Boolean(campus && college && hall && !overLimit);
+  const shopHref = isCanteenCart(items)
+    ? "/canteen"
+    : campus === "cityu"
+      ? "/taste"
+      : "/fusion";
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
       : null;
-  const lobby = hall ? getLobbyForHall(hall) : "";
+  const lobby = hall && campus ? getLobbyForHall(hall, campus) : "";
+
+  function handleCampusChange(next: CampusId) {
+    if (lockedCampus) return;
+    setGuestCampus(next);
+    setCampus(next);
+    setCollege("");
+    setHall("");
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || !campus) return;
     void placeOrder({
+      campus,
       college,
       hall,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
@@ -189,16 +222,41 @@ export default function CheckoutPage() {
             >
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <p className="mt-1 text-xs text-gray-500">
-                Dorm (college + hall) and lobby. No phone number.
+                {lockedCampus
+                  ? lockedCampus === "cityu"
+                    ? "Delivering to your CityU hall lobby. No phone number."
+                    : "Delivering to your CUHK dorm lobby. No phone number."
+                  : campus === "cityu"
+                    ? "Campus, compound, hall, and lobby. No phone number."
+                    : "Pick your university first, then dorm and lobby. No phone number."}
               </p>
-              <div className="mt-3">
-                <DeliveryAddressFields
-                  college={college}
-                  hall={hall}
-                  onCollegeChange={setCollege}
-                  onHallChange={setHall}
-                />
-              </div>
+              {lockedCampus ? (
+                <p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-800">
+                  {lockedCampus === "cityu" ? "GraceRun CityU" : "GraceRun CUHK"}
+                </p>
+              ) : (
+                <div className="mt-3">
+                  <CampusPickerCards
+                    value={guestCampus}
+                    onChange={handleCampusChange}
+                  />
+                </div>
+              )}
+              {campus ? (
+                <div className="mt-3">
+                  <DeliveryAddressFields
+                    campus={campus}
+                    college={college}
+                    hall={hall}
+                    onCollegeChange={setCollege}
+                    onHallChange={setHall}
+                  />
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-gray-500">
+                  Choose your university to see dorm options.
+                </p>
+              )}
               {hall ? (
                 <div className="mt-3 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
                   <span className="text-xs font-medium uppercase tracking-wide text-gray-500">

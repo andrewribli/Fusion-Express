@@ -6,7 +6,11 @@ import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 
-export function OrderActionBar() {
+export function OrderActionBar({
+  orderingEnabled = true,
+}: {
+  orderingEnabled?: boolean;
+}) {
   const router = useRouter();
   const { itemCount, subtotal, items } = useCart();
   const fee = resolveOrderDeliveryFee(items, "");
@@ -20,12 +24,17 @@ export function OrderActionBar() {
         <OrderLimitNotice subtotal={subtotal} />
         <button
           type="button"
-          disabled={overLimit}
-          onClick={() => router.push("/checkout")}
+          disabled={overLimit || !orderingEnabled}
+          onClick={() => {
+            if (!orderingEnabled) return;
+            router.push("/checkout");
+          }}
           className="flex min-h-11 w-full items-center justify-center rounded-full px-4 text-sm font-bold text-white shadow-lg disabled:opacity-50"
-          style={{ backgroundColor: "#ED1C24" }}
+          style={{ backgroundColor: orderingEnabled ? "#ED1C24" : "#9ca3af" }}
         >
-          {`Continue to checkout · $${subtotal + fee.deliveryFee}`}
+          {orderingEnabled
+            ? `Continue to checkout · $${subtotal + fee.deliveryFee}`
+            : "Canteen closed — checkout paused"}
         </button>
       </div>
     </div>

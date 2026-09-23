@@ -119,11 +119,18 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
   const items = parseItems(data.items);
   const orderChannelRaw = String(data.orderChannel ?? "").trim().toLowerCase();
   const orderChannel =
-    orderChannelRaw === "canteen" || orderChannelRaw === "fusion"
-      ? orderChannelRaw
+    orderChannelRaw === "canteen" ||
+    orderChannelRaw === "fusion" ||
+    orderChannelRaw === "taste"
+      ? (orderChannelRaw as Order["orderChannel"])
       : items.some((item) => item.itemId.startsWith("canteen:"))
         ? ("canteen" as const)
         : undefined;
+  const campusRaw = String(data.campus ?? "").trim().toLowerCase();
+  const campus =
+    campusRaw === "cuhk" || campusRaw === "cityu"
+      ? (campusRaw as Order["campus"])
+      : undefined;
   return {
     id,
     sessionId: String(data.sessionId ?? ""),
@@ -131,6 +138,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerName: data.customerName ? String(data.customerName) : undefined,
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
+    campus,
     orderChannel,
     canteenRestaurantId: data.canteenRestaurantId
       ? String(data.canteenRestaurantId)

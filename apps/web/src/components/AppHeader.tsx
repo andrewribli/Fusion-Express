@@ -9,6 +9,7 @@ import { RunnerModeBanner } from "@/components/RunnerModeBanner";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { isOverOrderLimit } from "@/lib/constants";
 import { homeForMode, isTabActive, runnerEntryHref, tabsForMode, type NavTab } from "@/lib/nav";
@@ -27,6 +28,8 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const { itemCount, subtotal } = useCart();
   const overLimit = isOverOrderLimit(subtotal);
   const { user, mode, setMode, canRunnerMode } = useUser();
+  const { config } = useCampus();
+  const brandLabel = config.brandLabel;
   const pathname = usePathname();
   const router = useRouter();
   const { openManualItem } = useManualItemModal();
@@ -38,7 +41,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const customerActive = useActiveCustomerOrders();
   const home = homeForMode(chromeMode);
   const activeTab = tabs.find((tab) => isTabActive(tab, pathname));
-  const pageLabel = title ?? activeTab?.label ?? "GraceRun";
+  const pageLabel = title ?? activeTab?.label ?? brandLabel;
 
   const navLink = (active: boolean) =>
     `hidden h-11 w-11 items-center justify-center rounded-full md:inline-flex ${
@@ -96,9 +99,12 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
             <Link
               href={runnerMode ? home : "/"}
               className="flex min-w-0 items-center gap-2"
-              aria-label="GraceRun home"
+              aria-label={`${brandLabel} home`}
             >
               <AppLogo size={44} className="h-11 w-11 shrink-0" />
+              <span className="hidden max-w-[9.5rem] truncate text-sm font-bold tracking-tight text-gray-900 sm:block">
+                {brandLabel}
+              </span>
               {runnerMode && (
                 <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
                   Runner
@@ -138,7 +144,9 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
             )}
             {!runnerMode && (
               <>
-                <RunnerQueueBell className="h-11 w-11 rounded-full" />
+                {canRunnerMode ? (
+                  <RunnerQueueBell className="h-11 w-11 rounded-full" />
+                ) : null}
                 <CustomerNotificationBell className="h-11 w-11 rounded-full" />
               </>
             )}

@@ -1,3 +1,5 @@
+import type { CampusId } from "./campus";
+
 export const CUHK_COLLEGE_HALLS = {
   "Shaw College": ["Kuo Mou Hall", "Student Hostel II"],
   "United College": [
@@ -45,17 +47,79 @@ export const CUHK_COLLEGE_HALLS = {
   "Campus Facilities": ["University Library"],
 } as const;
 
+/**
+ * CityU halls 1–12 in two compounds.
+ * Kowloon Tong is next to Festival Walk (Taste); Ma On Shan is farther.
+ */
+export const CITYU_COMPOUNDS = {
+  "Kowloon Tong Compound": [
+    "Hall 1",
+    "Hall 2",
+    "Hall 3",
+    "Hall 4",
+    "Hall 5",
+    "Hall 6",
+    "Hall 7",
+    "Hall 8",
+  ],
+  "Ma On Shan Compound": ["Hall 9", "Hall 10", "Hall 11", "Hall 12"],
+} as const;
+
 export type CuhkCollege = keyof typeof CUHK_COLLEGE_HALLS;
+export type CityUCompound = keyof typeof CITYU_COMPOUNDS;
 
 export const CUHK_COLLEGES = Object.keys(CUHK_COLLEGE_HALLS) as CuhkCollege[];
+export const CITYU_COMPOUND_NAMES = Object.keys(
+  CITYU_COMPOUNDS,
+) as CityUCompound[];
 
-export function getHallsForCollege(college: CuhkCollege): readonly string[] {
-  return CUHK_COLLEGE_HALLS[college];
+/** Residence groups for a campus (CUHK colleges or CityU compounds). */
+export function getResidenceGroups(campus: CampusId): readonly string[] {
+  return campus === "cityu" ? CITYU_COMPOUND_NAMES : CUHK_COLLEGES;
+}
+
+export function getHallsForResidence(
+  campus: CampusId,
+  residence: string,
+): readonly string[] {
+  if (campus === "cityu") {
+    if (residence in CITYU_COMPOUNDS) {
+      return CITYU_COMPOUNDS[residence as CityUCompound];
+    }
+    return [];
+  }
+  if (residence in CUHK_COLLEGE_HALLS) {
+    return CUHK_COLLEGE_HALLS[residence as CuhkCollege];
+  }
+  return [];
+}
+
+export function getHallsForCollege(college: CuhkCollege | string): readonly string[] {
+  if (college in CUHK_COLLEGE_HALLS) {
+    return CUHK_COLLEGE_HALLS[college as CuhkCollege];
+  }
+  return [];
+}
+
+export function getHallsForCompound(
+  compound: CityUCompound | string,
+): readonly string[] {
+  if (compound in CITYU_COMPOUNDS) {
+    return CITYU_COMPOUNDS[compound as CityUCompound];
+  }
+  return [];
+}
+
+/** Label for the first delivery dropdown (college vs compound). */
+export function residenceGroupLabel(campus: CampusId): string {
+  return campus === "cityu" ? "Compound" : "College";
 }
 
 /** Runner delivers to the hall lobby (or library entrance). */
-export function getLobbyForHall(hall: string): string {
+export function getLobbyForHall(hall: string, campus: CampusId = "cuhk"): string {
   if (hall === "University Library") return "University Library entrance";
+  if (!hall) return "";
+  if (campus === "cityu") return `${hall} Lobby`;
   return `${hall} lobby`;
 }
 

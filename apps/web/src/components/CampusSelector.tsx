@@ -4,18 +4,22 @@ import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { AccountMenu } from "@/components/AccountMenu";
+import { useCampus } from "@/context/CampusContext";
 
 /**
- * Landing page: pick Fusion groceries or CUHK canteen delivery.
+ * CUHK channel picker: Fusion groceries vs campus canteens.
  */
 export function CampusSelector() {
+  const { config } = useCampus();
+  const brand = config.brandLabel;
+
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
       <header className="border-b border-white/10 bg-[#0c0c0c]/95">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2" aria-label="GraceRun home">
+          <Link href="/" className="flex items-center gap-2" aria-label={`${brand} home`}>
             <AppLogo size={44} className="h-11 w-11" />
-            <span className="text-sm font-bold tracking-tight">GraceRun</span>
+            <span className="text-sm font-bold tracking-tight">{brand}</span>
           </Link>
           <div className="flex items-center gap-2">
             <RunnerQueueBell className="h-11 w-11 rounded-full border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]" />

@@ -1,3 +1,5 @@
+import type { CampusId } from "./campus";
+
 export const BASE_DELIVERY_FEE = 10;
 export const WEIGHT_INCLUDED_KG = 2;
 export const WEIGHT_SURCHARGE_PER_KG = 3;
@@ -16,6 +18,12 @@ export const ZONE_LABELS: Record<DeliveryZone, string> = {
   3: "Far (1.5–3 km)",
 };
 
+export const CITYU_ZONE_LABELS: Record<DeliveryZone, string> = {
+  1: "Nearby (Kowloon Tong → Festival Walk)",
+  2: "Medium",
+  3: "Far (Ma On Shan Compound)",
+};
+
 /** Colleges / residences relative to Fusion at Benjamin Franklin Centre */
 const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "Chung Chi College": 1,
@@ -32,12 +40,33 @@ const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "Campus Facilities": 1,
 };
 
-export function getDeliveryZone(college: string): DeliveryZone {
+/** CityU compounds relative to Taste at Festival Walk */
+const CITYU_COMPOUND_ZONES: Record<string, DeliveryZone> = {
+  "Kowloon Tong Compound": 1,
+  "Ma On Shan Compound": 3,
+};
+
+export function getDeliveryZone(
+  college: string,
+  campus: CampusId = "cuhk",
+): DeliveryZone {
+  if (campus === "cityu") {
+    return CITYU_COMPOUND_ZONES[college] ?? 2;
+  }
   return COLLEGE_ZONES[college] ?? 2;
 }
 
-export function zoneSurchargeForCollege(college: string): number {
-  return ZONE_DISTANCE_SURCHARGE[getDeliveryZone(college)];
+export function zoneSurchargeForCollege(
+  college: string,
+  campus: CampusId = "cuhk",
+): number {
+  return ZONE_DISTANCE_SURCHARGE[getDeliveryZone(college, campus)];
+}
+
+export function zoneLabelsForCampus(
+  campus: CampusId,
+): Record<DeliveryZone, string> {
+  return campus === "cityu" ? CITYU_ZONE_LABELS : ZONE_LABELS;
 }
 
 export interface DeliveryFeeBreakdown {
@@ -68,11 +97,13 @@ export function cartTotalWeightKg(
 export function calculateDeliveryFee(input: {
   weightKg: number;
   college: string;
+  campus?: CampusId;
 }): DeliveryFeeBreakdown {
   const weightKg = Math.max(0, round2(input.weightKg));
   const extraKg = Math.max(0, Math.ceil(weightKg - WEIGHT_INCLUDED_KG));
   const weightSurcharge = extraKg * WEIGHT_SURCHARGE_PER_KG;
-  const zone = getDeliveryZone(input.college);
+  const campus = input.campus ?? "cuhk";
+  const zone = getDeliveryZone(input.college, campus);
   const distanceSurcharge = ZONE_DISTANCE_SURCHARGE[zone];
 
   return {

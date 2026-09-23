@@ -1,4 +1,7 @@
 import type { OrderStatus } from "./order-status";
+import type { CampusId } from "./campus";
+
+export type { CampusId };
 
 export const MENU_CATEGORIES = [
   "seasonings",
@@ -96,6 +99,8 @@ export interface MenuItem {
   category: string;
   /** Excel Category: Groceries → dry, Fresh Food → refrigerated. */
   storeSection?: StoreSection;
+  /** Campus this SKU belongs to (CUHK Fusion vs CityU Taste). */
+  campus?: CampusId;
   price: number;
   salePrice?: number;
   bulkDealQty?: number;
@@ -182,7 +187,7 @@ export interface RunnerLocation {
   updatedAt: Date;
 }
 
-export type OrderChannel = "fusion" | "canteen";
+export type OrderChannel = "fusion" | "taste" | "canteen";
 
 export interface Order {
   id: string;
@@ -196,12 +201,15 @@ export interface Order {
   customerEmail?: string;
   /** Customer mobile for runner contact / guest checkout identity. */
   customerPhone?: string;
-  /** Storefront channel that placed the order (Fusion grocery vs campus canteen). */
+  /** University campus that owns this order (CUHK vs CityU). */
+  campus?: CampusId;
+  /** Storefront channel that placed the order (grocery vs campus canteen). */
   orderChannel?: OrderChannel;
   /** Canteen restaurant slug (e.g. uc-canteen) when orderChannel is canteen. */
   canteenRestaurantId?: string;
   items: OrderItem[];
   status: OrderStatus;
+  /** CUHK college or CityU compound. */
   college: string;
   hall: string;
   roomNumber?: string;

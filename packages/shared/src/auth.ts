@@ -12,7 +12,7 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getAuthClient, getDb, isFirebaseConfigured } from "./firebase";
 import { collectionName } from "./app-env";
-import { validateCuhkStudentEmail } from "./cuhk-email";
+import { validateAnyCampusEmail } from "./campus";
 
 const USERNAMES_COLLECTION = collectionName("usernames");
 const PHONES_COLLECTION = collectionName("phones");
@@ -133,7 +133,7 @@ export function validateUsername(username: string): string | null {
 }
 
 export function validateEmail(email: string): string | null {
-  return validateCuhkStudentEmail(email);
+  return validateAnyCampusEmail(email);
 }
 
 export function validatePassword(password: string): string | null {
@@ -367,8 +367,8 @@ export async function signUpWithEmail(
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured");
   }
-  const cuhkErr = validateCuhkStudentEmail(email);
-  if (cuhkErr) throw new Error(cuhkErr);
+  const emailErr = validateAnyCampusEmail(email);
+  if (emailErr) throw new Error(emailErr);
   const cred = await createUserWithEmailAndPassword(
     getAuthClient(),
     email.trim().toLowerCase(),
@@ -434,9 +434,9 @@ export async function sendPasswordReset(identifier: string): Promise<void> {
   const resolved = identifier.includes("@")
     ? identifier.trim().toLowerCase()
     : await resolveSignInEmail(identifier);
-  const cuhkErr = validateCuhkStudentEmail(resolved);
-  if (cuhkErr && !resolved.endsWith(`@${EMAIL_DOMAIN}`)) {
-    throw new Error(cuhkErr);
+  const emailErr = validateAnyCampusEmail(resolved);
+  if (emailErr && !resolved.endsWith(`@${EMAIL_DOMAIN}`)) {
+    throw new Error(emailErr);
   }
   // Skip continueUrl — unlisted origins (including Vercel hosts not yet in the
   // live Auth allowlist) make Firebase refuse the reset for real accounts.

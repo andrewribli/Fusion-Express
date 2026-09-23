@@ -30,6 +30,8 @@ import {
   type UserRole,
 } from "@/lib/roles";
 
+import type { CampusId } from "@fusion-express/shared/campus";
+
 export interface UserProfile {
   uid?: string;
   email?: string;
@@ -38,6 +40,8 @@ export interface UserProfile {
   isRunner?: boolean;
   isGuest?: boolean;
   createdAt?: string;
+  /** University campus (CUHK | CityU). */
+  campus?: CampusId;
   /** Which experiences this account signed up for. */
   role?: UserRole;
   runnerId?: string;
@@ -92,6 +96,7 @@ interface UserContextValue {
     fullName: string;
     college: string;
     hall: string;
+    campus?: CampusId;
   }) => Promise<UserProfile>;
   /** Enter guest browse mode (no account) — shop + checkout without forced login. */
   startGuestBrowse: () => void;
@@ -385,6 +390,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const fullProfile = await createUserProfile(firebaseUser.uid, {
         fullName: profile.fullName,
         email: profile.email,
+        campus: profile.campus,
         cuhkEmail: profile.cuhkEmail ?? profile.email,
         cuhkVerifiedAt: profile.cuhkVerifiedAt ?? new Date().toISOString(),
         isGuest: false,
@@ -420,7 +426,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const ensureGuestCheckout = useCallback(
-    async (opts: { fullName: string; college: string; hall: string }) => {
+    async (opts: {
+      fullName: string;
+      college: string;
+      hall: string;
+      campus?: CampusId;
+    }) => {
       const name = opts.fullName.trim();
       if (!name) throw new Error("Enter your full name");
       if (!opts.college.trim() || !opts.hall.trim()) {
@@ -433,6 +444,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           fullName: name,
           college: opts.college,
           hall: opts.hall,
+          campus: opts.campus ?? user.campus,
           isGuest: user.isGuest ?? false,
           role: normalizeRole(user.role, Boolean(user.isRunner)),
         };
@@ -442,6 +454,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             fullName: name,
             college: opts.college,
             hall: opts.hall,
+            campus: updated.campus,
           });
         }
         return updated;
@@ -454,6 +467,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           isGuest: true,
           isRunner: false,
           role: "customer",
+          campus: opts.campus,
           college: opts.college,
           hall: opts.hall,
           createdAt: new Date().toISOString(),
@@ -471,6 +485,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             fullName: name,
             college: opts.college,
             hall: opts.hall,
+            campus: opts.campus ?? existing.campus,
             isGuest: existing.isGuest ?? true,
             role: normalizeRole(existing.role, Boolean(existing.isRunner)),
           }
@@ -479,6 +494,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             fullName: name,
             isGuest: true,
             isRunner: false,
+            campus: opts.campus,
             college: opts.college,
             hall: opts.hall,
           });
@@ -488,6 +504,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           fullName: name,
           college: opts.college,
           hall: opts.hall,
+          campus: profile.campus,
           isGuest: profile.isGuest,
         });
       }

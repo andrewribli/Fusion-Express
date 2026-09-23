@@ -1,6 +1,13 @@
 import { createSign } from "crypto";
 import { NextResponse } from "next/server";
-import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
+import {
+  detectCampusFromEmail,
+  isAnyCampusEmail,
+  normalizeEmail,
+  validateCampusEmail,
+  isCampusId,
+  type CampusId,
+} from "@fusion-express/shared";
 import {
   generateOtpCode,
   issueOtpCookie,
@@ -102,16 +109,28 @@ export async function POST(request: Request) {
   try {
     requireOtpSecret();
 
-    let body: { email?: string; purpose?: string };
+    let body: { email?: string; purpose?: string; campus?: string };
     try {
-      body = (await request.json()) as { email?: string; purpose?: string };
+      body = (await request.json()) as {
+        email?: string;
+        purpose?: string;
+        campus?: string;
+      };
     } catch {
       return jsonError("Invalid request", 400);
     }
 
     const email = normalizeEmail(body.email ?? "");
-    if (!isCuhkStudentEmail(email)) {
-      return jsonError("Use your @link.cuhk.edu.hk email", 400);
+    const campusFromBody = isCampusId(body.campus) ? body.campus : null;
+    const campus: CampusId | null =
+      campusFromBody ?? detectCampusFromEmail(email);
+
+    if (!campus || !isAnyCampusEmail(email)) {
+      return jsonError("Please use your CUHK or CityU email", 400);
+    }
+    const campusErr = validateCampusEmail(email, campus);
+    if (campusErr) {
+      return jsonError(campusErr, 400);
     }
 
     const purpose: OtpPurpose =

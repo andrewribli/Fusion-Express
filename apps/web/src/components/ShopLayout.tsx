@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
@@ -159,6 +160,8 @@ export function ShopSearchBar({
 
 type ShopLayoutProps = {
   deliveryLabel: string;
+  /** Optional restaurant brand mark next to the delivery label. */
+  deliveryLogoSrc?: string;
   searchProducts: MenuItem[];
   search: string;
   onSearchChange: (v: string) => void;
@@ -168,6 +171,10 @@ type ShopLayoutProps = {
   mobileSidebarTitle?: string;
   children: ReactNode;
   cartChannel?: "fusion" | "canteen";
+  /** Hide floating Track Order on menu pages. */
+  hideTrackFab?: boolean;
+  /** When false, disable checkout CTAs (canteen closed). */
+  orderingEnabled?: boolean;
 };
 
 /**
@@ -176,6 +183,7 @@ type ShopLayoutProps = {
  */
 export function ShopLayout({
   deliveryLabel,
+  deliveryLogoSrc,
   searchProducts,
   search,
   onSearchChange,
@@ -185,13 +193,15 @@ export function ShopLayout({
   mobileSidebarTitle = "Categories",
   children,
   cartChannel = "fusion",
+  hideTrackFab = false,
+  orderingEnabled = true,
 }: ShopLayoutProps) {
   const { user, setMode, canRunnerMode } = useUser();
   const { itemCount, addItem } = useCart();
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
 
   return (
-    <AppShell>
+    <AppShell hideTrackFab={hideTrackFab}>
       <div className="shop-page min-h-screen bg-[#f5f5f5]">
         <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
@@ -223,9 +233,21 @@ export function ShopLayout({
             </Link>
 
             <div className="hidden min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex">
-              <span className="text-gray-400" aria-hidden>
-                📍
-              </span>
+              {deliveryLogoSrc ? (
+                <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md bg-white ring-1 ring-gray-200">
+                  <Image
+                    src={deliveryLogoSrc}
+                    alt=""
+                    fill
+                    sizes="28px"
+                    className="object-contain p-0.5"
+                  />
+                </span>
+              ) : (
+                <span className="text-gray-400" aria-hidden>
+                  📍
+                </span>
+              )}
               <span className="truncate text-gray-700">{deliveryLabel}</span>
             </div>
 
@@ -255,7 +277,7 @@ export function ShopLayout({
               Runner
             </Link>
 
-            <RunnerQueueBell />
+            {canRunnerMode ? <RunnerQueueBell /> : null}
             <CustomerNotificationBell />
 
             <Link
@@ -328,11 +350,14 @@ export function ShopLayout({
           <main className="min-w-0 px-3 py-4 pb-36 sm:px-4">{children}</main>
 
           <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] p-3 xl:block">
-            <MenuCartSummary channel={cartChannel} />
+            <MenuCartSummary
+              channel={cartChannel}
+              orderingEnabled={orderingEnabled}
+            />
           </div>
         </div>
 
-        <OrderActionBar />
+        <OrderActionBar orderingEnabled={orderingEnabled} />
       </div>
     </AppShell>
   );

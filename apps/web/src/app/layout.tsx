@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { StagingBanner } from "@/components/StagingBanner";
+import { CampusProvider } from "@/context/CampusContext";
 import { CartProvider } from "@/context/CartContext";
 import { UserProvider } from "@/context/UserContext";
 import { ManualItemModalProvider } from "@/lib/manual-item-modal";
@@ -37,7 +38,11 @@ export const viewport: Viewport = {
   themeColor: "#ED1C24",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${geist.variable} h-full`}>
       <body className="lite-mode min-h-full bg-[#f3f4f6] font-sans text-gray-900 antialiased">
@@ -49,12 +54,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <ThemeProvider>
           <UserProvider>
-            <CartProvider>
-              <ManualItemModalProvider>
-                <StagingBanner />
-                {children}
-              </ManualItemModalProvider>
-            </CartProvider>
+            <CampusProvider>
+              <CartProvider>
+                <ManualItemModalProvider>
+                  <StagingBanner />
+                  {children}
+                </ManualItemModalProvider>
+              </CartProvider>
+            </CampusProvider>
           </UserProvider>
         </ThemeProvider>
       </body>

@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   // Keep Admin SDK + jwks-rsa/jose out of the Turbopack/webpack server bundle.
   // Bundling them caused ERR_REQUIRE_ESM (CJS require of ESM-only jose@6).
   serverExternalPackages: ["firebase-admin", "jose", "jwks-rsa"],
+  // On Vercel (monorepo root), write Next output to repo-root `.next` so the
+  // platform Output Directory matches. Local/Turbopack keep app-local `.next`.
   distDir: process.env.VERCEL ? "../../.next" : ".next",
   async redirects() {
     return [

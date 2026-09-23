@@ -202,8 +202,9 @@ export function ForgotPasswordModal({
             className="mt-3 space-y-4"
           >
             <p className="text-sm text-gray-600">
-              Enter your CUHK email (@link.cuhk.edu.hk) or username. We&apos;ll
-              send a GraceRun verification code right away.
+              Enter your university email (@link.cuhk.edu.hk or
+              @my.cityu.edu.hk) or username. We&apos;ll send a GraceRun
+              verification code right away.
             </p>
             <div>
               <label

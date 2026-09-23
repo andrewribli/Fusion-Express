@@ -14,4 +14,6 @@ export * from "./resolve-image";
 export * from "./product-text";
 export * from "./orders";
 export * from "./cuhk-email";
+export * from "./cityu-email";
+export * from "./campus";
 export * from "./canteen-college";

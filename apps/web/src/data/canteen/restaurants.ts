@@ -6,6 +6,7 @@ export type RestaurantId =
   | "cu-cafe"
   | "sh-ho-canteen"
   | "paper-and-coffee"
+  | "sorazen"
   | "na-canteen"
   | "cc-canteen"
   | "shaw-canteen";
@@ -20,6 +21,8 @@ export type Restaurant = {
   deliveryFee: number;
   collegeId: CollegeId | null;
   menuReady: boolean;
+  /** Optional brand mark shown on list cards and canteen headers. */
+  logoSrc?: string;
 };
 
 export const CANTEEN_DELIVERY_FEE = 10;
@@ -40,7 +43,7 @@ export const RESTAURANTS: Restaurant[] = [
     name: "UC Canteen",
     shortName: "UC Canteen",
     blurb: "United College canteen — breakfast to dinner by time zone.",
-    hoursLabel: "9:00 AM – 8:30 PM (by meal period)",
+    hoursLabel: "7:30 AM – 7:30 PM (by meal period · closed Sun)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "UC",
     menuReady: true,
@@ -63,7 +66,7 @@ export const RESTAURANTS: Restaurant[] = [
     shortName: "S.H. Ho Canteen",
     blurb: "The S.H. Ho College canteen serves casual Chinese and Western meals.",
     location: "S.H. Ho College",
-    hoursLabel: "8:00 AM – 9:00 PM (Mon–Sat)",
+    hoursLabel: "8:00 AM – 9:00 PM (incl. Sundays)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "SHHO",
     menuReady: true,
@@ -73,23 +76,40 @@ export const RESTAURANTS: Restaurant[] = [
     name: "Paper & Coffee",
     shortName: "Paper & Coffee",
     blurb:
-      "Paper & Coffee is a popular spot for premium coffee and Japanese-style rice bowls. Famous for its signature House Brew and Fried Chicken.",
+      "Premium coffee and Japanese-style teishoku, donburi, and noodles near University Station.",
     location:
       "LG/F, William M.W. Mong Building (near the University Station / \"foot of the hill\")",
-    hoursLabel: "8:00 AM – 5:00 PM (Mon–Fri)",
+    hoursLabel: "10:30 AM – 5:30 PM (Mon–Fri)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
+    logoSrc: "/canteen/paper-and-coffee-logo.png",
+  },
+  {
+    id: "sorazen",
+    name: "SoraZen",
+    shortName: "SoraZen",
+    blurb:
+      "Japanese-inspired bowls, salads, and hot pots at Benjamin Franklin Centre — breakfast through dinner.",
+    location:
+      "Benjamin Franklin Centre, Lower Ground (BFC LG · BFCLG-SORAZEN)",
+    hoursLabel: "7:30 AM – 7:30 PM (Mon–Fri · closed Sat)",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: null,
+    menuReady: true,
+    logoSrc: "/canteen/sorazen-logo.png",
   },
   {
     id: "na-canteen",
     name: "NA Canteen",
     shortName: "NA Canteen",
-    blurb: "New Asia College canteen — college discount when an NA runner picks up.",
-    hoursLabel: "Coming soon",
+    blurb:
+      "Bites Bro New Asia Canteen — breakfast sets, Rice Noodle Institute lunch, and campus drinks. College discount when an NA runner picks up.",
+    location: "New Asia College",
+    hoursLabel: "7:30 AM – 8:00 PM (breakfast · lunch · drinks)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "NA",
-    menuReady: false,
+    menuReady: true,
   },
   {
     id: "cc-canteen",

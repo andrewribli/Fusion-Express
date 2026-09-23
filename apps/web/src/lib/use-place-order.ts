@@ -4,7 +4,10 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
-import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
+import {
+  formatDeliveryAddress,
+  getLobbyForHall,
+} from "@/data/cuhk-locations";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import {
   getEstimatedDeliveryTime,
@@ -22,6 +25,7 @@ import { isCanteenCart } from "@/lib/canteen/cart";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
+import type { CampusId } from "@fusion-express/shared/campus";
 
 export function usePlaceOrder() {
   const router = useRouter();
@@ -32,13 +36,14 @@ export function usePlaceOrder() {
 
   const placeOrder = useCallback(
     async (opts: {
+      campus: CampusId;
       college: string;
       hall: string;
       customerNote?: string;
       tip?: number;
     }) => {
-      if (!opts.college || !opts.hall || items.length === 0) {
-        setError("Add items and choose your college and hall first.");
+      if (!opts.campus || !opts.college || !opts.hall || items.length === 0) {
+        setError("Add items and choose your campus and dorm first.");
         return;
       }
 
@@ -55,6 +60,7 @@ export function usePlaceOrder() {
 
         const customer = await ensureGuestCheckout({
           fullName,
+          campus: opts.campus,
           college: opts.college,
           hall: opts.hall,
         });
@@ -79,12 +85,11 @@ export function usePlaceOrder() {
           setError(ORDER_LIMIT_MESSAGE);
           return;
         }
-        const fee = resolveOrderDeliveryFee(items, opts.college);
-        // Reject negative tips; clamp rather than blocking submit.
+        const fee = resolveOrderDeliveryFee(items, opts.college, opts.campus);
         const tipAmount = Math.max(0, opts.tip ?? 0);
         const total = orderSubtotal + fee.deliveryFee + tipAmount;
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
-        const lobbyPoint = getLobbyForHall(opts.hall);
+        const lobbyPoint = getLobbyForHall(opts.hall, opts.campus);
         const customerName = customer.fullName.trim();
         const canteen = isCanteenCart(items);
         const restaurantId = canteen
@@ -95,14 +100,19 @@ export function usePlaceOrder() {
         const canteenCollege = canteen
           ? canteenCollegeForRestaurant(restaurantId) ?? undefined
           : undefined;
+        const orderChannel = canteen
+          ? ("canteen" as const)
+          : opts.campus === "cityu"
+            ? ("taste" as const)
+            : ("fusion" as const);
 
         const orderId = await createOrder({
           sessionId,
-          // New orders always key on Auth uid (never studentId/email fallback).
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
-          orderChannel: canteen ? "canteen" : "fusion",
+          campus: opts.campus,
+          orderChannel,
           canteenRestaurantId: restaurantId ?? undefined,
           canteenCollege,
           items: orderItems,

@@ -7,22 +7,28 @@ import type { MenuItem as BfItem } from "@/data/canteen/bf-menu";
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 import type { UcMenuItem } from "@/data/canteen/uc-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
+import type { SimpleRestaurantId } from "@/data/canteen/simple-menu";
 import {
   toCartMenuItemFromBf,
   toCartMenuItemFromSimple,
   toCartMenuItemFromUc,
 } from "@/lib/canteen/cart";
 
-type Props =
+type Props = (
   | { kind: "bf"; item: BfItem; restaurantId: "benjamin-franklin" }
   | { kind: "uc"; item: UcMenuItem; restaurantId: "uc-canteen" }
   | {
       kind: "simple";
       item: SimpleMenuItem;
-      restaurantId: "cu-cafe" | "sh-ho-canteen" | "paper-and-coffee";
-    };
+      restaurantId: SimpleRestaurantId;
+    }
+) & {
+  /** When canteen is closed, block add-to-cart. */
+  orderingEnabled?: boolean;
+};
 
 export function CanteenMenuCard(props: Props) {
+  const orderingEnabled = props.orderingEnabled !== false;
   const { items, addItem, setQuantity } = useCart();
   const cartItem =
     props.kind === "bf"
@@ -42,53 +48,76 @@ export function CanteenMenuCard(props: Props) {
       ? props.item.image
       : undefined;
   const signature = props.kind === "simple" ? props.item.signature : false;
+  const includesDrink =
+    props.kind === "simple"
+      ? Boolean(props.item.includesDrink)
+      : props.kind === "uc"
+        ? /hot drink|includes.*drink|complimentary hot drink/i.test(
+            props.item.description ?? "",
+          )
+        : false;
+  const drinkAddon =
+    props.kind === "simple" ? props.item.drinkAddonPrice : undefined;
   const restaurantId: RestaurantId = props.restaurantId;
 
   return (
-    <article className="flex gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
-      {image ? (
-        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="relative aspect-square w-full shrink-0 bg-gray-50">
+        {image ? (
           <Image
             src={image}
             alt={name}
             fill
-            sizes="80px"
+            sizes="(max-width:768px) 50vw, 200px"
             className="object-cover"
           />
-        </div>
-      ) : (
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-50 to-gray-50 text-xl font-bold text-[#ED1C24]/80">
-          {name.slice(0, 1)}
-        </div>
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <h3 className="text-sm font-semibold leading-snug text-gray-900">
-                {name}
-              </h3>
-              {signature ? (
-                <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
-                  Signature
-                </span>
-              ) : null}
-            </div>
-            {nameZh ? (
-              <p className="mt-0.5 text-xs text-gray-500">{nameZh}</p>
-            ) : null}
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-50 to-gray-50 text-3xl font-bold text-[#ED1C24]/70">
+            {name.slice(0, 1)}
           </div>
-          <p className="shrink-0 text-sm font-bold text-[#ED1C24]">
-            {formatHkd(props.item.price)}
-          </p>
-        </div>
+        )}
+        {signature ? (
+          <span className="absolute left-2 top-2 rounded-md bg-[#ED1C24] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+            Signature
+          </span>
+        ) : null}
+        {includesDrink ? (
+          <span className="absolute bottom-2 left-2 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+            Includes Drink
+          </span>
+        ) : null}
+      </div>
+      <div className="flex flex-1 flex-col p-3">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900">
+          {name}
+        </h3>
+        {nameZh ? (
+          <p className="mt-0.5 line-clamp-1 text-xs text-gray-500">{nameZh}</p>
+        ) : null}
         {description ? (
-          <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-gray-500">
+          <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-gray-500">
             {description}
           </p>
         ) : null}
-        <div className="mt-2 flex justify-end">
-          {qty === 0 ? (
+        {typeof drinkAddon === "number" ? (
+          <p className="mt-1 text-[11px] font-medium text-gray-600">
+            Add a drink +{formatHkd(drinkAddon)}
+          </p>
+        ) : null}
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <p className="text-sm font-bold text-[#ED1C24]">
+            {formatHkd(props.item.price)}
+          </p>
+          {!orderingEnabled ? (
+            <button
+              type="button"
+              disabled
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-lg font-bold leading-none text-gray-400"
+              aria-label="Ordering closed"
+            >
+              +
+            </button>
+          ) : qty === 0 ? (
             <button
               type="button"
               onClick={() => addItem(cartItem)}
@@ -98,7 +127,7 @@ export function CanteenMenuCard(props: Props) {
               +
             </button>
           ) : (
-            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-1 py-0.5">
+            <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-1 py-0.5">
               <button
                 type="button"
                 aria-label={`Decrease ${name}`}

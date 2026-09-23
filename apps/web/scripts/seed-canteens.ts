@@ -1,6 +1,6 @@
 /**
  * Seeds Firestore `canteens/{id}` + `canteens/{id}/items/{itemId}`
- * for the three new CUHK cafe/canteen entries.
+ * for CUHK cafe/canteen entries (CU Cafe, S.H. Ho, Paper & Coffee, SoraZen).
  *
  * Usage (from apps/web):
  *   npx tsx scripts/seed-canteens.ts
@@ -12,225 +12,11 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-
-const PLACEHOLDER = "https://placehold.co/200x200/png";
-
-type SeedItem = {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  category: string;
-  image: string;
-  signature?: boolean;
-  sortOrder: number;
-};
-
-type SeedRestaurant = {
-  id: string;
-  name: string;
-  shortName: string;
-  blurb: string;
-  location: string;
-  hoursLabel: string;
-  deliveryFee: number;
-  collegeId: string | null;
-  menuReady: boolean;
-  items: SeedItem[];
-};
-
-const RESTAURANTS: SeedRestaurant[] = [
-  {
-    id: "cu-cafe",
-    name: "CU Cafe",
-    shortName: "CU Cafe",
-    blurb:
-      "CU Cafe is a grab-and-go spot for sandwiches, salads, and premium coffee.",
-    location: "Lee Shau Kee Building (LSK)",
-    hoursLabel: "8:00 AM – 6:00 PM (Mon–Fri)",
-    deliveryFee: 10,
-    collegeId: null,
-    menuReady: true,
-    items: [
-      {
-        id: "turkey-breast-sandwich",
-        name: "Turkey Breast Sandwich",
-        description: "Turkey breast on fresh bread — grab-and-go.",
-        price: 38,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 1,
-      },
-      {
-        id: "caesar-salad",
-        name: "Caesar Salad",
-        description: "Crisp romaine with classic Caesar dressing.",
-        price: 42,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 2,
-      },
-      {
-        id: "house-brew-coffee",
-        name: "House Brew Coffee",
-        description: "Premium drip coffee.",
-        price: 25,
-        category: "drinks",
-        image: PLACEHOLDER,
-        sortOrder: 3,
-      },
-      {
-        id: "matcha-latte",
-        name: "Matcha Latte",
-        description: "Smooth matcha with steamed milk.",
-        price: 32,
-        category: "drinks",
-        image: PLACEHOLDER,
-        sortOrder: 4,
-      },
-      {
-        id: "chocolate-cake",
-        name: "Chocolate Cake",
-        description: "Rich chocolate slice.",
-        price: 28,
-        category: "dessert",
-        image: PLACEHOLDER,
-        sortOrder: 5,
-      },
-    ],
-  },
-  {
-    id: "sh-ho-canteen",
-    name: "S.H. Ho College Canteen",
-    shortName: "S.H. Ho Canteen",
-    blurb:
-      "The S.H. Ho College canteen serves casual Chinese and Western meals.",
-    location: "S.H. Ho College",
-    hoursLabel: "8:00 AM – 9:00 PM (Mon–Sat)",
-    deliveryFee: 10,
-    collegeId: "SHHO",
-    menuReady: true,
-    items: [
-      {
-        id: "chicken-rice",
-        name: "Chicken Rice",
-        description: "Casual Chinese chicken rice.",
-        price: 42,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 1,
-      },
-      {
-        id: "beef-noodles",
-        name: "Beef Noodles",
-        description: "Beef noodles in savory broth.",
-        price: 45,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 2,
-      },
-      {
-        id: "club-sandwich",
-        name: "Club Sandwich",
-        description: "Western-style club sandwich.",
-        price: 38,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 3,
-      },
-      {
-        id: "fried-rice",
-        name: "Fried Rice",
-        description: "Classic fried rice.",
-        price: 40,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 4,
-      },
-      {
-        id: "iced-lemon-tea",
-        name: "Iced Lemon Tea",
-        description: "Refreshing iced lemon tea.",
-        price: 15,
-        category: "drinks",
-        image: PLACEHOLDER,
-        sortOrder: 5,
-      },
-    ],
-  },
-  {
-    id: "paper-and-coffee",
-    name: "Paper & Coffee",
-    shortName: "Paper & Coffee",
-    blurb:
-      "Paper & Coffee is a popular spot for premium coffee and Japanese-style rice bowls. Famous for its signature House Brew and Fried Chicken.",
-    location:
-      'LG/F, William M.W. Mong Building (near the University Station / "foot of the hill")',
-    hoursLabel: "8:00 AM – 5:00 PM (Mon–Fri)",
-    deliveryFee: 10,
-    collegeId: null,
-    menuReady: true,
-    items: [
-      {
-        id: "house-brew-coffee",
-        name: "House Brew Coffee",
-        description: "Signature house brew — a campus favorite.",
-        price: 25,
-        category: "drinks",
-        image: PLACEHOLDER,
-        signature: true,
-        sortOrder: 1,
-      },
-      {
-        id: "matcha-latte",
-        name: "Matcha Latte",
-        description: "Signature matcha latte.",
-        price: 32,
-        category: "drinks",
-        image: PLACEHOLDER,
-        signature: true,
-        sortOrder: 2,
-      },
-      {
-        id: "japanese-fried-chicken",
-        name: "Japanese Fried Chicken",
-        description: "Famous Japanese-style fried chicken.",
-        price: 50,
-        category: "mains",
-        image: PLACEHOLDER,
-        signature: true,
-        sortOrder: 3,
-      },
-      {
-        id: "chicken-rice-bowl",
-        name: "Chicken Rice Bowl",
-        description: "Japanese-style chicken rice bowl.",
-        price: 52,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 4,
-      },
-      {
-        id: "dark-chocolate-cake",
-        name: "Dark Chocolate Cake",
-        description: "Dark chocolate cake slice.",
-        price: 32,
-        category: "dessert",
-        image: PLACEHOLDER,
-        sortOrder: 5,
-      },
-      {
-        id: "tea-pickled-rice-fried-chicken",
-        name: "Tea-Pickled Rice with Fried Chicken",
-        description: "Tea-pickled rice topped with fried chicken.",
-        price: 50,
-        category: "mains",
-        image: PLACEHOLDER,
-        sortOrder: 6,
-      },
-    ],
-  },
-];
+import { RESTAURANTS } from "../src/data/canteen/restaurants";
+import {
+  getSimpleMenu,
+  isSimpleMenuRestaurant,
+} from "../src/data/canteen/simple-menu";
 
 const candidates = [
   process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
@@ -262,27 +48,57 @@ if (!getApps().length) {
 const db = getFirestore();
 
 async function seed() {
-  console.log(`Seeding ${RESTAURANTS.length} canteens into Firestore…`);
+  const targets = RESTAURANTS.filter(
+    (r) => r.menuReady && isSimpleMenuRestaurant(r.id),
+  );
+  console.log(`Seeding ${targets.length} canteens into Firestore…`);
 
-  for (const r of RESTAURANTS) {
-    const { items, ...meta } = r;
+  for (const r of targets) {
+    const items = getSimpleMenu(r.id) ?? [];
     const ref = db.collection("canteens").doc(r.id);
     await ref.set({
-      ...meta,
+      id: r.id,
+      name: r.name,
+      shortName: r.shortName,
+      blurb: r.blurb,
+      location: r.location ?? null,
+      hoursLabel: r.hoursLabel,
+      deliveryFee: r.deliveryFee,
+      collegeId: r.collegeId,
+      menuReady: r.menuReady,
+      logoSrc: r.logoSrc ?? null,
       updatedAt: new Date().toISOString(),
     });
     console.log(`  wrote canteens/${r.id}`);
 
-    const batch = db.batch();
-    for (const item of items) {
-      const itemRef = ref.collection("items").doc(item.id);
-      batch.set(itemRef, {
-        ...item,
-        restaurantId: r.id,
-        cartItemId: `canteen:${r.id}:${item.id}`,
-      });
+    // Clear stale items then rewrite (menus can shrink/rename).
+    const existing = await ref.collection("items").listDocuments();
+    for (let i = 0; i < existing.length; i += 400) {
+      const batch = db.batch();
+      for (const doc of existing.slice(i, i + 400)) batch.delete(doc);
+      await batch.commit();
     }
-    await batch.commit();
+
+    for (let i = 0; i < items.length; i += 400) {
+      const batch = db.batch();
+      const chunk = items.slice(i, i + 400);
+      chunk.forEach((item, idx) => {
+        const itemRef = ref.collection("items").doc(item.id);
+        batch.set(itemRef, {
+          id: item.id,
+          name: item.name,
+          description: item.description ?? null,
+          price: item.price,
+          category: item.category,
+          image: item.image,
+          signature: item.signature ?? false,
+          sortOrder: i + idx + 1,
+          restaurantId: r.id,
+          cartItemId: `canteen:${r.id}:${item.id}`,
+        });
+      });
+      await batch.commit();
+    }
     console.log(`    wrote ${items.length} items under canteens/${r.id}/items`);
   }
 

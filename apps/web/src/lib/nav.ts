@@ -24,7 +24,7 @@ export interface NavTab {
 }
 
 export const CUSTOMER_TABS: NavTab[] = [
-  { href: "/", label: "Home", iconId: "home", match: ["/", "/home", "/fusion", "/canteen"] },
+  { href: "/", label: "Home", iconId: "home", match: ["/", "/home", "/fusion", "/canteen", "/taste", "/cuhk", "/cityu"] },
   { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
     href: "#runner",

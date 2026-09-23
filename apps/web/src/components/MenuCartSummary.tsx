@@ -11,8 +11,10 @@ import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 
 export function MenuCartSummary({
   channel = "fusion",
+  orderingEnabled = true,
 }: {
   channel?: "fusion" | "canteen";
+  orderingEnabled?: boolean;
 }) {
   const router = useRouter();
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
@@ -20,10 +22,10 @@ export function MenuCartSummary({
   const fee = resolveOrderDeliveryFee(items, "");
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
+  const checkoutBlocked = !orderingEnabled || overLimit || itemCount === 0;
 
   function goCheckout() {
-    if (itemCount === 0) return;
-    // Guests finish on checkout (dorm + lobby) — no login required.
+    if (checkoutBlocked) return;
     router.push("/checkout");
   }
 
@@ -103,9 +105,14 @@ export function MenuCartSummary({
             Hall and delivery fee are confirmed at checkout.
           </p>
           <OrderLimitNotice subtotal={subtotal} />
+          {!orderingEnabled ? (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+              This canteen is closed — checkout is paused until it opens.
+            </p>
+          ) : null}
           <button
             type="button"
-            disabled={overLimit || itemCount === 0}
+            disabled={checkoutBlocked}
             onClick={goCheckout}
             className="block w-full rounded-xl bg-[#ED1C24] py-3 text-center text-sm font-bold text-white disabled:bg-gray-100 disabled:text-gray-400"
           >

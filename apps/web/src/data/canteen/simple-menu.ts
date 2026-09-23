@@ -1,5 +1,8 @@
 import type { MenuCategory } from "@/data/canteen/bf-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
+import { NA_MENU } from "@/data/canteen/na-menu";
+import { PAPER_AND_COFFEE_MENU } from "@/data/canteen/paper-and-coffee-menu";
+import { SORAZEN_MENU } from "@/data/canteen/sorazen-menu";
 
 /** Prefer placehold.co — via.placeholder.com is often blocked in browsers. */
 export const CANTEEN_PLACEHOLDER_IMAGE = "https://placehold.co/200x200/png";
@@ -13,6 +16,12 @@ export type SimpleMenuItem = {
   image: string;
   /** Featured / house specialty badge when true. */
   signature?: boolean;
+  /** Meal windows this item is sold (canteen period sections). */
+  mealPeriods?: Array<"breakfast" | "lunch" | "tea" | "dinner">;
+  /** Bento / set that already includes a drink. */
+  includesDrink?: boolean;
+  /** Optional add-drink surcharge shown as a variant. */
+  drinkAddonPrice?: number;
 };
 
 export type SimpleRestaurantMenu = {
@@ -108,80 +117,32 @@ export const SH_HO_MENU: SimpleMenuItem[] = [
   },
 ];
 
-export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
-  {
-    id: "house-brew-coffee",
-    name: "House Brew Coffee",
-    description: "Signature house brew — a campus favorite.",
-    price: 25,
-    category: "drinks",
-    image: img,
-    signature: true,
-  },
-  {
-    id: "matcha-latte",
-    name: "Matcha Latte",
-    description: "Signature matcha latte.",
-    price: 32,
-    category: "drinks",
-    image: img,
-    signature: true,
-  },
-  {
-    id: "japanese-fried-chicken",
-    name: "Japanese Fried Chicken",
-    description: "Famous Japanese-style fried chicken.",
-    price: 50,
-    category: "mains",
-    image: img,
-    signature: true,
-  },
-  {
-    id: "chicken-rice-bowl",
-    name: "Chicken Rice Bowl",
-    description: "Japanese-style chicken rice bowl.",
-    price: 52,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "dark-chocolate-cake",
-    name: "Dark Chocolate Cake",
-    description: "Dark chocolate cake slice.",
-    price: 32,
-    category: "dessert",
-    image: img,
-  },
-  {
-    id: "tea-pickled-rice-fried-chicken",
-    name: "Tea-Pickled Rice with Fried Chicken",
-    description: "Tea-pickled rice topped with fried chicken.",
-    price: 50,
-    category: "mains",
-    image: img,
-  },
-];
+export type SimpleRestaurantId =
+  | "cu-cafe"
+  | "sh-ho-canteen"
+  | "paper-and-coffee"
+  | "sorazen"
+  | "na-canteen";
 
-export const SIMPLE_MENUS: Record<
-  "cu-cafe" | "sh-ho-canteen" | "paper-and-coffee",
-  SimpleMenuItem[]
-> = {
+export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "cu-cafe": CU_CAFE_MENU,
   "sh-ho-canteen": SH_HO_MENU,
   "paper-and-coffee": PAPER_AND_COFFEE_MENU,
+  sorazen: SORAZEN_MENU,
+  "na-canteen": NA_MENU,
 };
 
 export function getSimpleMenu(
   restaurantId: string,
 ): SimpleMenuItem[] | undefined {
   if (restaurantId in SIMPLE_MENUS) {
-    return SIMPLE_MENUS[restaurantId as keyof typeof SIMPLE_MENUS];
+    return SIMPLE_MENUS[restaurantId as SimpleRestaurantId];
   }
   return undefined;
 }
 
 export function isSimpleMenuRestaurant(
   id: string,
-): id is keyof typeof SIMPLE_MENUS {
+): id is SimpleRestaurantId {
   return id in SIMPLE_MENUS;
 }
