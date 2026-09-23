@@ -42,10 +42,7 @@ export function CampusPickerCards({
                 active ? selected : cardBase
               }`}
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#ED1C24]">
-                {cfg.name}
-              </p>
-              <p className="mt-1 text-base font-bold">{cfg.brandLabel}</p>
+              <p className="text-base font-bold">{cfg.name}</p>
               <p className={`mt-1 text-xs leading-snug ${muted}`}>
                 {cfg.emailDomains.map((d) => `@${d}`).join(" · ")}
               </p>

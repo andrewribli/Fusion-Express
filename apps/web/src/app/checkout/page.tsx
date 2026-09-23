@@ -232,7 +232,7 @@ export default function CheckoutPage() {
               </p>
               {lockedCampus ? (
                 <p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-800">
-                  {lockedCampus === "cityu" ? "GraceRun CityU" : "GraceRun CUHK"}
+                  {lockedCampus === "cityu" ? "CityU" : "CUHK"}
                 </p>
               ) : (
                 <div className="mt-3">

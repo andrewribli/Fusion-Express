@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CampusSelector } from "@/components/CampusSelector";
 import { CityUChannelSelector } from "@/components/CityUChannelSelector";
@@ -11,16 +11,11 @@ import { useUser } from "@/context/UserContext";
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const { isReady, bootError, user, isGuestBrowsing, startGuestBrowse } =
-    useUser();
+  const { isReady, bootError, user } = useUser();
   const { isReady: campusReady } = useCampus();
+  // Only the login page's "Continue as Guest" opts into the menu without an
+  // account; a stored guest flag must not hide the homepage on later visits.
   const guestParam = searchParams.get("guest") === "1";
-
-  useEffect(() => {
-    if (guestParam && !isGuestBrowsing && (!user || user.isGuest)) {
-      startGuestBrowse();
-    }
-  }, [guestParam, isGuestBrowsing, user, startGuestBrowse]);
 
   if (!isReady || !campusReady) {
     return <BootScreen error={bootError} />;
@@ -30,10 +25,7 @@ function HomeContent() {
   }
 
   const signedIn = Boolean(user && !user.isGuest);
-  const browsing =
-    signedIn || isGuestBrowsing || guestParam || Boolean(user?.isGuest);
-
-  if (!browsing) {
+  if (!signedIn && !guestParam) {
     return <MarketingHome />;
   }
 

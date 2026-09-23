@@ -49,7 +49,7 @@ export const campusConfig: Record<CampusId, CampusConfig> = {
   cityu: {
     id: "cityu",
     name: "CityU",
-    brandLabel: "GraceRun CityU",
+    brandLabel: "Ptero",
     supermarket: "Taste",
     supermarketLocation: "Festival Walk",
     groceryChannel: "taste",

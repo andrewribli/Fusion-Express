@@ -1,25 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AppLogo } from "@/components/AppLogo";
 import { LegalLink } from "@/components/LegalLink";
-import { useUser } from "@/context/UserContext";
 
 /**
  * Marketing homepage for signed-out visitors.
- * Logged-in / guest-browse users never see this — they land on the channel menu.
+ * Signed-in users never see this — they land on the channel menu.
  */
 export function MarketingHome() {
-  const router = useRouter();
-  const { startGuestBrowse, setMode } = useUser();
-
-  function browseAsGuest() {
-    startGuestBrowse();
-    setMode("customer");
-    router.push("/?guest=1");
-  }
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0a0a]/90 backdrop-blur-md">
@@ -65,20 +54,13 @@ export function MarketingHome() {
           <p className="mt-5 max-w-xl text-lg text-zinc-400 sm:text-xl">
             No hill. No queue. Just food.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8">
             <Link
               href="/login?mode=signup"
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#ED1C24] px-7 text-base font-bold text-white shadow-lg shadow-[#ED1C24]/25 hover:bg-[#c9171e]"
             >
               Get Started
             </Link>
-            <button
-              type="button"
-              onClick={browseAsGuest}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 text-base font-bold text-white hover:border-white/40 hover:bg-white/10"
-            >
-              Browse Menu
-            </button>
           </div>
         </div>
       </section>
@@ -192,11 +174,7 @@ export function MarketingHome() {
           Same runners. Same lobby drop-off.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={browseAsGuest}
-            className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a1010] to-[#0f0f0f] p-6 text-left transition hover:border-[#ED1C24]/50"
-          >
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a1010] to-[#0f0f0f] p-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-[#ED1C24]">
               Groceries
             </p>
@@ -204,19 +182,8 @@ export function MarketingHome() {
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
               From Fusion (CUHK) or Taste (CityU) to your dorm lobby.
             </p>
-            <span className="mt-6 inline-flex text-sm font-bold text-[#ED1C24]">
-              Browse groceries →
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              startGuestBrowse();
-              setMode("customer");
-              router.push("/canteen");
-            }}
-            className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#10141a] to-[#0f0f0f] p-6 text-left transition hover:border-emerald-400/40"
-          >
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#10141a] to-[#0f0f0f] p-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
               Canteen
             </p>
@@ -224,10 +191,7 @@ export function MarketingHome() {
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
               From your campus canteen to your dorm lobby.
             </p>
-            <span className="mt-6 inline-flex text-sm font-bold text-emerald-400">
-              Browse canteens →
-            </span>
-          </button>
+          </div>
         </div>
       </section>
 
