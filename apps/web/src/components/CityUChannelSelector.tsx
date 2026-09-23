@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { AccountMenu } from "@/components/AccountMenu";
+import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
 
 /**
@@ -63,27 +64,23 @@ export function CityUChannelSelector() {
             </span>
           </Link>
 
-          <Link
-            href="/canteen?campus=cityu"
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#10141a] via-[#121212] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-emerald-400/50"
+          <div
+            aria-disabled
+            className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#10141a] via-[#121212] to-[#0f0f0f] p-6 opacity-60 shadow-lg shadow-black/40"
           >
-            <div
-              className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-emerald-500/20 blur-3xl transition group-hover:bg-emerald-500/30"
-              aria-hidden
-            />
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
               Campus food
             </p>
             <h2 className="mt-2 text-2xl font-bold">CityU Canteens</h2>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-              Coming soon on this unified site — CUHK canteens remain available
-              under CUHK for now.
+              Hot food from CityU canteens is on the way.
             </p>
-            <span className="mt-6 inline-flex rounded-xl bg-emerald-500/80 px-4 py-2.5 text-sm font-bold text-white">
-              Browse canteens
+            <span className="mt-6 inline-flex rounded-xl bg-white/10 px-4 py-2.5 text-sm font-bold text-zinc-300">
+              Coming soon
             </span>
-          </Link>
+          </div>
         </div>
+        <GuestCampusSwitch />
       </main>
     </div>
   );

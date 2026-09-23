@@ -1,10 +1,17 @@
 "use client";
 
+import { campusConfig } from "@fusion-express/shared/campus";
+import { useCampus } from "@/context/CampusContext";
+import { useCart } from "@/context/CartContext";
+import { cartCampus } from "@/lib/cart-campus";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 
 /** Opens the shared manual-add modal (same as the Add tab). */
 export function CustomItemCard({ className = "" }: { className?: string }) {
   const { openManualItem } = useManualItemModal();
+  const { items } = useCart();
+  const { campus } = useCampus();
+  const store = campusConfig[cartCampus(items) ?? campus].supermarket;
 
   return (
     <section
@@ -24,7 +31,7 @@ export function CustomItemCard({ className = "" }: { className?: string }) {
             Can&apos;t find your item?
           </span>
           <span className="shop-muted mt-0.5 block text-xs" style={{ color: "#6b7280" }}>
-            Add your own and the runner will find it at Fusion.
+            Add your own and the runner will find it at {store}.
           </span>
         </span>
         <span

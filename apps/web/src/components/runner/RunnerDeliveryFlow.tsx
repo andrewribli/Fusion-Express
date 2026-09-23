@@ -9,6 +9,7 @@ import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
 
 const STEPS = [
   "Order details",
@@ -66,6 +67,7 @@ export function RunnerDeliveryFlow({
   onClose: () => void;
 }) {
   const [step, setStep] = useState(() => runnerFlowStartStep(order));
+  const store = supermarketForCampus(order.campus);
   const hasReceipt = Boolean(order.receiptUrl || receiptFile);
   const hasBank = Boolean(order.bankStatementUrl || bankFile);
   const hasLobby = Boolean(order.deliveryPhotoUrl || photoFile);
@@ -165,7 +167,7 @@ export function RunnerDeliveryFlow({
           {step === 1 && (
             <div className="space-y-3">
               <p className="text-sm text-[#f5f5f5]">
-                Pay ${order.subtotal} at Fusion yourself, then attach the receipt and bank
+                Pay ${order.subtotal} at {store} yourself, then attach the receipt and bank
                 statement. Each photo saves as soon as you pick it.
               </p>
               {order.status === "purchased" && order.receiptUrl && order.bankStatementUrl ? (
@@ -174,7 +176,7 @@ export function RunnerDeliveryFlow({
                 </p>
               ) : null}
               <FileDropzone
-                label="Fusion receipt (required)"
+                label={`${store} receipt (required)`}
                 hint="Tap to take or choose a photo"
                 file={receiptFile}
                 existingUrl={order.receiptUrl}
@@ -183,7 +185,7 @@ export function RunnerDeliveryFlow({
               />
               <FileDropzone
                 label="Bank statement (required)"
-                hint="Screenshot of the Fusion payment"
+                hint={`Screenshot of the ${store} payment`}
                 file={bankFile}
                 existingUrl={order.bankStatementUrl}
                 busy={uploading === "bank"}
@@ -221,10 +223,10 @@ export function RunnerDeliveryFlow({
           {step === 3 && (
             <div className="space-y-3">
               <p className="text-sm text-[#f5f5f5]">
-                Enter the exact Fusion receipt total. The customer pays this plus delivery.
+                Enter the exact {store} receipt total. The customer pays this plus delivery.
               </p>
               <label className="block text-sm font-semibold text-white" htmlFor="final-total">
-                Final Fusion total (HK$)
+                Final {store} total (HK$)
               </label>
               <input
                 id="final-total"

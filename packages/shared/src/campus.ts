@@ -66,8 +66,23 @@ export function isCampusId(value: unknown): value is CampusId {
   return value === "cuhk" || value === "cityu";
 }
 
+/** Profiles and orders from before multi-campus have no campus; they are CUHK. */
+export function resolveCampus(value: unknown): CampusId {
+  return isCampusId(value) ? value : "cuhk";
+}
+
 export function getCampusConfig(campus: CampusId): CampusConfig {
   return campusConfig[campus];
+}
+
+/** Supermarket the runner shops at for a grocery order ("Fusion" / "Taste"). */
+export function supermarketForCampus(campus: unknown): string {
+  return campusConfig[resolveCampus(campus)].supermarket;
+}
+
+export function supermarketPickupLocation(campus: unknown): string {
+  const cfg = campusConfig[resolveCampus(campus)];
+  return `${cfg.supermarket} supermarket, ${cfg.supermarketLocation}, ${cfg.name}`;
 }
 
 export function emailDomain(email: string): string {

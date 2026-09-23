@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { supermarketPickupLocation } from "@fusion-express/shared/campus";
 import {
-  FUSION_PICKUP_LOCATION,
   sendAdminNewOrderNotice,
   sendNonRunnerOrderNudge,
   sendOrderConfirmation,
@@ -130,6 +130,7 @@ export async function POST(request: Request) {
       >();
       for (const r of recipients) {
         if (customerEmail && r.email === customerEmail) continue;
+        if (r.campus !== order.campus) continue;
         byEmail.set(r.email, r);
       }
       for (const email of envRunners) {
@@ -141,18 +142,19 @@ export async function POST(request: Request) {
         });
       }
 
+      const pickupLocation =
+        order.orderChannel === "canteen"
+          ? "Campus canteen (see the app for which one)"
+          : supermarketPickupLocation(order.campus);
       await mapPool([...byEmail.values()], 5, async (person) => {
         if (person.isRunner) {
-          await sendRunnerNotification(
-            person.email,
-            order.id,
-            FUSION_PICKUP_LOCATION,
-          );
+          await sendRunnerNotification(person.email, order.id, pickupLocation);
         } else {
           await sendNonRunnerOrderNudge(
             person.email,
             order.id,
-            FUSION_PICKUP_LOCATION,
+            pickupLocation,
+            order.campus,
           );
         }
       });

@@ -5,6 +5,7 @@ import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
 import { useUser } from "@/context/UserContext";
 
 export function RunnerAcceptConfirmModal({
@@ -37,6 +38,7 @@ export function RunnerAcceptConfirmModal({
 
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const isCanteen = resolveOrderChannel(order) === "canteen";
+  const store = supermarketForCampus(order.campus);
 
   return (
     <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/60 p-4 sm:items-center">
@@ -52,7 +54,9 @@ export function RunnerAcceptConfirmModal({
         <p className="mt-2 text-sm text-gray-600">
           {isCanteen
             ? "Pick up at the canteen, then deliver to the lobby and take a photo."
-            : "You pick up at Fusion without paying — GraceRun settles the grocery bill. Then deliver to the lobby and take a photo."}
+            : order.fusionPaidByPlatform
+              ? `You pick up at ${store} without paying — GraceRun settles the grocery bill. Then deliver to the lobby and take a photo.`
+              : `You pay at ${store} yourself and GraceRun reimburses you after delivery. Write the customer's name on the receipt, deliver to the lobby, and take a photo.`}
         </p>
         <div className="mt-3">
           <CollegeDiscountRunnerBadge

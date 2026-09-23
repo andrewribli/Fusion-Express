@@ -7,6 +7,10 @@ import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
+import {
+  resolveCampus,
+  supermarketForCampus,
+} from "@fusion-express/shared/campus";
 
 function formatKg(kg: number): string {
   return `${Math.round(kg * 100) / 100} kg`;
@@ -30,7 +34,9 @@ export function RunnerOrderDetails({
   const breakdown = calculateDeliveryFee({
     weightKg: computedWeight,
     college: order.college,
+    campus: resolveCampus(order.campus),
   });
+  const store = supermarketForCampus(order.campus);
   const earn = runnerEarningsForOrder(order.deliveryFee);
 
   return (
@@ -101,7 +107,7 @@ export function RunnerOrderDetails({
             "Pay this at the canteen counter, then deliver to the lobby."
           ) : (
             <>
-              Pay this at Fusion <span className="font-bold">yourself first</span>.
+              Pay this at {store} <span className="font-bold">yourself first</span>.
               GraceRun reimburses you after delivery. Write the customer&apos;s
               full name on the receipt.
             </>
@@ -117,7 +123,7 @@ export function RunnerOrderDetails({
             <p className="text-[15px] font-bold leading-snug text-[#7A1F1F]">
               Upon delivery to the customer&apos;s dorm:{" "}
               <span className="font-semibold">
-                Ensure you attach the original Fusion receipt with the{" "}
+                Ensure you attach the original {store} receipt with the{" "}
                 <span className="underline">
                   customer&apos;s full name written on it
                 </span>

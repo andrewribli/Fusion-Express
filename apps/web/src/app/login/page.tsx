@@ -19,6 +19,10 @@ import { validateCampusEmail, type CampusId } from "@fusion-express/shared/campu
 import { friendlyAuthError } from "@/lib/auth-errors";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { BootScreen } from "@/components/BootScreen";
+import {
+  DEMO_CITYU_CUSTOMER,
+  DEMO_CITYU_RUNNER,
+} from "@/config/demo";
 
 const inputClassName =
   "mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20";
@@ -90,6 +94,41 @@ export default function LoginPage() {
     startGuestBrowse();
     setAppMode("customer");
     router.push(guestContinuePath(itemCount));
+  }
+
+  async function signInAsDemo(
+    demo: { email: string; password: string },
+    asRunner: boolean,
+  ) {
+    setError("");
+    setLoading(true);
+    setEmail(demo.email);
+    setPassword(demo.password);
+    try {
+      if (!firebaseEnabled && !demoAuth) {
+        throw new Error("Firebase is not configured — cannot sign in demo accounts.");
+      }
+      if (demoAuth) {
+        await signUp(demo.password, {
+          fullName: asRunner ? DEMO_CITYU_RUNNER.name : DEMO_CITYU_CUSTOMER.name,
+          email: demo.email,
+          campus: "cityu",
+          cuhkEmail: demo.email,
+          cuhkVerifiedAt: new Date().toISOString(),
+          isRunner: asRunner,
+          phone: asRunner ? DEMO_CITYU_RUNNER.phone : undefined,
+          college: asRunner ? DEMO_CITYU_RUNNER.college : undefined,
+        });
+      } else {
+        await signIn(demo.email, demo.password);
+      }
+      setAppMode(asRunner ? "runner" : "customer");
+      router.push(asRunner ? "/runner/dashboard" : postLoginPath());
+    } catch (err) {
+      setError(friendlyAuthError(err) || "Demo sign in failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function switchMode(next: Mode) {
@@ -243,9 +282,10 @@ export default function LoginPage() {
     }
   }
 
-  // Already signed in — never leave people stuck on the auth form.
+  // Already signed in — never leave people stuck on the auth form. Guest
+  // checkout sessions still need to reach sign-up to make a real account.
   useEffect(() => {
-    if (!isReady || !user) return;
+    if (!isReady || !user || user.isGuest) return;
     router.replace("/");
   }, [user, isReady, router]);
 
@@ -363,7 +403,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="1155xxxxxx@link.cuhk.edu.hk"
+                placeholder="Your university email"
                 className={inputClassName}
               />
             </div>
@@ -410,6 +450,31 @@ export default function LoginPage() {
                 Browse and order without signing in — checkout only needs your
                 dorm and lobby.
               </p>
+            </div>
+            <div className="space-y-2 rounded-2xl border border-dashed border-[#ED1C24]/40 bg-red-50 p-4">
+              <p className="text-xs font-semibold text-gray-800">
+                CityU prototype demo accounts
+              </p>
+              <p className="text-[11px] text-gray-600">
+                Password for both:{" "}
+                <span className="font-mono font-semibold">cityu1234</span>
+              </p>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void signInAsDemo(DEMO_CITYU_CUSTOMER, false)}
+                className="w-full rounded-xl bg-white py-2.5 text-sm font-semibold text-gray-900 shadow-sm disabled:opacity-60"
+              >
+                Sign in as demo CityU customer
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void signInAsDemo(DEMO_CITYU_RUNNER, true)}
+                className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              >
+                Sign in as demo CityU runner
+              </button>
             </div>
           </form>
         ) : (

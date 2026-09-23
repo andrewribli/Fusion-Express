@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { ItemListRow } from "@/components/ItemListRow";
 import { MenuSearch } from "@/components/MenuSearch";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
+import { TASTE_PRODUCTS } from "@/data/cityu/taste-products";
+import { cartCampus } from "@/lib/cart-campus";
 import { loadAllProducts } from "@/lib/firestore";
 import { searchItems } from "@/lib/menu";
 import type { MenuItem } from "@/lib/types";
@@ -26,13 +29,20 @@ export function ProductSearchPanel({
   tone?: "dark" | "light";
   className?: string;
 }) {
-  const { addItem } = useCart();
+  const { addItem, items: cartItems } = useCart();
+  const { campus: activeCampus } = useCampus();
+  const campus = cartCampus(cartItems) ?? activeCampus;
   const [search, setSearch] = useState("");
   const [loaded, setLoaded] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(!items);
 
   useEffect(() => {
     if (items) {
+      setLoading(false);
+      return;
+    }
+    if (campus === "cityu") {
+      setLoaded(TASTE_PRODUCTS);
       setLoading(false);
       return;
     }
@@ -51,7 +61,7 @@ export function ProductSearchPanel({
     return () => {
       cancelled = true;
     };
-  }, [items]);
+  }, [items, campus]);
 
   const pool = items ?? loaded;
   const matches = search.trim() ? searchItems(pool, search) : [];

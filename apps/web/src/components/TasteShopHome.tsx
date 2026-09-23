@@ -60,7 +60,8 @@ export function TasteShopHome() {
             {config.supermarket} @ Festival Walk
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Prototype catalog — Halls 1–12 lobby delivery.
+            Delivered to your CityU hall lobby. Pay the exact receipt after
+            delivery.
           </p>
           <input
             type="search"

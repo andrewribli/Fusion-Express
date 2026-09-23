@@ -22,17 +22,20 @@ import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
-import { isCanteenCart } from "@/lib/canteen/cart";
+import { useCampus } from "@/context/CampusContext";
+import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const fee = resolveOrderDeliveryFee(items, "");
+  const { campus: activeCampus } = useCampus();
+  const campus = cartCampus(items) ?? activeCampus;
+  const mixedError = cartCampusError(items, null);
+  const fee = resolveOrderDeliveryFee(items, "", campus);
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
-  const shopHref = isCanteenCart(items) ? "/canteen" : "/fusion";
 
   function handleCancelOrder() {
     clearCart();
@@ -54,7 +57,7 @@ export default function CartPage() {
                     href="/"
                     className="mt-4 inline-block rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-white"
                   >
-                    Choose Fusion or Canteen
+                    Start shopping
                   </Link>
                 </div>
                 <ProductSearchPanel
@@ -179,9 +182,14 @@ export default function CartPage() {
                 <div className="mt-2">
                   <OrderLimitNotice subtotal={subtotal} />
                 </div>
+                {mixedError && (
+                  <p className="mt-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {mixedError}
+                  </p>
+                )}
                 <button
                   type="button"
-                  disabled={overLimit}
+                  disabled={overLimit || Boolean(mixedError)}
                   onClick={() => {
                     // Guests and signed-in users both finish on checkout so we
                     // can collect dorm / lobby in one place.

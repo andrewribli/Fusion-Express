@@ -22,6 +22,7 @@ import {
   restaurantIdFromOrderItems,
 } from "@/data/canteen/colleges";
 import { isCanteenCart } from "@/lib/canteen/cart";
+import { cartCampusError } from "@/lib/cart-campus";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
@@ -44,6 +45,11 @@ export function usePlaceOrder() {
     }) => {
       if (!opts.campus || !opts.college || !opts.hall || items.length === 0) {
         setError("Add items and choose your campus and dorm first.");
+        return;
+      }
+      const campusError = cartCampusError(items, opts.campus);
+      if (campusError) {
+        setError(campusError);
         return;
       }
 

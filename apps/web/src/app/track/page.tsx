@@ -29,6 +29,7 @@ import {
 } from "@/lib/notifications";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import type { Order } from "@/lib/types";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
 import { redirectToAirwallexCheckout } from "@/lib/airwallex-checkout";
 import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 
@@ -295,7 +296,7 @@ function TrackContent() {
 
             {order.priceAdjustmentStatus === "refund_pending" && (
               <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-800">
-                Fusion prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
+                {supermarketForCampus(order.campus)} prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
                 estimate. You will be refunded ${order.refundAmount} within 3–5 business
                 days via card, PayMe, or FPS.
               </p>
@@ -310,7 +311,7 @@ function TrackContent() {
               getUserAccountId(user) === order.customerId && (
                 <div className="mt-3 space-y-2 rounded-xl bg-amber-50 px-3 py-3">
                   <p className="text-xs text-amber-900">
-                    Fusion prices are higher than the app estimate. New total $
+                    {supermarketForCampus(order.campus)} prices are higher than the app estimate. New total $
                     {order.actualSubtotal != null
                       ? order.actualSubtotal + order.deliveryFee + (order.tip ?? 0)
                       : order.total}
@@ -372,7 +373,7 @@ function TrackContent() {
 
             {order.status === "delivered" && !hasConfirmedGroceryTotal(order) && (
               <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                Waiting for the runner to enter the Fusion receipt total. You pay
+                Waiting for the runner to enter the {supermarketForCampus(order.campus)} receipt total. You pay
                 that exact amount after it is in.
               </p>
             )}

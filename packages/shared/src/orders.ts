@@ -12,6 +12,7 @@ import {
   resolveSpecialInstructions,
 } from "./constants";
 import type { Order, OrderItem, OrderStatus, PriceAdjustmentStatus } from "./types";
+import type { CampusId } from "./campus";
 import {
   ACTIVE_ORDER_LIMIT_MESSAGE,
   CUSTOMER_DEADLINE_REMINDER_MS,
@@ -393,6 +394,16 @@ function filterOwnOrders(orders: Order[], excludeCustomerId?: string): Order[] {
   return orders.filter((o) => o.customerId !== excludeCustomerId);
 }
 
+/** Orders placed before multi-campus have no `campus`; they are all CUHK. */
+export function orderCampus(order: Pick<Order, "campus">): CampusId {
+  return order.campus ?? "cuhk";
+}
+
+function filterCampusOrders(orders: Order[], campus?: CampusId): Order[] {
+  if (!campus) return orders;
+  return orders.filter((o) => orderCampus(o) === campus);
+}
+
 const ORDER_PAGE_SIZE = 100;
 
 function parseSnapshotDocs(
@@ -414,6 +425,16 @@ function byNewestFirst(a: Order, b: Order): number {
  * "Missing or insufficient permissions".
  */
 export async function fetchPendingOrders(
+  excludeCustomerId?: string,
+  campus?: CampusId,
+): Promise<Order[]> {
+  return filterCampusOrders(
+    await fetchUnscopedPendingOrders(excludeCustomerId),
+    campus,
+  );
+}
+
+async function fetchUnscopedPendingOrders(
   excludeCustomerId?: string,
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
@@ -456,14 +477,19 @@ export function subscribePendingOrders(
   onOrders: (orders: Order[]) => void,
   options?: {
     excludeCustomerId?: string;
+    /** Only show jobs on the runner's own campus. */
+    campus?: CampusId;
     onError?: (err: Error) => void;
   },
 ): () => void {
   const emit = (orders: Order[]) => {
     onOrders(
-      filterOwnOrders(
-        orders.filter((o) => !o.runnerId),
-        options?.excludeCustomerId,
+      filterCampusOrders(
+        filterOwnOrders(
+          orders.filter((o) => !o.runnerId),
+          options?.excludeCustomerId,
+        ),
+        options?.campus,
       ),
     );
   };
@@ -620,6 +646,7 @@ export async function acceptOrder(
     subtotal: number;
     total: number;
   },
+  runnerCampus?: CampusId,
 ): Promise<void> {
   const now = new Date();
   const paymentFields = omitUndefined({
@@ -646,6 +673,9 @@ export async function acceptOrder(
       const order = parseOrder(snap.id, snap.data() as Record<string, unknown>);
       if (order.customerId === runnerUid) {
         throw new SelfPickupError();
+      }
+      if (runnerCampus && orderCampus(order) !== runnerCampus) {
+        throw new Error("This order is on a different campus.");
       }
       if (!isClaimableOrderStatus(order.status)) {
         if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;

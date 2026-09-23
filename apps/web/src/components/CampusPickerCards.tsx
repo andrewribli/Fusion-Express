@@ -2,6 +2,11 @@
 
 import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
 
+const CAMPUS_LOGOS: Record<CampusId, string> = {
+  cuhk: "/images/campus/cuhk.png",
+  cityu: "/images/campus/cityu.svg",
+};
+
 /**
  * Compact CUHK / CityU cards for signup and guest checkout.
  */
@@ -20,8 +25,6 @@ export function CampusPickerCards({
   const selected = dark
     ? "border-[#ED1C24] bg-[#1a1010] ring-2 ring-[#ED1C24]/40"
     : "border-[#ED1C24] bg-red-50 ring-2 ring-[#ED1C24]/30";
-  const muted = dark ? "text-zinc-400" : "text-gray-500";
-
   return (
     <fieldset>
       <legend className={`text-sm font-semibold ${dark ? "text-white" : "text-gray-900"}`}>
@@ -42,10 +45,19 @@ export function CampusPickerCards({
                 active ? selected : cardBase
               }`}
             >
-              <p className="text-base font-bold">{cfg.name}</p>
-              <p className={`mt-1 text-xs leading-snug ${muted}`}>
-                {cfg.emailDomains.map((d) => `@${d}`).join(" · ")}
-              </p>
+              <div
+                className={`flex h-16 w-fit items-center ${
+                  dark ? "rounded-lg bg-white p-1.5" : ""
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={CAMPUS_LOGOS[id]}
+                  alt={`${cfg.name} logo`}
+                  className="h-full w-auto max-w-full object-contain"
+                />
+              </div>
+              <p className="mt-3 text-base font-bold">{cfg.name}</p>
             </button>
           );
         })}

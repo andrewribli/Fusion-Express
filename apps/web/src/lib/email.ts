@@ -1,6 +1,7 @@
 import "server-only";
 import { Resend } from "resend";
 import { isStagingApp } from "@fusion-express/shared";
+import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
 
 const ACCENT = "#ED1C24";
 const FOOTER = "Thanks for using GraceRun — groceries delivered with grace.";
@@ -120,7 +121,7 @@ const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   },
   accepted: {
     heading: "A runner accepted your order",
-    body: "Your runner is heading to Fusion to collect your groceries.",
+    body: "Your runner is heading to {store} to collect your order.",
   },
   purchased: {
     heading: "Your order has been purchased",
@@ -128,7 +129,7 @@ const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   },
   delivered: {
     heading: "Order delivered — receipt ready",
-    body: "The runner uploaded the Fusion receipt. Reimburse them via PayMe/FPS, then mark runner paid.",
+    body: "The runner uploaded the {store} receipt. Reimburse them via PayMe/FPS, then mark runner paid.",
   },
   runner_paid: {
     heading: "GraceRun reimbursed you",
@@ -182,12 +183,14 @@ export async function sendOrderStatusUpdate(
   customerEmail: string,
   orderId: string,
   status: string,
+  store = "Fusion",
 ): Promise<void> {
   const trackUrl = orderTrackUrl(orderId);
-  const copy = STATUS_COPY[status] ?? {
+  const template = STATUS_COPY[status] ?? {
     heading: "Your order was updated",
     body: `Status is now ${status}.`,
   };
+  const copy = { ...template, body: template.body.replace("{store}", store) };
   const html = brandedEmail({
     preheader: `${copy.heading} (${orderId})`,
     heading: copy.heading,
@@ -241,7 +244,10 @@ export async function sendNonRunnerOrderNudge(
   email: string,
   orderId: string,
   pickupLocation: string,
+  campus: CampusId = "cuhk",
 ): Promise<void> {
+  const campusName = campusConfig[campus].name;
+  const supermarket = campusConfig[campus].supermarket;
   const origin = appOrigin();
   const registerUrl = `${origin}/runner/register`;
   const trackUrl = orderTrackUrl(orderId);
@@ -251,7 +257,7 @@ export async function sendNonRunnerOrderNudge(
     trackUrl: registerUrl,
     bodyHtml: `
       <p style="margin:0 0 12px;font-size:14px;color:#111827;">
-        Someone at CUHK just ordered groceries from Fusion — and GraceRun needs a hero (that's you, maybe?) to pick it up.
+        Someone at ${campusName} just ordered from ${supermarket} — and GraceRun needs a hero (that's you, maybe?) to pick it up.
       </p>
       <p style="margin:0 0 12px;font-size:14px;color:#111827;">
         You're signed up as a customer, so you can't grab this one yet. Create a runner account (takes a minute), then accept orders and earn delivery fees between classes.
@@ -260,7 +266,7 @@ export async function sendNonRunnerOrderNudge(
       <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(orderId)}</p>
       <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#111827;">Pickup</p>
       <p style="margin:0 0 16px;font-size:14px;color:#111827;">${escapeHtml(pickupLocation)}</p>
-      <p style="margin:0;font-size:13px;color:#6b7280;">No cape required. Just comfortable shoes and a CUHK email.</p>
+      <p style="margin:0;font-size:13px;color:#6b7280;">No cape required. Just comfortable shoes and a ${campusName} email.</p>
     `,
   });
   const { error } = await getResend().emails.send({
@@ -272,9 +278,6 @@ export async function sendNonRunnerOrderNudge(
   });
   if (error) throw new Error(error.message);
 }
-
-export const FUSION_PICKUP_LOCATION =
-  "Fusion supermarket, Benjamin Franklin Centre, CUHK";
 
 const DEADLINE_COPY: Record<string, { heading: string; body: string }> = {
   runner_reminder: {

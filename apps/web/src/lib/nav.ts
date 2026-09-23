@@ -80,6 +80,9 @@ export function isShopPath(pathname: string): boolean {
     pathname === "/" ||
     pathname === "/home" ||
     pathname === "/fusion" ||
+    pathname === "/taste" ||
+    pathname === "/cuhk" ||
+    pathname === "/cityu" ||
     pathname.startsWith("/canteen") ||
     pathname.startsWith("/browse") ||
     pathname.startsWith("/menu") ||

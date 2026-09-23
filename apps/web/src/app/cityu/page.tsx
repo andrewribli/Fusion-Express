@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { CampusSelector } from "@/components/CampusSelector";
 import { CityUChannelSelector } from "@/components/CityUChannelSelector";
 import { BootScreen } from "@/components/BootScreen";
 import { useCampus } from "@/context/CampusContext";
@@ -8,7 +9,7 @@ import { useUser } from "@/context/UserContext";
 
 export default function CityUChannelPage() {
   const { isReady, bootError, user } = useUser();
-  const { setCampus, isReady: campusReady } = useCampus();
+  const { campus, setCampus, isReady: campusReady } = useCampus();
 
   useEffect(() => {
     setCampus("cityu");
@@ -21,5 +22,5 @@ export default function CityUChannelPage() {
     return <BootScreen error={bootError} />;
   }
 
-  return <CityUChannelSelector />;
+  return campus === "cuhk" ? <CampusSelector /> : <CityUChannelSelector />;
 }

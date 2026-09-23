@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { resolveCampus, type CampusId } from "@fusion-express/shared/campus";
 import { getUserAccountId, useUser } from "@/context/UserContext";
+import { useCampus } from "@/context/CampusContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { subscribePendingOrders } from "@/lib/orders";
 
@@ -10,9 +12,9 @@ export type PendingQueueItem = {
   dorm: string;
 };
 
-async function fetchPendingQueue(): Promise<PendingQueueItem[]> {
+async function fetchPendingQueue(campus: CampusId): Promise<PendingQueueItem[]> {
   try {
-    const res = await fetch("/api/runner/pending-count", {
+    const res = await fetch(`/api/runner/pending-count?campus=${campus}`, {
       cache: "no-store",
     });
     if (!res.ok) return [];
@@ -37,15 +39,17 @@ async function fetchPendingQueue(): Promise<PendingQueueItem[]> {
 }
 
 /**
- * Live claimable runner-queue orders (pending, unassigned).
- * Runners get Firestore onSnapshot; everyone else polls the public count API
- * (client rules block non-runners from listing the job board).
+ * Live claimable runner-queue orders (pending, unassigned) on the viewer's
+ * campus. Runners get Firestore onSnapshot; everyone else polls the public
+ * count API (client rules block non-runners from listing the job board).
  */
 export function usePendingRunnerOrders(): {
   count: number;
   orders: PendingQueueItem[];
 } {
   const { user } = useUser();
+  const { campus: activeCampus } = useCampus();
+  const campus = user?.campus ? resolveCampus(user.campus) : activeCampus;
   const [orders, setOrders] = useState<PendingQueueItem[]>([]);
 
   useEffect(() => {
@@ -63,8 +67,9 @@ export function usePendingRunnerOrders(): {
         },
         {
           excludeCustomerId,
+          campus,
           onError: () => {
-            void fetchPendingQueue().then(setOrders);
+            void fetchPendingQueue(campus).then(setOrders);
           },
         },
       );
@@ -72,7 +77,7 @@ export function usePendingRunnerOrders(): {
 
     let cancelled = false;
     async function load() {
-      const next = await fetchPendingQueue();
+      const next = await fetchPendingQueue(campus);
       if (!cancelled) setOrders(next);
     }
     void load();
@@ -81,7 +86,7 @@ export function usePendingRunnerOrders(): {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [user]);
+  }, [user, campus]);
 
   return { count: orders.length, orders };
 }

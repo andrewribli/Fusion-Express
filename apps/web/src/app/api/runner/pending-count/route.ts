@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveCampus } from "@fusion-express/shared/campus";
 import { collectionName } from "@/lib/constants";
 import { adminAccessToken } from "@/lib/firestore-rest";
 
@@ -20,7 +21,8 @@ function fieldString(
  * Uses Firestore REST (not firebase-admin) to avoid the jose ESM crash on Vercel.
  * Public so customers can see available deliveries without runner list rules.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const campus = resolveCampus(new URL(request.url).searchParams.get("campus"));
   try {
     const ctx = await adminAccessToken();
     if (!ctx) {
@@ -78,6 +80,7 @@ export async function GET() {
       const runnerId = fieldString(fields, "runnerId");
       const runnerUid = fieldString(fields, "runnerUid");
       if (runnerId || runnerUid) continue;
+      if (resolveCampus(fieldString(fields, "campus")) !== campus) continue;
       const name = row.document?.name ?? "";
       const id = name.split("/").pop()?.trim() || fieldString(fields, "id");
       if (!id) continue;

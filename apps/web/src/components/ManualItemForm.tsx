@@ -7,6 +7,9 @@ import {
   RUNNER_JUDGMENT_NOTE,
 } from "@/lib/constants";
 import { createCustomMenuItem } from "@/lib/custom-item";
+import { useCampus } from "@/context/CampusContext";
+import { cartCampus } from "@/lib/cart-campus";
+import { campusConfig } from "@fusion-express/shared/campus";
 
 export function ManualItemForm({
   className = "",
@@ -15,7 +18,10 @@ export function ManualItemForm({
   className?: string;
   onAdded?: () => void;
 }) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
+  const { campus: activeCampus } = useCampus();
+  const campus = cartCampus(items) ?? activeCampus;
+  const store = campusConfig[campus].supermarket;
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [qty, setQty] = useState(1);
@@ -28,7 +34,10 @@ export function ManualItemForm({
     const parsed = Number.parseFloat(price);
     const estimatedPrice =
       Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-    addItem(createCustomMenuItem(trimmed, { estimatedPrice }), Math.max(1, qty));
+    addItem(
+      createCustomMenuItem(trimmed, { estimatedPrice, campus }),
+      Math.max(1, qty),
+    );
     setAdded(trimmed);
     setName("");
     setPrice("");
@@ -115,7 +124,7 @@ export function ManualItemForm({
         </p>
       )}
       <p className="mt-3 text-xs leading-relaxed text-gray-500">
-        The runner will find this item at Fusion. If it&apos;s not available, they&apos;ll
+        The runner will find this item at {store}. If it&apos;s not available, they&apos;ll
         use their best judgment. Custom items count as {CUSTOM_ITEM_DEFAULT_WEIGHT_KG}{" "}
         kg for the delivery-fee estimate. {RUNNER_JUDGMENT_NOTE}.
       </p>

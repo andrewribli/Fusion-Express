@@ -32,7 +32,8 @@ import { usePlaceOrder } from "@/lib/use-place-order";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { isCanteenCart } from "@/lib/canteen/cart";
-import type { CampusId } from "@fusion-express/shared/campus";
+import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
+import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
 export default function CheckoutPage() {
   const { user } = useUser();
@@ -58,7 +59,16 @@ export default function CheckoutPage() {
     }
   }, [lockedCampus, setCampus]);
 
+  const itemsCampus = cartCampus(items);
+  useEffect(() => {
+    if (!lockedCampus && itemsCampus && !guestCampus) {
+      setGuestCampus(itemsCampus);
+      setCampus(itemsCampus);
+    }
+  }, [guestCampus, itemsCampus, lockedCampus, setCampus]);
+
   const campus = lockedCampus ?? guestCampus;
+  const campusError = cartCampusError(items, campus);
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const fee = useMemo(
@@ -67,12 +77,12 @@ export default function CheckoutPage() {
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
-  const canSubmit = Boolean(campus && college && hall && !overLimit);
+  const canSubmit = Boolean(
+    campus && college && hall && !overLimit && !campusError,
+  );
   const shopHref = isCanteenCart(items)
     ? "/canteen"
-    : campus === "cityu"
-      ? "/taste"
-      : "/fusion";
+    : campusConfig[campus ?? "cuhk"].groceryPath;
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
@@ -143,6 +153,11 @@ export default function CheckoutPage() {
           {placeError && (
             <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
               {placeError}
+            </p>
+          )}
+          {campusError && (
+            <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {campusError}
             </p>
           )}
           <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
@@ -347,11 +362,16 @@ export default function CheckoutPage() {
                   </span>
                   <span className="text-sm font-normal">· ${total}</span>
                 </button>
-                {!canSubmit && (
-                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
-                    Choose your college and hall to continue.
+                {campusError ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24]">
+                    {campusError}
                   </p>
-                )}
+                ) : !canSubmit ? (
+                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
+                    Choose your {campus === "cityu" ? "compound" : "college"} and
+                    hall to continue.
+                  </p>
+                ) : null}
               </div>
             </div>
           </form>

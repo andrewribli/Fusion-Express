@@ -220,7 +220,7 @@ export function ForgotPasswordModal({
                 autoComplete="username"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="1155xxxxxx@link.cuhk.edu.hk or username"
+                placeholder="University email or username"
                 className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-[#ED1C24] focus:outline-none focus:ring-2 focus:ring-[#ED1C24]/20"
               />
             </div>

@@ -1,6 +1,7 @@
 import "server-only";
 import { createSign } from "crypto";
 import { collectionName } from "@/lib/constants";
+import { resolveCampus, type CampusId } from "@fusion-express/shared/campus";
 
 /**
  * Identity Toolkit + Firestore REST helpers for payment routes.
@@ -241,6 +242,8 @@ export type OrderEmailFields = {
   finalTotal: number;
   amountPaidByRunner: number;
   deliveryLocation: string;
+  campus: CampusId;
+  orderChannel: string;
   items: { name: string; quantity: number; price: number }[];
 };
 
@@ -280,6 +283,8 @@ export function orderEmailFieldsFromData(
     finalTotal: Number(data.finalTotal ?? 0) || 0,
     amountPaidByRunner: Number(data.amountPaidByRunner ?? 0) || 0,
     deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    campus: resolveCampus(data.campus),
+    orderChannel: String(data.orderChannel ?? ""),
     items,
   };
 }
@@ -544,12 +549,12 @@ export function filterBroadcastRecipients(
 }
 
 export async function listUserAlertRecipientsRest(): Promise<
-  { email: string; isRunner: boolean }[]
+  { email: string; isRunner: boolean; campus: CampusId }[]
 > {
   const ctx = await adminAccessToken();
   if (!ctx) return [];
   const col = collectionName("users");
-  const out: { email: string; isRunner: boolean }[] = [];
+  const out: { email: string; isRunner: boolean; campus: CampusId }[] = [];
   const seen = new Set<string>();
   let pageToken = "";
 
@@ -582,6 +587,7 @@ export async function listUserAlertRecipientsRest(): Promise<
       out.push({
         email,
         isRunner: Boolean(fields.isRunner) || Boolean(fields.runnerId),
+        campus: resolveCampus(fields.campus),
       });
     }
     if (!data.nextPageToken) break;

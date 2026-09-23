@@ -55,6 +55,14 @@ import {
 } from "@/lib/order-status";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
+import {
+  resolveCampus,
+  supermarketForCampus,
+} from "@fusion-express/shared/campus";
+
+function runnerCampusOf(user: { campus?: unknown }) {
+  return resolveCampus(user.campus);
+}
 
 type Tab = "available" | "active" | "expired" | "completed";
 
@@ -483,6 +491,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       },
       {
         excludeCustomerId: getUserAccountId(user),
+        campus: runnerCampusOf(user),
         onError: (err) => {
           setLoadError(err.message || "Could not load available orders.");
           setPending([]);
@@ -546,6 +555,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           email: user.email,
         },
         discount,
+        runnerCampusOf(user),
       );
       setConfirmOrder(null);
       router.push("/runner/deliveries");
@@ -739,13 +749,14 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     let bankStatementUrl = order?.bankStatementUrl;
     let deliveryPhotoUrl = order?.deliveryPhotoUrl;
     const verified = Boolean(bagConfirmed[orderId] || order?.runnerVerified);
+    const store = supermarketForCampus(order?.campus);
 
     if (!receiptUrl && !receipt) {
-      setDeliverError("Upload the Fusion receipt photo.");
+      setDeliverError(`Upload the ${store} receipt photo.`);
       return false;
     }
     if (!bankStatementUrl && !bank) {
-      setDeliverError("Upload a bank statement of the Fusion payment.");
+      setDeliverError(`Upload a bank statement of the ${store} payment.`);
       return false;
     }
     if (!deliveryPhotoUrl && !file) {
@@ -753,7 +764,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       return false;
     }
     if (!(finalTotal > 0)) {
-      setDeliverError("Enter the final Fusion receipt total before marking delivered.");
+      setDeliverError(`Enter the final ${store} receipt total before marking delivered.`);
       return false;
     }
     if (!verified) {

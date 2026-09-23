@@ -12,7 +12,7 @@ import { useUser } from "@/context/UserContext";
 function HomeContent() {
   const searchParams = useSearchParams();
   const { isReady, bootError, user } = useUser();
-  const { isReady: campusReady } = useCampus();
+  const { campus, isReady: campusReady } = useCampus();
   // Only the login page's "Continue as Guest" opts into the menu without an
   // account; a stored guest flag must not hide the homepage on later visits.
   const guestParam = searchParams.get("guest") === "1";
@@ -29,7 +29,7 @@ function HomeContent() {
     return <MarketingHome />;
   }
 
-  if (user?.campus === "cityu") {
+  if (campus === "cityu") {
     return <CityUChannelSelector />;
   }
   return <CampusSelector />;
