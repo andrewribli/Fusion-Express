@@ -39,7 +39,7 @@ function item(
   return { imageUrl: PLACEHOLDER_IMAGE, ...partial };
 }
 
-/** Dummy menus per CityU canteen — replace with real menus later. */
+/** Dummy menus per CityU canteen — matched to live ptero-cityu.vercel.app. */
 const MENUS: Record<RestaurantId, CanteenMenuItem[]> = {
   "city-express-ac1": [
     item({
@@ -80,13 +80,6 @@ const MENUS: Record<RestaurantId, CanteenMenuItem[]> = {
       price: 22,
       category: "Sides",
       timeZones: LTD,
-    }),
-    item({
-      id: "ce-lemon-tea",
-      name: "Iced Lemon Tea",
-      price: 16,
-      category: "Drinks",
-      timeZones: ALL,
     }),
   ],
   "ac2-canteen": [
@@ -132,15 +125,8 @@ const MENUS: Record<RestaurantId, CanteenMenuItem[]> = {
       category: "Mains",
       timeZones: D,
     }),
-    item({
-      id: "ac2-milk-tea",
-      name: "Milk Tea",
-      price: 16,
-      category: "Drinks",
-      timeZones: ALL,
-    }),
   ],
-  "ac3-cafe": [
+  "ac3-bistro": [
     item({
       id: "ac3-eggs-benedict",
       name: "Eggs Benedict",
@@ -176,57 +162,6 @@ const MENUS: Record<RestaurantId, CanteenMenuItem[]> = {
       price: 22,
       category: "Drinks",
       timeZones: ALL,
-    }),
-    item({
-      id: "ac3-croissant",
-      name: "Butter Croissant",
-      price: 24,
-      category: "Bakery",
-      timeZones: B,
-    }),
-  ],
-  cmcafe: [
-    item({
-      id: "cmc-chicken-rice",
-      name: "Chicken Rice",
-      price: 40,
-      category: "Mains",
-      timeZones: LD,
-    }),
-    item({
-      id: "cmc-fish-burger",
-      name: "Fried Fish Burger",
-      price: 45,
-      category: "Mains",
-      timeZones: LTD,
-    }),
-    item({
-      id: "cmc-milk-tea",
-      name: "Milk Tea",
-      price: 20,
-      category: "Drinks",
-      timeZones: ALL,
-    }),
-    item({
-      id: "cmc-americano",
-      name: "Americano",
-      price: 22,
-      category: "Drinks",
-      timeZones: ALL,
-    }),
-    item({
-      id: "cmc-club",
-      name: "Club Sandwich",
-      price: 38,
-      category: "Café",
-      timeZones: B,
-    }),
-    item({
-      id: "cmc-brownie",
-      name: "Chocolate Brownie",
-      price: 26,
-      category: "Dessert",
-      timeZones: T,
     }),
   ],
   "hall-canteen-klnt": [
@@ -265,13 +200,6 @@ const MENUS: Record<RestaurantId, CanteenMenuItem[]> = {
       category: "Mains",
       timeZones: T,
     }),
-    item({
-      id: "klnt-fries",
-      name: "French Fries",
-      price: 20,
-      category: "Sides",
-      timeZones: LTD,
-    }),
   ],
   "hall-canteen-mos": [
     item({
@@ -309,11 +237,48 @@ const MENUS: Record<RestaurantId, CanteenMenuItem[]> = {
       category: "Café",
       timeZones: B,
     }),
+  ],
+  "city-chinese": [
     item({
-      id: "mos-lemon-tea",
-      name: "Iced Lemon Tea",
-      price: 15,
+      id: "cc-har-gow",
+      name: "Har Gow (Shrimp Dumplings)",
+      price: 32,
+      category: "Dim Sum",
+      timeZones: ALL,
+    }),
+    item({
+      id: "cc-siu-mai",
+      name: "Siu Mai",
+      price: 30,
+      category: "Dim Sum",
+      timeZones: ALL,
+    }),
+    item({
+      id: "cc-char-siu",
+      name: "Char Siu Rice",
+      price: 48,
+      category: "Mains",
+      timeZones: ALL,
+    }),
+    item({
+      id: "cc-chicken-rice",
+      name: "Chicken Rice",
+      price: 42,
+      category: "Mains",
+      timeZones: ALL,
+    }),
+    item({
+      id: "cc-milk-tea",
+      name: "Milk Tea",
+      price: 18,
       category: "Drinks",
+      timeZones: ALL,
+    }),
+    item({
+      id: "cc-red-bean",
+      name: "Red Bean Sweet Soup",
+      price: 24,
+      category: "Dessert",
       timeZones: ALL,
     }),
   ],
