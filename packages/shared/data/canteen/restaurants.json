@@ -7,6 +7,7 @@
     "hoursLabel": "7:30 AM – 9:00 PM",
     "deliveryFee": 10,
     "collegeId": null,
+    "campus": "cuhk",
     "menuReady": true
   },
   {
@@ -17,6 +18,7 @@
     "hoursLabel": "9:00 AM – 8:30 PM (by meal period)",
     "deliveryFee": 10,
     "collegeId": "UC",
+    "campus": "cuhk",
     "menuReady": true
   },
   {
@@ -27,6 +29,7 @@
     "hoursLabel": "Coming soon",
     "deliveryFee": 10,
     "collegeId": "NA",
+    "campus": "cuhk",
     "menuReady": false
   },
   {
@@ -37,6 +40,7 @@
     "hoursLabel": "Coming soon",
     "deliveryFee": 10,
     "collegeId": "CC",
+    "campus": "cuhk",
     "menuReady": false
   },
   {
@@ -47,6 +51,19 @@
     "hoursLabel": "Coming soon",
     "deliveryFee": 10,
     "collegeId": "Shaw",
+    "campus": "cuhk",
     "menuReady": false
+  },
+  {
+    "id": "cityu-ebeneezers",
+    "name": "Ebeneezer's (5380 Cafe)",
+    "shortName": "Ebeneezer's",
+    "blurb": "CityU Yeung Building R5013 — kebabs, biryani, curry, pizza & more. Halal · No added MSG.",
+    "hoursLabel": "Mon–Sat 10:00 AM – 8:00 PM · Closed Sun & public holidays",
+    "deliveryFee": 10,
+    "collegeId": null,
+    "campus": "cityu",
+    "logo": "/images/canteen/ebeneezers-logo.png",
+    "menuReady": true
   }
 ]

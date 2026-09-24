@@ -1,0 +1,639 @@
+[
+  {
+    "id": "a1-donar-lamb-kebab",
+    "code": "A1",
+    "name": "Donar Lamb Kebab",
+    "nameZh": "羊肉沙威瑪",
+    "price": 47.7,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a2-gyros-chicken-kebab",
+    "code": "A2",
+    "name": "Gyros Chicken Kebab",
+    "nameZh": "雞肉沙威瑪",
+    "price": 45.6,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a3-chicken-tikka-kebab",
+    "code": "A3",
+    "name": "Chicken Tikka Kebab",
+    "nameZh": "烤雞沙威瑪",
+    "price": 45.6,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a4-falafel-kebab",
+    "code": "A4",
+    "name": "Falafel Kebab",
+    "nameZh": "鷹嘴豆餅沙威瑪",
+    "price": 42.5,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": true
+  },
+  {
+    "id": "a5-meatball-kebab",
+    "code": "A5",
+    "name": "Meatball Kebab",
+    "nameZh": "肉丸沙威瑪",
+    "price": 43.6,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a6-real-beef-kebab",
+    "code": "A6",
+    "name": "Real Beef Kebab",
+    "nameZh": "牛肉沙威瑪",
+    "price": 49.8,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a7-chicken-bites-kebab",
+    "code": "A7",
+    "name": "Chicken Bites Kebab",
+    "nameZh": "脆雞沙威瑪",
+    "price": 47.0,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a8-fish-kebab",
+    "code": "A8",
+    "name": "Fish Kebab",
+    "nameZh": "魚肉沙威瑪",
+    "price": 45.6,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a9-chicken-shish-kebab",
+    "code": "A9",
+    "name": "Chicken Shish Kebab",
+    "nameZh": "雞肉串燒沙威瑪",
+    "price": 44.0,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": false
+  },
+  {
+    "id": "a10-halloumi-cheese-kebab",
+    "code": "A10",
+    "name": "Halloumi Cheese Kebab",
+    "nameZh": "哈罗米芝士沙威瑪",
+    "price": 42.0,
+    "category": "Kebabs (Shawarma)",
+    "vegetarian": true
+  },
+  {
+    "id": "b1-vegetable-biryani",
+    "code": "B1",
+    "name": "Vegetable Biryani",
+    "nameZh": "蔬菜炒飯",
+    "price": 39.5,
+    "category": "Biryanis (Fried Rice)",
+    "vegetarian": true
+  },
+  {
+    "id": "b2-chicken-biryani",
+    "code": "B2",
+    "name": "Chicken Biryani",
+    "nameZh": "雞肉炒飯",
+    "price": 44.0,
+    "category": "Biryanis (Fried Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "b3-fish-biryani",
+    "code": "B3",
+    "name": "Fish Biryani",
+    "nameZh": "魚肉炒飯",
+    "price": 39.5,
+    "category": "Biryanis (Fried Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "b4-chicken-tikka-biryani",
+    "code": "B4",
+    "name": "Chicken Tikka Biryani",
+    "nameZh": "烤雞炒飯",
+    "price": 47.0,
+    "category": "Biryanis (Fried Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "b5-meatball-biryani",
+    "code": "B5",
+    "name": "Meatball Biryani",
+    "nameZh": "肉丸炒飯",
+    "price": 48.0,
+    "category": "Biryanis (Fried Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "b6-chicken-bites-biryani",
+    "code": "B6",
+    "name": "Chicken Bites Biryani",
+    "nameZh": "脆雞炒飯",
+    "price": 48.0,
+    "category": "Biryanis (Fried Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "c1-vegetable-curry-rice",
+    "code": "C1",
+    "name": "Vegetable Curry with Rice",
+    "nameZh": "蔬菜咖喱飯",
+    "price": 38.4,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": true
+  },
+  {
+    "id": "c2-chicken-curry-rice",
+    "code": "C2",
+    "name": "Chicken Curry with Rice",
+    "nameZh": "雞肉咖喱飯",
+    "price": 39.4,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "c3-fish-curry-rice",
+    "code": "C3",
+    "name": "Fish Curry with Rice",
+    "nameZh": "魚肉咖喱飯",
+    "price": 39.4,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "c4-meatball-curry-rice",
+    "code": "C4",
+    "name": "Meatball Curry with Rice",
+    "nameZh": "肉丸咖喱飯",
+    "price": 42.5,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "c5-chana-masala-rice",
+    "code": "C5",
+    "name": "Chana Masala with Rice",
+    "nameZh": "鷹嘴豆咖喱飯",
+    "price": 41.0,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": true
+  },
+  {
+    "id": "c6-dal-makhani-rice",
+    "code": "C6",
+    "name": "Dal Makhani with Rice",
+    "nameZh": "黑豆咖喱飯",
+    "price": 41.0,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": true
+  },
+  {
+    "id": "c7-chicken-bites-curry-rice",
+    "code": "C7",
+    "name": "Chicken Bites Curry with Rice",
+    "nameZh": "脆雞咖喱飯",
+    "price": 45.0,
+    "category": "Curries (Served with Rice)",
+    "vegetarian": false
+  },
+  {
+    "id": "d1-garden-salad",
+    "code": "D1",
+    "name": "Garden Salad",
+    "nameZh": "田園沙律",
+    "price": 27.5,
+    "category": "Salads",
+    "vegetarian": true
+  },
+  {
+    "id": "d2-roast-chicken-salad",
+    "code": "D2",
+    "name": "Roast Chicken Salad",
+    "nameZh": "燒雞沙律",
+    "price": 39.4,
+    "category": "Salads",
+    "vegetarian": false
+  },
+  {
+    "id": "d3-roast-lamb-salad",
+    "code": "D3",
+    "name": "Roast Lamb Salad",
+    "nameZh": "燒羊沙律",
+    "price": 47.7,
+    "category": "Salads",
+    "vegetarian": false
+  },
+  {
+    "id": "d4-chicken-tikka-salad",
+    "code": "D4",
+    "name": "Chicken Tikka Salad",
+    "nameZh": "烤雞沙律",
+    "price": 41.5,
+    "category": "Salads",
+    "vegetarian": false
+  },
+  {
+    "id": "d5-real-beef-salad",
+    "code": "D5",
+    "name": "Real Beef Salad",
+    "nameZh": "牛肉沙律",
+    "price": 49.8,
+    "category": "Salads",
+    "vegetarian": false
+  },
+  {
+    "id": "d6-halloumi-cheese-salad",
+    "code": "D6",
+    "name": "Halloumi Cheese Salad",
+    "nameZh": "哈罗米芝士沙律",
+    "price": 42.0,
+    "category": "Salads",
+    "vegetarian": true
+  },
+  {
+    "id": "e1-roast-chicken-rice",
+    "code": "E1",
+    "name": "Roast Chicken with Rice",
+    "nameZh": "燒雞配飯",
+    "price": 39.4,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e1-roast-chicken-chips",
+    "code": "E1",
+    "name": "Roast Chicken with Chips",
+    "nameZh": "燒雞配薯條",
+    "price": 45.6,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e2-roast-lamb-rice",
+    "code": "E2",
+    "name": "Roast Lamb with Rice",
+    "nameZh": "燒羊配飯",
+    "price": 47.7,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e2-roast-lamb-chips",
+    "code": "E2",
+    "name": "Roast Lamb with Chips",
+    "nameZh": "燒羊配薯條",
+    "price": 54.0,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e3-chicken-tikka-rice",
+    "code": "E3",
+    "name": "Chicken Tikka with Rice",
+    "nameZh": "烤雞配飯",
+    "price": 40.4,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e3-chicken-tikka-chips",
+    "code": "E3",
+    "name": "Chicken Tikka with Chips",
+    "nameZh": "烤雞配薯條",
+    "price": 45.6,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e4-real-beef-rice",
+    "code": "E4",
+    "name": "Real Beef with Rice",
+    "nameZh": "牛肉配飯",
+    "price": 49.8,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "e4-real-beef-chips",
+    "code": "E4",
+    "name": "Real Beef with Chips",
+    "nameZh": "牛肉配薯條",
+    "price": 54.5,
+    "category": "Meat Lovers",
+    "vegetarian": false
+  },
+  {
+    "id": "f1-margherita",
+    "code": "F1",
+    "name": "Margherita Pizza (10 inch)",
+    "nameZh": "瑪格莉特薄餅",
+    "price": 71.5,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": true
+  },
+  {
+    "id": "f2-pepperoni",
+    "code": "F2",
+    "name": "Pepperoni Pizza (10 inch)",
+    "nameZh": "意式辣肉腸薄餅",
+    "price": 77.0,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": false
+  },
+  {
+    "id": "f3-supreme",
+    "code": "F3",
+    "name": "Supreme Pizza (10 inch)",
+    "nameZh": "至尊薄餅",
+    "price": 83.5,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": false
+  },
+  {
+    "id": "f4-chicken-tikka-pizza",
+    "code": "F4",
+    "name": "Chicken Tikka Pizza (10 inch)",
+    "nameZh": "烤雞薄餅",
+    "price": 83.5,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": false
+  },
+  {
+    "id": "f5-vegetarian-pizza",
+    "code": "F5",
+    "name": "Vegetarian Pizza (10 inch)",
+    "nameZh": "素食薄餅",
+    "price": 77.0,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": true
+  },
+  {
+    "id": "f6-hawaiian",
+    "code": "F6",
+    "name": "Hawaiian Pizza (10 inch)",
+    "nameZh": "夏威夷薄餅",
+    "price": 77.0,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": false
+  },
+  {
+    "id": "f7-chicken-express",
+    "code": "F7",
+    "name": "Chicken Express Pizza (10 inch)",
+    "nameZh": "雞肉特快薄餅",
+    "price": 83.5,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": false
+  },
+  {
+    "id": "f8-turkey-ham-mushroom",
+    "code": "F8",
+    "name": "Turkey Ham & Mushroom Pizza (10 inch)",
+    "nameZh": "火雞火腿蘑菇薄餅",
+    "price": 77.0,
+    "category": "Pizzas (10 inch)",
+    "vegetarian": false
+  },
+  {
+    "id": "g1-chips",
+    "code": "G1",
+    "name": "Chips",
+    "nameZh": "薯條",
+    "price": 30.0,
+    "category": "Side Orders",
+    "vegetarian": true
+  },
+  {
+    "id": "g2-samosas",
+    "code": "G2",
+    "name": "Samosas (2 pcs)",
+    "nameZh": "咖喱角（2件）",
+    "price": 19.2,
+    "category": "Side Orders",
+    "vegetarian": true
+  },
+  {
+    "id": "g3-falafels",
+    "code": "G3",
+    "name": "Falafels (3 pcs)",
+    "nameZh": "鷹嘴豆餅（3件）",
+    "price": 20.7,
+    "category": "Side Orders",
+    "vegetarian": true
+  },
+  {
+    "id": "g4-spring-rolls",
+    "code": "G4",
+    "name": "Spring Rolls (4 pcs)",
+    "nameZh": "春卷（4件）",
+    "price": 20.7,
+    "category": "Side Orders",
+    "vegetarian": true
+  },
+  {
+    "id": "g5-hummus-pita",
+    "code": "G5",
+    "name": "Hummus & Pita Bread (1 pc)",
+    "nameZh": "鷹嘴豆泥配皮塔餅",
+    "price": 28.0,
+    "category": "Side Orders",
+    "vegetarian": true
+  },
+  {
+    "id": "g6-gulab-jamun",
+    "code": "G6",
+    "name": "Gulab Jamun (each)",
+    "nameZh": "印式甜品（每件）",
+    "price": 9.0,
+    "category": "Side Orders",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-pepsi",
+    "name": "Pepsi (canned)",
+    "nameZh": "百事可樂（罐裝）",
+    "price": 8.8,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-pepsi-light",
+    "name": "Pepsi Light (canned)",
+    "nameZh": "百事健怡（罐裝）",
+    "price": 8.8,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-7up",
+    "name": "7 Up (canned)",
+    "nameZh": "七喜（罐裝）",
+    "price": 8.8,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-7up-light",
+    "name": "7 Up Light (canned)",
+    "nameZh": "七喜健怡（罐裝）",
+    "price": 8.8,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-mirinda",
+    "name": "Mirinda Orange (canned)",
+    "nameZh": "美年達橙汁（罐裝）",
+    "price": 8.8,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-mountain-dew",
+    "name": "Mountain Dew (canned)",
+    "nameZh": "激浪（罐裝）",
+    "price": 8.8,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-sirma-apple",
+    "name": "Sirma Vitamin Drink — Apple",
+    "price": 12.4,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-sirma-lemon",
+    "name": "Sirma Vitamin Drink — Lemon",
+    "price": 12.4,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-sirma-pomegranate",
+    "name": "Sirma Vitamin Drink — Pomegranate",
+    "price": 12.4,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-sirma-orange",
+    "name": "Sirma Vitamin Drink — Orange",
+    "price": 12.4,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-masala-tea",
+    "name": "Masala Tea",
+    "nameZh": "馬莎拉茶",
+    "price": 12.0,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-cold-lemon-tea",
+    "name": "Cold Lemon Tea",
+    "nameZh": "凍檸檬茶",
+    "price": 13.5,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-cold-green-tea",
+    "name": "Cold Green Tea",
+    "nameZh": "凍綠茶",
+    "price": 13.5,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-mango-milk",
+    "name": "Mango Milk",
+    "nameZh": "芒果奶",
+    "price": 13.5,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-coconut-milk",
+    "name": "Coconut Milk",
+    "nameZh": "椰奶",
+    "price": 13.5,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "drink-coconut-water",
+    "name": "Coconut Water",
+    "nameZh": "椰子水",
+    "price": 13.5,
+    "category": "Beverages",
+    "vegetarian": true
+  },
+  {
+    "id": "upgrade-soft-drink",
+    "name": "Upgrade Combo — Soft Drink",
+    "description": "Add to any main item",
+    "price": 7.0,
+    "category": "Upgrade Combos",
+    "vegetarian": true
+  },
+  {
+    "id": "upgrade-tea",
+    "name": "Upgrade Combo — Tea",
+    "description": "Add to any main item",
+    "price": 8.0,
+    "category": "Upgrade Combos",
+    "vegetarian": true
+  },
+  {
+    "id": "upgrade-samosa",
+    "name": "Upgrade Combo — 1pc Samosa",
+    "description": "Add to any main item",
+    "price": 10.0,
+    "category": "Upgrade Combos",
+    "vegetarian": true
+  },
+  {
+    "id": "upgrade-spring-rolls",
+    "name": "Upgrade Combo — 2pcs Spring Roll",
+    "description": "Add to any main item",
+    "price": 11.0,
+    "category": "Upgrade Combos",
+    "vegetarian": true
+  },
+  {
+    "id": "upgrade-falafel",
+    "name": "Upgrade Combo — 2pcs Falafel",
+    "description": "Add to any main item",
+    "price": 14.0,
+    "category": "Upgrade Combos",
+    "vegetarian": true
+  },
+  {
+    "id": "addon-extra-cheese",
+    "name": "Extra Cheese",
+    "price": 19.0,
+    "category": "Add-ons",
+    "vegetarian": true
+  },
+  {
+    "id": "addon-extra-meat",
+    "name": "Extra Meat",
+    "price": 26.5,
+    "category": "Add-ons",
+    "vegetarian": false
+  }
+]

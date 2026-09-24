@@ -25,6 +25,7 @@
     "./data/product-image-overrides.json": "./data/product-image-overrides.json",
     "./data/canteen/bf-menu.json": "./data/canteen/bf-menu.json",
     "./data/canteen/uc-menu.json": "./data/canteen/uc-menu.json",
+    "./data/canteen/ebeneezers-menu.json": "./data/canteen/ebeneezers-menu.json",
     "./data/canteen/restaurants.json": "./data/canteen/restaurants.json",
     "./canteen": "./src/canteen.ts",
     "./shop-kind": "./src/shop-kind.ts"

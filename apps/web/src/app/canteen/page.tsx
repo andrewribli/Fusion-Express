@@ -1,13 +1,75 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
 import { useCart } from "@/context/CartContext";
-import { RESTAURANTS } from "@fusion-express/shared/canteen";
+import {
+  CAMPUS_LABELS,
+  RESTAURANTS,
+  type CanteenCampus,
+  type CanteenRestaurant,
+} from "@fusion-express/shared/canteen";
+
+const CAMPUS_ORDER: CanteenCampus[] = ["cuhk", "cityu"];
+
+function RestaurantCard({ r }: { r: CanteenRestaurant }) {
+  const body = (
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex min-w-0 items-start gap-3">
+        {r.logo ? (
+          <Image
+            src={r.logo}
+            alt=""
+            width={56}
+            height={56}
+            className="h-14 w-14 shrink-0 rounded-xl object-contain bg-white p-1"
+          />
+        ) : null}
+        <div className="min-w-0">
+          <h2 className="text-lg font-bold text-white">{r.name}</h2>
+          <p className="mt-1 text-sm text-zinc-400">{r.blurb}</p>
+          <p className="mt-2 text-xs text-zinc-500">{r.hoursLabel}</p>
+        </div>
+      </div>
+      {r.menuReady ? (
+        <span className="shrink-0 rounded-lg bg-emerald-500/20 px-2 py-1 text-[11px] font-semibold text-emerald-300">
+          Menu
+        </span>
+      ) : (
+        <span className="shrink-0 rounded-lg bg-white/10 px-2 py-1 text-[11px] font-semibold text-zinc-400">
+          Soon
+        </span>
+      )}
+    </div>
+  );
+
+  if (r.menuReady) {
+    return (
+      <Link
+        href={`/canteen/${r.id}`}
+        className="block rounded-2xl border border-white/10 bg-[#141414] p-4 transition hover:border-emerald-400/40"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-white/5 bg-[#121212] p-4 opacity-70">
+      {body}
+    </div>
+  );
+}
 
 export default function CanteenIndexPage() {
   const { itemCount } = useCart();
+
+  const byCampus = CAMPUS_ORDER.map((campus) => ({
+    campus,
+    restaurants: RESTAURANTS.filter((r) => r.campus === campus),
+  })).filter((g) => g.restaurants.length > 0);
 
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
@@ -37,7 +99,7 @@ export default function CanteenIndexPage() {
 
       <main className="mx-auto max-w-lg px-4 pb-24 pt-6">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-          CUHK canteens
+          Campus canteens
         </p>
         <h1 className="mt-2 text-2xl font-bold">GraceRun Canteen</h1>
         <p className="mt-2 text-sm text-zinc-400">
@@ -48,37 +110,20 @@ export default function CanteenIndexPage() {
           Canteen checkout is separate from Fusion grocery checkout.
         </p>
 
-        <ul className="mt-6 space-y-3">
-          {RESTAURANTS.map((r) => (
-            <li key={r.id}>
-              {r.menuReady ? (
-                <Link
-                  href={`/canteen/${r.id}`}
-                  className="block rounded-2xl border border-white/10 bg-[#141414] p-4 transition hover:border-emerald-400/40"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-lg font-bold text-white">{r.name}</h2>
-                      <p className="mt-1 text-sm text-zinc-400">{r.blurb}</p>
-                      <p className="mt-2 text-xs text-zinc-500">{r.hoursLabel}</p>
-                    </div>
-                    <span className="shrink-0 rounded-lg bg-emerald-500/20 px-2 py-1 text-[11px] font-semibold text-emerald-300">
-                      Menu
-                    </span>
-                  </div>
-                </Link>
-              ) : (
-                <div className="rounded-2xl border border-white/5 bg-[#121212] p-4 opacity-70">
-                  <h2 className="text-lg font-bold text-white">{r.name}</h2>
-                  <p className="mt-1 text-sm text-zinc-400">{r.blurb}</p>
-                  <p className="mt-2 text-xs font-semibold text-zinc-500">
-                    Coming soon
-                  </p>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        {byCampus.map(({ campus, restaurants }) => (
+          <section key={campus} className="mt-8">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-zinc-300">
+              {CAMPUS_LABELS[campus]}
+            </h2>
+            <ul className="mt-3 space-y-3">
+              {restaurants.map((r) => (
+                <li key={r.id}>
+                  <RestaurantCard r={r} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
       </main>
     </div>
   );
