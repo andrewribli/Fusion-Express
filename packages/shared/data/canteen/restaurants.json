@@ -55,6 +55,17 @@
     "menuReady": false
   },
   {
+    "id": "cityu-city-express",
+    "name": "城大食坊 City Express (AC1)",
+    "shortName": "City Express",
+    "blurb": "CityU Academic 1 canteen — Thai, roast meats, donburi, noodles, Halal & Coffee Lounge. Live menu from Order.Place.",
+    "hoursLabel": "Mon–Sat campus service hours · Closed Sun & public holidays (confirm on Order.Place)",
+    "deliveryFee": 10,
+    "collegeId": null,
+    "campus": "cityu",
+    "menuReady": true
+  },
+  {
     "id": "cityu-ebeneezers",
     "name": "Ebeneezer's (5380 Cafe)",
     "shortName": "Ebeneezer's",

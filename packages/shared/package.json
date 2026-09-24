@@ -26,6 +26,7 @@
     "./data/canteen/bf-menu.json": "./data/canteen/bf-menu.json",
     "./data/canteen/uc-menu.json": "./data/canteen/uc-menu.json",
     "./data/canteen/ebeneezers-menu.json": "./data/canteen/ebeneezers-menu.json",
+    "./data/canteen/cityu-city-express-menu.json": "./data/canteen/cityu-city-express-menu.json",
     "./data/canteen/restaurants.json": "./data/canteen/restaurants.json",
     "./canteen": "./src/canteen.ts",
     "./shop-kind": "./src/shop-kind.ts"

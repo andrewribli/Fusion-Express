@@ -1,6 +1,7 @@
 import bfMenu from "../data/canteen/bf-menu.json";
 import ucMenu from "../data/canteen/uc-menu.json";
 import ebeneezersMenu from "../data/canteen/ebeneezers-menu.json";
+import cityExpressMenu from "../data/canteen/cityu-city-express-menu.json";
 import restaurantsJson from "../data/canteen/restaurants.json";
 import {
   CANTEEN_ITEM_PREFIX,
@@ -67,6 +68,9 @@ export function getCanteenMenu(restaurantId: string): CanteenMenuItem[] {
   }
   if (restaurantId === "cityu-ebeneezers") {
     return ebeneezersMenu as CanteenMenuItem[];
+  }
+  if (restaurantId === "cityu-city-express") {
+    return cityExpressMenu as CanteenMenuItem[];
   }
   return [];
 }
