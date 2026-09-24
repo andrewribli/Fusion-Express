@@ -6,10 +6,10 @@ export const CANTEEN_DELIVERY_FEE = 10;
 export type RestaurantId =
   | "city-express-ac1"
   | "ac2-canteen"
-  | "ac3-cafe"
-  | "cmcafe"
+  | "ac3-bistro"
   | "hall-canteen-klnt"
-  | "hall-canteen-mos";
+  | "hall-canteen-mos"
+  | "city-chinese";
 
 export type Restaurant = {
   id: RestaurantId;
@@ -56,7 +56,7 @@ export const RESTAURANTS: Restaurant[] = [
     href: "/cityu/canteen/ac2-canteen",
     blurb: "Fast food by meal period in Li Dak Sum Yip Yio Chin Academic Building.",
     cuisine: "Fast Food",
-    location: "3/F, Li Dak Sum Yip Yio Chin Building",
+    location: "3/F, Li Dak Sum Yip Yio Chin Academic Building",
     hoursLabel: "07:30–21:00",
     pickupLabel: "AC2 Canteen",
     deliveryFee: CANTEEN_DELIVERY_FEE,
@@ -65,32 +65,16 @@ export const RESTAURANTS: Restaurant[] = [
     useMealPeriods: true,
   },
   {
-    id: "ac3-cafe",
+    id: "ac3-bistro",
     campus: "cityu",
-    name: "AC3 Cafe",
-    shortName: "AC3 Cafe",
-    href: "/cityu/canteen/ac3-cafe",
-    blurb: "Café favourites on Lau Ming Wai Academic Building.",
-    cuisine: "Café",
-    location: "3/F, Lau Ming Wai Academic Building",
-    hoursLabel: "07:30–21:00",
-    pickupLabel: "AC3 Cafe",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: null,
-    menuReady: true,
-    useMealPeriods: true,
-  },
-  {
-    id: "cmcafe",
-    campus: "cityu",
-    name: "CMCAFE",
-    shortName: "CMCAFE",
-    href: "/cityu/canteen/cmcafe",
-    blurb: "Café bites at Run Run Shaw Creative Media Centre.",
-    cuisine: "Café",
-    location: "3/F, Run Run Shaw Creative Media Centre",
-    hoursLabel: "08:00–20:00",
-    pickupLabel: "CMCAFE",
+    name: "AC3 Bistro",
+    shortName: "AC3 Bistro",
+    href: "/cityu/canteen/ac3-bistro",
+    blurb: "Western bites on Lau Ming Wai Academic Building.",
+    cuisine: "Western",
+    location: "7/F, Lau Ming Wai Academic Building",
+    hoursLabel: "07:30–21:00 (Mon–Sat)",
+    pickupLabel: "AC3 Bistro",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -121,12 +105,28 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Ma On Shan residence canteen — 10% off when a MOS runner accepts.",
     cuisine: "Café/Fast Food",
     location: "Ma On Shan Student Residence",
-    hoursLabel: "09:00–20:00",
+    hoursLabel: "09:00–20:00 (Mon–Fri), 09:00–18:00 (Sat)",
     pickupLabel: "Hall Canteen @MOS",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "MOS",
     menuReady: true,
     useMealPeriods: true,
+  },
+  {
+    id: "city-chinese",
+    campus: "cityu",
+    name: "City Chinese Restaurant",
+    shortName: "City Chinese",
+    href: "/cityu/canteen/city-chinese",
+    blurb: "Dim sum and Cantonese favourites on the Amenities Building.",
+    cuisine: "Dim Sum/Cantonese",
+    location: "8/F, Amenities Building",
+    hoursLabel: "11:00–22:30",
+    pickupLabel: "City Chinese",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: null,
+    menuReady: true,
+    useMealPeriods: false,
   },
 ];
 
