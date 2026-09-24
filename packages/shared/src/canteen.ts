@@ -1,5 +1,7 @@
 import bfMenu from "../data/canteen/bf-menu.json";
 import ucMenu from "../data/canteen/uc-menu.json";
+import ebeneezersMenu from "../data/canteen/ebeneezers-menu.json";
+import cityExpressMenu from "../data/canteen/cityu-city-express-menu.json";
 import restaurantsJson from "../data/canteen/restaurants.json";
 import {
   CANTEEN_ITEM_PREFIX,
@@ -12,6 +14,13 @@ export const CANTEEN_DELIVERY_FEE = 10;
 
 export type CanteenMealZone = "breakfast" | "lunch" | "tea" | "dinner";
 
+export type CanteenCampus = "cuhk" | "cityu";
+
+export const CAMPUS_LABELS: Record<CanteenCampus, string> = {
+  cuhk: "CUHK",
+  cityu: "CityU",
+};
+
 export interface CanteenRestaurant {
   id: string;
   name: string;
@@ -20,6 +29,8 @@ export interface CanteenRestaurant {
   hoursLabel: string;
   deliveryFee: number;
   collegeId: string | null;
+  campus: CanteenCampus;
+  logo?: string;
   menuReady: boolean;
 }
 
@@ -30,7 +41,9 @@ export interface CanteenMenuItem {
   description?: string;
   price: number;
   category: string;
+  code?: string;
   image?: string;
+  vegetarian?: boolean;
   timeZones?: CanteenMealZone[];
 }
 
@@ -40,12 +53,24 @@ export function getRestaurant(id: string): CanteenRestaurant | undefined {
   return RESTAURANTS.find((r) => r.id === id);
 }
 
+export function restaurantsByCampus(
+  campus: CanteenCampus,
+): CanteenRestaurant[] {
+  return RESTAURANTS.filter((r) => r.campus === campus);
+}
+
 export function getCanteenMenu(restaurantId: string): CanteenMenuItem[] {
   if (restaurantId === "benjamin-franklin") {
     return bfMenu as CanteenMenuItem[];
   }
   if (restaurantId === "uc-canteen") {
     return ucMenu as CanteenMenuItem[];
+  }
+  if (restaurantId === "cityu-ebeneezers") {
+    return ebeneezersMenu as CanteenMenuItem[];
+  }
+  if (restaurantId === "cityu-city-express") {
+    return cityExpressMenu as CanteenMenuItem[];
   }
   return [];
 }

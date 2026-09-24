@@ -1,0 +1,261 @@
+[
+  {
+    "id": "spicy-pork-diced-mapo-tofu-rice-with-kumquat-salted-lemon-7-up",
+    "name": "Spicy Pork Diced Mapo Tofu Rice with Kumquat Salted Lemon 7-Up",
+    "price": 36.0,
+    "category": "Back to School Offers",
+    "nameZh": "香辣肉丁麻婆豆腐飯 · 金桔鹹檸七喜",
+    "description": "包含飲料"
+  },
+  {
+    "id": "spicy-pork-diced-mapo-tofu-rice-with-hot-drink-upgrade-to-co-c387aa",
+    "name": "Spicy Pork Diced Mapo Tofu Rice with Hot Drink (Upgrade to cold drink +$1.5)",
+    "price": 36.0,
+    "category": "Back to School Offers",
+    "nameZh": "香辣肉丁麻婆豆腐飯 · 熱飲 · 轉凍飲品+$1.5",
+    "description": "熱飲可加$1.5轉凍飲"
+  },
+  {
+    "id": "sour-and-spicy-rice-noodles",
+    "name": "Sour and Spicy Rice Noodles",
+    "price": 22.5,
+    "category": "Sour and Spicy Rice Noodles",
+    "nameZh": "酸辣米線"
+  },
+  {
+    "id": "clear-soup-rice-noodles",
+    "name": "Clear Soup Rice Noodles",
+    "price": 20.5,
+    "category": "Sour and Spicy Rice Noodles",
+    "nameZh": "清湯米線"
+  },
+  {
+    "id": "thai-style-pratunam-chicken-rice-with-soup-of-the-day",
+    "name": "Thai-style Pratunam Chicken Rice with Soup of the Day",
+    "price": 49.1,
+    "category": "Thai Savory Selections",
+    "nameZh": "泰式水門雞飯 · 例湯"
+  },
+  {
+    "id": "lemongrass-chicken-leg-with-oil-rice",
+    "name": "Lemongrass Chicken Leg with Oil Rice",
+    "price": 38.9,
+    "category": "Thai Savory Selections",
+    "nameZh": "香茅雞髀 · 油飯"
+  },
+  {
+    "id": "duck-leg-noodle-soup",
+    "name": "Duck Leg Noodle Soup",
+    "price": 39.0,
+    "category": "Thai Soup Noodles",
+    "nameZh": "鴨腿湯河粉"
+  },
+  {
+    "id": "beef-double-combo-noodle-soup",
+    "name": "Beef Double Combo Noodle Soup",
+    "price": 39.9,
+    "category": "Thai Soup Noodles",
+    "nameZh": "牛肉雙拼湯粉"
+  },
+  {
+    "id": "lemongrass-chicken-wing-double-combo-noodle-soup",
+    "name": "Lemongrass Chicken Wing Double Combo Noodle Soup",
+    "price": 35.8,
+    "category": "Thai Soup Noodles",
+    "nameZh": "香茅雞翼雙拼湯粉"
+  },
+  {
+    "id": "lemongrass-pork-chop-double-combo-noodle-soup",
+    "name": "Lemongrass Pork Chop Double Combo Noodle Soup",
+    "price": 35.8,
+    "category": "Thai Soup Noodles",
+    "nameZh": "香茅豬扒雙拼湯粉"
+  },
+  {
+    "id": "lemongrass-chicken-wing-soup-noodles",
+    "name": "Lemongrass Chicken Wing Soup Noodles",
+    "price": 35.8,
+    "category": "Thai Soup Noodles",
+    "nameZh": "香茅雞翼湯粉"
+  },
+  {
+    "id": "fish-ball-soup-noodles",
+    "name": "Fish Ball Soup Noodles",
+    "price": 29.7,
+    "category": "Thai Soup Noodles",
+    "nameZh": "魚蛋湯粉"
+  },
+  {
+    "id": "salted-egg-three-treasures-rice",
+    "name": "Salted Egg Three Treasures Rice",
+    "price": 32.7,
+    "category": "Roasted Meats",
+    "nameZh": "鹹蛋三寶飯"
+  },
+  {
+    "id": "two-meat-roast-combo-rice",
+    "name": "Two Meat Roast Combo Rice",
+    "price": 28.6,
+    "category": "Roasted Meats",
+    "nameZh": "燒味雙拼飯"
+  },
+  {
+    "id": "single-meat-roast-rice",
+    "name": "Single Meat Roast Rice",
+    "price": 22.0,
+    "category": "Roasted Meats",
+    "nameZh": "燒味單拼飯"
+  },
+  {
+    "id": "spicy-pork-cubes-soy-sauce-chicken-rice",
+    "name": "Spicy Pork Cubes · Soy Sauce Chicken Rice",
+    "price": 44.0,
+    "category": "Roast Meat Recommendations",
+    "nameZh": "麻辣肉丁 · 豉油雞飯"
+  },
+  {
+    "id": "spicy-pork-cubes-roasted-duck-rice",
+    "name": "Spicy Pork Cubes · Roasted Duck Rice",
+    "price": 44.0,
+    "category": "Roast Meat Recommendations",
+    "nameZh": "麻辣肉丁 · 明爐燒鴨飯"
+  },
+  {
+    "id": "salted-egg-minced-pork-and-soy-sauce-chicken-leg-rice",
+    "name": "Salted Egg, Minced Pork, and Soy Sauce Chicken Leg Rice",
+    "price": 43.0,
+    "category": "Roast Meat Recommendations",
+    "nameZh": "鹹蛋 · 肉燥 · 油雞髀飯"
+  },
+  {
+    "id": "saliva-chicken-with-white-rice",
+    "name": "Saliva Chicken with White Rice",
+    "price": 40.9,
+    "category": "Roasted Meat Selections",
+    "nameZh": "口水雞 · 白飯"
+  },
+  {
+    "id": "simmered-pork-and-onsen-egg-donburi",
+    "name": "Simmered Pork and Onsen Egg Donburi",
+    "price": 49.1,
+    "category": "Donburi / Rice Bowls",
+    "nameZh": "汁煮豚肉 · 溫泉玉子丼"
+  },
+  {
+    "id": "spicy-beef-and-onsen-egg-donburi",
+    "name": "Spicy Beef and Onsen Egg Donburi",
+    "price": 49.1,
+    "category": "Donburi / Rice Bowls",
+    "nameZh": "辣味牛肉 · 溫泉玉子丼"
+  },
+  {
+    "id": "chikuwa-japanese-beef-sukiyaki-hot-pot",
+    "name": "Chikuwa Japanese Beef Sukiyaki Hot Pot",
+    "price": 56.3,
+    "category": "Japanese Hot Pot for One",
+    "nameZh": "竹輪日式牛肉壽喜火鍋"
+  },
+  {
+    "id": "chikuwa-japanese-pork-sukiyaki-hot-pot",
+    "name": "Chikuwa Japanese Pork Sukiyaki Hot Pot",
+    "price": 56.3,
+    "category": "Japanese Hot Pot for One",
+    "nameZh": "竹輪日式豚肉壽喜火鍋"
+  },
+  {
+    "id": "jumbo-crab-stick-japanese-beef-sukiyaki-hot-pot",
+    "name": "Jumbo Crab Stick Japanese Beef Sukiyaki Hot Pot",
+    "price": 56.3,
+    "category": "Japanese Hot Pot for One",
+    "nameZh": "珍寶蟹棒日式牛肉壽喜火鍋"
+  },
+  {
+    "id": "jumbo-crab-stick-japanese-pork-sukiyaki-hot-pot",
+    "name": "Jumbo Crab Stick Japanese Pork Sukiyaki Hot Pot",
+    "price": 56.3,
+    "category": "Japanese Hot Pot for One",
+    "nameZh": "珍寶蟹棒日式豚肉壽喜火鍋"
+  },
+  {
+    "id": "beef-soup-udon",
+    "name": "Beef Soup Udon",
+    "price": 49.1,
+    "category": "Japanese Soup Udon",
+    "nameZh": "牛肉湯烏冬"
+  },
+  {
+    "id": "teriyaki-chicken-chop-udon",
+    "name": "Teriyaki Chicken Chop Udon",
+    "price": 46.0,
+    "category": "Japanese Soup Udon",
+    "nameZh": "照燒雞扒烏冬"
+  },
+  {
+    "id": "breaded-fish-fillet-burger-fries",
+    "name": "Breaded Fish Fillet Burger & Fries",
+    "price": 38.9,
+    "category": "Burgers",
+    "nameZh": "吉列魚柳包 · 薯條",
+    "description": "製作需時約 10-15分鐘"
+  },
+  {
+    "id": "beef-burger-fries",
+    "name": "Beef Burger & Fries",
+    "price": 38.9,
+    "category": "Burgers",
+    "nameZh": "牛肉漢堡包 · 薯條",
+    "description": "製作需時約 10-15分鐘"
+  },
+  {
+    "id": "cheese-chicken-burger",
+    "name": "Cheese Chicken Burger",
+    "price": 20.5,
+    "category": "Burgers",
+    "nameZh": "芝士雞肉漢堡包"
+  },
+  {
+    "id": "halal-braised-beans-and-mixed-vegetables",
+    "name": "Halal Braised Beans and Mixed Vegetables",
+    "price": 38.0,
+    "category": "Halal Food Value Meals",
+    "nameZh": "清真燴豆雜菜",
+    "description": "製作需時約 10-15分鐘",
+    "vegetarian": true
+  },
+  {
+    "id": "halal-curry-chicken-with-white-rice",
+    "name": "Halal Curry Chicken with White Rice",
+    "price": 47.1,
+    "category": "Halal Food",
+    "nameZh": "清真咖喱雞 · 白飯",
+    "description": "製作需時約 10-15分鐘"
+  },
+  {
+    "id": "home-style-rice-3-choices",
+    "name": "Home-style Rice (3 choices)",
+    "price": 32.5,
+    "category": "Home-style Meals",
+    "nameZh": "家常飯(三款)"
+  },
+  {
+    "id": "home-style-rice-2-choices",
+    "name": "Home-style Rice (2 choices)",
+    "price": 24.5,
+    "category": "Home-style Meals",
+    "nameZh": "家常飯(兩款)"
+  },
+  {
+    "id": "large-iced-vanilla-latte-16oz",
+    "name": "Large Iced Vanilla Latte (16oz)",
+    "price": 33.8,
+    "category": "Coffee Lounge",
+    "nameZh": "大凍雲呢拿鮮奶咖啡(16oz)"
+  },
+  {
+    "id": "large-iced-hazelnut-latte-16oz",
+    "name": "Large Iced Hazelnut Latte (16oz)",
+    "price": 33.8,
+    "category": "Coffee Lounge",
+    "nameZh": "大凍榛子鮮奶咖啡(16oz)"
+  }
+]

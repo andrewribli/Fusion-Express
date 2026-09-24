@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { AccountMenu } from "@/components/AccountMenu";
@@ -15,6 +16,10 @@ import {
   type CanteenMealZone,
   type CanteenMenuItem,
 } from "@fusion-express/shared/canteen";
+
+function formatCanteenPrice(price: number): string {
+  return Number.isInteger(price) ? price.toFixed(0) : price.toFixed(1);
+}
 
 function MenuRow({
   item,
@@ -31,16 +36,29 @@ function MenuRow({
     <li className="flex items-start justify-between gap-3 border-b border-white/5 py-3">
       <div className="min-w-0">
         <p className="text-sm font-semibold text-white">
+          {item.code ? (
+            <span className="mr-1.5 font-mono text-xs text-zinc-500">
+              {item.code}
+            </span>
+          ) : null}
           {item.name}
           {item.nameZh ? (
             <span className="ml-1 font-normal text-zinc-400">({item.nameZh})</span>
+          ) : null}
+          {item.vegetarian ? (
+            <span
+              className="ml-1.5 inline-block align-middle text-[10px] font-semibold uppercase tracking-wide text-emerald-400"
+              title="Vegetarian"
+            >
+              Veg
+            </span>
           ) : null}
         </p>
         {item.description ? (
           <p className="mt-0.5 text-xs text-zinc-500">{item.description}</p>
         ) : null}
         <p className="mt-1 text-sm font-bold text-emerald-400">
-          HK${item.price.toFixed(0)}
+          HK${formatCanteenPrice(item.price)}
         </p>
       </div>
       {qty > 0 ? (
@@ -151,9 +169,23 @@ export default function CanteenMenuPage() {
       </header>
 
       <main className="mx-auto max-w-lg px-4 pb-28 pt-5">
-        <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-        <p className="mt-1 text-sm text-zinc-400">{restaurant.blurb}</p>
-        <p className="mt-1 text-xs text-zinc-500">{restaurant.hoursLabel}</p>
+        <div className="flex items-start gap-3">
+          {restaurant.logo ? (
+            <Image
+              src={restaurant.logo}
+              alt=""
+              width={64}
+              height={64}
+              className="h-16 w-16 shrink-0 rounded-xl object-contain bg-white p-1"
+              priority
+            />
+          ) : null}
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold">{restaurant.name}</h1>
+            <p className="mt-1 text-sm text-zinc-400">{restaurant.blurb}</p>
+            <p className="mt-1 text-xs text-zinc-500">{restaurant.hoursLabel}</p>
+          </div>
+        </div>
 
         {isUc ? (
           <div className="mt-4 flex flex-wrap gap-2">
