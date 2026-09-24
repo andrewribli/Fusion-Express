@@ -17,7 +17,7 @@ export type CampusFoodChannel = "canteen";
 export interface CampusConfig {
   id: CampusId;
   name: string;
-  /** Header / chrome label, e.g. "GraceRun CUHK". */
+  /** Header / chrome label, e.g. "GraceRun". */
   brandLabel: string;
   supermarket: string;
   supermarketLocation: string;
@@ -35,13 +35,13 @@ export const campusConfig: Record<CampusId, CampusConfig> = {
   cuhk: {
     id: "cuhk",
     name: "CUHK",
-    brandLabel: "GraceRun CUHK",
+    brandLabel: "GraceRun",
     supermarket: "Fusion",
     supermarketLocation: "Benjamin Franklin Centre",
     groceryChannel: "fusion",
     groceryPath: "/fusion",
     channelHomePath: "/cuhk",
-    tagline: "Groceries from Fusion to your CUHK dorm lobby.",
+    tagline: "Groceries from Fusion to your dorm lobby.",
     emailDomains: ["link.cuhk.edu.hk", "cuhk.edu.hk"],
     signupEmailError: "Please use your CUHK email",
     accent: "#ED1C24",

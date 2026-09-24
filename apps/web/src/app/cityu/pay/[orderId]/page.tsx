@@ -85,7 +85,7 @@ export default function PayPage({
         ) : (
           <form onSubmit={submit} className="mt-4 space-y-3 rounded-2xl bg-white p-4 shadow-sm">
             <p className="text-xs text-gray-500">
-              Demo checkout only — no real charge. Live GraceRun CUHK still uses the production
+              Demo checkout only — no real charge. Live GraceRun still uses the production
               Airwallex keys; this CityU prototype never talks to them.
             </p>
             {error && (

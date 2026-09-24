@@ -606,14 +606,14 @@ export function ShopHome() {
               <>
                 <section className="overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-[#ED1C24] to-[#c9171e] p-5 text-white shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
-                    GraceRun CUHK
+                    GraceRun
                   </p>
                   <h2 className="mt-1 text-xl font-extrabold sm:text-2xl">
                     Apply a voucher at checkout!
                   </h2>
                   <p className="mt-1 max-w-xl text-sm text-white/90">
-                    Groceries from Fusion to your CUHK hall lobby. Pay nothing
-                    until after delivery.
+                    Groceries from Fusion to your hall lobby. Pay nothing until
+                    after delivery.
                   </p>
                 </section>
 

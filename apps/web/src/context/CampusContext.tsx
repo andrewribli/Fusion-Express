@@ -45,6 +45,11 @@ interface CampusContextValue {
   campus: CampusId;
   config: CampusConfig;
   setCampus: (campus: CampusId) => void;
+  /**
+   * Route-level override (e.g. `/cuhk` / `/cityu` channel homes). Wins over
+   * profile campus so chrome brand matches the URL. Pass null on unmount.
+   */
+  forceCampus: (campus: CampusId | null) => void;
   clearCampus: () => void;
   isReady: boolean;
 }
@@ -54,12 +59,13 @@ const CampusContext = createContext<CampusContextValue | null>(null);
 export function CampusProvider({ children }: { children: ReactNode }) {
   const { user, isReady: userReady } = useUser();
   const [storedCampus, setStoredCampus] = useState<CampusId | null>(null);
+  const [forcedCampus, setForcedCampus] = useState<CampusId | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const fromUser = isCampusId(user?.campus) ? user.campus : null;
     const fromStore = loadStoredCampus();
-    // Profile campus always wins for signed-in users.
+    // Profile campus always wins for signed-in users (unless a route force is set).
     setStoredCampus(fromUser ?? fromStore);
     if (fromUser) persistCampus(fromUser);
     setHydrated(true);
@@ -68,6 +74,14 @@ export function CampusProvider({ children }: { children: ReactNode }) {
   const setCampus = useCallback((next: CampusId) => {
     setStoredCampus(next);
     persistCampus(next);
+  }, []);
+
+  const forceCampus = useCallback((next: CampusId | null) => {
+    setForcedCampus(next);
+    if (next) {
+      setStoredCampus(next);
+      persistCampus(next);
+    }
   }, []);
 
   const clearCampus = useCallback(() => {
@@ -82,6 +96,7 @@ export function CampusProvider({ children }: { children: ReactNode }) {
   }, [user?.campus]);
 
   const campus: CampusId =
+    forcedCampus ??
     (isCampusId(user?.campus) ? user.campus : null) ??
     storedCampus ??
     "cuhk";
@@ -91,10 +106,11 @@ export function CampusProvider({ children }: { children: ReactNode }) {
       campus,
       config: getCampusConfig(campus),
       setCampus,
+      forceCampus,
       clearCampus,
       isReady: hydrated && userReady,
     }),
-    [campus, clearCampus, hydrated, setCampus, userReady],
+    [campus, clearCampus, forceCampus, hydrated, setCampus, userReady],
   );
 
   return (
