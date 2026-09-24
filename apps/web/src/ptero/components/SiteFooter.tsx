@@ -27,7 +27,7 @@ export function SiteFooter({
         {CAMPUS.brandName} · {CAMPUS.shortTagline}
       </p>
       <p className="mt-1 text-[10px] text-gray-400">
-        Prototype — dummy {CAMPUS.supermarket} catalog. Not live orders.
+        Prototype — {CAMPUS.supermarket} Citygate catalog (Foodpanda). Not live orders.
       </p>
     </footer>
   );

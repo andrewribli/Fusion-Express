@@ -51,7 +51,7 @@ export const WHY_GRACERUN = [
   },
   {
     title: `Actual ${CAMPUS.supermarket} shelf prices`,
-    body: `The app total is an estimate. The runner confirms the real ${CAMPUS.supermarket} shelf price at Festival Walk.`,
+    body: `The app total is an estimate. The runner confirms the real ${CAMPUS.supermarket} shelf price at Citygate.`,
   },
 ] as const;
 

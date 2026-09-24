@@ -147,7 +147,7 @@ export function ShopHome() {
                 📍
               </span>
               <span className="truncate text-gray-700">
-                Deliver to CityU hall lobby · Taste, Festival Walk
+                Deliver to CityU hall lobby · Taste, Citygate
               </span>
             </button>
 
@@ -281,8 +281,8 @@ export function ShopHome() {
                 <h2 className="text-lg font-extrabold text-gray-900">{activeLabel}</h2>
                 {categoryItems.length === 0 ? (
                   <p className="mt-6 text-sm text-gray-500">
-                    No dummy Taste items in this aisle yet — try Instant Meal, Beverages, or
-                    Snacks &amp; Crisps.
+                    No Taste items in this aisle yet — try Beverages, Dairy, or
+                    Meat &amp; Seafood.
                   </p>
                 ) : (
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">

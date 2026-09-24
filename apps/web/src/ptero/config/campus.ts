@@ -16,8 +16,8 @@ export const CAMPUS = {
   name: "CityU",
   brandName: "Ptero",
   supermarket: "Taste",
-  supermarketLocation: "Festival Walk",
-  tagline: "Groceries from Taste to your CityU dorm lobby.",
+  supermarketLocation: "Citygate",
+  tagline: "Groceries from Taste Citygate to your CityU dorm lobby.",
   shortTagline: "Flying with grace.",
   emailDomains: ["cityu.edu.hk", "my.cityu.edu.hk"] as const,
   signupEmailError:
