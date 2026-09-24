@@ -144,7 +144,18 @@ export default function CanteenDetailPage() {
       searchPlaceholder={`Search ${restaurant.shortName}`}
       sidebar={sidebar}
     >
-      <div className="mb-4">
+      <div className="mb-4 flex items-start gap-3">
+        {restaurant.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={restaurant.logo}
+            alt=""
+            width={56}
+            height={56}
+            className="h-14 w-14 shrink-0 rounded-xl object-contain bg-white ring-1 ring-gray-100"
+          />
+        ) : null}
+        <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ED1C24]">
           {restaurant.cuisine}
         </p>
@@ -156,6 +167,7 @@ export default function CanteenDetailPage() {
           {restaurant.location} · {restaurant.hoursLabel} · HK$
           {restaurant.deliveryFee} delivery
         </p>
+        </div>
       </div>
 
       <div className="mb-4">

@@ -7,6 +7,7 @@ import { MarketingHome } from "@/components/MarketingHome";
 import { BootScreen } from "@/components/BootScreen";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
+import { campusConfig } from "@fusion-express/shared/campus";
 
 function HomeContent() {
   const router = useRouter();
@@ -20,14 +21,22 @@ function HomeContent() {
   // Profile campus only — never localStorage. Guests who last visited Ptero
   // must still land on the GraceRun homepage, not /cityu.
   const profileCampus = user && !user.isGuest ? user.campus : null;
-  const toPtero = isReady && campusReady && signedIn && profileCampus === "cityu";
+  const campusHome =
+    profileCampus === "cityu"
+      ? campusConfig.cityu.channelHomePath
+      : profileCampus === "cuhk"
+        ? campusConfig.cuhk.channelHomePath
+        : null;
+  // Already logged in → skip marketing and jump straight to that campus app.
+  const redirectToCampus =
+    isReady && campusReady && signedIn && Boolean(campusHome);
   const browsing = signedIn || guestParam;
 
   useEffect(() => {
-    if (toPtero) router.replace("/cityu");
-  }, [toPtero, router]);
+    if (redirectToCampus && campusHome) router.replace(campusHome);
+  }, [redirectToCampus, campusHome, router]);
 
-  if (!isReady || !campusReady || toPtero) {
+  if (!isReady || !campusReady || redirectToCampus) {
     return <BootScreen error={bootError} />;
   }
   if (bootError && !user) {
@@ -36,8 +45,7 @@ function HomeContent() {
   if (!browsing) {
     return <MarketingHome />;
   }
-  // Signed-in CUHK (or guest browse): CUHK channel picker. CityU signed-in
-  // users never reach here — they were redirected to /cityu.
+  // Guest browse without a campus profile: CUHK channel picker.
   return <CampusSelector />;
 }
 

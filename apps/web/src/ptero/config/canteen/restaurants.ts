@@ -5,6 +5,7 @@ export const CANTEEN_DELIVERY_FEE = 10;
 
 export type RestaurantId =
   | "city-express-ac1"
+  | "ebeneezers-5380"
   | "ac2-canteen"
   | "ac3-bistro"
   | "hall-canteen-klnt"
@@ -29,24 +30,43 @@ export type Restaurant = {
   menuReady: boolean;
   /** Organize menu by Breakfast / Lunch / Tea / Dinner. */
   useMealPeriods: boolean;
+  /** Optional logo under /public. */
+  logo?: string;
 };
 
 export const RESTAURANTS: Restaurant[] = [
   {
     id: "city-express-ac1",
     campus: "cityu",
-    name: "City Express (AC1)",
+    name: "城大食坊 City Express (AC1)",
     shortName: "City Express",
     href: "/cityu/canteen/city-express-ac1",
-    blurb: "Fast food classics from the Amenities Building.",
-    cuisine: "Fast Food",
-    location: "5/F, Amenities Building",
-    hoursLabel: "07:30–21:00",
+    blurb: "Thai, roast meats, donburi, noodles, Halal & Coffee Lounge — live menu from Order.Place.",
+    cuisine: "Multi-concept",
+    location: "Yeung Building / AC1 canteen",
+    hoursLabel: "Mon–Sat campus hours · Closed Sun & PH",
     pickupLabel: "City Express (AC1)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
-    useMealPeriods: true,
+    useMealPeriods: false,
+  },
+  {
+    id: "ebeneezers-5380",
+    campus: "cityu",
+    name: "Ebeneezer's (5380 Cafe)",
+    shortName: "Ebeneezer's",
+    href: "/cityu/canteen/ebeneezers-5380",
+    blurb: "Kebabs, biryani, curry, pizza & more. Halal · No added MSG.",
+    cuisine: "Halal / Middle Eastern",
+    location: "Yeung Building R5013",
+    hoursLabel: "Mon–Sat 10:00 AM – 8:00 PM · Closed Sun & PH",
+    pickupLabel: "Ebeneezer's (5380 Cafe)",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: null,
+    menuReady: true,
+    useMealPeriods: false,
+    logo: "/images/canteen/ebeneezers-logo.png",
   },
   {
     id: "ac2-canteen",
