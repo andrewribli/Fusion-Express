@@ -12,13 +12,16 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isReady, bootError, user } = useUser();
-  const { campus, isReady: campusReady } = useCampus();
+  const { isReady: campusReady } = useCampus();
   // Only the login page's "Continue as Guest" opts into the menu without an
   // account; a stored guest flag must not hide the homepage on later visits.
   const guestParam = searchParams.get("guest") === "1";
   const signedIn = Boolean(user && !user.isGuest);
+  // Profile campus only — never localStorage. Guests who last visited Ptero
+  // must still land on the GraceRun homepage, not /cityu.
+  const profileCampus = user && !user.isGuest ? user.campus : null;
+  const toPtero = isReady && campusReady && signedIn && profileCampus === "cityu";
   const browsing = signedIn || guestParam;
-  const toPtero = isReady && campusReady && browsing && campus === "cityu";
 
   useEffect(() => {
     if (toPtero) router.replace("/cityu");
@@ -33,6 +36,8 @@ function HomeContent() {
   if (!browsing) {
     return <MarketingHome />;
   }
+  // Signed-in CUHK (or guest browse): CUHK channel picker. CityU signed-in
+  // users never reach here — they were redirected to /cityu.
   return <CampusSelector />;
 }
 

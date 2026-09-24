@@ -54,12 +54,24 @@ export function MarketingHome() {
           <p className="mt-5 max-w-xl text-lg text-zinc-400 sm:text-xl">
             No hill. No queue. Just food.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              href="/login?mode=signup"
+              href="/cuhk"
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#ED1C24] px-7 text-base font-bold text-white shadow-lg shadow-[#ED1C24]/25 hover:bg-[#c9171e]"
             >
-              Get Started
+              CUHK
+            </Link>
+            <Link
+              href="/cityu"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 text-base font-bold text-white hover:bg-white/10"
+            >
+              CityU
+            </Link>
+            <Link
+              href="/login?mode=signup"
+              className="inline-flex min-h-12 items-center justify-center px-3 text-sm font-semibold text-zinc-400 underline-offset-4 hover:text-white hover:underline"
+            >
+              Create account
             </Link>
           </div>
         </div>
