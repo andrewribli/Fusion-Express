@@ -8,6 +8,7 @@ export const ORDER_STATUSES = [
   "pending",
   "accepted",
   "purchased",
+  "receipt_uploaded",
   "delivered",
   "paid",
   "cancelled",
@@ -19,6 +20,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Waiting for a runner",
   accepted: "Runner accepted",
   purchased: "Bought at the store",
+  receipt_uploaded: "Receipt uploaded",
   delivered: "Delivered to lobby",
   paid: "Paid",
   cancelled: "Cancelled",
@@ -28,6 +30,7 @@ export const TRACKING_STEPS: { status: OrderStatus; label: string }[] = [
   { status: "pending", label: "Placed" },
   { status: "accepted", label: "Accepted" },
   { status: "purchased", label: "Purchased" },
+  { status: "receipt_uploaded", label: "Receipt" },
   { status: "delivered", label: "Delivered" },
   { status: "paid", label: "Paid" },
 ];

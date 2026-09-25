@@ -6,6 +6,7 @@ import { useUser } from "@/context/UserContext";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
+  markChatSeen,
   sendChatMessage,
   subscribeChatMessages,
 } from "@/lib/chat";
@@ -46,6 +47,11 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (!user?.uid || messages.length === 0) return;
+    void markChatSeen(orderId, messages, user.uid);
+  }, [messages, orderId, user?.uid]);
+
   if (!user) return null;
 
   if (order && !canAccessOrderChat(order, user)) {
@@ -63,6 +69,10 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
 
   const senderId = user.uid;
   if (!senderId) return null;
+  const archived =
+    order?.status === "completed" &&
+    order.updatedAt instanceof Date &&
+    Date.now() - order.updatedAt.getTime() > 24 * 60 * 60 * 1000;
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
@@ -70,7 +80,9 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
     setSending(true);
     setError("");
     try {
-      await sendChatMessage(orderId, senderId, user!.fullName, text);
+      const role =
+        order?.runnerUid && order.runnerUid === senderId ? "runner" : "customer";
+      await sendChatMessage(orderId, senderId, user!.fullName, text, role);
       setText("");
     } catch {
       setError("Failed to send message.");
@@ -110,6 +122,9 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
                     {msg.senderName} · {formatMessageTime(msg.timestamp)}
                   </p>
                   <p className="mt-0.5 text-sm">{msg.message}</p>
+                  {isMine && msg.seen ? (
+                    <p className="mt-0.5 text-[10px] opacity-70">Seen</p>
+                  ) : null}
                 </div>
               </div>
             );
@@ -118,6 +133,11 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
         <div ref={bottomRef} />
       </div>
 
+      {archived ? (
+        <p className="border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
+          This chat is read-only. The order was completed more than 24 hours ago.
+        </p>
+      ) : (
       <form
         onSubmit={handleSend}
         className="border-t border-gray-100 p-3"
@@ -141,6 +161,7 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
           </button>
         </div>
       </form>
+      )}
     </div>
   );
 }

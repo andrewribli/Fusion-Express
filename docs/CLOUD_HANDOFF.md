@@ -136,3 +136,26 @@ Untracked: root PDFs, zips, `FoodPanda*.txt`, `06_large_demo_dataset.sql`, `scri
 
 Parent chat folder: `agent-transcripts/a3cff02b-abd0-43bd-875c-d63b66edd4d6/`  
 Canteen UX review subagent: `subagents/2eec9050-48d1-4cf8-9a86-2f80252e7c28.jsonl` — **complete** (fixes + prod deploy).
+
+---
+
+## Overnight — 26 Sep 2026 (Andrew sleeping)
+
+Continue on `cursor/ptero-cityu-match`. Do not reopen extra canteens. Do not commit PDFs, zips, exe, or catalogs.
+
+### Just landed locally (commit with this handoff)
+
+- Universal sign-in: `/cityu/login` redirects to `/login`. Email domain sends CUHK addresses to `/cuhk` and CityU addresses to `/cityu`. `?next=` on the other campus is ignored.
+- CityU runner uses CUHK `RunnerWorkspace` (`My Deliveries`, chat at `/cityu/chat/[orderId]`).
+- CityU delivery: no bank statement. Receipt photo then lobby photo. Status `receipt_uploaded` before `delivered`. Server check: `POST /api/orders/transition`. Runner cannot accept a second order while one is `accepted` / `purchased` / `receipt_uploaded`.
+- Chat: `senderRole`, `text`, `seen`. Read-only 24h after `completed`.
+- Admin: `/admin/chats` broadcast audiences (all / customers / runners / CUHK / CityU) plus 1:1. Log `adminBroadcasts`.
+- Rules/indexes updated in repo. **Firebase rules are not live until `firebase deploy`.**
+
+### Still do
+
+1. Confirm production deploy of this commit is aliased to gracerun.fit, www.gracerun.fit, gracerun.vercel.app, servecart.vercel.app.
+2. Deploy Firestore rules, storage rules, and indexes (`firebase deploy --only firestore:rules,firestore:indexes,storage`).
+3. Unread chat email: if the other person has not opened the thread within 5 minutes, send Resend “You have a new message”. Needs a cron or scheduled route. Do not email on every keystroke.
+4. Product-check CityU: sign in with `@link.cuhk.edu.hk` lands on CUHK; demo runner sees pending orders; accept → My Deliveries → receipt → dropoff photo → customer sees progress. CUHK runners still require a bank statement.
+5. Do not let customers mark delivered. Payment stays post-delivery.

@@ -22,8 +22,9 @@ const STEPS = [
 
 /** Resume wizard at the first incomplete step based on Firestore fields. */
 export function runnerFlowStartStep(order: Order): number {
+  const cityu = order.campus === "cityu";
   const hasReceipt = Boolean(order.receiptUrl);
-  const hasBank = Boolean(order.bankStatementUrl);
+  const hasBank = cityu || Boolean(order.bankStatementUrl);
   if (!hasReceipt || !hasBank) {
     return hasReceipt || hasBank ? 1 : 0;
   }
@@ -69,8 +70,9 @@ export function RunnerDeliveryFlow({
 }) {
   const [step, setStep] = useState(() => runnerFlowStartStep(order));
   const store = supermarketForCampus(order.campus);
+  const cityu = order.campus === "cityu";
   const hasReceipt = Boolean(order.receiptUrl || receiptFile);
-  const hasBank = Boolean(order.bankStatementUrl || bankFile);
+  const hasBank = cityu || Boolean(order.bankStatementUrl || bankFile);
   const hasLobby = Boolean(order.deliveryPhotoUrl || photoFile);
   const totalOk = Number(finalTotal) > 0;
   const blocked = busy || uploading !== "";
@@ -172,10 +174,11 @@ export function RunnerDeliveryFlow({
           {step === 1 && (
             <div className="space-y-3">
               <p className="text-sm text-[#f5f5f5]">
-                Pay ${order.subtotal} at {store} yourself, then attach the receipt and bank
-                statement. Each photo saves as soon as you pick it.
+                {cityu
+                  ? `Pay at ${store} yourself, then photograph the receipt. You cannot mark this delivered until that photo is saved.`
+                  : `Pay $${order.subtotal} at ${store} yourself, then attach the receipt and bank statement. Each photo saves as soon as you pick it.`}
               </p>
-              {order.status === "purchased" && order.receiptUrl && order.bankStatementUrl ? (
+              {order.status === "purchased" && order.receiptUrl && (cityu || order.bankStatementUrl) ? (
                 <p className="rounded-xl bg-green-950 px-3 py-2 text-sm text-green-200">
                   Purchase proof already saved. Continue to delivery.
                 </p>
@@ -188,6 +191,7 @@ export function RunnerDeliveryFlow({
                 busy={uploading === "receipt"}
                 onFile={onReceipt}
               />
+              {cityu ? null : (
               <FileDropzone
                 label="Bank statement (required)"
                 hint={`Screenshot of the ${store} payment`}
@@ -196,6 +200,7 @@ export function RunnerDeliveryFlow({
                 busy={uploading === "bank"}
                 onFile={onBank}
               />
+              )}
             </div>
           )}
 

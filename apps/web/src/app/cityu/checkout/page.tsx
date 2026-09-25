@@ -189,7 +189,7 @@ export default function CheckoutPage() {
           <div className="mb-4 rounded-xl border border-[#ED1C24]/40 bg-white px-4 py-3 text-sm text-gray-800">
             No account needed. Enter your name, hall, and lobby. No phone number.
             {" "}
-            <Link href="/cityu/login?next=/checkout" className="font-semibold text-[#ED1C24] underline">
+            <Link href="/login?next=/cityu/checkout" className="font-semibold text-[#ED1C24] underline">
               Already have a CityU account? Sign in
             </Link>
           </div>

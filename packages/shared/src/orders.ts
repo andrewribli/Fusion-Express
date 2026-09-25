@@ -726,7 +726,13 @@ export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
         query(
           collection(getDb(), ORDERS_COLLECTION),
           where("runnerUid", "==", runnerUid),
-          where("status", "in", ["accepted", "purchased", "assigned", "picked"]),
+          where("status", "in", [
+            "accepted",
+            "purchased",
+            "receipt_uploaded",
+            "assigned",
+            "picked",
+          ]),
         ),
       );
       return parseSnapshotDocs(snap.docs).sort(byNewestFirst);

@@ -321,6 +321,10 @@ export interface ChatMessage {
   senderId: string;
   senderName: string;
   message: string;
+  /** Same text as `message`. Stored for the shared chat schema. */
+  text?: string;
+  senderRole?: "customer" | "runner" | "admin";
+  seen?: boolean;
   timestamp: Date;
 }
 

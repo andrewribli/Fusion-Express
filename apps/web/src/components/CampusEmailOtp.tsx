@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import {
+  detectCampusFromEmail,
   getCampusConfig,
-  isCampusEmail,
+  validateAnyCampusEmail,
   validateCampusEmail,
   type CampusId,
 } from "@fusion-express/shared/campus";
@@ -23,14 +24,19 @@ export function CampusEmailOtp({
   initialEmail = "",
   verified,
   onVerified,
+  anyCampus = false,
 }: {
-  campus: CampusId;
+  campus?: CampusId | null;
   initialEmail?: string;
   verified: boolean;
   onVerified: (email: string) => void;
+  /** Accept CUHK or CityU. The address, not a campus picker, chooses the account. */
+  anyCampus?: boolean;
 }) {
-  const cfg = getCampusConfig(campus);
-  const hint = `Use your ${cfg.emailDomains.map((d) => `@${d}`).join(" or ")} email. We send a one-time code.`;
+  const cfg = campus ? getCampusConfig(campus) : null;
+  const hint = anyCampus
+    ? "Use your CUHK (@link.cuhk.edu.hk) or CityU (@my.cityu.edu.hk) email. We send a one-time code, then open the matching campus."
+    : `Use your ${cfg?.emailDomains.map((d) => `@${d}`).join(" or ")} email. We send a one-time code.`;
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
@@ -40,9 +46,19 @@ export function CampusEmailOtp({
 
   async function requestCode() {
     setError("");
-    const invalid = validateCampusEmail(email, campus);
-    if (invalid) {
-      setError(invalid);
+    const detected = detectCampusFromEmail(email);
+    const invalid = anyCampus
+      ? validateAnyCampusEmail(email)
+      : campus
+        ? validateCampusEmail(email, campus)
+        : "Choose your university email";
+    const otpCampus = anyCampus ? detected : campus;
+    if (anyCampus && !otpCampus) {
+      setError(invalid ?? "Please use your CUHK or CityU email");
+      return;
+    }
+    if (invalid || !otpCampus) {
+      setError(invalid || "Please use your CUHK or CityU email");
       return;
     }
     setLoading(true);
@@ -50,7 +66,7 @@ export function CampusEmailOtp({
       const res = await fetch("/api/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: "signup", campus }),
+        body: JSON.stringify({ email, purpose: "signup", campus: otpCampus }),
       });
       let data: { error?: string; message?: string; devCode?: string } = {};
       try {
@@ -101,15 +117,14 @@ export function CampusEmailOtp({
   }
 
   if (verified) {
+    const shown = initialEmail || email;
+    const label = anyCampus
+      ? "University email verified"
+      : `${cfg?.name ?? "University"} email verified`;
     return (
       <div className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
-        {cfg.name} email verified
-        {initialEmail
-          ? `: ${initialEmail}`
-          : isCampusEmail(email, campus)
-            ? `: ${email}`
-            : ""}
-        .
+        {label}
+        {shown ? `: ${shown}` : ""}.
       </div>
     );
   }
@@ -118,7 +133,7 @@ export function CampusEmailOtp({
     <div className="space-y-3">
       <div>
         <label htmlFor="campus-otp-email" className="block text-xs font-medium text-gray-600">
-          {cfg.name} email
+          {anyCampus ? "University email" : `${cfg?.name ?? "University"} email`}
         </label>
         <input
           id="campus-otp-email"
@@ -130,9 +145,11 @@ export function CampusEmailOtp({
             setSent(false);
           }}
           placeholder={
-            campus === "cityu"
-              ? "xxxxxx@my.cityu.edu.hk"
-              : "1155xxxxxx@link.cuhk.edu.hk"
+            anyCampus
+              ? "you@link.cuhk.edu.hk or you@my.cityu.edu.hk"
+              : campus === "cityu"
+                ? "xxxxxx@my.cityu.edu.hk"
+                : "1155xxxxxx@link.cuhk.edu.hk"
           }
           className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
         />

@@ -396,17 +396,36 @@ export function RunnerWorkspace({
 
   async function maybeMarkPurchased(orderId: string) {
     const order = orderWithProgress(orderId);
-    if (!order?.receiptUrl || !order.bankStatementUrl) return;
-    if (order.status === "purchased" || order.status === "delivered") return;
-    await markPurchased(orderId, {
-      receiptUrl: order.receiptUrl,
-      bankStatementUrl: order.bankStatementUrl,
-    });
-    patchActiveOrder(orderId, { status: "purchased" });
+    const cityu = order?.campus === "cityu";
+    if (!order?.receiptUrl || (!cityu && !order.bankStatementUrl)) return;
+    if (
+      order.status === "delivered" ||
+      order.status === "receipt_uploaded" ||
+      (order.status === "purchased" && !cityu)
+    ) {
+      return;
+    }
+    if (order.status !== "purchased") {
+      await markPurchased(orderId, {
+        receiptUrl: order.receiptUrl,
+        bankStatementUrl: order.bankStatementUrl,
+      });
+      patchActiveOrder(orderId, { status: "purchased" });
+    }
+    if (cityu) {
+      const { postOrderTransition } = await import("@/lib/order-transition");
+      await postOrderTransition({
+        orderId,
+        to: "receipt_uploaded",
+        receiptUrl: order.receiptUrl,
+        receiptAmount: order.finalTotal,
+      });
+      patchActiveOrder(orderId, { status: "receipt_uploaded" });
+    }
     void notifyOrderStatus({
       customerEmail: order.customerEmail,
       orderId,
-      status: "purchased",
+      status: cityu ? "receipt_uploaded" : "purchased",
     });
   }
 
@@ -565,6 +584,18 @@ export function RunnerWorkspace({
         });
     if (!found) {
       setAcceptError("Your runner profile is missing. Open Pick up an order once to finish setup.");
+      setConfirmOrder(null);
+      return;
+    }
+    if (
+      scope === "cityu" &&
+      openDeliveries.some((order) =>
+        order.status === "accepted" ||
+        order.status === "purchased" ||
+        order.status === "receipt_uploaded",
+      )
+    ) {
+      setAcceptError("Finish your current delivery before accepting another order.");
       setConfirmOrder(null);
       return;
     }
@@ -787,7 +818,8 @@ export function RunnerWorkspace({
       setDeliverError(`Upload the ${store} receipt photo.`);
       return false;
     }
-    if (!bankStatementUrl && !bank) {
+    const cityuOrder = order?.campus === "cityu";
+    if (!cityuOrder && !bankStatementUrl && !bank) {
       setDeliverError(`Upload a bank statement of the ${store} payment.`);
       return false;
     }
@@ -851,22 +883,40 @@ export function RunnerWorkspace({
         patchActiveOrder(orderId, { deliveryPhotoUrl });
       }
 
-      if (!receiptUrl || !bankStatementUrl || !deliveryPhotoUrl) {
+      if (!receiptUrl || (!cityuOrder && !bankStatementUrl) || !deliveryPhotoUrl) {
         setDeliverError("Missing proof photos. Re-upload and try again.");
         return false;
       }
 
-      await withTimeout(
-        markDeliveredWithTotal(orderId, {
-          finalTotal,
-          deliveryPhotoUrl,
-          bankStatementUrl,
+      if (cityuOrder) {
+        const { postOrderTransition } = await import("@/lib/order-transition");
+        if (order?.status !== "receipt_uploaded") {
+          await postOrderTransition({
+            orderId,
+            to: "receipt_uploaded",
+            receiptUrl,
+            receiptAmount: finalTotal,
+          });
+        }
+        await postOrderTransition({
+          orderId,
+          to: "delivered",
           receiptUrl,
-          runnerVerified: true,
-        }),
-        20000,
-        "Mark delivered",
-      );
+          dropoffPhotoUrl: deliveryPhotoUrl,
+        });
+      } else {
+        await withTimeout(
+          markDeliveredWithTotal(orderId, {
+            finalTotal,
+            deliveryPhotoUrl,
+            bankStatementUrl: bankStatementUrl ?? "",
+            receiptUrl,
+            runnerVerified: true,
+          }),
+          20000,
+          "Mark delivered",
+        );
+      }
 
       if (order) {
         const owner = ownerPaymentDetails();

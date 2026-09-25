@@ -73,6 +73,7 @@ export async function sendBroadcast(opts: {
   body: string;
   emails?: string[];
   test?: boolean;
+  audience?: "all" | "customers" | "runners" | "cuhk" | "cityu";
 }): Promise<BroadcastResult> {
   const res = await fetch("/api/email/broadcast", {
     method: "POST",
@@ -83,6 +84,7 @@ export async function sendBroadcast(opts: {
       body: opts.body,
       emails: opts.emails,
       test: Boolean(opts.test),
+      audience: opts.audience,
     }),
   });
   const data = await parseBroadcastResponse(res);

@@ -98,6 +98,13 @@
       ]
     },
     {
+      "collectionGroup": "messages",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "timestamp", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "paymentSubmissions_test",
       "queryScope": "COLLECTION",
       "fields": [

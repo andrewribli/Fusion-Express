@@ -4,11 +4,13 @@ import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   onSnapshot,
   orderBy,
   query,
   Timestamp,
+  updateDoc,
 } from "firebase/firestore";
 
 const mockMessages = new Map<string, ChatMessage[]>();
@@ -24,7 +26,13 @@ function parseMessage(
     orderId,
     senderId: String(data.senderId ?? ""),
     senderName: String(data.senderName ?? ""),
-    message: String(data.message ?? ""),
+    message: String(data.message ?? data.text ?? ""),
+    text: String(data.text ?? data.message ?? ""),
+    senderRole:
+      data.senderRole === "runner" || data.senderRole === "admin"
+        ? data.senderRole
+        : "customer",
+    seen: Boolean(data.seen),
     timestamp:
       ts && typeof ts === "object" && "toDate" in ts
         ? (ts as Timestamp).toDate()
@@ -37,6 +45,7 @@ export async function sendChatMessage(
   senderId: string,
   senderName: string,
   message: string,
+  senderRole: "customer" | "runner" | "admin" = "customer",
 ): Promise<ChatMessage> {
   const trimmed = message.trim();
   if (!trimmed) throw new Error("Message cannot be empty");
@@ -46,7 +55,10 @@ export async function sendChatMessage(
     orderId,
     senderId,
     senderName,
+    senderRole,
     message: trimmed,
+    text: trimmed,
+    seen: false,
     timestamp: now,
   };
 
@@ -118,6 +130,23 @@ export function subscribeChatMessages(
   }, 3000);
 
   return () => clearInterval(interval);
+}
+
+export async function markChatSeen(
+  orderId: string,
+  messages: ChatMessage[],
+  viewerId: string,
+): Promise<void> {
+  const unseen = messages.filter((m) => m.senderId !== viewerId && !m.seen);
+  if (!unseen.length || !isFirebaseConfigured()) return;
+  await Promise.all(
+    unseen.map((m) =>
+      updateDoc(
+        doc(getDb(), collectionName("chats"), orderId, "messages", m.id),
+        { seen: true },
+      ).catch(() => undefined),
+    ),
+  );
 }
 
 export function isOwnChatMessage(

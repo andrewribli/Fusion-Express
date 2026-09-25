@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendAdminBroadcast } from "@/lib/email";
 import {
+  createAdminDocumentRest,
   filterBroadcastRecipients,
   listBroadcastRecipientsRest,
   requireAdminRest,
@@ -76,6 +77,7 @@ async function handleBroadcast(request: Request) {
     emails?: string[];
     test?: boolean;
     dryRun?: boolean;
+    audience?: "all" | "customers" | "runners" | "cuhk" | "cityu";
   };
   try {
     body = (await request.json()) as typeof body;
@@ -105,7 +107,13 @@ async function handleBroadcast(request: Request) {
 
   try {
     const all = await listBroadcastRecipientsRest();
-    const filtered = filterBroadcastRecipients(all, group);
+    const audience = body.audience ?? "all";
+    const filtered = filterBroadcastRecipients(all, group).filter((person) => {
+      if (audience === "customers") return !person.isRunner;
+      if (audience === "runners") return person.isRunner;
+      if (audience === "cuhk" || audience === "cityu") return person.campus === audience;
+      return true;
+    });
     const recipients = filtered
       .map((person) => ({
         email: person.email,
@@ -192,6 +200,17 @@ async function handleBroadcast(request: Request) {
       .filter((o) => !o.ok)
       .map((o) => ({ email: o.email, error: o.error }));
     const sent = outcomes.filter((o) => o.ok).length;
+
+    try {
+      await createAdminDocumentRest("adminBroadcasts", {
+        message,
+        sentAt: new Date().toISOString(),
+        recipientCount: sent,
+        audience,
+      });
+    } catch (err) {
+      console.error("broadcast log failed", err);
+    }
 
     return NextResponse.json({
       ok: failed.length === 0,

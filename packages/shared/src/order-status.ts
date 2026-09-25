@@ -3,6 +3,7 @@ export const ORDER_STATUSES = [
   "paid",
   "accepted",
   "purchased",
+  "receipt_uploaded",
   "delivered",
   "runner_paid",
   "completed",
@@ -16,6 +17,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
   accepted: "Accepted",
   purchased: "Purchased",
+  receipt_uploaded: "Receipt uploaded",
   delivered: "Delivered",
   paid: "Paid",
   runner_paid: "Runner paid",
@@ -46,6 +48,7 @@ export const TRACKING_STEPS: { status: OrderStatus; label: string }[] = [
   { status: "pending", label: "Pending" },
   { status: "accepted", label: "Accepted" },
   { status: "purchased", label: "Purchased" },
+  { status: "receipt_uploaded", label: "Receipt uploaded" },
   { status: "delivered", label: "Delivered" },
   { status: "paid", label: "Paid" },
   { status: "runner_paid", label: "Runner reimbursed" },
@@ -61,7 +64,11 @@ export function getStepIndex(status: OrderStatus): number {
 }
 
 export function isActiveRunnerStatus(status: OrderStatus): boolean {
-  return status === "accepted" || status === "purchased";
+  return (
+    status === "accepted" ||
+    status === "purchased" ||
+    status === "receipt_uploaded"
+  );
 }
 
 /**
@@ -73,6 +80,7 @@ export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
     status === "pending" ||
     status === "accepted" ||
     status === "purchased" ||
+    status === "receipt_uploaded" ||
     status === "delivered"
   );
 }
@@ -87,7 +95,8 @@ export function countsTowardCustomerOrderPlacementCap(
   return (
     status === "pending" ||
     status === "accepted" ||
-    status === "purchased"
+    status === "purchased" ||
+    status === "receipt_uploaded"
   );
 }
 
@@ -215,7 +224,11 @@ export function customerDeadlineOf(order: {
 }
 
 export function isRunnerDeliveryOpen(status: OrderStatus): boolean {
-  return status === "accepted" || status === "purchased";
+  return (
+    status === "accepted" ||
+    status === "purchased" ||
+    status === "receipt_uploaded"
+  );
 }
 
 export function isRunnerHoldStatus(status: OrderStatus): boolean {

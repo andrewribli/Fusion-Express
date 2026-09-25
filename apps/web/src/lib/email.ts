@@ -120,16 +120,20 @@ const STATUS_COPY: Record<string, { heading: string; body: string }> = {
     body: "Thanks — GraceRun has your payment for this delivery.",
   },
   accepted: {
-    heading: "A runner accepted your order",
-    body: "Your runner is heading to {store} to collect your order.",
+    heading: "Your runner is on the way",
+    body: "A runner accepted your order and is heading to {store}.",
   },
   purchased: {
     heading: "Your order has been purchased",
     body: "Your groceries are on the way to your dorm lobby.",
   },
+  receipt_uploaded: {
+    heading: "Receipt uploaded",
+    body: "Your runner photographed the {store} receipt.",
+  },
   delivered: {
-    heading: "Order delivered — receipt ready",
-    body: "The runner uploaded the {store} receipt. Reimburse them via PayMe/FPS, then mark runner paid.",
+    heading: "Your order has arrived",
+    body: "Your order has arrived — please pay and collect it from the lobby.",
   },
   runner_paid: {
     heading: "GraceRun reimbursed you",

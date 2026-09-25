@@ -41,7 +41,7 @@ export default function RunnerIntroPage() {
           </Link>
         ) : (
           <Link
-            href="/cityu/login?mode=signup&next=/runner/register"
+            href="/login?mode=signup&next=/cityu/runner/register"
             className="mt-6 flex w-full items-center justify-center rounded-xl bg-fusion-red py-3 text-sm font-bold text-white"
           >
             Sign up with CityU email first

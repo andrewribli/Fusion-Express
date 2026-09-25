@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CampusEmailOtp } from "@/components/CampusEmailOtp";
-import { CampusPickerCards } from "@/components/CampusPickerCards";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { AppLogo } from "@/components/AppLogo";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
@@ -17,7 +16,6 @@ import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
 import {
   detectCampusFromEmail,
-  validateCampusEmail,
   type CampusId,
 } from "@fusion-express/shared/campus";
 import {
@@ -37,7 +35,7 @@ const inputClassName =
   "mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20";
 
 type Mode = "signin" | "signup";
-type SignupStep = 1 | 2 | 3 | 4;
+type SignupStep = 1 | 2 | 3;
 
 function safeNextPath(): string | null {
   if (typeof window === "undefined") return null;
@@ -86,7 +84,6 @@ export default function LoginPage() {
     }
   }, []);
   const [signupStep, setSignupStep] = useState<SignupStep>(1);
-  const [signupCampus, setSignupCampus] = useState<CampusId | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -131,8 +128,9 @@ export default function LoginPage() {
       } else {
         await signIn(demo.email, demo.password);
       }
+      setAppCampus("cityu");
       setAppMode(asRunner ? "runner" : "customer");
-      router.push(asRunner ? "/runner/dashboard" : postLoginPath("cityu"));
+      router.push(asRunner ? "/cityu/runner/dashboard" : postLoginPath("cityu"));
     } catch (err) {
       setError(friendlyAuthError(err) || "Demo sign in failed");
     } finally {
@@ -144,7 +142,6 @@ export default function LoginPage() {
     setMode(next);
     setError("");
     setSignupStep(1);
-    setSignupCampus(null);
     setCuhkVerified(false);
     setVerifiedEmail("");
     setAgreedToTerms(false);
@@ -167,8 +164,10 @@ export default function LoginPage() {
     try {
       if (firebaseEnabled || demoAuth) {
         await signIn(identifier, password);
+        const campus = detectCampusFromEmail(identifier);
+        if (campus) setAppCampus(campus);
         setAppMode("customer");
-        router.push(postLoginPath(detectCampusFromEmail(identifier)));
+        router.push(postLoginPath(campus));
       } else {
         setError("Live login requires Firebase. Add env vars to .env.local.");
       }
@@ -182,23 +181,14 @@ export default function LoginPage() {
   function goSignupNext() {
     setError("");
     if (signupStep === 1) {
-      if (!signupCampus) {
-        setError("Choose your university");
-        return;
-      }
-      setAppCampus(signupCampus);
-      setSignupStep(2);
-      return;
-    }
-    if (signupStep === 2) {
       if (!fullName.trim()) {
         setError("Enter your full name");
         return;
       }
-      setSignupStep(3);
+      setSignupStep(2);
       return;
     }
-    if (signupStep === 3) {
+    if (signupStep === 2) {
       const passErr = validatePassword(password);
       if (passErr) {
         setError(passErr);
@@ -208,7 +198,7 @@ export default function LoginPage() {
         setError("Passwords do not match");
         return;
       }
-      setSignupStep(4);
+      setSignupStep(3);
     }
   }
 
@@ -216,38 +206,32 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    if (!signupCampus) {
-      setError("Choose your university");
-      setSignupStep(1);
-      return;
-    }
-
     const registeringEmail = email.trim().toLowerCase();
-    const emailErr = validateCampusEmail(registeringEmail, signupCampus);
+    const campus = detectCampusFromEmail(registeringEmail);
     const passErr = validatePassword(password);
     if (!fullName.trim()) {
       setError("Enter your full name");
-      setSignupStep(2);
+      setSignupStep(1);
       return;
     }
     if (passErr) {
       setError(passErr);
-      setSignupStep(3);
+      setSignupStep(2);
       return;
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      setSignupStep(2);
+      return;
+    }
+    if (!campus) {
+      setError("Please use your CUHK or CityU email");
       setSignupStep(3);
       return;
     }
-    if (emailErr) {
-      setError(emailErr);
-      setSignupStep(4);
-      return;
-    }
     if (!cuhkVerified || !verifiedEmail) {
-      setError(`Verify your ${signupCampus === "cityu" ? "CityU" : "CUHK"} email before creating an account`);
-      setSignupStep(4);
+      setError("Verify your university email before creating an account");
+      setSignupStep(3);
       return;
     }
     if (registeringEmail !== verifiedEmail.trim().toLowerCase()) {
@@ -256,7 +240,7 @@ export default function LoginPage() {
       );
       setCuhkVerified(false);
       setVerifiedEmail("");
-      setSignupStep(4);
+      setSignupStep(3);
       return;
     }
     if (!agreedToTerms) {
@@ -269,7 +253,7 @@ export default function LoginPage() {
       const profile = {
         email: registeringEmail,
         fullName: fullName.trim(),
-        campus: signupCampus,
+        campus,
         isGuest: false,
         isRunner: false,
         cuhkEmail: registeringEmail,
@@ -281,9 +265,9 @@ export default function LoginPage() {
       } else {
         login(profile);
       }
-      setAppCampus(signupCampus);
+      setAppCampus(campus);
       setAppMode("customer");
-      router.push(postLoginPath(signupCampus));
+      router.push(postLoginPath(campus));
     } catch (err) {
       setError(friendlyAuthError(err, "Sign up failed"));
     } finally {
@@ -296,8 +280,9 @@ export default function LoginPage() {
   useEffect(() => {
     if (!isReady || !user || user.isGuest) return;
     const campus = accessCampusForUser(user);
+    if (campus) setAppCampus(campus);
     router.replace(campus ? campusHubPath(campus) : "/");
-  }, [user, isReady, router]);
+  }, [user, isReady, router, setAppCampus]);
 
   if (!isReady) {
     return <BootScreen error={bootError} />;
@@ -413,9 +398,12 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your university email"
+                placeholder="you@link.cuhk.edu.hk or you@my.cityu.edu.hk"
                 className={inputClassName}
               />
+              <p className="mt-1 text-xs text-gray-500">
+                CUHK email goes to GraceRun CUHK. CityU email goes to Ptero.
+              </p>
             </div>
             <div>
               <PasswordInput
@@ -490,7 +478,7 @@ export default function LoginPage() {
         ) : (
           <form
             onSubmit={
-              signupStep === 4
+              signupStep === 3
                 ? handleSignUp
                 : (e) => {
                     e.preventDefault();
@@ -501,10 +489,10 @@ export default function LoginPage() {
           >
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Step {signupStep} of 4
+                Step {signupStep} of 3
               </p>
               <div className="mt-2 flex gap-1">
-                {([1, 2, 3, 4] as const).map((step) => (
+                {([1, 2, 3] as const).map((step) => (
                   <span
                     key={step}
                     className={`h-1.5 flex-1 rounded-full ${
@@ -516,24 +504,6 @@ export default function LoginPage() {
             </div>
 
             {signupStep === 1 && (
-              <>
-                <p className="text-sm text-gray-600">
-                  This sets your menus, dorms, and which university email we
-                  accept. You can&apos;t switch later without a new account.
-                </p>
-                <CampusPickerCards
-                  value={signupCampus}
-                  onChange={(campus) => {
-                    setSignupCampus(campus);
-                    setCuhkVerified(false);
-                    setVerifiedEmail("");
-                    setEmail("");
-                  }}
-                />
-              </>
-            )}
-
-            {signupStep === 2 && (
               <div>
                 <label htmlFor="fullName" className="block text-xs font-medium text-gray-600">
                   Full Name
@@ -550,7 +520,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            {signupStep === 3 && (
+            {signupStep === 2 && (
               <>
                 <PasswordInput
                   id="signup-password"
@@ -571,17 +541,22 @@ export default function LoginPage() {
               </>
             )}
 
-            {signupStep === 4 && signupCampus && (
+            {signupStep === 3 && (
               <>
+                <p className="text-sm text-gray-600">
+                  A CUHK email opens GraceRun CUHK. A CityU email opens Ptero.
+                </p>
                 <CampusEmailOtp
-                  campus={signupCampus}
+                  anyCampus
                   initialEmail={email}
                   verified={cuhkVerified}
                   onVerified={(verified) => {
                     const normalized = verified.trim().toLowerCase();
+                    const campus = detectCampusFromEmail(normalized);
                     setEmail(normalized);
                     setVerifiedEmail(normalized);
                     setCuhkVerified(true);
+                    if (campus) setAppCampus(campus);
                     setError("");
                   }}
                 />
@@ -625,14 +600,13 @@ export default function LoginPage() {
               type="submit"
               disabled={
                 loading ||
-                (signupStep === 1 && !signupCampus) ||
-                (signupStep === 4 && (!cuhkVerified || !agreedToTerms))
+                (signupStep === 3 && (!cuhkVerified || !agreedToTerms))
               }
               className="min-h-12 w-full rounded-full bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
             >
               {loading
                 ? "Creating account…"
-                : signupStep === 4
+                : signupStep === 3
                   ? "Create Account"
                   : "Next"}
             </button>

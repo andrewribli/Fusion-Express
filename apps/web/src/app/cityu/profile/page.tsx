@@ -61,10 +61,10 @@ export default function ProfilePage() {
             </button>
           ) : (
             <Link
-              href="/cityu/login"
+              href="/login"
               className="block rounded-xl bg-fusion-red px-4 py-3 text-center text-sm font-semibold text-white"
             >
-              Sign in with CityU email
+              Sign in
             </Link>
           )}
         </div>

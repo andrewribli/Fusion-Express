@@ -161,7 +161,7 @@ export function CustomerNotificationBell({
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  router.push("/cityu/login");
+                  router.push("/login");
                 }}
                 className="rounded-xl bg-[#ED1C24] px-3 py-2 text-xs font-bold text-white"
               >

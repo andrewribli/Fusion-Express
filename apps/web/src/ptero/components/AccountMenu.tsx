@@ -122,18 +122,18 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
           ) : (
             <>
               <Link
-                href="/cityu/login"
+                href="/login"
                 onClick={() => setOpen(false)}
                 className="block px-3 py-2 text-gray-800 hover:bg-gray-50"
               >
                 Sign in
               </Link>
               <Link
-                href="/cityu/login?mode=signup"
+                href="/login?mode=signup"
                 onClick={() => setOpen(false)}
                 className="block px-3 py-2 text-gray-800 hover:bg-gray-50"
               >
-                Sign up with CityU email
+                Create account
               </Link>
             </>
           )}

@@ -396,6 +396,31 @@ service cloud.firestore {
           isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
         )
         && request.resource.data.senderId == uid();
+      allow update: if signedIn()
+        && (isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId)) || isAdmin())
+        && request.auth.uid != resource.data.senderId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+        && request.resource.data.seen == true;
+      allow delete: if false;
+    }
+
+    match /adminChats/{userId}/messages/{messageId} {
+      allow read: if signedIn() && (uid() == userId || isAdmin());
+      allow create: if signedIn()
+        && (uid() == userId || isAdmin())
+        && request.resource.data.senderId == uid()
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000;
+      allow update: if signedIn()
+        && (uid() == userId || isAdmin())
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']);
+      allow delete: if false;
+    }
+
+    match /adminBroadcasts/{broadcastId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
       allow update, delete: if false;
     }
 

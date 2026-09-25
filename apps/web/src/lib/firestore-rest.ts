@@ -445,6 +445,7 @@ export type BroadcastRecipient = {
   email: string;
   name: string;
   isRunner: boolean;
+  campus: CampusId;
   createdAt: Date | null;
 };
 
@@ -514,6 +515,7 @@ export async function listBroadcastRecipientsRest(): Promise<
         email,
         name: String(fields.fullName ?? fields.name ?? "").trim(),
         isRunner: Boolean(fields.isRunner) || Boolean(fields.runnerId),
+        campus: resolveCampus(fields.campus),
         createdAt: created instanceof Date ? created : null,
       });
     }
