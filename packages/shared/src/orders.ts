@@ -146,10 +146,10 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
       : undefined,
     items,
     status: normalizeOrderStatus(String(data.status ?? "pending")),
-    college: String(data.college ?? ""),
+    college: String(data.college ?? data.compound ?? ""),
     hall: String(data.hall ?? ""),
     roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
-    lobbyPoint: String(data.lobbyPoint ?? ""),
+    lobbyPoint: String(data.lobbyPoint ?? data.lobby ?? ""),
     zone: (() => {
       const z = Number(data.zone);
       return z === 1 || z === 2 || z === 3 ? z : undefined;
@@ -389,9 +389,49 @@ export class OrderAlreadyTakenError extends Error {
   }
 }
 
-function filterOwnOrders(orders: Order[], excludeCustomerId?: string): Order[] {
-  if (!excludeCustomerId) return orders;
-  return orders.filter((o) => o.customerId !== excludeCustomerId);
+export type RunnerSelfPickupIdentity = {
+  uid?: string;
+  email?: string | null;
+};
+
+function normalizeIdentityEmail(email?: string | null): string | undefined {
+  if (!email) return undefined;
+  const trimmed = email.trim().toLowerCase();
+  return trimmed || undefined;
+}
+
+/** Blocks runners from claiming orders they placed (uid or customer email). */
+export function isOwnCustomerOrder(
+  order: Pick<Order, "customerId" | "customerEmail">,
+  runner: RunnerSelfPickupIdentity,
+): boolean {
+  const runnerUid = runner.uid?.trim();
+  if (runnerUid && order.customerId === runnerUid) return true;
+  const orderEmail = normalizeIdentityEmail(order.customerEmail);
+  const runnerEmail = normalizeIdentityEmail(runner.email);
+  if (orderEmail && runnerEmail && orderEmail === runnerEmail) return true;
+  return false;
+}
+
+function runnerExcludeFromOptions(options?: {
+  excludeCustomerId?: string;
+  excludeCustomerEmail?: string | null;
+}): RunnerSelfPickupIdentity | undefined {
+  if (!options?.excludeCustomerId && !options?.excludeCustomerEmail) {
+    return undefined;
+  }
+  return {
+    uid: options.excludeCustomerId,
+    email: options.excludeCustomerEmail,
+  };
+}
+
+function filterOwnOrders(
+  orders: Order[],
+  exclude?: RunnerSelfPickupIdentity,
+): Order[] {
+  if (!exclude?.uid && !exclude?.email) return orders;
+  return orders.filter((o) => !isOwnCustomerOrder(o, exclude));
 }
 
 /** Orders placed before multi-campus have no `campus`; they are all CUHK. */
@@ -427,15 +467,17 @@ function byNewestFirst(a: Order, b: Order): number {
 export async function fetchPendingOrders(
   excludeCustomerId?: string,
   campus?: CampusId,
+  excludeCustomerEmail?: string | null,
 ): Promise<Order[]> {
   return filterCampusOrders(
-    await fetchUnscopedPendingOrders(excludeCustomerId),
+    await fetchUnscopedPendingOrders(excludeCustomerId, excludeCustomerEmail),
     campus,
   );
 }
 
 async function fetchUnscopedPendingOrders(
   excludeCustomerId?: string,
+  excludeCustomerEmail?: string | null,
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
@@ -451,7 +493,10 @@ async function fetchUnscopedPendingOrders(
       );
       return filterOwnOrders(
         parseSnapshotDocs(snap.docs).filter((o) => !o.runnerId),
-        excludeCustomerId,
+        runnerExcludeFromOptions({
+          excludeCustomerId,
+          excludeCustomerEmail,
+        }),
       );
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
@@ -463,7 +508,10 @@ async function fetchUnscopedPendingOrders(
 
   return filterOwnOrders(
     getMockPendingOrders().filter((o) => !o.runnerId),
-    excludeCustomerId,
+    runnerExcludeFromOptions({
+      excludeCustomerId,
+      excludeCustomerEmail,
+    }),
   );
 }
 
@@ -477,17 +525,19 @@ export function subscribePendingOrders(
   onOrders: (orders: Order[]) => void,
   options?: {
     excludeCustomerId?: string;
+    excludeCustomerEmail?: string | null;
     /** Only show jobs on the runner's own campus. */
     campus?: CampusId;
     onError?: (err: Error) => void;
   },
 ): () => void {
+  const excludeRunner = runnerExcludeFromOptions(options);
   const emit = (orders: Order[]) => {
     onOrders(
       filterCampusOrders(
         filterOwnOrders(
           orders.filter((o) => !o.runnerId),
-          options?.excludeCustomerId,
+          excludeRunner,
         ),
         options?.campus,
       ),
@@ -671,7 +721,12 @@ export async function acceptOrder(
       const snap = await tx.get(orderRef);
       if (!snap.exists()) throw new Error("Order not found");
       const order = parseOrder(snap.id, snap.data() as Record<string, unknown>);
-      if (order.customerId === runnerUid) {
+      if (
+        isOwnCustomerOrder(order, {
+          uid: runnerUid,
+          email: payment?.email,
+        })
+      ) {
         throw new SelfPickupError();
       }
       if (runnerCampus && orderCampus(order) !== runnerCampus) {
@@ -700,7 +755,12 @@ export async function acceptOrder(
 
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.customerId === runnerUid) {
+  if (
+    isOwnCustomerOrder(order, {
+      uid: runnerUid,
+      email: payment?.email,
+    })
+  ) {
     throw new SelfPickupError();
   }
   if (!isClaimableOrderStatus(order.status)) {

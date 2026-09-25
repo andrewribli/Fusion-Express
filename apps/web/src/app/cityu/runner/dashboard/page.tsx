@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { isOwnCustomerOrder } from "@fusion-express/shared/orders";
 import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import { CollegeDiscountRunnerBadge } from "@/ptero/components/CollegeDiscountRunnerBadge";
@@ -14,7 +16,31 @@ import { formatHkd, resolveOrderChannel } from "@/ptero/lib/types";
 export default function RunnerDashboardPage() {
   const { user, canRunnerMode } = useUser();
   const { orders, acceptOrder } = useAppState();
-  const available = orders.filter((o) => o.status === "pending" && o.campus === CAMPUS.id);
+  const [acceptError, setAcceptError] = useState("");
+  const available = useMemo(
+    () =>
+      orders.filter(
+        (o) =>
+          o.status === "pending" &&
+          o.campus === CAMPUS.id &&
+          (!user ||
+            !isOwnCustomerOrder(o, { uid: user.uid, email: user.email })),
+      ),
+    [orders, user],
+  );
+
+  async function handleAccept(orderId: string) {
+    setAcceptError("");
+    try {
+      await acceptOrder(orderId);
+    } catch (err) {
+      setAcceptError(
+        err instanceof Error
+          ? err.message
+          : "Could not accept this order.",
+      );
+    }
+  }
 
   if (!canRunnerMode) {
     return (
@@ -40,6 +66,11 @@ export default function RunnerDashboardPage() {
           Signed in as {user?.name} · {user?.phone}
           {user?.college ? ` · ${collegeLabel(user.college)}` : ""}
         </p>
+        {acceptError ? (
+          <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+            {acceptError}
+          </p>
+        ) : null}
         {available.length === 0 ? (
           <div className="mt-6 rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
             <p className="text-sm text-gray-600">No open CityU orders right now.</p>
@@ -118,7 +149,7 @@ export default function RunnerDashboardPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => acceptOrder(order.id)}
+                    onClick={() => handleAccept(order.id)}
                     className="mt-3 w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-white"
                   >
                     Accept run

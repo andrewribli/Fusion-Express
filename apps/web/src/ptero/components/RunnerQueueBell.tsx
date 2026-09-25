@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useAppState } from "@/ptero/context/AppState";
+import { isOwnCustomerOrder } from "@fusion-express/shared/orders";
+import { useAppState, useUser } from "@/ptero/context/AppState";
+import { CAMPUS_ID } from "@/ptero/config/campus";
 import { runnerEntryHref } from "@/ptero/lib/nav";
 
 type RunnerQueueBellProps = {
@@ -28,7 +30,8 @@ export function RunnerQueueBell({
   className = "",
   tone = "light",
 }: RunnerQueueBellProps) {
-  const { user, orders, setMode, canRunnerMode } = useAppState();
+  const { orders, setMode, canRunnerMode } = useAppState();
+  const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [hoverCapable, setHoverCapable] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -36,14 +39,24 @@ export function RunnerQueueBell({
   const queue = useMemo<QueueItem[]>(
     () =>
       orders
-        .filter((order) => order.status === "pending" && !order.runnerId)
+        .filter(
+          (order) =>
+            order.status === "pending" &&
+            !order.runnerId &&
+            order.campus === CAMPUS_ID &&
+            (!user ||
+              !isOwnCustomerOrder(order, {
+                uid: user.uid,
+                email: user.email,
+              })),
+        )
         .map((order) => ({
           id: order.id,
           dorm:
             [order.compound, order.hall].filter(Boolean).join(" → ") ||
             "Dorm TBD",
         })),
-    [orders],
+    [orders, user],
   );
   const count = queue.length;
 

@@ -491,6 +491,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       },
       {
         excludeCustomerId: getUserAccountId(user),
+        excludeCustomerEmail: user.email,
         campus: runnerCampusOf(user),
         onError: (err) => {
           setLoadError(err.message || "Could not load available orders.");

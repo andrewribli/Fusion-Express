@@ -92,6 +92,8 @@ export interface AppUser {
   college?: CollegeId | null;
   isGuest: boolean;
   isRunner: boolean;
+  /** Doc id in /runners when registered on Firestore (CUHK parity). */
+  runnerDocId?: string;
   passwordHash?: string;
 }
 

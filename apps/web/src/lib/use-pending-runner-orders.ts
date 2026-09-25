@@ -67,6 +67,7 @@ export function usePendingRunnerOrders(): {
         },
         {
           excludeCustomerId,
+          excludeCustomerEmail: user.email,
           campus,
           onError: () => {
             void fetchPendingQueue(campus).then(setOrders);

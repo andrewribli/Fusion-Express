@@ -11,12 +11,28 @@ import {
 } from "react";
 import { CAMPUS_ID } from "@/ptero/config/campus";
 import type { CollegeId } from "@/ptero/config/canteen/colleges";
-import { computeCollegeDiscount } from "@/ptero/config/canteen/colleges";
+import {
+  computeCollegeDiscount,
+  getCollege,
+} from "@/ptero/config/canteen/colleges";
 import { DEMO_CUSTOMER, DEMO_RUNNER } from "@/ptero/config/demo";
 import { hashPassword } from "@/ptero/lib/auth";
 import { notifyDiscountReceived, notifyOrderStatus } from "@/ptero/lib/canteen/notify";
 import { readJson, STORAGE_KEYS, writeJson } from "@/ptero/lib/storage";
 import type { AppMode, AppUser, Order, OrderStatus } from "@/ptero/lib/types";
+import {
+  isOwnCustomerOrder,
+  SelfPickupError,
+} from "@fusion-express/shared/orders";
+import { normalizePhone } from "@/lib/auth";
+import { findRunnerForUser, registerRunner as registerRunnerDoc } from "@/lib/runners";
+import { fetchUserProfile, updateUserProfileDoc } from "@/lib/users";
+import {
+  acceptPteroOrderOnFirestore,
+  isCloudOrderId,
+  persistPteroOrderToFirestore,
+  subscribeCityuPendingOrders,
+} from "@/ptero/lib/firestore-orders";
 
 async function ensureDemoUsers(existing: AppUser[]): Promise<AppUser[]> {
   let next = [...existing];
@@ -77,9 +93,11 @@ interface AppStateValue {
     phone: string;
     college: CollegeId;
   }) => Promise<AppUser>;
-  placeOrder: (order: Omit<Order, "id" | "campus" | "createdAt" | "status">) => Order;
+  placeOrder: (
+    order: Omit<Order, "id" | "campus" | "createdAt" | "status">,
+  ) => Promise<Order>;
   updateOrder: (id: string, patch: Partial<Order>) => Order | null;
-  acceptOrder: (id: string) => Order | null;
+  acceptOrder: (id: string) => Promise<Order | null>;
   markPurchased: (id: string, receiptTotal: number) => Order | null;
   markDelivered: (id: string) => Order | null;
   markPaid: (id: string) => Order | null;
@@ -91,6 +109,20 @@ function publicUser(user: AppUser): AppUser {
   const { passwordHash: _omit, ...rest } = user;
   void _omit;
   return rest;
+}
+
+function mergeCloudPendingOrders(local: Order[], cloudPending: Order[]): Order[] {
+  const byId = new Map<string, Order>();
+  for (const order of local) {
+    if (isCloudOrderId(order.id) && order.status === "pending") continue;
+    byId.set(order.id, order);
+  }
+  for (const order of cloudPending) {
+    byId.set(order.id, order);
+  }
+  return [...byId.values()].sort(
+    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+  );
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
@@ -148,6 +180,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("storage", onSync);
     };
   }, [reload]);
+
+  useEffect(() => {
+    return subscribeCityuPendingOrders(
+      (cloudPending) => {
+        setOrders((prev) => mergeCloudPendingOrders(prev, cloudPending));
+      },
+      {
+        excludeCustomerId: user?.uid,
+        excludeCustomerEmail: user?.email,
+      },
+    );
+  }, [user?.uid, user?.email]);
 
   const setMode = useCallback((next: AppMode) => {
     setModeState(next);
@@ -212,14 +256,61 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       try {
         const { firebaseSignIn } = await import("@/ptero/lib/firebase-auth");
         const fbUser = await firebaseSignIn(identifier, password);
+        const local = users.find((u) => u.email === identifier);
+        const profile = await fetchUserProfile(fbUser.uid);
         const session: AppUser = {
           uid: fbUser.uid,
           campus: CAMPUS_ID,
-          name: fbUser.displayName || "Andrew",
+          name:
+            local?.name ||
+            profile?.fullName?.trim() ||
+            fbUser.displayName ||
+            "CityU student",
           email: identifier,
           isGuest: false,
-          isRunner: false,
+          isRunner: Boolean(local?.isRunner || profile?.isRunner),
+          phone: local?.phone || profile?.phone,
+          college: (local?.college ||
+            (profile?.college as CollegeId | undefined)) as CollegeId | undefined,
+          runnerDocId: profile?.runnerId || local?.runnerDocId,
         };
+        if (local && local.uid !== fbUser.uid) {
+          persistUsers(
+            users.map((u) =>
+              u.email === identifier ? { ...session, passwordHash: u.passwordHash } : u,
+            ),
+          );
+        }
+        if (
+          session.isRunner &&
+          !session.runnerDocId &&
+          session.phone &&
+          session.college
+        ) {
+          try {
+            const residence = getCollege(session.college);
+            const runnerDocId = await registerRunnerDoc({
+              uid: session.uid,
+              fullName: session.name.trim() || "Runner",
+              studentId: session.uid.slice(0, 12),
+              phone: session.phone,
+              college: session.college,
+              hall: residence?.compound ?? "",
+              paymentMethod: "PayMe",
+              paymentId: session.phone,
+            });
+            await updateUserProfileDoc(session.uid, {
+              isRunner: true,
+              runnerId: runnerDocId,
+              phone: session.phone,
+              college: session.college,
+              fullName: session.name.trim() || "Runner",
+            });
+            session.runnerDocId = runnerDocId;
+          } catch (err) {
+            console.warn("CityU runner profile sync on sign-in:", err);
+          }
+        }
         persistUser(session);
         return publicUser(session);
       } catch {
@@ -261,11 +352,36 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       if (!user || user.isGuest || !user.email) {
         throw new Error("Sign up with your CityU email before becoming a runner.");
       }
+      const phone = normalizePhone(opts.phone);
+      const residence = getCollege(opts.college);
+      let runnerDocId = user.runnerDocId;
+      try {
+        runnerDocId = await registerRunnerDoc({
+          uid: user.uid,
+          fullName: user.name.trim() || "Runner",
+          studentId: user.uid.slice(0, 12),
+          phone,
+          college: opts.college,
+          hall: residence?.compound ?? "",
+          paymentMethod: "PayMe",
+          paymentId: phone,
+        });
+        await updateUserProfileDoc(user.uid, {
+          isRunner: true,
+          runnerId: runnerDocId,
+          phone,
+          college: opts.college,
+          fullName: user.name.trim() || "Runner",
+        });
+      } catch (err) {
+        console.warn("CityU runner Firestore registration:", err);
+      }
       const next: AppUser = {
         ...user,
         isRunner: true,
-        phone: opts.phone.trim(),
+        phone,
         college: opts.college,
+        runnerDocId,
       };
       persistUsers(users.map((u) => (u.uid === next.uid ? { ...u, ...next } : u)));
       persistUser(next);
@@ -276,18 +392,34 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   );
 
   const placeOrder = useCallback(
-    (draft: Omit<Order, "id" | "campus" | "createdAt" | "status">) => {
+    async (draft: Omit<Order, "id" | "campus" | "createdAt" | "status">) => {
+      let id = `CYU-${Date.now().toString(36).toUpperCase()}`;
+      try {
+        const cloudId = await persistPteroOrderToFirestore(draft);
+        if (cloudId) id = cloudId;
+      } catch (err) {
+        console.error("CityU Firestore placeOrder failed", err);
+        throw err instanceof Error
+          ? err
+          : new Error("Could not place order. Try again.");
+      }
       const order: Order = {
         ...draft,
-        id: `CYU-${Date.now().toString(36).toUpperCase()}`,
+        id,
         campus: CAMPUS_ID,
         status: "pending",
         createdAt: new Date().toISOString(),
       };
-      persistOrders([order, ...orders]);
+      setOrders((prev) => {
+        const next = mergeCloudPendingOrders(prev, [order]);
+        if (!isCloudOrderId(id)) {
+          writeJson(STORAGE_KEYS.orders, next);
+        }
+        return next;
+      });
       return order;
     },
-    [orders, persistOrders],
+    [],
   );
 
   const updateOrder = useCallback(
@@ -316,16 +448,58 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   );
 
   const acceptOrder = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!user?.isRunner) throw new Error("Only runners can update this order.");
       const current = orders.find((o) => o.id === id);
       if (!current || current.status !== "pending") return null;
+      if (current.runnerId) {
+        throw new Error("This order was already accepted by another runner.");
+      }
+      if (
+        isOwnCustomerOrder(current, {
+          uid: user.uid,
+          email: user.email,
+        })
+      ) {
+        throw new SelfPickupError();
+      }
 
       const { discountApplied, discountAmount } = computeCollegeDiscount(
         current.subtotal,
         user.college,
         current.canteenCollege,
       );
+      const discountedSubtotal = discountApplied
+        ? Math.max(0, current.subtotal - discountAmount)
+        : current.subtotal;
+      const discountedTotal =
+        discountedSubtotal + current.deliveryFee + current.tip;
+
+      if (isCloudOrderId(id)) {
+        const runnerDoc =
+          user.runnerDocId != null
+            ? { id: user.runnerDocId }
+            : await findRunnerForUser({ uid: user.uid });
+        if (!runnerDoc?.id) {
+          throw new Error("Register as a runner before accepting orders.");
+        }
+        await acceptPteroOrderOnFirestore({
+          orderId: id,
+          runnerDocId: runnerDoc.id,
+          runnerUid: user.uid,
+          runnerName: user.name,
+          runnerEmail: user.email,
+          runnerPhone: user.phone,
+          discount: {
+            discountApplied,
+            discountAmount,
+            runnerCollege: user.college ?? undefined,
+            canteenCollege: current.canteenCollege ?? undefined,
+            subtotal: discountedSubtotal,
+            total: discountedTotal,
+          },
+        });
+      }
 
       const next = updateOrder(id, {
         status: "accepted",

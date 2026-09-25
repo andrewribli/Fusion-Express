@@ -112,13 +112,13 @@ export default function CheckoutPage() {
     setConfirmOpen(true);
   }
 
-  function handleConfirmPlaceOrder() {
+  async function handleConfirmPlaceOrder() {
     if (!canSubmit) return;
     setLoading(true);
     try {
       const customer =
         user && !user.isGuest ? user : startGuest(guestName.trim());
-      const order = placeOrder({
+      const order = await placeOrder({
         sessionId,
         customerId: customer.uid,
         customerName: guestName.trim() || customer.name,
