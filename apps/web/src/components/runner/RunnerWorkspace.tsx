@@ -495,7 +495,6 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         campus: runnerCampusOf(user),
         onError: (err) => {
           setLoadError(err.message || "Could not load available orders.");
-          setPending([]);
         },
       },
     );

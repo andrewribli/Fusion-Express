@@ -15,7 +15,7 @@ import { formatHkd, resolveOrderChannel } from "@/ptero/lib/types";
 
 export default function RunnerDashboardPage() {
   const { user, canRunnerMode } = useUser();
-  const { orders, acceptOrder } = useAppState();
+  const { orders, ordersLoadError, acceptOrder } = useAppState();
   const [acceptError, setAcceptError] = useState("");
   const available = useMemo(
     () =>
@@ -66,6 +66,11 @@ export default function RunnerDashboardPage() {
           Signed in as {user?.name} · {user?.phone}
           {user?.college ? ` · ${collegeLabel(user.college)}` : ""}
         </p>
+        {ordersLoadError ? (
+          <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+            {ordersLoadError}
+          </p>
+        ) : null}
         {acceptError ? (
           <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
             {acceptError}
@@ -75,7 +80,8 @@ export default function RunnerDashboardPage() {
           <div className="mt-6 rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
             <p className="text-sm text-gray-600">No open CityU orders right now.</p>
             <p className="mt-1 text-xs text-gray-400">
-              Place a guest order in another tab, then come back here.
+              Signed-in CityU orders that are still unaccepted show up here,
+              including ones placed before you opened this page.
             </p>
           </div>
         ) : (

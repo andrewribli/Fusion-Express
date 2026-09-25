@@ -116,6 +116,11 @@ export async function persistPteroOrderToFirestore(
   });
 }
 
+/**
+ * CityU runner board. Firestore pending orders for campus `cityu` only.
+ * Tickets that never left the customer's browser (`CYU-…` in localStorage)
+ * cannot show up for a runner on another device.
+ */
 export function subscribeCityuPendingOrders(
   onPending: (orders: PteroOrder[]) => void,
   opts?: {

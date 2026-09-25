@@ -9,11 +9,23 @@ export type PendingQueueItem = {
   hall: string;
 };
 
+type QueryField = {
+  stringValue?: string;
+  timestampValue?: string;
+};
+
 function fieldString(
-  fields: Record<string, { stringValue?: string }> | undefined,
+  fields: Record<string, QueryField> | undefined,
   key: string,
 ): string {
   return String(fields?.[key]?.stringValue ?? "").trim();
+}
+
+function fieldTimestamp(
+  fields: Record<string, QueryField> | undefined,
+  key: string,
+): string {
+  return String(fields?.[key]?.timestampValue ?? "").trim();
 }
 
 /**
@@ -30,65 +42,91 @@ export async function GET(request: Request) {
     }
 
     const col = collectionName("orders");
-    const res = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${ctx.project}/databases/(default)/documents:runQuery`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${ctx.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          structuredQuery: {
-            from: [{ collectionId: col }],
-            where: {
-              fieldFilter: {
-                field: { fieldPath: "status" },
-                op: "EQUAL",
-                value: { stringValue: "pending" },
-              },
-            },
-            limit: 40,
-          },
-        }),
-      },
-    );
-
-    if (!res.ok) {
-      console.error(
-        "[pending-count] runQuery failed",
-        res.status,
-        (await res.text()).slice(0, 400),
-      );
-      return NextResponse.json({ count: 0, orders: [] as PendingQueueItem[] });
-    }
-
-    const rows = (await res.json()) as {
-      document?: {
-        name?: string;
-        fields?: Record<
-          string,
-          { stringValue?: string }
-        >;
-      };
-    }[];
-
+    const pageSize = 200;
     const orders: PendingQueueItem[] = [];
-    for (const row of rows) {
-      const fields = row.document?.fields;
-      if (!fields) continue;
-      const runnerId = fieldString(fields, "runnerId");
-      const runnerUid = fieldString(fields, "runnerUid");
-      if (runnerId || runnerUid) continue;
-      if (resolveCampus(fieldString(fields, "campus")) !== campus) continue;
-      const name = row.document?.name ?? "";
-      const id = name.split("/").pop()?.trim() || fieldString(fields, "id");
-      if (!id) continue;
-      orders.push({
-        id,
-        college: fieldString(fields, "college"),
-        hall: fieldString(fields, "hall"),
-      });
+    const seen = new Set<string>();
+    let startAfterCreatedAt: string | undefined;
+
+    for (let page = 0; page < 30; page++) {
+      const structuredQuery: Record<string, unknown> = {
+        from: [{ collectionId: col }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "status" },
+            op: "EQUAL",
+            value: { stringValue: "pending" },
+          },
+        },
+        orderBy: [
+          {
+            field: { fieldPath: "createdAt" },
+            direction: "DESCENDING",
+          },
+        ],
+        limit: pageSize,
+      };
+      if (startAfterCreatedAt) {
+        structuredQuery.startAt = {
+          values: [{ timestampValue: startAfterCreatedAt }],
+          before: false,
+        };
+      }
+
+      const res = await fetch(
+        `https://firestore.googleapis.com/v1/projects/${ctx.project}/databases/(default)/documents:runQuery`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${ctx.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ structuredQuery }),
+        },
+      );
+
+      if (!res.ok) {
+        console.error(
+          "[pending-count] runQuery failed",
+          res.status,
+          (await res.text()).slice(0, 400),
+        );
+        break;
+      }
+
+      const rows = (await res.json()) as {
+        document?: {
+          name?: string;
+          fields?: Record<string, QueryField>;
+        };
+      }[];
+
+      let pageCount = 0;
+      let lastCreatedAt = "";
+      for (const row of rows) {
+        const fields = row.document?.fields;
+        if (!fields) continue;
+        pageCount += 1;
+        const createdAt = fieldTimestamp(fields, "createdAt");
+        if (createdAt) lastCreatedAt = createdAt;
+        const runnerId = fieldString(fields, "runnerId");
+        const runnerUid = fieldString(fields, "runnerUid");
+        if (runnerId || runnerUid) continue;
+        if (resolveCampus(fieldString(fields, "campus")) !== campus) continue;
+        const name = row.document?.name ?? "";
+        const id = name.split("/").pop()?.trim() || fieldString(fields, "id");
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        orders.push({
+          id,
+          college: fieldString(fields, "college") || fieldString(fields, "compound"),
+          hall: fieldString(fields, "hall"),
+        });
+      }
+
+      if (pageCount < pageSize || !lastCreatedAt || lastCreatedAt === startAfterCreatedAt) {
+        break;
+      }
+      startAfterCreatedAt = lastCreatedAt;
     }
 
     return NextResponse.json({ count: orders.length, orders });

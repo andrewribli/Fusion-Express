@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -76,6 +77,8 @@ interface AppStateValue {
   user: AppUser | null;
   users: AppUser[];
   orders: Order[];
+  /** Set when the Firestore pending board could not be read. */
+  ordersLoadError: string;
   mode: AppMode;
   canRunnerMode: boolean;
   setMode: (mode: AppMode) => void;
@@ -129,8 +132,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoadError, setOrdersLoadError] = useState("");
   const [user, setUser] = useState<AppUser | null>(null);
   const [mode, setModeState] = useState<AppMode>("customer");
+  /** Latest Firestore pending board. localStorage reloads must not drop it. */
+  const cloudPendingRef = useRef<Order[]>([]);
 
   const persistUsers = useCallback((next: AppUser[]) => {
     setUsers(next);
@@ -153,7 +159,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const loadedUser = readJson<AppUser | null>(STORAGE_KEYS.currentUser, null);
     const loadedMode = readJson<AppMode>(STORAGE_KEYS.mode, "customer");
     setUsers(loadedUsers);
-    setOrders(loadedOrders);
+    // Any localStorage write dispatches gracerun-cityu-sync. Reloading the
+    // stored list alone wiped Firestore pending that this browser never saved.
+    setOrders(mergeCloudPendingOrders(loadedOrders, cloudPendingRef.current));
     setUser(loadedUser);
     setModeState(loadedMode);
   }, []);
@@ -182,16 +190,26 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [reload]);
 
   useEffect(() => {
+    if (!isReady) return;
+    // Guest CYU-* tickets stay in the placing browser's localStorage only.
+    // Signed-in checkout writes Firestore; this subscription is the board.
     return subscribeCityuPendingOrders(
       (cloudPending) => {
+        cloudPendingRef.current = cloudPending;
+        setOrdersLoadError("");
         setOrders((prev) => mergeCloudPendingOrders(prev, cloudPending));
       },
       {
         excludeCustomerId: user?.uid,
         excludeCustomerEmail: user?.email,
+        onError: (err) => {
+          setOrdersLoadError(
+            err.message || "Could not load available CityU orders.",
+          );
+        },
       },
     );
-  }, [user?.uid, user?.email]);
+  }, [isReady, user?.uid, user?.email]);
 
   const setMode = useCallback((next: AppMode) => {
     setModeState(next);
@@ -561,6 +579,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       user,
       users,
       orders,
+      ordersLoadError,
       mode,
       canRunnerMode,
       setMode,
@@ -581,6 +600,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       user,
       users,
       orders,
+      ordersLoadError,
       mode,
       canRunnerMode,
       setMode,

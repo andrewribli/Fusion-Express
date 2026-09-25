@@ -30,7 +30,7 @@ import {
   runnerDeadlineOf,
 } from "./order-status";
 import { omitUndefined } from "./omit-undefined";
-import { getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
+import { getAuthClient, getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
 import {
   addDoc,
   collection,
@@ -42,10 +42,14 @@ import {
   orderBy,
   query,
   runTransaction,
+  startAfter,
   updateDoc,
   where,
   Timestamp,
+  type QueryConstraint,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ORDERS_COLLECTION = collectionName("orders");
@@ -445,6 +449,14 @@ function filterCampusOrders(orders: Order[], campus?: CampusId): Order[] {
 }
 
 const ORDER_PAGE_SIZE = 100;
+/**
+ * Pending board page size. Campus is applied after the read, so stopping at
+ * one page of the newest tickets drops older CityU jobs once newer CUHK
+ * tickets fill that page. Walk the status+createdAt index (already deployed)
+ * until the board is exhausted.
+ */
+const PENDING_MAX_PAGES = 30;
+const PENDING_LISTENER_LIMIT = ORDER_PAGE_SIZE * PENDING_MAX_PAGES;
 
 function parseSnapshotDocs(
   docs: { id: string; data: () => unknown }[],
@@ -475,6 +487,18 @@ export async function fetchPendingOrders(
   );
 }
 
+function pendingPageConstraints(
+  cursor?: QueryDocumentSnapshot,
+): QueryConstraint[] {
+  const constraints: QueryConstraint[] = [
+    where("status", "==", "pending"),
+    orderBy("createdAt", "desc"),
+    limit(ORDER_PAGE_SIZE),
+  ];
+  if (cursor) constraints.push(startAfter(cursor));
+  return constraints;
+}
+
 async function fetchUnscopedPendingOrders(
   excludeCustomerId?: string,
   excludeCustomerEmail?: string | null,
@@ -483,16 +507,27 @@ async function fetchUnscopedPendingOrders(
     try {
       // Paid (Airwallex) orders are claimable. Legacy unpaid pending (no online
       // checkout) stay claimable so older tickets are not stranded.
-      const snap = await getDocs(
-        query(
-          collection(getDb(), ORDERS_COLLECTION),
-          where("status", "==", "pending"),
-          orderBy("createdAt", "desc"),
-          limit(ORDER_PAGE_SIZE),
-        ),
-      );
+      // Rules require status == 'pending' on this list. Campus is not in the
+      // query: legacy CUHK tickets have no campus field, and a campus equality
+      // filter would need a new composite index.
+      const col = collection(getDb(), ORDERS_COLLECTION);
+      const docs: QueryDocumentSnapshot[] = [];
+      let cursor: QueryDocumentSnapshot | undefined;
+      for (let page = 0; page < PENDING_MAX_PAGES; page++) {
+        const snap = await getDocs(
+          query(col, ...pendingPageConstraints(cursor)),
+        );
+        docs.push(...snap.docs);
+        if (snap.size < ORDER_PAGE_SIZE) break;
+        cursor = snap.docs[snap.docs.length - 1];
+        if (page === PENDING_MAX_PAGES - 1) {
+          console.warn(
+            "fetchPendingOrders hit the pending-order page cap; older tickets may be missing",
+          );
+        }
+      }
       return filterOwnOrders(
-        parseSnapshotDocs(snap.docs).filter((o) => !o.runnerId),
+        parseSnapshotDocs(docs).filter((o) => !o.runnerId),
         runnerExcludeFromOptions({
           excludeCustomerId,
           excludeCustomerEmail,
@@ -516,10 +551,18 @@ async function fetchUnscopedPendingOrders(
 }
 
 /**
- * Live pending job-board feed for runners. Matches the same scoped query as
- * `fetchPendingOrders` (rules require `status == 'pending'` for list). Unassigned
- * orders are filtered client-side (`runnerId` null/missing) so we stay within
- * the existing composite index.
+ * Live pending job-board feed for runners.
+ *
+ * Rules require `status == 'pending'` on the list query. Unassigned orders and
+ * campus are filtered client-side so legacy CUHK tickets (no `campus` field)
+ * stay on the CUHK board, and so we keep the deployed status+createdAt index.
+ *
+ * Refresh loads every pending page once, then keeps a live listener on that
+ * same window. A listener limited to the newest 100 tickets dropped older
+ * CityU jobs whenever newer CUHK tickets filled the page.
+ *
+ * Orders that never reached Firestore (CityU guest checkout kept only in that
+ * browser's localStorage, ids starting with `CYU-`) cannot appear here.
  */
 export function subscribePendingOrders(
   onOrders: (orders: Order[]) => void,
@@ -544,42 +587,91 @@ export function subscribePendingOrders(
     );
   };
 
-  if (isFirebaseConfigured()) {
+  if (!isFirebaseConfigured()) {
+    emit(getMockPendingOrders());
+    const interval = setInterval(() => {
+      emit(getMockPendingOrders());
+    }, 3000);
+    return () => clearInterval(interval);
+  }
+
+  let stopped = false;
+  let sawOrders = false;
+  let listenerReady = false;
+  let unsubSnap: () => void = () => undefined;
+
+  const fail = (err: unknown) => {
+    console.error("subscribePendingOrders Firestore failed", err);
+    options?.onError?.(
+      err instanceof Error ? err : new Error(String(err)),
+    );
+    if (!sawOrders) onOrders([]);
+  };
+
+  const pull = async () => {
+    try {
+      const orders = await fetchUnscopedPendingOrders(
+        options?.excludeCustomerId,
+        options?.excludeCustomerEmail,
+      );
+      if (stopped || listenerReady) return;
+      sawOrders = true;
+      emit(orders);
+    } catch (err) {
+      if (stopped || listenerReady) return;
+      fail(err);
+    }
+  };
+
+  const attach = () => {
+    unsubSnap();
     try {
       const q = query(
         collection(getDb(), ORDERS_COLLECTION),
         where("status", "==", "pending"),
         orderBy("createdAt", "desc"),
-        limit(ORDER_PAGE_SIZE),
+        limit(PENDING_LISTENER_LIMIT),
       );
-      return onSnapshot(
+      unsubSnap = onSnapshot(
         q,
         (snap) => {
+          if (stopped) return;
+          listenerReady = true;
+          sawOrders = true;
           emit(parseSnapshotDocs(snap.docs));
         },
         (err) => {
-          console.error("subscribePendingOrders Firestore failed", err);
-          options?.onError?.(
-            err instanceof Error ? err : new Error(String(err)),
-          );
-          onOrders([]);
+          if (!stopped) fail(err);
         },
       );
     } catch (err) {
-      console.error("subscribePendingOrders setup failed", err);
-      options?.onError?.(
-        err instanceof Error ? err : new Error(String(err)),
-      );
-      onOrders([]);
-      return () => undefined;
+      fail(err);
     }
+  };
+
+  let unsubAuth: () => void = () => undefined;
+  try {
+    // Persistence restores after refresh. Querying before that fails the
+    // listener permanently, so the board never fills the backlog.
+    unsubAuth = onAuthStateChanged(getAuthClient(), (user) => {
+      if (stopped) return;
+      unsubSnap();
+      if (!user) return;
+      void user.getIdToken().then(() => {
+        if (stopped) return;
+        void pull();
+        attach();
+      }, fail);
+    });
+  } catch (err) {
+    fail(err);
   }
 
-  emit(getMockPendingOrders());
-  const interval = setInterval(() => {
-    emit(getMockPendingOrders());
-  }, 3000);
-  return () => clearInterval(interval);
+  return () => {
+    stopped = true;
+    unsubSnap();
+    unsubAuth();
+  };
 }
 
 /** Order history for the signed-in customer, keyed on their auth uid. */
