@@ -3,33 +3,43 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CAMPUS } from "@/ptero/config/campus";
-import { useAppState, useUser } from "@/ptero/context/AppState";
+import { useUser as useSharedUser } from "@/context/UserContext";
+import {
+  appUserFromSharedProfile,
+  useAppState,
+  useUser,
+} from "@/ptero/context/AppState";
 
 /** Account control — My Orders count, avatar initials, outside-click (gracerun.fit). */
 export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
   const { user, signOut } = useUser();
+  const shared = useSharedUser();
+  // Shared Firebase session is what /login already trusts. Without this,
+  // the menu still says Sign in and that link is sent straight back here.
+  const session =
+    user && !user.isGuest ? user : appUserFromSharedProfile(shared.user);
   const { orders } = useAppState();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const activeOrders = useMemo(() => {
-    if (!user || user.isGuest) return 0;
+    if (!session || session.isGuest) return 0;
     return orders.filter(
       (o) =>
-        o.customerId === user.uid &&
+        o.customerId === session.uid &&
         !["paid", "cancelled"].includes(o.status),
     ).length;
-  }, [orders, user]);
+  }, [orders, session]);
 
   const initials = useMemo(() => {
-    if (!user?.name) return "?";
-    return user.name
+    if (!session?.name) return "?";
+    return session.name
       .split(/\s+/)
       .filter(Boolean)
       .slice(0, 2)
       .map((p) => p[0]?.toUpperCase() ?? "")
       .join("");
-  }, [user?.name]);
+  }, [session?.name]);
 
   useEffect(() => {
     if (!open) return;
@@ -61,7 +71,7 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
         aria-label="Account menu"
         aria-expanded={open}
       >
-        {user && !user.isGuest ? (
+        {session && !session.isGuest ? (
           <span>{initials || "Me"}</span>
         ) : (
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -79,12 +89,12 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
           <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
             {CAMPUS.brandName}
           </p>
-          {user && !user.isGuest ? (
+          {session && !session.isGuest ? (
             <>
               <p className="truncate px-3 pb-1 text-xs font-medium text-gray-800">
-                {user.name}
+                {session.name}
               </p>
-              <p className="truncate px-3 pb-2 text-xs text-gray-500">{user.email}</p>
+              <p className="truncate px-3 pb-2 text-xs text-gray-500">{session.email}</p>
               <Link
                 href="/cityu/orders"
                 onClick={() => setOpen(false)}

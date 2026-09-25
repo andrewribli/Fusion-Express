@@ -292,7 +292,10 @@ export default function LoginPage() {
     return <BootScreen error={bootError} />;
   }
 
-  if (user) {
+  // Guests must still see this form. Treating every stored profile as
+  // "already signed in" left /login on "Loading…" forever, so the CityU
+  // sign-in button never appeared and never submitted.
+  if (user && !user.isGuest) {
     return <BootScreen />;
   }
 

@@ -1,23 +1,28 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 /**
- * CityU used to have its own login ("CityU email" only). Sign-in is universal:
- * one form, and the address decides the campus. This route only forwards.
+ * CityU sign-in is the shared /login form. This route only forwards so a
+ * blank client page cannot sit here with no button.
  */
-export default function CityULoginRedirect() {
-  const router = useRouter();
+export default async function CityULoginRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const nextRaw = params.next;
+  const next = Array.isArray(nextRaw) ? nextRaw[0] : nextRaw;
+  const modeRaw = params.mode;
+  const mode = Array.isArray(modeRaw) ? modeRaw[0] : modeRaw;
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const next = params.get("next");
-    if (next === "/runner/register") params.set("next", "/cityu/runner/register");
-    if (next === "/checkout") params.set("next", "/cityu/checkout");
-    const query = params.toString();
-    router.replace(query ? `/login?${query}` : "/login");
-  }, [router]);
+  const query = new URLSearchParams();
+  if (mode === "signup") query.set("mode", "signup");
+  if (next === "/runner/register") query.set("next", "/cityu/runner/register");
+  else if (next === "/checkout") query.set("next", "/cityu/checkout");
+  else if (next && next.startsWith("/") && !next.startsWith("//")) {
+    query.set("next", next);
+  }
 
-  return null;
+  const suffix = query.toString();
+  redirect(suffix ? `/login?${suffix}` : "/login");
 }

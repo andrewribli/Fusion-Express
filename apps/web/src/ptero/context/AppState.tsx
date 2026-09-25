@@ -25,7 +25,9 @@ import {
   isOwnCustomerOrder,
   SelfPickupError,
 } from "@fusion-express/shared/orders";
+import { useUser as useSharedUser, type UserProfile } from "@/context/UserContext";
 import { normalizePhone, signOutUser } from "@/lib/auth";
+import { accessCampusForUser } from "@/lib/campus-access";
 import { clearStoredCampusPreference } from "@/lib/campus-routes";
 import { findRunnerForUser, registerRunner as registerRunnerDoc } from "@/lib/runners";
 import { fetchUserProfile, updateUserProfileDoc } from "@/lib/users";
@@ -109,6 +111,30 @@ interface AppStateValue {
 
 const AppStateContext = createContext<AppStateValue | null>(null);
 
+/**
+ * The shared GraceRun session (Firebase) is what `/login` treats as signed in.
+ * CityU chrome reads this prototype store instead, so a real session still
+ * showed "Sign in", and that link bounced straight back to `/cityu`.
+ */
+export function appUserFromSharedProfile(
+  profile: UserProfile | null | undefined,
+): AppUser | null {
+  if (!profile?.uid || profile.isGuest) return null;
+  if (accessCampusForUser(profile) !== "cityu") return null;
+  const college = getCollege(profile.college);
+  return {
+    uid: profile.uid,
+    campus: CAMPUS_ID,
+    name: profile.fullName?.trim() || "CityU student",
+    email: profile.email?.trim().toLowerCase() || null,
+    isGuest: false,
+    isRunner: Boolean(profile.isRunner),
+    phone: profile.phone,
+    college: college?.id,
+    runnerDocId: profile.runnerId,
+  };
+}
+
 function publicUser(user: AppUser): AppUser {
   const { passwordHash: _omit, ...rest } = user;
   void _omit;
@@ -138,6 +164,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<AppMode>("customer");
   /** Latest Firestore pending board. localStorage reloads must not drop it. */
   const cloudPendingRef = useRef<Order[]>([]);
+  /** Uid copied from the shared session. Cleared when that session ends. */
+  const adoptedUidRef = useRef<string | null>(null);
+  const signingOutRef = useRef(false);
+  const shared = useSharedUser();
 
   const persistUsers = useCallback((next: AppUser[]) => {
     setUsers(next);
@@ -189,6 +219,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("storage", onSync);
     };
   }, [reload]);
+
+  useEffect(() => {
+    if (!isReady || !shared.isReady || signingOutRef.current) return;
+    const mirrored = appUserFromSharedProfile(shared.user);
+    if (mirrored) {
+      adoptedUidRef.current = mirrored.uid;
+      if (user?.uid !== mirrored.uid || user.isGuest) persistUser(mirrored);
+      return;
+    }
+    if (user && adoptedUidRef.current && user.uid === adoptedUidRef.current) {
+      adoptedUidRef.current = null;
+      persistUser(null);
+    }
+  }, [isReady, persistUser, shared.isReady, shared.user, user?.isGuest, user?.uid]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -349,6 +393,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     // CityU sign-out only cleared the prototype user in localStorage.
     // Firebase Auth (shared with the rest of GraceRun) stayed signed in,
     // and `gracerun_campus` stayed `cityu`, so `/` kept redirecting here.
+    signingOutRef.current = true;
+    adoptedUidRef.current = null;
     persistUser(null);
     setMode("customer");
     clearStoredCampusPreference();
@@ -362,6 +408,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       await signOutUser();
     } catch {
       // Shared Auth may already be signed out, or unconfigured.
+    } finally {
+      signingOutRef.current = false;
     }
   }, [persistUser, setMode]);
 
