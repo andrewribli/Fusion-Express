@@ -36,6 +36,7 @@ import {
   isGroceryOpen,
   isGrocerySourceId,
 } from "@/lib/grocerySources";
+import { PlaceOrderConfirmModal } from "@/components/PlaceOrderConfirmModal";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -67,6 +68,7 @@ export default function CheckoutPage() {
   const [tip, setTip] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
@@ -107,6 +109,11 @@ export default function CheckoutPage() {
       return;
     }
     setError("");
+    setConfirmOpen(true);
+  }
+
+  function handleConfirmPlaceOrder() {
+    if (!canSubmit) return;
     setLoading(true);
     try {
       const customer =
@@ -142,8 +149,10 @@ export default function CheckoutPage() {
         discountAmount: 0,
       });
       clearCart();
+      setConfirmOpen(false);
       router.push(`/cityu/track/${order.id}`);
     } catch (err) {
+      setConfirmOpen(false);
       setError(err instanceof Error ? err.message : "Could not place order.");
     } finally {
       setLoading(false);
@@ -338,6 +347,20 @@ export default function CheckoutPage() {
           </button>
         </form>
       </main>
+      <PlaceOrderConfirmModal
+        open={confirmOpen}
+        loading={loading}
+        deliveryLine={
+          address
+            ? `${address} · ${lobby || getLobbyForHall(hall)}`
+            : null
+        }
+        totalLabel={`Estimated total · HK$${total.toFixed(2)}`}
+        onConfirm={handleConfirmPlaceOrder}
+        onCancel={() => {
+          if (!loading) setConfirmOpen(false);
+        }}
+      />
     </AppShell>
   );
 }
