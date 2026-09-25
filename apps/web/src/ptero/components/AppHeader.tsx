@@ -128,7 +128,9 @@ export function AppHeader({
             {!runnerMode && (
               <>
                 <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-                <RunnerQueueBell className="h-11 w-11 rounded-full" />
+                {canRunnerMode ? (
+                  <RunnerQueueBell className="h-11 w-11 rounded-full" />
+                ) : null}
               </>
             )}
             {tabs

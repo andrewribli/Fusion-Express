@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
-import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificationBell";
 import { FeedbackButton } from "@/ptero/components/FeedbackButton";
 import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { GROCERY_SOURCES } from "@/lib/grocerySources";
 import { CAMPUS } from "@/ptero/config/campus";
+import { useUser } from "@/ptero/context/AppState";
+import { runnerEntryHref } from "@/ptero/lib/nav";
 
 const headerIconClass =
   "h-11 w-11 rounded-full border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
@@ -16,6 +17,14 @@ const headerIconClass =
  * Landing: Taste supermarket vs CityU canteens — mirrors CUHK CampusSelector.
  */
 export function ChannelSelector() {
+  const { user, setMode, canRunnerMode } = useUser();
+  const loggedIn = Boolean(user && !user.isGuest);
+  const runnerHref = runnerEntryHref({ loggedIn, canRunnerMode });
+  const runnerCtaLabel = canRunnerMode
+    ? "Open runner dashboard"
+    : "Become a runner";
+  const runnerHeaderLabel = canRunnerMode ? "Runner" : "Become a runner";
+
   return (
     <div className="relative min-h-screen bg-[#0c0c0c] text-white">
       <header className="border-b border-white/10 bg-[#0c0c0c]/95">
@@ -25,8 +34,18 @@ export function ChannelSelector() {
             <span className="text-sm font-bold tracking-tight">{CAMPUS.brandName}</span>
           </Link>
           <div className="flex items-center gap-2">
-            <CustomerNotificationBell tone="dark" className={headerIconClass} />
-            <RunnerQueueBell tone="dark" className={headerIconClass} />
+            <Link
+              href={runnerHref}
+              onClick={() => {
+                if (canRunnerMode) setMode("runner");
+              }}
+              className="inline-flex min-h-11 items-center rounded-full border-2 border-emerald-400/60 bg-emerald-500 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-400"
+            >
+              {runnerHeaderLabel}
+            </Link>
+            {canRunnerMode ? (
+              <RunnerQueueBell tone="dark" className={headerIconClass} />
+            ) : null}
             <AccountMenu tone="dark" />
           </div>
         </div>
@@ -105,6 +124,30 @@ export function ChannelSelector() {
             </p>
             <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
               Browse canteens
+            </span>
+          </Link>
+
+          <Link
+            href={runnerHref}
+            onClick={() => {
+              if (canRunnerMode) setMode("runner");
+            }}
+            className="group relative overflow-hidden rounded-3xl border border-emerald-500/35 bg-gradient-to-br from-[#0f1a14] via-[#121212] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-emerald-400/70 sm:col-span-2"
+          >
+            <div
+              className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-emerald-500/25 blur-3xl transition group-hover:bg-emerald-500/35"
+              aria-hidden
+            />
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              Earn on campus
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">Run for {CAMPUS.brandName}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+              Pick up Taste, Wellcome, or canteen orders and deliver to dorm lobbies.
+              CityU email + HK mobile required.
+            </p>
+            <span className="mt-6 inline-flex rounded-xl border-2 border-emerald-400/50 bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
+              {runnerCtaLabel}
             </span>
           </Link>
         </div>

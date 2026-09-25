@@ -83,7 +83,9 @@ export function CanteenShopLayout({
               Runner
             </Link>
             <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-            <RunnerQueueBell className="h-11 w-11 rounded-full" />
+            {canRunnerMode ? (
+              <RunnerQueueBell className="h-11 w-11 rounded-full" />
+            ) : null}
             <Link
               href={checkoutHref}
               className={`relative flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
