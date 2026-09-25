@@ -3,11 +3,10 @@
 import { RunnerWorkspace } from "@/components/runner/RunnerWorkspace";
 import { AppShell } from "@/ptero/components/AppShell";
 
-/** CityU available board — same workspace as CUHK, campus `cityu`. */
-export default function RunnerDashboardPage() {
+export default function RunnerExpiredPage() {
   return (
     <AppShell>
-      <RunnerWorkspace view="available" scope="cityu" />
+      <RunnerWorkspace view="expired" scope="cityu" />
     </AppShell>
   );
 }

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
 import { FileDropzone } from "@/components/FileDropzone";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { orderCampus } from "@/lib/orders";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
@@ -156,7 +157,11 @@ export function RunnerDeliveryFlow({
                 {" · "}You earn ${runnerEarningsForOrder(order.deliveryFee)}
               </p>
               <Link
-                href={`/chat/${order.id}`}
+                href={
+                  orderCampus(order) === "cityu"
+                    ? `/cityu/chat/${order.id}`
+                    : `/chat/${order.id}`
+                }
                 className="flex min-h-11 items-center justify-center rounded-xl border border-white/20 text-sm font-semibold text-white"
               >
                 Contact customer

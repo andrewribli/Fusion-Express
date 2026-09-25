@@ -8,6 +8,10 @@ import { roleAllowsCustomer, roleAllowsRunner } from "@/lib/roles";
 
 function loginNext(pathname: string, search: string): string {
   const path = `${pathname}${search}`;
+  if (pathname.startsWith("/cityu")) {
+    if (pathname.startsWith("/cityu/login")) return "/cityu";
+    return `/cityu/login?next=${encodeURIComponent(path)}`;
+  }
   if (pathname === "/login") return "/";
   return `/login?next=${encodeURIComponent(path)}`;
 }
@@ -35,6 +39,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 export function RequireCustomer({ children }: { children: React.ReactNode }) {
   const { user, isReady, bootError, role, setMode } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isReady || bootError) return;
@@ -43,11 +48,15 @@ export function RequireCustomer({ children }: { children: React.ReactNode }) {
       return;
     }
     if (!roleAllowsCustomer(role)) {
-      router.replace("/runner/dashboard");
+      router.replace(
+        pathname.startsWith("/cityu")
+          ? "/cityu/runner/dashboard"
+          : "/runner/dashboard",
+      );
       return;
     }
     setMode("customer");
-  }, [user, isReady, bootError, role, router, setMode]);
+  }, [user, isReady, bootError, role, router, setMode, pathname]);
 
   if (!isReady || (bootError && !user)) {
     return <BootScreen error={bootError} />;
@@ -69,7 +78,7 @@ export function RequireRunner({ children }: { children: React.ReactNode }) {
       return;
     }
     if (!roleAllowsRunner(role)) {
-      router.replace("/");
+      router.replace(pathname.startsWith("/cityu") ? "/cityu/runner" : "/");
       return;
     }
     setMode("runner");

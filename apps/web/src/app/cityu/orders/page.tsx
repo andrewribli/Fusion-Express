@@ -1,19 +1,50 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { fetchOrdersByCustomer, orderCampus } from "@/lib/orders";
 import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import { OrderProgressBar } from "@/ptero/components/OrderProgressBar";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { useAppState, useUser } from "@/ptero/context/AppState";
-import { ORDER_STATUS_LABELS } from "@/ptero/lib/types";
+import { sharedOrderToPtero } from "@/ptero/lib/firestore-orders";
+import { ORDER_STATUS_LABELS, type Order } from "@/ptero/lib/types";
 
 export default function OrdersPage() {
   const { user } = useUser();
   const { orders } = useAppState();
-  const mine = user
-    ? orders.filter((o) => o.customerId === user.uid)
-    : orders;
+  const [cloud, setCloud] = useState<Order[]>([]);
+
+  useEffect(() => {
+    if (!user?.uid || user.isGuest) return;
+    let cancelled = false;
+    void fetchOrdersByCustomer(user.uid)
+      .then((rows) => {
+        if (cancelled) return;
+        setCloud(
+          rows
+            .filter((row) => orderCampus(row) === "cityu")
+            .map(sharedOrderToPtero),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid, user?.isGuest]);
+
+  const mine = useMemo(() => {
+    const local = user
+      ? orders.filter((o) => o.customerId === user.uid)
+      : orders;
+    const byId = new Map<string, Order>();
+    for (const order of local) byId.set(order.id, order);
+    for (const order of cloud) byId.set(order.id, order);
+    return [...byId.values()].sort(
+      (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+    );
+  }, [orders, user, cloud]);
 
   return (
     <AppShell>

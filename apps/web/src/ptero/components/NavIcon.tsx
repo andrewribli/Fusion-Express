@@ -66,6 +66,13 @@ export function NavIcon({
           <circle cx="18" cy="19" r="1.5" />
         </svg>
       );
+    case "earnings":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 7v10M9.5 9.5c.6-1 1.6-1.5 2.5-1.5 1.4 0 2.5.8 2.5 2s-1.1 2-2.5 2-2.5.8-2.5 2c0 1.1 1.1 2 2.5 2 .9 0 1.9-.5 2.5-1.5" />
+        </svg>
+      );
     case "runner":
       return (
         <svg {...common}>

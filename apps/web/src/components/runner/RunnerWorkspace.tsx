@@ -23,6 +23,7 @@ import {
   awaitingCustomerPriceApproval,
   fetchDeliveredOrdersByRunner,
   fetchRunnerOrders,
+  orderCampus,
   markCanteenDelivered,
   markCanteenPickedUp,
   markDeliveredWithTotal,
@@ -76,12 +77,30 @@ const VIEW_TABS: Record<RunnerView, Tab> = {
   earnings: "completed",
 };
 
-const VIEW_NAV: { view: RunnerView; label: string; href: string }[] = [
-  { view: "available", label: "Available", href: "/runner/dashboard" },
-  { view: "deliveries", label: "My Deliveries", href: "/runner/deliveries" },
-  { view: "expired", label: "Expired Deliveries", href: "/runner/expired" },
-  { view: "earnings", label: "Earnings", href: "/runner/earnings" },
-];
+/** CUHK `/runner/*` or CityU `/cityu/runner/*`. Same workspace, campus-scoped routes. */
+export type RunnerWorkspaceScope = "cuhk" | "cityu";
+
+const RUNNER_NAV: Record<
+  RunnerWorkspaceScope,
+  { view: RunnerView; label: string; href: string }[]
+> = {
+  cuhk: [
+    { view: "available", label: "Available", href: "/runner/dashboard" },
+    { view: "deliveries", label: "My Deliveries", href: "/runner/deliveries" },
+    { view: "expired", label: "Expired Deliveries", href: "/runner/expired" },
+    { view: "earnings", label: "Earnings", href: "/runner/earnings" },
+  ],
+  cityu: [
+    { view: "available", label: "Available", href: "/cityu/runner/dashboard" },
+    { view: "deliveries", label: "My Deliveries", href: "/cityu/runner/deliveries" },
+    { view: "expired", label: "Expired Deliveries", href: "/cityu/runner/expired" },
+    { view: "earnings", label: "Earnings", href: "/cityu/runner/earnings" },
+  ],
+};
+
+function runnerSetupHref(scope: RunnerWorkspaceScope): string {
+  return scope === "cityu" ? "/cityu/runner/register" : "/runner/terms";
+}
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
@@ -247,9 +266,16 @@ function AvailableOrderCard({
   );
 }
 
-export function RunnerWorkspace({ view }: { view: RunnerView }) {
+export function RunnerWorkspace({
+  view,
+  scope = "cuhk",
+}: {
+  view: RunnerView;
+  scope?: RunnerWorkspaceScope;
+}) {
   const router = useRouter();
   const { user, setRunnerRegistered } = useUser();
+  const nav = RUNNER_NAV[scope];
   const tab = VIEW_TABS[view];
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
@@ -415,8 +441,12 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           : Promise.resolve([]),
         runnerId ? fetchRunner(runnerId) : Promise.resolve(null),
       ]);
+      const onCampus = (rows: Order[]) =>
+        scope === "cityu"
+          ? rows.filter((order) => orderCampus(order) === "cityu")
+          : rows;
       setActive(
-        a.map((order) => {
+        onCampus(a).map((order) => {
           const local = progressRef.current[order.id];
           if (!local) return order;
           return {
@@ -433,7 +463,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           };
         }),
       );
-      setDelivered(d);
+      setDelivered(onCampus(d));
       setRunnerProfile(r);
     } catch (err) {
       setLoadError(
@@ -443,7 +473,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       setLoading(false);
       initialLoad.current = false;
     }
-  }, [user, setRunnerRegistered]);
+  }, [user, setRunnerRegistered, scope]);
 
   useEffect(() => {
     if (!user) return;
@@ -468,13 +498,13 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         });
         return;
       }
-      router.replace("/runner/terms");
+      router.replace(runnerSetupHref(scope));
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [user, router, refresh, setRunnerRegistered]);
+  }, [user, router, refresh, setRunnerRegistered, scope]);
 
   useEffect(() => {
     if (!user?.isRunner) {
@@ -492,13 +522,13 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       {
         excludeCustomerId: getUserAccountId(user),
         excludeCustomerEmail: user.email,
-        campus: runnerCampusOf(user),
+        campus: scope === "cityu" ? "cityu" : runnerCampusOf(user),
         onError: (err) => {
           setLoadError(err.message || "Could not load available orders.");
         },
       },
     );
-  }, [user]);
+  }, [user, scope]);
 
   const activeIds = openDeliveries.map((o) => o.id).join(",");
   useEffect(() => {
@@ -555,10 +585,12 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           email: user.email,
         },
         discount,
-        runnerCampusOf(user),
+        scope === "cityu" ? "cityu" : runnerCampusOf(user),
       );
       setConfirmOrder(null);
-      router.push("/runner/deliveries");
+      router.push(
+        scope === "cityu" ? "/cityu/runner/deliveries" : "/runner/deliveries",
+      );
       void notifyOrderStatus({
         customerEmail: confirmOrder.customerEmail,
         orderId: confirmOrder.id,
@@ -986,7 +1018,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
 
   return (
     <RequireRunner>
-      <AppShell>
+      <AppShell hideNav={scope === "cityu"}>
         <LakersWallpaper>
           <AppHeader title="Runner Dashboard" />
 
@@ -996,7 +1028,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
             }`}
           >
             <div className="grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4">
-              {VIEW_NAV.map((item) => (
+              {nav.map((item) => (
                 <Link
                   key={item.view}
                   href={item.href}
@@ -1113,6 +1145,16 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                               ? "Pick up order"
                               : "Start order"}
                         </button>
+                        <Link
+                          href={
+                            orderCampus(order) === "cityu"
+                              ? `/cityu/chat/${order.id}`
+                              : `/chat/${order.id}`
+                          }
+                          className="mt-2 flex min-h-11 items-center justify-center rounded-xl border border-[#ED1C24] text-sm font-semibold text-[#ED1C24]"
+                        >
+                          Chat with customer
+                        </Link>
                       </li>
                     ))}
                   </ul>

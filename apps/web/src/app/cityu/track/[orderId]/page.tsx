@@ -1,7 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { fetchOrder, orderCampus } from "@/lib/orders";
 import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import {
@@ -13,6 +14,7 @@ import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { CAMPUS } from "@/ptero/config/campus";
 import { getRestaurant } from "@/ptero/config/canteen/restaurants";
 import { useAppState } from "@/ptero/context/AppState";
+import { sharedOrderToPtero } from "@/ptero/lib/firestore-orders";
 import {
   customerAmountDue,
   formatHkd,
@@ -27,7 +29,41 @@ export default function TrackOrderPage({
 }) {
   const { orderId } = use(params);
   const { orders } = useAppState();
-  const order = orders.find((o) => o.id === orderId);
+  const local = orders.find((o) => o.id === orderId);
+  const [remote, setRemote] = useState<typeof local | null>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchOrder(orderId)
+      .then((row) => {
+        if (cancelled) return;
+        if (!row || orderCampus(row) !== "cityu") {
+          setRemote(null);
+          return;
+        }
+        setRemote(sharedOrderToPtero(row));
+      })
+      .catch(() => {
+        if (!cancelled) setRemote(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId]);
+
+  const order = remote === undefined ? local : (remote ?? local);
+
+  if (!order && remote === undefined) {
+    return (
+      <AppShell>
+        <PrototypeBanner />
+        <AppHeader showBack backHref="/cityu/orders" title="Track" />
+        <main className="mx-auto max-w-[480px] px-4 py-10 text-center text-sm text-gray-500">
+          Loading order…
+        </main>
+      </AppShell>
+    );
+  }
 
   if (!order) {
     return (
@@ -85,6 +121,18 @@ export default function TrackOrderPage({
             )}
           </div>
         )}
+
+        {order.status === "accepted" ||
+        order.status === "purchased" ||
+        order.status === "delivered" ||
+        order.status === "paid" ? (
+          <Link
+            href={`/cityu/chat/${order.id}`}
+            className="mt-3 flex w-full items-center justify-center rounded-xl border border-[#ED1C24] py-3 text-sm font-bold text-[#ED1C24]"
+          >
+            Chat with runner
+          </Link>
+        ) : null}
 
         <div className="mt-3">
           <DiscountReceivedBanner

@@ -7,6 +7,7 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChat } from "@/components/OrderChat";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
+import { resolveCampus } from "@fusion-express/shared/campus";
 
 export default function ChatPage({
   params,
@@ -15,9 +16,14 @@ export default function ChatPage({
 }) {
   const { orderId } = use(params);
   const { user } = useUser();
+  const campus = resolveCampus(user?.campus);
   const backHref = user?.isRunner
-    ? "/runner/dashboard"
-    : `/track?orderId=${orderId}`;
+    ? campus === "cityu"
+      ? "/cityu/runner/deliveries"
+      : "/runner/dashboard"
+    : campus === "cityu"
+      ? `/cityu/track/${orderId}`
+      : `/track?orderId=${orderId}`;
 
   return (
     <RequireAuth>

@@ -56,7 +56,13 @@ export const RUNNER_TABS: NavTab[] = [
     action: "switch-customer",
   },
   { href: "/cityu/runner/dashboard", label: "Available", iconId: "available" },
-  { href: "/cityu/runner/deliveries", label: "Deliveries", iconId: "deliveries" },
+  {
+    href: "/cityu/runner/deliveries",
+    label: "My Deliveries",
+    iconId: "deliveries",
+    match: ["/cityu/runner/expired", "/cityu/chat"],
+  },
+  { href: "/cityu/runner/earnings", label: "Earnings", iconId: "earnings" },
   { href: "/cityu/runner/profile", label: "Profile", iconId: "profile" },
 ];
 
