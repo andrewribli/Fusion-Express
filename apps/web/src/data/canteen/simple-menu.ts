@@ -12,6 +12,8 @@ export type SimpleMenuItem = {
   name: string;
   description?: string;
   price: number;
+  /** True when the venue has not published a price. `price` is then 0. */
+  priceOnRequest?: boolean;
   category: MenuCategory;
   image: string;
   /** Featured / house specialty badge when true. */
