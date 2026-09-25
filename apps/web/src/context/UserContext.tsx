@@ -11,6 +11,7 @@ import {
 } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser } from "@/lib/auth";
+import { clearStoredCampusPreference } from "@/lib/campus-routes";
 import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 import { isDemoAuth } from "@/lib/constants";
 import {
@@ -515,6 +516,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    // Clear the remembered campus before Firebase notifies listeners.
+    // Otherwise a CityU session left `gracerun_campus=cityu` and the next
+    // visit to `/` still opened the CityU shop.
+    clearStoredCampusPreference();
     if (firebaseEnabled && !isDemoAuth()) {
       await signOutUser();
     }

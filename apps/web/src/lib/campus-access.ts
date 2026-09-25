@@ -1,8 +1,8 @@
 import {
+  detectCampusFromEmail,
   getCampusConfig,
   isCampusId,
   isOwnerLoginEmail,
-  resolveCampus,
   type CampusId,
 } from "@fusion-express/shared/campus";
 import type { UserProfile } from "@/context/UserContext";
@@ -20,20 +20,38 @@ export function isSafePostLoginNext(next: string | null | undefined): next is st
   return true;
 }
 
-/** Where to send the user after sign-in / sign-up (honors ?next= when safe). */
+/**
+ * Where to send the user after sign-in / sign-up.
+ * The email's campus wins. A `?next=` path on the other campus is ignored
+ * so a CUHK address never lands in the CityU shop (and the reverse).
+ */
 export function postLoginDestination(opts: {
   campus?: CampusId | null;
   next?: string | null;
 }): string {
-  if (isSafePostLoginNext(opts.next)) return opts.next;
-  if (isCampusId(opts.campus)) return campusHubPath(opts.campus);
+  const campus = isCampusId(opts.campus) ? opts.campus : null;
+  if (isSafePostLoginNext(opts.next)) {
+    const nextCampus = campusFromPathname(opts.next);
+    if (!campus || !nextCampus || nextCampus === campus) return opts.next;
+  }
+  if (campus) return campusHubPath(campus);
   return "/";
 }
 
-/** Campus used for route isolation; guests and browse-only sessions are unrestricted. */
+/**
+ * Campus for route isolation. Guests and signed-out visitors are
+ * unrestricted — do not pass localStorage `gracerun_campus` in here.
+ * A missing profile campus is not a campus (do not guess CityU or CUHK).
+ * University email domain wins over a stored profile campus, so a CUHK
+ * address stays CUHK even if an older session wrote `campus: cityu`.
+ */
 export function accessCampusForUser(user: UserProfile | null | undefined): CampusId | null {
-  if (!user || user.isGuest) return null;
-  return resolveCampus(user.campus);
+  if (!user?.uid || user.isGuest) return null;
+  if (user.email) {
+    const fromEmail = detectCampusFromEmail(user.email);
+    if (fromEmail) return fromEmail;
+  }
+  return isCampusId(user.campus) ? user.campus : null;
 }
 
 /** Admins (Firestore /admins) and the CityU owner login may cross campuses. */

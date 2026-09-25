@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useAppState, useUser } from "@/ptero/context/AppState";
 
@@ -10,7 +9,6 @@ import { useAppState, useUser } from "@/ptero/context/AppState";
 export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
   const { user, signOut } = useUser();
   const { orders } = useAppState();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -109,9 +107,12 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
               <button
                 type="button"
                 onClick={() => {
-                  signOut();
                   setOpen(false);
-                  router.push("/cityu");
+                  void (async () => {
+                    await signOut();
+                    // Guest after sign-out: marketing home, not the CityU shop.
+                    window.location.href = "/";
+                  })();
                 }}
                 className="block w-full px-3 py-2 text-left text-gray-800 hover:bg-gray-50"
               >

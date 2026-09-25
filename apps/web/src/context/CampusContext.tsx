@@ -17,10 +17,8 @@ import {
   type CampusId,
 } from "@fusion-express/shared/campus";
 import { useUser } from "@/context/UserContext";
-import { campusFromPathname } from "@/lib/campus-routes";
+import { CAMPUS_STORAGE_KEY, campusFromPathname } from "@/lib/campus-routes";
 import { usePathname } from "next/navigation";
-
-const CAMPUS_STORAGE_KEY = "gracerun_campus";
 
 function loadStoredCampus(): CampusId | null {
   if (typeof window === "undefined") return null;
@@ -62,7 +60,9 @@ export function CampusProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fromUser = isCampusId(user?.campus) ? user.campus : null;
     const fromStore = loadStoredCampus();
-    // Profile campus always wins for signed-in users.
+    // Profile campus wins while someone is signed in. A stored value is only
+    // a guest hint — sign-out clears it (see clearStoredCampusPreference).
+    // Do not treat `gracerun_campus` as proof the visitor belongs on /cityu.
     setStoredCampus(fromUser ?? fromStore);
     if (fromUser) persistCampus(fromUser);
     setHydrated(true);

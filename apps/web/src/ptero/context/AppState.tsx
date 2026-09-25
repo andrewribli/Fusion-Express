@@ -25,7 +25,8 @@ import {
   isOwnCustomerOrder,
   SelfPickupError,
 } from "@fusion-express/shared/orders";
-import { normalizePhone } from "@/lib/auth";
+import { normalizePhone, signOutUser } from "@/lib/auth";
+import { clearStoredCampusPreference } from "@/lib/campus-routes";
 import { findRunnerForUser, registerRunner as registerRunnerDoc } from "@/lib/runners";
 import { fetchUserProfile, updateUserProfileDoc } from "@/lib/users";
 import {
@@ -90,7 +91,7 @@ interface AppStateValue {
     phone?: string;
   }) => Promise<AppUser>;
   signIn: (email: string, password: string) => Promise<AppUser>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
   startGuest: (name: string) => AppUser;
   registerRunner: (opts: {
     phone: string;
@@ -344,9 +345,24 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [users, persistUser],
   );
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
+    // CityU sign-out only cleared the prototype user in localStorage.
+    // Firebase Auth (shared with the rest of GraceRun) stayed signed in,
+    // and `gracerun_campus` stayed `cityu`, so `/` kept redirecting here.
     persistUser(null);
     setMode("customer");
+    clearStoredCampusPreference();
+    try {
+      const { firebaseSignOutUser } = await import("@/ptero/lib/firebase-auth");
+      await firebaseSignOutUser();
+    } catch {
+      // Prototype builds without CityU Firebase config still sign out locally.
+    }
+    try {
+      await signOutUser();
+    } catch {
+      // Shared Auth may already be signed out, or unconfigured.
+    }
   }, [persistUser, setMode]);
 
   const startGuest = useCallback(

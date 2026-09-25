@@ -12,6 +12,8 @@ import {
 
 /**
  * Keeps signed-in CUHK and CityU accounts on their campus routes.
+ * Guests and signed-out visitors are not redirected — a leftover
+ * `gracerun_campus` value must not send them to /cityu.
  * Admins and the owner login (see packages/shared campus allowlist) may cross.
  */
 export function CampusAccessGuard({ children }: { children: React.ReactNode }) {

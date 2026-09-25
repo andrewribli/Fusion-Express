@@ -48,7 +48,13 @@ export default function ProfilePage() {
           {user && !user.isGuest ? (
             <button
               type="button"
-              onClick={signOut}
+              onClick={() => {
+                void (async () => {
+                  await signOut();
+                  // Guest after sign-out: marketing home, not the CityU shop.
+                  window.location.href = "/";
+                })();
+              }}
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold"
             >
               Sign out
