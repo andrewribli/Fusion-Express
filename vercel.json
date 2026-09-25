@@ -15,5 +15,11 @@
       "destination": "https://gracerun.vercel.app/:path*",
       "statusCode": 301
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/unread-chat",
+      "schedule": "* * * * *"
+    }
   ]
 }
