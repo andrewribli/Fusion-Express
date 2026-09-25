@@ -8,6 +8,7 @@ import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
+import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
 
 export function MenuCartSummary({
   channel = "fusion",
@@ -22,7 +23,16 @@ export function MenuCartSummary({
   const fee = resolveOrderDeliveryFee(items, "");
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
-  const checkoutBlocked = !orderingEnabled || overLimit || itemCount === 0;
+  const canteenGate = getCanteenCheckoutGate(items);
+  const canteenCheckoutBlocked = isCanteenCart(items) && !canteenGate.allowed;
+  const checkoutBlocked =
+    !orderingEnabled ||
+    canteenCheckoutBlocked ||
+    overLimit ||
+    itemCount === 0;
+  const checkoutPauseMessage =
+    canteenGate.message ??
+    "This canteen is closed — checkout is paused until it opens.";
 
   function goCheckout() {
     if (checkoutBlocked) return;
@@ -105,9 +115,9 @@ export function MenuCartSummary({
             Hall and delivery fee are confirmed at checkout.
           </p>
           <OrderLimitNotice subtotal={subtotal} />
-          {!orderingEnabled ? (
+          {!orderingEnabled || canteenCheckoutBlocked ? (
             <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
-              This canteen is closed — checkout is paused until it opens.
+              {checkoutPauseMessage}
             </p>
           ) : null}
           <button

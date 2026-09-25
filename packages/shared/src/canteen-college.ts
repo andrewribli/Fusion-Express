@@ -65,9 +65,15 @@ const RESTAURANT_COLLEGE: Record<string, CollegeId | null> = {
   "cu-cafe": null,
   "sh-ho-canteen": "SHHO",
   "paper-and-coffee": null,
+  sorazen: null,
+  ebeneezers: null,
+  "orchid-lodge": "CC",
   "na-canteen": "NA",
   "cc-canteen": "CC",
   "shaw-canteen": "Shaw",
+  wys: "WYS",
+  lws: "LWS",
+  "chung-chi-tang": "CC",
 };
 
 const RESTAURANT_NAMES: Record<string, string> = {
@@ -76,9 +82,15 @@ const RESTAURANT_NAMES: Record<string, string> = {
   "cu-cafe": "CU Cafe",
   "sh-ho-canteen": "S.H. Ho College Canteen",
   "paper-and-coffee": "Paper & Coffee",
+  sorazen: "SoraZen",
+  ebeneezers: "Ebeneezer's",
+  "orchid-lodge": "Orchid Lodge",
   "na-canteen": "NA Canteen",
   "cc-canteen": "CC Canteen",
   "shaw-canteen": "Shaw Canteen",
+  wys: "WYS Canteen",
+  lws: "LWS Canteen",
+  "chung-chi-tang": "Chung Chi Tang",
 };
 
 export function getCollege(id: CollegeId | string | null | undefined): College | undefined {

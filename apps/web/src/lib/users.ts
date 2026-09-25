@@ -61,6 +61,13 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
   };
 }
 
+/** Firestore stub with no name or email — usually anonymous Auth or a failed write. */
+export function isOrphanUserProfile(profile: UserProfile): boolean {
+  const name = profile.fullName?.trim();
+  const email = (profile.email ?? profile.cuhkEmail ?? "").trim();
+  return !name && !email;
+}
+
 export async function fetchUserProfile(uid: string): Promise<UserProfile | null> {
   if (!isFirebaseConfigured()) return null;
   try {
@@ -78,15 +85,24 @@ export async function fetchUserProfile(uid: string): Promise<UserProfile | null>
 }
 
 /** Admin-only: security rules reject listing /users for everyone else. */
-export async function fetchAllUsers(): Promise<UserProfile[]> {
-  if (!isFirebaseConfigured()) return [];
+export async function fetchAllUsers(): Promise<{
+  users: UserProfile[];
+  hiddenOrphanCount: number;
+}> {
+  if (!isFirebaseConfigured()) return { users: [], hiddenOrphanCount: 0 };
   const snap = await getDocs(collection(getDb(), USERS_COLLECTION));
-  const users = snap.docs.map((d) =>
+  const all = snap.docs.map((d) =>
     parseUserDoc(d.id, d.data() as Record<string, unknown>),
   );
-  return users.sort((a, b) =>
-    a.fullName.localeCompare(b.fullName, "en", { sensitivity: "base" }),
-  );
+  const users = all
+    .filter((profile) => !isOrphanUserProfile(profile))
+    .sort((a, b) =>
+      a.fullName.localeCompare(b.fullName, "en", { sensitivity: "base" }),
+    );
+  return {
+    users,
+    hiddenOrphanCount: all.length - users.length,
+  };
 }
 
 export async function createUserProfile(

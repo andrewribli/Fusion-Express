@@ -1,6 +1,5 @@
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 
-const img = "https://placehold.co/200x200/png";
 
 /** Scraped from https://www.sorazen.hk/ (menu v17). Prices HKD. */
 export const SORAZEN_MENU: SimpleMenuItem[] = [
@@ -11,7 +10,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "經典早餐 (雞) · Breakfast 07:30–11:00",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/classic-breakfast-chicken.jpg",
   },
   {
     id: "classic-breakfast-beef",
@@ -19,7 +18,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "經典早餐 (牛) · Breakfast 07:30–11:00",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/classic-breakfast-beef.jpg",
   },
   {
     id: "classic-breakfast-veg",
@@ -27,7 +26,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "經典素食早餐 · Vegan · Breakfast 07:30–11:00",
     price: 36,
     category: "mains",
-    image: img,
+    image: "/canteen/food/classic-breakfast-veg.jpg",
   },
   {
     id: "classic-breakfast-fish",
@@ -35,7 +34,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "經典早餐 (魚) · Breakfast 07:30–11:00",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/classic-breakfast-fish.jpg",
   },
   {
     id: "smoked-salmon-sandwich",
@@ -43,7 +42,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "煙燻三文魚三文治 · Breakfast / Tea",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/smoked-salmon-sandwich.jpg",
   },
   {
     id: "avocado-egg-sandwich",
@@ -51,7 +50,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "牛油果蛋三文治 · Vegan · Breakfast 07:30–11:00",
     price: 34,
     category: "mains",
-    image: img,
+    image: "/canteen/food/avocado-egg-sandwich.jpg",
   },
   {
     id: "french-toast",
@@ -59,7 +58,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "法式吐司 · Breakfast / Tea",
     price: 32,
     category: "mains",
-    image: img,
+    image: "/canteen/food/sorazen-french-toast.jpg",
   },
   {
     id: "fruit-yogurt-cup",
@@ -67,7 +66,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "水果優格杯 · Breakfast 07:30–11:00",
     price: 28,
     category: "dessert",
-    image: img,
+    image: "/canteen/food/fruit-yogurt-cup.jpg",
   },
   {
     id: "fruit-oatmeal-cup",
@@ -75,7 +74,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "水果燕麥杯 · Breakfast 07:30–11:00",
     price: 28,
     category: "dessert",
-    image: img,
+    image: "/canteen/food/fruit-oatmeal-cup.jpg",
   },
   {
     id: "garden-fruit-salad",
@@ -83,7 +82,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "田園水果沙律 · Vegan · Breakfast 07:30–11:00",
     price: 30,
     category: "mains",
-    image: img,
+    image: "/canteen/food/garden-fruit-salad.jpg",
   },
 
   // —— Lunch mains (11:00–15:00) ——
@@ -93,7 +92,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "鹽麴烤全雞腿飯 · Lunch 11:00–15:00",
     price: 45,
     category: "mains",
-    image: img,
+    image: "/canteen/food/salt-grilled-chicken-leg-rice.jpg",
     signature: true,
   },
   {
@@ -102,7 +101,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "鹽麴烤雞肉飯 · Lunch 11:00–15:00",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/salt-grilled-chicken-rice.jpg",
   },
   {
     id: "secret-karaage-chicken-rice",
@@ -110,7 +109,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "秘製炸雞肉飯 · Lunch / Dinner",
     price: 52,
     category: "mains",
-    image: img,
+    image: "/canteen/food/secret-karaage-chicken-rice.jpg",
     signature: true,
   },
   {
@@ -119,7 +118,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "慢煮鴨腿肉飯 · Lunch 11:00–15:00",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/slow-cooked-duck-leg-rice.jpg",
   },
   {
     id: "pan-seared-duck-breast-rice",
@@ -127,7 +126,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "香煎一夜花鴨胸肉飯 · Lunch 11:00–15:00",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/pan-seared-duck-breast-rice.jpg",
   },
   {
     id: "slow-roasted-lamb-shoulder-rice",
@@ -135,7 +134,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "慢烤羊肩肉飯 · Lunch 11:00–15:00",
     price: 69,
     category: "mains",
-    image: img,
+    image: "/canteen/food/slow-roasted-lamb-shoulder-rice.jpg",
   },
   {
     id: "ginger-beef-rice",
@@ -143,7 +142,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "薑汁牛肉燒飯 · Lunch 11:00–15:00",
     price: 52,
     category: "mains",
-    image: img,
+    image: "/canteen/food/ginger-beef-rice.jpg",
   },
   {
     id: "slow-roasted-beef-shoulder-ribeye-rice",
@@ -151,7 +150,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "慢烤牛肩胛即呷肉飯 · Lunch 11:00–15:00",
     price: 68,
     category: "mains",
-    image: img,
+    image: "/canteen/food/slow-roasted-beef-shoulder-ribeye-rice.jpg",
   },
   {
     id: "grilled-norwegian-salmon-rice",
@@ -159,7 +158,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "鹽麴烤挪威三文魚飯 · Lunch / Dinner",
     price: 68,
     category: "mains",
-    image: img,
+    image: "/canteen/food/grilled-norwegian-salmon-rice.jpg",
   },
   {
     id: "secret-truffle-vegetable-rice",
@@ -167,7 +166,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "秘製松露野菜飯 · Vegan · Lunch 11:00–15:00",
     price: 55,
     category: "mains",
-    image: img,
+    image: "/canteen/food/secret-truffle-vegetable-rice.jpg",
   },
   {
     id: "stewed-vegetables-rice",
@@ -175,7 +174,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "燉野菜飯 · Vegan · Lunch / Tea",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/stewed-vegetables-rice.jpg",
   },
 
   // —— Salad (11:00–19:30) ——
@@ -185,7 +184,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "鹽麴燒雞肉沙律 · Salad 11:00–19:30",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/grilled-shio-koji-chicken-salad.jpg",
   },
   {
     id: "seared-beef-short-rib-salad",
@@ -193,7 +192,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "炙燒牛小排沙律 · Salad 11:00–19:30",
     price: 72,
     category: "mains",
-    image: img,
+    image: "/canteen/food/seared-beef-short-rib-salad.jpg",
   },
   {
     id: "avocado-tofu-salad",
@@ -201,7 +200,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "牛油果豆腐沙律 · Vegan · Salad 11:00–19:30",
     price: 46,
     category: "mains",
-    image: img,
+    image: "/canteen/food/avocado-tofu-salad.jpg",
   },
   {
     id: "build-your-own-salad",
@@ -210,7 +209,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
       "自選主菜和主食 $48 · Choose 1 carb base, 2 mains, 1 dressing · Salad 11:00–19:30",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/build-your-own-salad.jpg",
     signature: true,
   },
 
@@ -221,7 +220,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "薑汁牛燒肉丼飯 · Tea 15:00–17:00",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/ginger-beef-donburi.jpg",
   },
   {
     id: "buttery-teriyaki-chicken-donburi",
@@ -229,7 +228,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "牛油照燒雞肉丼飯 · Tea 15:00–17:00",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/buttery-teriyaki-chicken-donburi.jpg",
   },
   {
     id: "karaage-chicken-donburi",
@@ -237,7 +236,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "秘製唐揚雞肉丼 · Tea 15:00–17:00",
     price: 52,
     category: "mains",
-    image: img,
+    image: "/canteen/food/karaage-chicken-donburi.jpg",
   },
   {
     id: "stewed-vegetables-donburi",
@@ -245,7 +244,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "燉野菜丼 · Vegan · Tea 15:00–17:00",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/stewed-vegetables-donburi.jpg",
   },
   {
     id: "short-rib-sandwich",
@@ -253,7 +252,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "牛小排三文治 · Tea 15:00–17:00",
     price: 62,
     category: "mains",
-    image: img,
+    image: "/canteen/food/short-rib-sandwich.jpg",
   },
   {
     id: "fried-fish-burger",
@@ -261,7 +260,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "酥炸魚漢堡 · Tea 15:00–17:00",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/fried-fish-burger.jpg",
   },
   {
     id: "fried-soft-shell-crab-burger",
@@ -269,7 +268,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "酥炸軟殼蟹漢堡 · Tea 15:00–17:00",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/fried-soft-shell-crab-burger.jpg",
   },
   {
     id: "avocado-smoked-salmon-toast",
@@ -277,7 +276,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "牛油果煙燻三文魚多士 · Tea 15:00–17:00",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/avocado-smoked-salmon-toast.jpg",
   },
   {
     id: "fried-portobello-mushroom-burger",
@@ -285,7 +284,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "酥炸大啡菇漢堡 · Vegan · Tea 15:00–17:00",
     price: 46,
     category: "mains",
-    image: img,
+    image: "/canteen/food/fried-portobello-mushroom-burger.jpg",
   },
   {
     id: "chefs-special-fried-platter",
@@ -293,7 +292,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "主廚精選炸物拼盤 · Tea 15:00–17:00",
     price: 58,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/chefs-special-fried-platter.jpg",
   },
   {
     id: "fries-mentai-mayo",
@@ -301,7 +300,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "炸薯條 明太子沙律醬 · Tea 15:00–17:00",
     price: 28,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/fries-mentai-mayo.jpg",
   },
   {
     id: "karaage-squid-rings",
@@ -309,7 +308,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "唐揚魷魚圈 · Tea 15:00–17:00",
     price: 30,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/karaage-squid-rings.jpg",
   },
   {
     id: "nachos-mixed-sauces",
@@ -317,7 +316,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "墨西哥粟米片配雙色醬 · Vegan · Tea 15:00–17:00",
     price: 38,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/nachos-mixed-sauces.jpg",
   },
 
   // —— Dinner (17:00–19:30) ——
@@ -327,7 +326,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "醬燒菇配溫泉蛋丼飯 · Vegan-friendly · Dinner 17:00–19:30",
     price: 45,
     category: "mains",
-    image: img,
+    image: "/canteen/food/mushrooms-onsen-egg-donburi.jpg",
   },
   {
     id: "roasted-spring-chicken-rice",
@@ -335,7 +334,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "焗烤春雞飯 · Dinner 17:00–19:30",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/roasted-spring-chicken-rice.jpg",
   },
   {
     id: "soy-glazed-beef-enoki-donburi",
@@ -343,7 +342,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "醬燒金針菇肥牛丼飯 · Dinner 17:00–19:30",
     price: 62,
     category: "mains",
-    image: img,
+    image: "/canteen/food/soy-glazed-beef-enoki-donburi.jpg",
   },
   {
     id: "slow-roasted-short-rib-donburi",
@@ -351,7 +350,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "慢烤牛小排丼飯配溫泉蛋 · Dinner 17:00–19:30",
     price: 78,
     category: "mains",
-    image: img,
+    image: "/canteen/food/slow-roasted-short-rib-donburi.jpg",
     signature: true,
   },
   {
@@ -360,7 +359,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "炙燒封門牛丼飯配溫泉蛋 · Dinner 17:00–19:30",
     price: 72,
     category: "mains",
-    image: img,
+    image: "/canteen/food/seared-hanger-steak-donburi.jpg",
   },
   {
     id: "shrimp-vegetable-tempura-rice",
@@ -368,7 +367,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "炸蝦野菜天婦羅飯 · Dinner 17:00–19:30",
     price: 68,
     category: "mains",
-    image: img,
+    image: "/canteen/food/shrimp-vegetable-tempura-rice.jpg",
   },
   {
     id: "vegetable-tempura-rice",
@@ -376,7 +375,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "炸野菜天婦羅飯 · Vegan · Dinner 17:00–19:30",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/vegetable-tempura-rice.jpg",
   },
   {
     id: "chicken-clear-soup-hot-pot",
@@ -384,7 +383,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "雞肉清雞湯鍋 · Dinner 17:00–19:30",
     price: 68,
     category: "mains",
-    image: img,
+    image: "/canteen/food/sukiyaki-beef-hot-pot.jpg",
   },
   {
     id: "sukiyaki-beef-hot-pot",
@@ -392,7 +391,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "壽喜燒牛肉鍋 · Dinner 17:00–19:30",
     price: 78,
     category: "mains",
-    image: img,
+    image: "/canteen/food/sukiyaki-beef-hot-pot.jpg",
   },
   {
     id: "vegetable-tofu-soy-milk-hot-pot",
@@ -400,7 +399,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "野菜豆腐豆乳鍋 · Vegan · Dinner 17:00–19:30",
     price: 68,
     category: "mains",
-    image: img,
+    image: "/canteen/food/vegetable-tofu-soy-milk-hot-pot.jpg",
   },
 
   // —— Shared add-ons / sides ——
@@ -410,7 +409,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "吉列炸蝦 · Add-on",
     price: 22,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/fried-shrimp-cutlet.jpg",
   },
   {
     id: "fried-oysters-cutlet",
@@ -418,7 +417,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "吉列炸蠔 · Dinner add-on",
     price: 26,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/fried-oysters-cutlet.jpg",
   },
   {
     id: "fried-fish-cutlet",
@@ -426,7 +425,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "吉列炸魚 · Dinner add-on",
     price: 20,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/fried-fish-cutlet.jpg",
   },
   {
     id: "pumpkin-croquette",
@@ -434,7 +433,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "日本南瓜薯餅 · Vegan · Lunch add-on",
     price: 19,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/pumpkin-croquette.jpg",
   },
   {
     id: "secret-karaage-chicken-wings",
@@ -442,7 +441,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "秘製炸雞翼 / 唐揚雞翼 · Add-on",
     price: 24,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/secret-karaage-chicken-wings.jpg",
   },
   {
     id: "secret-karaage-fried-chicken",
@@ -450,7 +449,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "秘製炸雞肉 / 唐揚炸雞 · Add-on",
     price: 22,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/secret-karaage-fried-chicken.jpg",
   },
   {
     id: "okra-sesame-dressing",
@@ -458,7 +457,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "芝麻醬拌秋葵 · Vegan · Add-on",
     price: 16,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/combo-vegetables.jpg",
   },
   {
     id: "teriyaki-mixed-mushrooms",
@@ -466,7 +465,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "醬烤雜菇 · Vegan · Lunch add-on",
     price: 18,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/teriyaki-mixed-mushrooms.jpg",
   },
   {
     id: "onsen-tamago",
@@ -474,7 +473,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "溫泉蛋 · Soft-boiled egg add-on",
     price: 8,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/onsen-tamago.jpg",
   },
   {
     id: "combo-salad",
@@ -482,7 +481,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "加配沙律 · Lunch +$8 · Tea/Dinner +$6",
     price: 8,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/combo-salad.jpg",
   },
   {
     id: "combo-soup",
@@ -490,7 +489,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "加配湯 · Tea / Dinner +$6",
     price: 6,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/combo-soup.jpg",
   },
   {
     id: "combo-curry-sauce",
@@ -498,7 +497,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "咖哩醬 · Lunch combo add-on",
     price: 12,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/combo-curry-sauce.jpg",
   },
   {
     id: "combo-vegetables",
@@ -506,7 +505,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "野菜 · Lunch combo add-on",
     price: 8,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/combo-vegetables.jpg",
   },
   {
     id: "combo-tea",
@@ -514,7 +513,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "精選茶 · Combo add-on +$3",
     price: 3,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/combo-tea.jpg",
   },
 
   // —— Drinks (all day) ——
@@ -524,7 +523,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "黑咖啡 · +$2 iced",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/black-coffee.jpg",
   },
   {
     id: "cappuccino",
@@ -532,7 +531,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "泡沫咖啡 · +$2 iced",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cappuccino.jpg",
   },
   {
     id: "caffe-latte",
@@ -540,7 +539,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "拿鐵咖啡 · +$2 iced",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/caffe-latte.jpg",
   },
   {
     id: "flat-white",
@@ -548,7 +547,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "平白咖啡 · +$2 iced",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/flat-white.jpg",
   },
   {
     id: "apple-juice",
@@ -556,7 +555,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "蘋果汁",
     price: 15,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/apple-juice.jpg",
   },
   {
     id: "lemon-black-tea",
@@ -564,7 +563,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "檸檬紅茶 · +$2 iced",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/lemon-black-tea.jpg",
   },
   {
     id: "lemon-grapefruit-sparkling",
@@ -572,7 +571,7 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "檸檬西柚氣泡水",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/roselle-peach-sparkling.jpg",
   },
   {
     id: "roselle-peach-sparkling",
@@ -580,6 +579,6 @@ export const SORAZEN_MENU: SimpleMenuItem[] = [
     description: "洛神花蜜桃氣泡水",
     price: 20,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/roselle-peach-sparkling.jpg",
   },
 ];

@@ -34,6 +34,8 @@ import {
   isBfCanteenOpen,
   isSimpleCanteenOpen,
 } from "@/lib/canteen/hours";
+import { isOrderableCanteen } from "@/lib/canteenConfig";
+import { isOpen } from "@/lib/openingHours";
 import {
   getCanteenConfig,
   CANTEEN_MEAL_PERIODS,
@@ -66,6 +68,10 @@ const SLUG_ALIASES: Record<string, string> = {
   na: "na-canteen",
   "new-asia": "na-canteen",
   "new-asia-canteen": "na-canteen",
+  ebeneezers: "ebeneezers",
+  ebeneezer: "ebeneezers",
+  "ebeneezer's": "ebeneezers",
+  "orchid-lodge": "orchid-lodge",
 };
 
 const BF_FILTERS: Array<"all" | MenuCategory> = [
@@ -91,7 +97,7 @@ export default function CanteenSlugPage() {
   }, [rawSlug, router]);
 
   const searchProducts = useMemo<MenuItem[]>(() => {
-    if (!restaurant) return [];
+    if (!restaurant || !restaurant.menuReady) return [];
     if (restaurant.id === "benjamin-franklin") {
       return BF_MENU.map((item) => toCartMenuItemFromBf(item, "benjamin-franklin"));
     }
@@ -130,6 +136,11 @@ export default function CanteenSlugPage() {
             }`}
           >
             {r.shortName}
+            {!r.menuReady ? (
+              <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
+                Soon
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -176,16 +187,19 @@ export default function CanteenSlugPage() {
       cartChannel="canteen"
       hideTrackFab
       orderingEnabled={
-        restaurant.id === "benjamin-franklin"
-          ? isBfCanteenOpen()
-          : restaurant.id === "uc-canteen"
-            ? Boolean(getCurrentUcPeriod())
-            : isSimpleMenuRestaurant(restaurant.id)
-              ? Boolean(isSimpleCanteenOpen(restaurant.id))
-              : false
+        isOrderableCanteen(restaurant.id) &&
+        (restaurant.id === "uc-canteen"
+          ? Boolean(getCurrentUcPeriod())
+          : isOpen(restaurant.id))
       }
     >
-      {restaurant.id === "benjamin-franklin" ? (
+      {!restaurant.menuReady ? (
+        <StubMenu
+          name={restaurant.name}
+          blurb={restaurant.blurb}
+          restaurantId={restaurant.id}
+        />
+      ) : restaurant.id === "benjamin-franklin" ? (
         <BfMenu search={search} />
       ) : restaurant.id === "uc-canteen" ? (
         <UcMenu search={search} />
@@ -512,7 +526,7 @@ function UcMenu({ search }: { search: string }) {
           </p>
           <p className="mt-2 text-sm text-amber-800/80">
             Open periods: Breakfast 7:30–11:00 · Lunch 11:00–2:30 · Tea
-            2:30–5:00 · Dinner 5:00–7:30 (HKT). Closed Sundays.
+            2:30–5:00 · Dinner 5:00–8:45 (HKT). Closed Sundays.
           </p>
         </div>
       ) : (

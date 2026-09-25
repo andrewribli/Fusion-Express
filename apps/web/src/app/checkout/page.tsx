@@ -31,7 +31,7 @@ import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
-import { isCanteenCart } from "@/lib/canteen/cart";
+import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
 import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
@@ -60,15 +60,25 @@ export default function CheckoutPage() {
   }, [lockedCampus, setCampus]);
 
   const itemsCampus = cartCampus(items);
-  useEffect(() => {
-    if (!lockedCampus && itemsCampus && !guestCampus) {
-      setGuestCampus(itemsCampus);
-      setCampus(itemsCampus);
-    }
-  }, [guestCampus, itemsCampus, lockedCampus, setCampus]);
+  /** Cart channel fixes campus (canteen / one-campus grocery); no cross-university pick. */
+  const cartLockedCampus = itemsCampus;
+  const deliveryCampusLock = lockedCampus ?? cartLockedCampus;
 
-  const campus = lockedCampus ?? guestCampus;
+  useEffect(() => {
+    if (deliveryCampusLock) {
+      setCampus(deliveryCampusLock);
+      if (!lockedCampus) {
+        setGuestCampus(deliveryCampusLock);
+      }
+    }
+  }, [deliveryCampusLock, lockedCampus, setCampus]);
+
+  const campus = deliveryCampusLock ?? guestCampus;
+  const canteenOrder = isCanteenCart(items);
   const campusError = cartCampusError(items, campus);
+  const canteenGate = getCanteenCheckoutGate(items);
+  const canteenError =
+    isCanteenCart(items) && !canteenGate.allowed ? canteenGate.message : null;
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const fee = useMemo(
@@ -78,7 +88,12 @@ export default function CheckoutPage() {
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
-    campus && college && hall && !overLimit && !campusError,
+    campus &&
+      college &&
+      hall &&
+      !overLimit &&
+      !campusError &&
+      !canteenError,
   );
   const shopHref = isCanteenCart(items)
     ? "/canteen"
@@ -90,7 +105,7 @@ export default function CheckoutPage() {
   const lobby = hall && campus ? getLobbyForHall(hall, campus) : "";
 
   function handleCampusChange(next: CampusId) {
-    if (lockedCampus) return;
+    if (deliveryCampusLock) return;
     setGuestCampus(next);
     setCampus(next);
     setCollege("");
@@ -158,6 +173,11 @@ export default function CheckoutPage() {
           {campusError && (
             <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
               {campusError}
+            </p>
+          )}
+          {canteenError && (
+            <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              {canteenError}
             </p>
           )}
           <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
@@ -237,17 +257,21 @@ export default function CheckoutPage() {
             >
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <p className="mt-1 text-xs text-gray-500">
-                {lockedCampus
-                  ? lockedCampus === "cityu"
-                    ? "Delivering to your CityU hall lobby. No phone number."
-                    : "Delivering to your CUHK dorm lobby. No phone number."
+                {deliveryCampusLock
+                  ? deliveryCampusLock === "cityu"
+                    ? canteenOrder
+                      ? "CityU canteen — hall lobby delivery. No phone number."
+                      : "Delivering to your CityU hall lobby. No phone number."
+                    : canteenOrder
+                      ? "CUHK canteen — dorm lobby delivery. No phone number."
+                      : "Delivering to your CUHK dorm lobby. No phone number."
                   : campus === "cityu"
                     ? "Campus, compound, hall, and lobby. No phone number."
                     : "Pick your university first, then dorm and lobby. No phone number."}
               </p>
-              {lockedCampus ? (
+              {deliveryCampusLock ? (
                 <p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-800">
-                  {lockedCampus === "cityu" ? "CityU" : "CUHK"}
+                  {deliveryCampusLock === "cityu" ? "CityU" : "CUHK"}
                 </p>
               ) : (
                 <div className="mt-3">

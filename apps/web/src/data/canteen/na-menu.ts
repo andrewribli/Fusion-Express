@@ -1,6 +1,5 @@
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 
-const img = "https://placehold.co/200x200/png";
 
 /**
  * New Asia College canteen (Bites Bro / Rice Noodle Institute) from printed menus:
@@ -14,7 +13,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 炒蛋三文治",
     price: 14,
     category: "mains",
-    image: img,
+    image: "/canteen/food/scrambled-egg-sandwich.jpg",
   },
   {
     id: "spam-egg-sandwich",
@@ -22,7 +21,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 餐蛋/腿蛋三文治",
     price: 16,
     category: "mains",
-    image: img,
+    image: "/canteen/food/spam-egg-sandwich.jpg",
   },
   {
     id: "salty-beef-egg-sandwich",
@@ -30,7 +29,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 鹹牛肉三文治",
     price: 16,
     category: "mains",
-    image: img,
+    image: "/canteen/food/scrambled-egg-sandwich.jpg",
   },
   {
     id: "cheese-ham-or-pbj-sandwich",
@@ -38,7 +37,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 芝腿/花生/果醬三文治",
     price: 18,
     category: "mains",
-    image: img,
+    image: "/canteen/food/cheese-ham-or-pbj-sandwich.jpg",
   },
   {
     id: "healthy-oatmeal",
@@ -46,7 +45,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 健康營養麥皮",
     price: 15,
     category: "mains",
-    image: img,
+    image: "/canteen/food/healthy-oatmeal.jpg",
   },
   {
     id: "sandwich-toasted",
@@ -54,7 +53,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐加配 · 烘底 (+$2 with sandwich)",
     price: 2,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/sandwich-toasted.jpg",
   },
   {
     id: "sandwich-upgrade-oatmeal",
@@ -62,7 +61,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐加配 · 變整碗麥皮 (+$10 with sandwich)",
     price: 10,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/sandwich-upgrade-oatmeal.jpg",
   },
 
   // —— Breakfast noodles ——
@@ -72,7 +71,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 雪菜肉絲米粉",
     price: 24,
     category: "mains",
-    image: img,
+    image: "/canteen/food/preserved-veg-shredded-meat-vermicelli.jpg",
   },
   {
     id: "five-spice-meat-noodles",
@@ -80,7 +79,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 五香肉丁麵",
     price: 24,
     category: "mains",
-    image: img,
+    image: "/canteen/food/five-spice-meat-noodles.jpg",
   },
   {
     id: "satay-beef-noodles",
@@ -88,7 +87,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 沙嗲牛肉麵",
     price: 25,
     category: "mains",
-    image: img,
+    image: "/canteen/food/satay-beef-noodles.jpg",
   },
   {
     id: "tomato-macaroni-sausage-patty",
@@ -96,7 +95,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 招牌蕃茄漢堡扒粟米通粉",
     price: 28,
     category: "mains",
-    image: img,
+    image: "/canteen/food/tomato-macaroni-sausage-patty.jpg",
   },
   {
     id: "choose-3-breakfast-combo",
@@ -104,7 +103,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐 · 餐肉/炒蛋/菜/漢堡扒/麵（任選三款）",
     price: 28,
     category: "mains",
-    image: img,
+    image: "/canteen/food/choose-3-breakfast-combo.jpg",
   },
   {
     id: "noodle-change-macaroni-vermicelli",
@@ -112,7 +111,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐麵加配 · 轉通粉或米粉 (+$1)",
     price: 1,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-change-macaroni-vermicelli.jpg",
   },
   {
     id: "noodle-add-oatmeal-bowl",
@@ -120,7 +119,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐麵加配 · 要整碗麥皮 (+$10)",
     price: 10,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-add-oatmeal-bowl.jpg",
   },
   {
     id: "noodle-add-butter-bread-egg",
@@ -128,7 +127,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐麵加配 · 牛油麵包+牛乳滑蛋 (+$6)",
     price: 6,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-add-butter-bread-egg.jpg",
   },
   {
     id: "noodle-add-protein",
@@ -136,7 +135,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "早餐麵加配 · 雞扒/炒蛋/餐肉/火腿/漢堡扒 (+$5)",
     price: 5,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-add-protein.jpg",
   },
 
   // —— Breakfast combos ——
@@ -147,7 +146,7 @@ export const NA_MENU: SimpleMenuItem[] = [
       "西式 · 歐陸式早餐 — baked beans, sausage, egg, sausage patty, butter toast",
     price: 36,
     category: "mains",
-    image: img,
+    image: "/canteen/food/all-day-western-breakfast.jpg",
   },
   {
     id: "hk-rice-noodle-roll-siu-mai",
@@ -155,7 +154,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "港式小吃 · 腸粉（4條）配燒賣（5粒）",
     price: 20,
     category: "mains",
-    image: img,
+    image: "/canteen/food/hk-rice-noodle-roll-siu-mai.jpg",
   },
 
   // —— Lunch: Rice Noodle Institute 米線研究所 ——
@@ -165,7 +164,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "午餐 · 香滑雞肉米線",
     price: 34,
     category: "mains",
-    image: img,
+    image: "/canteen/food/juicy-chicken-rice-noodles.jpg",
     signature: true,
   },
   {
@@ -174,7 +173,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "午餐 · 健康素菜甜粟米米線",
     price: 36,
     category: "mains",
-    image: img,
+    image: "/canteen/food/veggie-sweet-corn-rice-noodles.jpg",
   },
   {
     id: "signature-sliced-beef-rice-noodles",
@@ -182,7 +181,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "午餐 · 精選肥牛米線",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/signature-sliced-beef-rice-noodles.jpg",
     signature: true,
   },
   {
@@ -191,7 +190,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "午餐 · 越式扎肉米線",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/vietnamese-sausage-rice-noodles.jpg",
   },
   {
     id: "signature-pork-cartilage-rice-noodles",
@@ -199,7 +198,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "午餐 · 招牌豬軟骨米線",
     price: 45,
     category: "mains",
-    image: img,
+    image: "/canteen/food/signature-pork-cartilage-rice-noodles.jpg",
     signature: true,
   },
   {
@@ -208,7 +207,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "午餐 · 餓媽家姐米線（廚師發辦）",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/omakase-rice-noodles.jpg",
     signature: true,
   },
 
@@ -219,7 +218,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加 · 雞肉",
     price: 6,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/add-chicken.jpg",
   },
   {
     id: "add-vietnamese-sausage",
@@ -227,7 +226,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加 · 扎肉",
     price: 8,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/add-vietnamese-sausage.jpg",
   },
   {
     id: "add-beef",
@@ -235,7 +234,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加 · 肥牛",
     price: 10,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/add-beef.jpg",
   },
   {
     id: "add-baby-cabbage",
@@ -243,7 +242,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加 · 娃娃菜",
     price: 10,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/add-baby-cabbage.jpg",
   },
   {
     id: "add-zhajiang",
@@ -251,7 +250,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加 · 炸醬",
     price: 10,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-instant.jpg",
   },
   {
     id: "soup-spicy-tomato",
@@ -259,7 +258,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "自選湯底 · 麻辣番茄 (+$2; original/spicy/tomato free)",
     price: 2,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/soup-spicy-tomato.jpg",
   },
   {
     id: "noodle-sweet-potato",
@@ -267,7 +266,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "自選面底 · 薯粉 (+$3)",
     price: 3,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-sweet-potato.jpg",
   },
   {
     id: "noodle-instant",
@@ -275,7 +274,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "自選面底 · 公仔麵 (+$3)",
     price: 3,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/noodle-instant.jpg",
   },
   {
     id: "extra-noodle-base",
@@ -283,7 +282,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "自選面底 · 加底 (+$2)",
     price: 2,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/extra-noodle-base.jpg",
   },
   {
     id: "cold-black-fungus-salad",
@@ -291,7 +290,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加小食 · 涼拌雲耳",
     price: 15,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/chinese-cucumber-salad.jpg",
   },
   {
     id: "chinese-cucumber-salad",
@@ -299,7 +298,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "追加小食 · 涼拌青瓜",
     price: 15,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/chinese-cucumber-salad.jpg",
   },
 
   // —— Drinks (Bites Bro New Asia Canteen) ——
@@ -309,7 +308,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱朱古力",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-chocolate.jpg",
   },
   {
     id: "hot-horlicks",
@@ -317,7 +316,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱好立克",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-horlicks.jpg",
   },
   {
     id: "hot-ovaltine",
@@ -325,7 +324,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱阿華田",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-ovaltine.jpg",
   },
   {
     id: "hot-milk-tea",
@@ -333,7 +332,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱奶茶",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-milk-tea.jpg",
   },
   {
     id: "hot-coffee-with-milk",
@@ -341,7 +340,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱鴛鴦",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-coffee-with-milk.jpg",
   },
   {
     id: "hot-lemon-tea",
@@ -349,7 +348,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱檸茶",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-lemon-tea.jpg",
   },
   {
     id: "hot-lemon-water",
@@ -357,7 +356,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱檸水",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-lemon-water.jpg",
   },
   {
     id: "hot-lemon-honey",
@@ -365,7 +364,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱檸蜜",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-lemon-honey.jpg",
   },
   {
     id: "hot-coffee",
@@ -373,7 +372,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "熱飲 · 熱咖啡",
     price: 8,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hot-coffee.jpg",
   },
   {
     id: "cold-chocolate",
@@ -381,7 +380,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍朱古力",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-chocolate.jpg",
   },
   {
     id: "cold-horlicks",
@@ -389,7 +388,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍好立克",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-horlicks.jpg",
   },
   {
     id: "cold-ovaltine",
@@ -397,7 +396,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍阿華田",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-ovaltine.jpg",
   },
   {
     id: "cold-milk-tea",
@@ -405,7 +404,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍奶茶",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-milk-tea.jpg",
   },
   {
     id: "cold-coffee-with-milk",
@@ -413,7 +412,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍鴛鴦",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-coffee-with-milk.jpg",
   },
   {
     id: "cold-lemon-tea",
@@ -421,7 +420,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍檸茶",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-lemon-tea.jpg",
   },
   {
     id: "cold-lemon-water",
@@ -429,7 +428,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍檸水",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-lemon-water.jpg",
   },
   {
     id: "cold-lemon-honey",
@@ -437,7 +436,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍檸蜜",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-lemon-honey.jpg",
   },
   {
     id: "cold-coffee",
@@ -445,7 +444,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "凍飲 · 凍咖啡",
     price: 12,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-coffee.jpg",
   },
   {
     id: "na-ice-milk-red-bean",
@@ -453,7 +452,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "招牌 · 新亞紅豆冰",
     price: 13,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/na-ice-milk-red-bean.jpg",
     signature: true,
   },
   {
@@ -462,7 +461,7 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "套餐加配 · 熱飲 (+$4; excl. hotdog/burger sets)",
     price: 4,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/set-add-hot-drink.jpg",
   },
   {
     id: "set-add-cold-drink",
@@ -470,6 +469,6 @@ export const NA_MENU: SimpleMenuItem[] = [
     description: "套餐加配 · 凍飲 (+$6; excl. hotdog/burger sets)",
     price: 6,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/set-add-cold-drink.jpg",
   },
 ];

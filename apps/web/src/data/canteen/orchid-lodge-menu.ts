@@ -3,7 +3,6 @@
  * (OpenRice reviews). Unconfirmed signature dishes use priceOnRequest.
  */
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
-import { CANTEEN_PLACEHOLDER_IMAGE as img } from "@/data/canteen/simple-menu";
 
 export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
   {
@@ -12,7 +11,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "巨型五層厚西多士 — Review-confirmed HK$39",
     price: 39,
     category: "mains",
-    image: img,
+    image: "/canteen/food/five-layer-french-toast.jpg",
     signature: true,
   },
   {
@@ -21,7 +20,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "芝士煙肉碎蛋焗薯 — Review-confirmed HK$38",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/cheese-bacon-egg-baked-potato.jpg",
     signature: true,
   },
   {
@@ -30,7 +29,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "自家製鮮牛肉漢堡包 — price not listed on OpenRice",
     price: 0,
     category: "mains",
-    image: img,
+    image: "/canteen/food/homemade-beef-burger.jpg",
     signature: true,
     priceOnRequest: true,
   },
@@ -40,7 +39,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "焗薯餐 — price not listed on OpenRice",
     price: 0,
     category: "mains",
-    image: img,
+    image: "/canteen/food/baked-potato-set.jpg",
     priceOnRequest: true,
   },
   {
@@ -49,7 +48,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "煙三文魚凱撒沙律 — price not listed on OpenRice",
     price: 0,
     category: "mains",
-    image: img,
+    image: "/canteen/food/smoked-salmon-caesar.jpg",
     priceOnRequest: true,
   },
   {
@@ -58,7 +57,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "蘭苑三文治 — price not listed on OpenRice",
     price: 0,
     category: "mains",
-    image: img,
+    image: "/canteen/food/orchid-sandwich.jpg",
     priceOnRequest: true,
   },
   {
@@ -67,7 +66,7 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "檸檬慕絲批 — price not listed on OpenRice",
     price: 0,
     category: "dessert",
-    image: img,
+    image: "/canteen/food/lemon-mousse-pie.jpg",
     signature: true,
     priceOnRequest: true,
   },
@@ -77,6 +76,6 @@ export const ORCHID_LODGE_MENU: SimpleMenuItem[] = [
     description: "Add to French toast — Review-confirmed HK$10",
     price: 10,
     category: "dessert",
-    image: img,
+    image: "/canteen/food/ice-cream-scoop.jpg",
   },
 ];

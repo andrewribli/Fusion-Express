@@ -3,5 +3,5 @@
 import { ShopHome } from "@/ptero/components/ShopHome";
 
 export default function TastePage() {
-  return <ShopHome />;
+  return <ShopHome routeSource="taste" />;
 }

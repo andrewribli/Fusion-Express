@@ -21,15 +21,15 @@ export type CanteenId =
   | "uc-canteen"
   | "ebeneezers"
   | "orchid-lodge"
-  | "wys"
-  | "lws"
-  | "chung-chi-tang"
   | "benjamin-franklin"
   | "cu-cafe"
   | "sh-ho-canteen"
   | "na-canteen"
   | "cc-canteen"
-  | "shaw-canteen";
+  | "shaw-canteen"
+  | "wys"
+  | "lws"
+  | "chung-chi-tang";
 
 export type CanteenMeta = {
   id: CanteenId;
@@ -42,10 +42,7 @@ export type CanteenMeta = {
   hoursLabel: string;
 };
 
-/**
- * Launch set: five open + three coming soon.
- * Legacy venues (BF, CU Cafe, SH Ho, NA) stay open for existing links.
- */
+/** Open venues first (display order), then coming soon. */
 export const CANTEEN_CATALOG: CanteenMeta[] = [
   {
     id: "sorazen",
@@ -68,7 +65,7 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
   {
     id: "uc-canteen",
     name: "UC Canteen",
-    shortName: "UC Can",
+    shortName: "UC Canteen",
     status: "open",
     collegeId: "UC",
     menuSource: "data/canteen/uc-menu.ts",
@@ -81,17 +78,70 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
     status: "open",
     collegeId: null,
     menuSource: "data/canteen/ebeneezers-menu.ts",
-    /** CONFIRM — FoodPanda listing had no published hours when scraped. */
-    hoursLabel: "Mon–Sat 11:00 – 21:00 (provisional · confirm with venue)",
+    hoursLabel: "Mon–Sat 11:00 – 21:00",
   },
   {
     id: "orchid-lodge",
     name: "Orchid Lodge",
     shortName: "Orchid Lodge",
-    status: "open",
+    status: "coming_soon",
     collegeId: "CC",
     menuSource: "data/canteen/orchid-lodge-menu.ts",
-    hoursLabel: "Mon–Fri 08:00 – 20:30 · Sat 07:30 – 17:00 · closed Sun",
+    hoursLabel: "Coming soon",
+  },
+  {
+    id: "benjamin-franklin",
+    name: "Benjamin Franklin Canteen",
+    shortName: "Benjamin Franklin",
+    status: "coming_soon",
+    collegeId: null,
+    menuSource: "data/canteen/bf-menu.ts",
+    hoursLabel: "Coming soon",
+  },
+  {
+    id: "cu-cafe",
+    name: "CU Cafe",
+    shortName: "CU Cafe",
+    status: "coming_soon",
+    collegeId: null,
+    menuSource: "data/canteen/simple-menu.ts (CU_CAFE_MENU)",
+    hoursLabel: "Coming soon",
+  },
+  {
+    id: "sh-ho-canteen",
+    name: "S.H. Ho College Canteen",
+    shortName: "S.H. Ho Canteen",
+    status: "coming_soon",
+    collegeId: "SHHO",
+    menuSource: "data/canteen/simple-menu.ts (SH_HO_MENU)",
+    hoursLabel: "Coming soon",
+  },
+  {
+    id: "na-canteen",
+    name: "NA Canteen",
+    shortName: "NA Canteen",
+    status: "coming_soon",
+    collegeId: "NA",
+    menuSource: "data/canteen/na-menu.ts",
+    hoursLabel: "Coming soon",
+  },
+  {
+    id: "cc-canteen",
+    name: "CC Canteen",
+    shortName: "CC Canteen",
+    status: "coming_soon",
+    collegeId: "CC",
+    menuSource: "(stub)",
+    hoursLabel: "Coming soon",
+  },
+  {
+    id: "shaw-canteen",
+    name: "Shaw Canteen",
+    shortName: "Shaw Canteen",
+    status: "coming_soon",
+    collegeId: "Shaw",
+    menuSource: "(stub)",
+    hoursLabel: "Coming soon",
   },
   {
     id: "wys",

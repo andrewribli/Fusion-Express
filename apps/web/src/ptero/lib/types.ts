@@ -2,7 +2,7 @@ import type { CampusId } from "@/ptero/config/campus";
 import type { CollegeId } from "@/ptero/config/canteen/colleges";
 import type { RestaurantId } from "@/ptero/config/canteen/restaurants";
 
-export type OrderChannel = "taste" | "canteen";
+export type OrderChannel = "taste" | "wellcome" | "canteen";
 
 export const ORDER_STATUSES = [
   "pending",
@@ -18,7 +18,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Waiting for a runner",
   accepted: "Runner accepted",
-  purchased: "Bought at Taste",
+  purchased: "Bought at the store",
   delivered: "Delivered to lobby",
   paid: "Paid",
   cancelled: "Cancelled",
@@ -58,6 +58,8 @@ export interface MenuItem {
   /** Set for canteen cart lines (`canteen:{restaurant}:{item}`). */
   restaurantId?: RestaurantId | string;
   restaurantName?: string;
+  /** CityU grocery store this line belongs to. */
+  grocerySource?: "taste" | "wellcome";
 }
 
 export interface CartItem {
@@ -98,6 +100,8 @@ export interface Order {
   campus: CampusId;
   /** taste = supermarket; canteen = CityU canteens. Mirrors CUHK fusion|canteen. */
   orderChannel?: OrderChannel;
+  grocerySource?: "taste" | "wellcome";
+  pickupLocation?: string;
   canteenRestaurantId?: string;
   canteenCollege?: CollegeId | null;
   sessionId: string;

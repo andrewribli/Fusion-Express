@@ -81,6 +81,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "img.rtacdn-os.com",
+      },
+      {
+        protocol: "https",
         hostname: "placehold.co",
       },
       {

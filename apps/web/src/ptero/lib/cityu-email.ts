@@ -11,8 +11,11 @@ export function isCityUStudentEmail(email: string): boolean {
 }
 
 /** Returns an error message, or null when the email is a valid CityU address. */
+const OWNER_LOGIN_EMAILS = ["andrew.ribli@gmail.com"] as const;
+
 export function validateCityUStudentEmail(email: string): string | null {
   const trimmed = normalizeEmail(email);
+  if ((OWNER_LOGIN_EMAILS as readonly string[]).includes(trimmed)) return null;
   if (!trimmed.includes("@")) {
     return "Please use your CityU email to sign up.";
   }

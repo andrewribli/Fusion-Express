@@ -17,6 +17,8 @@ import {
   type CampusId,
 } from "@fusion-express/shared/campus";
 import { useUser } from "@/context/UserContext";
+import { campusFromPathname } from "@/lib/campus-routes";
+import { usePathname } from "next/navigation";
 
 const CAMPUS_STORAGE_KEY = "gracerun_campus";
 
@@ -53,6 +55,7 @@ const CampusContext = createContext<CampusContextValue | null>(null);
 
 export function CampusProvider({ children }: { children: ReactNode }) {
   const { user, isReady: userReady } = useUser();
+  const pathname = usePathname();
   const [storedCampus, setStoredCampus] = useState<CampusId | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
@@ -81,7 +84,10 @@ export function CampusProvider({ children }: { children: ReactNode }) {
     persistCampus(null);
   }, [user?.campus]);
 
+  const routeCampus = campusFromPathname(pathname);
+
   const campus: CampusId =
+    routeCampus ??
     (isCampusId(user?.campus) ? user.campus : null) ??
     storedCampus ??
     "cuhk";

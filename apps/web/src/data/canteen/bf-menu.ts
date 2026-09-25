@@ -25,7 +25,7 @@ export const MENU: MenuItem[] = [
     price: 28,
     category: "mains",
     image:
-      "https://images.unsplash.com/photo-1604908176997-125f25cc7f3d?w=400&h=400&fit=crop",
+      "/canteen/food/bf-chicken-rice.jpg",
   },
   {
     id: "beef-noodles",
@@ -34,7 +34,7 @@ export const MENU: MenuItem[] = [
     price: 38,
     category: "mains",
     image:
-      "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop",
+      "/canteen/food/bf-beef-noodles.jpg",
   },
   {
     id: "fried-rice",
@@ -43,7 +43,7 @@ export const MENU: MenuItem[] = [
     price: 26,
     category: "mains",
     image:
-      "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop",
+      "/canteen/food/bf-fried-rice.jpg",
   },
   {
     id: "hotpot-set",
@@ -52,7 +52,7 @@ export const MENU: MenuItem[] = [
     price: 55,
     category: "mains",
     image:
-      "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop&sat=-20",
+      "/canteen/food/hotpot-set.jpg",
   },
   {
     id: "sandwiches",
@@ -61,7 +61,7 @@ export const MENU: MenuItem[] = [
     price: 22,
     category: "snacks",
     image:
-      "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=400&fit=crop",
+      "/canteen/food/sandwiches.jpg",
   },
   {
     id: "coffee",
@@ -70,7 +70,7 @@ export const MENU: MenuItem[] = [
     price: 15,
     category: "drinks",
     image:
-      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop",
+      "/canteen/food/coffee.jpg",
   },
   {
     id: "milk-tea",
@@ -79,7 +79,7 @@ export const MENU: MenuItem[] = [
     price: 16,
     category: "drinks",
     image:
-      "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=400&h=400&fit=crop",
+      "/canteen/food/milk-tea.jpg",
   },
   {
     id: "fruit-cup",
@@ -88,7 +88,7 @@ export const MENU: MenuItem[] = [
     price: 18,
     category: "dessert",
     image:
-      "https://images.unsplash.com/photo-1619566636858-adf3ef4644b9?w=400&h=400&fit=crop",
+      "/canteen/food/fruit-cup.jpg",
   },
   {
     id: "soup-of-the-day",
@@ -97,7 +97,7 @@ export const MENU: MenuItem[] = [
     price: 20,
     category: "mains",
     image:
-      "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=400&fit=crop",
+      "/canteen/food/soup-of-the-day.jpg",
   },
   {
     id: "curry-fish-balls",
@@ -106,7 +106,7 @@ export const MENU: MenuItem[] = [
     price: 18,
     category: "snacks",
     image:
-      "https://images.unsplash.com/photo-1555939594-58ed7bd77b50?w=400&h=400&fit=crop",
+      "/canteen/food/curry-fish-balls.jpg",
   },
   {
     id: "french-toast",
@@ -115,7 +115,7 @@ export const MENU: MenuItem[] = [
     price: 24,
     category: "snacks",
     image:
-      "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400&h=400&fit=crop",
+      "/canteen/food/bf-french-toast.jpg",
   },
   {
     id: "egg-tart",
@@ -124,7 +124,7 @@ export const MENU: MenuItem[] = [
     price: 12,
     category: "dessert",
     image:
-      "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?w=400&h=400&fit=crop",
+      "/canteen/food/egg-tart.jpg",
   },
   {
     id: "pineapple-bun",
@@ -133,7 +133,7 @@ export const MENU: MenuItem[] = [
     price: 10,
     category: "dessert",
     image:
-      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop",
+      "/canteen/food/pineapple-bun.jpg",
   },
   {
     id: "iced-lemon-tea",
@@ -142,7 +142,7 @@ export const MENU: MenuItem[] = [
     price: 14,
     category: "drinks",
     image:
-      "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop",
+      "/canteen/food/bf-iced-lemon-tea.jpg",
   },
   {
     id: "spring-rolls",
@@ -151,7 +151,7 @@ export const MENU: MenuItem[] = [
     price: 20,
     category: "snacks",
     image:
-      "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=400&fit=crop",
+      "/canteen/food/bf-spring-rolls.jpg",
   },
 ];
 

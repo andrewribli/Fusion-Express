@@ -12,10 +12,8 @@ export default function CuhkChannelPage() {
   const { setCampus, isReady: campusReady } = useCampus();
 
   useEffect(() => {
-    // Guests browsing /cuhk get the CUHK menu context. Signed-in CityU users
-    // keep their profile campus; CampusContext already prefers profile.
-    if (!user || user.isGuest) setCampus("cuhk");
-  }, [user, setCampus]);
+    setCampus("cuhk");
+  }, [setCampus]);
 
   if (!isReady || !campusReady) {
     return <BootScreen error={bootError} />;

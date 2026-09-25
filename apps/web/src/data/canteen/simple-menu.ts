@@ -2,10 +2,9 @@ import type { MenuCategory } from "@/data/canteen/bf-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
 import { NA_MENU } from "@/data/canteen/na-menu";
 import { PAPER_AND_COFFEE_MENU } from "@/data/canteen/paper-and-coffee-menu";
+import { EBENEEZERS_MENU } from "@/data/canteen/ebeneezers-menu";
+import { ORCHID_LODGE_MENU } from "@/data/canteen/orchid-lodge-menu";
 import { SORAZEN_MENU } from "@/data/canteen/sorazen-menu";
-
-/** Prefer placehold.co — via.placeholder.com is often blocked in browsers. */
-export const CANTEEN_PLACEHOLDER_IMAGE = "https://placehold.co/200x200/png";
 
 export type SimpleMenuItem = {
   id: string;
@@ -31,7 +30,6 @@ export type SimpleRestaurantMenu = {
   items: SimpleMenuItem[];
 };
 
-const img = CANTEEN_PLACEHOLDER_IMAGE;
 
 export const CU_CAFE_MENU: SimpleMenuItem[] = [
   {
@@ -40,7 +38,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     description: "Turkey breast on fresh bread — grab-and-go.",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/turkey-breast-sandwich.jpg",
   },
   {
     id: "caesar-salad",
@@ -48,7 +46,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     description: "Crisp romaine with classic Caesar dressing.",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/caesar-salad.jpg",
   },
   {
     id: "house-brew-coffee",
@@ -56,7 +54,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     description: "Premium drip coffee.",
     price: 25,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cucafe-house-brew-coffee.jpg",
   },
   {
     id: "matcha-latte",
@@ -64,7 +62,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     description: "Smooth matcha with steamed milk.",
     price: 32,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/matcha-latte.jpg",
   },
   {
     id: "chocolate-cake",
@@ -72,7 +70,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     description: "Rich chocolate slice.",
     price: 28,
     category: "dessert",
-    image: img,
+    image: "/canteen/food/chocolate-cake.jpg",
   },
 ];
 
@@ -83,7 +81,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = [
     description: "Casual Chinese chicken rice.",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/shho-chicken-rice.jpg",
   },
   {
     id: "beef-noodles",
@@ -91,7 +89,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = [
     description: "Beef noodles in savory broth.",
     price: 45,
     category: "mains",
-    image: img,
+    image: "/canteen/food/shho-beef-noodles.jpg",
   },
   {
     id: "club-sandwich",
@@ -99,7 +97,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = [
     description: "Western-style club sandwich.",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/club-sandwich.jpg",
   },
   {
     id: "fried-rice",
@@ -107,7 +105,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = [
     description: "Classic fried rice.",
     price: 40,
     category: "mains",
-    image: img,
+    image: "/canteen/food/shho-fried-rice.jpg",
   },
   {
     id: "iced-lemon-tea",
@@ -115,7 +113,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = [
     description: "Refreshing iced lemon tea.",
     price: 15,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/shho-iced-lemon-tea.jpg",
   },
 ];
 
@@ -124,7 +122,9 @@ export type SimpleRestaurantId =
   | "sh-ho-canteen"
   | "paper-and-coffee"
   | "sorazen"
-  | "na-canteen";
+  | "na-canteen"
+  | "ebeneezers"
+  | "orchid-lodge";
 
 export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "cu-cafe": CU_CAFE_MENU,
@@ -132,6 +132,8 @@ export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "paper-and-coffee": PAPER_AND_COFFEE_MENU,
   sorazen: SORAZEN_MENU,
   "na-canteen": NA_MENU,
+  ebeneezers: EBENEEZERS_MENU,
+  "orchid-lodge": ORCHID_LODGE_MENU,
 };
 
 export function getSimpleMenu(

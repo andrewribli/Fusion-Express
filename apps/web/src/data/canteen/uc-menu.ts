@@ -12,6 +12,7 @@ export type UcMenuItem = {
   price: number;
   category: string;
   timeZones: MealPeriod[];
+  image?: string;
   /** Flagged for Andrew review */
   unclear?: boolean;
   unclearNote?: string;
@@ -64,6 +65,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Breakfast: Sandwiches / Buns ———
   {
     id: "uc-bf-single-sandwich",
+    image: "/canteen/food/uc-bf-single-sandwich.jpg",
     name: "Single Filling Sandwich",
     nameZh: "單拼三文治",
     description: "Choose one filling.",
@@ -73,6 +75,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-double-sandwich",
+    image: "/canteen/food/uc-bf-double-sandwich.jpg",
     name: "Double-Filling Sandwich",
     nameZh: "雙拼三文治",
     description: "Ham / cheese / scrambled egg / luncheon meat.",
@@ -82,6 +85,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-egg-salad-sandwich",
+    image: "/canteen/food/uc-bf-egg-salad-sandwich.jpg",
     name: "Egg Salad Sandwich",
     nameZh: "蛋沙律三文治",
     description: "Contains egg · Vegetarian.",
@@ -91,6 +95,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-tuna-sandwich",
+    image: "/canteen/food/uc-bf-tuna-sandwich.jpg",
     name: "Tuna Sandwich",
     nameZh: "吞拿魚三文治",
     description: "Contains fish / seafood.",
@@ -100,6 +105,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-pineapple-bun-butter",
+    image: "/canteen/food/uc-bf-pineapple-bun-butter.jpg",
     name: "Pineapple Bun with Butter",
     nameZh: "菠蘿油",
     description: "Contains egg, milk · Vegetarian.",
@@ -111,6 +117,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Breakfast: Noodle sets ———
   {
     id: "uc-bf-satay-beef",
+    image: "/canteen/food/uc-bf-satay-beef.jpg",
     name: "Satay Beef Breakfast Set",
     nameZh: "沙爹牛肉",
     description:
@@ -121,6 +128,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-spiced-pork",
+    image: "/canteen/food/uc-bf-spiced-pork.jpg",
     name: "Spiced Pork Cubes Breakfast Set",
     nameZh: "五香肉丁",
     description: "Noodle set + bread roll + hot drink.",
@@ -130,6 +138,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-chicken-steak-set",
+    image: "/canteen/food/uc-bf-chicken-steak-set.jpg",
     name: "Chicken Steak Breakfast Set",
     nameZh: "雞扒",
     description: "Noodle set + bread roll + hot drink.",
@@ -139,6 +148,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-wood-ear",
+    image: "/canteen/food/uc-bf-wood-ear.jpg",
     name: "Wood Ear Mushroom Breakfast Set",
     nameZh: "雲耳",
     description: "Noodle set + bread roll + hot drink.",
@@ -148,6 +158,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-preserved-veg-pork",
+    image: "/canteen/food/uc-bf-preserved-veg-pork.jpg",
     name: "Pork with Preserved Vegetables Set",
     nameZh: "自家製雪菜肉碎",
     description: "Noodle set + bread roll + hot drink.",
@@ -157,6 +168,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-double-noodles",
+    image: "/canteen/food/uc-bf-double-noodles.jpg",
     name: "Double-Filling Instant Noodles Set",
     nameZh: "雙拼粉麵",
     description: "Ham / egg / luncheon meat / sausage + bread roll + hot drink.",
@@ -168,6 +180,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Breakfast: Continental / HK ———
   {
     id: "uc-bf-pork-fillet-full",
+    image: "/canteen/food/uc-bf-pork-fillet-full.jpg",
     name: "Pork Fillet & Milk Scrambled Eggs Full Breakfast",
     nameZh: "豬柳扒牛奶炒蛋早晨全餐",
     description: "With salad, cherry tomato, beans & butter bread + hot drink.",
@@ -177,6 +190,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-chicken-full",
+    image: "/canteen/food/uc-bf-chicken-full.jpg",
     name: "Chicken Steak & Milk Scrambled Eggs Full Breakfast",
     nameZh: "雞扒&牛奶炒蛋早晨全餐",
     description: "With salad, cherry tomato + hot drink.",
@@ -186,6 +200,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-pork-chop-full",
+    image: "/canteen/food/uc-bf-pork-chop-full.jpg",
     name: "Pork Chop & Milk Scrambled Eggs Full Breakfast",
     nameZh: "豬扒&牛奶炒蛋早晨全餐",
     description: "With salad, cherry tomato + hot drink.",
@@ -195,6 +210,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-omelet-pork",
+    image: "/canteen/food/uc-bf-omelet-pork.jpg",
     name: "Ham Omelet & Pork Fillet + Mini Croissant",
     nameZh: "火腿奄列&豬柳扒+迷你牛角包",
     description: "Includes complimentary hot drink.",
@@ -204,6 +220,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-bolo-eggs-ham",
+    image: "/canteen/food/uc-bf-bolo-eggs-ham.jpg",
     name: "Pineapple Bun with Butter, Eggs & Ham",
     nameZh: "菠蘿油雙蛋火腿",
     description: "Includes complimentary hot drink.",
@@ -215,6 +232,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Breakfast: UC student special ———
   {
     id: "uc-bf-uc-pineapple",
+    image: "/canteen/food/uc-bf-uc-pineapple.jpg",
     name: "Pineapple Bun (UC Student Special)",
     nameZh: "菠蘿包",
     description: "United College student special · includes hot drink.",
@@ -224,6 +242,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-ham-macaroni",
+    image: "/canteen/food/uc-bf-ham-macaroni.jpg",
     name: "Ham with Rice Macaroni (UC Student Special)",
     nameZh: "火腿米通粉",
     description: "United College student special · includes hot drink · gluten-free.",
@@ -235,6 +254,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Breakfast drinks (canteen) ———
   {
     id: "uc-bf-drink-milk-tea",
+    image: "/canteen/food/uc-bf-drink-milk-tea.jpg",
     name: "Milk Tea",
     nameZh: "奶茶",
     description: "Hot $8 · Iced $9",
@@ -244,6 +264,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-coffee",
+    image: "/canteen/food/uc-bf-drink-coffee.jpg",
     name: "Coffee",
     nameZh: "咖啡",
     description: "Hot $8 · Iced $9",
@@ -253,6 +274,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-yuan-yang",
+    image: "/canteen/food/uc-bf-drink-yuan-yang.jpg",
     name: "Coffee & Tea (Yuan Yang)",
     nameZh: "鴛鴦",
     description: "Hot $8 · Iced $9",
@@ -262,6 +284,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-watercress",
+    image: "/canteen/food/uc-bf-drink-watercress.jpg",
     name: "Watercress with Honey",
     nameZh: "菜蜜",
     description: "Hot $8 · Iced $9",
@@ -271,6 +294,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-ovaltine",
+    image: "/canteen/food/uc-bf-drink-ovaltine.jpg",
     name: "Ovaltine",
     nameZh: "阿華田",
     description: "Hot $8 · Iced $9",
@@ -280,6 +304,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-lemon-tea",
+    image: "/canteen/food/uc-bf-drink-lemon-tea.jpg",
     name: "Lemon Tea",
     nameZh: "檸檬茶",
     description: "Hot $8 · Iced $9 · Menu spelling: Leamon Tea",
@@ -289,6 +314,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-lemonade",
+    image: "/canteen/food/uc-bf-drink-lemonade.jpg",
     name: "Lemonade",
     nameZh: "檸檬水",
     description: "Hot $8 · Iced $9",
@@ -298,6 +324,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-ribena",
+    image: "/canteen/food/uc-bf-drink-lemonade.jpg",
     name: "Ribena",
     nameZh: "利賓納",
     description: "Hot $9 · Iced $11",
@@ -307,6 +334,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-ribena-lemon",
+    image: "/canteen/food/uc-bf-drink-lemon-tea.jpg",
     name: "Ribena with Lemon",
     nameZh: "檸檬利賓納",
     description: "Hot $10 · Iced $13",
@@ -316,6 +344,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-watercress-lemon",
+    image: "/canteen/food/uc-bf-drink-watercress-lemon.jpg",
     name: "Watercress Honey with Lemon",
     nameZh: "檸檬菜蜜",
     description: "Hot $10 · Iced $13",
@@ -325,6 +354,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-red-bean",
+    image: "/canteen/food/uc-bf-drink-red-bean.jpg",
     name: "Red Bean Ice",
     nameZh: "紅豆冰",
     description: "Iced only · $15",
@@ -334,6 +364,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bf-drink-milk-tea-red-bean",
+    image: "/canteen/food/uc-bf-drink-milk-tea-red-bean.jpg",
     name: "Milk Tea with Red Bean",
     nameZh: "奶茶紅豆冰",
     description: "Iced only · $16",
@@ -345,6 +376,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Spicy rice noodles ———
   {
     id: "uc-noodles-spicy-base",
+    image: "/canteen/food/uc-noodles-spicy-base.jpg",
     name: "Spicy / Hot & Sour Rice Noodles (1 topping)",
     nameZh: "單拼米線 / 米粉",
     description:
@@ -357,6 +389,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Tea/Dinner: Vietnamese ———
   {
     id: "uc-vn-chicken",
+    image: "/canteen/food/uc-vn-chicken.jpg",
     name: "Vietnamese Shredded Chicken Noodle Soup",
     nameZh: "雞絲越式湯河",
     description: "Beef bone broth · flat or rice noodles.",
@@ -366,6 +399,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-vn-sausage",
+    image: "/canteen/food/uc-vn-sausage.jpg",
     name: "Vietnamese Sausage Noodle Soup",
     nameZh: "越式扎肉湯河",
     description: "Beef bone broth · flat or rice noodles.",
@@ -375,6 +409,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-vn-lemongrass-wings",
+    image: "/canteen/food/uc-vn-lemongrass-wings.jpg",
     name: "Lemongrass Chicken Wings Vietnamese Noodles",
     nameZh: "香茅雞翼越式湯河",
     description: "Beef bone broth · flat or rice noodles.",
@@ -384,6 +419,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-vn-beef",
+    image: "/canteen/food/uc-vn-beef.jpg",
     name: "Vietnamese Sliced Beef Pho",
     nameZh: "越式牛柳片湯河",
     description: "Beef bone broth · flat or rice noodles.",
@@ -393,6 +429,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-vn-lemongrass-pork",
+    image: "/canteen/food/uc-vn-lemongrass-pork.jpg",
     name: "Lemongrass Pork Chop Vietnamese Noodles",
     nameZh: "香茅豬扒越式湯河",
     description: "Beef bone broth · flat or rice noodles.",
@@ -402,6 +439,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-vn-tendon-balls",
+    image: "/canteen/food/uc-vn-tendon-balls.jpg",
     name: "Vietnamese Noodles with Beef Tendon Balls",
     nameZh: "牛筋丸越式湯河",
     description: "Beef bone broth · flat or rice noodles.",
@@ -411,6 +449,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-vn-combo-two",
+    image: "/canteen/food/uc-vn-combo-two.jpg",
     name: "Special Combination Vietnamese Pho (For Two)",
     nameZh: "雞錦火車頭越式湯河(二人份)",
     description: "Sharing portion for two.",
@@ -422,6 +461,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Spaghetti ———
   {
     id: "uc-spag-salmon",
+    image: "/canteen/food/uc-spag-salmon.jpg",
     name: "Smoked Salmon Stir-Fried Spaghetti (Tomato)",
     nameZh: "茄汁煙三文魚意大利粉",
     description: "Tomato sauce.",
@@ -431,6 +471,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-spag-beef",
+    image: "/canteen/food/uc-spag-salmon.jpg",
     name: "Black Pepper Beef Fillet Spaghetti",
     nameZh: "黑椒牛柳絲意大利粉",
     price: 50,
@@ -439,6 +480,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-spag-duck",
+    image: "/canteen/food/uc-spag-salmon.jpg",
     name: "Black Pepper Smoked Duck Breast Spaghetti",
     nameZh: "黑椒煙鴨胸意大利粉",
     description: "NEW",
@@ -450,6 +492,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Bibimbap ———
   {
     id: "uc-bibi-fried-chicken",
+    image: "/canteen/food/uc-bibi-fried-chicken.jpg",
     name: "Korean Fried Chicken Bibimbap",
     nameZh: "韓式炸雞石鍋拌飯",
     description: "Contains egg.",
@@ -459,6 +502,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bibi-salmon",
+    image: "/canteen/food/uc-bibi-salmon.jpg",
     name: "Smoked Salmon Bibimbap",
     nameZh: "煙三文魚韓式石鍋拌飯",
     description: "Contains egg · seafood.",
@@ -468,6 +512,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bibi-eel",
+    image: "/canteen/food/uc-bibi-eel.jpg",
     name: "Eel Bibimbap",
     nameZh: "鰻魚韓式石鍋拌飯",
     description: "Contains egg · seafood.",
@@ -477,6 +522,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-bibi-veg",
+    image: "/canteen/food/uc-bibi-veg.jpg",
     name: "Vegetable Bibimbap",
     nameZh: "時蔬韓式石鍋拌飯",
     description: "Contains egg · Vegetarian option.",
@@ -488,6 +534,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Mealbox ———
   {
     id: "uc-box-chicken-spam",
+    image: "/canteen/food/uc-box-chicken-spam.jpg",
     name: "Chicken Steak & Luncheon Meat Rice",
     nameZh: "農場厚雞拼餐肉",
     description: "Onion or black pepper sauce · spaghetti or rice.",
@@ -497,6 +544,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-box-pork-sausage",
+    image: "/canteen/food/uc-box-pork-sausage.jpg",
     name: "Pork Chop & Sausage Rice",
     nameZh: "厚切豬扒拼腸仔",
     description: "Onion or black pepper sauce.",
@@ -506,6 +554,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-box-mixed-grill",
+    image: "/canteen/food/uc-box-mixed-grill.jpg",
     name: "Mixed Grill Rice (Chicken & Pork)",
     nameZh: "開心雙扒",
     description: "Chicken steak & pork chop.",
@@ -515,6 +564,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-box-four",
+    image: "/canteen/food/uc-box-four.jpg",
     name: "Four Combo Rice",
     nameZh: "開心四拼飯",
     description: "Luncheon meat, sausage, egg & ham.",
@@ -526,6 +576,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Japanese curry ———
   {
     id: "uc-curry-crab-pancake",
+    image: "/canteen/food/uc-curry-crab-pancake.jpg",
     name: "Japanese Curry with Cream Crabmeat Potato Pancakes",
     nameZh: "日式咖喱忌廉蟹肉薯餅拼甜薯飯",
     description: "With sweet potato rice.",
@@ -535,6 +586,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-curry-cheese-chicken",
+    image: "/canteen/food/uc-curry-cheese-chicken.jpg",
     name: "Japanese Curry with Cheesy Chicken Patty",
     nameZh: "日式咖喱流心芝士雞肉漢堡拼甜薯飯",
     description: "With sweet potato rice.",
@@ -544,6 +596,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-curry-sesame-wings",
+    image: "/canteen/food/uc-curry-sesame-wings.jpg",
     name: "Japanese Curry with Sesame Chicken Wings",
     nameZh: "日式芝麻雞翼拼甜薯咖喱飯",
     description: "With sweet potato rice.",
@@ -553,6 +606,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-curry-chicken-cutlet",
+    image: "/canteen/food/uc-curry-chicken-cutlet.jpg",
     name: "Japanese Curry with Chicken Cutlet",
     nameZh: "日式咖喱吉列雞扒拼甜薯飯",
     description: "With sweet potato rice.",
@@ -562,6 +616,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-curry-ebi",
+    image: "/canteen/food/uc-curry-ebi.jpg",
     name: "Japanese Curry with Bite-Sized Ebi Katsu",
     nameZh: "日式一口蝦餅拼甜薯咖喱飯",
     description: "With sweet potato rice.",
@@ -571,6 +626,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-curry-grilled-cheese",
+    image: "/canteen/food/uc-curry-grilled-cheese.jpg",
     name: "Add Grilled Cheese",
     nameZh: "秘製火炙芝士",
     description: "Add-on for curry sets · +$6",
@@ -582,6 +638,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Salad ———
   {
     id: "uc-salad-chicken",
+    image: "/canteen/food/uc-salad-chicken.jpg",
     name: "Garden Salad with Chicken",
     nameZh: "雞扒田園沙律",
     price: 45,
@@ -590,6 +647,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-salad-salmon",
+    image: "/canteen/food/uc-salad-salmon.jpg",
     name: "Garden Salad with Smoked Salmon",
     nameZh: "煙三文魚田園沙律",
     price: 46,
@@ -598,6 +656,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-salad-karaage",
+    image: "/canteen/food/uc-salad-karaage.jpg",
     name: "Garden Salad with Japanese Karaage Chicken",
     nameZh: "唐揚炸雞田園沙律",
     price: 43,
@@ -606,6 +665,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-salad-duck",
+    image: "/canteen/food/uc-salad-duck.jpg",
     name: "Garden Salad with Smoked Duck Breast",
     nameZh: "煙鴨胸田園沙律",
     price: 37,
@@ -616,6 +676,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch/Dinner: Vegetarian ———
   {
     id: "uc-veg-beancurd",
+    image: "/canteen/food/uc-veg-beancurd.jpg",
     name: "Vegetarian Bean Curd Sheet Rolls with Salad",
     nameZh: "素鮮竹卷田園沙律",
     description: "Vegetarian.",
@@ -625,6 +686,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-veg-curry-fish",
+    image: "/canteen/food/uc-veg-curry-fish.jpg",
     name: "Japanese Curry with Vegetarian Fish Fillets",
     nameZh: "日式咖喱素魚塊飯",
     description: "Vegetarian.",
@@ -634,6 +696,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-veg-curry-squid",
+    image: "/canteen/food/uc-veg-curry-squid.jpg",
     name: "Japanese Curry with Mushroom Vegetarian Squid Cake",
     nameZh: "日式香菇素墨魚餅咖喱飯",
     description: "Vegetarian.",
@@ -645,6 +708,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch: Rice with sides ———
   {
     id: "uc-rice-1",
+    image: "/canteen/food/uc-rice-1.jpg",
     name: "Rice with Single Side",
     nameZh: "一餸飯",
     description: "Includes daily soup or soft drink. Choose side by number.",
@@ -654,6 +718,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-rice-2",
+    image: "/canteen/food/uc-rice-2.jpg",
     name: "Rice with Two Sides",
     nameZh: "兩餸飯",
     description: "Includes daily soup or soft drink.",
@@ -663,6 +728,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-rice-3",
+    image: "/canteen/food/uc-rice-3.jpg",
     name: "Rice with Three Sides",
     nameZh: "三餸飯",
     description: "Includes daily soup or soft drink. Same side ×3: +$5.",
@@ -672,6 +738,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-daily-soup",
+    image: "/canteen/food/uc-daily-soup.jpg",
     name: "Daily Soup",
     nameZh: "例湯",
     price: 14,
@@ -682,6 +749,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch: Scallion oil ———
   {
     id: "uc-scallion-pork",
+    image: "/canteen/food/uc-scallion-pork.jpg",
     name: "Scallion Oil Pork Chop & Fried Egg Rice",
     nameZh: "蔥油厚切豬扒雙蛋飯",
     description: "Contains egg.",
@@ -691,6 +759,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-scallion-chicken",
+    image: "/canteen/food/uc-scallion-chicken.jpg",
     name: "Scallion Oil Chicken Steak & Sausage Rice",
     nameZh: "蔥油農場厚雞扒雙腸飯",
     price: 47,
@@ -701,6 +770,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch: Taiwanese ———
   {
     id: "uc-tw-chicken",
+    image: "/canteen/food/uc-tw-chicken.jpg",
     name: "Chicken Steak Taiwanese Braised Pork Rice",
     nameZh: "雞扒台式滷肉飯",
     price: 42,
@@ -709,6 +779,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tw-eel",
+    image: "/canteen/food/uc-bibi-eel.jpg",
     name: "Eel Taiwanese Braised Pork Rice",
     nameZh: "鰻魚台式滷肉飯",
     description: "Contains seafood.",
@@ -718,6 +789,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tw-fish",
+    image: "/canteen/food/uc-tw-fish.jpg",
     name: "Fried Fish Fillet Taiwanese Braised Pork Rice",
     nameZh: "吉列魚柳台式滷肉飯",
     description:
@@ -731,6 +803,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tw-salmon",
+    image: "/canteen/food/uc-tw-salmon.jpg",
     name: "Smoked Salmon Taiwanese Braised Pork Rice",
     nameZh: "煙三文魚台式滷肉飯",
     description: "Contains seafood.",
@@ -740,6 +813,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tw-karaage",
+    image: "/canteen/food/uc-tw-karaage.jpg",
     name: "Crispy Chicken Taiwanese Braised Pork Rice",
     nameZh: "唐揚雞台式滷肉飯",
     price: 45,
@@ -750,6 +824,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch: Fried noodles ———
   {
     id: "uc-dry-pot-beef",
+    image: "/canteen/food/uc-dry-pot-beef.jpg",
     name: "Sizzling Dry-Pot Beef with Udon",
     nameZh: "幹鍋肥牛炒烏冬",
     price: 52,
@@ -760,6 +835,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Lunch: Sichuan ———
   {
     id: "uc-sichuan-mei-cai",
+    image: "/canteen/food/uc-sichuan-mei-cai.jpg",
     name: "Braised Pork with Preserved Vegetables + Rice",
     nameZh: "梅菜扣肉 配白飯包例湯汽水",
     description:
@@ -773,6 +849,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-sichuan-fish",
+    image: "/canteen/food/uc-sichuan-fish.jpg",
     name: "Sichuan Boiled Fish with Pickled Cabbage + Rice",
     nameZh: "酸菜魚 配白飯包例湯汽水",
     description: "Includes soup & soft drink · seafood.",
@@ -782,6 +859,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-sichuan-steam-fish",
+    image: "/canteen/food/uc-sichuan-steam-fish.jpg",
     name: "Steamed Pomfret / Threadfin + Rice",
     nameZh: "豉汁蒸倉魚 / 鹹鮮蒸馬友 配白飯包例湯汽水",
     description:
@@ -796,6 +874,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Tea time: Salad / wedges ———
   {
     id: "uc-tea-cutlet-chicken",
+    image: "/canteen/food/uc-tea-cutlet-chicken.jpg",
     name: "Cutlet Chicken with Salad or Potato Wedges",
     nameZh: "吉列雞扒配沙律/薯角餐",
     description: "Includes free hot drink.",
@@ -805,6 +884,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-fried-leg",
+    image: "/canteen/food/uc-tea-fried-leg.jpg",
     name: "Fried Chicken Leg with Salad or Potato Wedges",
     nameZh: "炸雞髀配沙律/薯角餐",
     description: "Includes free hot drink.",
@@ -814,6 +894,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-double-cheese-burger",
+    image: "/canteen/food/homemade-beef-burger.jpg",
     name: "Double Cheese Pork Patty Burger + Salad/Wedges",
     nameZh: "雙層芝士豬柳漢堡配沙律/薯角",
     description: "Includes free hot drink.",
@@ -823,6 +904,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-pork-cutlet-burger",
+    image: "/canteen/food/fried-fish-burger.jpg",
     name: "Panko Pork Cutlet Burger + Salad/Wedges",
     nameZh: "吉列豬扒漢堡配沙律/薯角",
     description: "Includes free hot drink.",
@@ -832,6 +914,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-cheese-chicken-burger",
+    image: "/canteen/food/uc-tea-cheese-chicken-burger.jpg",
     name: "Cheese Chicken Burger + Salad/Wedges",
     nameZh: "流心芝士雞肉漢堡配沙律/薯角",
     description: "Includes free hot drink.",
@@ -841,6 +924,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-chicken-burger",
+    image: "/canteen/food/uc-tea-chicken-burger.jpg",
     name: "Cutlet Chicken Burger + Salad/Wedges",
     nameZh: "吉列雞扒漢堡配沙律/薯角",
     description: "Includes free hot drink.",
@@ -850,6 +934,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-hotdog",
+    image: "/canteen/food/uc-tea-hotdog.jpg",
     name: "Hot Dog with Ketchup & Mustard + Salad/Wedges",
     nameZh: "開心熱狗拼沙律/薯角",
     description: "Includes free hot drink. Menu typo: CHot dog.",
@@ -861,6 +946,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Tea: sandwiches / croissants ———
   {
     id: "uc-tea-ham-cheese-croissant",
+    image: "/canteen/food/uc-tea-ham-cheese-croissant.jpg",
     name: "Ham and Cheese Croissant",
     nameZh: "芝士火腿牛角包",
     price: 24,
@@ -869,6 +955,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-tuna-croissant",
+    image: "/canteen/food/uc-tea-tuna-croissant.jpg",
     name: "Tuna with Cucumber Croissant",
     nameZh: "吞拿魚配青瓜牛角包",
     description: "Contains seafood.",
@@ -878,6 +965,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-tomato-chicken",
+    image: "/canteen/food/uc-tea-tomato-chicken.jpg",
     name: "Tomato Chicken Sandwich",
     nameZh: "蕃茄烤雞三文治",
     price: 22,
@@ -886,6 +974,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-salmon-croissant",
+    image: "/canteen/food/uc-tea-salmon-croissant.jpg",
     name: "Smoked Salmon & Egg Salad Croissant",
     nameZh: "煙三文魚蛋沙律牛角包",
     description: "Contains seafood · egg.",
@@ -895,6 +984,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-tomato-cheese",
+    image: "/canteen/food/uc-tea-tomato-cheese.jpg",
     name: "Tomato and Cheese Croissant",
     nameZh: "芝士蕃茄牛角包",
     description: "Vegetarian.",
@@ -906,6 +996,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Tea: afternoon sets ———
   {
     id: "uc-tea-double-noodles",
+    image: "/canteen/food/uc-tea-double-noodles.jpg",
     name: "Afternoon Double-Filling Instant Noodles",
     nameZh: "雙拼粉麵",
     description:
@@ -916,6 +1007,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-scallion-noodles-chicken",
+    image: "/canteen/food/uc-tea-scallion-noodles-chicken.jpg",
     name: "Scallion Oil Instant Noodles (Chicken & Ham)",
     nameZh: "蔥油撈公仔麵(雞扒拼火腿)",
     description: "Hot drink free.",
@@ -925,6 +1017,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-scallion-noodles-pork",
+    image: "/canteen/food/uc-tea-scallion-noodles-pork.jpg",
     name: "Scallion Oil Instant Noodles (Pork Patty & Sausage)",
     nameZh: "蔥油撈公仔麵(豬柳漢堡拼腸仔)",
     description: "Hot drink free.",
@@ -936,6 +1029,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Tea: bites ———
   {
     id: "uc-tea-french-toast",
+    image: "/canteen/food/uc-tea-french-toast.jpg",
     name: "Hong Kong Style French Toast",
     nameZh: "西多士",
     description: "Contains egg · dairy · Vegetarian.",
@@ -945,6 +1039,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-redbean-toast",
+    image: "/canteen/food/uc-tea-redbean-toast.jpg",
     name: "French Toast with Red Bean",
     nameZh: "紅豆西多士",
     description: "Contains egg · dairy.",
@@ -954,6 +1049,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-cartilage",
+    image: "/canteen/food/uc-tea-cartilage.jpg",
     name: "Pork Cartilage Stick Dumplings (4 pcs)",
     nameZh: "豬軟骨餃子棒(4件)",
     price: 24,
@@ -962,6 +1058,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-tea-chicken-skewers",
+    image: "/canteen/food/uc-tea-chicken-skewers.jpg",
     name: "Charcoal-Grilled Chicken Skewers (5 pcs)",
     nameZh: "炭燒雞肉串(5串)",
     price: 22,
@@ -974,6 +1071,7 @@ export const UC_MENU: UcMenuItem[] = [
   // ——— Tea House drinks (all day while open) ———
   {
     id: "uc-th-classic-mt",
+    image: "/canteen/food/uc-th-classic-mt.jpg",
     name: "Classic Milk Tea",
     nameZh: "經典奶茶",
     description: "Tea House · 500ml · cold/warm",
@@ -983,6 +1081,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-pearls-mt",
+    image: "/canteen/food/uc-th-pearls-mt.jpg",
     name: "Pearls Milk Tea",
     nameZh: "珍珠奶茶",
     price: 18,
@@ -991,6 +1090,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-taro-pearls",
+    image: "/canteen/food/uc-th-pearls-mt.jpg",
     name: "Taro Pearls Milk Tea",
     nameZh: "芋香珍珠奶茶",
     price: 20,
@@ -999,6 +1099,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-litchi-mt",
+    image: "/canteen/food/uc-th-pineapple-mt.jpg",
     name: "Litchi Coconut Jelly Milk Tea",
     nameZh: "荔枝椰果奶茶",
     price: 18,
@@ -1007,6 +1108,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-pineapple-mt",
+    image: "/canteen/food/uc-th-pineapple-mt.jpg",
     name: "Pineapple Coconut Jelly Milk Tea",
     nameZh: "菠蘿椰果奶茶",
     price: 18,
@@ -1015,6 +1117,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-agar-mt",
+    image: "/canteen/food/uc-th-agar-mt.jpg",
     name: "Agar-agar Milk Tea",
     nameZh: "黑糖寒天奶茶",
     price: 18,
@@ -1023,6 +1126,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-redbean-mt",
+    image: "/canteen/food/uc-th-redbean-mt.jpg",
     name: "Red Beans Milk Tea",
     nameZh: "紅豆奶茶",
     price: 19,
@@ -1031,6 +1135,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-pudding-mt",
+    image: "/canteen/food/uc-th-pudding-mt.jpg",
     name: "Pudding Milk Tea",
     nameZh: "布丁奶茶",
     price: 19,
@@ -1039,6 +1144,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-coffee-crystal",
+    image: "/canteen/food/uc-th-coffee-crystal.jpg",
     name: "Coffee Crystal Milk Tea",
     nameZh: "咖啡水晶奶茶",
     price: 20,
@@ -1047,6 +1153,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-gt-crystal",
+    image: "/canteen/food/uc-th-gt-crystal.jpg",
     name: "Green Tea Crystal Milk Tea",
     nameZh: "綠茶水晶奶茶",
     price: 20,
@@ -1055,6 +1162,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-mango-boba",
+    image: "/canteen/food/uc-th-mango-boba.jpg",
     name: "Mango Popping Boba Milk Tea",
     nameZh: "芒爆奶茶",
     price: 20,
@@ -1063,6 +1171,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-yogurt-boba",
+    image: "/canteen/food/uc-th-mango-boba.jpg",
     name: "Yogurt Popping Boba Milk Tea",
     nameZh: "乳酪爆珠奶茶",
     price: 20,
@@ -1071,6 +1180,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-peach-boba",
+    image: "/canteen/food/uc-th-soda-peach.jpg",
     name: "Peach Popping Boba Milk Tea",
     nameZh: "水蜜桃爆珠奶茶",
     price: 20,
@@ -1079,6 +1189,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-strawberry-boba",
+    image: "/canteen/food/uc-th-mango-boba.jpg",
     name: "Strawberry Popping Boba Milk Tea",
     nameZh: "草莓爆珠奶茶",
     price: 20,
@@ -1087,6 +1198,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-honey-boba",
+    image: "/canteen/food/uc-th-classic-mt.jpg",
     name: "Honey Popping Boba Milk Tea",
     nameZh: "蜂蜜爆珠奶茶",
     price: 20,
@@ -1095,6 +1207,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cheese-sjc",
+    image: "/canteen/food/uc-th-cheese-sjc.jpg",
     name: "Shy Jih Chuen with Cheese Milk Cap",
     nameZh: "熊貓芝士奶蓋四季春",
     price: 22,
@@ -1103,6 +1216,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cheese-jasmine",
+    image: "/canteen/food/uc-th-cheese-jasmine.jpg",
     name: "Jasmine Green Tea with Cheese Milk Cap",
     nameZh: "芝士奶蓋茉莉",
     price: 22,
@@ -1111,6 +1225,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cheese-rose",
+    image: "/canteen/food/uc-th-cheese-rose.jpg",
     name: "Rose Oolong with Cheese Milk Cap",
     nameZh: "芝士奶蓋玫瑰烏龍",
     price: 22,
@@ -1119,6 +1234,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cheese-osmanthus",
+    image: "/canteen/food/uc-th-cheese-osmanthus.jpg",
     name: "Osmanthus Oolong with Cheese Milk Cap",
     nameZh: "芝士奶蓋桂花烏龍",
     price: 22,
@@ -1127,6 +1243,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cheese-alishan",
+    image: "/canteen/food/uc-th-cheese-alishan.jpg",
     name: "Alishan Oolong with Cheese Milk Cap",
     nameZh: "芝士奶蓋阿里山烏龍",
     price: 22,
@@ -1135,6 +1252,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cheese-choco",
+    image: "/canteen/food/uc-th-cheese-choco.jpg",
     name: "Chocolate with Cheese Milk Cap",
     nameZh: "芝士奶蓋可可",
     price: 26,
@@ -1143,6 +1261,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cream-sjc",
+    image: "/canteen/food/uc-th-cream-jasmine.jpg",
     name: "Shy Jih Chuen with Cream Milk",
     nameZh: "四季春厚奶",
     price: 22,
@@ -1151,6 +1270,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cream-rose",
+    image: "/canteen/food/uc-th-cheese-rose.jpg",
     name: "Rose Oolong with Cream Milk",
     nameZh: "玫瑰烏龍厚奶",
     price: 22,
@@ -1159,6 +1279,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cream-osmanthus",
+    image: "/canteen/food/uc-th-cheese-osmanthus.jpg",
     name: "Osmanthus Oolong with Cream Milk",
     nameZh: "桂花烏龍厚奶",
     price: 22,
@@ -1167,6 +1288,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cream-jasmine",
+    image: "/canteen/food/uc-th-cream-jasmine.jpg",
     name: "Jasmine Green Tea with Cream Milk",
     nameZh: "高香茉莉厚奶",
     price: 22,
@@ -1175,6 +1297,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cream-sticky",
+    image: "/canteen/food/uc-th-cream-sticky.jpg",
     name: "Sticky Rice Green Tea with Cream Milk",
     nameZh: "糯香毛尖綠茶厚奶",
     price: 22,
@@ -1183,6 +1306,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-cream-peach",
+    image: "/canteen/food/uc-th-cream-jasmine.jpg",
     name: "White Peach Oolong with Cream Milk",
     nameZh: "白桃烏龍厚奶",
     price: 22,
@@ -1191,6 +1315,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-soda-passion",
+    image: "/canteen/food/uc-th-soda-passion.jpg",
     name: "Passion Fruit Soda",
     nameZh: "百香果梳打",
     description: "Cold only",
@@ -1200,6 +1325,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-soda-peach",
+    image: "/canteen/food/uc-th-soda-peach.jpg",
     name: "White Peach Soda",
     nameZh: "白桃梳打",
     description: "Cold only",
@@ -1209,6 +1335,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-soda-kumquat",
+    image: "/canteen/food/uc-th-soda-passion.jpg",
     name: "Kumquat Lime Soda",
     nameZh: "金桔青檸梳打",
     description: "Cold only",
@@ -1218,6 +1345,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-coconut",
+    image: "/canteen/food/uc-th-coconut.jpg",
     name: "Coconut Milk",
     nameZh: "椰子奶",
     price: 18,
@@ -1226,6 +1354,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-choco-coco",
+    image: "/canteen/food/uc-th-choco-coco.jpg",
     name: "Chocolate CoCo",
     nameZh: "朱古力可可",
     price: 21,
@@ -1234,6 +1363,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-aladdin",
+    image: "/canteen/food/uc-th-aladdin.jpg",
     name: "Pudding Milk Tea with Cheese Milk Cap",
     nameZh: "阿拉丁之茶",
     price: 23,
@@ -1242,6 +1372,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-uncle",
+    image: "/canteen/food/uc-th-uncle.jpg",
     name: "Mr. Uncle's Milk Tea (700ml)",
     nameZh: "大叔奶茶",
     price: 27,
@@ -1250,6 +1381,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-one-lemon",
+    image: "/canteen/food/uc-th-one-lemon.jpg",
     name: "One Lemon Surprise (700ml)",
     nameZh: "一顆檸檬",
     description: "Cold only",
@@ -1259,6 +1391,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-honey-lemon-aiyu",
+    image: "/canteen/food/uc-th-honey-lemon-aiyu.jpg",
     name: "Honey Lemon Tea with Aiyu Jelly",
     nameZh: "蜜糖檸檬愛玉",
     description: "Cold only",
@@ -1268,6 +1401,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tropical",
+    image: "/canteen/food/uc-th-tropical.jpg",
     name: "Tropical Fruit Tea (700ml)",
     nameZh: "繽紛水果茶",
     description: "Cold only",
@@ -1277,6 +1411,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-sjc",
+    image: "/canteen/food/uc-th-tea-sjc.jpg",
     name: "Shy Jih Chuen Tea",
     nameZh: "四季春",
     price: 16,
@@ -1285,6 +1420,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-jasmine",
+    image: "/canteen/food/uc-th-tea-jasmine.jpg",
     name: "Jasmine Green Tea",
     nameZh: "茉莉綠茶",
     price: 16,
@@ -1293,6 +1429,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-rose",
+    image: "/canteen/food/uc-th-tea-rose.jpg",
     name: "Rose Oolong Tea",
     nameZh: "玫瑰烏龍",
     price: 16,
@@ -1301,6 +1438,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-osmanthus",
+    image: "/canteen/food/uc-th-tea-rose.jpg",
     name: "Osmanthus Oolong Tea",
     nameZh: "桂花烏龍",
     price: 16,
@@ -1309,6 +1447,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-alishan",
+    image: "/canteen/food/uc-th-tea-alishan.jpg",
     name: "Alishan Oolong Tea",
     nameZh: "阿里山烏龍",
     price: 16,
@@ -1317,6 +1456,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-roselle",
+    image: "/canteen/food/uc-th-tea-roselle.jpg",
     name: "Roselle Tea",
     nameZh: "洛神花茶",
     price: 17,
@@ -1325,6 +1465,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-hibiscus",
+    image: "/canteen/food/uc-th-tea-hibiscus.jpg",
     name: "Hibiscus Apple Tea",
     nameZh: "芙蓉蘋果果茶",
     price: 17,
@@ -1333,6 +1474,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-berry",
+    image: "/canteen/food/uc-th-tea-berry.jpg",
     name: "Mix Berry Tea",
     nameZh: "多莓果茶",
     price: 17,
@@ -1341,6 +1483,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-rose-peach",
+    image: "/canteen/food/uc-th-tea-rose-peach.jpg",
     name: "Rose Peach Tea",
     nameZh: "玫瑰蜜桃果茶",
     price: 17,
@@ -1349,6 +1492,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-muscat",
+    image: "/canteen/food/uc-th-tea-rose-peach.jpg",
     name: "Shine Muscat Jinxuan Oolong",
     nameZh: "香印金萱烏龍",
     price: 18,
@@ -1357,6 +1501,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-tea-white-peach",
+    image: "/canteen/food/uc-th-tea-rose-peach.jpg",
     name: "White Peach Oolong Tea",
     nameZh: "白桃烏龍",
     price: 18,
@@ -1365,6 +1510,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-wm",
+    image: "/canteen/food/uc-th-wm.jpg",
     name: "Winter Melon Tea",
     nameZh: "台灣冬瓜茶",
     description: "Cold only",
@@ -1374,6 +1520,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-wm-lemon",
+    image: "/canteen/food/uc-th-wm.jpg",
     name: "Winter Melon Tea with Lemon",
     nameZh: "檸檬冬瓜茶",
     description: "Cold only",
@@ -1383,6 +1530,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-wm-aiyu",
+    image: "/canteen/food/uc-th-wm-grass.jpg",
     name: "Winter Melon Tea with Aiyu Jelly",
     nameZh: "愛玉冬瓜茶",
     description: "Cold only",
@@ -1392,6 +1540,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-wm-grass",
+    image: "/canteen/food/uc-th-wm-grass.jpg",
     name: "Winter Melon Tea with Grass Jelly",
     nameZh: "仙草冬瓜茶",
     description: "Cold only",
@@ -1401,6 +1550,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-wm-aloe",
+    image: "/canteen/food/uc-th-wm-aloe.jpg",
     name: "Winter Melon Tea with Aloe",
     nameZh: "蘆薈冬瓜茶",
     description: "Cold only",
@@ -1410,6 +1560,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-hot-ginger",
+    image: "/canteen/food/uc-th-hot-ginger.jpg",
     name: "Honey Ginger (Hot)",
     nameZh: "蜂蜜生薑",
     price: 18,
@@ -1418,6 +1569,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-hot-date",
+    image: "/canteen/food/uc-th-hot-date.jpg",
     name: "Honey Red Date (Hot)",
     nameZh: "蜂蜜紅棗",
     price: 18,
@@ -1426,6 +1578,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-hot-aloe",
+    image: "/canteen/food/uc-th-hot-aloe.jpg",
     name: "Honey Aloe (Hot)",
     nameZh: "蜂蜜蘆薈",
     price: 18,
@@ -1434,6 +1587,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-hot-apple",
+    image: "/canteen/food/uc-th-hot-apple.jpg",
     name: "Honey Apple Tea (Hot)",
     nameZh: "蜂蜜蘋果",
     price: 18,
@@ -1442,6 +1596,7 @@ export const UC_MENU: UcMenuItem[] = [
   },
   {
     id: "uc-th-hot-ginger-lemon",
+    image: "/canteen/food/uc-th-hot-ginger-lemon.jpg",
     name: "Honey Ginger with Lemon (Hot)",
     nameZh: "蜜糖檸檬生薑",
     price: 20,

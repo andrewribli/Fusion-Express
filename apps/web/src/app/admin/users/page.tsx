@@ -26,13 +26,17 @@ export default function AdminUsersPage() {
   const [deletingUid, setDeletingUid] = useState<string | null>(null);
   const [repairingUid, setRepairingUid] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState("");
+  const [orphanCount, setOrphanCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const rows = await fetchAllUsers();
-        if (!cancelled) setUsers(rows);
+        const { users: rows, hiddenOrphanCount } = await fetchAllUsers();
+        if (!cancelled) {
+          setUsers(rows);
+          setOrphanCount(hiddenOrphanCount);
+        }
         try {
           const counts = await fetchUnreadReplyCounts();
           if (!cancelled) setUnread(counts);
@@ -150,6 +154,13 @@ export default function AdminUsersPage() {
                   ? "Loading…"
                   : `${users.length} account${users.length === 1 ? "" : "s"}, sorted by name`}
               </p>
+              {!loading && orphanCount > 0 ? (
+                <p className="mt-2 text-xs text-amber-800">
+                  {orphanCount} empty Firestore profile{orphanCount === 1 ? "" : "s"}{" "}
+                  hidden (no name or email — usually anonymous Auth or abandoned
+                  checkout). Use Firebase Console to delete if needed.
+                </p>
+              ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   href="/admin/messaging"

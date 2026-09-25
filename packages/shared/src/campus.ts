@@ -90,6 +90,7 @@ export function emailDomain(email: string): string {
 }
 
 export function detectCampusFromEmail(email: string): CampusId | null {
+  if (isOwnerLoginEmail(email)) return "cityu";
   const domain = emailDomain(email);
   for (const id of CAMPUS_IDS) {
     if ((campusConfig[id].emailDomains as readonly string[]).includes(domain)) {
@@ -99,7 +100,17 @@ export function detectCampusFromEmail(email: string): CampusId | null {
   return null;
 }
 
+/** Owner login that is not a university address. Campus CityU. */
+const OWNER_LOGIN_EMAILS = ["andrew.ribli@gmail.com"] as const;
+
+export function isOwnerLoginEmail(email: string): boolean {
+  return (OWNER_LOGIN_EMAILS as readonly string[]).includes(
+    email.trim().toLowerCase(),
+  );
+}
+
 export function isCampusEmail(email: string, campus: CampusId): boolean {
+  if (campus === "cityu" && isOwnerLoginEmail(email)) return true;
   const domain = emailDomain(email);
   return (campusConfig[campus].emailDomains as readonly string[]).includes(
     domain,

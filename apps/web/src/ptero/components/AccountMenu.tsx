@@ -7,7 +7,7 @@ import { CAMPUS } from "@/ptero/config/campus";
 import { useAppState, useUser } from "@/ptero/context/AppState";
 
 /** Account control — My Orders count, avatar initials, outside-click (gracerun.fit). */
-export function AccountMenu() {
+export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
   const { user, signOut } = useUser();
   const { orders } = useAppState();
   const router = useRouter();
@@ -55,7 +55,11 @@ export function AccountMenu() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-bold text-gray-800 hover:bg-gray-100"
+        className={
+          tone === "dark"
+            ? "flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-xs font-bold text-white hover:bg-[#1f1f1f]"
+            : "flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-bold text-gray-800 hover:bg-gray-100"
+        }
         aria-label="Account menu"
         aria-expanded={open}
       >

@@ -112,6 +112,28 @@ export function usePlaceOrder() {
             ? ("taste" as const)
             : ("fusion" as const);
 
+        if (canteen && restaurantId) {
+          const validation = await fetch("/api/canteen/validate-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              canteenId: restaurantId,
+              itemIds: orderItems.map((item) => item.itemId),
+            }),
+          });
+          if (!validation.ok) {
+            let message = "This canteen is not accepting orders right now.";
+            try {
+              const data = (await validation.json()) as { error?: string };
+              if (data.error) message = data.error;
+            } catch {
+              // ignore
+            }
+            setError(message);
+            return;
+          }
+        }
+
         const orderId = await createOrder({
           sessionId,
           customerId: customer.uid,

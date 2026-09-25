@@ -30,6 +30,12 @@ import { canteenCollegeForRestaurant } from "@/ptero/config/canteen/restaurants"
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/ptero/lib/delivery";
 import { lineTotal } from "@/ptero/lib/pricing";
 import { formInputClassName } from "@/ptero/components/DeliveryAddressFields";
+import {
+  MIXED_GROCERY_CHECKOUT_MESSAGE,
+  grocerySourceById,
+  isGroceryOpen,
+  isGrocerySourceId,
+} from "@/lib/grocerySources";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -38,6 +44,17 @@ export default function CheckoutPage() {
   const { items, subtotal, sessionId, clearCart } = useCart();
 
   const canteen = isCanteenCart(items);
+  const groceryIds = [
+    ...new Set(
+      items
+        .map((line) => line.item.grocerySource)
+        .filter(isGrocerySourceId),
+    ),
+  ];
+  const mixedGrocery = groceryIds.length > 1;
+  const groceryId = groceryIds.length === 1 ? groceryIds[0] : null;
+  const groceryClosed = groceryId ? !isGroceryOpen(groceryId) : false;
+  const grocery = groceryId ? grocerySourceById(groceryId) : null;
   const restaurantId = canteen
     ? primaryCanteenRestaurantId(items.map((c) => ({ id: c.item.id })))
     : null;
@@ -61,17 +78,34 @@ export default function CheckoutPage() {
         distanceSurcharge: 0,
       };
     }
+    if (grocery) {
+      return {
+        deliveryFee: grocery.deliveryFee,
+        weightSurcharge: 0,
+        distanceSurcharge: 0,
+      };
+    }
     return calculateDeliveryFee({ weightKg, compound });
-  }, [canteen, weightKg, compound]);
+  }, [canteen, grocery, weightKg, compound]);
   const total = subtotal + fee.deliveryFee + tip;
   const overLimit = isOverOrderLimit(subtotal);
-  const canSubmit = Boolean(compound && hall && lobby && guestName.trim() && !overLimit);
+  const canSubmit = Boolean(
+    compound && hall && lobby && guestName.trim() && !overLimit && !mixedGrocery && !groceryClosed,
+  );
   const address = compound && hall ? formatDeliveryAddress(compound, hall) : null;
   const backHref = canteen ? "/cityu/canteen" : "/cityu/cart";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    if (mixedGrocery) {
+      setError(MIXED_GROCERY_CHECKOUT_MESSAGE);
+      return;
+    }
+    if (groceryClosed) {
+      setError("This store is closed. Checkout opens with the shop.");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -82,7 +116,9 @@ export default function CheckoutPage() {
         customerId: customer.uid,
         customerName: guestName.trim() || customer.name,
         customerEmail: customer.email ?? undefined,
-        orderChannel: canteen ? "canteen" : "taste",
+        orderChannel: canteen ? "canteen" : groceryId === "wellcome" ? "wellcome" : "taste",
+        grocerySource: groceryId ?? undefined,
+        pickupLocation: grocery?.pickup,
         canteenRestaurantId: restaurantId ?? undefined,
         canteenCollege: canteen
           ? canteenCollegeForRestaurant(restaurantId)
@@ -148,6 +184,17 @@ export default function CheckoutPage() {
               Already have a CityU account? Sign in
             </Link>
           </div>
+        )}
+        {mixedGrocery && (
+          <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {MIXED_GROCERY_CHECKOUT_MESSAGE}
+          </p>
+        )}
+        {groceryClosed && grocery && (
+          <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            {grocery.name} is closed ({grocery.hours.open}–{grocery.hours.close}). Checkout is
+            locked until it opens.
+          </p>
         )}
         {error && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>

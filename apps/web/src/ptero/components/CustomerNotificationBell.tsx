@@ -10,7 +10,7 @@ import {
 } from "@/ptero/lib/canteen/notify";
 import type { CustomerNotification } from "@/ptero/lib/types";
 
-type Props = { className?: string };
+type Props = { className?: string; tone?: "light" | "dark" };
 
 function accentClass(n: CustomerNotification): string {
   if (n.type === "discount_received" || n.accent === "gold" || n.accent === "green") {
@@ -23,7 +23,10 @@ function accentClass(n: CustomerNotification): string {
  * Customer-facing notification bell (college discount + order events).
  * Prototype: localStorage notifications + email outbox mirror.
  */
-export function CustomerNotificationBell({ className = "" }: Props) {
+export function CustomerNotificationBell({
+  className = "",
+  tone = "light",
+}: Props) {
   const { user } = useUser();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -111,7 +114,12 @@ export function CustomerNotificationBell({ className = "" }: Props) {
         onClick={() => {
           if (!hoverCapable) setOpen((v) => !v);
         }}
-        className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24] ${className}`}
+        className={
+          className ||
+          (tone === "dark"
+            ? "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-white transition-colors hover:bg-[#1f1f1f]"
+            : "relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24]")
+        }
         aria-label={label}
         aria-expanded={open}
         title={label}

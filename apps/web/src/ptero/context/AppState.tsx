@@ -211,7 +211,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       const identifier = email.trim().toLowerCase();
       try {
         const { firebaseSignIn } = await import("@/ptero/lib/firebase-auth");
-        await firebaseSignIn(identifier, password);
+        const fbUser = await firebaseSignIn(identifier, password);
+        const session: AppUser = {
+          uid: fbUser.uid,
+          campus: CAMPUS_ID,
+          name: fbUser.displayName || "Andrew",
+          email: identifier,
+          isGuest: false,
+          isRunner: false,
+        };
+        persistUser(session);
+        return publicUser(session);
       } catch {
         // Fall through to local prototype auth.
       }

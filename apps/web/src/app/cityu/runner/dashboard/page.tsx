@@ -72,7 +72,11 @@ export default function RunnerDashboardPage() {
                           : "bg-red-50 text-[#ED1C24]"
                       }`}
                     >
-                      {channel === "canteen" ? "Canteen" : CAMPUS.supermarket}
+                      {channel === "canteen"
+                        ? "Canteen"
+                        : channel === "wellcome"
+                          ? "Wellcome"
+                          : "Taste"}
                     </span>
                     {matchCollege ? (
                       <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800">
@@ -91,8 +95,8 @@ export default function RunnerDashboardPage() {
                         : ""}
                     </p>
                   ) : (
-                    <p className="mt-1 text-xs text-gray-500">
-                      Shopping at {CAMPUS.supermarket}, {CAMPUS.supermarketLocation}
+                    <p className="mt-1 text-xs font-medium text-gray-700">
+                      Pickup: {order.pickupLocation ?? `${CAMPUS.supermarket}, ${CAMPUS.supermarketLocation}`}
                     </p>
                   )}
                   <p className="mt-1 text-sm">

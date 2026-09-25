@@ -43,10 +43,7 @@ export function CanteenMenuCard(props: Props) {
     props.kind === "uc" || props.kind === "bf" || props.kind === "simple"
       ? props.item.description
       : undefined;
-  const image =
-    props.kind === "bf" || props.kind === "simple"
-      ? props.item.image
-      : undefined;
+  const image = props.item.image;
   const signature = props.kind === "simple" ? props.item.signature : false;
   const includesDrink =
     props.kind === "simple"

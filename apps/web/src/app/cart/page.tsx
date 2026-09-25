@@ -24,6 +24,7 @@ import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
 import { useCampus } from "@/context/CampusContext";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
+import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
 
 export default function CartPage() {
   const router = useRouter();
@@ -32,6 +33,9 @@ export default function CartPage() {
   const { campus: activeCampus } = useCampus();
   const campus = cartCampus(items) ?? activeCampus;
   const mixedError = cartCampusError(items, null);
+  const canteenGate = getCanteenCheckoutGate(items);
+  const canteenError =
+    isCanteenCart(items) && !canteenGate.allowed ? canteenGate.message : null;
   const fee = resolveOrderDeliveryFee(items, "", campus);
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
@@ -187,9 +191,14 @@ export default function CartPage() {
                     {mixedError}
                   </p>
                 )}
+                {canteenError && (
+                  <p className="mt-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                    {canteenError}
+                  </p>
+                )}
                 <button
                   type="button"
-                  disabled={overLimit || Boolean(mixedError)}
+                  disabled={overLimit || Boolean(mixedError) || Boolean(canteenError)}
                   onClick={() => {
                     // Guests and signed-in users both finish on checkout so we
                     // can collect dorm / lobby in one place.

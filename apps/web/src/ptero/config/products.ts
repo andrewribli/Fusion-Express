@@ -42,6 +42,7 @@ function toMenuItem(raw: CatalogItem, index: number): MenuItem {
     priceType: "fixed",
     runnerInputsPrice: false,
     inStock: true,
+    grocerySource: "taste",
     sortOrder: raw.sortOrder ?? index + 1,
     weightKg: raw.weightKg ?? 0.35,
   };

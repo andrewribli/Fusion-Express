@@ -3,11 +3,18 @@ import {
   resolveCampus,
   type CampusId,
 } from "@fusion-express/shared/campus";
-import type { CartItem } from "@/lib/types";
+import { isCanteenItemId } from "@/lib/canteen/cart";
+import type { CartItem, MenuItem } from "@/lib/types";
+
+/** Campus an item must be delivered on (canteen lines are always CUHK). */
+export function cartItemCampus(item: MenuItem): CampusId {
+  if (isCanteenItemId(item.id)) return "cuhk";
+  return resolveCampus(item.campus);
+}
 
 /** Fusion catalog and canteen items predate `campus` on items; they are CUHK. */
 export function cartCampuses(items: CartItem[]): CampusId[] {
-  return [...new Set(items.map(({ item }) => resolveCampus(item.campus)))];
+  return [...new Set(items.map(({ item }) => cartItemCampus(item)))];
 }
 
 /** The single campus a cart can be delivered to, or null when empty or mixed. */

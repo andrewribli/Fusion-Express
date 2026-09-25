@@ -7,6 +7,7 @@ import { runnerEntryHref } from "@/ptero/lib/nav";
 
 type RunnerQueueBellProps = {
   className?: string;
+  tone?: "light" | "dark";
 };
 
 type QueueItem = {
@@ -23,7 +24,10 @@ function shortOrderId(id: string): string {
  * Header bell for available runner deliveries (CityU prototype).
  * Hover (desktop) or tap (mobile) opens a dark dropdown of pending jobs.
  */
-export function RunnerQueueBell({ className = "" }: RunnerQueueBellProps) {
+export function RunnerQueueBell({
+  className = "",
+  tone = "light",
+}: RunnerQueueBellProps) {
   const { user, orders, setMode, canRunnerMode } = useAppState();
   const [open, setOpen] = useState(false);
   const [hoverCapable, setHoverCapable] = useState(false);
@@ -101,7 +105,12 @@ export function RunnerQueueBell({ className = "" }: RunnerQueueBellProps) {
         onClick={() => {
           if (!hoverCapable) setOpen((v) => !v);
         }}
-        className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24] ${className}`}
+        className={
+          className ||
+          (tone === "dark"
+            ? "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-white transition-colors hover:bg-[#1f1f1f]"
+            : "relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24]")
+        }
         aria-label={label}
         aria-expanded={open}
         aria-haspopup="true"

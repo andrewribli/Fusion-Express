@@ -35,12 +35,18 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
           {item.name}
         </h3>
         <p className="shop-muted mt-0.5 text-xs" style={{ color: "#9ca3af" }}>
-          per {item.unit}
+          {item.grocerySource ? item.category : `per ${item.unit}`}
         </p>
         <div className="mt-1 flex flex-wrap items-baseline gap-1.5">
-          <p className="text-sm font-bold leading-tight" style={{ color: "#ED1C24" }}>
-            {formatMenuPrice(item)}
-          </p>
+          {item.grocerySource ? (
+            <p className="text-xs font-bold leading-tight" style={{ color: "#ED1C24" }}>
+              Est. {formatMenuPrice(item)} — confirmed at pickup.
+            </p>
+          ) : (
+            <p className="text-sm font-bold leading-tight" style={{ color: "#ED1C24" }}>
+              {formatMenuPrice(item)}
+            </p>
+          )}
           {onSale ? (
             <p className="text-[11px] text-gray-400 line-through">{formatHkd(item.price)}</p>
           ) : null}

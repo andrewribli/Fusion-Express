@@ -15,7 +15,16 @@ import { useCart } from "@/context/CartContext";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
-import { validateCampusEmail, type CampusId } from "@fusion-express/shared/campus";
+import {
+  detectCampusFromEmail,
+  validateCampusEmail,
+  type CampusId,
+} from "@fusion-express/shared/campus";
+import {
+  accessCampusForUser,
+  campusHubPath,
+  postLoginDestination,
+} from "@/lib/campus-access";
 import { friendlyAuthError } from "@/lib/auth-errors";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { BootScreen } from "@/components/BootScreen";
@@ -38,8 +47,8 @@ function safeNextPath(): string | null {
   return next;
 }
 
-function postLoginPath(): string {
-  return safeNextPath() ?? "/";
+function postLoginPath(campus?: CampusId | null): string {
+  return postLoginDestination({ campus, next: safeNextPath() });
 }
 
 /**
@@ -123,7 +132,7 @@ export default function LoginPage() {
         await signIn(demo.email, demo.password);
       }
       setAppMode(asRunner ? "runner" : "customer");
-      router.push(asRunner ? "/runner/dashboard" : postLoginPath());
+      router.push(asRunner ? "/runner/dashboard" : postLoginPath("cityu"));
     } catch (err) {
       setError(friendlyAuthError(err) || "Demo sign in failed");
     } finally {
@@ -159,7 +168,7 @@ export default function LoginPage() {
       if (firebaseEnabled || demoAuth) {
         await signIn(identifier, password);
         setAppMode("customer");
-        router.push(postLoginPath());
+        router.push(postLoginPath(detectCampusFromEmail(identifier)));
       } else {
         setError("Live login requires Firebase. Add env vars to .env.local.");
       }
@@ -274,7 +283,7 @@ export default function LoginPage() {
       }
       setAppCampus(signupCampus);
       setAppMode("customer");
-      router.push(postLoginPath());
+      router.push(postLoginPath(signupCampus));
     } catch (err) {
       setError(friendlyAuthError(err, "Sign up failed"));
     } finally {
@@ -286,7 +295,8 @@ export default function LoginPage() {
   // checkout sessions still need to reach sign-up to make a real account.
   useEffect(() => {
     if (!isReady || !user || user.isGuest) return;
-    router.replace("/");
+    const campus = accessCampusForUser(user);
+    router.replace(campus ? campusHubPath(campus) : "/");
   }, [user, isReady, router]);
 
   if (!isReady) {

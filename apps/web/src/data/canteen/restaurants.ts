@@ -1,15 +1,12 @@
 import type { CollegeId } from "@/data/canteen/colleges";
+import {
+  CANTEEN_CATALOG,
+  canteenStatus,
+  getCanteenMeta,
+  type CanteenId,
+} from "@/lib/canteenConfig";
 
-export type RestaurantId =
-  | "benjamin-franklin"
-  | "uc-canteen"
-  | "cu-cafe"
-  | "sh-ho-canteen"
-  | "paper-and-coffee"
-  | "sorazen"
-  | "na-canteen"
-  | "cc-canteen"
-  | "shaw-canteen";
+export type RestaurantId = CanteenId;
 
 export type Restaurant = {
   id: RestaurantId;
@@ -21,118 +18,97 @@ export type Restaurant = {
   deliveryFee: number;
   collegeId: CollegeId | null;
   menuReady: boolean;
-  /** Optional brand mark shown on list cards and canteen headers. */
   logoSrc?: string;
 };
 
 export const CANTEEN_DELIVERY_FEE = 10;
 
-export const RESTAURANTS: Restaurant[] = [
-  {
-    id: "benjamin-franklin",
-    name: "Benjamin Franklin Canteen",
-    shortName: "Benjamin Franklin",
-    blurb: "Campus canteen classics to your dorm lobby.",
-    hoursLabel: "7:30 AM – 9:00 PM",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: null,
-    menuReady: true,
-  },
-  {
-    id: "uc-canteen",
-    name: "UC Canteen",
-    shortName: "UC Canteen",
-    blurb: "United College canteen — breakfast to dinner by time zone.",
-    hoursLabel: "7:30 AM – 7:30 PM (by meal period · closed Sun)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: "UC",
-    menuReady: true,
-  },
-  {
-    id: "cu-cafe",
-    name: "CU Cafe",
-    shortName: "CU Cafe",
-    blurb:
-      "CU Cafe is a grab-and-go spot for sandwiches, salads, and premium coffee.",
-    location: "Lee Shau Kee Building (LSK)",
-    hoursLabel: "8:00 AM – 6:00 PM (Mon–Fri)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: null,
-    menuReady: true,
-  },
-  {
-    id: "sh-ho-canteen",
-    name: "S.H. Ho College Canteen",
-    shortName: "S.H. Ho Canteen",
-    blurb: "The S.H. Ho College canteen serves casual Chinese and Western meals.",
-    location: "S.H. Ho College",
-    hoursLabel: "8:00 AM – 9:00 PM (incl. Sundays)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: "SHHO",
-    menuReady: true,
-  },
-  {
-    id: "paper-and-coffee",
-    name: "Paper & Coffee",
-    shortName: "Paper & Coffee",
-    blurb:
-      "Premium coffee and Japanese-style teishoku, donburi, and noodles near University Station.",
-    location:
-      "LG/F, William M.W. Mong Building (near the University Station / \"foot of the hill\")",
-    hoursLabel: "10:30 AM – 5:30 PM (Mon–Fri)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: null,
-    menuReady: true,
-    logoSrc: "/canteen/paper-and-coffee-logo.png",
-  },
-  {
-    id: "sorazen",
-    name: "SoraZen",
-    shortName: "SoraZen",
+const RESTAURANT_COPY: Record<
+  RestaurantId,
+  Pick<Restaurant, "blurb" | "location" | "logoSrc">
+> = {
+  sorazen: {
     blurb:
       "Japanese-inspired bowls, salads, and hot pots at Benjamin Franklin Centre — breakfast through dinner.",
     location:
       "Benjamin Franklin Centre, Lower Ground (BFC LG · BFCLG-SORAZEN)",
-    hoursLabel: "7:30 AM – 7:30 PM (Mon–Fri · closed Sat)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: null,
-    menuReady: true,
     logoSrc: "/canteen/sorazen-logo.png",
   },
-  {
-    id: "na-canteen",
-    name: "NA Canteen",
-    shortName: "NA Canteen",
+  "paper-and-coffee": {
     blurb:
-      "Bites Bro New Asia Canteen — breakfast sets, Rice Noodle Institute lunch, and campus drinks. College discount when an NA runner picks up.",
+      "Premium coffee and Japanese-style teishoku, donburi, and noodles near University Station.",
+    location:
+      "LG/F, William M.W. Mong Building (near the University Station / \"foot of the hill\")",
+    logoSrc: "/canteen/paper-and-coffee-logo.png",
+  },
+  "uc-canteen": {
+    blurb: "United College canteen — breakfast to dinner by time zone.",
+  },
+  ebeneezers: {
+    blurb:
+      "Kebabs, biryani, curry plates, and pizza — FoodPanda pickup menu for CUHK students and staff.",
+    location: "Benjamin Franklin Centre (CUHK)",
+  },
+  "orchid-lodge": {
+    blurb: "Chung Chi Orchid Lodge — café and light meals.",
+    location: "Orchid Lodge, Chung Chi College",
+  },
+  "benjamin-franklin": {
+    blurb: "Campus canteen classics to your dorm lobby.",
+  },
+  "cu-cafe": {
+    blurb:
+      "CU Cafe is a grab-and-go spot for sandwiches, salads, and premium coffee.",
+    location: "Lee Shau Kee Building (LSK)",
+  },
+  "sh-ho-canteen": {
+    blurb: "The S.H. Ho College canteen serves casual Chinese and Western meals.",
+    location: "S.H. Ho College",
+  },
+  "na-canteen": {
+    blurb:
+      "Bites Bro New Asia Canteen — breakfast sets, Rice Noodle Institute lunch, and campus drinks.",
     location: "New Asia College",
-    hoursLabel: "7:30 AM – 8:00 PM (breakfast · lunch · drinks)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: "NA",
-    menuReady: true,
   },
-  {
-    id: "cc-canteen",
-    name: "CC Canteen",
-    shortName: "CC Canteen",
+  "cc-canteen": {
     blurb: "Chung Chi College canteen — college discount when a CC runner picks up.",
-    hoursLabel: "Coming soon",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: "CC",
-    menuReady: false,
   },
-  {
-    id: "shaw-canteen",
-    name: "Shaw Canteen",
-    shortName: "Shaw Canteen",
+  "shaw-canteen": {
     blurb: "Shaw College canteen — college discount when a Shaw runner picks up.",
-    hoursLabel: "Coming soon",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
-    collegeId: "Shaw",
-    menuReady: false,
   },
-];
+  wys: {
+    blurb: "Wu Yee Sun College canteen.",
+  },
+  lws: {
+    blurb: "Lee Woo Sing College canteen.",
+  },
+  "chung-chi-tang": {
+    blurb: "Chung Chi Tang dining.",
+  },
+};
+
+function buildRestaurant(meta: (typeof CANTEEN_CATALOG)[number]): Restaurant {
+  const copy = RESTAURANT_COPY[meta.id];
+  const open = canteenStatus(meta.id) === "open";
+  return {
+    id: meta.id,
+    name: meta.name,
+    shortName: meta.shortName,
+    blurb: copy.blurb,
+    location: copy.location,
+    hoursLabel: open ? meta.hoursLabel : "Coming soon",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: meta.collegeId,
+    menuReady: open,
+    logoSrc: copy.logoSrc,
+  };
+}
+
+/** Open canteens first (catalog order), then coming soon. */
+export const RESTAURANTS: Restaurant[] = CANTEEN_CATALOG.map(buildRestaurant);
 
 export function getRestaurant(id: string): Restaurant | undefined {
-  return RESTAURANTS.find((r) => r.id === id);
+  const meta = getCanteenMeta(id);
+  if (!meta) return undefined;
+  return buildRestaurant(meta);
 }

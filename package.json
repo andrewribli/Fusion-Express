@@ -12,9 +12,13 @@
     "build": "turbo run build --filter=@fusion-express/web",
     "build:web": "turbo run build --filter=@fusion-express/web",
     "lint": "turbo run lint --filter=@fusion-express/web",
-    "seed": "npm run seed -w @fusion-express/web"
+    "seed": "npm run seed -w @fusion-express/web",
+    "scrape:wellcome": "tsx scripts/scrape-wellcome.ts",
+    "seed:wellcome": "tsx scripts/seed-wellcome.ts",
+    "refresh:wellcome": "npm run scrape:wellcome && npm run seed:wellcome"
   },
   "devDependencies": {
+    "tsx": "^4.23.12",
     "turbo": "^2.5.4"
   },
   "overrides": {

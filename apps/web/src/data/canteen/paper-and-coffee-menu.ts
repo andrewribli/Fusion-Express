@@ -1,6 +1,5 @@
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 
-const img = "https://placehold.co/200x200/png";
 
 /**
  * Full Paper & Coffee menu from in-store printed sheets:
@@ -14,7 +13,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "濃縮咖啡 · Hot",
     price: 23,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/espresso-single.jpg",
   },
   {
     id: "espresso-double",
@@ -22,7 +21,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "濃縮咖啡 · Hot",
     price: 27,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/espresso-double.jpg",
   },
   {
     id: "long-black",
@@ -30,7 +29,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "黑咖啡 · Hot or cold",
     price: 27,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/long-black.jpg",
   },
   {
     id: "honey-ice-black",
@@ -38,7 +37,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "蜂蜜黑咖啡 · Cold",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/honey-ice-black.jpg",
   },
   {
     id: "espresso-tonic",
@@ -46,7 +45,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "咖啡湯力 · Cold",
     price: 47,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/espresso-tonic.jpg",
   },
   {
     id: "cold-brew",
@@ -54,7 +53,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "冷萃咖啡 · Cold",
     price: 47,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-brew.jpg",
     signature: true,
   },
 
@@ -65,7 +64,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "鮮奶咖啡",
     price: 31,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/latte-hot.jpg",
   },
   {
     id: "latte-cold",
@@ -73,7 +72,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "鮮奶咖啡",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/latte-cold.jpg",
   },
   {
     id: "honey-cinnamon-latte",
@@ -81,7 +80,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "肉桂蜂蜜鮮奶咖啡 · Hot",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/honey-cinnamon-latte.jpg",
   },
   {
     id: "mocha",
@@ -89,7 +88,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "朱古力咖啡 · Hot or cold",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/mocha.jpg",
   },
 
   // —— Non-coffee ——
@@ -99,7 +98,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "抹茶鮮奶",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/matcha-latte-hot.jpg",
     signature: true,
   },
   {
@@ -108,7 +107,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "抹茶鮮奶",
     price: 37,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/matcha-latte-cold.jpg",
   },
   {
     id: "hojicha-latte-hot",
@@ -116,7 +115,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "焙茶鮮奶",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hojicha-latte-hot.jpg",
   },
   {
     id: "hojicha-latte-cold",
@@ -124,7 +123,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "焙茶鮮奶",
     price: 37,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/hojicha-latte-cold.jpg",
   },
   {
     id: "chocolate-hot",
@@ -132,7 +131,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "朱古力",
     price: 31,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/chocolate-hot.jpg",
   },
   {
     id: "chocolate-cold",
@@ -140,7 +139,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "朱古力",
     price: 33,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/chocolate-cold.jpg",
   },
   {
     id: "homemade-lemonade",
@@ -148,7 +147,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "自家製檸檬飲品 · Cold",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/homemade-lemonade.jpg",
   },
   {
     id: "apple-juice-100",
@@ -156,7 +155,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "純蘋果汁 · Cold",
     price: 30,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/apple-juice-100.jpg",
   },
 
   // —— Tea ——
@@ -166,7 +165,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "大吉嶺伯爵紅茶 · Hot",
     price: 30,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/darjeeling-earl-grey.jpg",
   },
   {
     id: "chamomile-flower",
@@ -174,7 +173,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "洋甘菊花茶 · Hot",
     price: 30,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/chamomile-flower.jpg",
   },
   {
     id: "popcorn-tea",
@@ -182,7 +181,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "玄米茶 · Hot",
     price: 30,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/popcorn-tea.jpg",
   },
   {
     id: "honey-ginger-drink",
@@ -190,7 +189,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "蜂蜜薑茶 · Hot",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/honey-ginger-drink.jpg",
   },
   {
     id: "cold-brew-tea",
@@ -198,7 +197,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "冷泡茶 · Cold",
     price: 35,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-brew-tea.jpg",
   },
 
   // —— Drink add-ons ——
@@ -208,7 +207,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "燕麥奶 add-on",
     price: 3,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/oat-milk.jpg",
   },
   {
     id: "add-shot",
@@ -216,7 +215,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "Extra espresso shot",
     price: 4,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/add-shot.jpg",
   },
 
   // —— Food add drinks (tea set pricing) ——
@@ -226,7 +225,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "招牌咖啡 · Food-menu add drink",
     price: 24,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/paper-house-brew-coffee.jpg",
     signature: true,
   },
   {
@@ -235,7 +234,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "咖啡的心水 · Food-menu add drink",
     price: 30,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/baristas-pick.jpg",
   },
   {
     id: "flat-white-add",
@@ -243,7 +242,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "鮮奶咖啡 · Food-menu add drink",
     price: 28,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/flat-white-add.jpg",
   },
   {
     id: "cold-brew-add",
@@ -251,7 +250,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "冷泡咖啡 · Food-menu add drink",
     price: 32,
     category: "drinks",
-    image: img,
+    image: "/canteen/food/cold-brew-add.jpg",
   },
 
   // —— Teishoku (salad, soup & rice) ——
@@ -261,7 +260,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "日式炸雞肉定食 · w/ salad, soup & rice",
     price: 45,
     category: "mains",
-    image: img,
+    image: "/canteen/food/teishoku-fried-chicken.jpg",
     signature: true,
     drinkAddonPrice: 24,
   },
@@ -271,7 +270,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "吉列豬扒定食 · w/ salad, soup & rice",
     price: 48,
     category: "mains",
-    image: img,
+    image: "/canteen/food/teishoku-pork-cutlet.jpg",
     drinkAddonPrice: 24,
   },
   {
@@ -280,7 +279,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "海老天婦羅定食 · w/ salad, soup & rice",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/shrimp-vegetable-tempura-rice.jpg",
     drinkAddonPrice: 24,
   },
   {
@@ -289,7 +288,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "西京燒三文魚定食 · w/ salad, soup & rice",
     price: 72,
     category: "mains",
-    image: img,
+    image: "/canteen/food/teishoku-saikyo-salmon.png",
     drinkAddonPrice: 24,
   },
 
@@ -300,7 +299,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "滑蛋親子丼 · Chicken & egg over rice · w/ salad & soup",
     price: 42,
     category: "mains",
-    image: img,
+    image: "/canteen/food/oyakodon.jpg",
   },
   {
     id: "shrimp-patty-tempura-don",
@@ -308,7 +307,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "蝦餅天婦羅丼 · w/ salad & soup",
     price: 58,
     category: "mains",
-    image: img,
+    image: "/canteen/food/shrimp-patty-tempura-don.jpg",
   },
   {
     id: "deluxe-gyudon",
@@ -316,7 +315,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "親子燒牛肉丼 · Beef, egg & toppings · w/ salad & soup",
     price: 66,
     category: "mains",
-    image: img,
+    image: "/canteen/food/deluxe-gyudon.jpg",
   },
   {
     id: "veg-tempura-addon",
@@ -324,7 +323,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "野菜天婦羅 · Teishoku / donburi add-on · Vegan",
     price: 18,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/veg-tempura-addon.jpg",
   },
   {
     id: "avocado-tempura-addon",
@@ -332,7 +331,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "牛油果天婦羅 · Teishoku / donburi add-on · Vegan",
     price: 20,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/avocado-tempura-addon.jpg",
   },
 
   // —— Noodles ——
@@ -342,7 +341,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "冷蕎麥麵 · Vegan",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/cold-soba.jpg",
   },
   {
     id: "mentaiko-udon-half",
@@ -350,7 +349,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "明太子稻庭烏冬",
     price: 35,
     category: "mains",
-    image: img,
+    image: "/canteen/food/mentaiko-udon-full.jpg",
   },
   {
     id: "mentaiko-udon-full",
@@ -358,7 +357,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "明太子稻庭烏冬",
     price: 60,
     category: "mains",
-    image: img,
+    image: "/canteen/food/mentaiko-udon-full.jpg",
   },
   {
     id: "sesame-beef-udon-half",
@@ -366,7 +365,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "芝麻醬牛肉稻庭烏冬",
     price: 32,
     category: "mains",
-    image: img,
+    image: "/canteen/food/sesame-beef-udon-full.jpg",
   },
   {
     id: "sesame-beef-udon-full",
@@ -374,7 +373,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "芝麻醬牛肉稻庭烏冬",
     price: 57,
     category: "mains",
-    image: img,
+    image: "/canteen/food/sesame-beef-udon-full.jpg",
   },
   {
     id: "tomato-beef-udon-half",
@@ -382,7 +381,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "蕃茄牛肉稻庭烏冬",
     price: 38,
     category: "mains",
-    image: img,
+    image: "/canteen/food/tomato-beef-udon-half.jpg",
   },
   {
     id: "tomato-beef-udon-full",
@@ -390,7 +389,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "蕃茄牛肉稻庭烏冬",
     price: 68,
     category: "mains",
-    image: img,
+    image: "/canteen/food/tomato-beef-udon-full.jpg",
   },
 
   // —— Chazuke ——
@@ -400,7 +399,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "日式醬油燒菇茶漬飯 · Vegan",
     price: 22,
     category: "mains",
-    image: img,
+    image: "/canteen/food/grilled-mushrooms-chazuke.jpg",
   },
 
   // —— Mini bites ——
@@ -410,7 +409,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "炸薯條 / 炸薯塊",
     price: 20,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/potato-chips.jpg",
   },
   {
     id: "japanese-fried-chicken",
@@ -418,7 +417,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "日式炸雞肉",
     price: 30,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/japanese-fried-chicken.jpg",
     signature: true,
   },
   {
@@ -427,7 +426,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "炸魚塊",
     price: 30,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/fried-fish.jpg",
   },
   {
     id: "chicken-and-chips",
@@ -435,7 +434,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "炸雞薯條",
     price: 45,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/chicken-and-chips.jpg",
   },
   {
     id: "fish-and-chips",
@@ -443,7 +442,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "炸魚薯條",
     price: 45,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/fish-and-chips.jpg",
   },
 
   // —— Taiwanese pancake ——
@@ -453,7 +452,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "台式蛋餅 · Bacon / sweet corn / cheese",
     price: 25,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/taiwanese-pancake.jpg",
   },
   {
     id: "taiwanese-pancake-extra-topping",
@@ -461,7 +460,7 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "台式蛋餅加配料",
     price: 5,
     category: "snacks",
-    image: img,
+    image: "/canteen/food/taiwanese-pancake-extra-topping.jpg",
   },
 
   // —— Dessert ——
@@ -471,6 +470,6 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     description: "芝士蛋糕",
     price: 18,
     category: "dessert",
-    image: img,
+    image: "/canteen/food/ny-cheesecake.jpg",
   },
 ];

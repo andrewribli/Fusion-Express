@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
@@ -9,54 +9,106 @@ import { CartSidebar } from "@/ptero/components/CartSidebar";
 import { CustomItemCard } from "@/ptero/components/CustomItemCard";
 import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificationBell";
 import { FeedbackButton } from "@/ptero/components/FeedbackButton";
+import { GrocerySourcePicker } from "@/ptero/components/GrocerySourcePicker";
 import { MenuItemCard } from "@/ptero/components/MenuItemCard";
 import { OrderActionBar } from "@/ptero/components/OrderActionBar";
 import { PreviousOrderChecklist } from "@/ptero/components/PreviousOrderChecklist";
-import { ProductRailCard } from "@/ptero/components/ProductRailCard";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { CAMPUS } from "@/ptero/config/campus";
-import { SIDEBAR_CATEGORIES, type SidebarCategoryId } from "@/ptero/config/categories";
-import {
-  CATEGORY_LABELS,
-  productsByCategory,
-  recommendedProducts,
-  searchProducts,
-  TASTE_PRODUCTS,
-} from "@/ptero/config/products";
+import { TASTE_PRODUCTS } from "@/ptero/config/products";
 import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
 import { runnerEntryHref } from "@/ptero/lib/nav";
+import type { MenuItem } from "@/ptero/lib/types";
+import { loadWellcomeMenu } from "@/lib/loadWellcomeMenu";
+import {
+  CANONICAL_GROCERY_CATEGORIES,
+  GROCERY_SOURCE_STORAGE_KEY,
+  canonicalGroceryCategory,
+  grocerySourceById,
+  isGroceryOpen,
+  isGrocerySourceId,
+  type CanonicalGroceryCategory,
+  type GrocerySourceId,
+} from "@/lib/grocerySources";
 
-export function ShopHome() {
+export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
   const { itemCount } = useCart();
   const { user, setMode, canRunnerMode } = useUser();
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<SidebarCategoryId | "all">(
-    "all",
-  );
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
+  const [source, setSource] = useState<GrocerySourceId | null>(null);
+  const [aisle, setAisle] = useState<CanonicalGroceryCategory | "all">("all");
+  const [sortDesc, setSortDesc] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(48);
+  const [wellcomeItems, setWellcomeItems] = useState<MenuItem[]>([]);
+  const [wellcomeStatus, setWellcomeStatus] = useState<"idle" | "loading" | "ready" | "error">(
+    "idle",
+  );
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const searching = Boolean(search.trim());
-  const results = useMemo(
-    () => (searching ? searchProducts(search) : []),
-    [search, searching],
-  );
-  const recommended = useMemo(() => recommendedProducts(), []);
-  const categoryItems = useMemo(() => {
-    if (activeCategory === "all") return TASTE_PRODUCTS;
-    return productsByCategory(activeCategory);
-  }, [activeCategory]);
+  useEffect(() => {
+    if (routeSource) {
+      setSource(routeSource);
+      return;
+    }
+    const stored = window.localStorage.getItem(GROCERY_SOURCE_STORAGE_KEY);
+    if (isGrocerySourceId(stored)) setSource(stored);
+  }, [routeSource]);
 
-  const activeLabel =
-    activeCategory === "all"
-      ? "All items"
-      : CATEGORY_LABELS[activeCategory];
+  useEffect(() => {
+    if (source !== "wellcome") return;
+    let cancelled = false;
+    setWellcomeStatus("loading");
+    loadWellcomeMenu()
+      .then((rows) => {
+        if (cancelled) return;
+        setWellcomeItems(rows);
+        setWellcomeStatus("ready");
+      })
+      .catch(() => {
+        if (!cancelled) setWellcomeStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [source]);
 
-  function selectCategory(id: SidebarCategoryId | "all") {
-    setActiveCategory(id);
+  function chooseSource(id: GrocerySourceId) {
+    setSource(id);
+    window.localStorage.setItem(GROCERY_SOURCE_STORAGE_KEY, id);
+    setAisle("all");
     setSearch("");
+    setVisibleCount(48);
+  }
+
+  const store = source ? grocerySourceById(source) : null;
+  const storeOpen = source ? isGroceryOpen(source) : false;
+  const catalog = source === "wellcome" ? wellcomeItems : source === "taste" ? TASTE_PRODUCTS : [];
+
+  const searching = Boolean(search.trim());
+  const menuItems = useMemo(() => {
+    if (!source) return [];
+    const q = search.trim().toLowerCase();
+    let rows = catalog;
+    if (q) {
+      rows = rows.filter((item) => item.name.toLowerCase().includes(q));
+    } else if (aisle !== "all") {
+      rows = rows.filter(
+        (item) => canonicalGroceryCategory(item.category, item.name) === aisle,
+      );
+    }
+    const sorted = [...rows].sort(
+      (a, b) => (a.salePrice ?? a.price) - (b.salePrice ?? b.price),
+    );
+    return sortDesc ? sorted.reverse() : sorted;
+  }, [aisle, catalog, search, sortDesc, source]);
+
+  function selectAisle(id: CanonicalGroceryCategory | "all") {
+    setAisle(id);
+    setSearch("");
+    setVisibleCount(48);
     setMobileCatsOpen(false);
   }
 
@@ -64,9 +116,9 @@ export function ShopHome() {
     <nav aria-label="Categories" className="flex flex-col">
       <button
         type="button"
-        onClick={() => selectCategory("all")}
+        onClick={() => selectAisle("all")}
         className={`flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm transition-colors ${
-          activeCategory === "all"
+          aisle === "all"
             ? "bg-red-50 font-bold text-[#ED1C24]"
             : "font-medium text-gray-800 hover:bg-gray-50"
         }`}
@@ -76,20 +128,20 @@ export function ShopHome() {
           ›
         </span>
       </button>
-      {SIDEBAR_CATEGORIES.map((cat) => {
-        const active = activeCategory === cat.id;
+      {CANONICAL_GROCERY_CATEGORIES.map((cat) => {
+        const active = aisle === cat;
         return (
           <button
-            key={cat.id}
+            key={cat}
             type="button"
-            onClick={() => selectCategory(cat.id)}
+            onClick={() => selectAisle(cat)}
             className={`flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm transition-colors ${
               active
                 ? "bg-red-50 font-bold text-[#ED1C24]"
                 : "font-medium text-gray-800 hover:bg-gray-50"
             }`}
           >
-            <span className="pr-2 leading-snug">{cat.label}</span>
+            <span className="pr-2 leading-snug">{cat}</span>
             <span className="shrink-0 text-gray-400" aria-hidden>
               ›
             </span>
@@ -147,7 +199,8 @@ export function ShopHome() {
                 📍
               </span>
               <span className="truncate text-gray-700">
-                Deliver to CityU hall lobby · Taste, Citygate
+                Deliver to CityU hall lobby
+                {store ? ` · ${store.name}` : ""}
               </span>
             </button>
 
@@ -156,8 +209,11 @@ export function ShopHome() {
                 ref={searchRef}
                 type="search"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={`Search ${CAMPUS.supermarket}`}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setVisibleCount(48);
+                }}
+                placeholder={store ? `Search ${store.name}` : "Search groceries"}
                 className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 pr-10 text-sm outline-none focus:border-[#ED1C24]"
                 autoComplete="off"
               />
@@ -217,6 +273,7 @@ export function ShopHome() {
             </div>
           </div>
         </header>
+        <GrocerySourcePicker selected={source} onSelect={chooseSource} />
 
         {/* Mobile category drawer */}
         {mobileCatsOpen && (
@@ -254,79 +311,107 @@ export function ShopHome() {
 
           {/* Center content */}
           <main className="min-w-0 px-3 py-4 pb-28 sm:px-4">
-            <p id="delivery-hint" className="text-sm font-medium text-gray-800">
-              {CAMPUS.tagline}
-            </p>
-            <p className="mt-0.5 text-xs text-gray-500">
-              Pickup at {CAMPUS.supermarket}, {CAMPUS.supermarketLocation}.
-            </p>
-
-            {searching ? (
-              <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
-                <h2 className="text-base font-bold text-gray-900">
-                  Results for “{search.trim()}”
-                </h2>
-                {results.length === 0 ? (
-                  <p className="mt-4 text-sm text-gray-500">No matching Taste items.</p>
-                ) : (
-                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {results.map((item) => (
-                      <MenuItemCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                )}
-              </section>
-            ) : activeCategory !== "all" ? (
-              <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
-                <h2 className="text-lg font-extrabold text-gray-900">{activeLabel}</h2>
-                {categoryItems.length === 0 ? (
-                  <p className="mt-6 text-sm text-gray-500">
-                    No Taste items in this aisle yet — try Beverages, Dairy, or
-                    Meat &amp; Seafood.
-                  </p>
-                ) : (
-                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {categoryItems.map((item) => (
-                      <MenuItemCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                )}
-              </section>
+            {!store ? (
+              <p className="text-sm text-gray-600">
+                Pick Taste or Wellcome. Your last choice is remembered next time.
+              </p>
             ) : (
               <>
-                <section className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-[#ED1C24] to-[#c9171e] p-5 text-white shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
-                    Ptero
+                <p id="delivery-hint" className="text-sm font-medium text-gray-800">
+                  {store.name}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">
+                  Pickup at {store.pickup}. {store.walkMinutes} min walk. Delivery HK$
+                  {store.deliveryFee}.
+                </p>
+                {!storeOpen ? (
+                  <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
+                    {store.name} is closed ({store.hours.open}–{store.hours.close}). The menu
+                    stays visible and checkout is locked until it opens.
                   </p>
-                  <h2 className="mt-1 text-xl font-extrabold sm:text-2xl">
-                    Apply a voucher at checkout!
-                  </h2>
-                  <p className="mt-1 max-w-xl text-sm text-white/90">
-                    Prototype promo banner — order from Taste and we deliver to your CityU hall
-                    lobby. Pay after delivery via Airwallex.
-                  </p>
-                </section>
-
-                <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-lg font-extrabold text-gray-900">
-                      Recommended for you
+                ) : null}
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => selectAisle("all")}
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      aisle === "all" ? "bg-gray-900 text-white" : "bg-white text-gray-700"
+                    }`}
+                  >
+                    All
+                  </button>
+                  {CANONICAL_GROCERY_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => selectAisle(cat)}
+                      className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                        aisle === cat ? "bg-gray-900 text-white" : "bg-white text-gray-700"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSortDesc(false)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      !sortDesc ? "bg-[#ED1C24] text-white" : "bg-white text-gray-700"
+                    }`}
+                  >
+                    Cheapest
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSortDesc(true)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      sortDesc ? "bg-[#ED1C24] text-white" : "bg-white text-gray-700"
+                    }`}
+                  >
+                    Most expensive
+                  </button>
+                </div>
+                {source === "wellcome" && wellcomeStatus === "loading" ? (
+                  <p className="mt-4 text-sm text-gray-500">Loading Wellcome…</p>
+                ) : null}
+                {source === "wellcome" && wellcomeStatus === "error" ? (
+                  <p className="mt-4 text-sm text-red-600">Could not load Wellcome right now.</p>
+                ) : null}
+                <section className="mt-4">
+                  {searching ? (
+                    <h2 className="mb-3 text-base font-bold text-gray-900">
+                      Results for “{search.trim()}”
                     </h2>
-                  </div>
-                  <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
-                    {recommended.map((item) => (
-                      <ProductRailCard key={item.id} item={item} />
-                    ))}
-                  </div>
-                </section>
-
-                <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
-                  <h2 className="text-lg font-extrabold text-gray-900">More from Taste</h2>
-                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {TASTE_PRODUCTS.slice(0, 12).map((item) => (
-                      <MenuItemCard key={item.id} item={item} />
-                    ))}
-                  </div>
+                  ) : null}
+                  {menuItems.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      {source === "wellcome" && wellcomeStatus !== "ready"
+                        ? "The Wellcome menu will show here once it has loaded."
+                        : "Nothing in this aisle."}
+                    </p>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        {menuItems.slice(0, visibleCount).map((item) => (
+                          <MenuItemCard
+                            key={item.id}
+                            item={{ ...item, inStock: storeOpen && item.inStock }}
+                          />
+                        ))}
+                      </div>
+                      {visibleCount < menuItems.length ? (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCount((count) => count + 48)}
+                          className="mt-4 w-full rounded-xl bg-white py-3 text-sm font-semibold text-gray-800"
+                        >
+                          Show more ({menuItems.length - visibleCount} left)
+                        </button>
+                      ) : null}
+                    </>
+                  )}
                 </section>
               </>
             )}
