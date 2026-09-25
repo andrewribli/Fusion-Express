@@ -61,8 +61,11 @@ export const CITYU_COMPOUNDS = {
     "Hall 6",
     "Hall 7",
     "Hall 8",
+    "Hall 9",
+    "Hall 10",
+    "Hall 11",
   ],
-  "Ma On Shan Compound": ["Hall 9", "Hall 10", "Hall 11", "Hall 12"],
+  "Ma On Shan Compound": ["Hall 12"],
 } as const;
 
 export type CuhkCollege = keyof typeof CUHK_COLLEGE_HALLS;

@@ -28,6 +28,7 @@ import {
   DEFAULT_SPECIAL_INSTRUCTIONS,
 } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
+import { PlaceOrderConfirmModal } from "@/components/PlaceOrderConfirmModal";
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
@@ -51,6 +52,7 @@ export default function CheckoutPage() {
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (lockedCampus) {
@@ -115,6 +117,12 @@ export default function CheckoutPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit || !campus) return;
+    setConfirmOpen(true);
+  }
+
+  function handleConfirmPlaceOrder() {
+    if (!canSubmit || !campus) return;
+    setConfirmOpen(false);
     void placeOrder({
       campus,
       college,
@@ -401,6 +409,18 @@ export default function CheckoutPage() {
           </form>
         </main>
       </LakersWallpaper>
+      <PlaceOrderConfirmModal
+        open={confirmOpen}
+        loading={loading}
+        deliveryLine={
+          address
+            ? `${address}${lobby ? ` · ${lobby}` : ""}`
+            : null
+        }
+        totalLabel={`Estimated total · $${total.toFixed(2)}`}
+        onConfirm={handleConfirmPlaceOrder}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </AppShell>
   );
 }
