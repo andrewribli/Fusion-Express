@@ -39,19 +39,16 @@ export function postLoginDestination(opts: {
 }
 
 /**
- * Campus for route isolation. Guests and signed-out visitors are
- * unrestricted — do not pass localStorage `gracerun_campus` in here.
- * A missing profile campus is not a campus (do not guess CityU or CUHK).
- * University email domain wins over a stored profile campus, so a CUHK
- * address stays CUHK even if an older session wrote `campus: cityu`.
+ * Campus for route isolation. Email domain only — never a stored profile
+ * campus, cookie, or `gracerun_campus` value.
+ * @link.cuhk.edu.hk / @cuhk.edu.hk → CUHK.
+ * @cityu.edu.hk / @my.cityu.edu.hk → CityU.
+ * Guests, signed-out visitors, and addresses outside those domains are
+ * unrestricted.
  */
 export function accessCampusForUser(user: UserProfile | null | undefined): CampusId | null {
-  if (!user?.uid || user.isGuest) return null;
-  if (user.email) {
-    const fromEmail = detectCampusFromEmail(user.email);
-    if (fromEmail) return fromEmail;
-  }
-  return isCampusId(user.campus) ? user.campus : null;
+  if (!user?.uid || user.isGuest || !user.email) return null;
+  return detectCampusFromEmail(user.email);
 }
 
 /** Admins (Firestore /admins) and the CityU owner login may cross campuses. */

@@ -5,8 +5,8 @@ import { AppLogo } from "@/components/AppLogo";
 import { LegalLink } from "@/components/LegalLink";
 
 /**
- * Marketing homepage for signed-out visitors.
- * Signed-in users never see this — they land on the channel menu.
+ * Homepage campus selector. Shown to everyone on `/`.
+ * Does not send visitors to a campus hub.
  */
 export function MarketingHome() {
   return (

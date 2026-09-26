@@ -12,33 +12,13 @@ import {
 import {
   campusConfig,
   getCampusConfig,
-  isCampusId,
   type CampusConfig,
   type CampusId,
 } from "@fusion-express/shared/campus";
 import { useUser } from "@/context/UserContext";
-import { CAMPUS_STORAGE_KEY, campusFromPathname } from "@/lib/campus-routes";
+import { accessCampusForUser } from "@/lib/campus-access";
+import { campusFromPathname, clearStoredCampusPreference } from "@/lib/campus-routes";
 import { usePathname } from "next/navigation";
-
-function loadStoredCampus(): CampusId | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(CAMPUS_STORAGE_KEY);
-    return isCampusId(raw) ? raw : null;
-  } catch {
-    return null;
-  }
-}
-
-function persistCampus(campus: CampusId | null) {
-  if (typeof window === "undefined") return;
-  try {
-    if (campus) localStorage.setItem(CAMPUS_STORAGE_KEY, campus);
-    else localStorage.removeItem(CAMPUS_STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
 
 interface CampusContextValue {
   /** Active campus for menus / chrome. Defaults to CUHK for guests. */
@@ -54,43 +34,27 @@ const CampusContext = createContext<CampusContextValue | null>(null);
 export function CampusProvider({ children }: { children: ReactNode }) {
   const { user, isReady: userReady } = useUser();
   const pathname = usePathname();
-  const [storedCampus, setStoredCampus] = useState<CampusId | null>(null);
+  const [pickedCampus, setPickedCampus] = useState<CampusId | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const fromUser = isCampusId(user?.campus) ? user.campus : null;
-    const fromStore = loadStoredCampus();
-    // Profile campus wins while someone is signed in. A stored value is only
-    // a guest hint — sign-out clears it (see clearStoredCampusPreference).
-    // Do not treat `gracerun_campus` as proof the visitor belongs on /cityu.
-    setStoredCampus(fromUser ?? fromStore);
-    if (fromUser) persistCampus(fromUser);
+    // Wipe leftover last-used campus memory. Do not read it back.
+    clearStoredCampusPreference();
     setHydrated(true);
-  }, [user?.campus]);
+  }, []);
 
   const setCampus = useCallback((next: CampusId) => {
-    setStoredCampus(next);
-    persistCampus(next);
+    setPickedCampus(next);
   }, []);
 
   const clearCampus = useCallback(() => {
-    // Guests may clear a checkout pick; signed-in users keep profile campus.
-    if (isCampusId(user?.campus)) {
-      setStoredCampus(user.campus);
-      persistCampus(user.campus);
-      return;
-    }
-    setStoredCampus(null);
-    persistCampus(null);
-  }, [user?.campus]);
+    setPickedCampus(null);
+  }, []);
 
   const routeCampus = campusFromPathname(pathname);
+  const emailCampus = accessCampusForUser(user);
 
-  const campus: CampusId =
-    routeCampus ??
-    (isCampusId(user?.campus) ? user.campus : null) ??
-    storedCampus ??
-    "cuhk";
+  const campus: CampusId = routeCampus ?? emailCampus ?? pickedCampus ?? "cuhk";
 
   const value = useMemo<CampusContextValue>(
     () => ({
