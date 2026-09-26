@@ -74,7 +74,7 @@ export function RunnerQueueBell({
   }, []);
 
   useEffect(() => {
-    if (!open || hoverCapable) return;
+    if (!open) return;
     function onPointerDown(event: MouseEvent | TouchEvent) {
       const root = rootRef.current;
       if (!root) return;
@@ -82,13 +82,18 @@ export function RunnerQueueBell({
         setOpen(false);
       }
     }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, hoverCapable]);
+  }, [open]);
 
   const label =
     count <= 0
@@ -151,8 +156,9 @@ export function RunnerQueueBell({
       </button>
 
       {open && (
+        <div className="absolute right-0 top-full z-[60] pt-2">
         <div
-          className="absolute right-0 z-[60] mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-xl shadow-black/40"
+          className="w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-xl shadow-black/40"
           role="menu"
           aria-label="Available deliveries"
         >
@@ -191,6 +197,7 @@ export function RunnerQueueBell({
               ))}
             </ul>
           )}
+        </div>
         </div>
       )}
     </div>
