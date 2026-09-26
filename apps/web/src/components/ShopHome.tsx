@@ -325,7 +325,6 @@ export function ShopHome() {
   function selectAisle(entry: { section: StoreSection; aisle: Aisle } | null) {
     setActiveAisle(entry);
     setSearch("");
-    setMobileCatsOpen(false);
   }
 
   const categoryList = (
@@ -396,7 +395,6 @@ export function ShopHome() {
       <button
         type="button"
         onClick={() => {
-          setMobileCatsOpen(false);
           openManualItem();
         }}
         className="flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
@@ -461,25 +459,7 @@ export function ShopHome() {
             },
             { href: user ? "/profile" : "/login", label: user ? "Account" : "Sign in" },
           ]}
-          menuBody={
-            <nav className="px-2 py-2 text-sm text-gray-700">
-              <p className="px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-400">
-                Categories
-              </p>
-              <button
-                type="button"
-                className="block w-full rounded-lg px-3 py-2.5 text-left font-medium hover:bg-gray-50"
-                onClick={() => {
-                  setSearchOpen(true);
-                }}
-              >
-                Search products
-              </button>
-              <a href="/canteen" className="block rounded-lg px-3 py-2.5 font-medium hover:bg-gray-50">
-                Canteens
-              </a>
-            </nav>
-          }
+          menuBody={categoryList}
         />
 
 

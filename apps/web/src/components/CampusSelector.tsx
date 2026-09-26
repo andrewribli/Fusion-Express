@@ -6,7 +6,7 @@ import { MobileAppHeader } from "@/components/MobileAppHeader";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
-import { useBothCarts } from "@/context/CartContext";
+import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { runnerEntryHref } from "@/lib/nav";
 import { useRouter } from "next/navigation";
@@ -17,10 +17,10 @@ import { useRouter } from "next/navigation";
 export function CampusSelector() {
   const { config } = useCampus();
   const { user, setMode, canRunnerMode } = useUser();
-  const { fusion, canteen } = useBothCarts();
+  const { itemCount } = useCart();
   const router = useRouter();
   const brand = config.brandLabel;
-  const cartCount = fusion.itemCount + canteen.itemCount;
+  const cartCount = itemCount;
   const headerIconClass =
     "h-11 w-11 rounded-xl border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
 
@@ -31,7 +31,7 @@ export function CampusSelector() {
         logo={<AppLogo size={32} className="h-8 w-8" />}
         brandName={brand}
         homeHref="/"
-        cartHref={canteen.itemCount > 0 ? "/canteen/cart" : "/cart"}
+        cartHref="/cart"
         cartCount={cartCount}
         bell={<RunnerQueueBell className={headerIconClass} />}
         onSearchClick={() => router.push("/fusion#search")}
