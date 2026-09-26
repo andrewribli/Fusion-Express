@@ -747,6 +747,83 @@ export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
   return getMockRunnerOrders(runnerUid);
 }
 
+/** Active runner jobs: accepted through paid, not yet completed. */
+const RUNNER_CURRENT_ORDER_STATUSES = [
+  "accepted",
+  "purchased",
+  "receipt_uploaded",
+  "delivered",
+  "paid",
+  "assigned",
+  "picked",
+] as const;
+
+function isRunnerCurrentOrder(order: Order): boolean {
+  return (
+    order.status === "accepted" ||
+    order.status === "purchased" ||
+    order.status === "receipt_uploaded" ||
+    order.status === "delivered" ||
+    order.status === "paid"
+  );
+}
+
+/**
+ * Live list of the runner's orders that are not finished yet.
+ * Uses the existing runnerUid + status index.
+ */
+export function subscribeRunnerActiveOrders(
+  runnerUid: string,
+  onOrders: (orders: Order[]) => void,
+  onError?: (err: Error) => void,
+): () => void {
+  if (!runnerUid) {
+    onOrders([]);
+    return () => undefined;
+  }
+
+  const emit = (orders: Order[]) => {
+    onOrders(
+      orders
+        .filter(isRunnerCurrentOrder)
+        .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
+    );
+  };
+
+  if (!isFirebaseConfigured()) {
+    emit(getMockRunnerOrders(runnerUid));
+    return () => undefined;
+  }
+
+  let unsub = () => {
+    /* no listener */
+  };
+  try {
+    const q = query(
+      collection(getDb(), ORDERS_COLLECTION),
+      where("runnerUid", "==", runnerUid),
+      where("status", "in", [...RUNNER_CURRENT_ORDER_STATUSES]),
+    );
+    unsub = onSnapshot(
+      q,
+      (snap) => {
+        emit(parseSnapshotDocs(snap.docs));
+      },
+      (err) => {
+        console.error("subscribeRunnerActiveOrders failed", err);
+        onError?.(err);
+        onOrders([]);
+      },
+    );
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    onError?.(error);
+    onOrders([]);
+  }
+
+  return () => unsub();
+}
+
 export async function fetchDeliveredOrdersByRunner(
   runnerUid: string,
 ): Promise<Order[]> {

@@ -6,13 +6,18 @@ import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { AccountMenu } from "@/components/AccountMenu";
 import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
+import { useUser } from "@/context/UserContext";
+import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
 
 /**
  * CUHK channel picker: Fusion groceries vs campus canteens.
  */
 export function CampusSelector() {
   const { config } = useCampus();
+  const { canRunnerMode } = useUser();
   const brand = config.brandLabel;
+  const headerIconClass =
+    "h-11 w-11 rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
 
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
@@ -23,7 +28,14 @@ export function CampusSelector() {
             <span className="text-sm font-bold tracking-tight">{brand}</span>
           </Link>
           <div className="flex items-center gap-2">
-            <RunnerQueueBell className="h-11 w-11 rounded-full border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]" />
+            <RunnerQueueBell className={headerIconClass} />
+            {canRunnerMode ? (
+              <RunnerHeaderShortcuts
+                ordersOnly
+                tone="dark"
+                className="h-11 w-11 rounded-full"
+              />
+            ) : null}
             <AccountMenu />
           </div>
         </div>

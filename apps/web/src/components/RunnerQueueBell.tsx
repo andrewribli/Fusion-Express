@@ -87,7 +87,10 @@ export function RunnerQueueBell({ className = "" }: RunnerQueueBellProps) {
         onClick={() => {
           if (!hoverCapable) setOpen((v) => !v);
         }}
-        className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24] ${className}`}
+        className={`relative inline-flex shrink-0 items-center justify-center ${
+          className ||
+          "h-10 w-10 rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24]"
+        }`}
         aria-label={label}
         aria-expanded={open}
         aria-haspopup="true"

@@ -5,13 +5,14 @@ import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
 import { FeedbackButton } from "@/ptero/components/FeedbackButton";
 import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
+import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
 import { GROCERY_SOURCES } from "@/lib/grocerySources";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useUser } from "@/ptero/context/AppState";
 import { runnerEntryHref } from "@/ptero/lib/nav";
 
 const headerIconClass =
-  "h-11 w-11 rounded-full border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
+  "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
 
 /**
  * Landing: Taste supermarket vs CityU canteens — mirrors CUHK CampusSelector.
@@ -45,6 +46,13 @@ export function ChannelSelector() {
             </Link>
             {canRunnerMode ? (
               <RunnerQueueBell tone="dark" className={headerIconClass} />
+            ) : null}
+            {canRunnerMode ? (
+              <RunnerHeaderShortcuts
+                ordersOnly
+                tone="dark"
+                className="h-11 w-11 rounded-full"
+              />
             ) : null}
             <AccountMenu tone="dark" />
           </div>

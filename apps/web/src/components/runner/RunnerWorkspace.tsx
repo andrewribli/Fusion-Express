@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { AdminSupportChat } from "@/components/AdminSupportChat";
@@ -39,6 +39,7 @@ import {
 } from "@/lib/orders";
 import { buildAcceptDiscount } from "@/lib/canteen-discount";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
+import { RUNNER_BOARD_REFRESH_EVENT } from "@/lib/runner-board-refresh";
 import { compressImage } from "@/lib/compress-image";
 import { notifyOrderStatus } from "@/lib/notify-email";
 import { notifyCanteenEvent } from "@/lib/notify-canteen";
@@ -104,6 +105,35 @@ function runnerSetupHref(scope: RunnerWorkspaceScope): string {
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
+}
+
+const HK_WEEKDAY: Record<string, number> = {
+  Mon: 0,
+  Tue: 1,
+  Wed: 2,
+  Thu: 3,
+  Fri: 4,
+  Sat: 5,
+  Sun: 6,
+};
+
+/** Monday 00:00 Asia/Hong_Kong, as a UTC timestamp. */
+function startOfWeekHkMs(now: number): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Hong_Kong",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).formatToParts(new Date(now));
+  const value = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  const year = Number(value("year"));
+  const month = Number(value("month"));
+  const day = Number(value("day"));
+  const offset = HK_WEEKDAY[value("weekday")] ?? 0;
+  const mondayUtc = Date.UTC(year, month - 1, day) - offset * 86_400_000;
+  return mondayUtc - 8 * 3_600_000;
 }
 
 function itemCount(order: Order): number {
@@ -274,9 +304,12 @@ export function RunnerWorkspace({
   scope?: RunnerWorkspaceScope;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, setRunnerRegistered } = useUser();
   const nav = RUNNER_NAV[scope];
-  const tab = VIEW_TABS[view];
+  const [pane, setPane] = useState<RunnerView>(view);
+  const [boardNonce, setBoardNonce] = useState(0);
+  const tab = VIEW_TABS[pane];
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
   const [delivered, setDelivered] = useState<Order[]>([]);
@@ -321,6 +354,10 @@ export function RunnerWorkspace({
     isRunnerDeliveryExpired(order, now),
   );
   useDeadlineWatch(active);
+
+  useEffect(() => {
+    setPane(view);
+  }, [view]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
@@ -495,6 +532,16 @@ export function RunnerWorkspace({
   }, [user, setRunnerRegistered, scope]);
 
   useEffect(() => {
+    function onRefresh() {
+      setPane("available");
+      setBoardNonce((value) => value + 1);
+      void refresh();
+    }
+    window.addEventListener(RUNNER_BOARD_REFRESH_EVENT, onRefresh);
+    return () => window.removeEventListener(RUNNER_BOARD_REFRESH_EVENT, onRefresh);
+  }, [refresh]);
+
+  useEffect(() => {
     if (!user) return;
 
     if (user.isRunner) {
@@ -533,10 +580,6 @@ export function RunnerWorkspace({
     return subscribePendingOrders(
       (orders) => {
         setPending(orders);
-        if (initialLoad.current) {
-          setLoading(false);
-          initialLoad.current = false;
-        }
       },
       {
         excludeCustomerId: getUserAccountId(user),
@@ -547,7 +590,7 @@ export function RunnerWorkspace({
         },
       },
     );
-  }, [user, scope]);
+  }, [user, scope, boardNonce]);
 
   const activeIds = openDeliveries.map((o) => o.id).join(",");
   useEffect(() => {
@@ -1061,7 +1104,12 @@ export function RunnerWorkspace({
   const flowOrder =
     openDeliveries.find((order) => order.id === flowOrderId) ?? null;
 
-  const totalFromDeliveries = delivered.reduce(
+  const weekStart = startOfWeekHkMs(now);
+  const weekDelivered = delivered.filter((order) => {
+    const stamp = order.deliveredAt ?? order.updatedAt;
+    return stamp.getTime() >= weekStart;
+  });
+  const weekEarned = weekDelivered.reduce(
     (sum, order) => sum + runnerEarningsForOrder(order.deliveryFee),
     0,
   );
@@ -1074,16 +1122,26 @@ export function RunnerWorkspace({
 
           <main
             className={`mx-auto px-4 py-4 ${
-              view === "deliveries" ? "max-w-[480px] lg:max-w-5xl" : "max-w-[480px]"
+              pane === "deliveries" ? "max-w-[480px] lg:max-w-5xl" : "max-w-[480px]"
             }`}
           >
-            <div className="grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4">
+            <div
+              role="tablist"
+              aria-label="Runner dashboard"
+              className="relative z-20 grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4"
+            >
               {nav.map((item) => (
-                <Link
+                <button
                   key={item.view}
-                  href={item.href}
+                  type="button"
+                  role="tab"
+                  aria-selected={pane === item.view}
+                  onClick={() => {
+                    setPane(item.view);
+                    if (pathname !== item.href) router.push(item.href);
+                  }}
                   className={`rounded-lg px-1 py-2.5 text-center text-xs font-semibold leading-tight transition-colors ${
-                    view === item.view
+                    pane === item.view
                       ? "bg-[#ED1C24] text-white shadow-sm"
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
@@ -1092,7 +1150,7 @@ export function RunnerWorkspace({
                   {item.view === "expired" && expiredDeliveries.length > 0
                     ? ` (${expiredDeliveries.length})`
                     : ""}
-                </Link>
+                </button>
               ))}
             </div>
 
@@ -1150,7 +1208,7 @@ export function RunnerWorkspace({
                 )}
                 {openDeliveries.length === 0 ? (
                   <div className="rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
-                    <p className="text-sm text-gray-600">No accepted orders.</p>
+                    <p className="text-sm text-gray-600">You have no active deliveries.</p>
                   </div>
                 ) : (
                   <ul className="space-y-3">
@@ -1229,9 +1287,9 @@ export function RunnerWorkspace({
             {!loading && tab === "completed" && (
               <section className="mt-4 space-y-4">
                 <div className="rounded-2xl bg-[#ED1C24] p-5 text-white shadow-md">
-                  <p className="text-sm text-white/80">Total Earned</p>
+                  <p className="text-sm text-white/80">Earned this week</p>
                   <p className="mt-1 text-3xl font-bold">
-                    ${runnerProfile?.totalEarned ?? totalFromDeliveries}
+                    ${weekEarned}
                   </p>
                   <p className="mt-2 text-xs text-white/80">
                     You keep {RUNNER_EARNINGS_RATE * 100}% of each order&apos;s delivery fee.
