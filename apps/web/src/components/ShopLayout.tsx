@@ -162,11 +162,13 @@ type ShopLayoutProps = {
   deliveryLabel: string;
   /** Optional restaurant brand mark next to the delivery label. */
   deliveryLogoSrc?: string;
-  searchProducts: MenuItem[];
-  search: string;
-  onSearchChange: (v: string) => void;
-  onSearchSelect: (item: MenuItem) => void;
+  searchProducts?: MenuItem[];
+  search?: string;
+  onSearchChange?: (v: string) => void;
+  onSearchSelect?: (item: MenuItem) => void;
   searchPlaceholder?: string;
+  /** Replace the default product search bar (e.g. MealSearch on canteen index). */
+  searchSlot?: ReactNode;
   sidebar: ReactNode;
   mobileSidebarTitle?: string;
   children: ReactNode;
@@ -184,11 +186,12 @@ type ShopLayoutProps = {
 export function ShopLayout({
   deliveryLabel,
   deliveryLogoSrc,
-  searchProducts,
-  search,
+  searchProducts = [],
+  search = "",
   onSearchChange,
   onSearchSelect,
   searchPlaceholder,
+  searchSlot,
   sidebar,
   mobileSidebarTitle = "Categories",
   children,
@@ -252,16 +255,18 @@ export function ShopLayout({
             </div>
 
             <div className="relative min-w-0 flex-1 md:max-w-md">
-              <ShopSearchBar
-                products={searchProducts}
-                value={search}
-                onChange={onSearchChange}
-                onSelect={(item) => {
-                  onSearchSelect(item);
-                  addItem(item);
-                }}
-                placeholder={searchPlaceholder}
-              />
+              {searchSlot ?? (
+                <ShopSearchBar
+                  products={searchProducts}
+                  value={search}
+                  onChange={onSearchChange ?? (() => undefined)}
+                  onSelect={(item) => {
+                    onSearchSelect?.(item);
+                    addItem(item);
+                  }}
+                  placeholder={searchPlaceholder}
+                />
+              )}
             </div>
 
             <Link

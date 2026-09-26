@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ShopLayout } from "@/components/ShopLayout";
 import { CollegeDiscountBanner } from "@/components/canteen/CollegeDiscountBanner";
+import { CanteenDishDetailModal } from "@/components/canteen/CanteenDishDetailModal";
+import { useFocusCanteenItem } from "@/components/canteen/useFocusCanteenItem";
 import {
   CATEGORY_LABELS,
   MENU as BF_MENU,
+  getMenuItem as getBfMenuItem,
   type MenuCategory,
 } from "@/data/canteen/bf-menu";
 import {
@@ -23,6 +26,7 @@ import {
 } from "@/data/canteen/simple-menu";
 import Image from "next/image";
 import {
+  getUcMenuItem,
   groupByCategory,
   ucItemsForPeriod,
   type MealPeriod,
@@ -54,6 +58,7 @@ import {
   toCartMenuItemFromSimple,
   toCartMenuItemFromUc,
 } from "@/lib/canteen/cart";
+import { useCart } from "@/context/CartContext";
 import type { MenuItem } from "@/lib/types";
 
 const SLUG_ALIASES: Record<string, string> = {
@@ -82,9 +87,11 @@ const BF_FILTERS: Array<"all" | MenuCategory> = [
   "dessert",
 ];
 
-export default function CanteenSlugPage() {
+function CanteenSlugInner() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
+  const { addItem } = useCart();
+  const { focusItemId, detailOpen, closeDetail } = useFocusCanteenItem();
   const rawSlug = String(params?.slug ?? "");
   const slug = SLUG_ALIASES[rawSlug] ?? rawSlug;
   const restaurant = getRestaurant(slug);
@@ -94,7 +101,9 @@ export default function CanteenSlugPage() {
 
   useEffect(() => {
     if (rawSlug && SLUG_ALIASES[rawSlug] && !blocked) {
-      router.replace(`/canteen/${SLUG_ALIASES[rawSlug]}`);
+      const params = new URLSearchParams(window.location.search);
+      const q = params.toString();
+      router.replace(q ? `/canteen/${SLUG_ALIASES[rawSlug]}?${q}` : `/canteen/${SLUG_ALIASES[rawSlug]}`);
     }
   }, [rawSlug, router, blocked]);
 
@@ -120,6 +129,47 @@ export default function CanteenSlugPage() {
     }
     return [];
   }, [restaurant]);
+
+  const focusDetail = useMemo(() => {
+    if (!restaurant || !focusItemId) return null;
+    if (restaurant.id === "benjamin-franklin") {
+      const item = getBfMenuItem(focusItemId);
+      if (!item) return null;
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        imageUrl: item.image,
+      };
+    }
+    if (restaurant.id === "uc-canteen") {
+      const item = getUcMenuItem(focusItemId);
+      if (!item) return null;
+      return {
+        id: item.id,
+        name: item.nameZh ? `${item.name} (${item.nameZh})` : item.name,
+        description: item.description,
+        price: item.price,
+        imageUrl: item.image,
+      };
+    }
+    if (isSimpleMenuRestaurant(restaurant.id)) {
+      const item = (getSimpleMenu(restaurant.id) ?? []).find(
+        (i) => i.id === focusItemId,
+      );
+      if (!item) return null;
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        imageUrl: item.image,
+        drinkAddonPrice: item.drinkAddonPrice,
+      };
+    }
+    return null;
+  }, [restaurant, focusItemId]);
 
   const sidebar = (
     <nav className="px-2 py-2">
@@ -223,7 +273,53 @@ export default function CanteenSlugPage() {
           restaurantId={restaurant.id}
         />
       )}
+
+      <CanteenDishDetailModal
+        open={detailOpen && Boolean(focusDetail)}
+        item={focusDetail}
+        orderingEnabled={
+          isOrderableCanteen(restaurant.id) &&
+          (restaurant.id === "uc-canteen"
+            ? Boolean(getCurrentUcPeriod())
+            : isOpen(restaurant.id))
+        }
+        onClose={closeDetail}
+        onAdd={(detail, qty) => {
+          if (restaurant.id === "benjamin-franklin") {
+            const item = getBfMenuItem(detail.id);
+            if (item) addItem(toCartMenuItemFromBf(item, "benjamin-franklin"), qty);
+            return;
+          }
+          if (restaurant.id === "uc-canteen") {
+            const item = getUcMenuItem(detail.id);
+            if (item) addItem(toCartMenuItemFromUc(item, "uc-canteen"), qty);
+            return;
+          }
+          if (isSimpleMenuRestaurant(restaurant.id)) {
+            const item = (getSimpleMenu(restaurant.id) ?? []).find(
+              (i) => i.id === detail.id,
+            );
+            if (item) {
+              addItem(
+                toCartMenuItemFromSimple(
+                  item,
+                  restaurant.id as SimpleRestaurantId,
+                ),
+                qty,
+              );
+            }
+          }
+        }}
+      />
     </ShopLayout>
+  );
+}
+
+export default function CanteenSlugPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading menu…</div>}>
+      <CanteenSlugInner />
+    </Suspense>
   );
 }
 

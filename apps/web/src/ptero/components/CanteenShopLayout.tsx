@@ -20,8 +20,10 @@ import { runnerEntryHref } from "@/ptero/lib/nav";
 type Props = {
   deliveryLabel?: string;
   searchPlaceholder?: string;
-  search: string;
-  onSearchChange: (value: string) => void;
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  /** Replace the default search input (e.g. shared MealSearch). */
+  searchSlot?: ReactNode;
   sidebar?: ReactNode;
   mobileSidebarTitle?: string;
   children: ReactNode;
@@ -34,8 +36,9 @@ type Props = {
 export function CanteenShopLayout({
   deliveryLabel = "Deliver to CityU hall lobby · Canteen",
   searchPlaceholder = "Search menu",
-  search,
+  search = "",
   onSearchChange,
+  searchSlot,
   sidebar,
   mobileSidebarTitle = "Canteens",
   children,
@@ -63,13 +66,15 @@ export function CanteenShopLayout({
             </p>
           </div>
           <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="min-w-0 flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none focus:border-[#ED1C24] sm:w-56 sm:flex-none"
-            />
+            {searchSlot ?? (
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="min-w-0 flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none focus:border-[#ED1C24] sm:w-56 sm:flex-none"
+              />
+            )}
             <Link
               href={runnerEntryHref({
                 loggedIn: Boolean(user && !user.isGuest),

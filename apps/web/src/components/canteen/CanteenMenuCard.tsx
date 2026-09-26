@@ -58,7 +58,10 @@ export function CanteenMenuCard(props: Props) {
   const restaurantId: RestaurantId = props.restaurantId;
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <article
+      data-menu-item-id={props.item.id}
+      className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition"
+    >
       <div className="relative aspect-square w-full shrink-0 bg-gray-50">
         {image ? (
           <Image
