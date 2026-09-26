@@ -90,11 +90,17 @@ export default function CanteenSlugPage() {
   const restaurant = getRestaurant(slug);
   const [search, setSearch] = useState("");
 
+  const blocked = Boolean(restaurant && !isOrderableCanteen(restaurant.id));
+
   useEffect(() => {
-    if (rawSlug && SLUG_ALIASES[rawSlug]) {
+    if (rawSlug && SLUG_ALIASES[rawSlug] && !blocked) {
       router.replace(`/canteen/${SLUG_ALIASES[rawSlug]}`);
     }
-  }, [rawSlug, router]);
+  }, [rawSlug, router, blocked]);
+
+  useEffect(() => {
+    if (blocked) router.replace("/canteen");
+  }, [blocked, router]);
 
   const searchProducts = useMemo<MenuItem[]>(() => {
     if (!restaurant || !restaurant.menuReady) return [];
@@ -125,6 +131,20 @@ export default function CanteenSlugPage() {
       </Link>
       {RESTAURANTS.map((r) => {
         const active = r.id === restaurant?.id;
+        if (!r.menuReady) {
+          return (
+            <div
+              key={r.id}
+              aria-disabled="true"
+              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400"
+            >
+              {r.shortName}
+              <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
+                Soon
+              </span>
+            </div>
+          );
+        }
         return (
           <Link
             key={r.id}
@@ -136,18 +156,13 @@ export default function CanteenSlugPage() {
             }`}
           >
             {r.shortName}
-            {!r.menuReady ? (
-              <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
-                Soon
-              </span>
-            ) : null}
           </Link>
         );
       })}
     </nav>
   );
 
-  if (!restaurant) {
+  if (!restaurant || blocked) {
     return (
       <ShopLayout
         deliveryLabel="Deliver to CUHK hall lobby · Canteen"
@@ -161,7 +176,9 @@ export default function CanteenSlugPage() {
         cartChannel="canteen"
       >
         <div className="rounded-2xl border border-gray-100 bg-white px-4 py-10 text-center shadow-sm">
-          <p className="text-sm text-gray-600">Canteen not found.</p>
+          <p className="text-sm text-gray-600">
+            {blocked ? "This canteen is coming soon." : "Canteen not found."}
+          </p>
           <Link
             href="/canteen"
             className="mt-4 inline-block text-sm font-semibold text-[#ED1C24]"
@@ -193,13 +210,7 @@ export default function CanteenSlugPage() {
           : isOpen(restaurant.id))
       }
     >
-      {!restaurant.menuReady ? (
-        <StubMenu
-          name={restaurant.name}
-          blurb={restaurant.blurb}
-          restaurantId={restaurant.id}
-        />
-      ) : restaurant.id === "benjamin-franklin" ? (
+      {!isOrderableCanteen(restaurant.id) ? null : restaurant.id === "benjamin-franklin" ? (
         <BfMenu search={search} />
       ) : restaurant.id === "uc-canteen" ? (
         <UcMenu search={search} />

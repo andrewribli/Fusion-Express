@@ -26,7 +26,7 @@ import {
   isCanteenCart,
   primaryCanteenRestaurantId,
 } from "@/ptero/lib/canteen/cart";
-import { canteenCollegeForRestaurant } from "@/ptero/config/canteen/restaurants";
+import { canteenCollegeForRestaurant, getRestaurant, isOrderableRestaurant } from "@/ptero/config/canteen/restaurants";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/ptero/lib/delivery";
 import { lineTotal } from "@/ptero/lib/pricing";
 import { formInputClassName } from "@/ptero/components/DeliveryAddressFields";
@@ -58,6 +58,11 @@ export default function CheckoutPage() {
   const grocery = groceryId ? grocerySourceById(groceryId) : null;
   const restaurantId = canteen
     ? primaryCanteenRestaurantId(items.map((c) => ({ id: c.item.id })))
+    : null;
+  const canteenBlocked =
+    canteen && !isOrderableRestaurant(restaurantId);
+  const canteenBlockedMessage = canteenBlocked
+    ? `${getRestaurant(restaurantId ?? "")?.shortName ?? "This canteen"} is coming soon and isn't accepting orders.`
     : null;
 
   const [compound, setCompound] = useState("");
@@ -92,7 +97,14 @@ export default function CheckoutPage() {
   const total = subtotal + fee.deliveryFee + tip;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
-    compound && hall && lobby && guestName.trim() && !overLimit && !mixedGrocery && !groceryClosed,
+    compound &&
+      hall &&
+      lobby &&
+      guestName.trim() &&
+      !overLimit &&
+      !mixedGrocery &&
+      !groceryClosed &&
+      !canteenBlocked,
   );
   const address = compound && hall ? formatDeliveryAddress(compound, hall) : null;
   const backHref = canteen ? "/cityu/canteen" : "/cityu/cart";
@@ -106,6 +118,10 @@ export default function CheckoutPage() {
     }
     if (groceryClosed) {
       setError("This store is closed. Checkout opens with the shop.");
+      return;
+    }
+    if (canteenBlocked) {
+      setError(canteenBlockedMessage ?? "This canteen isn't accepting orders.");
       return;
     }
     setError("");
@@ -203,6 +219,11 @@ export default function CheckoutPage() {
           <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
             {grocery.name} is closed ({grocery.hours.open}–{grocery.hours.close}). Checkout is
             locked until it opens.
+          </p>
+        )}
+        {canteenBlocked && canteenBlockedMessage && (
+          <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            {canteenBlockedMessage}
           </p>
         )}
         {error && (

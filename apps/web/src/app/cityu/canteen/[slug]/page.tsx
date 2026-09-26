@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { CanteenShopLayout } from "@/ptero/components/CanteenShopLayout";
 import { CollegeDiscountBanner } from "@/ptero/components/CollegeDiscount";
 import {
@@ -79,12 +79,18 @@ function MenuRow({
 
 export default function CanteenDetailPage() {
   const params = useParams<{ slug: string }>();
+  const router = useRouter();
   const slug = params.slug;
   const restaurant = getRestaurant(slug);
   const [search, setSearch] = useState("");
+  const blocked = Boolean(restaurant && !restaurant.menuReady);
+
+  useEffect(() => {
+    if (blocked) router.replace("/cityu/canteen");
+  }, [blocked, router]);
 
   const menu = useMemo(() => {
-    if (!restaurant) return [];
+    if (!restaurant || !restaurant.menuReady) return [];
     const all = getCanteenMenu(restaurant.id);
     const q = search.trim().toLowerCase();
     if (!q) return all;
@@ -104,24 +110,39 @@ export default function CanteenDetailPage() {
       >
         ← All canteens
       </Link>
-      {RESTAURANTS.map((r) => (
-        <Link
-          key={r.id}
-          href={`/cityu/canteen/${r.id}`}
-          className={`block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gray-50 ${
-            r.id === slug ? "bg-red-50 text-[#ED1C24]" : "text-gray-800"
-          }`}
-        >
-          {r.shortName}
-        </Link>
-      ))}
+      {RESTAURANTS.map((r) =>
+        r.menuReady ? (
+          <Link
+            key={r.id}
+            href={`/cityu/canteen/${r.id}`}
+            className={`block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gray-50 ${
+              r.id === slug ? "bg-red-50 text-[#ED1C24]" : "text-gray-800"
+            }`}
+          >
+            {r.shortName}
+          </Link>
+        ) : (
+          <div
+            key={r.id}
+            aria-disabled="true"
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400"
+          >
+            {r.shortName}
+            <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
+              Soon
+            </span>
+          </div>
+        ),
+      )}
     </nav>
   );
 
-  if (!restaurant) {
+  if (!restaurant || blocked) {
     return (
       <CanteenShopLayout search={search} onSearchChange={setSearch} sidebar={sidebar}>
-        <p className="text-sm text-gray-600">Canteen not found.</p>
+        <p className="text-sm text-gray-600">
+          {blocked ? "This canteen is coming soon." : "Canteen not found."}
+        </p>
         <Link href="/cityu/canteen" className="mt-2 inline-block text-sm font-semibold text-[#ED1C24]">
           Back to CityU Canteens
         </Link>

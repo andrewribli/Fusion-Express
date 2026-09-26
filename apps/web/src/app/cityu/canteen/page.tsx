@@ -31,20 +31,28 @@ export default function CanteenIndexPage() {
       >
         ← {CAMPUS.supermarket} supermarket
       </Link>
-      {RESTAURANTS.map((r) => (
-        <Link
-          key={r.id}
-          href={`/cityu/canteen/${r.id}`}
-          className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
-        >
-          {r.shortName}
-          {!r.menuReady ? (
+      {RESTAURANTS.map((r) =>
+        r.menuReady ? (
+          <Link
+            key={r.id}
+            href={`/cityu/canteen/${r.id}`}
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          >
+            {r.shortName}
+          </Link>
+        ) : (
+          <div
+            key={r.id}
+            aria-disabled="true"
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400"
+          >
+            {r.shortName}
             <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
               Soon
             </span>
-          ) : null}
-        </Link>
-      ))}
+          </div>
+        ),
+      )}
     </nav>
   );
 
@@ -73,30 +81,30 @@ export default function CanteenIndexPage() {
       <div className="grid gap-3 sm:grid-cols-2">
         {filtered.map((r) => {
           const college = r.collegeId ? getCollege(r.collegeId) : undefined;
-          return (
-            <Link
-              key={r.id}
-              href={`/cityu/canteen/${r.id}`}
-              className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[#ED1C24]/40 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-start gap-3">
-                  {r.logo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={r.logo}
-                      alt=""
-                      width={48}
-                      height={48}
-                      className="h-12 w-12 shrink-0 rounded-xl object-contain bg-white ring-1 ring-gray-100"
-                    />
-                  ) : null}
-                  <div className="min-w-0">
+          const body = (
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                {r.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={r.logo}
+                    alt=""
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 shrink-0 rounded-xl object-contain bg-white ring-1 ring-gray-100"
+                  />
+                ) : null}
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-base font-bold text-gray-900">{r.name}</p>
                     {college ? (
                       <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
                         {college.shortName} · 10% off
+                      </span>
+                    ) : null}
+                    {!r.menuReady ? (
+                      <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+                        Soon
                       </span>
                     ) : null}
                   </div>
@@ -109,12 +117,37 @@ export default function CanteenIndexPage() {
                   <p className="mt-1 text-xs text-gray-500">
                     {r.hoursLabel} · HK${r.deliveryFee} delivery
                   </p>
-                  </div>
                 </div>
-                <span className="shrink-0 rounded-lg bg-[#ED1C24] px-3 py-1.5 text-xs font-semibold text-white">
-                  Menu
-                </span>
               </div>
+              <span
+                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                  r.menuReady
+                    ? "bg-[#ED1C24] text-white"
+                    : "border border-gray-200 bg-gray-100 text-gray-500"
+                }`}
+              >
+                {r.menuReady ? "Menu" : "Soon"}
+              </span>
+            </div>
+          );
+          if (!r.menuReady) {
+            return (
+              <div
+                key={r.id}
+                aria-disabled="true"
+                className="block rounded-2xl border border-gray-100 bg-white p-4 opacity-95 shadow-sm"
+              >
+                {body}
+              </div>
+            );
+          }
+          return (
+            <Link
+              key={r.id}
+              href={`/cityu/canteen/${r.id}`}
+              className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[#ED1C24]/40 hover:shadow-md"
+            >
+              {body}
             </Link>
           );
         })}

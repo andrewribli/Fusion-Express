@@ -17,6 +17,7 @@ import {
   getCollege,
 } from "@/ptero/config/canteen/colleges";
 import { DEMO_CUSTOMER, DEMO_RUNNER } from "@/ptero/config/demo";
+import { isOrderableRestaurant } from "@/ptero/config/canteen/restaurants";
 import { hashPassword } from "@/ptero/lib/auth";
 import { notifyDiscountReceived, notifyOrderStatus } from "@/ptero/lib/canteen/notify";
 import { readJson, STORAGE_KEYS, writeJson } from "@/ptero/lib/storage";
@@ -477,6 +478,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const placeOrder = useCallback(
     async (draft: Omit<Order, "id" | "campus" | "createdAt" | "status">) => {
+      if (
+        draft.orderChannel === "canteen" &&
+        !isOrderableRestaurant(draft.canteenRestaurantId)
+      ) {
+        throw new Error("This canteen is coming soon and isn't accepting orders.");
+      }
       let id = `CYU-${Date.now().toString(36).toUpperCase()}`;
       try {
         const cloudId = await persistPteroOrderToFirestore(draft);

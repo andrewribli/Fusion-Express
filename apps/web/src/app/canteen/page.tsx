@@ -41,20 +41,28 @@ export default function CanteenIndexPage() {
 
   const sidebar = (
     <nav className="px-2 py-2">
-      {RESTAURANTS.map((r) => (
-        <Link
-          key={r.id}
-          href={`/canteen/${r.id}`}
-          className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
-        >
-          {r.shortName}
-          {!r.menuReady ? (
+      {RESTAURANTS.map((r) =>
+        r.menuReady ? (
+          <Link
+            key={r.id}
+            href={`/canteen/${r.id}`}
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          >
+            {r.shortName}
+          </Link>
+        ) : (
+          <div
+            key={r.id}
+            aria-disabled="true"
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400"
+          >
+            {r.shortName}
             <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
               Soon
             </span>
-          ) : null}
-        </Link>
-      ))}
+          </div>
+        ),
+      )}
     </nav>
   );
 
@@ -89,16 +97,13 @@ export default function CanteenIndexPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {filtered.map((r) => {
           const college = r.collegeId ? getCollege(r.collegeId) : undefined;
-          return (
-            <Link
-              key={r.id}
-              href={`/canteen/${r.id}`}
-              className={`flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition ${
-                r.menuReady
-                  ? "hover:border-[#ED1C24]/40 hover:shadow-md"
-                  : "opacity-95 hover:border-gray-200"
-              }`}
-            >
+          const className = `flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition ${
+            r.menuReady
+              ? "hover:border-[#ED1C24]/40 hover:shadow-md"
+              : "opacity-95"
+          }`;
+          const body = (
+            <>
               <div className="flex items-start gap-3">
                 {r.logoSrc ? (
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-50 ring-1 ring-gray-100">
@@ -145,6 +150,18 @@ export default function CanteenIndexPage() {
                   {r.menuReady ? "Menu" : "Soon"}
                 </span>
               </div>
+            </>
+          );
+          if (!r.menuReady) {
+            return (
+              <div key={r.id} aria-disabled="true" className={className}>
+                {body}
+              </div>
+            );
+          }
+          return (
+            <Link key={r.id} href={`/canteen/${r.id}`} className={className}>
+              {body}
             </Link>
           );
         })}

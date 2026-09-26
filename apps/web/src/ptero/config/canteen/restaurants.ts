@@ -60,11 +60,11 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Kebabs, biryani, curry, pizza & more. Halal · No added MSG.",
     cuisine: "Halal / Middle Eastern",
     location: "Yeung Building R5013",
-    hoursLabel: "Mon–Sat 10:00 AM – 8:00 PM · Closed Sun & PH",
+    hoursLabel: "Coming soon",
     pickupLabel: "Ebeneezer's (5380 Cafe)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
-    menuReady: true,
+    menuReady: false,
     useMealPeriods: false,
     logo: "/images/canteen/ebeneezers-logo.png",
   },
@@ -77,11 +77,11 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Fast food by meal period in Li Dak Sum Yip Yio Chin Academic Building.",
     cuisine: "Fast Food",
     location: "3/F, Li Dak Sum Yip Yio Chin Academic Building",
-    hoursLabel: "07:30–21:00",
+    hoursLabel: "Coming soon",
     pickupLabel: "AC2 Canteen",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
-    menuReady: true,
+    menuReady: false,
     useMealPeriods: true,
   },
   {
@@ -93,11 +93,11 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Western bites on Lau Ming Wai Academic Building.",
     cuisine: "Western",
     location: "7/F, Lau Ming Wai Academic Building",
-    hoursLabel: "07:30–21:00 (Mon–Sat)",
+    hoursLabel: "Coming soon",
     pickupLabel: "AC3 Bistro",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
-    menuReady: true,
+    menuReady: false,
     useMealPeriods: true,
   },
   {
@@ -109,11 +109,11 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Café and fast food at Kowloon Tong Student Residence — 10% off with a KLNT runner.",
     cuisine: "Café/Fast Food",
     location: "Kowloon Tong Student Residence",
-    hoursLabel: "08:00–22:00",
+    hoursLabel: "Coming soon",
     pickupLabel: "Hall Canteen @KLNT",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "KLNT",
-    menuReady: true,
+    menuReady: false,
     useMealPeriods: true,
   },
   {
@@ -125,11 +125,11 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Ma On Shan residence canteen — 10% off when a MOS runner accepts.",
     cuisine: "Café/Fast Food",
     location: "Ma On Shan Student Residence",
-    hoursLabel: "09:00–20:00 (Mon–Fri), 09:00–18:00 (Sat)",
+    hoursLabel: "Coming soon",
     pickupLabel: "Hall Canteen @MOS",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "MOS",
-    menuReady: true,
+    menuReady: false,
     useMealPeriods: true,
   },
   {
@@ -141,17 +141,23 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Dim sum and Cantonese favourites on the Amenities Building.",
     cuisine: "Dim Sum/Cantonese",
     location: "8/F, Amenities Building",
-    hoursLabel: "11:00–22:30",
+    hoursLabel: "Coming soon",
     pickupLabel: "City Chinese",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
-    menuReady: true,
+    menuReady: false,
     useMealPeriods: false,
   },
 ];
 
 export function getRestaurant(id: RestaurantId | string): Restaurant | undefined {
   return RESTAURANTS.find((r) => r.id === id);
+}
+
+/** Only canteens with a live menu can be opened or ordered. */
+export function isOrderableRestaurant(id: string | null | undefined): boolean {
+  if (!id) return false;
+  return getRestaurant(id)?.menuReady === true;
 }
 
 export function canteenCollegeForRestaurant(
