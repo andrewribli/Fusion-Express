@@ -1,28 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
+import { MealSearch } from "@/components/canteen/MealSearch";
 import { CanteenShopLayout } from "@/ptero/components/CanteenShopLayout";
 import { CAMPUS } from "@/ptero/config/campus";
 import { getCollege } from "@/ptero/config/canteen/colleges";
 import { RESTAURANTS } from "@/ptero/config/canteen/restaurants";
 
 export default function CanteenIndexPage() {
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return RESTAURANTS;
-    return RESTAURANTS.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.shortName.toLowerCase().includes(q) ||
-        r.blurb.toLowerCase().includes(q) ||
-        r.cuisine.toLowerCase().includes(q) ||
-        r.location.toLowerCase().includes(q),
-    );
-  }, [search]);
-
   const sidebar = (
     <nav className="px-2 py-2">
       <Link
@@ -58,9 +43,7 @@ export default function CanteenIndexPage() {
 
   return (
     <CanteenShopLayout
-      search={search}
-      onSearchChange={setSearch}
-      searchPlaceholder="Search canteens"
+      searchSlot={<MealSearch campus="cityu" />}
       sidebar={sidebar}
       mobileSidebarTitle="CityU Canteens"
     >
@@ -79,7 +62,7 @@ export default function CanteenIndexPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {filtered.map((r) => {
+        {RESTAURANTS.map((r) => {
           const college = r.collegeId ? getCollege(r.collegeId) : undefined;
           const body = (
             <div className="flex items-start justify-between gap-3">

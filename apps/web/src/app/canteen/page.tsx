@@ -1,44 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShopLayout } from "@/components/ShopLayout";
+import { MealSearch } from "@/components/canteen/MealSearch";
 import { getCollege } from "@/data/canteen/colleges";
 import { RESTAURANTS } from "@/data/canteen/restaurants";
-import type { MenuItem } from "@/lib/types";
 
 export default function CanteenIndexPage() {
-  const [search, setSearch] = useState("");
-
-  const searchProducts = useMemo<MenuItem[]>(
-    () =>
-      RESTAURANTS.filter((r) => r.menuReady).map((r) => ({
-        id: `canteen-nav:${r.id}`,
-        name: r.name,
-        category: "other",
-        price: r.deliveryFee,
-        unit: "each",
-        priceType: "fixed",
-        runnerInputsPrice: false,
-        inStock: true,
-        sortOrder: 0,
-        weightKg: 0,
-      })),
-    [],
-  );
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return RESTAURANTS;
-    return RESTAURANTS.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.shortName.toLowerCase().includes(q) ||
-        r.blurb.toLowerCase().includes(q),
-    );
-  }, [search]);
-
   const sidebar = (
     <nav className="px-2 py-2">
       {RESTAURANTS.map((r) =>
@@ -69,14 +38,7 @@ export default function CanteenIndexPage() {
   return (
     <ShopLayout
       deliveryLabel="Deliver to CUHK hall lobby · Canteen"
-      searchProducts={searchProducts}
-      search={search}
-      onSearchChange={setSearch}
-      onSearchSelect={(item) => {
-        const id = item.id.replace(/^canteen-nav:/, "");
-        if (id) window.location.href = `/canteen/${id}`;
-      }}
-      searchPlaceholder="Search canteens"
+      searchSlot={<MealSearch campus="cuhk" />}
       sidebar={sidebar}
       mobileSidebarTitle="Canteens"
       cartChannel="canteen"
@@ -95,7 +57,7 @@ export default function CanteenIndexPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {filtered.map((r) => {
+        {RESTAURANTS.map((r) => {
           const college = r.collegeId ? getCollege(r.collegeId) : undefined;
           const className = `flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition ${
             r.menuReady

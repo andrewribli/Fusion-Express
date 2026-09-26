@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { CanteenDishDetailModal } from "@/components/canteen/CanteenDishDetailModal";
+import { useFocusCanteenItem } from "@/components/canteen/useFocusCanteenItem";
 import { CanteenShopLayout } from "@/ptero/components/CanteenShopLayout";
 import { CollegeDiscountBanner } from "@/ptero/components/CollegeDiscount";
 import {
   getCanteenMenu,
+  getCanteenMenuItem,
   groupMenuByCategory,
   groupMenuByMealPeriod,
   type CanteenMenuItem,
@@ -15,6 +18,7 @@ import { getRestaurant, RESTAURANTS } from "@/ptero/config/canteen/restaurants";
 import { toCartMenuItem } from "@/ptero/lib/canteen/cart";
 import { useCart } from "@/ptero/context/CartContext";
 import { formatHkd } from "@/ptero/lib/types";
+import { isCanteenOpenNow } from "@/lib/meal-search";
 
 function MenuRow({
   restaurantId,
@@ -28,7 +32,10 @@ function MenuRow({
   const qty = items.find((c) => c.item.id === cartId)?.quantity ?? 0;
 
   return (
-    <li className="flex items-start justify-between gap-3 border-b border-gray-50 py-3 last:border-0">
+    <li
+      data-menu-item-id={item.id}
+      className="flex items-start justify-between gap-3 border-b border-gray-50 py-3 last:border-0 transition"
+    >
       <div className="flex min-w-0 gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -77,13 +84,18 @@ function MenuRow({
   );
 }
 
-export default function CanteenDetailPage() {
+function CanteenDetailInner() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const slug = params.slug;
   const restaurant = getRestaurant(slug);
   const [search, setSearch] = useState("");
   const blocked = Boolean(restaurant && !restaurant.menuReady);
+  const { addItem } = useCart();
+  const { focusItemId, detailOpen, closeDetail } = useFocusCanteenItem();
+  const openNow = restaurant
+    ? isCanteenOpenNow("cityu", restaurant.id)
+    : false;
 
   useEffect(() => {
     if (blocked) router.replace("/cityu/canteen");
@@ -101,6 +113,11 @@ export default function CanteenDetailPage() {
         (i.description?.toLowerCase().includes(q) ?? false),
     );
   }, [restaurant, search]);
+
+  const focusItem = useMemo(() => {
+    if (!restaurant || !focusItemId) return null;
+    return getCanteenMenuItem(restaurant.id, focusItemId) ?? null;
+  }, [restaurant, focusItemId]);
 
   const sidebar = (
     <nav className="px-2 py-2">
@@ -238,6 +255,36 @@ export default function CanteenDetailPage() {
       {menu.length === 0 ? (
         <p className="text-sm text-gray-500">No items match your search.</p>
       ) : null}
+
+      <CanteenDishDetailModal
+        open={detailOpen && Boolean(focusItem)}
+        item={
+          focusItem
+            ? {
+                id: focusItem.id,
+                name: focusItem.name,
+                description: focusItem.description,
+                price: focusItem.price,
+                imageUrl: focusItem.imageUrl,
+              }
+            : null
+        }
+        orderingEnabled={openNow}
+        onClose={closeDetail}
+        onAdd={(detail, qty) => {
+          const menuItem = getCanteenMenuItem(restaurant.id, detail.id);
+          if (!menuItem) return;
+          addItem(toCartMenuItem(restaurant.id, menuItem), qty);
+        }}
+      />
     </CanteenShopLayout>
+  );
+}
+
+export default function CanteenDetailPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading menu…</div>}>
+      <CanteenDetailInner />
+    </Suspense>
   );
 }
