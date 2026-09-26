@@ -13,11 +13,11 @@ export function AppShell({
 }) {
   return (
     <>
-      <div className={hideNav ? "" : "pb-20 md:pb-0"}>
+      <div className={hideNav ? "" : "pb-28 md:pb-0"}>
         {children}
         <SiteFooter />
       </div>
-      <TrackOrderFab />
+      {!hideNav && <TrackOrderFab />}
       {!hideNav && <BottomNav />}
     </>
   );

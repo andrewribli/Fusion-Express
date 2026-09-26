@@ -404,18 +404,24 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /adminChats/{userId}/messages/{messageId} {
+    match /adminChats/{userId} {
       allow read: if signedIn() && (uid() == userId || isAdmin());
-      allow create: if signedIn()
-        && (uid() == userId || isAdmin())
-        && request.resource.data.senderId == uid()
-        && request.resource.data.text is string
-        && request.resource.data.text.size() > 0
-        && request.resource.data.text.size() <= 2000;
-      allow update: if signedIn()
-        && (uid() == userId || isAdmin())
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']);
+      allow create, update: if signedIn() && (uid() == userId || isAdmin());
       allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if signedIn() && (uid() == userId || isAdmin());
+        allow create: if signedIn()
+          && (uid() == userId || isAdmin())
+          && request.resource.data.senderId == uid()
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+        allow update: if signedIn()
+          && (uid() == userId || isAdmin())
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']);
+        allow delete: if false;
+      }
     }
 
     match /adminBroadcasts/{broadcastId} {

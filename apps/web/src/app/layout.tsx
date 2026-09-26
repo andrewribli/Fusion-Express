@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { AdminSessionSync } from "@/components/AdminSessionSync";
 import { CampusAccessGuard } from "@/components/CampusAccessGuard";
 import { StagingBanner } from "@/components/StagingBanner";
 import { CampusProvider } from "@/context/CampusContext";
@@ -59,6 +60,7 @@ export default function RootLayout({
               <CartProvider>
                 <ManualItemModalProvider>
                   <StagingBanner />
+                  <AdminSessionSync />
                   <CampusAccessGuard>{children}</CampusAccessGuard>
                 </ManualItemModalProvider>
               </CartProvider>

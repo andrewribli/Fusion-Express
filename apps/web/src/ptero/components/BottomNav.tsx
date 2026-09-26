@@ -56,7 +56,7 @@ export function BottomNav() {
               aria-label={tab.label}
               aria-current={active ? "page" : undefined}
               onClick={(event) => onTabClick(tab, event)}
-              className="relative flex min-h-[3.5rem] flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 text-center text-[10px] font-medium leading-tight"
+              className="relative flex min-h-[3.5rem] min-w-[44px] flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 text-center text-[10px] font-medium leading-tight"
               style={{ color }}
             >
               {active ? (

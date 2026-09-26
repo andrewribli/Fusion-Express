@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useUser, type UserProfile } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
+import { isAdminAllowlistEmail } from "@/lib/admin-emails";
+import { isAdminUser } from "@/lib/admins";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 function initials(user: UserProfile): string {
   const parts = user.fullName.trim().split(/\s+/).filter(Boolean);
@@ -75,7 +77,23 @@ export function AccountMenu({
   const { href: trackHref, count: activeCount } = useActiveCustomerOrders();
   const [open, setOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!user?.uid || !isAdminAllowlistEmail(user.email)) {
+      setShowAdmin(false);
+      return;
+    }
+    void isAdminUser({ uid: user.uid, email: user.email }).then((ok) => {
+      if (!cancelled) setShowAdmin(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid, user?.email]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -141,6 +159,19 @@ export function AccountMenu({
           <MenuLink href="/profile" onClick={() => setOpen(false)}>
             Profile Settings
           </MenuLink>
+          {showAdmin ? (
+            <>
+              <AdminMenuLink href="/admin/broadcast" onClick={() => setOpen(false)}>
+                Admin broadcast
+              </AdminMenuLink>
+              <AdminMenuLink href="/admin/chats" onClick={() => setOpen(false)}>
+                Admin chats
+              </AdminMenuLink>
+              <AdminMenuLink href="/admin/users" onClick={() => setOpen(false)}>
+                Admin users
+              </AdminMenuLink>
+            </>
+          ) : null}
           <button
             type="button"
             role="menuitem"
@@ -188,5 +219,43 @@ function MenuLink({
     >
       {children}
     </Link>
+  );
+}
+
+function AdminMenuLink({
+  href,
+  onClick,
+  children,
+}: {
+  href: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      className="block w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+      onClick={() => {
+        onClick();
+        void (async () => {
+          try {
+            const { getAuthClient } = await import("@/lib/firebase");
+            const token = await getAuthClient().currentUser?.getIdToken();
+            if (token) {
+              await fetch("/api/admin/session", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+              });
+            }
+          } catch {
+            /* ignore */
+          }
+          window.location.href = href;
+        })();
+      }}
+    >
+      {children}
+    </button>
   );
 }

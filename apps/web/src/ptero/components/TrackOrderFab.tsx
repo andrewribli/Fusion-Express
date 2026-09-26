@@ -8,7 +8,7 @@ import { useCart } from "@/ptero/context/CartContext";
 
 const ACTIVE = new Set(["pending", "accepted", "purchased", "delivered"]);
 
-/** Floating Track Order chip — mirrors gracerun.fit TrackOrderFab. */
+/** Docked Track Order bar above bottom nav — no floating pill over cards. */
 export function TrackOrderFab() {
   const pathname = usePathname();
   const { mode, user } = useUser();
@@ -28,20 +28,19 @@ export function TrackOrderFab() {
 
   const href =
     active.length === 1 ? `/cityu/track/${active[0].id}` : "/cityu/orders";
-  const bottomClass =
-    itemCount > 0
-      ? "bottom-[9.75rem] md:bottom-24"
-      : "bottom-[5.75rem] md:bottom-6";
+  const bottom = itemCount > 0 ? "bottom-[7.25rem]" : "bottom-[3.5rem]";
 
   return (
-    <Link
-      href={href}
-      className={`fixed left-3 z-40 flex min-h-11 items-center gap-2 rounded-full bg-[#ED1C24] px-4 py-2.5 text-sm font-bold text-white shadow-lg hover:bg-[#d11920] sm:left-1/2 sm:-translate-x-1/2 ${bottomClass}`}
-    >
-      Track Order
-      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1.5 text-[11px] font-bold text-[#ED1C24]">
-        {active.length > 9 ? "9+" : active.length}
-      </span>
-    </Link>
+    <div className={`fixed inset-x-0 z-40 px-3 pb-2 md:hidden ${bottom}`}>
+      <Link
+        href={href}
+        className="mx-auto flex min-h-11 max-w-[480px] items-center justify-center gap-2 rounded-2xl bg-[#ED1C24] px-4 text-sm font-bold text-white shadow-md"
+      >
+        Track Order
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1.5 text-[11px] font-bold text-[#ED1C24]">
+          {active.length > 9 ? "9+" : active.length}
+        </span>
+      </Link>
+    </div>
   );
 }

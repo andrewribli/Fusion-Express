@@ -547,6 +547,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Otherwise a CityU session left `gracerun_campus=cityu` and the next
     // visit to `/` still opened the CityU shop.
     clearStoredCampusPreference();
+    await fetch("/api/admin/session", { method: "DELETE" }).catch(
+      () => undefined,
+    );
     if (firebaseEnabled && !isDemoAuth()) {
       await signOutUser();
     }

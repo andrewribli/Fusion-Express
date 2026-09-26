@@ -31,7 +31,7 @@ export function CampusAccessGuard({ children }: { children: React.ReactNode }) {
       return;
     }
     setAdminChecked(false);
-    void isAdminUid(user.uid).then((allowed) => {
+    void isAdminUid(user.uid, user.email).then((allowed) => {
       if (!cancelled) {
         setIsAdmin(allowed);
         setAdminChecked(true);

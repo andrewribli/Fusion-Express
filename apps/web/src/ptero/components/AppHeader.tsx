@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
-import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificationBell";
 import { NavIcon } from "@/ptero/components/NavIcon";
 import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { CAMPUS } from "@/ptero/config/campus";
@@ -126,12 +125,7 @@ export function AppHeader({
               </Link>
             )}
             {!runnerMode && (
-              <>
-                <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-                {canRunnerMode ? (
-                  <RunnerQueueBell className="h-11 w-11 rounded-full" />
-                ) : null}
-              </>
+              <RunnerQueueBell className="h-11 w-11 rounded-full" />
             )}
             {tabs
               .filter(

@@ -442,6 +442,7 @@ export type BroadcastGroup =
   | "long_term";
 
 export type BroadcastRecipient = {
+  uid: string;
   email: string;
   name: string;
   isRunner: boolean;
@@ -449,9 +450,13 @@ export type BroadcastRecipient = {
   createdAt: Date | null;
 };
 
-/** Verify the caller and that `/admins/{uid}` exists. No Admin SDK. */
+/** Verify the caller is an allowlisted admin with `/admins/{uid}`. No Admin SDK. */
 export async function requireAdminRest(request: Request): Promise<RestAuthed> {
   const auth = await requireAuthRest(request);
+  const { isAdminAllowlistEmail } = await import("@/lib/admin-emails");
+  if (!isAdminAllowlistEmail(auth.email)) {
+    throw new RestAuthError("Admin access only.", 403);
+  }
   const ctx = await adminAccessToken();
   if (!ctx) {
     throw new RestAuthError("Could not verify admin access.", 503);
@@ -500,7 +505,7 @@ export async function listBroadcastRecipientsRest(): Promise<
       throw new RestAuthError("Could not load users from Firestore.", 502);
     }
     const data = (await res.json()) as {
-      documents?: { fields?: Record<string, FirestoreValue> }[];
+      documents?: { name?: string; fields?: Record<string, FirestoreValue> }[];
       nextPageToken?: string;
     };
     for (const doc of data.documents ?? []) {
@@ -511,7 +516,12 @@ export async function listBroadcastRecipientsRest(): Promise<
       if (!email.includes("@") || seen.has(email)) continue;
       seen.add(email);
       const created = fields.createdAt;
+      const uid =
+        String(fields.uid ?? "").trim() ||
+        (doc.name ?? "").split("/").pop() ||
+        "";
       out.push({
+        uid,
         email,
         name: String(fields.fullName ?? fields.name ?? "").trim(),
         isRunner: Boolean(fields.isRunner) || Boolean(fields.runnerId),

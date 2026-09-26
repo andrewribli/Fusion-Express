@@ -2,44 +2,57 @@
 
 import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
+import { MobileAppHeader } from "@/components/MobileAppHeader";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
-import { AccountMenu } from "@/components/AccountMenu";
 import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
+import { useBothCarts } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
-import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
+import { runnerEntryHref } from "@/lib/nav";
+import { useRouter } from "next/navigation";
 
 /**
  * CUHK channel picker: Fusion groceries vs campus canteens.
  */
 export function CampusSelector() {
   const { config } = useCampus();
-  const { canRunnerMode } = useUser();
+  const { user, setMode, canRunnerMode } = useUser();
+  const { fusion, canteen } = useBothCarts();
+  const router = useRouter();
   const brand = config.brandLabel;
+  const cartCount = fusion.itemCount + canteen.itemCount;
   const headerIconClass =
-    "h-11 w-11 rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
+    "h-11 w-11 rounded-xl border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
 
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
-      <header className="border-b border-white/10 bg-[#0c0c0c]/95">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2" aria-label={`${brand} home`}>
-            <AppLogo size={44} className="h-11 w-11" />
-            <span className="text-sm font-bold tracking-tight">{brand}</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <RunnerQueueBell className={headerIconClass} />
-            {canRunnerMode ? (
-              <RunnerHeaderShortcuts
-                ordersOnly
-                tone="dark"
-                className="h-11 w-11 rounded-full"
-              />
-            ) : null}
-            <AccountMenu />
-          </div>
-        </div>
-      </header>
+      <MobileAppHeader
+        tone="dark"
+        logo={<AppLogo size={32} className="h-8 w-8" />}
+        brandName={brand}
+        homeHref="/"
+        cartHref={canteen.itemCount > 0 ? "/canteen/cart" : "/cart"}
+        cartCount={cartCount}
+        bell={<RunnerQueueBell className={headerIconClass} />}
+        onSearchClick={() => router.push("/fusion#search")}
+        menuTitle="Menu"
+        menuLinks={[
+          { href: "/canteen", label: "Canteens" },
+          { href: "/fusion", label: "Fusion groceries" },
+          { href: "/cityu", label: "Switch to CityU" },
+          {
+            href: runnerEntryHref({
+              loggedIn: Boolean(user),
+              canRunnerMode,
+            }),
+            label: canRunnerMode ? "Runner dashboard" : "Become a runner",
+            onClick: () => {
+              if (canRunnerMode) setMode("runner");
+            },
+          },
+          { href: user ? "/profile" : "/login", label: user ? "Account" : "Sign in" },
+        ]}
+      />
 
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-8 sm:pt-12">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ED1C24]">

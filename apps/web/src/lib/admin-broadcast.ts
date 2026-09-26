@@ -13,6 +13,8 @@ export type BroadcastResult = {
   group?: BroadcastGroup;
   count?: number;
   sent?: number;
+  notified?: number;
+  queued?: number;
   failed?: { email: string; error: string }[];
   recipients?: BroadcastPerson[];
   test?: boolean;

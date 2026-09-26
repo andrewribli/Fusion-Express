@@ -6,8 +6,7 @@ import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
 import { NavIcon } from "@/components/NavIcon";
 import { RunnerModeBanner } from "@/components/RunnerModeBanner";
-import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
-import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
+import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { useCart } from "@/context/CartContext";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
@@ -142,11 +141,9 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                 Switch to Customer
               </Link>
             )}
-            {canRunnerMode ? (
-              <RunnerHeaderShortcuts className="h-11 w-11 rounded-full" />
-            ) : !runnerMode ? (
-              <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-            ) : null}
+            {!runnerMode && (
+              <RunnerQueueBell className="h-11 w-11 rounded-full" />
+            )}
             {tabs
               .filter(
                 (tab) =>

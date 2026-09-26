@@ -6,17 +6,20 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import {
-  fetchUnreadForUser,
-  markThreadRead,
-  sendDirectMessage,
-  subscribeDirectMessages,
-} from "@/lib/direct-messages";
-import type { DirectMessage } from "@/lib/direct-messages";
+  markAdminChatSeen,
+  sendAdminChatMessage,
+  subscribeAdminChatMessages,
+  subscribeAdminInboxUnread,
+  type AdminChatMessage,
+} from "@/lib/admin-chats";
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
 }
 
+/**
+ * User-facing GraceRun 1:1 inbox — adminChats/{userId}/messages.
+ */
 export function AdminSupportChat({
   forceOpen,
   onOpenChange,
@@ -24,14 +27,13 @@ export function AdminSupportChat({
 }: {
   forceOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Inline panel (e.g. runner deliveries) instead of floating FAB */
   embedded?: boolean;
 } = {}) {
   const pathname = usePathname();
   const { user, mode } = useUser();
   const { itemCount } = useCart();
   const [open, setOpen] = useState(Boolean(forceOpen));
-  const [messages, setMessages] = useState<DirectMessage[]>([]);
+  const [messages, setMessages] = useState<AdminChatMessage[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -51,18 +53,14 @@ export function AdminSupportChat({
     if (!user?.uid) return;
     const uid = user.uid;
     if (open) {
-      return subscribeDirectMessages(uid, setMessages);
+      return subscribeAdminChatMessages(uid, setMessages);
     }
-    void fetchUnreadForUser(uid).then(setUnread).catch(() => undefined);
-    const interval = setInterval(() => {
-      void fetchUnreadForUser(uid).then(setUnread).catch(() => undefined);
-    }, 15000);
-    return () => clearInterval(interval);
+    return subscribeAdminInboxUnread(uid, setUnread);
   }, [user?.uid, open]);
 
   useEffect(() => {
     if (!open || !user?.uid) return;
-    void markThreadRead({ userId: user.uid, readerId: user.uid });
+    void markAdminChatSeen({ userId: user.uid, readerId: user.uid });
     setUnread(0);
   }, [open, user?.uid, messages.length]);
 
@@ -88,7 +86,6 @@ export function AdminSupportChat({
 
   if (pathname.startsWith("/admin")) return null;
   if (!embedded && mode === "runner" && pathname.startsWith("/runner/deliveries")) {
-    // Deliveries page has its own Chat with Admin card.
     return null;
   }
 
@@ -98,10 +95,10 @@ export function AdminSupportChat({
     setError("");
     setSending(true);
     try {
-      await sendDirectMessage({
+      await sendAdminChatMessage({
         userId: user.uid,
         senderId: user.uid,
-        message: text,
+        text: text.trim(),
       });
       setText("");
     } catch (err) {
@@ -120,12 +117,9 @@ export function AdminSupportChat({
           : "flex h-[24rem] w-[min(22rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl"
       }
     >
-      <div
-        className="flex items-start justify-between gap-3 px-4 py-3"
-        style={{ backgroundColor: mode === "runner" ? "#1d1160" : "#ED1C24" }}
-      >
+      <div className="flex items-start justify-between gap-3 bg-[#ED1C24] px-4 py-3">
         <div>
-          <p className="text-sm font-bold text-white">Chat with Admin</p>
+          <p className="text-sm font-bold text-white">Message from GraceRun</p>
           <p className="mt-0.5 text-[11px] text-white/80">
             Payments, receipts, and order help.
           </p>
@@ -134,7 +128,7 @@ export function AdminSupportChat({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-white/90 hover:bg-white/15"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl text-white/90 hover:bg-white/15"
             aria-label="Close chat"
           >
             ×
@@ -144,7 +138,7 @@ export function AdminSupportChat({
 
       {!user ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
-          <p className="text-sm text-gray-600">Sign in to message admin.</p>
+          <p className="text-sm text-gray-600">Sign in to message GraceRun.</p>
           <Link href="/login" className="text-sm font-semibold text-[#ED1C24] underline">
             Sign in
           </Link>
@@ -154,7 +148,7 @@ export function AdminSupportChat({
           <div className="flex-1 space-y-2 overflow-y-auto bg-gray-50 px-3 py-3">
             {messages.length === 0 && (
               <p className="text-center text-xs text-gray-500">
-                Ask admin about payments, refunds, or delivery issues.
+                Ask about payments, refunds, or delivery issues.
               </p>
             )}
             {messages.map((msg) => {
@@ -173,16 +167,17 @@ export function AdminSupportChat({
                   >
                     {!mine && (
                       <p className="mb-0.5 text-[10px] font-semibold opacity-70">
-                        Admin
+                        GraceRun
                       </p>
                     )}
-                    <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                    <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                     <p
                       className={`mt-1 text-[10px] ${
                         mine ? "text-white/70" : "text-gray-400"
                       }`}
                     >
                       {formatTime(msg.createdAt)}
+                      {msg.seen ? " · Seen" : ""}
                     </p>
                   </div>
                 </div>
@@ -195,14 +190,13 @@ export function AdminSupportChat({
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Message admin…"
-              className="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
+              placeholder="Message GraceRun…"
+              className="min-h-11 min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
             />
             <button
               type="submit"
               disabled={sending || !text.trim()}
-              className="rounded-full px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-              style={{ backgroundColor: "#ED1C24" }}
+              className="min-h-11 rounded-full bg-[#ED1C24] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
             >
               Send
             </button>
@@ -219,10 +213,9 @@ export function AdminSupportChat({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-sm font-bold text-white shadow-sm"
-            style={{ backgroundColor: "#1d1160" }}
+            className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl bg-[#111827] px-4 py-3 text-left text-sm font-bold text-white shadow-sm"
           >
-            <span>Chat with Admin</span>
+            <span>Message from GraceRun</span>
             <span className="text-[#ED1C24]">Open →</span>
           </button>
         ) : (
@@ -232,26 +225,24 @@ export function AdminSupportChat({
     );
   }
 
-  const onCartOrCheckout =
-    pathname.startsWith("/cart") || pathname.startsWith("/checkout");
+  // Sit above the docked utility bar / bottom nav — not over product cards.
   const fabBottom =
     mode === "runner"
-      ? "bottom-28 md:bottom-6"
-      : onCartOrCheckout || itemCount > 0
-        ? "bottom-[11.5rem] md:bottom-6"
-        : "bottom-28 md:bottom-6";
+      ? "bottom-28"
+      : itemCount > 0
+        ? "bottom-[11.5rem]"
+        : "bottom-[8.5rem]";
 
   return (
-    <div ref={rootRef} className={`fixed right-3 z-40 md:right-6 ${fabBottom}`}>
+    <div ref={rootRef} className={`fixed right-3 z-40 hidden md:block md:bottom-6 ${fabBottom}`}>
       {open ? (
         panel
       ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="relative flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg"
-          style={{ backgroundColor: mode === "runner" ? "#1d1160" : "#ED1C24" }}
-          aria-label="Chat with Admin"
+          className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#ED1C24] text-white shadow-lg"
+          aria-label="Message from GraceRun"
         >
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden>
             <path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8.4L4 20.4V6a2 2 0 0 1 2-2Zm2 4v2h12V8H6Zm0 4v2h8v-2H6Z" />

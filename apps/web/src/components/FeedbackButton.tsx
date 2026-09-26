@@ -2,27 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { feedbackErrorMessage, submitFeedback } from "@/lib/feedback";
 
-export function FeedbackButton() {
+export function FeedbackButton({
+  controlledOpen,
+  onOpenChange,
+  docked = false,
+}: {
+  controlledOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** When true, hide the floating FAB — open only via dock / hamburger. */
+  docked?: boolean;
+} = {}) {
   const { user } = useUser();
-  const { itemCount } = useCart();
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
-
-  const onCart = pathname.startsWith("/cart") || pathname.startsWith("/checkout");
-  const fabBottom =
-    onCart || itemCount > 0
-      ? "bottom-[11.5rem] md:bottom-6"
-      : "bottom-28 md:bottom-6";
 
   useEffect(() => {
     if (!open) return;
@@ -43,7 +44,7 @@ export function FeedbackButton() {
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, setOpen]);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -68,19 +69,21 @@ export function FeedbackButton() {
     }
   }
 
+  if (docked && !open) return null;
+
   return (
     <div
       ref={rootRef}
-      className={`fixed right-3 z-40 md:right-6 ${fabBottom}`}
+      className="fixed bottom-28 left-1/2 z-50 w-[min(22rem,calc(100vw-1.5rem))] -translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:translate-x-0"
     >
       {open ? (
         <form
           onSubmit={(e) => void onSubmit(e)}
-          className="w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl"
+          className="rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-base font-bold text-gray-900">Give us feedback 😊</p>
+              <p className="text-base font-bold text-gray-900">Give us feedback</p>
               <p className="mt-0.5 text-xs text-gray-500">
                 What worked, what was confusing, or what we should add.
               </p>
@@ -125,22 +128,10 @@ export function FeedbackButton() {
             disabled={sending || !message.trim() || !user}
             className="mt-3 min-h-11 w-full rounded-xl bg-[#ED1C24] py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#d11920] disabled:opacity-50"
           >
-            {sending ? "Sending…" : "Give us feedback 😊"}
+            {sending ? "Sending…" : "Send feedback"}
           </button>
         </form>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ED1C24]/90 text-white shadow-lg backdrop-blur hover:bg-[#d11920] md:h-12 md:w-12"
-          aria-label="Give us feedback"
-          aria-expanded={false}
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden>
-            <path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8.4L4 20.4V6a2 2 0 0 1 2-2Zm2 4v2h12V8H6Zm0 4v2h8v-2H6Z" />
-          </svg>
-        </button>
-      )}
+      ) : null}
     </div>
   );
 }

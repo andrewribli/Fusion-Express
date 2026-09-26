@@ -1,63 +1,61 @@
 "use client";
 
 import Link from "next/link";
-import { AccountMenu } from "@/ptero/components/AccountMenu";
+import { useRouter } from "next/navigation";
 import { AppLogo } from "@/ptero/components/AppLogo";
-import { FeedbackButton } from "@/ptero/components/FeedbackButton";
+import { MobileAppHeader } from "@/components/MobileAppHeader";
 import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
-import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
 import { GROCERY_SOURCES } from "@/lib/grocerySources";
 import { CAMPUS } from "@/ptero/config/campus";
+import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
 import { runnerEntryHref } from "@/ptero/lib/nav";
 
 const headerIconClass =
-  "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
+  "h-11 w-11 rounded-xl border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
 
 /**
  * Landing: Taste supermarket vs CityU canteens — mirrors CUHK CampusSelector.
  */
 export function ChannelSelector() {
   const { user, setMode, canRunnerMode } = useUser();
+  const { itemCount } = useCart();
+  const router = useRouter();
   const loggedIn = Boolean(user && !user.isGuest);
   const runnerHref = runnerEntryHref({ loggedIn, canRunnerMode });
   const runnerCtaLabel = canRunnerMode
     ? "Open runner dashboard"
     : "Become a runner";
-  const runnerHeaderLabel = canRunnerMode ? "Runner" : "Become a runner";
 
   return (
     <div className="relative min-h-screen bg-[#0c0c0c] text-white">
-      <header className="border-b border-white/10 bg-[#0c0c0c]/95">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/cityu" className="flex items-center gap-2" aria-label={`${CAMPUS.brandName} home`}>
-            <AppLogo size={44} className="h-11 w-11" />
-            <span className="text-sm font-bold tracking-tight">{CAMPUS.brandName}</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link
-              href={runnerHref}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
-              }}
-              className="inline-flex min-h-11 items-center rounded-full border-2 border-emerald-400/60 bg-emerald-500 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-400"
-            >
-              {runnerHeaderLabel}
-            </Link>
-            {canRunnerMode ? (
-              <RunnerQueueBell tone="dark" className={headerIconClass} />
-            ) : null}
-            {canRunnerMode ? (
-              <RunnerHeaderShortcuts
-                ordersOnly
-                tone="dark"
-                className="h-11 w-11 rounded-full"
-              />
-            ) : null}
-            <AccountMenu tone="dark" />
-          </div>
-        </div>
-      </header>
+      <MobileAppHeader
+        tone="dark"
+        logo={<AppLogo size={32} className="h-8 w-8" />}
+        brandName={CAMPUS.brandName}
+        homeHref="/cityu"
+        cartHref="/cityu/cart"
+        cartCount={itemCount}
+        bell={<RunnerQueueBell tone="dark" className={headerIconClass} />}
+        onSearchClick={() => router.push("/cityu/taste")}
+        menuTitle="Menu"
+        menuLinks={[
+          { href: "/cityu/canteen", label: "Canteens" },
+          { href: "/cityu/taste", label: "Taste groceries" },
+          { href: "/cuhk", label: "Switch to CUHK" },
+          {
+            href: runnerHref,
+            label: canRunnerMode ? "Runner dashboard" : "Become a runner",
+            onClick: () => {
+              if (canRunnerMode) setMode("runner");
+            },
+          },
+          {
+            href: loggedIn ? "/cityu/profile" : "/cityu/login",
+            label: loggedIn ? "Account" : "Sign in",
+          },
+        ]}
+      />
 
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-8 sm:pt-12">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ED1C24]">
@@ -160,7 +158,6 @@ export function ChannelSelector() {
           </Link>
         </div>
       </main>
-      <FeedbackButton />
     </div>
   );
 }
