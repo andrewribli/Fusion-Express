@@ -45,6 +45,7 @@ import { notifyOrderStatus } from "@/lib/notify-email";
 import { notifyCanteenEvent } from "@/lib/notify-canteen";
 import { fetchRunner, findRunnerForUser } from "@/lib/runners";
 import { ownerPaymentDetails } from "@/lib/owner-payment";
+import { lookupRunnerCustomerName } from "@/lib/runner-customer-name";
 import {
   EXPIRED_DELIVERIES_NOTICE,
   formatExpiredAgo,
@@ -138,6 +139,13 @@ function startOfWeekHkMs(now: number): number {
 
 function itemCount(order: Order): number {
   return order.items.reduce((sum, item) => sum + item.quantity, 0);
+}
+
+/** Available-card title. A missing name stays "Customer", never the document id. */
+function customerCardTitle(order: Order): string {
+  const name = order.customerName?.trim();
+  if (!name || name === order.id) return "Customer";
+  return name;
 }
 
 function ExpiredDeliveryCard({
@@ -251,7 +259,7 @@ function AvailableOrderCard({
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex justify-between gap-3">
         <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
-          {order.id}
+          {customerCardTitle(order)}
           <OrderChannelBadge order={order} />
         </p>
         <p className="shrink-0 text-xs text-gray-500">{formatTime(order.createdAt)}</p>
@@ -591,6 +599,40 @@ export function RunnerWorkspace({
       },
     );
   }, [user, scope, boardNonce]);
+
+  useEffect(() => {
+    const missing = pending.filter((order) => {
+      const name = order.customerName?.trim();
+      return !name || name === order.id;
+    });
+    if (missing.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missing.map(async (order) => ({
+        id: order.id,
+        name: (await lookupRunnerCustomerName(order.id)).trim(),
+      })),
+    ).then((rows) => {
+      if (cancelled) return;
+      const byId = new Map(
+        rows
+          .filter((row) => row.name && row.name !== row.id)
+          .map((row) => [row.id, row.name]),
+      );
+      if (byId.size === 0) return;
+      setPending((prev) =>
+        prev.map((order) => {
+          const name = byId.get(order.id);
+          const current = order.customerName?.trim();
+          if (!name || (current && current !== order.id)) return order;
+          return { ...order, customerName: name };
+        }),
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pending]);
 
   const activeIds = openDeliveries.map((o) => o.id).join(",");
   useEffect(() => {

@@ -119,6 +119,21 @@ function parseItems(raw: unknown): Order["items"] {
   });
 }
 
+/** Order title name. Never the Firestore document id. */
+function customerNameFromOrderData(
+  orderId: string,
+  data: Record<string, unknown>,
+): string | undefined {
+  const candidates = [data.customerName, data.fullName, data.name];
+  for (const raw of candidates) {
+    if (typeof raw !== "string") continue;
+    const name = raw.trim();
+    if (!name || name === orderId) continue;
+    return name;
+  }
+  return undefined;
+}
+
 function parseOrder(id: string, data: Record<string, unknown>): Order {
   const loc = data.runnerLocation as Record<string, unknown> | undefined;
   const items = parseItems(data.items);
@@ -140,7 +155,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     id,
     sessionId: String(data.sessionId ?? ""),
     customerId: String(data.customerId ?? data.sessionId ?? ""),
-    customerName: data.customerName ? String(data.customerName) : undefined,
+    customerName: customerNameFromOrderData(id, data),
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
     campus,
