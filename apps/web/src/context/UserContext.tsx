@@ -12,7 +12,11 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser } from "@/lib/auth";
 import { clearStoredCampusPreference } from "@/lib/campus-routes";
-import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
+import {
+  ensureBrowserLocalPersistence,
+  getAuthClient,
+  isFirebaseConfigured,
+} from "@/lib/firebase";
 import { isDemoAuth } from "@/lib/constants";
 import {
   clearRunnerFromProfile,
@@ -253,8 +257,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Show the last real account while IndexedDB/local persistence restores.
+    // A transient null from Auth must not wipe this — that was the refresh logout.
+    const cachedOnBoot = loadUser();
+    if (cachedOnBoot && !cachedOnBoot.isGuest) {
+      setUser(cachedOnBoot);
+    }
+
     let cancelled = false;
     let becameReady = false;
+    /** True only after `authStateReady()` — local persistence has finished. */
+    let persistenceReady = false;
     const markReady = () => {
       becameReady = true;
       if (!cancelled) setIsReady(true);
@@ -269,70 +282,84 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }, 5000);
 
     let unsub: (() => void) | undefined;
-    try {
-      unsub = onAuthStateChanged(
-        getAuthClient(),
-        (firebaseUser) => {
-          window.clearTimeout(failOpen);
-          if (cancelled) return;
-          setBootError(null);
-          markReady();
 
-          if (!firebaseUser) {
-            setUser(null);
-            cacheProfile(null);
-            // Keep guest-browse flag so Continue as Guest survives auth null.
-            return;
-          }
+    void (async () => {
+      try {
+        // Local persistence is registered before the listener. A null user
+        // before `authStateReady()` is IndexedDB still opening, not a sign-out.
+        await ensureBrowserLocalPersistence();
+        const auth = getAuthClient();
+        await auth.authStateReady();
+        if (cancelled) return;
+        persistenceReady = true;
 
-          setGuestBrowseFlag(false);
-          setIsGuestBrowsing(false);
+        unsub = onAuthStateChanged(
+          auth,
+          (firebaseUser) => {
+            window.clearTimeout(failOpen);
+            if (cancelled) return;
+            setBootError(null);
 
-          const cached = loadUser();
-          if (cached?.uid === firebaseUser.uid) {
-            setUser({
-              ...cached,
-              photoURL: firebaseUser.photoURL || cached.photoURL,
-            });
-          }
-
-          void (async () => {
-            try {
-              const profile = await fetchUserProfile(firebaseUser.uid);
-              const base =
-                profile ??
-                (cached?.uid === firebaseUser.uid ? cached : null);
-              if (!base || cancelled) return;
-              const hydrated = await restoreRunnerProfile({
-                ...base,
-                photoURL: firebaseUser.photoURL || base.photoURL,
-              });
-              if (cancelled) return;
-              setUser(hydrated);
-              cacheProfile(hydrated);
-              if (hydrated.isRunner || hydrated.termsAcceptedAt) {
-                profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
-                setTermsAccepted(true);
-              }
-            } catch (err) {
-              console.error("Auth restore failed", err);
-              setBootError(firebaseErrorText(err));
+            if (!firebaseUser) {
+              // Ignore a null that arrives before local persistence restores.
+              if (!persistenceReady) return;
+              setUser(null);
+              cacheProfile(null);
+              markReady();
+              // Keep guest-browse flag so Continue as Guest survives auth null.
+              return;
             }
-          })();
-        },
-        (err) => {
-          console.error("Auth listener failed", err);
-          window.clearTimeout(failOpen);
-          setBootError(firebaseErrorText(err));
-          markReady();
-        },
-      );
-    } catch (err) {
-      console.error("Auth init failed", err);
-      window.clearTimeout(failOpen);
-      setBootError(firebaseErrorText(err));
-      markReady();
-    }
+
+            markReady();
+            setGuestBrowseFlag(false);
+            setIsGuestBrowsing(false);
+
+            const cached = loadUser();
+            if (cached?.uid === firebaseUser.uid) {
+              setUser({
+                ...cached,
+                photoURL: firebaseUser.photoURL || cached.photoURL,
+              });
+            }
+
+            void (async () => {
+              try {
+                const profile = await fetchUserProfile(firebaseUser.uid);
+                const base =
+                  profile ??
+                  (cached?.uid === firebaseUser.uid ? cached : null);
+                if (!base || cancelled) return;
+                const hydrated = await restoreRunnerProfile({
+                  ...base,
+                  photoURL: firebaseUser.photoURL || base.photoURL,
+                });
+                if (cancelled) return;
+                setUser(hydrated);
+                cacheProfile(hydrated);
+                if (hydrated.isRunner || hydrated.termsAcceptedAt) {
+                  profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
+                  setTermsAccepted(true);
+                }
+              } catch (err) {
+                console.error("Auth restore failed", err);
+                setBootError(firebaseErrorText(err));
+              }
+            })();
+          },
+          (err) => {
+            console.error("Auth listener failed", err);
+            window.clearTimeout(failOpen);
+            setBootError(firebaseErrorText(err));
+            markReady();
+          },
+        );
+      } catch (err) {
+        console.error("Auth init failed", err);
+        window.clearTimeout(failOpen);
+        setBootError(firebaseErrorText(err));
+        markReady();
+      }
+    })();
 
     return () => {
       cancelled = true;

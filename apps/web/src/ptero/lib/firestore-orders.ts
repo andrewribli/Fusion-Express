@@ -7,9 +7,7 @@ import {
   subscribePendingOrders,
   acceptOrder as acceptFirestoreOrder,
 } from "@fusion-express/shared/orders";
-import { isFirebaseConfigured } from "@/lib/firebase";
-import { getAuth } from "firebase/auth";
-import { getFirebaseApp } from "@/ptero/lib/firebase";
+import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 
 export function isCloudOrderId(orderId: string): boolean {
   return !orderId.startsWith("CYU-");
@@ -80,7 +78,7 @@ export async function persistPteroOrderToFirestore(
   draft: PteroOrderDraft,
 ): Promise<string | null> {
   if (!isFirebaseConfigured()) return null;
-  const auth = getAuth(getFirebaseApp());
+  const auth = getAuthClient();
   if (!auth.currentUser) return null;
 
   const total = draft.subtotal + draft.deliveryFee + draft.tip;

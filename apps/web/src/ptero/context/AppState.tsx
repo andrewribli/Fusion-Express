@@ -390,6 +390,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    // Click path only. Refresh and layout effects must not call this —
+    // it signs out the shared Auth instance and clears the cached profile.
     // CityU sign-out only cleared the prototype user in localStorage.
     // Firebase Auth (shared with the rest of GraceRun) stayed signed in,
     // and `gracerun_campus` stayed `cityu`, so `/` kept redirecting here.
