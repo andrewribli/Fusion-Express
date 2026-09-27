@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeDeliveryFee } from "./delivery-pricing.ts";
+import { computeDeliveryFee, formatDeliveryQuote } from "./delivery-pricing.ts";
 import { CUHK_COLLEGE_HALLS } from "./locations.ts";
 import {
   BLOCK_THRESHOLD,
@@ -171,7 +171,55 @@ describe("CUHK delivery graph", () => {
     assert.equal(cuhkDestinationNode("International House (I-House)", "I-House 5"), "i-house-345");
     assert.equal(cuhkDestinationNode("Postgraduate Halls (PGH)", "PGH 3"), "pg-halls");
     assert.equal(cuhkDestinationNode("Chung Chi College", "Ming Hua"), "shho-mc-chungchi");
-    assert.equal(cuhkDestinationNode("Campus Facilities", "University Library"), null);
+    assert.equal(cuhkDestinationNode("Campus Facilities", "University Library"), "lsk");
+  });
+
+  it("prices University Library as the LSK stop", () => {
+    assert.equal(resolveCuhkNode("University Library"), "lsk");
+    assert.equal(resolveCuhkNode("university library"), "lsk");
+    assert.equal(resolveCuhkNode("university-library"), "lsk");
+    assert.equal(cuhkDestinationNode("Campus Facilities", "university-library"), "lsk");
+    assert.equal(resolveCuhkNode("Campus Facilities"), null);
+    assert.equal(cuhkDestinationNode("Campus Facilities", undefined), null);
+    assert.equal(cuhkDestinationNode("Campus Facilities", ""), null);
+    assert.equal(cuhkDestinationNode(undefined, "Campus Facilities"), null);
+    assert.equal(
+      cuhkDestinationNode("International House (I-House)", "I-House 1"),
+      "i-house-12",
+    );
+    assert.equal(
+      cuhkDestinationNode("International House (I-House)", "I-House 5"),
+      "i-house-345",
+    );
+
+    for (const origin of ["fusion", "uc", "paper-coffee"]) {
+      const library = computeCuhkFee(origin, "University Library");
+      const lsk = computeCuhkFee(origin, "lsk");
+      assert.deepEqual(library, lsk);
+      assert.equal(library?.fee, lsk?.fee);
+      assert.deepEqual(library?.path, lsk?.path);
+    }
+
+    const sameStop = computeCuhkFee("lsk", "University Library");
+    assert.deepEqual(sameStop, { fee: 0, rawFee: 0, path: ["lsk"], floored: false });
+
+    const quote = computeDeliveryFee({
+      campus: "cuhk",
+      sourceId: "fusion",
+      college: "Campus Facilities",
+      hallId: "University Library",
+    });
+    const lskQuote = computeDeliveryFee({
+      campus: "cuhk",
+      sourceId: "fusion",
+      hallId: "lsk",
+    });
+    assert.equal(quote.available, true);
+    assert.equal(quote.deliveryDestination, "lsk");
+    assert.equal(quote.total, lskQuote.total);
+    assert.deepEqual(quote.deliveryPath, lskQuote.deliveryPath);
+    assert.equal(formatDeliveryQuote(quote), `Delivery: HK$${quote.total}`);
+    assert.equal(formatDeliveryQuote(quote).includes("fusion"), false);
   });
 
   it("rejects the SRRS hub as a customer destination and keeps it out of the hall picker", () => {

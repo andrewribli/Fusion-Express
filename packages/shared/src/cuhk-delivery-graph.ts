@@ -7,6 +7,8 @@
  * Every edge has a route tag. There are no untagged edges.
  *
  * fusion and sorazen are the same building. sorazen is an alias, not a node.
+ * University Library is the same delivery stop as LSK. That hall name is an
+ * alias, not a node. The college label "Campus Facilities" is only a group.
  * srrs is a hub only. It is not a customer hall.
  *
  * When BUS_ONLY[origin] includes the destination, walks that leave the origin
@@ -133,13 +135,17 @@ function isNode(value: string): value is CuhkNode {
   return NODE_SET.has(value);
 }
 
-/** sorazen is Fusion. Ids the shop already uses are accepted here. srrs stays a hub. */
+/**
+ * sorazen is Fusion. University Library is LSK. Ids the shop already uses are
+ * accepted here. srrs stays a hub.
+ */
 export function resolveCuhkNode(id: string | null | undefined): CuhkNode | null {
   const raw = (id ?? "").trim().toLowerCase();
   if (!raw) return null;
   if (raw === "sorazen") return "fusion";
   if (raw === "paper-and-coffee") return "paper-coffee";
   if (raw === "uc-canteen") return "uc";
+  if (raw === "university library" || raw === "university-library") return "lsk";
   if (isNode(raw)) return raw;
   return null;
 }
