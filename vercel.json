@@ -6,7 +6,7 @@
   "crons": [
     {
       "path": "/api/cron/expire-deliveries",
-      "schedule": "* * * * *"
+      "schedule": "15 4 * * *"
     }
   ],
   "redirects": [

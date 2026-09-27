@@ -147,72 +147,101 @@ export async function processExpiredDeliveryWarnings(
       continue;
     }
     summary.considered += 1;
-
-    const outcome = await deliverExpiredWarning({
-      order: preview,
-      now,
-      loadUser: async (uid) => {
-        const userSnap = await db.collection(collectionName("users")).doc(uid).get();
-        if (!userSnap.exists) return null;
-        const user = userSnap.data() ?? {};
-        const email = asString(user.email);
-        return {
-          email: email || undefined,
-          fullName: asString(user.fullName) || undefined,
-          isTestAccount: user.isTestAccount === true,
-        };
-      },
-      claim: () => claimExpiry(db, docSnap.id, now),
-      markSent: async (sent) => {
-        await orders.doc(docSnap.id).update({
-          expiredWarningSentAt: Timestamp.fromDate(sent.at),
-          expiredWarningSentTo: sent.to,
-          expiredWarningMessageId: sent.messageId,
-          expiredWarningClaimAt: FieldValue.delete(),
-          updatedAt: Timestamp.fromDate(sent.at),
-        });
-      },
-      markSkipped: async (reason, at) => {
-        await orders.doc(docSnap.id).update({
-          expiredWarningSkippedAt: Timestamp.fromDate(at),
-          expiredWarningSkipReason: reason,
-          expiredWarningClaimAt: FieldValue.delete(),
-          updatedAt: Timestamp.fromDate(at),
-        });
-      },
-      markFailed: async (at, error) => {
-        await orders.doc(docSnap.id).update({
-          expiredWarningFailedAt: Timestamp.fromDate(at),
-          expiredWarningLastError: error.slice(0, 500),
-          expiredWarningClaimAt: FieldValue.delete(),
-          updatedAt: Timestamp.fromDate(at),
-        });
-      },
-      recordFailure: async (failure) => {
-        await db.collection(collectionName("emailFailures")).add({
-          kind: failure.kind,
-          orderId: failure.orderId,
-          runnerUid: failure.runnerUid,
-          to: failure.to,
-          cc: failure.cc,
-          attempts: failure.attempts,
-          error: failure.error.slice(0, 500),
-          createdAt: Timestamp.fromDate(failure.createdAt),
-        });
-      },
-      send: async (message) => {
-        const id = await sendRunnerExpiredWarningEmail(message);
-        return { id };
-      },
-    }).catch((err) => {
-      console.error(`expired warning crashed for ${docSnap.id}`, err);
-      return { outcome: "failed" as const };
-    });
-
-    tally(summary, outcome.outcome);
+    tally(summary, await deliverForOrder(db, docSnap.id, data, now));
   }
 
   return summary;
+}
+
+/** Persist expiry and send the one-time warning for a single order. Never throws. */
+export async function warnExpiredOrderById(
+  orderId: string,
+  now = new Date(),
+): Promise<ExpiredWarningOutcome> {
+  const db = getAdminDb();
+  if (!db) {
+    console.error("expire deliveries: admin Firestore is unavailable");
+    return "missing";
+  }
+  const snap = await db.collection(collectionName("orders")).doc(orderId).get();
+  if (!snap.exists) return "missing";
+  const data = (snap.data() ?? {}) as Record<string, unknown>;
+  const preview = toWarningOrder(orderId, data);
+  if (preview.status === "cancelled") return "cancelled";
+  if (!isRunnerExpiryDue(preview, now)) return "not_expired";
+  if (preview.expiredWarningSentAt) return "already_sent";
+  return deliverForOrder(db, orderId, data, now);
+}
+
+async function deliverForOrder(
+  db: NonNullable<ReturnType<typeof getAdminDb>>,
+  orderId: string,
+  data: Record<string, unknown>,
+  now: Date,
+): Promise<ExpiredWarningOutcome> {
+  const preview = toWarningOrder(orderId, data);
+  const orders = db.collection(collectionName("orders"));
+  const outcome = await deliverExpiredWarning({
+    order: preview,
+    now,
+    loadUser: async (uid) => {
+      const userSnap = await db.collection(collectionName("users")).doc(uid).get();
+      if (!userSnap.exists) return null;
+      const user = userSnap.data() ?? {};
+      const email = asString(user.email);
+      return {
+        email: email || undefined,
+        fullName: asString(user.fullName) || undefined,
+        isTestAccount: user.isTestAccount === true,
+      };
+    },
+    claim: () => claimExpiry(db, orderId, now),
+    markSent: async (sent) => {
+      await orders.doc(orderId).update({
+        expiredWarningSentAt: Timestamp.fromDate(sent.at),
+        expiredWarningSentTo: sent.to,
+        expiredWarningMessageId: sent.messageId,
+        expiredWarningClaimAt: FieldValue.delete(),
+        updatedAt: Timestamp.fromDate(sent.at),
+      });
+    },
+    markSkipped: async (reason, at) => {
+      await orders.doc(orderId).update({
+        expiredWarningSkippedAt: Timestamp.fromDate(at),
+        expiredWarningSkipReason: reason,
+        expiredWarningClaimAt: FieldValue.delete(),
+        updatedAt: Timestamp.fromDate(at),
+      });
+    },
+    markFailed: async (at, error) => {
+      await orders.doc(orderId).update({
+        expiredWarningFailedAt: Timestamp.fromDate(at),
+        expiredWarningLastError: error.slice(0, 500),
+        expiredWarningClaimAt: FieldValue.delete(),
+        updatedAt: Timestamp.fromDate(at),
+      });
+    },
+    recordFailure: async (failure) => {
+      await db.collection(collectionName("emailFailures")).add({
+        kind: failure.kind,
+        orderId: failure.orderId,
+        runnerUid: failure.runnerUid,
+        to: failure.to,
+        cc: failure.cc,
+        attempts: failure.attempts,
+        error: failure.error.slice(0, 500),
+        createdAt: Timestamp.fromDate(failure.createdAt),
+      });
+    },
+    send: async (message) => {
+      const id = await sendRunnerExpiredWarningEmail(message);
+      return { id };
+    },
+  }).catch((err) => {
+    console.error(`expired warning crashed for ${orderId}`, err);
+    return { outcome: "failed" as const };
+  });
+  return outcome.outcome;
 }
 
 function tally(summary: ExpireJobSummary, outcome: ExpiredWarningOutcome): void {
