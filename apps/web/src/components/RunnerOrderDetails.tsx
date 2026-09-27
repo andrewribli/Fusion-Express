@@ -5,7 +5,6 @@ import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
-import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import { supermarketForCampus } from "@fusion-express/shared/campus";
 
@@ -63,9 +62,11 @@ export function RunnerOrderDetails({
           <p className="text-xs text-gray-600">Room: {order.roomNumber}</p>
         )}
         <p className="text-xs text-gray-600">Lobby: {order.lobbyPoint}</p>
-        <div className="mt-3">
-          <OrderCounterparty orderId={order.id} label="Customer:" />
-        </div>
+        {order.customerName && (
+          <p className="mt-1 text-xs text-gray-600">
+            Customer: {order.customerName}
+          </p>
+        )}
       </section>
 
       <section>
