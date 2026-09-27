@@ -15,6 +15,7 @@ import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
 import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 import {
@@ -196,6 +197,9 @@ function TrackContent() {
 
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <CustomerOrderHeading order={order} />
+            <div className="mt-3">
+              <OrderCounterparty orderId={order.id} label="Your runner:" />
+            </div>
 
             <p className="mt-2 text-sm text-gray-700">
               {formatDeliveryAddress(order.college, order.hall)}
