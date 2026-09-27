@@ -20,4 +20,3 @@ export * from "./cuhk-email";
 export * from "./cityu-email";
 export * from "./campus";
 export * from "./canteen-college";
-export * from "./delivery-identity";
