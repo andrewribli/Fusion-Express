@@ -96,7 +96,9 @@ export default function CheckoutPage() {
       hall &&
       !overLimit &&
       !campusError &&
-      !canteenError,
+      !canteenError &&
+      fee.quote.available !== false &&
+      !fee.quote.pending,
   );
   const shopHref = isCanteenCart(items)
     ? "/canteen"
@@ -234,7 +236,7 @@ export default function CheckoutPage() {
                   ${subtotal}
                 </span>
               </div>
-              {fee.quote.pricing.startsWith("cityu") ? (
+              {fee.quote.pricing === "cuhk-graph" || fee.quote.pricing.startsWith("cityu") ? (
                 <div className="mt-2">
                   <DeliveryQuote quote={fee.quote} large />
                 </div>
@@ -404,6 +406,10 @@ export default function CheckoutPage() {
                 {campusError ? (
                   <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24]">
                     {campusError}
+                  </p>
+                ) : fee.quote.available === false ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24] md:text-white">
+                    {fee.quote.unavailableMessage}
                   </p>
                 ) : !canSubmit ? (
                   <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">

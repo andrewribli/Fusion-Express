@@ -164,6 +164,7 @@ export default function TrackOrderPage({
               <span>
                 {formatStoredDeliveryFee({
                   deliveryFee: order.deliveryFee,
+                  deliveryOrigin: order.deliveryOrigin,
                   deliveryBase: order.deliveryBase,
                   deliverySurcharge: order.deliverySurcharge,
                   deliveryTotal: order.deliveryTotal,

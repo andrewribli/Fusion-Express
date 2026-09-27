@@ -186,6 +186,17 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerNote: data.runnerNote ? String(data.runnerNote) : undefined,
     subtotal: Number(data.subtotal ?? 0),
     deliveryFee: Number(data.deliveryFee ?? 10),
+    deliveryOrigin: data.deliveryOrigin ? String(data.deliveryOrigin) : undefined,
+    deliveryDestination: data.deliveryDestination
+      ? String(data.deliveryDestination)
+      : undefined,
+    deliveryFeeRaw:
+      data.deliveryFeeRaw != null && Number.isFinite(Number(data.deliveryFeeRaw))
+        ? Number(data.deliveryFeeRaw)
+        : undefined,
+    deliveryPath: Array.isArray(data.deliveryPath)
+      ? data.deliveryPath.map((node) => String(node))
+      : undefined,
     deliveryBase: finiteMoney(data.deliveryBase),
     deliverySurcharge: finiteMoney(data.deliverySurcharge),
     deliveryTotal: finiteMoney(data.deliveryTotal),
@@ -225,6 +236,13 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
           ? Number(data.finalTotal)
           : undefined,
     receiptUrl: data.receiptUrl ? String(data.receiptUrl) : undefined,
+    receiptAmount:
+      data.receiptAmount != null && Number(data.receiptAmount) > 0
+        ? round2(Number(data.receiptAmount))
+        : undefined,
+    receiptUploadedAt: data.receiptUploadedAt
+      ? toDate(data.receiptUploadedAt)
+      : undefined,
     bankStatementUrl: data.bankStatementUrl
       ? String(data.bankStatementUrl)
       : undefined,
@@ -346,6 +364,12 @@ export async function createOrder(
     canteenRestaurantId: order.canteenRestaurantId,
     orderChannel: order.orderChannel,
   });
+  if (priced.quote.available === false || priced.quote.pending) {
+    throw new Error(
+      priced.quote.unavailableMessage ??
+        "Choose a delivery hall before placing this order.",
+    );
+  }
   order = {
     ...order,
     sourceId: priced.sourceId,
@@ -353,6 +377,10 @@ export async function createOrder(
     deliverySurcharge: priced.deliverySurcharge,
     deliveryTotal: priced.deliveryTotal,
     deliveryFee: priced.deliveryFee,
+    deliveryOrigin: priced.deliveryOrigin,
+    deliveryDestination: priced.deliveryDestination,
+    deliveryFeeRaw: priced.deliveryFeeRaw,
+    deliveryPath: priced.deliveryPath,
     total: priced.total,
     zone: priced.zone ?? order.zone,
     totalWeight: priced.totalWeight,
