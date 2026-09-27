@@ -13,6 +13,7 @@ import { RunnerOrderDetails } from "@/components/RunnerOrderDetails";
 import { RunnerOrderPreviewModal } from "@/components/RunnerOrderPreviewModal";
 import { RunnerDeliveryFlow } from "@/components/runner/RunnerDeliveryFlow";
 import { CanteenDeliveryFlow } from "@/components/runner/CanteenDeliveryFlow";
+import { RunnerOrderHistory } from "@/components/runner/RunnerOrderHistory";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
 import { OrderChannelBadge, resolveOrderChannel } from "@/components/OrderChannelBadge";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
@@ -55,6 +56,7 @@ import {
   runnerExpiredAtOf,
   runnerWarningTotal,
   RUNNER_EARNINGS_RATE,
+  ORDER_STATUS_LABELS,
 } from "@/lib/order-status";
 import { CustomerPartyName } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
@@ -68,16 +70,17 @@ function runnerCampusOf(user: { campus?: unknown }) {
   return resolveCampus(user.campus);
 }
 
-type Tab = "available" | "active" | "expired" | "completed";
+type Tab = "available" | "active" | "expired" | "completed" | "history";
 
 /** One runner nav destination per view. */
-export type RunnerView = "available" | "deliveries" | "expired" | "earnings";
+export type RunnerView = "available" | "deliveries" | "expired" | "earnings" | "history";
 
 const VIEW_TABS: Record<RunnerView, Tab> = {
   available: "available",
   deliveries: "active",
   expired: "expired",
   earnings: "completed",
+  history: "history",
 };
 
 /** CUHK `/runner/*` or CityU `/cityu/runner/*`. Same workspace, campus-scoped routes. */
@@ -91,12 +94,14 @@ const RUNNER_NAV: Record<
     { view: "available", label: "Available", href: "/runner/dashboard" },
     { view: "deliveries", label: "My Deliveries", href: "/runner/deliveries" },
     { view: "expired", label: "Expired Deliveries", href: "/runner/expired" },
+    { view: "history", label: "History", href: "/runner/history" },
     { view: "earnings", label: "Earnings", href: "/runner/earnings" },
   ],
   cityu: [
     { view: "available", label: "Available", href: "/cityu/runner/dashboard" },
     { view: "deliveries", label: "My Deliveries", href: "/cityu/runner/deliveries" },
     { view: "expired", label: "Expired Deliveries", href: "/cityu/runner/expired" },
+    { view: "history", label: "History", href: "/cityu/runner/history" },
     { view: "earnings", label: "Earnings", href: "/cityu/runner/earnings" },
   ],
 };
@@ -1151,7 +1156,9 @@ export function RunnerWorkspace({
     <RequireRunner>
       <AppShell hideNav={scope === "cityu"}>
         <LakersWallpaper>
-          <AppHeader title="Runner Dashboard" />
+          <AppHeader
+            title={pane === "history" ? "Order history" : "Runner Dashboard"}
+          />
 
           <main
             className={`mx-auto px-4 py-4 ${
@@ -1161,7 +1168,7 @@ export function RunnerWorkspace({
             <div
               role="tablist"
               aria-label="Runner dashboard"
-              className="relative z-20 grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4"
+              className="relative z-20 grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-3 lg:grid-cols-5"
             >
               {nav.map((item) => (
                 <button
@@ -1260,7 +1267,9 @@ export function RunnerWorkspace({
                             </p>
                           </div>
                           <p className="shrink-0 text-xs font-semibold text-[#ED1C24]">
-                            {order.status === "purchased" ? "Ready to deliver" : "Accepted"}
+                            {order.status === "purchased"
+                              ? "Ready to deliver"
+                              : ORDER_STATUS_LABELS[order.status]}
                           </p>
                         </div>
                         <DeadlineBanner order={order} party="runner" />
@@ -1317,6 +1326,10 @@ export function RunnerWorkspace({
               <div className="mt-4">
                 <ExpiredDeliveriesColumn orders={expiredDeliveries} now={now} />
               </div>
+            )}
+
+            {!loading && tab === "history" && (
+              <RunnerOrderHistory orders={delivered} />
             )}
 
             {!loading && tab === "completed" && (

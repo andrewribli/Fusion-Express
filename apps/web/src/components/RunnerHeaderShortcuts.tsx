@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { resolveCampus, type CampusId } from "@fusion-express/shared/campus";
 import { subscribeRunnerActiveOrders } from "@/lib/orders";
-import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import { isActiveRunnerStatus, ORDER_STATUS_LABELS } from "@/lib/order-status";
 import type { Order } from "@/lib/types";
 import { useUser } from "@/context/UserContext";
 import { campusFromPathname } from "@/lib/campus-routes";
@@ -30,6 +30,13 @@ function headerCampus(pathname: string, profileCampus?: string | null): CampusId
 
 function availableHref(campus: CampusId): string {
   return campus === "cityu" ? "/cityu/runner/dashboard" : "/runner/dashboard";
+}
+
+/** Runner workspace only. Customer hubs (/ and /cityu) stay null. */
+function runnerHistoryHref(pathname: string): string | null {
+  if (pathname.startsWith("/cityu/runner")) return "/cityu/runner/history";
+  if (pathname.startsWith("/runner")) return "/runner/history";
+  return null;
 }
 
 function chatHref(order: Order, campus: CampusId): string {
@@ -77,7 +84,8 @@ export function RunnerHeaderShortcuts({
   const [now, setNow] = useState(() => Date.now());
   const rootRef = useRef<HTMLDivElement>(null);
   const campus = headerCampus(pathname, user?.campus);
-  const visible = orders;
+  const historyHref = runnerHistoryHref(pathname);
+  const visible = orders.filter((order) => isActiveRunnerStatus(order.status));
   const activeCount = visible.length;
   const hasCurrent = activeCount > 0;
 
@@ -143,6 +151,12 @@ export function RunnerHeaderShortcuts({
   function openChat(order: Order) {
     setOpen(false);
     router.push(chatHref(order, campus));
+  }
+
+  function openHistory() {
+    if (!historyHref) return;
+    setOpen(false);
+    router.push(historyHref);
   }
 
   const availableLabel =
@@ -274,6 +288,17 @@ export function RunnerHeaderShortcuts({
                   );
                 })}
               </ul>
+            )}
+            {historyHref && (
+              <div className="border-t border-gray-100 px-3 py-2.5">
+                <button
+                  type="button"
+                  onClick={openHistory}
+                  className="text-sm font-semibold text-[#ED1C24]"
+                >
+                  Order history
+                </button>
+              </div>
             )}
           </div>
         )}

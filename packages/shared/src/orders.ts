@@ -20,6 +20,7 @@ import {
   customerDeadlineOf,
   countsTowardCustomerOrderPlacementCap,
   isActiveCustomerOrderStatus,
+  isActiveRunnerStatus,
   isClaimableOrderStatus,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
@@ -796,29 +797,27 @@ export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
   return getMockRunnerOrders(runnerUid);
 }
 
-/** Active runner jobs: accepted through paid, not yet completed. */
+/**
+ * Current Order only. In progress, before delivery.
+ * Legacy values match the same steps: assigned → accepted, picked → purchased.
+ * Delivered, paid, runner_paid, completed, and customer_paid stay out.
+ */
 const RUNNER_CURRENT_ORDER_STATUSES = [
   "accepted",
   "purchased",
   "receipt_uploaded",
-  "delivered",
-  "paid",
   "assigned",
   "picked",
+  "runner_assigned",
+  "picked_up",
 ] as const;
 
 function isRunnerCurrentOrder(order: Order): boolean {
-  return (
-    order.status === "accepted" ||
-    order.status === "purchased" ||
-    order.status === "receipt_uploaded" ||
-    order.status === "delivered" ||
-    order.status === "paid"
-  );
+  return isActiveRunnerStatus(order.status);
 }
 
 /**
- * Live list of the runner's orders that are not finished yet.
+ * Live list of the runner's orders that are not delivered yet.
  * Uses the existing runnerUid + status index.
  */
 export function subscribeRunnerActiveOrders(
@@ -873,6 +872,7 @@ export function subscribeRunnerActiveOrders(
   return () => unsub();
 }
 
+/** Runner order history: delivered and every status after delivery. */
 export async function fetchDeliveredOrdersByRunner(
   runnerUid: string,
 ): Promise<Order[]> {
