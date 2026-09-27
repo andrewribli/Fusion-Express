@@ -8,9 +8,7 @@ import {
   formatDeliveryAddress,
   getLobbyForHall,
 } from "@/data/cuhk-locations";
-import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import {
-  getEstimatedDeliveryTime,
   isOverOrderLimit,
   ORDER_LIMIT_MESSAGE,
   resolveSpecialInstructions,
@@ -24,7 +22,7 @@ import {
 import { isCanteenCart } from "@/lib/canteen/cart";
 import { cartCampusError } from "@/lib/cart-campus";
 import { requestNotificationPermission } from "@/lib/notifications";
-import { createOrder } from "@/lib/orders";
+import { createOrderOnServer } from "@/lib/create-order-server";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import type { CampusId } from "@fusion-express/shared/campus";
 
@@ -91,10 +89,7 @@ export function usePlaceOrder() {
           setError(ORDER_LIMIT_MESSAGE);
           return;
         }
-        const fee = resolveOrderDeliveryFee(items, opts.college, opts.campus);
         const tipAmount = Math.max(0, opts.tip ?? 0);
-        const total = orderSubtotal + fee.deliveryFee + tipAmount;
-        const estimatedDeliveryAt = getEstimatedDeliveryTime();
         const lobbyPoint = getLobbyForHall(opts.hall, opts.campus);
         const customerName = customer.fullName.trim();
         const canteen = isCanteenCart(items);
@@ -134,22 +129,20 @@ export function usePlaceOrder() {
           }
         }
 
-        const orderId = await createOrder({
+        const placed = await createOrderOnServer({
           sessionId,
-          customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
           campus: opts.campus,
+          sourceId: canteen && restaurantId ? restaurantId : "fusion",
+          hallId: opts.hall,
           orderChannel,
           canteenRestaurantId: restaurantId ?? undefined,
           canteenCollege,
           items: orderItems,
-          status: "pending",
           college: opts.college,
           hall: opts.hall,
           lobbyPoint,
-          zone: fee.zone,
-          totalWeight: fee.weightKg,
           customerNote: resolveSpecialInstructions(
             [
               opts.customerNote?.trim(),
@@ -163,13 +156,10 @@ export function usePlaceOrder() {
               .join("\n"),
           ),
           subtotal: orderSubtotal,
-          deliveryFee: fee.deliveryFee,
           tip: tipAmount || undefined,
-          total,
-          paymentReceived: false,
-          fusionPaidByPlatform: false,
-          estimatedDeliveryAt,
         });
+        const orderId = placed.id;
+        const total = placed.total;
 
         void notifyOrderPlaced({
           customerEmail: customer.email,

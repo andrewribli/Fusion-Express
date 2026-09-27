@@ -30,6 +30,7 @@ import {
   runnerDeadlineOf,
 } from "./order-status";
 import { omitUndefined } from "./omit-undefined";
+import { lockedDeliveryPricing } from "./delivery-pricing";
 import { getAuthClient, getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
 import {
   addDoc,
@@ -134,6 +135,13 @@ function customerNameFromOrderData(
   return undefined;
 }
 
+function finiteMoney(value: unknown): number | undefined {
+  if (value == null || value === "") return undefined;
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return undefined;
+  return Math.round(amount * 100) / 100;
+}
+
 function parseOrder(id: string, data: Record<string, unknown>): Order {
   const loc = data.runnerLocation as Record<string, unknown> | undefined;
   const items = parseItems(data.items);
@@ -178,6 +186,10 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerNote: data.runnerNote ? String(data.runnerNote) : undefined,
     subtotal: Number(data.subtotal ?? 0),
     deliveryFee: Number(data.deliveryFee ?? 10),
+    deliveryBase: finiteMoney(data.deliveryBase),
+    deliverySurcharge: finiteMoney(data.deliverySurcharge),
+    deliveryTotal: finiteMoney(data.deliveryTotal),
+    sourceId: data.sourceId ? String(data.sourceId) : undefined,
     tip: data.tip != null ? Number(data.tip) : undefined,
     total: Number(data.total ?? 0),
     discountApplied:
@@ -323,6 +335,28 @@ export function orderGrandTotal(
 export async function createOrder(
   order: Omit<Order, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
+  const priced = lockedDeliveryPricing({
+    campus: order.campus,
+    sourceId: order.sourceId,
+    hallId: order.hall,
+    college: order.college,
+    items: order.items,
+    subtotal: order.subtotal,
+    tip: order.tip,
+    canteenRestaurantId: order.canteenRestaurantId,
+    orderChannel: order.orderChannel,
+  });
+  order = {
+    ...order,
+    sourceId: priced.sourceId,
+    deliveryBase: priced.deliveryBase,
+    deliverySurcharge: priced.deliverySurcharge,
+    deliveryTotal: priced.deliveryTotal,
+    deliveryFee: priced.deliveryFee,
+    total: priced.total,
+    zone: priced.zone ?? order.zone,
+    totalWeight: priced.totalWeight,
+  };
   if (isOverOrderLimit(order.subtotal)) {
     throw new Error(ORDER_LIMIT_MESSAGE);
   }

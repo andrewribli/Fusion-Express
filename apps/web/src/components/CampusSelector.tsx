@@ -8,6 +8,7 @@ import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
 /**
  * CUHK channel picker: Fusion groceries vs campus canteens.
@@ -88,8 +89,7 @@ export function CampusSelector() {
             </p>
             <h2 className="mt-2 text-2xl font-bold">Canteen</h2>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-              Benjamin Franklin, UC, and more — flat HK$10 delivery, 10% college
-              discount when your runner matches.
+              {`Benjamin Franklin, UC, and more — flat HK$${formatHkdAmount(computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base)} delivery, 10% college discount when your runner matches.`}
             </p>
             <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
               Browse canteens

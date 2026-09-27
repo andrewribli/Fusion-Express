@@ -1,10 +1,8 @@
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import {
-  calculateDeliveryFee,
-  cartTotalWeightKg,
-} from "@fusion-express/shared/delivery";
+import { cartTotalWeightKg } from "@fusion-express/shared/delivery";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 import {
   CUHK_COLLEGES,
   formatDeliveryAddress,
@@ -38,10 +36,17 @@ export default function CheckoutScreen() {
 
   const weightKg = cartTotalWeightKg(items);
   const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college }),
-    [weightKg, college],
+    () =>
+      computeDeliveryFee({
+        campus: "cuhk",
+        sourceId: "fusion",
+        hallId: hall,
+        college,
+        weightKg,
+      }),
+    [weightKg, college, hall],
   );
-  const total = subtotal + fee.deliveryFee;
+  const total = subtotal + fee.total;
 
   function pickCollege(next: CuhkCollege) {
     setCollege(next);
@@ -86,7 +91,7 @@ export default function CheckoutScreen() {
           (sum, line) => sum + lineTotal(line.item, line.quantity),
           0,
         ),
-        deliveryFee: fee.deliveryFee,
+        deliveryFee: fee.total,
         total,
         paymentReceived: false,
         estimatedDeliveryAt: getEstimatedDeliveryTime(),
@@ -151,7 +156,7 @@ export default function CheckoutScreen() {
         {formatDeliveryAddress(college, hall)}
       </Text>
       <Text className="mt-1 text-sm text-gray-600">
-        Zone {fee.zone} · delivery ${fee.deliveryFee} · total ${total}
+        Zone {fee.zone} · delivery ${fee.total} · total ${total}
       </Text>
       {user ? (
         <Text className="mt-1 text-xs text-gray-500">

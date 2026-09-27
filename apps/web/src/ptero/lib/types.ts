@@ -121,6 +121,9 @@ export interface Order {
   customerNote: string;
   subtotal: number;
   deliveryFee: number;
+  deliveryBase?: number;
+  deliverySurcharge?: number;
+  deliveryTotal?: number;
   tip: number;
   /** Exact Taste till total entered by the runner. */
   receiptTotal?: number;

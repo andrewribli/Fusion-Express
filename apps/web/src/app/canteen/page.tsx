@@ -6,8 +6,12 @@ import { ShopLayout } from "@/components/ShopLayout";
 import { MealSearch } from "@/components/canteen/MealSearch";
 import { getCollege } from "@/data/canteen/colleges";
 import { RESTAURANTS } from "@/data/canteen/restaurants";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
 export default function CanteenIndexPage() {
+  const canteenBase = formatHkdAmount(
+    computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base,
+  );
   const sidebar = (
     <nav className="px-2 py-2">
       {RESTAURANTS.map((r) =>
@@ -52,7 +56,7 @@ export default function CanteenIndexPage() {
         </h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
           Your canteen favorites, delivered to your dorm lobby. Flat delivery
-          HK$10 · 10% college canteen discount when your runner matches.
+          HK${canteenBase} · 10% college canteen discount when your runner matches.
         </p>
       </div>
 

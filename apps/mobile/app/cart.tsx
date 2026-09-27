@@ -1,16 +1,19 @@
 import { Link } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import {
-  calculateDeliveryFee,
-  cartTotalWeightKg,
-} from "@fusion-express/shared/delivery";
+import { cartTotalWeightKg } from "@fusion-express/shared/delivery";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import { useCart } from "../src/cart";
 
 export default function CartScreen() {
   const { items, subtotal, setQuantity } = useCart();
   const weightKg = cartTotalWeightKg(items);
-  const fee = calculateDeliveryFee({ weightKg, college: "" });
+  const fee = computeDeliveryFee({
+    campus: "cuhk",
+    sourceId: "fusion",
+    college: "",
+    weightKg,
+  });
 
   return (
     <ScrollView className="flex-1 bg-white px-4 pt-4">
@@ -50,7 +53,7 @@ export default function CartScreen() {
           Zone defaults to medium (+${fee.distanceSurcharge}) until college is set.
         </Text>
         <Text className="mt-2 font-bold">
-          Items ${subtotal} + delivery ${fee.deliveryFee}
+          Items ${subtotal} + delivery ${fee.total}
         </Text>
       </View>
 

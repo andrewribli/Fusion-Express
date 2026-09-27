@@ -16,13 +16,28 @@ import {
 } from "@/ptero/lib/constants";
 import { lineTotal } from "@/ptero/lib/pricing";
 import { formatMenuPrice } from "@/ptero/lib/types";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/ptero/lib/delivery";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
+import { isGrocerySourceId } from "@/lib/grocerySources";
+import { isCanteenCart, primaryCanteenRestaurantId } from "@/ptero/lib/canteen/cart";
+import { readCityuHall } from "@/lib/cityu-hall";
+import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const router = useRouter();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const weightKg = cartTotalWeightKg(items);
-  const fee = calculateDeliveryFee({ weightKg, compound: "" });
+  const [hall, setHall] = useState("");
+  useEffect(() => {
+    setHall(readCityuHall());
+  }, []);
+  const canteen = isCanteenCart(items);
+  const groceryIds = [
+    ...new Set(items.map((line) => line.item.grocerySource).filter(isGrocerySourceId)),
+  ];
+  const sourceId = canteen
+    ? primaryCanteenRestaurantId(items.map((line) => ({ id: line.item.id }))) || "ac1"
+    : groceryIds[0] || "taste";
+  const quote = computeDeliveryFee({ campus: "cityu", sourceId, hallId: hall });
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
 
@@ -110,10 +125,14 @@ export default function CartPage() {
                 <span>Subtotal</span>
                 <span>HK${subtotal.toFixed(2)}</span>
               </div>
-              <div className="mt-1 flex justify-between text-gray-500">
-                <span>Delivery (from HK${fee.baseFee})</span>
-                <span>Finalised at checkout</span>
+              <div className="mt-2">
+                <DeliveryQuote quote={quote} />
               </div>
+              <p className="mt-2 text-xs text-gray-500">
+                {hall
+                  ? "This delivery total is locked when you place the order."
+                  : `From HK$${formatHkdAmount(quote.base)} before a hall is chosen.`}
+              </p>
               <p className="mt-2 text-xs text-gray-500">
                 Est. delivery by {formatEta(eta)} (~{ESTIMATED_DELIVERY_MINUTES} min)
               </p>

@@ -6,8 +6,12 @@ import { CanteenShopLayout } from "@/ptero/components/CanteenShopLayout";
 import { CAMPUS } from "@/ptero/config/campus";
 import { getCollege } from "@/ptero/config/canteen/colleges";
 import { RESTAURANTS } from "@/ptero/config/canteen/restaurants";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
 export default function CanteenIndexPage() {
+  const canteenBase = formatHkdAmount(
+    computeDeliveryFee({ campus: "cityu", sourceId: "ac1" }).base,
+  );
   const sidebar = (
     <nav className="px-2 py-2">
       <Link
@@ -55,7 +59,7 @@ export default function CanteenIndexPage() {
           {CAMPUS.brandName} Canteen
         </h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
-          Campus favourites delivered to your dorm lobby. Flat delivery HK$10 ·
+          Campus favourites delivered to your dorm lobby. Delivery from HK${canteenBase} before your hall surcharge ·
           10% residence discount when your runner matches (e.g. MOS runner → MOS
           Hall Canteen).
         </p>

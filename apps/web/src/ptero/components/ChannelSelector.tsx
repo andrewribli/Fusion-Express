@@ -10,6 +10,7 @@ import { GROCERY_SOURCES } from "@/lib/grocerySources";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useUser } from "@/ptero/context/AppState";
 import { runnerEntryHref } from "@/ptero/lib/nav";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
 const headerIconClass =
   "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
@@ -127,8 +128,7 @@ export function ChannelSelector() {
             </p>
             <h2 className="mt-2 text-2xl font-bold">CityU Canteens</h2>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-              AC1–AC3, hall canteens, and City Chinese — flat HK$10 delivery, 10%
-              residence discount when your runner matches.
+              {`AC1 and Ebeneezer's — HK$${formatHkdAmount(computeDeliveryFee({ campus: "cityu", sourceId: "ac1" }).base)} base plus a hall surcharge, 10% residence discount when your runner matches.`}
             </p>
             <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
               Browse canteens

@@ -18,6 +18,11 @@ import {
   RESTAURANTS,
   type Restaurant,
 } from "@/data/canteen/restaurants";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
+
+const CUHK_CANTEEN_BASE = formatHkdAmount(
+  computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base,
+);
 import {
   getSimpleMenu,
   isSimpleMenuRestaurant,
@@ -492,7 +497,7 @@ function BfMenu({ search }: { search: string }) {
         Benjamin Franklin Canteen
       </h1>
       <p className="mt-1 text-sm text-gray-600">
-        Campus favorites · HK$10 flat delivery to your lobby
+        Campus favorites · HK${CUHK_CANTEEN_BASE} flat delivery to your lobby
       </p>
       <div
         className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
@@ -581,7 +586,7 @@ function UcMenu({ search }: { search: string }) {
         </p>
         <h1 className="mt-1 text-2xl font-extrabold text-gray-900">UC Canteen</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Menu changes by time of day. Flat HK$10 delivery to your lobby.
+          Menu changes by time of day. Flat HK${CUHK_CANTEEN_BASE} delivery to your lobby.
         </p>
       </div>
 

@@ -220,6 +220,15 @@ export interface Order {
   runnerNote?: string;
   subtotal: number;
   deliveryFee: number;
+  /**
+   * Locked when the order is created. Missing on older orders — do not backfill.
+   * deliveryFee on new orders equals deliveryTotal.
+   */
+  deliveryBase?: number;
+  deliverySurcharge?: number;
+  deliveryTotal?: number;
+  /** taste, wellcome, ac1, eben, fusion, or a canteen id. */
+  sourceId?: string;
   tip?: number;
   total: number;
   /** True when a same-college runner unlocked the 10% canteen food discount. */

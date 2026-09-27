@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/ptero/components/AppHeader";
@@ -22,12 +22,10 @@ import {
   TIP_PRESETS,
 } from "@/ptero/lib/constants";
 import {
-  canteenDeliveryFeeHkd,
   isCanteenCart,
   primaryCanteenRestaurantId,
 } from "@/ptero/lib/canteen/cart";
 import { canteenCollegeForRestaurant, getRestaurant, isOrderableRestaurant } from "@/ptero/config/canteen/restaurants";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/ptero/lib/delivery";
 import { lineTotal } from "@/ptero/lib/pricing";
 import { formInputClassName } from "@/ptero/components/DeliveryAddressFields";
 import {
@@ -37,6 +35,13 @@ import {
   isGrocerySourceId,
 } from "@/lib/grocerySources";
 import { PlaceOrderConfirmModal } from "@/components/PlaceOrderConfirmModal";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
+import { rememberCityuHall } from "@/lib/cityu-hall";
+import {
+  computeDeliveryFee,
+  formatDeliveryQuote,
+  formatHkdAmount,
+} from "@fusion-express/shared/delivery-pricing";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -76,25 +81,13 @@ export default function CheckoutPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
-  const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
-  const fee = useMemo(() => {
-    if (canteen) {
-      return {
-        deliveryFee: canteenDeliveryFeeHkd(),
-        weightSurcharge: 0,
-        distanceSurcharge: 0,
-      };
-    }
-    if (grocery) {
-      return {
-        deliveryFee: grocery.deliveryFee,
-        weightSurcharge: 0,
-        distanceSurcharge: 0,
-      };
-    }
-    return calculateDeliveryFee({ weightKg, compound });
-  }, [canteen, grocery, weightKg, compound]);
-  const total = subtotal + fee.deliveryFee + tip;
+  const quote = useMemo(() => {
+    const sourceId = canteen
+      ? restaurantId || "ac1"
+      : groceryId || "taste";
+    return computeDeliveryFee({ campus: "cityu", sourceId, hallId: hall });
+  }, [canteen, restaurantId, groceryId, hall]);
+  const total = subtotal + quote.total + tip;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
     compound &&
@@ -106,6 +99,9 @@ export default function CheckoutPage() {
       !groceryClosed &&
       !canteenBlocked,
   );
+  useEffect(() => {
+    rememberCityuHall(hall);
+  }, [hall]);
   const address = compound && hall ? formatDeliveryAddress(compound, hall) : null;
   const backHref = canteen ? "/cityu/canteen" : "/cityu/cart";
 
@@ -159,7 +155,7 @@ export default function CheckoutPage() {
         lobby: lobby || getLobbyForHall(hall),
         customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
         subtotal,
-        deliveryFee: fee.deliveryFee,
+        deliveryFee: quote.total,
         tip,
         discountApplied: false,
         discountAmount: 0,
@@ -197,8 +193,8 @@ export default function CheckoutPage() {
       <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
         {canteen && (
           <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-            CityU canteen order · flat HK$10 delivery. If a matching residence
-            runner accepts (KLNT / MOS), you get 10% off food.
+            CityU canteen order · {formatDeliveryQuote(quote)}. If a matching residence
+            runner accepts (KLNT / MOS), you get 10% off food. Delivery is not discounted.
           </div>
         )}
         {(!user || user.isGuest) && (
@@ -332,9 +328,8 @@ export default function CheckoutPage() {
               <span>Subtotal (estimate)</span>
               <span>HK${subtotal.toFixed(2)}</span>
             </div>
-            <div className="mt-1 flex justify-between">
-              <span>Delivery</span>
-              <span>HK${fee.deliveryFee.toFixed(2)}</span>
+            <div className="mt-3">
+              <DeliveryQuote quote={quote} large />
             </div>
             <div className="mt-1 flex justify-between">
               <span>Tip</span>
@@ -349,7 +344,7 @@ export default function CheckoutPage() {
                 ? [
                     "You pay nothing now. Order first — menu prices are estimates.",
                     "A runner accepts, picks up at the canteen, and delivers to your lobby.",
-                    "Matching residence runners unlock 10% off food (delivery stays HK$10).",
+                    `Matching residence runners unlock 10% off food (delivery stays HK$${formatHkdAmount(quote.total)}).`,
                     "You then pay food total plus delivery via Airwallex.",
                   ]
                 : PAYMENT_FLOW_STEPS

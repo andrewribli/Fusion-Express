@@ -1,9 +1,8 @@
 import type { Order as SharedOrder } from "@fusion-express/shared/types";
 import type { Order as PteroOrder, OrderItem } from "@/ptero/lib/types";
 import { CAMPUS_ID } from "@/ptero/config/campus";
-import { getDeliveryZone } from "@/ptero/lib/delivery";
+import { createOrderOnServer } from "@/lib/create-order-server";
 import {
-  createOrder,
   subscribePendingOrders,
   acceptOrder as acceptFirestoreOrder,
 } from "@fusion-express/shared/orders";
@@ -57,6 +56,9 @@ export function sharedOrderToPtero(order: SharedOrder): PteroOrder {
     customerNote: order.customerNote ?? "",
     subtotal: order.subtotal,
     deliveryFee: order.deliveryFee,
+    deliveryBase: order.deliveryBase,
+    deliverySurcharge: order.deliverySurcharge,
+    deliveryTotal: order.deliveryTotal,
     tip: order.tip ?? 0,
     receiptTotal: order.finalTotal,
     runnerId: order.runnerUid ?? order.runnerId,
@@ -81,14 +83,17 @@ export async function persistPteroOrderToFirestore(
   const auth = getAuthClient();
   if (!auth.currentUser) return null;
 
-  const total = draft.subtotal + draft.deliveryFee + draft.tip;
-  const zone = getDeliveryZone(draft.compound);
-  return createOrder({
+  const sourceId =
+    draft.canteenRestaurantId ||
+    draft.grocerySource ||
+    (draft.orderChannel === "wellcome" ? "wellcome" : "taste");
+  const placed = await createOrderOnServer({
     sessionId: draft.sessionId,
-    customerId: auth.currentUser.uid,
     customerName: draft.customerName,
     customerEmail: draft.customerEmail,
     campus: CAMPUS_ID,
+    sourceId,
+    hallId: draft.hall,
     orderChannel: mapOrderChannel(draft.orderChannel),
     canteenRestaurantId: draft.canteenRestaurantId,
     canteenCollege: draft.canteenCollege ?? undefined,
@@ -99,19 +104,18 @@ export async function persistPteroOrderToFirestore(
       quantity: item.quantity,
       weightKg: item.weightKg,
     })),
-    status: "pending",
     college: draft.compound,
     hall: draft.hall,
     lobbyPoint: draft.lobby,
-    zone,
     customerNote: draft.customerNote,
     subtotal: draft.subtotal,
-    deliveryFee: draft.deliveryFee,
     tip: draft.tip,
-    total,
-    paymentReceived: false,
-    fusionPaidByPlatform: false,
   });
+  draft.deliveryFee = placed.deliveryFee;
+  draft.deliveryBase = placed.deliveryBase;
+  draft.deliverySurcharge = placed.deliverySurcharge;
+  draft.deliveryTotal = placed.deliveryTotal;
+  return placed.id;
 }
 
 /**

@@ -1,23 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrderLimitNotice } from "@/ptero/components/OrderLimitNotice";
 import { useCart } from "@/ptero/context/CartContext";
-import { canteenDeliveryFeeHkd, isCanteenCart } from "@/ptero/lib/canteen/cart";
+import { isCanteenCart, primaryCanteenRestaurantId } from "@/ptero/lib/canteen/cart";
 import { isOverOrderLimit } from "@/ptero/lib/constants";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/ptero/lib/delivery";
+import { isGrocerySourceId } from "@/lib/grocerySources";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
+import { readCityuHall } from "@/lib/cityu-hall";
 
-/** Mobile sticky checkout bar — mirrors gracerun.fit OrderActionBar. */
+/** Mobile sticky checkout bar — delivery total comes from the pricing engine. */
 export function OrderActionBar() {
   const router = useRouter();
   const { itemCount, subtotal, items } = useCart();
+  const [hall, setHall] = useState("");
+  useEffect(() => {
+    setHall(readCityuHall());
+  }, []);
   const canteen = isCanteenCart(items);
-  const fee = canteen
-    ? canteenDeliveryFeeHkd()
-    : calculateDeliveryFee({
-        weightKg: cartTotalWeightKg(items),
-        compound: "",
-      }).deliveryFee;
+  const groceryIds = [
+    ...new Set(items.map((line) => line.item.grocerySource).filter(isGrocerySourceId)),
+  ];
+  const sourceId = canteen
+    ? primaryCanteenRestaurantId(items.map((line) => ({ id: line.item.id }))) || "ac1"
+    : groceryIds[0] || "taste";
+  const quote = computeDeliveryFee({ campus: "cityu", sourceId, hallId: hall });
   const overLimit = isOverOrderLimit(subtotal);
 
   if (itemCount === 0) return null;
@@ -32,7 +40,7 @@ export function OrderActionBar() {
           onClick={() => router.push("/cityu/checkout")}
           className="flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 text-sm font-bold text-white shadow-lg disabled:opacity-50"
         >
-          {`Continue to checkout · $${(subtotal + fee).toFixed(0)}`}
+          {`Continue to checkout · $${(subtotal + quote.total).toFixed(0)}`}
         </button>
       </div>
     </div>

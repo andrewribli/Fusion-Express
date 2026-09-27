@@ -1,5 +1,7 @@
 export * from "./app-env";
 export * from "./delivery";
+export * from "./halls";
+export * from "./delivery-pricing";
 export * from "./omit-undefined";
 export * from "./types";
 export * from "./roles";
@@ -18,3 +20,4 @@ export * from "./cuhk-email";
 export * from "./cityu-email";
 export * from "./campus";
 export * from "./canteen-college";
+export * from "./delivery-identity";

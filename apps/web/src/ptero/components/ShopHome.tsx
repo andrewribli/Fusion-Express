@@ -38,6 +38,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
   const { user, setMode, canRunnerMode } = useUser();
   const [search, setSearch] = useState("");
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [source, setSource] = useState<GrocerySourceId | null>(null);
   const [aisle, setAisle] = useState<CanonicalGroceryCategory | "all">("all");
   const [sortDesc, setSortDesc] = useState(false);
@@ -246,8 +247,9 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
             <CustomerNotificationBell className="h-10 w-10 rounded-lg" />
             <RunnerQueueBell className="h-10 w-10 rounded-lg" />
 
-            <Link
-              href="/cityu/cart"
+            <button
+              type="button"
+              onClick={() => setMobileCartOpen(true)}
               className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
               aria-label="Cart"
             >
@@ -266,7 +268,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
-            </Link>
+            </button>
 
             <div className="hidden sm:block">
               <AccountMenu />
@@ -300,6 +302,34 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
           </div>
         )}
 
+        {mobileCartOpen && (
+          <div className="fixed inset-0 z-[60] xl:hidden">
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="Close cart"
+              onClick={() => setMobileCartOpen(false)}
+            />
+            <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl bg-white shadow-xl">
+              <div className="flex items-center justify-between px-3 py-2">
+                <p className="text-sm font-bold text-gray-900">Your cart</p>
+                <button
+                  type="button"
+                  onClick={() => setMobileCartOpen(false)}
+                  className="rounded-lg px-2 py-1 text-sm font-semibold text-gray-500"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="min-h-0 flex-1 p-3">
+                <div className="h-[min(70vh,560px)]">
+                  <CartSidebar />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="mx-auto grid max-w-[1400px] gap-0 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_300px]">
           {/* Left vertical categories */}
           <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] overflow-y-auto border-r border-gray-200 bg-white lg:block">
@@ -322,7 +352,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
                 </p>
                 <p className="mt-0.5 text-xs text-gray-500">
                   Pickup at {store.pickup}. {store.walkMinutes} min walk. Delivery HK$
-                  {store.deliveryFee}.
+                  {store.deliveryFee} base before hall surcharge.
                 </p>
                 {!storeOpen ? (
                   <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">

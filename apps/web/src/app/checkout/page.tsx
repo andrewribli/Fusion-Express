@@ -32,6 +32,7 @@ import { PlaceOrderConfirmModal } from "@/components/PlaceOrderConfirmModal";
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
 import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
 import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
@@ -84,8 +85,8 @@ export default function CheckoutPage() {
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const fee = useMemo(
-    () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk"),
-    [items, college, campus],
+    () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk", hall),
+    [items, college, campus, hall],
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
@@ -233,7 +234,13 @@ export default function CheckoutPage() {
                   ${subtotal}
                 </span>
               </div>
-              <DeliveryFeeBreakdown breakdown={fee} />
+              {fee.quote.pricing.startsWith("cityu") ? (
+                <div className="mt-2">
+                  <DeliveryQuote quote={fee.quote} large />
+                </div>
+              ) : (
+                <DeliveryFeeBreakdown breakdown={fee} />
+              )}
               {tipAmount > 0 && (
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>

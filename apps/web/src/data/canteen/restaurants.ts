@@ -5,6 +5,7 @@ import {
   getCanteenMeta,
   type CanteenId,
 } from "@/lib/canteenConfig";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 
 export type RestaurantId = CanteenId;
 
@@ -21,7 +22,11 @@ export type Restaurant = {
   logoSrc?: string;
 };
 
-export const CANTEEN_DELIVERY_FEE = 10;
+/** CUHK canteen delivery, read from the pricing engine (unchanged flat fee). */
+export const CANTEEN_DELIVERY_FEE = computeDeliveryFee({
+  campus: "cuhk",
+  sourceId: "sorazen",
+}).base;
 
 const RESTAURANT_COPY: Record<
   RestaurantId,

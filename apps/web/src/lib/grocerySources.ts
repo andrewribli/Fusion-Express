@@ -1,4 +1,5 @@
 import { hktParts } from "@/data/canteen/canteen-config";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 
 export {
   CANONICAL_GROCERY_CATEGORIES,
@@ -36,7 +37,7 @@ export const GROCERY_SOURCES: Record<GrocerySourceId, GrocerySource> = {
     campus: "cityu",
     tier: "premium",
     walkMinutes: 13,
-    deliveryFee: 10,
+    deliveryFee: computeDeliveryFee({ campus: "cityu", sourceId: "taste" }).base,
     pickup: "Taste, Festival Walk",
     status: "open",
     hours: { open: "08:00", close: "22:00" },
@@ -47,7 +48,7 @@ export const GROCERY_SOURCES: Record<GrocerySourceId, GrocerySource> = {
     campus: "cityu",
     tier: "value",
     walkMinutes: 13,
-    deliveryFee: 10,
+    deliveryFee: computeDeliveryFee({ campus: "cityu", sourceId: "wellcome" }).base,
     pickup: "Wellcome, Nam Shan Estate",
     status: "open",
     hours: { open: "08:00", close: "22:30" },

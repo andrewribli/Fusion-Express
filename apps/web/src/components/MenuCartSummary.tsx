@@ -9,6 +9,7 @@ import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
+import { formatDeliveryQuote } from "@fusion-express/shared/delivery-pricing";
 
 export function MenuCartSummary({
   channel = "fusion",
@@ -112,7 +113,7 @@ export function MenuCartSummary({
             <span>${total}</span>
           </div>
           <p className="text-[10px] leading-snug text-gray-500">
-            Hall and delivery fee are confirmed at checkout.
+            {formatDeliveryQuote(fee.quote)}
           </p>
           <OrderLimitNotice subtotal={subtotal} />
           {!orderingEnabled || canteenCheckoutBlocked ? (

@@ -1,7 +1,15 @@
 import type { CollegeId } from "@/ptero/config/canteen/colleges";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 
-/** Flat canteen delivery fee — same as CUHK GraceRun Canteen. */
-export const CANTEEN_DELIVERY_FEE = 10;
+/** CityU canteens Andrew did not reprice stay on today's flat fee. */
+export const CANTEEN_DELIVERY_FEE = computeDeliveryFee({
+  campus: "cityu",
+  sourceId: "ac2-canteen",
+}).base;
+
+function deliveryBase(sourceId: string): number {
+  return computeDeliveryFee({ campus: "cityu", sourceId }).base;
+}
 
 export type RestaurantId =
   | "city-express-ac1"
@@ -46,7 +54,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "Yeung Building / AC1 canteen",
     hoursLabel: "Mon–Sat campus hours · Closed Sun & PH",
     pickupLabel: "City Express (AC1)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("city-express-ac1"),
     collegeId: null,
     menuReady: true,
     useMealPeriods: false,
@@ -62,7 +70,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "Yeung Building R5013",
     hoursLabel: "Mon–Sat 10:00 AM – 8:00 PM · Closed Sun & PH",
     pickupLabel: "Ebeneezer's (5380 Cafe)",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("ebeneezers-5380"),
     collegeId: null,
     menuReady: true,
     useMealPeriods: false,
@@ -79,7 +87,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "3/F, Li Dak Sum Yip Yio Chin Academic Building",
     hoursLabel: "Coming soon",
     pickupLabel: "AC2 Canteen",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("ac2-canteen"),
     collegeId: null,
     menuReady: false,
     useMealPeriods: true,
@@ -95,7 +103,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "7/F, Lau Ming Wai Academic Building",
     hoursLabel: "Coming soon",
     pickupLabel: "AC3 Bistro",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("ac3-bistro"),
     collegeId: null,
     menuReady: false,
     useMealPeriods: true,
@@ -111,7 +119,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "Kowloon Tong Student Residence",
     hoursLabel: "Coming soon",
     pickupLabel: "Hall Canteen @KLNT",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("hall-canteen-klnt"),
     collegeId: "KLNT",
     menuReady: false,
     useMealPeriods: true,
@@ -127,7 +135,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "Ma On Shan Student Residence",
     hoursLabel: "Coming soon",
     pickupLabel: "Hall Canteen @MOS",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("hall-canteen-mos"),
     collegeId: "MOS",
     menuReady: false,
     useMealPeriods: true,
@@ -143,7 +151,7 @@ export const RESTAURANTS: Restaurant[] = [
     location: "8/F, Amenities Building",
     hoursLabel: "Coming soon",
     pickupLabel: "City Chinese",
-    deliveryFee: CANTEEN_DELIVERY_FEE,
+    deliveryFee: deliveryBase("city-chinese"),
     collegeId: null,
     menuReady: false,
     useMealPeriods: false,

@@ -4,11 +4,11 @@ import {
   type CanteenMenuItem,
 } from "@/ptero/config/canteen/menus";
 import {
-  CANTEEN_DELIVERY_FEE,
   getRestaurant,
   type RestaurantId,
 } from "@/ptero/config/canteen/restaurants";
 import type { CartItem, MenuItem } from "@/ptero/lib/types";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 
 const CANTEEN_PREFIX = "canteen:";
 
@@ -42,8 +42,8 @@ export function isCanteenCart(items: CartItem[]): boolean {
   return items.length > 0 && items.every((c) => isCanteenItemId(c.item.id));
 }
 
-export function canteenDeliveryFeeHkd(): number {
-  return CANTEEN_DELIVERY_FEE;
+export function canteenDeliveryFeeHkd(sourceId = "ac1"): number {
+  return computeDeliveryFee({ campus: "cityu", sourceId }).base;
 }
 
 export function toCartMenuItem(

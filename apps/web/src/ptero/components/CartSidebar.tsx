@@ -1,32 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/ptero/context/CartContext";
-import { canteenDeliveryFeeHkd, isCanteenCart } from "@/ptero/lib/canteen/cart";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/ptero/lib/delivery";
+import {
+  isCanteenCart,
+  primaryCanteenRestaurantId,
+} from "@/ptero/lib/canteen/cart";
 import { lineTotal } from "@/ptero/lib/pricing";
 import { isOverOrderLimit } from "@/ptero/lib/constants";
 import { formatHkd } from "@/ptero/lib/types";
+import { isGrocerySourceId } from "@/lib/grocerySources";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
+import { readCityuHall } from "@/lib/cityu-hall";
 
 export function CartSidebar({
   flatDeliveryFee = false,
+  hallId,
 }: {
-  /** Force HK$10 canteen fee (canteen shop chrome). */
+  /** Canteen shop chrome. The fee still comes from the pricing engine. */
   flatDeliveryFee?: boolean;
+  hallId?: string;
 }) {
   const router = useRouter();
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
   const canteen = flatDeliveryFee || isCanteenCart(items);
-  const fee = canteen
-    ? {
-        deliveryFee: canteenDeliveryFeeHkd(),
-      }
-    : calculateDeliveryFee({
-        weightKg: cartTotalWeightKg(items),
-        compound: "",
-      });
-  const total = subtotal + fee.deliveryFee;
+  const [savedHall, setSavedHall] = useState("");
+  useEffect(() => {
+    setSavedHall(readCityuHall());
+  }, []);
+  const hall = hallId || savedHall;
+  const groceryIds = [
+    ...new Set(
+      items.map((line) => line.item.grocerySource).filter(isGrocerySourceId),
+    ),
+  ];
+  const sourceId = canteen
+    ? primaryCanteenRestaurantId(items.map((line) => ({ id: line.item.id }))) || "ac1"
+    : groceryIds[0] || "taste";
+  const quote = computeDeliveryFee({
+    campus: "cityu",
+    sourceId,
+    hallId: hall,
+  });
+  const total = subtotal + quote.total;
   const overLimit = isOverOrderLimit(subtotal);
 
   return (
@@ -93,18 +112,15 @@ export function CartSidebar({
             {formatHkd(subtotal)}
           </span>
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Delivery</span>
-          <span>{formatHkd(fee.deliveryFee)}</span>
-        </div>
+        <DeliveryQuote quote={quote} />
         <div className="flex justify-between text-sm font-bold text-gray-900">
           <span>Total (incl. fees)</span>
           <span>{formatHkd(total)}</span>
         </div>
         <p className="text-[10px] leading-snug text-gray-500">
-          {canteen
-            ? "Flat HK$10 canteen delivery. 10% residence discount applies when your runner matches."
-            : "Delivery fee confirmed at checkout from your CityU hall."}
+          {hall
+            ? "10% residence discount applies to food when your runner matches. Delivery stays at the total above."
+            : "Hall surcharge is added once you choose a hall."}
         </p>
         <button
           type="button"

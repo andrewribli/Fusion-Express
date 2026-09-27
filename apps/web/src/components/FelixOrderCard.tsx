@@ -8,16 +8,20 @@ import {
   felixOrderSubtotal,
 } from "@/lib/felix-order";
 import { formatSaleLabel } from "@/lib/pricing";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { computeDeliveryFee, itemsWeightKg } from "@fusion-express/shared/delivery-pricing";
 
 export function FelixOrderCard() {
   const { replaceCart } = useCart();
   const cart = useMemo(() => buildFelixSuggestedCart(), []);
   const description = useMemo(() => describeFelixOrder(cart), [cart]);
   const subtotal = felixOrderSubtotal(cart);
-  const fee = calculateDeliveryFee({
-    weightKg: cartTotalWeightKg(cart),
+  const fee = computeDeliveryFee({
+    campus: "cuhk",
+    sourceId: "fusion",
     college: "Chung Chi College",
+    weightKg: itemsWeightKg(
+      cart.map((line) => ({ weightKg: line.item.weightKg, quantity: line.quantity })),
+    ),
   });
   const saleLabel = cart[0] ? formatSaleLabel(cart[0].item) : null;
 
@@ -38,7 +42,7 @@ export function FelixOrderCard() {
         <p className="mt-1 text-xs font-medium text-fusion-red">Deal: {saleLabel}</p>
       )}
       <p className="mt-2 text-sm text-gray-500">
-        + ${fee.deliveryFee} delivery · total ${subtotal + fee.deliveryFee}
+        + ${fee.total} delivery · total ${subtotal + fee.total}
       </p>
       <button
         type="button"

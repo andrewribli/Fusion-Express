@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchOrder, orderCampus } from "@/lib/orders";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import {
@@ -21,6 +22,7 @@ import {
   ORDER_STATUS_LABELS,
   resolveOrderChannel,
 } from "@/ptero/lib/types";
+import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 
 export default function TrackOrderPage({
   params,
@@ -113,14 +115,9 @@ export default function TrackOrderPage({
           </div>
         </div>
 
-        {order.runnerName && (
-          <div className="mt-3 rounded-2xl border border-gray-100 bg-white p-4 text-sm shadow-sm">
-            <p className="font-semibold">Runner: {order.runnerName}</p>
-            {order.runnerPhone && (
-              <p className="mt-1 text-xs text-gray-500">Runner phone: {order.runnerPhone}</p>
-            )}
-          </div>
-        )}
+        <div className="mt-3">
+          <OrderCounterparty orderId={order.id} label="Your runner:" />
+        </div>
 
         {order.status === "accepted" ||
         order.status === "purchased" ||
@@ -164,7 +161,15 @@ export default function TrackOrderPage({
             />
             <div className="flex justify-between">
               <span>Delivery</span>
-              <span>{formatHkd(order.deliveryFee)}</span>
+              <span>
+                {formatStoredDeliveryFee({
+                  deliveryFee: order.deliveryFee,
+                  deliveryBase: order.deliveryBase,
+                  deliverySurcharge: order.deliverySurcharge,
+                  deliveryTotal: order.deliveryTotal,
+                  hall: order.hall,
+                })}
+              </span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Amount due</span>

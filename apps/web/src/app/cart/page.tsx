@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -20,6 +21,8 @@ import { lineTotal } from "@/lib/pricing";
 import { formatMenuPrice } from "@/lib/types";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
+import { readCityuHall } from "@/lib/cityu-hall";
 import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
 import { useCampus } from "@/context/CampusContext";
@@ -32,11 +35,15 @@ export default function CartPage() {
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
   const { campus: activeCampus } = useCampus();
   const campus = cartCampus(items) ?? activeCampus;
+  const [hall, setHall] = useState("");
+  useEffect(() => {
+    if (campus === "cityu") setHall(readCityuHall());
+  }, [campus]);
   const mixedError = cartCampusError(items, null);
   const canteenGate = getCanteenCheckoutGate(items);
   const canteenError =
     isCanteenCart(items) && !canteenGate.allowed ? canteenGate.message : null;
-  const fee = resolveOrderDeliveryFee(items, "", campus);
+  const fee = resolveOrderDeliveryFee(items, "", campus, campus === "cityu" ? hall : "");
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
@@ -157,7 +164,11 @@ export default function CartPage() {
                         ${subtotal}
                       </span>
                     </div>
-                    <DeliveryFeeBreakdown breakdown={fee} />
+                    {fee.quote.pricing.startsWith("cityu") ? (
+                      <DeliveryQuote quote={fee.quote} />
+                    ) : (
+                      <DeliveryFeeBreakdown breakdown={fee} />
+                    )}
                     <p className="text-xs text-gray-500">
                         Delivery fee is confirmed at checkout from your hall.
                       </p>
