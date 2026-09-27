@@ -5,6 +5,7 @@ import {
   type DeliveryZone,
 } from "./delivery";
 import { findHall, isCityuHall12 } from "./halls";
+import { CUHK_COLLEGE_HALLS, type CuhkCollege } from "./locations";
 import {
   computeCuhkFee,
   cuhkDestinationNode,
