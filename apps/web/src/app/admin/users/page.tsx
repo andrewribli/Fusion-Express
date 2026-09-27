@@ -10,6 +10,7 @@ import type { UserProfile } from "@/context/UserContext";
 import { AdminUserChatModal } from "@/components/AdminUserChatModal";
 import { fetchUnreadReplyCounts } from "@/lib/direct-messages";
 import { getAuthClient } from "@/lib/firebase";
+import { fetchExpiredDeliveryCounts } from "@/lib/expired-delivery-counts";
 import { fetchAllUsers } from "@/lib/users";
 import { PartyAvatar } from "@/components/DeliveryIdentity";
 
@@ -28,6 +29,7 @@ export default function AdminUsersPage() {
   const [repairingUid, setRepairingUid] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState("");
   const [orphanCount, setOrphanCount] = useState(0);
+  const [expiredCounts, setExpiredCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +45,12 @@ export default function AdminUsersPage() {
           if (!cancelled) setUnread(counts);
         } catch {
           // Chat badges are optional if indexes are still building.
+        }
+        try {
+          const expired = await fetchExpiredDeliveryCounts();
+          if (!cancelled) setExpiredCounts(expired);
+        } catch {
+          // Expired counts are optional if the field index is still building.
         }
       } catch (err) {
         if (!cancelled) {
@@ -220,6 +228,7 @@ export default function AdminUsersPage() {
                         <th className="whitespace-nowrap py-2 pr-4">Email</th>
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
                         <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Expired deliveries</th>
                         <th className="whitespace-nowrap py-2 pr-4">Guest</th>
                         <th className="whitespace-nowrap py-2 pr-4">Message</th>
                         <th className="whitespace-nowrap py-2">Actions</th>
@@ -253,6 +262,9 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {u.isRunner ? "Yes" : "No"}
+                          </td>
+                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
+                            {u.uid ? (expiredCounts[u.uid] ?? 0) : 0}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {u.isGuest ? "Yes" : "No"}

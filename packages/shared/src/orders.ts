@@ -272,6 +272,15 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerExpiredAt: data.runnerExpiredAt
       ? toDate(data.runnerExpiredAt)
       : undefined,
+    expiredWarningSentAt: data.expiredWarningSentAt
+      ? toDate(data.expiredWarningSentAt)
+      : undefined,
+    expiredWarningSentTo: data.expiredWarningSentTo
+      ? String(data.expiredWarningSentTo)
+      : undefined,
+    expiredWarningMessageId: data.expiredWarningMessageId
+      ? String(data.expiredWarningMessageId)
+      : undefined,
     customerOverdueAt: data.customerOverdueAt
       ? toDate(data.customerOverdueAt)
       : undefined,

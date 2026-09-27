@@ -283,6 +283,10 @@ export interface Order {
   runnerWarningCount?: number;
   customerWarningCount?: number;
   runnerExpiredAt?: Date;
+  /** Set when the runner expiry warning email was sent. */
+  expiredWarningSentAt?: Date;
+  expiredWarningSentTo?: string;
+  expiredWarningMessageId?: string;
   customerOverdueAt?: Date;
   runnerReminderSentAt?: Date;
   customerReminderSentAt?: Date;

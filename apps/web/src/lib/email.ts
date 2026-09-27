@@ -537,6 +537,36 @@ Thanks for running with GraceRun!
   if (error) throw new Error(error.message);
 }
 
+/** Runner-only expiry warning. Returns the Resend message id. */
+export async function sendRunnerExpiredWarningEmail(opts: {
+  to: string;
+  cc: string;
+  subject: string;
+  text: string;
+}): Promise<string> {
+  const html = brandedBroadcastEmail({
+    preheader: opts.subject,
+    heading: "Your delivery has expired",
+    bodyHtml: bodyTextToHtml(opts.text),
+  });
+  const cc =
+    opts.cc.trim().toLowerCase() === opts.to.trim().toLowerCase()
+      ? undefined
+      : opts.cc.trim();
+  const { data, error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    cc,
+    replyTo: "hello@gracerun.fit",
+    subject: opts.subject,
+    html,
+    text: opts.text,
+  });
+  if (error) throw new Error(error.message);
+  if (!data?.id) throw new Error("Resend did not return a message id");
+  return data.id;
+}
+
 export async function sendCanteenPickedUpEmail(opts: {
   to: string;
   orderId: string;

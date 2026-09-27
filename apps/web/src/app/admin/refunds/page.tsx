@@ -104,6 +104,11 @@ export default function AdminRefundsPage() {
                         <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
                           {order.id}
                           <OrderChannelBadge order={order} />
+                          {order.expiredWarningSentAt ? (
+                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">
+                              Warned
+                            </span>
+                          ) : null}
                         </p>
                         <p className="font-semibold text-green-700">
                           Refund ${order.refundAmount}
