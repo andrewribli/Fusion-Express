@@ -11,6 +11,7 @@ import { AdminUserChatModal } from "@/components/AdminUserChatModal";
 import { fetchUnreadReplyCounts } from "@/lib/direct-messages";
 import { getAuthClient } from "@/lib/firebase";
 import { fetchAllUsers } from "@/lib/users";
+import { PartyAvatar } from "@/components/DeliveryIdentity";
 
 function cell(value: string | undefined): string {
   const trimmed = value?.trim();
@@ -214,6 +215,7 @@ export default function AdminUsersPage() {
                   <table className="min-w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-gray-200 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <th className="whitespace-nowrap py-2 pr-4">Photo</th>
                         <th className="whitespace-nowrap py-2 pr-4">Full name</th>
                         <th className="whitespace-nowrap py-2 pr-4">Email</th>
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
@@ -229,8 +231,19 @@ export default function AdminUsersPage() {
                           key={u.uid ?? u.email ?? u.fullName}
                           className="border-b border-gray-100 last:border-0"
                         >
+                          <td className="py-2.5 pr-4">
+                            <PartyAvatar
+                              name={u.fullName || "A"}
+                              photoUrl={u.photoUrl || u.photoURL}
+                            />
+                          </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 font-medium text-gray-900">
-                            {cell(u.fullName)}
+                            <span className="block max-w-[390px] truncate">{cell(u.fullName)}</span>
+                            {u.isAnonymous && u.pseudonym ? (
+                              <span className="block max-w-[390px] truncate text-xs font-normal text-gray-500">
+                                Partner sees {u.pseudonym}
+                              </span>
+                            ) : null}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.email)}

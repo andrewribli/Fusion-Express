@@ -40,6 +40,27 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         : String(data.termsAcceptedAt)
       : undefined,
     photoURL: data.photoURL ? String(data.photoURL) : undefined,
+    displayName:
+      typeof data.displayName === "string" && data.displayName.trim()
+        ? data.displayName.trim()
+        : null,
+    photoUrl:
+      typeof data.photoUrl === "string" && data.photoUrl.trim()
+        ? data.photoUrl.trim()
+        : null,
+    isAnonymous: data.isAnonymous === true,
+    pseudonym:
+      typeof data.pseudonym === "string" && data.pseudonym.trim()
+        ? data.pseudonym.trim()
+        : null,
+    pseudonymChangedAt:
+      data.pseudonymChangedAt &&
+      typeof data.pseudonymChangedAt === "object" &&
+      "toDate" in data.pseudonymChangedAt
+        ? (data.pseudonymChangedAt as Timestamp).toDate().toISOString()
+        : data.pseudonymChangedAt
+          ? String(data.pseudonymChangedAt)
+          : null,
     campus:
       data.campus === "cuhk" || data.campus === "cityu"
         ? data.campus
@@ -154,12 +175,20 @@ export async function updateUserProfileDoc(
   partial: Partial<UserProfile>,
 ): Promise<void> {
   if (!isFirebaseConfigured()) return;
+  const rest = { ...partial } as Record<string, unknown>;
+  // Pseudonym and its cooldown are written by the delivery-identity API.
+  // Nulls must not be stored: rules only allow a real string or a missing field.
+  delete rest.pseudonym;
+  delete rest.pseudonymChangedAt;
+  if (rest.displayName == null) delete rest.displayName;
+  if (rest.photoUrl == null) delete rest.photoUrl;
+  if (rest.isAnonymous == null) delete rest.isAnonymous;
   await setDoc(
     doc(getDb(), USERS_COLLECTION, uid),
     omitUndefined({
-      ...partial,
+      ...rest,
       updatedAt: Timestamp.fromDate(new Date()),
-    } as Record<string, unknown>),
+    }),
     { merge: true },
   );
 }

@@ -56,6 +56,15 @@ export interface UserProfile {
   cuhkEmail?: string;
   cuhkVerifiedAt?: string;
   photoURL?: string;
+  /** Name shown to the other person on an active delivery. Null uses the account name. */
+  displayName?: string | null;
+  /** Delivery avatar. Hidden from the other person while anonymous. */
+  photoUrl?: string | null;
+  /** When true, the other person on a delivery sees the stored pseudonym and no photo. */
+  isAnonymous?: boolean;
+  /** Stable "Anonymous Adjective Animal" name. Set once, then every 30 days. */
+  pseudonym?: string | null;
+  pseudonymChangedAt?: string | null;
   /** Legacy fields kept for old Firestore docs; not written on new signups. */
   username?: string;
   chineseName?: string;
@@ -109,6 +118,8 @@ interface UserContextValue {
   isGuestBrowsing: boolean;
   logout: () => Promise<void>;
   updateProfile: (profile: UserProfile) => void;
+  /** Update the signed-in profile in this browser without writing Firestore. */
+  rememberProfile: (profile: UserProfile) => void;
   acceptRunnerTerms: () => void;
   setRunnerRegistered: (
     runnerId: string,
@@ -570,6 +581,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     [firebaseEnabled, persist],
   );
 
+  const rememberProfile = useCallback(
+    (profile: UserProfile) => {
+      persist(profile);
+    },
+    [persist],
+  );
+
   const setMode = useCallback((next: AppMode) => {
     profileStore()?.setItem(APP_MODE_KEY, next);
     setSavedMode(next);
@@ -655,6 +673,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isGuestBrowsing,
       logout,
       updateProfile,
+      rememberProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
     }),
@@ -677,6 +696,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isGuestBrowsing,
       logout,
       updateProfile,
+      rememberProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
     ],

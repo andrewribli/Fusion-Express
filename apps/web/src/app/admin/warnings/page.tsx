@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
+import { AdminRealPerson } from "@/components/DeliveryIdentity";
 import {
   escalateDeadlineWarning,
   fetchDeadlineWatchOrders,
@@ -144,9 +145,12 @@ export default function AdminWarningsPage() {
                               {order.id}
                               <OrderChannelBadge order={order} />
                             </p>
+                            <AdminRealPerson
+                              uid={order.runnerUid}
+                              fallbackName={order.runnerName || "Runner"}
+                            />
                             <p className="mt-1 text-xs text-gray-500">
-                              {order.runnerName ?? "Runner"} · expired{" "}
-                              {formatWhen(order.runnerExpiredAt)} · warnings{" "}
+                              Expired {formatWhen(order.runnerExpiredAt)} · warnings{" "}
                               {order.runnerWarningCount ?? 0}
                             </p>
                             <button
@@ -183,9 +187,12 @@ export default function AdminWarningsPage() {
                               {order.id}
                               <OrderChannelBadge order={order} />
                             </p>
+                            <AdminRealPerson
+                              uid={order.customerId}
+                              fallbackName={order.customerName || "Customer"}
+                            />
                             <p className="mt-1 text-xs text-gray-500">
-                              {order.customerName ?? "Customer"} · overdue{" "}
-                              {formatWhen(order.customerOverdueAt)} · warnings{" "}
+                              Overdue {formatWhen(order.customerOverdueAt)} · warnings{" "}
                               {order.customerWarningCount ?? 0}
                             </p>
                             <button

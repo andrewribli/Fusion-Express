@@ -5,6 +5,7 @@ import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { CAMPUS } from "@/ptero/config/campus";
+import { DeliveryIdentitySettings } from "@/components/DeliveryIdentitySettings";
 import { useUser } from "@/ptero/context/AppState";
 
 export default function ProfilePage() {
@@ -29,6 +30,7 @@ export default function ProfilePage() {
             {user?.email ?? "No email · guest checkout does not need a phone number"}
           </p>
         </div>
+        {user && !user.isGuest ? <DeliveryIdentitySettings /> : null}
         <div className="mt-3 space-y-2">
           {canRunnerMode ? (
             <Link

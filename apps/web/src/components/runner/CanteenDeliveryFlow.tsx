@@ -10,6 +10,7 @@ import { canteenNameForRestaurant, restaurantIdFromOrderItems } from "@/data/can
 import { orderCampus } from "@/lib/orders";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
 
@@ -117,6 +118,9 @@ export function CanteenDeliveryFlow({
                   {formatDeliveryAddress(order.college, order.hall)}
                 </p>
                 <p className="text-xs text-[#c4c4c4]">Lobby: {order.lobbyPoint}</p>
+                <div className="mt-3">
+                  <OrderCounterparty orderId={order.id} label="Customer:" tone="dark" />
+                </div>
               </div>
               <RunnerOrderItemList items={order.items} dark />
               {order.discountApplied && (order.discountAmount ?? 0) > 0 && (

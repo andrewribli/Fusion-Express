@@ -11,6 +11,7 @@ import { campusFromPathname } from "@/lib/campus-routes";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { requestRunnerBoardRefresh } from "@/lib/runner-board-refresh";
 import { usePendingRunnerOrders } from "@/lib/use-pending-runner-orders";
+import { useOrderParty } from "@/components/DeliveryIdentity";
 
 type RunnerHeaderShortcutsProps = {
   className?: string;
@@ -38,9 +39,9 @@ function chatHref(order: Order, campus: CampusId): string {
     : `/chat/${order.id}`;
 }
 
-function firstName(name: string | undefined): string {
-  const part = (name ?? "").trim().split(/\s+/)[0];
-  return part || "Customer";
+function CurrentOrderName({ orderId }: { orderId: string }) {
+  const party = useOrderParty(orderId);
+  return <>{party?.name || "Customer"}</>;
 }
 
 function timeSince(date: Date, now: number): string {
@@ -259,7 +260,7 @@ export function RunnerHeaderShortcuts({
                       >
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold text-gray-900">
-                            {firstName(order.customerName)} · {dorm}
+                            <CurrentOrderName orderId={order.id} /> · {dorm}
                           </span>
                           <span className="mt-0.5 block text-xs text-gray-500">
                             {timeSince(order.updatedAt, now)}

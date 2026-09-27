@@ -158,8 +158,77 @@ service cloud.firestore {
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
         'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
-        'isRunner', 'runnerId'
+        'isRunner', 'runnerId',
+        'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt'
       ]);
+    }
+
+    /**
+     * Delivery identity. Only the account owner reaches this function.
+     * Pseudonym format is "Anonymous <adjective> <animal>" and can change
+     * only when the previous timestamp is at least 30 days old.
+     */
+    function pseudonymShapeOk(value) {
+      return value is string
+        && value.matches('Anonymous (Amber|Bold|Brave|Bright|Calm|Clever|Cosmic|Cozy|Daring|Dizzy|Dreamy|Eager|Fancy|Fluffy|Gentle|Happy|Jolly|Kind|Lively|Lucky|Merry|Misty|Noble|Plucky|Proud|Quiet|Rapid|Silly|Sleepy|Snappy|Sunny|Swift|Tiny|Trusty|Vivid|Warm|Wise|Witty|Zesty|Zippy) (Badger|Bear|Crane|Deer|Dolphin|Dove|Duck|Eagle|Falcon|Finch|Fox|Frog|Gecko|Goose|Hare|Heron|Koala|Lark|Lynx|Mole|Moose|Mouse|Newt|Otter|Owl|Panda|Piper|Quail|Rabbit|Robin|Seal|Shrew|Snail|Sparrow|Swan|Tiger|Toad|Turtle|Wren|Yak)');
+    }
+
+    function displayNameOk() {
+      return !('displayName' in request.resource.data)
+        || (
+          request.resource.data.displayName is string
+          && request.resource.data.displayName.size() > 0
+          && request.resource.data.displayName.size() <= 40
+          && !request.resource.data.displayName.matches('.*@.*')
+        );
+    }
+
+    function photoUrlOk() {
+      return !('photoUrl' in request.resource.data)
+        || (
+          request.resource.data.photoUrl is string
+          && request.resource.data.photoUrl.size() < 2048
+          && request.resource.data.photoUrl.matches('https://.*')
+          && request.resource.data.photoUrl.matches('.*avatars(%2F|/)' + uid() + '(%2F|/)avatar\\.jpg.*')
+        );
+    }
+
+    function isAnonymousOk() {
+      return !('isAnonymous' in request.resource.data)
+        || request.resource.data.isAnonymous is bool;
+    }
+
+    function anonymousHasPseudonym() {
+      return request.resource.data.get('isAnonymous', false) != true
+        || pseudonymShapeOk(request.resource.data.get('pseudonym', ''));
+    }
+
+    function pseudonymCreateOk() {
+      return !('pseudonym' in request.resource.data)
+        || (
+          pseudonymShapeOk(request.resource.data.pseudonym)
+          && request.resource.data.pseudonymChangedAt == request.time
+        );
+    }
+
+    function pseudonymUpdateOk() {
+      let keys = changedKeys();
+      return (
+        !keys.hasAny(['pseudonym', 'pseudonymChangedAt'])
+        || (
+          keys.hasAny(['pseudonym'])
+          && pseudonymShapeOk(request.resource.data.pseudonym)
+          && request.resource.data.pseudonymChangedAt == request.time
+          && (
+            !('pseudonym' in resource.data)
+            || !(resource.data.pseudonym is string)
+            || resource.data.pseudonym.size() == 0
+            || !('pseudonymChangedAt' in resource.data)
+            || !(resource.data.pseudonymChangedAt is timestamp)
+            || request.time > resource.data.pseudonymChangedAt + duration.value(30, 'd')
+          )
+        )
+      );
     }
 
     function ownsRunnerDoc(runnerDocId) {
@@ -198,7 +267,12 @@ service cloud.firestore {
         && phoneOkForRole()
         && data.get('uid', uid()) == uid()
         && data.get('isRunner', false) == false
-        && !('runnerId' in data);
+        && !('runnerId' in data)
+        && displayNameOk()
+        && photoUrlOk()
+        && isAnonymousOk()
+        && anonymousHasPseudonym()
+        && pseudonymCreateOk();
     }
 
     function userUpdateOk(userId) {
@@ -227,7 +301,12 @@ service cloud.firestore {
             && ownsRunnerDoc(request.resource.data.runnerId)
           )
         )
-        && phoneOkForRole();
+        && phoneOkForRole()
+        && displayNameOk()
+        && photoUrlOk()
+        && isAnonymousOk()
+        && anonymousHasPseudonym()
+        && pseudonymUpdateOk();
     }
 
     match /users/{userId} {

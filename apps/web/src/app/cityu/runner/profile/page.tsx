@@ -5,6 +5,7 @@ import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { CAMPUS } from "@/ptero/config/campus";
+import { DeliveryIdentitySettings } from "@/components/DeliveryIdentitySettings";
 import { useUser } from "@/ptero/context/AppState";
 
 export default function RunnerProfilePage() {
@@ -25,6 +26,7 @@ export default function RunnerProfilePage() {
             campus: {CAMPUS.id} · supermarket: {CAMPUS.supermarket}
           </p>
         </div>
+        <DeliveryIdentitySettings />
         <Link
           href="/cityu"
           onClick={() => setMode("customer")}

@@ -9,6 +9,7 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { ModeSwitchButton } from "@/components/ModeSwitchButton";
+import { DeliveryIdentitySettings } from "@/components/DeliveryIdentitySettings";
 import { useUser } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useDemoAuth } from "@/lib/use-demo-auth";
@@ -59,6 +60,8 @@ export function ProfileView() {
                 </button>
               )}
             </section>
+
+            {!isGuest && user?.uid ? <DeliveryIdentitySettings /> : null}
 
             <section className="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-500">Account type</h2>

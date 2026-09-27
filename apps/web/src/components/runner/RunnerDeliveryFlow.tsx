@@ -9,6 +9,7 @@ import { orderCampus } from "@/lib/orders";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
+import { OrderCounterparty, useOrderParty } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import { supermarketForCampus } from "@fusion-express/shared/campus";
 
@@ -76,6 +77,8 @@ export function RunnerDeliveryFlow({
   const hasLobby = Boolean(order.deliveryPhotoUrl || photoFile);
   const totalOk = Number(finalTotal) > 0;
   const blocked = busy || uploading !== "";
+  const customer = useOrderParty(order.id);
+  const customerLabel = customer?.name || "the customer";
 
   useEffect(() => {
     setStep(runnerFlowStartStep(order));
@@ -144,11 +147,9 @@ export function RunnerDeliveryFlow({
                   {formatDeliveryAddress(order.college, order.hall)}
                 </p>
                 <p className="text-xs text-[#c4c4c4]">Lobby: {order.lobbyPoint}</p>
-                {order.customerName && (
-                  <p className="mt-1 text-xs text-[#c4c4c4]">
-                    Customer: {order.customerName}
-                  </p>
-                )}
+                <div className="mt-3">
+                  <OrderCounterparty orderId={order.id} label="Customer:" tone="dark" />
+                </div>
               </div>
               <RunnerOrderItemList items={order.items} dark />
               <p className="rounded-xl bg-[#2a2418] px-3 py-2 text-[#f5e6c8]">
@@ -207,7 +208,7 @@ export function RunnerDeliveryFlow({
           {step === 2 && (
             <div className="space-y-3">
               <p className="text-sm font-semibold text-[#f5f5f5]">
-                Write {order.customerName || "the customer's full name"} on the receipt and
+                Write {customerLabel} on the receipt and
                 attach it to the bag.
               </p>
               <label className="flex min-h-11 items-start gap-3 rounded-xl bg-[#2a2a2a] px-3 py-3 text-sm text-white">

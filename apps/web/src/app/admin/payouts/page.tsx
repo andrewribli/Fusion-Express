@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
+import { AdminRealPerson } from "@/components/DeliveryIdentity";
 import {
   fetchAdminReviewOrders,
   markRunnerPayout,
@@ -167,12 +168,16 @@ export default function AdminPayoutsPage() {
                               <OrderChannelBadge order={order} />
                             </p>
                             <p className="text-xs text-gray-500">
-                              {order.runnerName ?? "Runner"} ·{" "}
                               {adminPayoutLabel(order.status)}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              Customer: {order.customerName ?? order.customerId}
-                            </p>
+                            <AdminRealPerson
+                              uid={order.runnerUid}
+                              fallbackName={order.runnerName || "Runner"}
+                            />
+                            <AdminRealPerson
+                              uid={order.customerId}
+                              fallbackName={order.customerName || "Customer"}
+                            />
                           </div>
                           <p className="text-right text-sm font-bold text-[#ED1C24]">
                             Pay runner ${reimburse}

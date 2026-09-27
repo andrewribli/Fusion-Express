@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { useUser } from "@/context/UserContext";
+import { publicDeliveryName } from "@fusion-express/shared/delivery-identity";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
@@ -82,7 +84,13 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
     try {
       const role =
         order?.runnerUid && order.runnerUid === senderId ? "runner" : "customer";
-      await sendChatMessage(orderId, senderId, user!.fullName, text, role);
+      await sendChatMessage(
+        orderId,
+        senderId,
+        publicDeliveryName(user!, user!.fullName || "Customer"),
+        text,
+        role,
+      );
       setText("");
     } catch {
       setError("Failed to send message.");
@@ -94,8 +102,14 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col rounded-2xl border border-gray-100 bg-white shadow-sm md:h-[520px]">
       <div className="border-b border-gray-100 px-4 py-3">
-        <p className="text-sm font-semibold text-gray-900">Order Chat</p>
-        <p className="text-xs text-gray-500">{orderId}</p>
+        {order ? (
+          <OrderCounterparty
+            orderId={orderId}
+            label={order.customerId === user.uid ? "Your runner:" : "Customer:"}
+          />
+        ) : (
+          <p className="text-sm font-semibold text-gray-900">Order chat</p>
+        )}
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">

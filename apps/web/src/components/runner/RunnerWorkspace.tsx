@@ -56,6 +56,7 @@ import {
   runnerWarningTotal,
   RUNNER_EARNINGS_RATE,
 } from "@/lib/order-status";
+import { CustomerPartyName } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
 import {
@@ -141,13 +142,6 @@ function itemCount(order: Order): number {
   return order.items.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-/** Available-card title. A missing name stays "Customer", never the document id. */
-function customerCardTitle(order: Order): string {
-  const name = order.customerName?.trim();
-  if (!name || name === order.id) return "Customer";
-  return name;
-}
-
 function ExpiredDeliveryCard({
   order,
   now,
@@ -169,8 +163,8 @@ function ExpiredDeliveryCard({
       }}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="break-all font-bold" style={{ color: "#e5e5e5" }}>
-          {order.id}
+        <p className="min-w-0 font-bold" style={{ color: "#e5e5e5" }}>
+          <CustomerPartyName orderId={order.id} className="text-inherit" />
         </p>
         <span
           className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
@@ -179,9 +173,6 @@ function ExpiredDeliveryCard({
           Expired
         </span>
       </div>
-      <p className="mt-2 text-sm font-medium" style={{ color: "#e5e5e5" }}>
-        {order.customerName || "Customer"}
-      </p>
       <p className="mt-1 text-sm" style={{ color: "#a3a3a3" }}>
         {formatDeliveryAddress(order.college, order.hall)}
       </p>
@@ -258,8 +249,8 @@ function AvailableOrderCard({
   return (
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex justify-between gap-3">
-        <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
-          {customerCardTitle(order)}
+        <p className="flex min-w-0 flex-wrap items-center gap-2 font-bold text-gray-900">
+          <CustomerPartyName orderId={order.id} />
           <OrderChannelBadge order={order} />
         </p>
         <p className="shrink-0 text-xs text-gray-500">{formatTime(order.createdAt)}</p>
@@ -1264,7 +1255,9 @@ export function RunnerWorkspace({
                             <p className="font-bold text-gray-900">
                               {formatDeliveryAddress(order.college, order.hall)}
                             </p>
-                            <p className="mt-0.5 text-xs text-gray-500">{order.id}</p>
+                            <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                              <CustomerPartyName orderId={order.id} />
+                            </p>
                           </div>
                           <p className="shrink-0 text-xs font-semibold text-[#ED1C24]">
                             {order.status === "purchased" ? "Ready to deliver" : "Accepted"}
@@ -1363,7 +1356,9 @@ export function RunnerWorkspace({
                         className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                       >
                         <div className="flex justify-between gap-3">
-                          <p className="font-bold text-gray-900">{order.id}</p>
+                          <p className="font-bold text-gray-900">
+                            <CustomerPartyName orderId={order.id} />
+                          </p>
                           <p className="text-xs text-gray-500">
                             {formatTime(order.deliveredAt ?? order.updatedAt)}
                           </p>

@@ -51,5 +51,34 @@ service firebase.storage {
         && request.auth.uid == userId
         && isImageUnder10mb();
     }
+
+    function isStorageAdmin() {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    function avatarWrite(userId) {
+      return signedIn()
+        && request.auth.uid == userId
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType == 'image/jpeg';
+    }
+
+    // Owner and admin can read. Everyone else gets the file only if the
+    // delivery-identity API hands them the download URL, which it withholds
+    // for anonymous users and for people who are not on the order.
+    match /avatars/{userId}/{fileName} {
+      allow read: if signedIn() && (
+        request.auth.uid == userId || isStorageAdmin()
+      );
+      allow write: if fileName == 'avatar.jpg' && avatarWrite(userId);
+    }
+
+    match /test/avatars/{userId}/{fileName} {
+      allow read: if signedIn() && (
+        request.auth.uid == userId || isStorageAdmin()
+      );
+      allow write: if fileName == 'avatar.jpg' && avatarWrite(userId);
+    }
   }
 }
