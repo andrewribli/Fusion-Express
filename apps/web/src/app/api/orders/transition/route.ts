@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import {
   assertDeliveryTransition,
+  isCityuCanteenOrder,
   normalizeOrderStatus,
+  parseHkdAmount,
   type OrderStatus,
 } from "@fusion-express/shared";
 import { collectionName } from "@/lib/constants";
@@ -73,6 +75,18 @@ export async function POST(request: Request) {
     const dropoff =
       body.dropoffPhotoUrl?.trim() ||
       String(data.dropoffPhotoUrl ?? data.deliveryPhotoUrl ?? "");
+    const receiptAmount =
+      parseHkdAmount(data.receiptAmount) ?? parseHkdAmount(body.receiptAmount);
+    const items = Array.isArray(data.items) ? data.items : [];
+    const requireReceiptTotal = isCityuCanteenOrder({
+      campus: typeof data.campus === "string" ? data.campus : undefined,
+      orderChannel:
+        typeof data.orderChannel === "string" ? data.orderChannel : undefined,
+      items: items.map((item) => {
+        const row = item as { itemId?: unknown };
+        return { itemId: String(row?.itemId ?? "") };
+      }),
+    });
 
     assertDeliveryTransition({
       from,
@@ -80,7 +94,9 @@ export async function POST(request: Request) {
       actor,
       isAssignedRunner: isAssigned || to === "accepted",
       receiptUrl,
+      receiptAmount,
       dropoffPhotoUrl: dropoff,
+      requireReceiptTotal,
     });
 
     const now = FieldValue.serverTimestamp();
@@ -93,9 +109,9 @@ export async function POST(request: Request) {
     if (to === "receipt_uploaded") {
       updates.receiptUrl = receiptUrl;
       updates.receiptUploadedAt = now;
-      if (body.receiptAmount && body.receiptAmount > 0) {
-        updates.receiptAmount = body.receiptAmount;
-        updates.finalTotal = body.receiptAmount;
+      if (receiptAmount != null && receiptAmount > 0) {
+        updates.receiptAmount = receiptAmount;
+        updates.finalTotal = receiptAmount;
       }
     }
     if (to === "delivered") {
@@ -122,7 +138,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     const message = err instanceof Error ? err.message : "Could not update order.";
-    const status = /Cannot move|Only |required|Upload/i.test(message) ? 400 : 500;
+    const status = /Cannot move|Only |required|Upload|receipt total|HKD/i.test(message)
+      ? 400
+      : 500;
     return NextResponse.json({ error: message }, { status });
   }
 }

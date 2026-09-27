@@ -13,19 +13,41 @@ import { resolveSpecialInstructions } from "@/lib/constants";
 import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
+import { isCityuCanteenOrder, parseHkdAmount } from "@fusion-express/shared";
+
+function orderPickedUp(order: Order): boolean {
+  return (
+    order.status === "purchased" ||
+    order.status === "receipt_uploaded" ||
+    order.status === "delivered" ||
+    Boolean(order.pickedUpAt)
+  );
+}
+
+/** CityU step 2 opens only after the receipt photo and HKD total are stored. */
+function cityuReceiptStepDone(order: Order): boolean {
+  return (
+    order.status === "receipt_uploaded" &&
+    Boolean(order.receiptUrl) &&
+    parseHkdAmount(order.receiptAmount) != null
+  );
+}
 
 /**
- * Simplified runner flow for canteen orders: pick up → lobby photo → deliver.
- * No Fusion receipt / bank statement.
+ * Canteen runner flow. CUHK stays pick up, then lobby photo.
+ * CityU step 1 requires a receipt photo and the HKD total before the lobby photo.
  */
 export function CanteenDeliveryFlow({
   order,
   runnerCollege,
   photoFile,
+  receiptFile,
   busy,
   uploading,
   error,
   onPhoto,
+  onReceipt,
+  onReceiptContinue,
   onPickedUp,
   onDelivered,
   onClose,
@@ -33,37 +55,71 @@ export function CanteenDeliveryFlow({
   order: Order;
   runnerCollege?: string | null;
   photoFile?: File;
+  receiptFile?: File;
   busy: boolean;
-  uploading: "" | "photo";
+  uploading: "" | "receipt" | "photo";
   error: string;
   onPhoto: (file: File) => void;
+  onReceipt?: (file: File) => void;
+  onReceiptContinue?: (amount: number) => Promise<boolean>;
   onPickedUp: () => Promise<boolean>;
   onDelivered: () => Promise<boolean>;
   onClose: () => void;
 }) {
-  const pickedUp =
-    order.status === "purchased" ||
-    order.status === "delivered" ||
-    Boolean(order.pickedUpAt);
-  const [step, setStep] = useState(pickedUp ? 1 : 0);
+  const cityu = isCityuCanteenOrder(order);
+  const pickedUp = orderPickedUp(order);
+  const [step, setStep] = useState(() =>
+    cityu ? (cityuReceiptStepDone(order) ? 1 : 0) : pickedUp ? 1 : 0,
+  );
+  const [amountText, setAmountText] = useState(() =>
+    order.receiptAmount != null && order.receiptAmount > 0
+      ? String(order.receiptAmount)
+      : "",
+  );
+  const typedAmount = parseHkdAmount(amountText);
+  const hasReceipt = Boolean(order.receiptUrl);
   const hasLobby = Boolean(order.deliveryPhotoUrl || photoFile);
   const blocked = busy || uploading !== "";
+  const canContinue = pickedUp && hasReceipt && typedAmount != null;
   const restaurantId =
     order.canteenRestaurantId || restaurantIdFromOrderItems(order.items);
   const canteenName = canteenNameForRestaurant(restaurantId);
 
   useEffect(() => {
     setStep(
-      order.status === "purchased" ||
-        order.status === "delivered" ||
-        Boolean(order.pickedUpAt)
-        ? 1
-        : 0,
+      cityu
+        ? cityuReceiptStepDone(order)
+          ? 1
+          : 0
+        : orderPickedUp(order)
+          ? 1
+          : 0,
     );
-  }, [order.id, order.status, order.pickedUpAt]);
+  }, [
+    cityu,
+    order.id,
+    order.status,
+    order.pickedUpAt,
+    order.receiptUrl,
+    order.receiptAmount,
+  ]);
+
+  useEffect(() => {
+    setAmountText(
+      order.receiptAmount != null && order.receiptAmount > 0
+        ? String(order.receiptAmount)
+        : "",
+    );
+  }, [order.id, order.receiptAmount]);
 
   async function handlePickUp() {
     const ok = await onPickedUp();
+    if (ok && !cityu) setStep(1);
+  }
+
+  async function handleContinue() {
+    if (typedAmount == null || !onReceiptContinue) return;
+    const ok = await onReceiptContinue(typedAmount);
     if (ok) setStep(1);
   }
 
@@ -146,6 +202,37 @@ export function CanteenDeliveryFlow({
               >
                 Contact customer
               </Link>
+              {cityu ? (
+                <>
+                  <FileDropzone
+                    label="Receipt photo (required)"
+                    hint="Photo of the canteen receipt"
+                    file={receiptFile}
+                    existingUrl={order.receiptUrl}
+                    busy={uploading === "receipt"}
+                    onFile={(file) => onReceipt?.(file)}
+                  />
+                  <label
+                    className="block text-sm font-semibold text-white"
+                    htmlFor="canteen-receipt-amount"
+                  >
+                    Receipt total (HK$)
+                  </label>
+                  <input
+                    id="canteen-receipt-amount"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    value={amountText}
+                    onChange={(event) => setAmountText(event.target.value)}
+                    placeholder="0.00"
+                    className="min-h-12 w-full rounded-xl border border-white/15 bg-[#2a2a2a] px-4 text-lg font-bold text-white"
+                  />
+                  <p className="text-xs text-[#c4c4c4]">
+                    Type the exact total on the receipt. Both the photo and a
+                    valid HKD amount are required before the lobby photo.
+                  </p>
+                </>
+              ) : null}
             </div>
           )}
 
@@ -174,14 +261,25 @@ export function CanteenDeliveryFlow({
 
         <div className="border-t border-white/10 px-4 py-3">
           {step === 0 ? (
-            <button
-              type="button"
-              disabled={blocked}
-              onClick={() => void handlePickUp()}
-              className="min-h-12 w-full rounded-xl bg-[#ED1C24] text-sm font-bold text-white disabled:opacity-50"
-            >
-              {busy ? "Saving…" : "Mark as Picked Up"}
-            </button>
+            cityu && pickedUp ? (
+              <button
+                type="button"
+                disabled={!canContinue || blocked}
+                onClick={() => void handleContinue()}
+                className="min-h-12 w-full rounded-xl bg-[#ED1C24] text-sm font-bold text-white disabled:opacity-50"
+              >
+                {busy ? "Saving…" : "Continue"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={blocked}
+                onClick={() => void handlePickUp()}
+                className="min-h-12 w-full rounded-xl bg-[#ED1C24] text-sm font-bold text-white disabled:opacity-50"
+              >
+                {busy ? "Saving…" : "Mark as Picked Up"}
+              </button>
+            )
           ) : (
             <button
               type="button"

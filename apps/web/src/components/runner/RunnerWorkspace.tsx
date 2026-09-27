@@ -62,6 +62,10 @@ import { CustomerPartyName } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
 import {
+  isCityuCanteenOrder,
+  parseHkdAmount,
+} from "@fusion-express/shared";
+import {
   resolveCampus,
   supermarketForCampus,
 } from "@fusion-express/shared/campus";
@@ -343,6 +347,8 @@ export function RunnerWorkspace({
       string,
       {
         receiptUrl?: string;
+        receiptAmount?: number;
+        receiptUploadedAt?: Date;
         bankStatementUrl?: string;
         deliveryPhotoUrl?: string;
         finalTotal?: number;
@@ -438,6 +444,8 @@ export function RunnerWorkspace({
   async function maybeMarkPurchased(orderId: string) {
     const order = orderWithProgress(orderId);
     const cityu = order?.campus === "cityu";
+    // CityU canteen stores the receipt URL here, then the HKD total on step 1.
+    if (order && isCityuCanteenOrder(order)) return;
     if (!order?.receiptUrl || (!cityu && !order.bankStatementUrl)) return;
     if (
       order.status === "delivered" ||
@@ -512,14 +520,18 @@ export function RunnerWorkspace({
           return {
             ...order,
             receiptUrl: order.receiptUrl ?? local.receiptUrl,
+            receiptAmount: order.receiptAmount ?? local.receiptAmount,
+            receiptUploadedAt: order.receiptUploadedAt ?? local.receiptUploadedAt,
             bankStatementUrl: order.bankStatementUrl ?? local.bankStatementUrl,
             deliveryPhotoUrl: order.deliveryPhotoUrl ?? local.deliveryPhotoUrl,
             finalTotal: order.finalTotal ?? local.finalTotal,
             runnerVerified: order.runnerVerified || local.runnerVerified,
             status:
-              order.status === "accepted" && local.status === "purchased"
-                ? "purchased"
-                : order.status,
+              order.status === "purchased" && local.status === "receipt_uploaded"
+                ? "receipt_uploaded"
+                : order.status === "accepted" && local.status === "purchased"
+                  ? "purchased"
+                  : order.status,
           };
         }),
       );
@@ -1040,7 +1052,13 @@ export function RunnerWorkspace({
   async function handleCanteenPickedUp(orderId: string): Promise<boolean> {
     const order = orderWithProgress(orderId);
     if (!order) return false;
-    if (order.status === "purchased" || order.status === "delivered") return true;
+    if (
+      order.status === "purchased" ||
+      order.status === "receipt_uploaded" ||
+      order.status === "delivered"
+    ) {
+      return true;
+    }
     setPurchasingId(orderId);
     setDeliverError("");
     try {

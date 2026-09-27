@@ -3,4 +3,4 @@ description: Always deploy Fusion Express to Vercel production after shipping us
 alwaysApply: true
 ---
 
-After implementing or fixing anything that should be on the live app, deploy with `npx --yes vercel@59.3.0 --prod --yes` (do not wait for the user to ask). Target https://gracerun.vercel.app. After --prod, alias the deployment to gracerun.vercel.app and keep servecart.vercel.app pointing at the same deployment so the host redirect still works.
+After implementing or fixing anything that should be on the live app, deploy with `npx --yes vercel@59.3.0 --prod --yes --scope fusion-1468` (do not wait for the user to ask). The only site that matters is https://www.gracerun.fit. Do not alias or deploy to gracerun.vercel.app, servecart.vercel.app, or any other host.
