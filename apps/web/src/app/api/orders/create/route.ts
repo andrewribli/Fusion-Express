@@ -28,6 +28,11 @@ type ItemBody = {
   weightKg?: number;
 };
 
+/** SRRS is a CUHK routing hub. It is never a customer delivery destination. */
+function isSrrsHub(value: unknown): boolean {
+  return typeof value === "string" && value.trim().toLowerCase() === "srrs";
+}
+
 /**
  * Creates an order and prices delivery on the server.
  * Client deliveryFee / deliveryBase / deliverySurcharge / deliveryTotal are ignored.
@@ -48,6 +53,16 @@ export async function POST(request: Request) {
     if (!campus || !hallId || !college || rawItems.length === 0) {
       return NextResponse.json(
         { error: "campus, hall, and items are required." },
+        { status: 400 },
+      );
+    }
+    if (
+      isSrrsHub(hallId) ||
+      isSrrsHub(college) ||
+      isSrrsHub(body.deliveryDestination)
+    ) {
+      return NextResponse.json(
+        { error: "Choose a delivery hall before placing this order." },
         { status: 400 },
       );
     }
@@ -133,6 +148,13 @@ export async function POST(request: Request) {
       if (!findHall(hallId, "cityu")) {
         return NextResponse.json({ error: "Choose a CityU hall." }, { status: 400 });
       }
+    }
+
+    if (priced.deliveryDestination === "srrs") {
+      return NextResponse.json(
+        { error: "Choose a delivery hall before placing this order." },
+        { status: 400 },
+      );
     }
 
     if (

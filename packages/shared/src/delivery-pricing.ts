@@ -18,8 +18,9 @@ import {
  * Delivery pricing for GraceRun.
  *
  * CityU: store base plus one hall surcharge. That graph is not the CUHK graph.
- * CUHK: cheapest directed path in cuhk-delivery-graph. The HK$5 floor and the
- * HK$12 block apply to that path total.
+ * CUHK: cheapest directed path in cuhk-delivery-graph. Bus-only pairs drop the
+ * origin's walks except a hub-walk whitelist, then the HK$5 floor and the
+ * HK$12 block apply to that path total. SRRS is a hub, not a destination.
  * Hall 12 has no CityU tier — those orders keep today's CityU checkout fee.
  */
 
@@ -205,6 +206,17 @@ function cuhkGraphQuote(
     pricing: "cuhk-graph",
     deliveryOrigin: origin ?? undefined,
   };
+
+  if (
+    resolveCuhkNode(input.hallId) === "srrs" ||
+    resolveCuhkNode(input.college) === "srrs"
+  ) {
+    return {
+      ...empty,
+      available: false,
+      unavailableMessage: cuhkUnavailableMessage(originLabel, destinationLabel),
+    };
+  }
 
   if (!input.hallId?.trim() && !input.college?.trim()) {
     return { ...empty, pending: true };

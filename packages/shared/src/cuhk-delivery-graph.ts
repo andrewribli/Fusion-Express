@@ -1,9 +1,19 @@
 /**
  * CUHK delivery is a directed graph. The fee is the cheapest path, not a
- * destination lookup. Add a route by appending to EDGES — do not special-case
- * a hall in the search.
+ * destination lookup. Add a route by appending to CUHK_EDGES — do not
+ * special-case a hall in the search, and do not mirror an edge that is not
+ * listed on its own.
+ *
+ * Every edge has a route tag. There are no untagged edges.
  *
  * fusion and sorazen are the same building. sorazen is an alias, not a node.
+ * srrs is a hub only. It is not a customer hall.
+ *
+ * When BUS_ONLY[origin] includes the destination, walks that leave the origin
+ * are dropped except edges whose `to` is in HUB_WALKS[origin]. Dijkstra then
+ * runs on that filtered list. Other pairs use the full list.
+ * On a cost tie, the path with fewer edges wins (a direct edge beats a longer
+ * walk of the same cost).
  */
 
 export const FEE_FLOOR = 5;
@@ -11,6 +21,7 @@ export const BLOCK_THRESHOLD = 12;
 
 export const CUHK_NODES = [
   "fusion",
+  "srrs",
   "paper-coffee",
   "uc",
   "lsk",
@@ -28,45 +39,78 @@ export const CUHK_NODES = [
 
 export type CuhkNode = (typeof CUHK_NODES)[number];
 
+export type CuhkRoute = "walk" | "bus-3" | "bus-3-4" | "bus-8" | "shuttle";
+
 export type CuhkEdge = {
   from: CuhkNode;
   to: CuhkNode;
   /** Raw edge cost. The HK$5 floor is applied to the path total, not here. */
   fee: number;
-  route?: string;
+  route: CuhkRoute;
 };
 
 /** Directed. Do not mirror an edge unless it is listed on its own. */
 export const CUHK_EDGES: CuhkEdge[] = [
-  { from: "fusion", to: "lsk", fee: 0 },
-  { from: "fusion", to: "mmw", fee: 2 },
+  { from: "fusion", to: "lsk", fee: 0, route: "walk" },
+  { from: "fusion", to: "mmw", fee: 2, route: "walk" },
+  { from: "fusion", to: "srrs", fee: 1, route: "walk" },
+  { from: "fusion", to: "pg-halls", fee: 4, route: "walk" },
+  { from: "fusion", to: "shho-mc-chungchi", fee: 1, route: "walk" },
+  { from: "fusion", to: "uc", fee: 4, route: "walk" },
   { from: "fusion", to: "cw-chu", fee: 3, route: "bus-8" },
-  { from: "fusion", to: "pg-halls", fee: 4 },
-  { from: "fusion", to: "shho-mc-chungchi", fee: 1 },
-  { from: "fusion", to: "uc", fee: 4 },
-  { from: "lsk", to: "i-house-12", fee: 1 },
-  { from: "lsk", to: "wys", fee: 2 },
-  { from: "lsk", to: "uc", fee: 3 },
-  { from: "lsk", to: "lws", fee: 3 },
-  { from: "uc", to: "na", fee: 2 },
-  { from: "uc", to: "fusion", fee: 4 },
-  { from: "uc", to: "lsk", fee: 3 },
-  { from: "mmw", to: "i-house-345", fee: 0 },
-  { from: "mmw", to: "na", fee: 2 },
-  { from: "mmw", to: "shho-mc-chungchi", fee: 1 },
-  { from: "na", to: "mmw", fee: 0 },
-  { from: "i-house-345", to: "mmw", fee: 0 },
-  { from: "shho-mc-chungchi", to: "mmw", fee: 0 },
-  { from: "shho-mc-chungchi", to: "fusion", fee: 1 },
-  { from: "shho-mc-chungchi", to: "pg-halls", fee: 2 },
-  { from: "pg-halls", to: "shho-mc-chungchi", fee: 2 },
+  { from: "srrs", to: "shaw", fee: 3, route: "bus-3" },
+  { from: "lsk", to: "i-house-12", fee: 1, route: "walk" },
+  { from: "lsk", to: "wys", fee: 2, route: "walk" },
+  { from: "lsk", to: "uc", fee: 3, route: "walk" },
+  { from: "lsk", to: "lws", fee: 3, route: "walk" },
+  { from: "uc", to: "na", fee: 2, route: "walk" },
+  { from: "uc", to: "fusion", fee: 4, route: "walk" },
+  { from: "uc", to: "lsk", fee: 3, route: "walk" },
+  { from: "uc", to: "lws", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "wys", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "cw-chu", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "shaw", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "i-house-12", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "shho-mc-chungchi", fee: 2, route: "bus-3-4" },
+  { from: "mmw", to: "i-house-345", fee: 0, route: "walk" },
+  { from: "mmw", to: "na", fee: 2, route: "walk" },
+  { from: "mmw", to: "shho-mc-chungchi", fee: 1, route: "walk" },
+  { from: "na", to: "mmw", fee: 0, route: "walk" },
+  { from: "i-house-345", to: "mmw", fee: 0, route: "walk" },
+  { from: "shho-mc-chungchi", to: "mmw", fee: 0, route: "walk" },
+  { from: "shho-mc-chungchi", to: "fusion", fee: 1, route: "walk" },
+  { from: "shho-mc-chungchi", to: "pg-halls", fee: 3, route: "walk" },
+  { from: "pg-halls", to: "shho-mc-chungchi", fee: 3, route: "walk" },
   { from: "paper-coffee", to: "fusion", fee: 4, route: "bus-3-4" },
-  { from: "paper-coffee", to: "shho-mc-chungchi", fee: 0 },
-  { from: "paper-coffee", to: "pg-halls", fee: 1 },
-  { from: "wys", to: "shaw", fee: 1 },
-  { from: "lws", to: "i-house-12", fee: 1 },
-  { from: "lws", to: "shaw", fee: 1 },
+  { from: "paper-coffee", to: "shho-mc-chungchi", fee: 0, route: "walk" },
+  { from: "paper-coffee", to: "pg-halls", fee: 1, route: "walk" },
+  { from: "paper-coffee", to: "uc", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "na", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "lws", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "shaw", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "wys", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "cw-chu", fee: 5, route: "bus-3-4" },
+  { from: "wys", to: "shaw", fee: 1, route: "walk" },
+  { from: "lws", to: "i-house-12", fee: 1, route: "walk" },
+  { from: "lws", to: "shaw", fee: 1, route: "walk" },
 ];
+
+/**
+ * Destinations that must not use the origin's ordinary walks.
+ * Filtering applies only when the destination is in this list.
+ */
+export const BUS_ONLY: Partial<Record<CuhkNode, readonly CuhkNode[]>> = {
+  fusion: ["cw-chu", "shaw"],
+  "paper-coffee": ["uc", "na", "lws", "shaw", "wys", "cw-chu"],
+  uc: ["lws", "wys", "cw-chu", "shaw", "i-house-12", "shho-mc-chungchi", "pg-halls"],
+};
+
+/** Walks out of the origin that stay available on a bus-only search. */
+export const HUB_WALKS: Partial<Record<CuhkNode, readonly CuhkNode[]>> = {
+  fusion: ["srrs"],
+  "paper-coffee": [],
+  uc: [],
+};
 
 export type CuhkFeeHit = {
   fee: number;
@@ -85,32 +129,11 @@ export type CuhkFeeBlocked = {
 
 const NODE_SET = new Set<string>(CUHK_NODES);
 
-const ADJACENCY: Record<CuhkNode, { to: CuhkNode; fee: number }[]> = {
-  fusion: [],
-  "paper-coffee": [],
-  uc: [],
-  lsk: [],
-  mmw: [],
-  na: [],
-  wys: [],
-  shaw: [],
-  lws: [],
-  "i-house-12": [],
-  "i-house-345": [],
-  "pg-halls": [],
-  "cw-chu": [],
-  "shho-mc-chungchi": [],
-};
-
-for (const edge of CUHK_EDGES) {
-  ADJACENCY[edge.from].push({ to: edge.to, fee: edge.fee });
-}
-
 function isNode(value: string): value is CuhkNode {
   return NODE_SET.has(value);
 }
 
-/** sorazen is Fusion. Ids the shop already uses are accepted here. */
+/** sorazen is Fusion. Ids the shop already uses are accepted here. srrs stays a hub. */
 export function resolveCuhkNode(id: string | null | undefined): CuhkNode | null {
   const raw = (id ?? "").trim().toLowerCase();
   if (!raw) return null;
@@ -162,17 +185,26 @@ function pgHallNode(label: string): CuhkNode | null {
   return null;
 }
 
+/** The SRRS hub is not a hall a customer can select. */
+function customerNode(node: CuhkNode | null): CuhkNode | null {
+  if (node === "srrs") return null;
+  return node;
+}
+
 /**
  * Map a CUHK dorm onto a graph node. International House needs a block
- * number (1–2 vs 3–5). Anything else unmatched stays unpriced.
+ * number (1–2 vs 3–5). The SRRS hub and anything else unmatched stay unpriced.
  */
 export function cuhkDestinationNode(
   college: string | null | undefined,
   hall: string | null | undefined,
 ): CuhkNode | null {
-  const hallNode = resolveCuhkNode(hall);
+  if (resolveCuhkNode(hall) === "srrs" || resolveCuhkNode(college) === "srrs") {
+    return null;
+  }
+  const hallNode = customerNode(resolveCuhkNode(hall));
   if (hallNode) return hallNode;
-  const collegeNode = resolveCuhkNode(college);
+  const collegeNode = customerNode(resolveCuhkNode(college));
   if (collegeNode) return collegeNode;
 
   const hallLabel = hall ?? "";
@@ -182,13 +214,13 @@ export function cuhkDestinationNode(
     pgHallNode(hallLabel) ??
     COLLEGE_NODE[squash(hallLabel)] ??
     null;
-  if (fromHall) return fromHall;
+  if (fromHall) return customerNode(fromHall);
 
   if (iHouseNode(collegeLabel)) return null;
-  return (
+  return customerNode(
     pgHallNode(collegeLabel) ??
-    COLLEGE_NODE[squash(collegeLabel)] ??
-    null
+      COLLEGE_NODE[squash(collegeLabel)] ??
+      null,
   );
 }
 
@@ -223,7 +255,7 @@ export function computeCuhkFee(
     return { fee: 0, rawFee: 0, path: [start], floored: false };
   }
 
-  const found = cheapestPath(start, end);
+  const found = cheapestPath(start, end, edgesForSearch(start, end));
   if (!found) return null;
   return settleCuhkFee(found.rawFee, found.path, false, `${start} → ${end}`);
 }
@@ -261,38 +293,78 @@ export function settleCuhkFee(
   };
 }
 
+function edgesForSearch(origin: CuhkNode, destination: CuhkNode): CuhkEdge[] {
+  const busOnly = BUS_ONLY[origin];
+  if (!busOnly || !busOnly.includes(destination)) return CUHK_EDGES;
+  const hubs = new Set<CuhkNode>(HUB_WALKS[origin] ?? []);
+  return CUHK_EDGES.filter((edge) => {
+    if (edge.from !== origin || edge.route !== "walk") return true;
+    return hubs.has(edge.to);
+  });
+}
+
+type PathState = { cost: number; hops: number };
+
+/** True when `next` is a strictly cheaper cost, or the same cost with fewer edges. */
+function isBetterPath(next: PathState, known: PathState | undefined): boolean {
+  if (!known) return true;
+  if (next.cost !== known.cost) return next.cost < known.cost;
+  return next.hops < known.hops;
+}
+
 function cheapestPath(
   start: CuhkNode,
   end: CuhkNode,
+  edges: readonly CuhkEdge[],
 ): { rawFee: number; path: CuhkNode[] } | null {
-  const cost = new Map<CuhkNode, number>();
+  const adjacency: Record<CuhkNode, { to: CuhkNode; fee: number }[]> = {
+    fusion: [],
+    srrs: [],
+    "paper-coffee": [],
+    uc: [],
+    lsk: [],
+    mmw: [],
+    na: [],
+    wys: [],
+    shaw: [],
+    lws: [],
+    "i-house-12": [],
+    "i-house-345": [],
+    "pg-halls": [],
+    "cw-chu": [],
+    "shho-mc-chungchi": [],
+  };
+  for (const edge of edges) {
+    adjacency[edge.from].push({ to: edge.to, fee: edge.fee });
+  }
+
+  const best = new Map<CuhkNode, PathState>();
   const prev = new Map<CuhkNode, CuhkNode>();
   const settled = new Set<CuhkNode>();
-  cost.set(start, 0);
+  best.set(start, { cost: 0, hops: 0 });
 
   while (settled.size < CUHK_NODES.length) {
     let current: CuhkNode | null = null;
-    let best = Infinity;
+    let currentBest: PathState | null = null;
     for (const node of CUHK_NODES) {
       if (settled.has(node)) continue;
-      const candidate = cost.get(node);
-      if (candidate == null || candidate >= best) continue;
-      best = candidate;
+      const candidate = best.get(node);
+      if (!candidate || !isBetterPath(candidate, currentBest ?? undefined)) continue;
       current = node;
+      currentBest = candidate;
     }
-    if (!current || best === Infinity) break;
+    if (!current || !currentBest) break;
     if (current === end) break;
     settled.add(current);
-    for (const edge of ADJACENCY[current]) {
-      const next = best + edge.fee;
-      const known = cost.get(edge.to);
-      if (known != null && known <= next) continue;
-      cost.set(edge.to, next);
+    for (const edge of adjacency[current]) {
+      const next = { cost: currentBest.cost + edge.fee, hops: currentBest.hops + 1 };
+      if (!isBetterPath(next, best.get(edge.to))) continue;
+      best.set(edge.to, next);
       prev.set(edge.to, current);
     }
   }
 
-  const rawFee = cost.get(end);
+  const rawFee = best.get(end)?.cost;
   if (rawFee == null) return null;
 
   const path: CuhkNode[] = [end];
