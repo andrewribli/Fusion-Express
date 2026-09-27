@@ -132,9 +132,9 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     openMin: 8 * 60,
     closeMin: 20 * 60 + 30,
     weekdays: "mon-fri",
-    hoursLabel: "Coming soon",
+    hoursLabel: "Mon–Fri 08:00 – 20:30",
     mealPeriods: false,
-    nextOpenFallback: "TBD",
+    nextOpenFallback: "8:00 AM",
   },
   wys: {
     openMin: 0,
