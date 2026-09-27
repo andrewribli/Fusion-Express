@@ -135,6 +135,20 @@ export async function POST(request: Request) {
       }
     }
 
+    if (
+      priced.quote.available === false ||
+      priced.quote.pending
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            priced.quote.unavailableMessage ??
+            "Choose a delivery hall before placing this order.",
+        },
+        { status: 400 },
+      );
+    }
+
     const now = new Date();
     const orderChannel =
       priced.sourceId === "fusion"
@@ -176,6 +190,10 @@ export async function POST(request: Request) {
       deliverySurcharge: priced.deliverySurcharge,
       deliveryTotal: priced.deliveryTotal,
       deliveryFee: priced.deliveryFee,
+      deliveryOrigin: priced.deliveryOrigin,
+      deliveryDestination: priced.deliveryDestination,
+      deliveryFeeRaw: priced.deliveryFeeRaw,
+      deliveryPath: priced.deliveryPath,
       tip: tip || undefined,
       total: priced.total,
       paymentReceived: false,

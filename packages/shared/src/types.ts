@@ -227,6 +227,14 @@ export interface Order {
   deliveryBase?: number;
   deliverySurcharge?: number;
   deliveryTotal?: number;
+  /** CUHK graph node the order left from. Not recomputed later. */
+  deliveryOrigin?: string;
+  /** CUHK graph node the order went to. Not recomputed later. */
+  deliveryDestination?: string;
+  /** Path cost before the HK$5 floor. Customers never see this. */
+  deliveryFeeRaw?: number;
+  /** Node ids along the cheapest directed path. Customers never see this. */
+  deliveryPath?: string[];
   /** taste, wellcome, ac1, eben, fusion, or a canteen id. */
   sourceId?: string;
   tip?: number;
@@ -252,6 +260,9 @@ export interface Order {
   finalTotal?: number;
   amountPaidByRunner?: number;
   receiptUrl?: string;
+  /** HKD total printed on the receipt. */
+  receiptAmount?: number;
+  receiptUploadedAt?: Date;
   bankStatementUrl?: string;
   customerNameOnReceipt?: boolean;
   runnerVerified?: boolean;

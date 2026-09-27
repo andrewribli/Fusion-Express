@@ -6,12 +6,20 @@ import {
 } from "./delivery";
 import { findHall, isCityuHall12 } from "./halls";
 import { CUHK_COLLEGE_HALLS, type CuhkCollege } from "./locations";
+import {
+  computeCuhkFee,
+  cuhkDestinationNode,
+  cuhkOriginLabel,
+  cuhkUnavailableMessage,
+  resolveCuhkNode,
+} from "./cuhk-delivery-graph";
 
 /**
  * Delivery pricing for GraceRun.
  *
- * CityU numbers are Andrew's confirmed schedule (base + hall surcharge, once).
- * CUHK Fusion grocery and CUHK canteens stay on the fee the app already charges.
+ * CityU: store base plus one hall surcharge. That graph is not the CUHK graph.
+ * CUHK: cheapest directed path in cuhk-delivery-graph. The HK$5 floor and the
+ * HK$12 block apply to that path total.
  * Hall 12 has no CityU tier — those orders keep today's CityU checkout fee.
  */
 
@@ -32,7 +40,8 @@ export type DeliveryPricingKind =
   | "cityu-hall12-legacy"
   | "cityu-legacy-source"
   | "cuhk-flat"
-  | "cuhk-grocery";
+  | "cuhk-grocery"
+  | "cuhk-graph";
 
 export interface DeliveryFeeQuote {
   base: number;
@@ -46,6 +55,15 @@ export interface DeliveryFeeQuote {
   extraKg?: number;
   weightSurcharge?: number;
   distanceSurcharge?: number;
+  /** False when the CUHK route must not be charged. */
+  available?: boolean;
+  /** True until a CUHK hall is chosen. The cart does not invent a fee. */
+  pending?: boolean;
+  unavailableMessage?: string;
+  deliveryOrigin?: string;
+  deliveryDestination?: string;
+  deliveryFeeRaw?: number;
+  deliveryPath?: string[];
 }
 
 export interface ComputeDeliveryFeeInput {
@@ -170,6 +188,64 @@ function cuhkFlatQuote(hallId: string | null | undefined): DeliveryFeeQuote {
   };
 }
 
+function cuhkGraphQuote(
+  input: ComputeDeliveryFeeInput,
+  sourceId: string,
+): DeliveryFeeQuote {
+  const origin = resolveCuhkNode(sourceId);
+  const originLabel = cuhkOriginLabel(sourceId);
+  const hallName =
+    findHall(input.hallId, "cuhk")?.name ?? (input.hallId?.trim() || undefined);
+  const destinationLabel = hallName || input.college?.trim() || "that hall";
+  const empty: DeliveryFeeQuote = {
+    base: 0,
+    surcharge: 0,
+    total: 0,
+    hallName,
+    pricing: "cuhk-graph",
+    deliveryOrigin: origin ?? undefined,
+  };
+
+  if (!input.hallId?.trim() && !input.college?.trim()) {
+    return { ...empty, pending: true };
+  }
+
+  const destination = cuhkDestinationNode(input.college, input.hallId);
+  if (!origin || !destination) {
+    return {
+      ...empty,
+      available: false,
+      unavailableMessage: cuhkUnavailableMessage(originLabel, destinationLabel),
+    };
+  }
+
+  const hit = computeCuhkFee(origin, destination);
+  if (!hit || hit.fee == null) {
+    return {
+      ...empty,
+      available: false,
+      deliveryOrigin: origin,
+      deliveryDestination: destination,
+      deliveryFeeRaw: hit?.rawFee,
+      deliveryPath: hit?.path,
+      unavailableMessage: cuhkUnavailableMessage(originLabel, destinationLabel),
+    };
+  }
+
+  return {
+    base: hit.fee,
+    surcharge: 0,
+    total: hit.fee,
+    hallName,
+    pricing: "cuhk-graph",
+    available: true,
+    deliveryOrigin: origin,
+    deliveryDestination: destination,
+    deliveryFeeRaw: hit.rawFee,
+    deliveryPath: hit.path,
+  };
+}
+
 function cityuLegacyQuote(
   kind: "cityu-hall12-legacy" | "cityu-legacy-source",
   hallName?: string,
@@ -194,8 +270,7 @@ export function computeDeliveryFee(
   const sourceId = normalizeDeliverySourceId(campus, input.sourceId || "");
 
   if (campus === "cuhk") {
-    if (sourceId === "fusion") return cuhkGroceryQuote(input);
-    return cuhkFlatQuote(input.hallId);
+    return cuhkGraphQuote(input, sourceId);
   }
 
   const hall = findHall(input.hallId, "cityu");
@@ -247,6 +322,13 @@ export function formatDeliveryQuote(quote: DeliveryFeeQuote): string {
   if (quote.pricing === "cityu-hall12-legacy") {
     return `Delivery: HK$${total}`;
   }
+  if (quote.pricing === "cuhk-graph") {
+    if (quote.pending) return "Delivery is confirmed at checkout.";
+    if (quote.available === false && quote.unavailableMessage) {
+      return quote.unavailableMessage;
+    }
+    return `Delivery: HK$${total}`;
+  }
   if (quote.pricing === "cuhk-grocery" || quote.pricing === "cuhk-flat") {
     if (!quote.surcharge) return `Delivery: HK$${base}`;
     return `Delivery: HK$${base} base + HK$${formatHkdAmount(quote.surcharge)} = HK$${total}`;
@@ -261,11 +343,15 @@ export function formatDeliveryQuote(quote: DeliveryFeeQuote): string {
  */
 export function formatStoredDeliveryFee(order: {
   deliveryFee: number;
+  deliveryOrigin?: string;
   deliveryBase?: number;
   deliverySurcharge?: number;
   deliveryTotal?: number;
   hall?: string;
 }): string {
+  if (order.deliveryOrigin) {
+    return `Delivery: HK$${formatHkdAmount(order.deliveryFee)}`;
+  }
   if (
     order.deliveryBase == null ||
     order.deliverySurcharge == null ||
@@ -365,6 +451,10 @@ export function lockedDeliveryPricing(input: {
   total: number;
   zone?: DeliveryZone;
   totalWeight: number;
+  deliveryOrigin?: string;
+  deliveryDestination?: string;
+  deliveryFeeRaw?: number;
+  deliveryPath?: string[];
 } {
   const sourceId = resolveOrderSourceId(input);
   const campus: CampusId = input.campus === "cityu" ? "cityu" : "cuhk";
@@ -395,6 +485,10 @@ export function lockedDeliveryPricing(input: {
     total: round2(input.subtotal + quote.total + tip),
     zone: quote.zone,
     totalWeight,
+    deliveryOrigin: quote.deliveryOrigin,
+    deliveryDestination: quote.deliveryDestination,
+    deliveryFeeRaw: quote.deliveryFeeRaw,
+    deliveryPath: quote.deliveryPath,
   };
 }
 

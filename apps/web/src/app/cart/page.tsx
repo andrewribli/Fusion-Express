@@ -164,7 +164,7 @@ export default function CartPage() {
                         ${subtotal}
                       </span>
                     </div>
-                    {fee.quote.pricing.startsWith("cityu") ? (
+                    {fee.quote.pricing === "cuhk-graph" || fee.quote.pricing.startsWith("cityu") ? (
                       <DeliveryQuote quote={fee.quote} />
                     ) : (
                       <DeliveryFeeBreakdown breakdown={fee} />
