@@ -117,6 +117,7 @@ export function hasActiveFilters(filters: MealSearchFilters): boolean {
   if (filters.price.kind !== "none") return true;
   if (filters.openNowOnly) return true;
   if (filters.canteenIds !== null) return true;
+  if (filters.favoritesOnly) return true;
   return false;
 }
 
@@ -126,6 +127,7 @@ export function countActiveFilters(filters: MealSearchFilters): number {
   if (filters.price.kind !== "none") n += 1;
   if (filters.openNowOnly) n += 1;
   if (filters.canteenIds !== null) n += 1;
+  if (filters.favoritesOnly) n += 1;
   return n;
 }
 
@@ -136,6 +138,7 @@ export function defaultFilters(): MealSearchFilters {
     openNowOnly: false,
     canteenIds: null,
     sort: "best",
+    favoritesOnly: false,
   };
 }
 
@@ -168,11 +171,14 @@ export function searchCampusDishes(
   campus: MealSearchCampus,
   rawQuery: string,
   filters: MealSearchFilters,
+  favoriteIds: ReadonlySet<string> | readonly string[] = [],
 ): MealSearchResult {
   const catalog = getCampusDishes(campus);
   const q = rawQuery.trim();
   const queryActive = q.length >= MEAL_SEARCH_MIN_CHARS;
   const filtersActive = hasActiveFilters(filters);
+  const fav =
+    favoriteIds instanceof Set ? favoriteIds : new Set(favoriteIds);
 
   if (!queryActive && !filtersActive) {
     return {
@@ -218,8 +224,18 @@ export function searchCampusDishes(
     ranked = ranked.filter((d) => d.openNow);
   }
 
+  if (filters.favoritesOnly) {
+    ranked = ranked.filter((d) => fav.has(`canteen:${d.canteenId}:${d.itemId}`));
+  }
+
   const sort = effectiveSort(q, filters);
   ranked.sort((a, b) => {
+    if (sort === "favorites") {
+      const aFav = fav.has(`canteen:${a.canteenId}:${a.itemId}`) ? 0 : 1;
+      const bFav = fav.has(`canteen:${b.canteenId}:${b.itemId}`) ? 0 : 1;
+      if (aFav !== bFav) return aFav - bFav;
+      return comparePriceAsc(a, b);
+    }
     switch (sort) {
       case "price-asc":
         return comparePriceAsc(a, b);

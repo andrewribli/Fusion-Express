@@ -159,7 +159,8 @@ service cloud.firestore {
         'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
         'isRunner', 'runnerId',
-        'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt'
+        'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt',
+        'favorites'
       ]);
     }
 

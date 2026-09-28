@@ -56,6 +56,7 @@ import {
   PriceSortSelect,
   SimpleItemsGrid,
   UcItemsGrid,
+  useFavoritesOnly,
   usePriceSort,
 } from "@/components/canteen/CanteenMenuGrid";
 import {
@@ -370,6 +371,7 @@ function SimpleMenuView({
   const restaurantId = restaurant.id as SimpleRestaurantId;
   const [filter, setFilter] = useState<"all" | MenuCategory>("all");
   const [sort, setSort] = usePriceSort();
+  const [favoritesOnly, setFavoritesOnly] = useFavoritesOnly();
   const open = isSimpleCanteenOpen(restaurantId) ?? false;
   const cfg = getCanteenConfig(restaurantId);
   const menu = getSimpleMenu(restaurantId) ?? [];
@@ -454,7 +456,12 @@ function SimpleMenuView({
             );
           })}
         </div>
-        <PriceSortSelect value={sort} onChange={setSort} />
+        <PriceSortSelect
+          value={sort}
+          onChange={setSort}
+          favoritesOnly={favoritesOnly}
+          onFavoritesOnlyChange={setFavoritesOnly}
+        />
       </div>
       {items.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">
@@ -466,6 +473,7 @@ function SimpleMenuView({
           restaurantId={restaurantId}
           orderingEnabled={open}
           sort={sort}
+          favoritesOnly={favoritesOnly}
           groupByMealPeriod={Boolean(cfg?.mealPeriods)}
         />
       )}
@@ -476,6 +484,7 @@ function SimpleMenuView({
 function BfMenu({ search }: { search: string }) {
   const [filter, setFilter] = useState<"all" | MenuCategory>("all");
   const [sort, setSort] = usePriceSort();
+  const [favoritesOnly, setFavoritesOnly] = useFavoritesOnly();
   const open = isBfCanteenOpen();
   const items = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -531,12 +540,17 @@ function BfMenu({ search }: { search: string }) {
             );
           })}
         </div>
-        <PriceSortSelect value={sort} onChange={setSort} />
+        <PriceSortSelect
+          value={sort}
+          onChange={setSort}
+          favoritesOnly={favoritesOnly}
+          onFavoritesOnlyChange={setFavoritesOnly}
+        />
       </div>
       {items.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">No matching items.</p>
       ) : (
-        <BfItemsGrid items={items} orderingEnabled={open} sort={sort} />
+        <BfItemsGrid items={items} orderingEnabled={open} sort={sort} favoritesOnly={favoritesOnly} />
       )}
     </>
   );
@@ -546,6 +560,7 @@ function UcMenu({ search }: { search: string }) {
   const [period, setPeriod] = useState<MealPeriod | null>(null);
   const [nextOpen, setNextOpen] = useState("7:30 AM");
   const [sort, setSort] = usePriceSort();
+  const [favoritesOnly, setFavoritesOnly] = useFavoritesOnly();
   const open = Boolean(period);
 
   useEffect(() => {
@@ -628,7 +643,12 @@ function UcMenu({ search }: { search: string }) {
             );
           })}
         </div>
-        <PriceSortSelect value={sort} onChange={setSort} />
+        <PriceSortSelect
+          value={sort}
+          onChange={setSort}
+          favoritesOnly={favoritesOnly}
+          onFavoritesOnlyChange={setFavoritesOnly}
+        />
       </div>
 
       {!open ? (
@@ -652,6 +672,7 @@ function UcMenu({ search }: { search: string }) {
                 items={group.items}
                 orderingEnabled={open}
                 sort={sort}
+                favoritesOnly={favoritesOnly}
               />
             </section>
           ))}

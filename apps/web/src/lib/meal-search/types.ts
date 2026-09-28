@@ -5,7 +5,7 @@ export type MealSearchCampus = "cuhk" | "cityu";
 /** User-facing category chips (Part 2). */
 export type MealBucket = "all" | "meals" | "drinks" | "snacks" | "desserts";
 
-export type MealSort = "best" | "price-asc" | "price-desc" | "az";
+export type MealSort = "best" | "price-asc" | "price-desc" | "az" | "favorites";
 
 export type PriceFilter =
   | { kind: "none" }
@@ -45,4 +45,5 @@ export type MealSearchFilters = {
   /** Empty = all canteens that appear in text/filter matches. */
   canteenIds: string[] | null;
   sort: MealSort;
+  favoritesOnly: boolean;
 };

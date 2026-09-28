@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { MenuItem } from "@/ptero/lib/types";
 import { formatHkd, formatMenuPrice } from "@/ptero/lib/types";
+import { FavoriteHeart } from "@/components/FavoriteHeart";
 import { ProductCardQtyControl } from "@/ptero/components/ProductCardQtyControl";
 
 export function ProductRailCard({
@@ -31,6 +32,10 @@ export function ProductRailCard({
             {badge}
           </span>
         ) : null}
+        <FavoriteHeart
+          itemId={item.id}
+          className="absolute right-1.5 top-1.5 z-[1]"
+        />
         <ProductCardQtyControl item={item} size="sm" />
       </div>
       <div className="flex flex-col gap-1 px-2.5 pb-3 pt-2">

@@ -13,6 +13,7 @@ import {
   toCartMenuItemFromSimple,
   toCartMenuItemFromUc,
 } from "@/lib/canteen/cart";
+import { FavoriteHeart } from "@/components/FavoriteHeart";
 
 type Props = (
   | { kind: "bf"; item: BfItem; restaurantId: "benjamin-franklin" }
@@ -81,6 +82,10 @@ export function CanteenMenuCard(props: Props) {
             Signature
           </span>
         ) : null}
+        <FavoriteHeart
+          itemId={cartItem.id}
+          className="absolute right-2 top-2 z-10"
+        />
         {includesDrink ? (
           <span className="absolute bottom-2 left-2 rounded-md bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
             Includes Drink

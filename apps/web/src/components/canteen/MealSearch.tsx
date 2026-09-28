@@ -29,6 +29,9 @@ import {
   type PriceFilter,
   type RankedDish,
 } from "@/lib/meal-search";
+import { FavoriteHeart } from "@/components/FavoriteHeart";
+import { useFavorites } from "@/context/FavoritesContext";
+import { canteenFavoriteId } from "@/lib/favorites";
 
 const BUCKETS: { id: MealBucket; label: string }[] = [
   { id: "all", label: "All" },
@@ -49,6 +52,7 @@ const PRICE_PRESETS: {
 ];
 
 const SORTS: { id: MealSort; label: string }[] = [
+  { id: "favorites", label: "Favorites first" },
   { id: "best", label: "Best match" },
   { id: "price-asc", label: "Price ↑" },
   { id: "price-desc", label: "Price ↓" },
@@ -119,44 +123,49 @@ function ResultRow({
   onPick: (dish: RankedDish) => void;
 }) {
   const closed = !dish.interactive;
+  const favId = canteenFavoriteId(dish.canteenId, dish.itemId);
   return (
-    <button
-      type="button"
-      disabled={closed}
-      onClick={() => {
-        if (closed) return;
-        onPick(dish);
-      }}
-      className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition ${
-        closed
-          ? "cursor-not-allowed opacity-50 grayscale"
-          : "hover:bg-red-50/70"
-      }`}
-    >
-      <DishThumb dish={dish} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-gray-900">{dish.name}</p>
-        <p className="mt-0.5 text-sm font-medium text-[#ED1C24]">
-          {formatEstPrice(dish.price)}
-        </p>
-        <p className="mt-0.5 truncate text-xs text-gray-500">
-          {dish.canteenShortName}
-        </p>
-      </div>
-      <span
-        className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-          dish.openNow
-            ? "bg-emerald-50 text-emerald-700"
-            : dish.orderable
-              ? "bg-amber-50 text-amber-800"
-              : "bg-gray-100 text-gray-500"
+    <div className="relative flex w-full items-center gap-1 pr-1">
+      <button
+        type="button"
+        disabled={closed}
+        onClick={() => {
+          if (closed) return;
+          onPick(dish);
+        }}
+        className={`flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-left transition ${
+          closed
+            ? "cursor-not-allowed opacity-50 grayscale"
+            : "hover:bg-red-50/70"
         }`}
       >
-        {dish.openNow ? "Open" : dish.orderable ? "Closed" : "Soon"}
-      </span>
-    </button>
+        <DishThumb dish={dish} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-gray-900">{dish.name}</p>
+          <p className="mt-0.5 text-sm font-medium text-[#ED1C24]">
+            {formatEstPrice(dish.price)}
+          </p>
+          <p className="mt-0.5 truncate text-xs text-gray-500">
+            {dish.canteenShortName}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+            dish.openNow
+              ? "bg-emerald-50 text-emerald-700"
+              : dish.orderable
+                ? "bg-amber-50 text-amber-800"
+                : "bg-gray-100 text-gray-500"
+          }`}
+        >
+          {dish.openNow ? "Open" : dish.orderable ? "Closed" : "Soon"}
+        </span>
+      </button>
+      <FavoriteHeart itemId={favId} className="shrink-0" />
+    </div>
   );
 }
+
 
 function CategoryChips({
   value,
@@ -326,6 +335,18 @@ function FiltersBody({
         />
       </label>
 
+      <label className="flex items-center justify-between gap-3 text-sm font-medium text-gray-800">
+        <span>♥ Favorites only</span>
+        <input
+          type="checkbox"
+          checked={filters.favoritesOnly}
+          onChange={(e) =>
+            setFilters((f) => ({ ...f, favoritesOnly: e.target.checked }))
+          }
+          className="h-5 w-5 rounded border-gray-300 text-[#ED1C24]"
+        />
+      </label>
+
       {canteens.length > 1 ? (
         <div>
           <button
@@ -418,6 +439,7 @@ export function MealSearch({ campus }: { campus: MealSearchCampus }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [limit, setLimit] = useState(MEAL_SEARCH_PAGE_SIZE);
+  const { favoriteSet } = useFavorites();
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -428,8 +450,8 @@ export function MealSearch({ campus }: { campus: MealSearchCampus }) {
   }, [draft]);
 
   const result = useMemo(
-    () => searchCampusDishes(campus, query, filters),
-    [campus, query, filters],
+    () => searchCampusDishes(campus, query, filters, favoriteSet),
+    [campus, query, filters, favoriteSet],
   );
 
   const panelVisible =
@@ -484,7 +506,11 @@ export function MealSearch({ campus }: { campus: MealSearchCampus }) {
       </div>
     ) : result.emptyReason === "filters" ? (
       <div className="px-4 py-6 text-center">
-        <p className="text-sm text-gray-700">No dishes match your filters.</p>
+        <p className="text-sm text-gray-700">
+          {filters.favoritesOnly
+            ? "You haven't favorited anything yet. Tap the ♥ on any item to save it here."
+            : "No dishes match your filters."}
+        </p>
         <button
           type="button"
           onClick={clearFilters}

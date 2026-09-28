@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { CanteenMenuCard } from "@/components/canteen/CanteenMenuCard";
+import { useFavorites } from "@/context/FavoritesContext";
 import {
   CANTEEN_MEAL_PERIODS,
   getActiveMealPeriod,
@@ -12,42 +13,91 @@ import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 import type { SimpleRestaurantId } from "@/data/canteen/simple-menu";
 import type { MenuItem as BfItem } from "@/data/canteen/bf-menu";
 import type { UcMenuItem } from "@/data/canteen/uc-menu";
+import {
+  canteenFavoriteId,
+  filterFavoritesOnly,
+  sortFavoritesFirst,
+} from "@/lib/favorites";
 
-export type PriceSort = "default" | "cheap" | "expensive";
+export type PriceSort = "default" | "cheap" | "expensive" | "favorites" | "az";
 
 export function PriceSortSelect({
   value,
   onChange,
+  favoritesOnly,
+  onFavoritesOnlyChange,
 }: {
   value: PriceSort;
   onChange: (v: PriceSort) => void;
+  favoritesOnly?: boolean;
+  onFavoritesOnlyChange?: (v: boolean) => void;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-gray-700">
-      <span className="shrink-0 font-medium">Sort</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as PriceSort)}
-        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm"
-      >
-        <option value="default">Featured</option>
-        <option value="cheap">Cheapest First</option>
-        <option value="expensive">Most Expensive First</option>
-      </select>
-    </label>
+    <div className="flex flex-wrap items-center gap-3">
+      <label className="flex items-center gap-2 text-sm text-gray-700">
+        <span className="shrink-0 font-medium">Sort</span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as PriceSort)}
+          className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm"
+        >
+          <option value="favorites">Favorites first</option>
+          <option value="default">Featured</option>
+          <option value="cheap">Price ↑</option>
+          <option value="expensive">Price ↓</option>
+          <option value="az">A–Z</option>
+        </select>
+      </label>
+      {onFavoritesOnlyChange ? (
+        <button
+          type="button"
+          aria-pressed={Boolean(favoritesOnly)}
+          onClick={() => onFavoritesOnlyChange(!favoritesOnly)}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+            favoritesOnly
+              ? "bg-[#ED1C24] text-white"
+              : "border border-gray-200 bg-white text-gray-700"
+          }`}
+        >
+          ♥ Favorites only
+        </button>
+      ) : null}
+    </div>
   );
 }
 
-function sortByPrice<T extends { price: number }>(
+function sortMenuItems<T extends { id: string; price: number; name: string }>(
   items: T[],
   sort: PriceSort,
+  favoriteSet: Set<string>,
+  favoriteIdFor: (item: T) => string,
 ): T[] {
-  if (sort === "default") return items;
-  const copy = [...items];
-  copy.sort((a, b) =>
-    sort === "cheap" ? a.price - b.price : b.price - a.price,
-  );
-  return copy;
+  let list = [...items];
+  const byPriceAsc = (a: T, b: T) => a.price - b.price;
+  const byPriceDesc = (a: T, b: T) => b.price - a.price;
+  const byName = (a: T, b: T) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" });
+
+  if (sort === "cheap") list.sort(byPriceAsc);
+  else if (sort === "expensive") list.sort(byPriceDesc);
+  else if (sort === "az") list.sort(byName);
+  else if (sort === "favorites") {
+    list = sortFavoritesFirst(list, favoriteIdFor, favoriteSet, byPriceAsc);
+  }
+  return list;
+}
+
+function prepareItems<T extends { id: string; price: number; name: string }>(
+  items: T[],
+  sort: PriceSort,
+  favoritesOnly: boolean,
+  favoriteSet: Set<string>,
+  favoriteIdFor: (item: T) => string,
+): T[] {
+  let list = favoritesOnly
+    ? filterFavoritesOnly(items, favoriteIdFor, favoriteSet)
+    : items;
+  return sortMenuItems(list, sort, favoriteSet, favoriteIdFor);
 }
 
 function mealPeriodForSimple(item: SimpleMenuItem): MealPeriodId[] {
@@ -62,24 +112,39 @@ function mealPeriodForSimple(item: SimpleMenuItem): MealPeriodId[] {
   return ["lunch", "tea", "dinner"];
 }
 
+function EmptyFavorites() {
+  return (
+    <p className="mt-4 rounded-xl border border-dashed border-gray-200 bg-white px-4 py-8 text-center text-sm text-gray-600">
+      You haven&apos;t favorited anything yet. Tap the ♥ on any item to save it
+      here.
+    </p>
+  );
+}
+
 export function SimpleItemsGrid({
   items,
   restaurantId,
   orderingEnabled,
   sort,
+  favoritesOnly = false,
   groupByMealPeriod,
 }: {
   items: SimpleMenuItem[];
   restaurantId: SimpleRestaurantId;
   orderingEnabled: boolean;
   sort: PriceSort;
+  favoritesOnly?: boolean;
   groupByMealPeriod: boolean;
 }) {
+  const { favoriteSet } = useFavorites();
+  const favId = (item: SimpleMenuItem) =>
+    canteenFavoriteId(restaurantId, item.id);
   const active = getActiveMealPeriod();
   const periods = orderedMealPeriods(active);
 
   if (!groupByMealPeriod) {
-    const sorted = sortByPrice(items, sort);
+    const sorted = prepareItems(items, sort, favoritesOnly, favoriteSet, favId);
+    if (favoritesOnly && sorted.length === 0) return <EmptyFavorites />;
     return (
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {sorted.map((item) => (
@@ -100,9 +165,12 @@ export function SimpleItemsGrid({
       {periods.map((periodId) => {
         const slot = CANTEEN_MEAL_PERIODS[periodId];
         const isActive = active === periodId;
-        const sectionItems = sortByPrice(
+        const sectionItems = prepareItems(
           items.filter((i) => mealPeriodForSimple(i).includes(periodId)),
           sort,
+          favoritesOnly,
+          favoriteSet,
+          favId,
         );
         if (sectionItems.length === 0) return null;
         return (
@@ -154,12 +222,22 @@ export function BfItemsGrid({
   items,
   orderingEnabled,
   sort,
+  favoritesOnly = false,
 }: {
   items: BfItem[];
   orderingEnabled: boolean;
   sort: PriceSort;
+  favoritesOnly?: boolean;
 }) {
-  const sorted = sortByPrice(items, sort);
+  const { favoriteSet } = useFavorites();
+  const sorted = prepareItems(
+    items,
+    sort,
+    favoritesOnly,
+    favoriteSet,
+    (item) => canteenFavoriteId("benjamin-franklin", item.id),
+  );
+  if (favoritesOnly && sorted.length === 0) return <EmptyFavorites />;
   return (
     <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {sorted.map((item) => (
@@ -179,12 +257,26 @@ export function UcItemsGrid({
   items,
   orderingEnabled,
   sort,
+  favoritesOnly = false,
 }: {
   items: UcMenuItem[];
   orderingEnabled: boolean;
   sort: PriceSort;
+  favoritesOnly?: boolean;
 }) {
-  const sorted = useMemo(() => sortByPrice(items, sort), [items, sort]);
+  const { favoriteSet } = useFavorites();
+  const sorted = useMemo(
+    () =>
+      prepareItems(
+        items,
+        sort,
+        favoritesOnly,
+        favoriteSet,
+        (item) => canteenFavoriteId("uc-canteen", item.id),
+      ),
+    [items, sort, favoritesOnly, favoriteSet],
+  );
+  if (favoritesOnly && sorted.length === 0) return <EmptyFavorites />;
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {sorted.map((item) => (
@@ -202,4 +294,8 @@ export function UcItemsGrid({
 
 export function usePriceSort() {
   return useState<PriceSort>("default");
+}
+
+export function useFavoritesOnly() {
+  return useState(false);
 }

@@ -74,7 +74,7 @@ export function PartyAvatar({
   );
 }
 
-/** Customer or runner on this order: label, avatar, and truncated name. */
+/** Customer or runner on this order: label, avatar, and full name. */
 export function OrderCounterparty({
   orderId,
   label,
@@ -90,14 +90,14 @@ export function OrderCounterparty({
   return (
     <div className="flex min-w-0 items-center gap-3">
       <PartyAvatar name={party.name} photoUrl={party.photoUrl} />
-      <p className={`min-w-0 max-w-[min(100%,390px)] truncate text-sm font-semibold ${text}`}>
+      <p className={`min-w-0 text-sm font-semibold leading-snug break-words ${text}`}>
         {label} {party.name}
       </p>
     </div>
   );
 }
 
-/** Runner card title. Never the Firestore document id. */
+/** Runner card title. Full name or pseudonym — never the Firestore document id. */
 export function CustomerPartyName({
   orderId,
   className = "",
@@ -108,12 +108,11 @@ export function CustomerPartyName({
   const party = useOrderParty(orderId);
   const name = party?.name?.trim() || "Customer";
   return (
-    <span className={`inline-block min-w-0 max-w-[min(100%,390px)] truncate align-bottom ${className}`}>
+    <span className={`inline-block min-w-0 break-words align-bottom ${className}`}>
       {name}
     </span>
   );
 }
-
 /**
  * Admin surfaces. Reads the user document the admin is already allowed to
  * open, and always shows the account name and uploaded photo.

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { MenuItem } from "@/ptero/lib/types";
 import { formatHkd, formatMenuPrice } from "@/ptero/lib/types";
+import { FavoriteHeart } from "@/components/FavoriteHeart";
 import { ProductCardQtyControl } from "@/ptero/components/ProductCardQtyControl";
 
 export function MenuItemCard({ item }: { item: MenuItem }) {
@@ -25,6 +26,10 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
             sizes="(min-width: 768px) 33vw, 50vw"
           />
         ) : null}
+        <FavoriteHeart
+          itemId={item.id}
+          className="absolute right-1.5 top-1.5 z-10"
+        />
         <ProductCardQtyControl item={item} />
       </div>
       <div className="flex flex-1 flex-col p-2.5">

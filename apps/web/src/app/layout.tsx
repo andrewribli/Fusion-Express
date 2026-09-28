@@ -4,7 +4,9 @@ import { CampusAccessGuard } from "@/components/CampusAccessGuard";
 import { StagingBanner } from "@/components/StagingBanner";
 import { CampusProvider } from "@/context/CampusContext";
 import { CartProvider } from "@/context/CartContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import { UserProvider } from "@/context/UserContext";
+import { FavoritesToastHost } from "@/components/FavoriteHeart";
 import { ManualItemModalProvider } from "@/lib/manual-item-modal";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
@@ -55,14 +57,17 @@ export default function RootLayout({
         />
         <ThemeProvider>
           <UserProvider>
-            <CampusProvider>
-              <CartProvider>
-                <ManualItemModalProvider>
-                  <StagingBanner />
-                  <CampusAccessGuard>{children}</CampusAccessGuard>
-                </ManualItemModalProvider>
-              </CartProvider>
-            </CampusProvider>
+            <FavoritesProvider>
+              <CampusProvider>
+                <CartProvider>
+                  <ManualItemModalProvider>
+                    <StagingBanner />
+                    <CampusAccessGuard>{children}</CampusAccessGuard>
+                    <FavoritesToastHost />
+                  </ManualItemModalProvider>
+                </CartProvider>
+              </CampusProvider>
+            </FavoritesProvider>
           </UserProvider>
         </ThemeProvider>
       </body>
