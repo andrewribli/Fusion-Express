@@ -69,7 +69,7 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
     status: "open",
     collegeId: null,
     menuSource: "data/canteen/paper-and-coffee-menu.ts",
-    hoursLabel: "Every day 10:30 – 20:00",
+    hoursLabel: "Mon–Sat 10:30 – 20:00 · closed Sunday",
   },
   {
     id: "uc-canteen",
@@ -84,10 +84,10 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
     id: "orchid-lodge",
     name: "Orchid Lodge",
     shortName: "Orchid Lodge",
-    status: "open",
+    status: "coming_soon",
     collegeId: "CC",
     menuSource: "data/canteen/orchid-lodge-menu.ts",
-    hoursLabel: "Mon–Fri 08:00 – 20:30",
+    hoursLabel: "Coming soon",
   },
   {
     id: "benjamin-franklin",

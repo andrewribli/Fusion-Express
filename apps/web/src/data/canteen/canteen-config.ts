@@ -107,10 +107,10 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
   "paper-and-coffee": {
     openMin: 10 * 60 + 30,
     closeMin: 20 * 60,
-    weekdays: "everyday",
-    hoursLabel: "Every day 10:30 AM – 8:00 PM",
+    weekdays: "mon-sat",
+    hoursLabel: "Mon–Sat 10:30 AM – 8:00 PM · closed Sunday",
     mealPeriods: false,
-    nextOpenFallback: "10:30 AM",
+    nextOpenFallback: "10:30 AM Monday",
   },
   sorazen: {
     openMin: 10 * 60,
@@ -129,12 +129,12 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     nextOpenFallback: "11:00 AM Monday",
   },
   "orchid-lodge": {
-    openMin: 8 * 60,
-    closeMin: 20 * 60 + 30,
+    openMin: 0,
+    closeMin: 0,
     weekdays: "mon-fri",
-    hoursLabel: "Mon–Fri 08:00 – 20:30",
+    hoursLabel: "Coming soon",
     mealPeriods: false,
-    nextOpenFallback: "8:00 AM",
+    nextOpenFallback: "TBD",
   },
   wys: {
     openMin: 0,
