@@ -4,6 +4,15 @@
  * special-case a hall in the search, and do not mirror an edge that is not
  * listed on its own.
  *
+ * Customer fee for ordinary canteen origins:
+ *   CUHK_BASE_FEE + Dijkstra path cost
+ * UC Canteen (`uc` / `uc-canteen`) is flat CUHK_BASE_FEE to every reachable
+ * destination (no path surcharge). Same-building stays HK$0.
+ *
+ * The old HK$5 FEE_FLOOR is retired — the base replaces it so we do not
+ * double-count a minimum. BLOCK_THRESHOLD still applies to the Dijkstra path
+ * cost alone (before adding the base).
+ *
  * Every edge has a route tag. There are no untagged edges.
  *
  * fusion and sorazen are the same building. sorazen is an alias, not a node.
@@ -18,7 +27,16 @@
  * walk of the same cost).
  */
 
-export const FEE_FLOOR = 5;
+/** Base delivery rate from every CUHK canteen origin (HK$). */
+export const CUHK_BASE_FEE = 8.5;
+
+/**
+ * @deprecated Replaced by CUHK_BASE_FEE. Kept so older callers/tests resolve.
+ * Do not use for new fee math — that would double-count the minimum.
+ */
+export const FEE_FLOOR = CUHK_BASE_FEE;
+
+/** Dijkstra path cost above this is unavailable (checked before adding base). */
 export const BLOCK_THRESHOLD = 12;
 
 export const CUHK_NODES = [
@@ -41,12 +59,20 @@ export const CUHK_NODES = [
 
 export type CuhkNode = (typeof CUHK_NODES)[number];
 
+/**
+ * Origins that charge a flat fee to every reachable destination (no Dijkstra
+ * surcharge). Keys are resolved graph nodes (`uc-canteen` → `uc`).
+ */
+export const FLAT_RATE_ORIGINS: Partial<Record<CuhkNode, number>> = {
+  uc: CUHK_BASE_FEE,
+};
+
 export type CuhkRoute = "walk" | "bus-3" | "bus-3-4" | "bus-8" | "shuttle";
 
 export type CuhkEdge = {
   from: CuhkNode;
   to: CuhkNode;
-  /** Raw edge cost. The HK$5 floor is applied to the path total, not here. */
+  /** Raw edge cost (distance component). Customer fee adds CUHK_BASE_FEE. */
   fee: number;
   route: CuhkRoute;
 };
@@ -244,10 +270,15 @@ export function cuhkUnavailableMessage(origin: string, destination: string): str
   return `We don't currently deliver from ${origin} to ${destination}. Check back soon.`;
 }
 
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 /**
  * Cheapest directed path. Returns null when no path exists.
- * When the raw cost is above BLOCK_THRESHOLD, fee is null and reason is
- * route_too_expensive — that route is not charged.
+ * UC Canteen is flat CUHK_BASE_FEE. Other origins charge
+ * CUHK_BASE_FEE + Dijkstra path cost. When the Dijkstra cost is above
+ * BLOCK_THRESHOLD, fee is null and reason is route_too_expensive.
  */
 export function computeCuhkFee(
   origin: string,
@@ -263,15 +294,29 @@ export function computeCuhkFee(
 
   const found = cheapestPath(start, end, edgesForSearch(start, end));
   if (!found) return null;
+
+  const flatFee = FLAT_RATE_ORIGINS[start];
+  if (flatFee != null) {
+    return {
+      fee: flatFee,
+      rawFee: flatFee,
+      path: found.path,
+      floored: false,
+    };
+  }
+
   return settleCuhkFee(found.rawFee, found.path, false, `${start} → ${end}`);
 }
 
-/** Floor and block apply to the finished path cost, never to a single edge. */
+/**
+ * Apply base + path cost. Block checks the Dijkstra cost alone (before base).
+ * `floored` stays false — the old HK$5 floor is gone; CUHK_BASE_FEE is the base.
+ */
 export function settleCuhkFee(
   rawFee: number,
   path: CuhkNode[],
   sameNode: boolean,
-  label = path.join(" → "),
+  _label = path.join(" → "),
 ): CuhkFeeHit | CuhkFeeBlocked {
   if (sameNode) {
     return { fee: 0, rawFee: 0, path, floored: false };
@@ -285,17 +330,11 @@ export function settleCuhkFee(
       floored: false,
     };
   }
-  const floored = rawFee < FEE_FLOOR;
-  if (floored) {
-    console.warn(
-      `[delivery] CUHK fee floor raised ${label} from HK$${rawFee} to HK$${FEE_FLOOR}`,
-    );
-  }
   return {
-    fee: floored ? FEE_FLOOR : rawFee,
+    fee: round2(CUHK_BASE_FEE + rawFee),
     rawFee,
     path,
-    floored,
+    floored: false,
   };
 }
 

@@ -8,6 +8,7 @@ import { findHall, isCityuHall12 } from "./halls";
 import { CUHK_COLLEGE_HALLS, type CuhkCollege } from "./locations";
 import {
   computeCuhkFee,
+  CUHK_BASE_FEE,
   cuhkDestinationNode,
   cuhkOriginLabel,
   cuhkUnavailableMessage,
@@ -19,9 +20,11 @@ import {
  *
  * CityU: store base plus one hall surcharge. That graph is not the CUHK graph.
  * CUHK: cheapest directed path in cuhk-delivery-graph. Bus-only pairs drop the
- * origin's walks except a hub-walk whitelist, then the HK$5 floor and the
- * HK$12 block apply to that path total. SRRS is a hub, not a destination.
- * Hall 12 has no CityU tier — those orders keep today's CityU checkout fee.
+ * origin's walks except a hub-walk whitelist. Ordinary canteen origins charge
+ * CUHK_BASE_FEE + Dijkstra path cost; UC Canteen is flat CUHK_BASE_FEE.
+ * Routes whose Dijkstra cost exceeds the block threshold stay unavailable.
+ * SRRS is a hub, not a destination. Hall 12 has no CityU tier — those orders
+ * keep today's CityU checkout fee.
  */
 
 export const CITYU_TASTE_BASE = 15;
@@ -219,7 +222,12 @@ function cuhkGraphQuote(
   }
 
   if (!input.hallId?.trim() && !input.college?.trim()) {
-    return { ...empty, pending: true };
+    return {
+      ...empty,
+      pending: true,
+      base: CUHK_BASE_FEE,
+      total: CUHK_BASE_FEE,
+    };
   }
 
   const destination = cuhkDestinationNode(input.college, input.hallId);
