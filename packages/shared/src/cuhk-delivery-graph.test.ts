@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeDeliveryFee, formatDeliveryQuote } from "./delivery-pricing.ts";
+import {
+  computeDeliveryFee,
+  formatDeliveryQuote,
+  formatHkdAmount,
+} from "./delivery-pricing.ts";
 import { CUHK_COLLEGE_HALLS } from "./locations.ts";
 import {
   BLOCK_THRESHOLD,
@@ -237,7 +241,10 @@ describe("CUHK delivery graph", () => {
     assert.equal(quote.deliveryDestination, "lsk");
     assert.equal(quote.total, lskQuote.total);
     assert.deepEqual(quote.deliveryPath, lskQuote.deliveryPath);
-    assert.equal(formatDeliveryQuote(quote), `Delivery: HK$${quote.total}`);
+    assert.equal(
+      formatDeliveryQuote(quote),
+      `Delivery: HK$${formatHkdAmount(quote.total)}`,
+    );
     assert.equal(formatDeliveryQuote(quote).includes("fusion"), false);
   });
 
