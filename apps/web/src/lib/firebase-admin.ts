@@ -8,9 +8,16 @@ import {
   type App,
   type ServiceAccount,
 } from "firebase-admin/app";
-import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { collectionName } from "@/lib/constants";
+
+/**
+ * Do not statically import `firebase-admin/auth`. Loading it pulls
+ * jwks-rsa → jose; jose@6 is ESM-only and crashes the whole route module
+ * on Vercel with ERR_REQUIRE_ESM (empty HTTP 500, no JSON body).
+ * Lazy-require so Identity Toolkit REST auth still works without Auth SDK.
+ */
+type Auth = import("firebase-admin/auth").Auth;
 
 function loadServiceAccount(): ServiceAccount | null {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
@@ -54,7 +61,17 @@ function getAdminApp(): App | null {
 
 export function getAdminAuth(): Auth | null {
   const app = getAdminApp();
-  return app ? getAuth(app) : null;
+  if (!app) return null;
+  try {
+    // Externalized package — CJS require is intentional and keeps Auth off
+    // the module's critical load path for routes that only need REST/Firestore.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getAuth } = require("firebase-admin/auth") as typeof import("firebase-admin/auth");
+    return getAuth(app);
+  } catch (err) {
+    console.error("firebase-admin/auth unavailable (jose/jwks-rsa?)", err);
+    return null;
+  }
 }
 
 export function getAdminDb(): Firestore | null {
@@ -400,25 +417,28 @@ async function listBroadcastRecipientsViaRest(
 }
 
 /**
- * Verify a Firebase ID token without loading Auth SDK path as the only option.
- * Prefer Admin SDK verifyIdToken; fall back to Identity Toolkit REST.
+ * Verify a Firebase ID token. Prefer Identity Toolkit REST so we never load
+ * firebase-admin/auth (jwks-rsa/jose) on the common path. Admin SDK is a
+ * fallback only when REST cannot verify.
  */
 async function verifyIdToken(
   idToken: string,
 ): Promise<{ uid: string; email: string | null } | null> {
+  const viaRest = await verifyIdTokenViaRest(idToken);
+  if (viaRest) return viaRest;
+
   const auth = getAdminAuth();
-  if (auth) {
-    try {
-      const decoded = await auth.verifyIdToken(idToken, true);
-      return {
-        uid: decoded.uid,
-        email: decoded.email?.trim().toLowerCase() || null,
-      };
-    } catch (err) {
-      console.error("verifyIdToken Admin SDK failed; trying REST", err);
-    }
+  if (!auth) return null;
+  try {
+    const decoded = await auth.verifyIdToken(idToken, true);
+    return {
+      uid: decoded.uid,
+      email: decoded.email?.trim().toLowerCase() || null,
+    };
+  } catch (err) {
+    console.error("verifyIdToken Admin SDK failed after REST", err);
+    return null;
   }
-  return verifyIdTokenViaRest(idToken);
 }
 
 /**
@@ -466,7 +486,8 @@ export type AuthedRequest = {
 
 /**
  * Verify Firebase ID token from Authorization: Bearer.
- * Prefer Admin SDK verifyIdToken; fall back to Identity Toolkit REST.
+ * Uses Identity Toolkit REST first (see verifyIdToken) so missing/invalid
+ * tokens return JSON 401 even when firebase-admin/auth cannot load.
  */
 export async function requireAuthFromRequest(
   request: Request,
