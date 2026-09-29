@@ -195,14 +195,22 @@ export function sanitizeAvatarUrl(value: unknown, uid: string): string | null {
   if (!value.startsWith("https://")) {
     throw new Error("Photo is invalid.");
   }
-  let decoded = value;
-  try {
-    decoded = decodeURIComponent(value);
-  } catch {
-    decoded = value;
+  const slashNeedle = `avatars/${uid}/avatar.jpg`;
+  const encodedNeedle = `avatars%2F${uid}%2Favatar.jpg`;
+  let pathOk = value.includes(slashNeedle) || value.includes(encodedNeedle);
+  if (!pathOk) {
+    try {
+      const parsed = new URL(value);
+      const path = decodeURIComponent(parsed.pathname);
+      pathOk =
+        path.includes(`/${slashNeedle}`) ||
+        path.endsWith(slashNeedle) ||
+        path.includes(`/o/${slashNeedle}`);
+    } catch {
+      pathOk = false;
+    }
   }
-  const needle = `avatars/${uid}/avatar.jpg`;
-  if (!decoded.includes(needle)) {
+  if (!pathOk) {
     throw new Error("Photo must be your own avatar.");
   }
   return value;

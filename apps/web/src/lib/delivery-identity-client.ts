@@ -94,27 +94,57 @@ export async function saveMyDeliveryIdentity(input: {
   });
 }
 
-/** Longest side 512px, JPEG quality 0.85. */
+/** Longest side 512px, JPEG quality 0.85. Falls back when createImageBitmap fails (HEIC). */
 export async function compressAvatar(file: Blob): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
   try {
-    const longest = Math.max(bitmap.width, bitmap.height);
-    const scale = longest > 512 ? 512 / longest : 1;
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Could not process that photo.");
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((result) => resolve(result), "image/jpeg", 0.85);
-    });
-    if (!blob) throw new Error("Could not process that photo.");
-    return blob;
-  } finally {
-    bitmap.close();
+    const bitmap = await createImageBitmap(file);
+    try {
+      const longest = Math.max(bitmap.width, bitmap.height);
+      const scale = longest > 512 ? 512 / longest : 1;
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not process that photo.");
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((result) => resolve(result), "image/jpeg", 0.85);
+      });
+      if (!blob) throw new Error("Could not process that photo.");
+      return blob;
+    } finally {
+      bitmap.close();
+    }
+  } catch {
+    // iOS HEIC / some cameras: load via <img> then draw.
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error("Could not read that photo."));
+        el.src = objectUrl;
+      });
+      const longest = Math.max(img.naturalWidth, img.naturalHeight);
+      const scale = longest > 512 ? 512 / longest : 1;
+      const width = Math.max(1, Math.round(img.naturalWidth * scale));
+      const height = Math.max(1, Math.round(img.naturalHeight * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not process that photo.");
+      ctx.drawImage(img, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((result) => resolve(result), "image/jpeg", 0.85);
+      });
+      if (!blob) throw new Error("Could not process that photo.");
+      return blob;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
   }
 }
 
