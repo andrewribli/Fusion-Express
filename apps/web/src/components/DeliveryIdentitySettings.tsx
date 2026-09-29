@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser, type UserProfile } from "@/context/UserContext";
 import { publicDeliveryName } from "@fusion-express/shared/delivery-identity";
 import {
@@ -38,12 +38,18 @@ export function DeliveryIdentitySettings() {
   const [savedFlash, setSavedFlash] = useState(false);
   const [error, setError] = useState("");
   const [tipOpen, setTipOpen] = useState(false);
+  /** Bumped on any local edit so a late identity fetch cannot wipe the form. */
+  const [editGen, setEditGen] = useState(0);
+  const loadGenRef = useRef(0);
 
   useEffect(() => {
     if (!user?.uid) return;
     let cancelled = false;
+    const genAtStart = loadGenRef.current;
     void fetchMyDeliveryIdentity().then((row) => {
       if (cancelled || !row) return;
+      // Local edits (photo pick, typing) win over a slow first load.
+      if (loadGenRef.current !== genAtStart) return;
       setIdentity(row);
       setDisplayName(row.displayName ?? "");
       setShowReal(!row.isAnonymous);
@@ -65,16 +71,25 @@ export function DeliveryIdentitySettings() {
     };
   }, [previewUrl]);
 
+  function touch() {
+    loadGenRef.current += 1;
+    setEditGen((n) => n + 1);
+  }
+
   const dirty = useMemo(() => {
-    if (!identity) return false;
+    if (!identity) {
+      // Still allow save once the form has any local photo/name work.
+      return Boolean(photoUrl || previewUrl || displayName.trim() || clearPhoto || editGen > 0);
+    }
     const nameNow = displayName.trim();
     const nameSaved = (identity.displayName ?? "").trim();
     if (nameNow !== nameSaved) return true;
     if (showReal === identity.isAnonymous) return true;
     if (clearPhoto && identity.photoUrl) return true;
+    if (previewUrl) return true;
     if (photoUrl && photoUrl !== identity.photoUrl) return true;
     return false;
-  }, [identity, displayName, showReal, clearPhoto, photoUrl]);
+  }, [identity, displayName, showReal, clearPhoto, photoUrl, previewUrl, editGen]);
 
   if (!user?.uid) return null;
 
@@ -93,6 +108,10 @@ export function DeliveryIdentitySettings() {
 
   async function saveAll(extra?: { changePseudonym?: boolean }): Promise<boolean> {
     if (!user) return false;
+    if (uploading) {
+      setError("Wait for the photo to finish uploading, then tap Save.");
+      return false;
+    }
     setBusy(true);
     setError("");
     setSavedFlash(false);
@@ -135,6 +154,7 @@ export function DeliveryIdentitySettings() {
 
   async function onPhoto(file: File | undefined) {
     if (!file || !user?.uid) return;
+    touch();
     setError("");
     setUploading(true);
     const local = URL.createObjectURL(file);
@@ -198,6 +218,7 @@ export function DeliveryIdentitySettings() {
           type="button"
           disabled={busy || uploading}
           onClick={() => {
+            touch();
             setClearPhoto(true);
             setPhotoUrl(null);
             if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
@@ -218,7 +239,10 @@ export function DeliveryIdentitySettings() {
         maxLength={40}
         disabled={busy}
         placeholder={user.fullName || "Your name"}
-        onChange={(event) => setDisplayName(event.target.value)}
+        onChange={(event) => {
+          touch();
+          setDisplayName(event.target.value);
+        }}
         className="mt-1 w-full max-w-[390px] rounded-xl border border-gray-200 px-3 py-2.5 text-sm"
       />
       <p className="mt-1 max-w-[390px] break-words text-xs text-gray-500">
@@ -232,7 +256,10 @@ export function DeliveryIdentitySettings() {
           checked={showReal}
           disabled={busy}
           title={TOOLTIP}
-          onChange={(event) => setShowReal(event.target.checked)}
+          onChange={(event) => {
+            touch();
+            setShowReal(event.target.checked);
+          }}
         />
         <span>
           Show my real name and photo to the person I&apos;m delivering to / receiving from
@@ -274,12 +301,17 @@ export function DeliveryIdentitySettings() {
 
       <button
         type="button"
-        disabled={busy || uploading || !dirty}
+        disabled={busy || uploading}
         onClick={() => void saveAll()}
         className="mt-4 min-h-12 w-full rounded-xl bg-[#ED1C24] text-sm font-bold text-white disabled:opacity-50"
       >
-        {busy ? "Saving…" : "Save profile"}
+        {busy ? "Saving…" : uploading ? "Uploading photo…" : "Save profile"}
       </button>
+      {!dirty && !busy && !uploading ? (
+        <p className="mt-2 text-xs text-gray-500">
+          Change your photo, name, or privacy options, then tap Save profile.
+        </p>
+      ) : null}
       {savedFlash ? (
         <p className="mt-2 text-sm font-medium text-emerald-700">Saved.</p>
       ) : null}
