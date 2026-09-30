@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { isAdminUid } from "@/lib/admins";
+import { cityuBetaRedirect } from "@/lib/betaAccess";
 import {
   accessCampusForUser,
   bypassesCampusIsolation,
@@ -12,8 +13,8 @@ import {
 
 /**
  * Keeps signed-in CUHK and CityU accounts on their campus routes.
- * Guests and signed-out visitors are not redirected — a leftover
- * `gracerun_campus` value must not send them to /cityu.
+ * CityU is also gated by `canAccessCityU` — guests and everyone
+ * else on `/cityu` go home. Allowlisted CUHK emails may still open CityU.
  * Admins and the owner login (see packages/shared campus allowlist) may cross.
  */
 export function CampusAccessGuard({ children }: { children: React.ReactNode }) {
@@ -43,11 +44,17 @@ export function CampusAccessGuard({ children }: { children: React.ReactNode }) {
   }, [user?.uid]);
 
   useEffect(() => {
-    if (!isReady || !adminChecked) return;
+    if (!isReady) return;
+    const betaHome = cityuBetaRedirect(pathname, user?.email);
+    if (betaHome && betaHome !== pathname) {
+      router.replace(betaHome);
+      return;
+    }
+    if (!adminChecked) return;
     const campus = accessCampusForUser(user);
     if (!campus) return;
     const bypass = bypassesCampusIsolation(user, isAdmin);
-    const dest = campusAccessRedirect(pathname, campus, bypass);
+    const dest = campusAccessRedirect(pathname, campus, bypass, user?.email);
     if (dest && dest !== pathname) {
       router.replace(dest);
     }

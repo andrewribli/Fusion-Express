@@ -89,7 +89,12 @@ export async function POST(request: Request) {
         normalizeCollegeId(String(data.runnerCollege ?? data.canteenCollege ?? "")) ??
         String(data.runnerCollege ?? data.canteenCollege ?? "your college");
       const label = collegeLabel(college) || String(college);
-      const message = `Discount received! Your runner is from ${label}, so you got 10% off your canteen order.`;
+      const split = data.discountSplit as { customer?: number } | undefined;
+      const savings = Number(split?.customer ?? 0);
+      const message =
+        savings > 0
+          ? `Discount received! Your runner is from ${label}, so you save HK$${savings.toFixed(0)} on this canteen order.`
+          : `Discount received! Your runner is from ${label}, so you got 10% off your canteen order.`;
 
       await createAdminDocumentRest(collectionName("notifications"), {
         type: "discount_received",
@@ -107,6 +112,7 @@ export async function POST(request: Request) {
           to: customerEmail,
           orderId,
           collegeLabel: label,
+          customerSavings: savings > 0 ? savings : undefined,
         });
       }
       return NextResponse.json({ ok: true });

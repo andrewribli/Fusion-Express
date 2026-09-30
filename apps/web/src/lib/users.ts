@@ -1,9 +1,16 @@
 import type { UserProfile } from "@/context/UserContext";
 import { omitUndefined } from "@/lib/omit-undefined";
 import { collectionName } from "@/lib/constants";
-import { normalizeRole, isUserRole } from "@/lib/roles";
-import { getDb, isFirebaseConfigured } from "@/lib/firebase";
+import { isUserRole } from "@/lib/roles";
+import { isPermissionDenied } from "@/lib/auth-errors";
+import { getAuthClient, getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, getDoc, getDocs, collection, setDoc, Timestamp, deleteField } from "firebase/firestore";
+import {
+  isCityUDirectoryUser,
+  isOrphanUserProfile,
+  parseUserDoc,
+  selectAdminDirectoryUsers,
+} from "@/lib/user-directory";
 
 const USERS_COLLECTION = collectionName("users");
 
@@ -12,82 +19,7 @@ export type UserProfileDoc = UserProfile & {
   updatedAt: Date;
 };
 
-function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
-  return {
-    uid,
-    email: data.email ? String(data.email) : undefined,
-    fullName: String(data.fullName ?? ""),
-    phone: data.phone ? String(data.phone) : undefined,
-    isRunner: Boolean(data.isRunner),
-    isGuest: Boolean(data.isGuest),
-    createdAt:
-      data.createdAt &&
-      typeof data.createdAt === "object" &&
-      "toDate" in data.createdAt
-        ? (data.createdAt as Timestamp).toDate().toISOString()
-        : data.createdAt
-          ? String(data.createdAt)
-          : undefined,
-    role: normalizeRole(data.role, Boolean(data.isRunner)),
-    runnerId: data.runnerId ? String(data.runnerId) : undefined,
-    runnerPaymentMethod: data.runnerPaymentMethod as UserProfile["runnerPaymentMethod"],
-    runnerPaymentId: data.runnerPaymentId ? String(data.runnerPaymentId) : undefined,
-    termsAcceptedAt: data.termsAcceptedAt
-      ? typeof data.termsAcceptedAt === "object" &&
-        data.termsAcceptedAt &&
-        "toDate" in data.termsAcceptedAt
-        ? (data.termsAcceptedAt as Timestamp).toDate().toISOString()
-        : String(data.termsAcceptedAt)
-      : undefined,
-    photoURL: data.photoURL ? String(data.photoURL) : undefined,
-    displayName:
-      typeof data.displayName === "string" && data.displayName.trim()
-        ? data.displayName.trim()
-        : null,
-    photoUrl:
-      typeof data.photoUrl === "string" && data.photoUrl.trim()
-        ? data.photoUrl.trim()
-        : null,
-    isAnonymous: data.isAnonymous === true,
-    pseudonym:
-      typeof data.pseudonym === "string" && data.pseudonym.trim()
-        ? data.pseudonym.trim()
-        : null,
-    pseudonymChangedAt:
-      data.pseudonymChangedAt &&
-      typeof data.pseudonymChangedAt === "object" &&
-      "toDate" in data.pseudonymChangedAt
-        ? (data.pseudonymChangedAt as Timestamp).toDate().toISOString()
-        : data.pseudonymChangedAt
-          ? String(data.pseudonymChangedAt)
-          : null,
-    campus:
-      data.campus === "cuhk" || data.campus === "cityu"
-        ? data.campus
-        : undefined,
-    cuhkEmail: data.cuhkEmail ? String(data.cuhkEmail) : undefined,
-    cuhkVerifiedAt: data.cuhkVerifiedAt
-      ? typeof data.cuhkVerifiedAt === "object" &&
-        data.cuhkVerifiedAt &&
-        "toDate" in data.cuhkVerifiedAt
-        ? (data.cuhkVerifiedAt as Timestamp).toDate().toISOString()
-        : String(data.cuhkVerifiedAt)
-      : undefined,
-    username: data.username ? String(data.username) : undefined,
-    chineseName: data.chineseName ? String(data.chineseName) : undefined,
-    studentId: data.studentId ? String(data.studentId) : undefined,
-    college: data.college ? String(data.college) : undefined,
-    hall: data.hall ? String(data.hall) : undefined,
-    roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
-  };
-}
-
-/** Firestore stub with no name or email — usually anonymous Auth or a failed write. */
-export function isOrphanUserProfile(profile: UserProfile): boolean {
-  const name = profile.fullName?.trim();
-  const email = (profile.email ?? profile.cuhkEmail ?? "").trim();
-  return !name && !email;
-}
+export { isOrphanUserProfile, parseUserDoc, isCityUDirectoryUser };
 
 export async function fetchUserProfile(uid: string): Promise<UserProfile | null> {
   if (!isFirebaseConfigured()) return null;
@@ -110,19 +42,23 @@ export async function fetchAllUsers(): Promise<{
   users: UserProfile[];
   hiddenOrphanCount: number;
 }> {
+  return fetchDirectoryUsers("cuhk");
+}
+
+export async function fetchDirectoryUsers(
+  campus: "cuhk" | "cityu",
+): Promise<{
+  users: UserProfile[];
+  hiddenOrphanCount: number;
+}> {
   if (!isFirebaseConfigured()) return { users: [], hiddenOrphanCount: 0 };
   const snap = await getDocs(collection(getDb(), USERS_COLLECTION));
   const all = snap.docs.map((d) =>
     parseUserDoc(d.id, d.data() as Record<string, unknown>),
   );
-  const users = all
-    .filter((profile) => !isOrphanUserProfile(profile))
-    .sort((a, b) =>
-      a.fullName.localeCompare(b.fullName, "en", { sensitivity: "base" }),
-    );
   return {
-    users,
-    hiddenOrphanCount: all.length - users.length,
+    users: selectAdminDirectoryUsers(campus, all),
+    hiddenOrphanCount: 0,
   };
 }
 
@@ -131,15 +67,23 @@ export async function createUserProfile(
   profile: Pick<UserProfile, "fullName"> & Partial<UserProfile>,
 ): Promise<UserProfile> {
   const now = new Date();
+  const phone = profile.phone?.trim();
+  const studentId = profile.studentId?.trim();
+  const campus =
+    profile.campus === "cuhk" || profile.campus === "cityu"
+      ? profile.campus
+      : undefined;
   const payload = {
     uid,
     fullName: profile.fullName,
     email: profile.email?.trim().toLowerCase(),
-    // Phone is runner-only. Customers and guests omit it.
-    phone: profile.isRunner ? profile.phone : undefined,
+    phone: phone || undefined,
+    studentId: studentId || undefined,
+    // New accounts are customers. Runner access is a later terms-sheet write.
+    role: "customer" as const,
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
-    campus: profile.campus,
+    campus,
     college: profile.college,
     hall: profile.hall,
     cuhkEmail: profile.cuhkEmail,
@@ -148,26 +92,45 @@ export async function createUserProfile(
     updatedAt: Timestamp.fromDate(now),
   };
   if (isFirebaseConfigured()) {
-    await setDoc(
-      doc(getDb(), USERS_COLLECTION, uid),
-      omitUndefined(payload as Record<string, unknown>),
-    );
+    await writeOwnUserDoc(uid, omitUndefined(payload as Record<string, unknown>));
   }
 
   return {
     uid,
     fullName: profile.fullName,
     email: profile.email,
-    phone: profile.phone,
+    phone: phone || profile.phone,
+    studentId: studentId || undefined,
+    role: "customer",
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
-    campus: profile.campus,
+    campus,
     college: profile.college,
     hall: profile.hall,
     cuhkEmail: profile.cuhkEmail,
     cuhkVerifiedAt: profile.cuhkVerifiedAt,
     createdAt: now.toISOString(),
   };
+}
+
+/**
+ * First Firestore write after createUser can run before the ID token is
+ * attached. One forced refresh, then the real rules error surfaces.
+ */
+async function writeOwnUserDoc(
+  uid: string,
+  data: Record<string, unknown>,
+): Promise<void> {
+  const ref = doc(getDb(), USERS_COLLECTION, uid);
+  try {
+    await setDoc(ref, data);
+  } catch (err) {
+    if (!isPermissionDenied(err)) throw err;
+    const current = getAuthClient().currentUser;
+    if (!current || current.uid !== uid) throw err;
+    await current.getIdToken(true);
+    await setDoc(ref, data);
+  }
 }
 
 export async function updateUserProfileDoc(
@@ -180,6 +143,10 @@ export async function updateUserProfileDoc(
   // Nulls must not be stored: rules only allow a real string or a missing field.
   delete rest.pseudonym;
   delete rest.pseudonymChangedAt;
+  // College lock and appeals are server-only.
+  delete rest.runnerCollege;
+  delete rest.runnerCollegeLockedAt;
+  delete rest.runnerCollegeAppeal;
   if (rest.displayName == null) delete rest.displayName;
   if (rest.photoUrl == null) delete rest.photoUrl;
   if (rest.isAnonymous == null) delete rest.isAnonymous;

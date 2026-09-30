@@ -3,83 +3,39 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
-import { useUser, type UserProfile } from "@/context/UserContext";
+import { UserAvatar } from "@/components/UserAvatar";
+import { useUser } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
-
-function initials(user: UserProfile): string {
-  const parts = user.fullName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
-  }
-  if (parts.length === 1 && parts[0].length >= 2) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-  const handle = (user.email || "").replace(/[^a-zA-Z0-9]/g, "");
-  if (handle.length >= 2) return handle.slice(0, 2).toUpperCase();
-  if (handle.length === 1) return handle.toUpperCase();
-  return "";
-}
-
-function DefaultUserIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
-    </svg>
-  );
-}
-
-function HeaderAvatar({
-  user,
-}: {
-  user: UserProfile | null;
-}) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const letters = user ? initials(user) : "";
-  const photoURL = user?.photoURL?.trim();
-  const showPhoto = Boolean(photoURL) && !imageFailed;
-
-  if (!user) {
-    return (
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2a2a2a] text-gray-300">
-        <DefaultUserIcon className="h-4 w-4" />
-      </span>
-    );
-  }
-
-  if (showPhoto) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={photoURL}
-        alt=""
-        className="h-9 w-9 rounded-full object-cover"
-        onError={() => setImageFailed(true)}
-      />
-    );
-  }
-
-  return (
-    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ED1C24] text-[11px] font-bold text-white">
-      {letters || <DefaultUserIcon className="h-4 w-4 text-white" />}
-    </span>
-  );
-}
 
 export function AccountMenu({
   hideThemeChip: _hideThemeChip = false,
+  placement = "down",
+  avatarSize = 36,
+  label,
 }: {
   /** Unused — colorways are unified to the homepage. */
   hideThemeChip?: boolean;
+  /** Bottom nav opens above the icon so it stays on screen. */
+  placement?: "down" | "up";
+  avatarSize?: number;
+  label?: string;
 }) {
   const { user, logout } = useUser();
   const { href: trackHref, count: activeCount } = useActiveCustomerOrders();
   const [open, setOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  /** Ignore the tap that opened the menu so it cannot land on Sign Out. */
+  const [actionsReady, setActionsReady] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setActionsReady(false);
+      return;
+    }
 
-    function onPointerDown(event: MouseEvent) {
+    const arm = window.setTimeout(() => setActionsReady(true), 350);
+
+    function onPointerDown(event: MouseEvent | TouchEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false);
       }
@@ -90,23 +46,29 @@ export function AccountMenu({
     }
 
     document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      window.clearTimeout(arm);
       document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
+  const labelClass = "text-[11px] font-medium leading-tight text-gray-500";
+
   if (!user) {
     return (
-      <div className="flex items-center gap-1.5">
+      <div className={label ? "flex flex-col items-center justify-center gap-0.5" : "flex items-center gap-1.5"}>
         <Link
           href="/login"
           aria-label="Sign in"
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:opacity-90"
+          className="flex items-center justify-center rounded-full hover:opacity-90"
         >
-          <HeaderAvatar user={null} />
+          <UserAvatar user={null} size={avatarSize} />
         </Link>
+        {label ? <span className={labelClass}>{label}</span> : null}
       </div>
     );
   }
@@ -117,24 +79,40 @@ export function AccountMenu({
     window.location.href = "/";
   }
 
+  const panelClass =
+    placement === "up"
+      ? "absolute right-0 bottom-full z-[80] mb-2 w-56 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl"
+      : "absolute right-0 top-full z-[80] mt-2 w-56 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl";
+
   return (
-    <div ref={rootRef} className="relative">
+    <div
+      ref={rootRef}
+      className={label ? "relative flex flex-col items-center justify-center gap-0.5" : "relative"}
+    >
       <button
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setOpen((prev) => !prev);
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
         className="rounded-full shadow-sm hover:opacity-90"
       >
-        <HeaderAvatar user={user} />
+        <UserAvatar user={user} size={avatarSize} />
       </button>
+      {label ? <span className={labelClass}>{label}</span> : null}
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl"
+          className={`${panelClass}${actionsReady ? "" : " pointer-events-none"}`}
         >
+          <MenuLink href="/cuhk" onClick={() => setOpen(false)}>
+            CUHK home
+          </MenuLink>
           <MenuLink href={trackHref} onClick={() => setOpen(false)}>
             My Orders{activeCount > 0 ? ` (${activeCount})` : ""}
           </MenuLink>
@@ -156,7 +134,12 @@ export function AccountMenu({
             <button
               type="button"
               role="menuitem"
-              onClick={signOut}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!actionsReady) return;
+                void signOut();
+              }}
               className="flex w-full px-4 py-2.5 text-left text-sm font-semibold text-[#ED1C24] hover:bg-red-50"
             >
               Sign Out

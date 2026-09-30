@@ -35,6 +35,7 @@ const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "C.W. Chu College": 3,
   "Wu Yee Sun College (WYS)": 3,
   "New Asia College": 3,
+  "International House": 3,
   "International House (I-House)": 3,
   "Postgraduate Halls (PGH)": 3,
   "Campus Facilities": 1,

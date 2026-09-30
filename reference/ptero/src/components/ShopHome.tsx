@@ -296,7 +296,7 @@ export function ShopHome() {
               <>
                 <section className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-[#ED1C24] to-[#c9171e] p-5 text-white shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
-                    Ptero
+                    GraceRun CityU
                   </p>
                   <h2 className="mt-1 text-xl font-extrabold sm:text-2xl">
                     Apply a voucher at checkout!

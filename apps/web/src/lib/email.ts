@@ -600,10 +600,127 @@ export async function sendCollegeDiscountEmail(opts: {
   to: string;
   orderId: string;
   collegeLabel: string;
+  /** Customer savings in HKD. Omit for the retired percentage wording. */
+  customerSavings?: number;
 }): Promise<void> {
   const college = opts.collegeLabel.trim() || "your college";
-  const message = `Discount received! Your runner is from ${college}, so you got 10% off your canteen order.`;
-  const subject = "You got a 10% discount!";
+  const savings = opts.customerSavings;
+  const message =
+    savings != null && savings > 0
+      ? `Discount received! Your runner is from ${college}, so you save HK$${savings.toFixed(0)} on this canteen order.`
+      : `Discount received! Your runner is from ${college}, so you got 10% off your canteen order.`;
+  const subject =
+    savings != null && savings > 0
+      ? `You save HK$${savings.toFixed(0)}`
+      : "You got a 10% discount!";
+  const trackUrl = orderTrackUrl(opts.orderId);
+  const html = brandedEmail({
+    preheader: message,
+    heading: subject,
+    trackUrl,
+    bodyHtml: `
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">Order number</p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(opts.orderId)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(message)}</p>
+    `,
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${message}\nOrder ${opts.orderId}\nTrack: ${trackUrl}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendRunnerCollegeSetEmail(
+  to: string,
+  collegeLabel: string,
+): Promise<void> {
+  const college = collegeLabel.trim() || "your college";
+  const message = `Your college is set to ${college}. This is permanent. If you selected the wrong college, appeal at hello@gracerun.fit.`;
+  const subject = "Your GraceRun college is set";
+  const html = brandedBroadcastEmail({
+    preheader: message,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(message),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to,
+    replyTo: "hello@gracerun.fit",
+    subject,
+    html,
+    text: `${message}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendCollegeAppealInboxEmail(opts: {
+  runnerName: string;
+  runnerEmail: string;
+  currentCollege: string;
+  requestedCollege: string;
+  reason: string;
+}): Promise<void> {
+  const message = `${opts.runnerName} (${opts.runnerEmail}) appealed a college change.
+Current: ${opts.currentCollege}
+Requested: ${opts.requestedCollege}
+
+${opts.reason.trim()}`;
+  const subject = "Runner college appeal";
+  const html = brandedBroadcastEmail({
+    preheader: subject,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(message),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: "hello@gracerun.fit",
+    replyTo: opts.runnerEmail,
+    subject,
+    html,
+    text: message,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendCollegeAppealDecisionEmail(opts: {
+  to: string;
+  approved: boolean;
+  collegeLabel: string;
+}): Promise<void> {
+  const college = opts.collegeLabel.trim() || "your college";
+  const message = opts.approved
+    ? `Your college appeal was approved. Your college is now ${college}.`
+    : `Your college appeal was not approved. Your college stays ${college}.`;
+  const subject = opts.approved
+    ? "College appeal approved"
+    : "College appeal not approved";
+  const html = brandedBroadcastEmail({
+    preheader: message,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(message),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    replyTo: "hello@gracerun.fit",
+    subject,
+    html,
+    text: `${message}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendNoCollegeDiscountEmail(opts: {
+  to: string;
+  orderId: string;
+}): Promise<void> {
+  const message =
+    "No matching-college runner was available. Discount not applied.";
+  const subject = "College discount not applied";
   const trackUrl = orderTrackUrl(opts.orderId);
   const html = brandedEmail({
     preheader: message,

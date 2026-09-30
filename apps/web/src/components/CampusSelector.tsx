@@ -9,6 +9,7 @@ import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
 import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 
 /**
  * CUHK channel picker: Fusion groceries vs campus canteens.
@@ -16,6 +17,11 @@ import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/deli
 export function CampusSelector() {
   const { config } = useCampus();
   const { canRunnerMode } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
+  const runnerTitle =
+    runnerEntry.decision.status === "ready" && runnerEntry.decision.runner
+      ? "Runner mode"
+      : "Become a runner";
   const brand = config.brandLabel;
   const headerIconClass =
     "h-11 w-11 rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
@@ -89,10 +95,42 @@ export function CampusSelector() {
             </p>
             <h2 className="mt-2 text-2xl font-bold">Canteen</h2>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-              {`Benjamin Franklin, UC, and more — flat HK$${formatHkdAmount(computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base)} delivery, 10% college discount when your runner matches.`}
+              {`Benjamin Franklin, UC, Paper & Coffee, and more. Delivery depends on the canteen and your hall (from HK$${formatHkdAmount(computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base)}). At UC Canteen you save HK$2 when a United College runner accepts.`}
             </p>
             <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
               Browse canteens
+            </span>
+          </Link>
+
+          <Link
+            href={runnerEntry.href}
+            aria-busy={runnerEntry.loading || undefined}
+            aria-disabled={runnerEntry.loading || undefined}
+            onClick={(event) => {
+              if (runnerEntry.loading) {
+                event.preventDefault();
+                return;
+              }
+              runnerEntry.onClick(event);
+            }}
+            className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#101a14] via-[#121212] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-emerald-400/70 ${
+              runnerEntry.loading ? "opacity-60" : ""
+            }`}
+          >
+            <div
+              className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-emerald-500/25 blur-3xl transition group-hover:bg-emerald-500/35"
+              aria-hidden
+            />
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              Earn on campus
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">{runnerTitle}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+              Pick up Fusion or canteen orders and deliver them to dorm lobbies.
+              CUHK email and a Hong Kong mobile number are required.
+            </p>
+            <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
+              {runnerEntry.loading ? "Loading…" : runnerTitle}
             </span>
           </Link>
         </div>

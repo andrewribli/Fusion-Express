@@ -68,7 +68,7 @@ export const RESTAURANTS: Restaurant[] = [
     blurb: "Kebabs, biryani, curry, pizza & more. Halal · No added MSG.",
     cuisine: "Halal / Middle Eastern",
     location: "Yeung Building R5013",
-    hoursLabel: "Mon–Sat 10:00 AM – 8:00 PM · Closed Sun & PH",
+    hoursLabel: "Mon–Sat 10:00 AM – 7:45 PM (orders · to 8:00) · Closed Sun & PH",
     pickupLabel: "Ebeneezer's (5380 Cafe)",
     deliveryFee: deliveryBase("ebeneezers-5380"),
     collegeId: null,

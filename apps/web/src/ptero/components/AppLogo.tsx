@@ -1,8 +1,6 @@
-import { CAMPUS } from "@/ptero/config/campus";
-
-/** Ptero mark (pterodactyl + bag + wordmark) on light background. */
-export const APP_LOGO_SRC = "/ptero/images/ptero-logo.png?v=4";
-export const APP_ICON_SRC = "/ptero/images/ptero-icon.png?v=4";
+/** GraceRun mark. CityU chrome uses the same asset as CUHK. */
+export const APP_LOGO_SRC = "/images/gracerun-logo.png?v=3";
+export const APP_ICON_SRC = "/images/gracerun-icon.png?v=3";
 
 export function AppLogo({
   size = 40,
@@ -21,7 +19,7 @@ export function AppLogo({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={APP_LOGO_SRC}
-        alt={CAMPUS.brandName}
+        alt="GraceRun"
         width={size}
         height={size}
         decoding="async"

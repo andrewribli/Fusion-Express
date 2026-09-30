@@ -2,13 +2,61 @@
 
 import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
+import { AccountMenu } from "@/components/AccountMenu";
 import { LegalLink } from "@/components/LegalLink";
+import { useUser } from "@/context/UserContext";
+import {
+  CITYU_COMING_SOON_LABEL,
+  canAccessCityU,
+} from "@/lib/betaAccess";
+
+function CityUHomeButton() {
+  const { user } = useUser();
+  const open = canAccessCityU(user?.email);
+
+  if (open) {
+    return (
+      <Link
+        href="/cityu"
+        className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 text-base font-bold text-white hover:bg-white/10"
+      >
+        CityU
+      </Link>
+    );
+  }
+
+  return (
+    <span className="group relative inline-flex">
+      <span
+        role="link"
+        aria-disabled="true"
+        aria-label={`CityU — ${CITYU_COMING_SOON_LABEL}`}
+        title={CITYU_COMING_SOON_LABEL}
+        className="inline-flex min-h-12 cursor-default flex-col items-center justify-center gap-0.5 rounded-full border border-dashed border-white/25 bg-white/[0.04] px-7 py-2 text-base font-bold text-white/55"
+      >
+        <span>CityU</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">
+          {CITYU_COMING_SOON_LABEL}
+        </span>
+      </span>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-lg group-hover:block group-focus-within:block"
+      >
+        {CITYU_COMING_SOON_LABEL}
+      </span>
+    </span>
+  );
+}
 
 /**
  * Homepage campus selector. Shown to everyone on `/`.
  * Does not send visitors to a campus hub.
  */
 export function MarketingHome() {
+  const { user } = useUser();
+  const signedIn = Boolean(user && !user.isGuest);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0a0a0a]/90 backdrop-blur-md">
@@ -18,18 +66,32 @@ export function MarketingHome() {
             <span className="text-sm font-extrabold tracking-tight">GraceRun</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="rounded-full px-3 py-2 text-sm font-semibold text-zinc-300 hover:text-white"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/login?mode=signup"
-              className="rounded-full bg-[#ED1C24] px-4 py-2 text-sm font-bold text-white hover:bg-[#c9171e]"
-            >
-              Get Started
-            </Link>
+            {signedIn ? (
+              <>
+                <Link
+                  href="/cuhk"
+                  className="rounded-full px-3 py-2 text-sm font-semibold text-zinc-300 hover:text-white"
+                >
+                  CUHK home
+                </Link>
+                <AccountMenu />
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-full px-3 py-2 text-sm font-semibold text-zinc-300 hover:text-white"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/login?mode=signup"
+                  className="rounded-full bg-[#ED1C24] px-4 py-2 text-sm font-bold text-white hover:bg-[#c9171e]"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -61,12 +123,7 @@ export function MarketingHome() {
             >
               CUHK
             </Link>
-            <Link
-              href="/cityu"
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 text-base font-bold text-white hover:bg-white/10"
-            >
-              CityU
-            </Link>
+            <CityUHomeButton />
             <Link
               href="/login?mode=signup"
               className="inline-flex min-h-12 items-center justify-center px-3 text-sm font-semibold text-zinc-400 underline-offset-4 hover:text-white hover:underline"

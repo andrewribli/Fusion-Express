@@ -18,10 +18,10 @@ export function CanteenChrome({
   const { itemCount } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0c0c0c]/95 backdrop-blur">
+    <header className="sticky top-0 z-40 overflow-visible border-b border-white/10 bg-[#0c0c0c]/95 backdrop-blur">
       <div className="mx-auto flex max-w-lg items-center justify-between gap-2 px-4 py-3">
         <div className="min-w-0">
-          <Link href="/" className="flex items-center gap-2" aria-label="GraceRun home">
+          <Link href="/cuhk" className="flex items-center gap-2" aria-label="CUHK home">
             <AppLogo size={36} className="h-9 w-9" />
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-white">GraceRun</p>

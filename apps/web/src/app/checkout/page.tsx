@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
@@ -34,8 +34,20 @@ import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { DeliveryQuote } from "@/components/DeliveryQuote";
 import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import {
+  formatScheduledLabel,
+  resolveDeliveryTiming,
+  resolveOrderVenue,
+} from "@/lib/order-window";
+import { ScheduleDelivery } from "@/components/ScheduleDelivery";
 import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
+import { PLATFORM_FEE, previewCustomerSavings } from "@fusion-express/shared";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
+import {
+  canteenNameForRestaurant,
+  restaurantIdFromCanteenItemId,
+} from "@fusion-express/shared/canteen-college";
 
 export default function CheckoutPage() {
   const { user } = useUser();
@@ -54,6 +66,13 @@ export default function CheckoutPage() {
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState<"now" | "schedule">("now");
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const isAdmin = useIsAdmin(user?.uid);
+  const onDeliveryMode = useCallback((mode: "now" | "schedule") => {
+    setDeliveryMode(mode);
+  }, []);
 
   useEffect(() => {
     if (lockedCampus) {
@@ -79,16 +98,77 @@ export default function CheckoutPage() {
   const campus = deliveryCampusLock ?? guestCampus;
   const canteenOrder = isCanteenCart(items);
   const campusError = cartCampusError(items, campus);
-  const canteenGate = getCanteenCheckoutGate(items);
-  const canteenError =
-    isCanteenCart(items) && !canteenGate.allowed ? canteenGate.message : null;
+  const canteenGate = getCanteenCheckoutGate(items, { adminBypass: isAdmin });
+  const canteenHardError =
+    isCanteenCart(items) && !canteenGate.allowed && !canteenGate.hoursClosed
+      ? canteenGate.message
+      : null;
+  const venue = useMemo(() => {
+    const restaurantId = items
+      .map(({ item }) => restaurantIdFromCanteenItemId(item.id))
+      .find((id): id is string => Boolean(id));
+    const wellcome = items.some(({ item }) => item.id.startsWith("wellcome:"));
+    const orderCampus = campus === "cityu" ? "cityu" : "cuhk";
+    return resolveOrderVenue({
+      campus: orderCampus,
+      itemIds: items.map(({ item }) => item.id),
+      sourceId: restaurantId
+        ? restaurantId
+        : wellcome
+          ? "wellcome"
+          : orderCampus === "cityu"
+            ? "taste"
+            : "fusion",
+      orderChannel: canteenOrder
+        ? "canteen"
+        : wellcome
+          ? "wellcome"
+          : orderCampus === "cityu"
+            ? "taste"
+            : "fusion",
+      canteenRestaurantId: restaurantId,
+    });
+  }, [campus, canteenOrder, items]);
+  const timing = useMemo(
+    () =>
+      resolveDeliveryTiming({
+        venue,
+        isAdmin,
+        mode: deliveryMode,
+        date: scheduleDate,
+        time: scheduleTime,
+      }),
+    [venue, isAdmin, deliveryMode, scheduleDate, scheduleTime],
+  );
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
   const fee = useMemo(
     () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk", hall),
     [items, college, campus, hall],
   );
-  const total = subtotal + fee.deliveryFee + tipAmount;
+  const pickup = useMemo(() => {
+    for (const { item } of items) {
+      const restaurantId = restaurantIdFromCanteenItemId(item.id);
+      if (restaurantId) {
+        return {
+          label: canteenNameForRestaurant(restaurantId),
+          restaurantId,
+        };
+      }
+      if (item.id.startsWith("wellcome:")) {
+        return { label: "Wellcome", restaurantId: null as string | null };
+      }
+    }
+    if (campus === "cityu") return { label: "Taste", restaurantId: null };
+    return { label: "Fusion", restaurantId: null };
+  }, [items, campus]);
+  const pickupLabel = pickup.label;
+  const collegeSavings =
+    campus === "cuhk"
+      ? previewCustomerSavings({ campus, restaurantId: pickup.restaurantId })
+      : 0;
+  const total =
+    subtotal + fee.deliveryFee + tipAmount + PLATFORM_FEE - collegeSavings;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
     campus &&
@@ -96,7 +176,8 @@ export default function CheckoutPage() {
       hall &&
       !overLimit &&
       !campusError &&
-      !canteenError &&
+      !canteenHardError &&
+      timing.allowed &&
       fee.quote.available !== false &&
       !fee.quote.pending,
   );
@@ -132,6 +213,7 @@ export default function CheckoutPage() {
       hall,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
+      scheduledFor: timing.scheduledFor ?? undefined,
     });
   }
 
@@ -141,9 +223,8 @@ export default function CheckoutPage() {
         <LakersWallpaper>
           <AppHeader showBack backHref="/cart" title="Checkout" />
           <main className="mx-auto max-w-[480px] px-4 py-8">
-            <p className="text-center text-sm text-white/80">
-              Nothing to checkout yet. Search below, add a custom item, or keep
-              shopping.
+            <p className="text-center text-base text-white/80">
+              Add items to place an order
             </p>
             <ProductSearchPanel
               className="mt-4"
@@ -177,24 +258,44 @@ export default function CheckoutPage() {
             </div>
           )}
           {placeError && (
-            <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {placeError}
-            </p>
+            <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-base text-red-700">
+              <p>{placeError}</p>
+              <p className="mt-2">
+                Try again, or contact support with the chat button.
+              </p>
+            </div>
           )}
           {campusError && (
             <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
               {campusError}
             </p>
           )}
-          {canteenError && (
+          {canteenHardError && (
             <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-              {canteenError}
+              {canteenHardError}
             </p>
           )}
+          {canteenGate.hoursClosed && canteenGate.message ? (
+            <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              {canteenGate.message}
+            </p>
+          ) : null}
           <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
-            Est. delivery by {formatEta(estimatedDeliveryAt)} (~
-            {ESTIMATED_DELIVERY_MINUTES} min after order)
+            {timing.scheduledFor
+              ? `Scheduled for ${formatScheduledLabel(new Date(timing.scheduledFor))}`
+              : `Est. delivery by ${formatEta(estimatedDeliveryAt)} (~${ESTIMATED_DELIVERY_MINUTES} min after order)`}
           </div>
+          <ScheduleDelivery
+            venue={venue}
+            isAdmin={isAdmin}
+            mode={deliveryMode}
+            date={scheduleDate}
+            time={scheduleTime}
+            onMode={onDeliveryMode}
+            onDate={setScheduleDate}
+            onTime={setScheduleTime}
+            error={deliveryMode === "schedule" ? timing.error : null}
+          />
 
           <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <h2 className="text-sm font-semibold text-gray-900">Order Summary</h2>
@@ -238,7 +339,7 @@ export default function CheckoutPage() {
               </div>
               {fee.quote.pricing === "cuhk-graph" || fee.quote.pricing.startsWith("cityu") ? (
                 <div className="mt-2">
-                  <DeliveryQuote quote={fee.quote} large />
+                  <DeliveryQuote quote={fee.quote} large fromLabel={pickupLabel} />
                 </div>
               ) : (
                 <DeliveryFeeBreakdown breakdown={fee} />
@@ -249,13 +350,32 @@ export default function CheckoutPage() {
                   <span>${tipAmount}</span>
                 </div>
               )}
+              {collegeSavings > 0 && (
+                <>
+                  <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900">
+                    College discount applied — you save HK${collegeSavings.toFixed(0)}
+                  </p>
+                  <div className="flex justify-between font-medium text-emerald-800">
+                    <span>College discount</span>
+                    <span>−HK${collegeSavings.toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Applies when a matching-college runner accepts. A runner from
+                    another college removes this HK${collegeSavings.toFixed(0)}.
+                  </p>
+                </>
+              )}
+              <div className="flex justify-between text-gray-600">
+                <span>Platform fee</span>
+                <span>${PLATFORM_FEE.toFixed(2)}</span>
+              </div>
               <div
                 className={`flex justify-between pt-1 text-base font-bold ${
                   overLimit ? "text-[#ED1C24]" : ""
                 }`}
               >
                 <span>Total</span>
-                <span>${total}</span>
+                <span>${total.toFixed(2)}</span>
               </div>
             </div>
           </section>
@@ -410,6 +530,10 @@ export default function CheckoutPage() {
                 ) : fee.quote.available === false ? (
                   <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24] md:text-white">
                     {fee.quote.unavailableMessage}
+                  </p>
+                ) : timing.error ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-amber-200">
+                    {timing.error}
                   </p>
                 ) : !canSubmit ? (
                   <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">

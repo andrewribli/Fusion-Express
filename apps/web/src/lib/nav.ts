@@ -24,7 +24,7 @@ export interface NavTab {
 }
 
 export const CUSTOMER_TABS: NavTab[] = [
-  { href: "/", label: "Home", iconId: "home", match: ["/", "/home", "/fusion", "/canteen", "/taste", "/cuhk", "/cityu"] },
+  { href: "/cuhk", label: "Home", iconId: "home", match: ["/", "/home", "/fusion", "/canteen", "/taste", "/cuhk"] },
   { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
     href: "#runner",
@@ -92,15 +92,7 @@ export function isShopPath(pathname: string): boolean {
 }
 
 export function homeForMode(mode: AppMode): string {
-  return mode === "runner" ? "/runner/dashboard" : "/";
+  return mode === "runner" ? "/runner/dashboard" : "/cuhk";
 }
 
-/** Where the Runner tab / Switch to Runner button should send the user. */
-export function runnerEntryHref(opts: {
-  loggedIn: boolean;
-  canRunnerMode: boolean;
-}): string {
-  if (!opts.loggedIn) return "/login?next=/runner/terms";
-  if (opts.canRunnerMode) return "/runner/dashboard";
-  return "/runner/terms";
-}
+export { resolveRunnerEntry } from "@/lib/runner-entry";

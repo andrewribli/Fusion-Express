@@ -1,15 +1,45 @@
 import { NextResponse } from "next/server";
-import { isOpen, closedBanner } from "@/lib/openingHours";
+import { closedBanner, isOpen } from "@/lib/openingHours";
 import { isOrderableCanteen } from "@/lib/canteenConfig";
 import {
   isDrinkAddonItemId,
   parseDrinkAddonId,
 } from "@/lib/canteen/drink-addon";
+import {
+  AdminAuthError,
+  callerIsAdmin,
+  requireAuthFromRequest,
+} from "@/lib/firebase-admin";
+import {
+  immediateOrderDecision,
+  parseScheduledFor,
+  scheduledOrderDecision,
+  venueForCanteenId,
+  type WindowDecision,
+} from "@/lib/order-window";
+
+async function withAdminBypass(
+  request: Request,
+  decision: WindowDecision,
+  reopen: (isAdmin: boolean) => WindowDecision,
+): Promise<WindowDecision> {
+  if (decision.allowed || !decision.bypassable) return decision;
+  const header = request.headers.get("authorization") ?? "";
+  if (!header.startsWith("Bearer ")) return decision;
+  try {
+    const auth = await requireAuthFromRequest(request);
+    if (!(await callerIsAdmin(auth.uid, auth.idToken))) return decision;
+    return reopen(true);
+  } catch (err) {
+    if (err instanceof AdminAuthError) return decision;
+    throw err;
+  }
+}
 
 /**
  * GET ?id=sorazen → { open, banner, status }
- * POST body: { canteenId, itemIds: string[] } → validates hours + drink add-ons
- *   before client createOrder. Returns 400 if closed / invalid add-ons.
+ * POST body: { canteenId, itemIds, scheduledFor? }
+ * Hours and holiday closes are skipped only for an /admins/{uid} caller.
  */
 export async function GET(request: Request) {
   const id = new URL(request.url).searchParams.get("id") ?? "";
@@ -26,7 +56,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  let body: { canteenId?: string; itemIds?: string[] };
+  let body: { canteenId?: string; itemIds?: string[]; scheduledFor?: unknown };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -39,23 +69,32 @@ export async function POST(request: Request) {
   if (!canteenId) {
     return NextResponse.json({ error: "Missing canteenId" }, { status: 400 });
   }
-  if (!isOrderableCanteen(canteenId)) {
-    return NextResponse.json(
-      { error: closedBanner(canteenId) || "This canteen is not orderable yet." },
-      { status: 400 },
-    );
+
+  const venue = venueForCanteenId(canteenId);
+  const scheduled = parseScheduledFor(body.scheduledFor);
+  if (scheduled === "invalid") {
+    return NextResponse.json({ error: "Pick a valid delivery time." }, { status: 400 });
   }
-  if (!isOpen(canteenId)) {
+  const now = new Date();
+  const decision = await withAdminBypass(
+    request,
+    scheduled
+      ? scheduledOrderDecision(venue, scheduled, { isAdmin: false, now })
+      : immediateOrderDecision(venue, { isAdmin: false, at: now }),
+    (isAdmin) =>
+      scheduled
+        ? scheduledOrderDecision(venue, scheduled, { isAdmin, now })
+        : immediateOrderDecision(venue, { isAdmin, at: now }),
+  );
+  if (!decision.allowed) {
     return NextResponse.json(
-      { error: closedBanner(canteenId) },
+      { error: decision.message ?? closedBanner(canteenId) },
       { status: 400 },
     );
   }
 
   const mains = itemIds.filter(
-    (id) =>
-      id.startsWith(`canteen:${canteenId}:`) &&
-      !isDrinkAddonItemId(id),
+    (id) => id.startsWith(`canteen:${canteenId}:`) && !isDrinkAddonItemId(id),
   );
   const addons = itemIds.filter(isDrinkAddonItemId);
 
@@ -69,13 +108,12 @@ export async function POST(request: Request) {
     }
     const mainId = `canteen:${canteenId}:${parsed.mainItemId}`;
     if (!mains.includes(mainId) && !itemIds.includes(mainId)) {
-      // Main may use full cart id form canteen:rest:item
       const hasMain = itemIds.some(
         (id) =>
           id === mainId ||
-          id.endsWith(`:${parsed.mainItemId}`) &&
+          (id.endsWith(`:${parsed.mainItemId}`) &&
             id.startsWith(`canteen:${canteenId}:`) &&
-            !isDrinkAddonItemId(id),
+            !isDrinkAddonItemId(id)),
       );
       if (!hasMain) {
         return NextResponse.json(
@@ -89,7 +127,6 @@ export async function POST(request: Request) {
     }
   }
 
-  // At most one add-on per main
   const byMain = new Map<string, number>();
   for (const addonId of addons) {
     const parsed = parseDrinkAddonId(addonId);

@@ -5,10 +5,17 @@ import { AppHeader } from "@/ptero/components/AppHeader";
 import { AppShell } from "@/ptero/components/AppShell";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { CAMPUS } from "@/ptero/config/campus";
-import { useUser } from "@/ptero/context/AppState";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 
 export default function RunnerIntroPage() {
-  const { user, canRunnerMode } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
+  const label =
+    runnerEntry.decision.status === "ready" && runnerEntry.decision.runner
+      ? "Open runner dashboard"
+      : runnerEntry.decision.status === "ready" &&
+          runnerEntry.href.startsWith("/cityu/runner/register")
+        ? "Add your phone and start running"
+        : "Sign up with CityU email first";
 
   return (
     <AppShell>
@@ -23,30 +30,21 @@ export default function RunnerIntroPage() {
         <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-600">
           <li>CityU email required (@cityu.edu.hk or @my.cityu.edu.hk)</li>
           <li>Hong Kong mobile required so customers can reach you after accept</li>
-          <li>You front the Taste bill; Ptero reimburses after the customer pays via Airwallex</li>
+          <li>You front the Taste bill; GraceRun reimburses after the customer pays via Airwallex</li>
         </ul>
-        {canRunnerMode ? (
-          <Link
-            href="/cityu/runner/dashboard"
-            className="mt-6 flex w-full items-center justify-center rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white"
-          >
-            Open runner dashboard
-          </Link>
-        ) : user && !user.isGuest ? (
-          <Link
-            href="/cityu/runner/register"
-            className="mt-6 flex w-full items-center justify-center rounded-xl bg-fusion-red py-3 text-sm font-bold text-white"
-          >
-            Add your phone and start running
-          </Link>
-        ) : (
-          <Link
-            href="/login?mode=signup&next=/cityu/runner/register"
-            className="mt-6 flex w-full items-center justify-center rounded-xl bg-fusion-red py-3 text-sm font-bold text-white"
-          >
-            Sign up with CityU email first
-          </Link>
-        )}
+        <Link
+          href={runnerEntry.href}
+          aria-busy={runnerEntry.loading || undefined}
+          aria-disabled={runnerEntry.loading || undefined}
+          onClick={runnerEntry.onClick}
+          className={`mt-6 flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white ${
+            runnerEntry.decision.status === "ready" && runnerEntry.decision.runner
+              ? "bg-emerald-500"
+              : "bg-fusion-red"
+          } ${runnerEntry.loading ? "opacity-60" : ""}`}
+        >
+          {runnerEntry.loading ? "Loading…" : label}
+        </Link>
       </main>
     </AppShell>
   );

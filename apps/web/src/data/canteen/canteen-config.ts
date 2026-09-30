@@ -60,7 +60,7 @@ export type WeekdayRule =
 export type CanteenHoursConfig = {
   /** Inclusive open minute-of-day (HKT). */
   openMin: number;
-  /** Exclusive close minute-of-day (HKT). */
+  /** Exclusive close minute-of-day (HKT) — order cutoff, not kitchen lights-out. */
   closeMin: number;
   weekdays: WeekdayRule;
   /** Human label for banners. */
@@ -69,6 +69,8 @@ export type CanteenHoursConfig = {
   mealPeriods: boolean;
   /** Next-open hint when closed outside all periods. */
   nextOpenFallback: string;
+  /** Closed on Hong Kong general holidays (in addition to weekday rules). */
+  closedOnPublicHolidays?: boolean;
 };
 
 export const canteenConfig: Record<string, CanteenHoursConfig> = {
@@ -121,12 +123,15 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     nextOpenFallback: "10:00 AM Monday",
   },
   ebeneezers: {
-    openMin: 11 * 60,
-    closeMin: 21 * 60,
+    // Restaurant 10:00–20:00; stop taking orders 15 minutes before close.
+    openMin: 10 * 60,
+    closeMin: 19 * 60 + 45,
     weekdays: "mon-sat",
-    hoursLabel: "Mon–Sat 11:00 AM – 9:00 PM",
+    hoursLabel:
+      "Mon–Sat 10:00 AM – 7:45 PM (orders · restaurant to 8:00) · closed Sun & public holidays",
     mealPeriods: false,
-    nextOpenFallback: "11:00 AM Monday",
+    nextOpenFallback: "10:00 AM Monday",
+    closedOnPublicHolidays: true,
   },
   "orchid-lodge": {
     openMin: 0,
@@ -160,13 +165,16 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     mealPeriods: false,
     nextOpenFallback: "TBD",
   },
-  "na-canteen": {
-    openMin: 7 * 60 + 30,
-    closeMin: 20 * 60,
-    weekdays: "mon-sat",
-    hoursLabel: "7:30 AM – 8:00 PM (breakfast · lunch · drinks)",
-    mealPeriods: true,
-    nextOpenFallback: "7:30 AM",
+  "na-webbites": {
+    // Restaurant 08:00–20:00; stop taking orders 15 minutes before close.
+    // Pin2Eat frequency "0;1;3;2;4;5" is not mapped to weekday names, so this is daily.
+    openMin: 8 * 60,
+    closeMin: 19 * 60 + 45,
+    weekdays: "everyday",
+    hoursLabel:
+      "Daily 8:00 AM – 7:45 PM (orders) · restaurant to 8:00 PM",
+    mealPeriods: false,
+    nextOpenFallback: "8:00 AM",
   },
   "cc-canteen": {
     openMin: 7 * 60 + 30,

@@ -14,11 +14,11 @@ export const CAMPUS_ID: CampusId = "cityu";
 export const CAMPUS = {
   id: CAMPUS_ID,
   name: "CityU",
-  brandName: "Ptero",
+  brandName: "GraceRun CityU",
   supermarket: "Taste",
   supermarketLocation: "Citygate",
   tagline: "Groceries from Taste Citygate to your CityU dorm lobby.",
-  shortTagline: "Flying with grace.",
+  shortTagline: "Groceries. Delivered with grace.",
   emailDomains: ["cityu.edu.hk", "my.cityu.edu.hk"] as const,
   signupEmailError:
     "Please use your CityU email to sign up. (@cityu.edu.hk or @my.cityu.edu.hk)",

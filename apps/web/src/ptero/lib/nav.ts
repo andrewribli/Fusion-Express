@@ -90,11 +90,4 @@ export function homeForMode(mode: AppMode): string {
   return mode === "runner" ? "/cityu/runner/dashboard" : "/cityu";
 }
 
-export function runnerEntryHref(opts: {
-  loggedIn: boolean;
-  canRunnerMode: boolean;
-}): string {
-  if (opts.canRunnerMode) return "/cityu/runner/dashboard";
-  if (opts.loggedIn) return "/cityu/runner/register";
-  return "/cityu/runner";
-}
+export { resolveRunnerEntry } from "@/lib/runner-entry";

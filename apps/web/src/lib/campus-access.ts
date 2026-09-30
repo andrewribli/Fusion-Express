@@ -6,6 +6,7 @@ import {
   type CampusId,
 } from "@fusion-express/shared/campus";
 import type { UserProfile } from "@/context/UserContext";
+import { canAccessCityU } from "@/lib/betaAccess";
 import { campusFromPathname } from "@/lib/campus-routes";
 
 /** Signed-in home hub for a campus (`/cuhk` or `/cityu`). */
@@ -28,12 +29,19 @@ export function isSafePostLoginNext(next: string | null | undefined): next is st
 export function postLoginDestination(opts: {
   campus?: CampusId | null;
   next?: string | null;
+  email?: string | null;
 }): string {
   const campus = isCampusId(opts.campus) ? opts.campus : null;
+  const cityuOpen = canAccessCityU(opts.email);
   if (isSafePostLoginNext(opts.next)) {
     const nextCampus = campusFromPathname(opts.next);
-    if (!campus || !nextCampus || nextCampus === campus) return opts.next;
+    if (nextCampus === "cityu" && !cityuOpen) {
+      // CityU is beta-locked — ignore ?next=/cityu…
+    } else if (!campus || !nextCampus || nextCampus === campus) {
+      return opts.next;
+    }
   }
+  if (campus === "cityu" && !cityuOpen) return "/";
   if (campus) return campusHubPath(campus);
   return "/";
 }
@@ -88,10 +96,15 @@ export function campusAccessRedirect(
   pathname: string,
   userCampus: CampusId,
   bypass: boolean,
+  email?: string | null,
 ): string | null {
   if (bypass) return null;
   if (isCampusNeutralPath(pathname)) return null;
   const routeCampus = campusFromPathname(pathname);
+  // Allowlisted testers (including CUHK emails) may open CityU.
+  if (routeCampus === "cityu" && canAccessCityU(email)) return null;
   if (!routeCampus || routeCampus === userCampus) return null;
+  // Do not bounce locked CityU-domain accounts into a closed campus.
+  if (userCampus === "cityu" && !canAccessCityU(email)) return "/";
   return campusHubPath(userCampus);
 }

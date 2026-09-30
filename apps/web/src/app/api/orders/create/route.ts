@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import {
   ACTIVE_ORDER_LIMIT_MESSAGE,
+  collegeDiscountCreateFields,
   countsTowardCustomerOrderPlacementCap,
   getEstimatedDeliveryTime,
   isOverOrderLimit,
@@ -13,12 +14,21 @@ import {
   resolveSpecialInstructions,
 } from "@fusion-express/shared";
 import { findHall } from "@fusion-express/shared/halls";
+import { canAccessCityU } from "@/lib/betaAccess";
 import { collectionName } from "@/lib/constants";
 import {
   AdminAuthError,
+  callerIsAdmin,
   getAdminDb,
   requireAuthFromRequest,
 } from "@/lib/firebase-admin";
+import {
+  immediateOrderDecision,
+  parseScheduledFor,
+  resolveOrderVenue,
+  scheduledOrderDecision,
+  type WindowDecision,
+} from "@/lib/order-window";
 
 type ItemBody = {
   itemId?: string;
@@ -47,6 +57,12 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as Record<string, unknown>;
     const campus = body.campus === "cityu" ? "cityu" : body.campus === "cuhk" ? "cuhk" : null;
+    if (campus === "cityu" && !canAccessCityU(auth.email)) {
+      return NextResponse.json(
+        { error: "CityU delivery is not open yet." },
+        { status: 403 },
+      );
+    }
     const hallId = typeof body.hallId === "string" ? body.hallId.trim() : typeof body.hall === "string" ? body.hall.trim() : "";
     const college = typeof body.college === "string" ? body.college.trim() : "";
     const rawItems = Array.isArray(body.items) ? (body.items as ItemBody[]) : [];
@@ -178,6 +194,55 @@ export async function POST(request: Request) {
         : canteenIds.size > 0 || body.orderChannel === "canteen"
           ? "canteen"
           : "taste";
+    const restaurantId =
+      typeof body.canteenRestaurantId === "string" && body.canteenRestaurantId.trim()
+        ? body.canteenRestaurantId.trim()
+        : canteenIds.size === 1
+          ? [...canteenIds][0]
+          : undefined;
+    const venue = resolveOrderVenue({
+      campus,
+      itemIds: items.map((item) => item.itemId),
+      sourceId: priced.sourceId,
+      orderChannel,
+      canteenRestaurantId: restaurantId,
+    });
+    const scheduledRaw = parseScheduledFor(body.scheduledFor);
+    if (scheduledRaw === "invalid") {
+      return NextResponse.json({ error: "Pick a valid delivery time." }, { status: 400 });
+    }
+    let isAdmin: boolean | null = null;
+    const admin = async () => {
+      if (isAdmin == null) isAdmin = await callerIsAdmin(auth.uid, auth.idToken);
+      return isAdmin;
+    };
+    const acceptWindow = async (decision: WindowDecision) => {
+      if (!decision.allowed && decision.bypassable && (await admin())) {
+        return scheduledRaw
+          ? scheduledOrderDecision(venue, scheduledRaw, { isAdmin: true, now })
+          : immediateOrderDecision(venue, { isAdmin: true, at: now });
+      }
+      return decision;
+    };
+    const windowDecision = await acceptWindow(
+      scheduledRaw
+        ? scheduledOrderDecision(venue, scheduledRaw, { isAdmin: false, now })
+        : immediateOrderDecision(venue, { isAdmin: false, at: now }),
+    );
+    if (!windowDecision.allowed) {
+      return NextResponse.json(
+        { error: windowDecision.message ?? "This shop is closed." },
+        { status: 400 },
+      );
+    }
+    const scheduledFor = scheduledRaw ?? undefined;
+    const collegeDiscount = collegeDiscountCreateFields({
+      campus,
+      orderChannel,
+      restaurantId,
+      foodSubtotal: subtotal,
+      currentTotal: priced.total,
+    });
     const payload = omitUndefined({
       sessionId: typeof body.sessionId === "string" ? body.sessionId : auth.uid,
       customerId: auth.uid,
@@ -189,12 +254,7 @@ export async function POST(request: Request) {
       campus,
       sourceId: priced.sourceId,
       orderChannel,
-      canteenRestaurantId:
-        typeof body.canteenRestaurantId === "string"
-          ? body.canteenRestaurantId
-          : canteenIds.size === 1
-            ? [...canteenIds][0]
-            : undefined,
+      canteenRestaurantId: restaurantId,
       canteenCollege:
         typeof body.canteenCollege === "string" ? body.canteenCollege : undefined,
       items,
@@ -207,7 +267,7 @@ export async function POST(request: Request) {
       customerNote: resolveSpecialInstructions(
         typeof body.customerNote === "string" ? body.customerNote : undefined,
       ),
-      subtotal,
+      subtotal: collegeDiscount?.subtotal ?? subtotal,
       deliveryBase: priced.deliveryBase,
       deliverySurcharge: priced.deliverySurcharge,
       deliveryTotal: priced.deliveryTotal,
@@ -217,11 +277,19 @@ export async function POST(request: Request) {
       deliveryFeeRaw: priced.deliveryFeeRaw,
       deliveryPath: priced.deliveryPath,
       tip: tip || undefined,
-      total: priced.total,
+      platformFee: priced.platformFee,
+      total: collegeDiscount?.total ?? priced.total,
+      discountCollege: collegeDiscount?.discountCollege,
+      discountAmount: collegeDiscount?.discountAmount,
+      discountSplit: collegeDiscount?.discountSplit,
+      discountApplied: collegeDiscount ? false : undefined,
+      platformDiscountFee: collegeDiscount ? 0 : undefined,
+      collegeDiscountStatus: collegeDiscount?.collegeDiscountStatus,
       paymentReceived: false,
       fusionPaidByPlatform: true,
       estimatedSubtotal: subtotal,
-      estimatedDeliveryAt: getEstimatedDeliveryTime(now),
+      estimatedDeliveryAt: scheduledFor ?? getEstimatedDeliveryTime(now),
+      scheduledFor,
       createdAt: now,
       updatedAt: FieldValue.serverTimestamp(),
     });
@@ -234,7 +302,8 @@ export async function POST(request: Request) {
       deliverySurcharge: priced.deliverySurcharge,
       deliveryTotal: priced.deliveryTotal,
       deliveryFee: priced.deliveryFee,
-      total: priced.total,
+      platformFee: priced.platformFee,
+      total: collegeDiscount?.total ?? priced.total,
     });
   } catch (err) {
     if (err instanceof AdminAuthError) {

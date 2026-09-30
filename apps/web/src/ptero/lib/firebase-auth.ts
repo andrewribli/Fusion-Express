@@ -6,6 +6,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseDb } from "@/ptero/lib/firebase";
+import { collectionName } from "@fusion-express/shared";
 import { validateCityUStudentEmail } from "@/ptero/lib/cityu-email";
 
 function authErrorCode(err: unknown): string | undefined {
@@ -20,7 +21,7 @@ function mapAuthError(err: unknown): Error {
   const code = authErrorCode(err);
   switch (code) {
     case "auth/email-already-in-use":
-      return new Error("An account with this CityU email already exists.");
+      return new Error("This email is already registered. Sign in instead.");
     case "auth/invalid-email":
       return new Error(
         "Please use your CityU email to sign up. (@cityu.edu.hk or @my.cityu.edu.hk)",
@@ -31,7 +32,15 @@ function mapAuthError(err: unknown): Error {
     case "auth/wrong-password":
     case "auth/user-not-found":
       return new Error("Incorrect email or password.");
+    case "permission-denied":
+      return new Error("We couldn't save your account. Please try again.");
     default:
+      if (
+        err instanceof Error &&
+        /missing or insufficient permissions/i.test(err.message)
+      ) {
+        return new Error("We couldn't save your account. Please try again.");
+      }
       if (err instanceof Error) return err;
       return new Error("Authentication failed");
   }
@@ -51,11 +60,15 @@ export async function firebaseSignUp(opts: {
       opts.email.trim().toLowerCase(),
       opts.password,
     );
-    await setDoc(doc(getFirebaseDb(), "users", cred.user.uid), {
+    await cred.user.getIdToken();
+    await setDoc(doc(getFirebaseDb(), collectionName("users"), cred.user.uid), {
+      uid: cred.user.uid,
       email: opts.email.trim().toLowerCase(),
       fullName: opts.fullName.trim(),
       campus: "cityu",
-      cityuVerifiedAt: serverTimestamp(),
+      role: "customer",
+      isGuest: false,
+      isRunner: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });

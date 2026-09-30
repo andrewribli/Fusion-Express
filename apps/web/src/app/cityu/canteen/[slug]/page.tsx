@@ -17,15 +17,20 @@ import {
 import { getRestaurant, RESTAURANTS } from "@/ptero/config/canteen/restaurants";
 import { toCartMenuItem } from "@/ptero/lib/canteen/cart";
 import { useCart } from "@/ptero/context/CartContext";
+import { useUser } from "@/ptero/context/AppState";
 import { formatHkd } from "@/ptero/lib/types";
 import { isCanteenOpenNow } from "@/lib/meal-search";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { ADMIN_ORDERING_NOTE } from "@/lib/order-window";
 
 function MenuRow({
   restaurantId,
   item,
+  orderingEnabled,
 }: {
   restaurantId: string;
   item: CanteenMenuItem;
+  orderingEnabled: boolean;
 }) {
   const { addItem, items, setQuantity } = useCart();
   const cartId = `canteen:${restaurantId}:${item.id}`;
@@ -65,8 +70,12 @@ function MenuRow({
           <span className="min-w-5 text-center text-sm font-semibold">{qty}</span>
           <button
             type="button"
-            onClick={() => setQuantity(cartId, qty + 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 font-bold"
+            disabled={!orderingEnabled}
+            onClick={() => {
+              if (!orderingEnabled) return;
+              setQuantity(cartId, qty + 1);
+            }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 font-bold disabled:text-gray-300"
           >
             +
           </button>
@@ -74,10 +83,14 @@ function MenuRow({
       ) : (
         <button
           type="button"
-          onClick={() => addItem(toCartMenuItem(restaurantId, item))}
-          className="rounded-xl bg-[#ED1C24] px-3 py-2 text-xs font-bold text-white"
+          disabled={!orderingEnabled}
+          onClick={() => {
+            if (!orderingEnabled) return;
+            addItem(toCartMenuItem(restaurantId, item));
+          }}
+          className="rounded-xl bg-[#ED1C24] px-3 py-2 text-xs font-bold text-white disabled:bg-gray-200 disabled:text-gray-500"
         >
-          Add
+          {orderingEnabled ? "Add" : "Closed"}
         </button>
       )}
     </li>
@@ -93,9 +106,12 @@ function CanteenDetailInner() {
   const blocked = Boolean(restaurant && !restaurant.menuReady);
   const { addItem } = useCart();
   const { focusItemId, detailOpen, closeDetail } = useFocusCanteenItem();
+  const { user } = useUser();
+  const isAdmin = useIsAdmin(user?.uid);
   const openNow = restaurant
     ? isCanteenOpenNow("cityu", restaurant.id)
     : false;
+  const canOrder = openNow || isAdmin;
 
   useEffect(() => {
     if (blocked) router.replace("/cityu/canteen");
@@ -190,7 +206,7 @@ function CanteenDetailInner() {
             alt=""
             width={56}
             height={56}
-            className="h-14 w-14 shrink-0 rounded-xl object-contain bg-white ring-1 ring-gray-100"
+            className="h-auto max-h-[120px] w-auto max-w-[45%] shrink-0 rounded-xl bg-white object-contain ring-1 ring-gray-100 lg:h-14 lg:w-14 lg:max-h-14 lg:max-w-none"
           />
         ) : null}
         <div className="min-w-0">
@@ -207,6 +223,14 @@ function CanteenDetailInner() {
         </p>
         </div>
       </div>
+      {!openNow ? (
+        <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {restaurant.shortName} is closed. {restaurant.hoursLabel}
+          {isAdmin ? (
+            <span className="mt-1 block font-medium text-gray-800">{ADMIN_ORDERING_NOTE}</span>
+          ) : null}
+        </p>
+      ) : null}
 
       <div className="mb-4">
         <CollegeDiscountBanner collegeId={restaurant.collegeId} />
@@ -227,6 +251,7 @@ function CanteenDetailInner() {
                     key={`${group.period}-${item.id}`}
                     restaurantId={restaurant.id}
                     item={item}
+                    orderingEnabled={canOrder}
                   />
                 ))}
               </ul>
@@ -246,6 +271,7 @@ function CanteenDetailInner() {
                     key={item.id}
                     restaurantId={restaurant.id}
                     item={item}
+                    orderingEnabled={canOrder}
                   />
                 ))}
               </ul>
@@ -269,7 +295,7 @@ function CanteenDetailInner() {
               }
             : null
         }
-        orderingEnabled={openNow}
+        orderingEnabled={canOrder}
         onClose={closeDetail}
         onAdd={(detail, qty) => {
           const menuItem = getCanteenMenuItem(restaurant.id, detail.id);

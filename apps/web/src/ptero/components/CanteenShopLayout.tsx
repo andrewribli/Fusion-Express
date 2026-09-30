@@ -9,13 +9,12 @@ import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificatio
 import { FeedbackButton } from "@/ptero/components/FeedbackButton";
 import { OrderActionBar } from "@/ptero/components/OrderActionBar";
 import { PreviousOrderChecklist } from "@/ptero/components/PreviousOrderChecklist";
-import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { TrackOrderFab } from "@/ptero/components/TrackOrderFab";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
 import { isOverOrderLimit } from "@/ptero/lib/constants";
-import { runnerEntryHref } from "@/ptero/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 
 type Props = {
   deliveryLabel?: string;
@@ -44,7 +43,8 @@ export function CanteenShopLayout({
   children,
 }: Props) {
   const { itemCount, subtotal } = useCart();
-  const { user, setMode, canRunnerMode } = useUser();
+  const { setMode } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
   const overLimit = isOverOrderLimit(subtotal);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -76,21 +76,26 @@ export function CanteenShopLayout({
               />
             )}
             <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user && !user.isGuest),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
+              href={runnerEntry.href}
+              aria-busy={runnerEntry.loading || undefined}
+              aria-disabled={runnerEntry.loading || undefined}
+              onClick={(event) => {
+                if (runnerEntry.loading) {
+                  event.preventDefault();
+                  return;
+                }
+                runnerEntry.onClick(event);
+                if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+                  setMode("runner");
+                }
               }}
-              className="hidden rounded-full border-2 border-emerald-300 bg-emerald-500 px-3 py-2 text-xs font-bold text-white sm:inline-flex"
+              className={`hidden rounded-full border-2 border-emerald-300 bg-emerald-500 px-3 py-2 text-xs font-bold text-white sm:inline-flex ${
+                runnerEntry.loading ? "opacity-60" : ""
+              }`}
             >
               Runner
             </Link>
             <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-            {canRunnerMode ? (
-              <RunnerQueueBell className="h-11 w-11 rounded-full" />
-            ) : null}
             <Link
               href={checkoutHref}
               className={`relative flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
@@ -121,7 +126,7 @@ export function CanteenShopLayout({
           </div>
         </aside>
 
-        <div className="min-w-0">
+        <div className="min-w-0 pb-[calc(12rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
           <button
             type="button"
             className="mb-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 lg:hidden"

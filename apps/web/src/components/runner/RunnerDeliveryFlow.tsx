@@ -12,6 +12,7 @@ import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import { OrderCounterparty, useOrderParty } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import { supermarketForCampus } from "@fusion-express/shared/campus";
+import { formatScheduledLabel } from "@/lib/order-window";
 
 const STEPS = [
   "Order details",
@@ -147,6 +148,11 @@ export function RunnerDeliveryFlow({
                   {formatDeliveryAddress(order.college, order.hall)}
                 </p>
                 <p className="text-xs text-[#c4c4c4]">Lobby: {order.lobbyPoint}</p>
+                {order.scheduledFor ? (
+                  <p className="mt-2 text-sm font-semibold text-amber-200">
+                    Scheduled for {formatScheduledLabel(order.scheduledFor)}
+                  </p>
+                ) : null}
                 <div className="mt-3">
                   <OrderCounterparty orderId={order.id} label="Customer:" tone="dark" />
                 </div>

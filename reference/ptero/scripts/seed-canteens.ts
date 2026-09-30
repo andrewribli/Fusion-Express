@@ -1,5 +1,5 @@
 /**
- * Seed CityU canteens + menu subcollections into Firestore (ptero-cityu).
+ * Seed CityU canteens + menu subcollections into Firestore (Firebase project ptero-cityu).
  *
  * Usage:
  *   npx tsx scripts/seed-canteens.ts

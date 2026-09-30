@@ -6,7 +6,6 @@ import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
 import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificationBell";
 import { NavIcon } from "@/ptero/components/NavIcon";
-import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
@@ -14,10 +13,10 @@ import { isOverOrderLimit } from "@/ptero/lib/constants";
 import {
   homeForMode,
   isTabActive,
-  runnerEntryHref,
   tabsForMode,
   type NavTab,
 } from "@/ptero/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 
 export function AppHeader({
   showBack,
@@ -30,7 +29,8 @@ export function AppHeader({
 }) {
   const { itemCount, subtotal } = useCart();
   const overLimit = isOverOrderLimit(subtotal);
-  const { user, mode, setMode, canRunnerMode } = useUser();
+  const { user, mode, setMode } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
   const pathname = usePathname();
   const router = useRouter();
   const chromeMode = pathname.startsWith("/cityu/runner") ? "runner" : mode;
@@ -49,12 +49,12 @@ export function AppHeader({
   function onTabClick(tab: NavTab, event: React.MouseEvent) {
     if (tab.action === "switch-runner") {
       event.preventDefault();
-      const href = runnerEntryHref({
-        loggedIn: Boolean(user && !user.isGuest),
-        canRunnerMode,
-      });
-      if (canRunnerMode) setMode("runner");
-      router.push(href);
+      if (runnerEntry.loading) return;
+      runnerEntry.onClick(event);
+      if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+        setMode("runner");
+      }
+      router.push(runnerEntry.href);
     }
     if (tab.action === "switch-customer") {
       event.preventDefault();
@@ -105,14 +105,22 @@ export function AppHeader({
           <nav className="flex shrink-0 items-center gap-1.5">
             {!runnerMode ? (
               <Link
-                href={runnerEntryHref({
-                  loggedIn: Boolean(user && !user.isGuest),
-                  canRunnerMode,
-                })}
-                onClick={() => {
-                  if (canRunnerMode) setMode("runner");
+                href={runnerEntry.href}
+                aria-busy={runnerEntry.loading || undefined}
+                aria-disabled={runnerEntry.loading || undefined}
+                onClick={(event) => {
+                  if (runnerEntry.loading) {
+                    event.preventDefault();
+                    return;
+                  }
+                  runnerEntry.onClick(event);
+                  if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+                    setMode("runner");
+                  }
                 }}
-                className="hidden min-h-11 items-center rounded-full border-2 border-emerald-300 bg-emerald-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-600 sm:inline-flex"
+                className={`hidden min-h-11 items-center rounded-full border-2 border-emerald-300 bg-emerald-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-600 sm:inline-flex ${
+                  runnerEntry.loading ? "opacity-60" : ""
+                }`}
               >
                 Switch to Runner
               </Link>
@@ -126,12 +134,7 @@ export function AppHeader({
               </Link>
             )}
             {!runnerMode && (
-              <>
-                <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-                {canRunnerMode ? (
-                  <RunnerQueueBell className="h-11 w-11 rounded-full" />
-                ) : null}
-              </>
+              <CustomerNotificationBell className="h-11 w-11 rounded-full" />
             )}
             {tabs
               .filter(
@@ -171,9 +174,7 @@ export function AppHeader({
                 )}
               </Link>
             )}
-            <div className="hidden sm:block">
-              <AccountMenu />
-            </div>
+            <AccountMenu />
           </nav>
         </div>
       </header>

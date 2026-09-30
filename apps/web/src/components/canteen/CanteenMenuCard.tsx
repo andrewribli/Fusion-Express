@@ -39,7 +39,14 @@ export function CanteenMenuCard(props: Props) {
         : toCartMenuItemFromSimple(props.item, props.restaurantId);
   const qty = items.find((c) => c.item.id === cartItem.id)?.quantity ?? 0;
   const name = props.item.name;
-  const nameZh = props.kind === "uc" ? props.item.nameZh : undefined;
+  const nameZh =
+    props.kind === "uc"
+      ? props.item.nameZh
+      : props.kind === "simple"
+        ? props.item.nameZh
+        : undefined;
+  const soldOut = props.kind === "simple" && props.item.isAvailable === false;
+  const canAdd = orderingEnabled && !soldOut;
   const description =
     props.kind === "uc" || props.kind === "bf" || props.kind === "simple"
       ? props.item.description
@@ -113,7 +120,11 @@ export function CanteenMenuCard(props: Props) {
           <p className="text-sm font-bold text-[#ED1C24]">
             {formatHkd(props.item.price)}
           </p>
-          {!orderingEnabled ? (
+          {soldOut ? (
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              Sold out
+            </span>
+          ) : !canAdd ? (
             <button
               type="button"
               disabled

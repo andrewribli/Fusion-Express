@@ -24,12 +24,14 @@ import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { loadAllProducts } from "@/lib/firestore";
 import { resolveHomePopularItems } from "@/lib/home-popular";
-import { runnerEntryHref } from "@/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 import { getAisleItems, searchItems } from "@/lib/menu";
 import { popularityScore, topPopularItems } from "@/lib/popular-items";
 import { formatMenuPrice, type MenuItem } from "@/lib/types";
 import { AppLogo } from "@/components/AppLogo";
+import { StoreHoursBanner } from "@/components/StoreHoursBanner";
+import { useIsAdmin } from "@/lib/use-is-admin";
 import type { Aisle, StoreSection } from "@/data/aisles";
 
 const BATCH = 24;
@@ -225,7 +227,9 @@ function HomeSearchBar({
 
 export function ShopHome() {
   const { addItem, itemCount } = useCart();
-  const { user, setMode, canRunnerMode } = useUser();
+  const { user } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
+  const isAdmin = useIsAdmin(user?.uid);
   const { openManualItem } = useManualItemModal();
   const [guestBrowse, setGuestBrowse] = useState(false);
   const [products, setProducts] = useState<MenuItem[]>([]);
@@ -412,7 +416,7 @@ export function ShopHome() {
   return (
     <AppShell>
       <div className="shop-page min-h-screen bg-[#f5f5f5]">
-        <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+        <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
             <button
               type="button"
@@ -431,18 +435,24 @@ export function ShopHome() {
             </button>
 
             <Link
-              href="/"
+              href="/cuhk"
               onClick={() => {
                 setSearch("");
                 selectAisle(null);
               }}
               className="flex shrink-0 items-center gap-2"
-              aria-label="GraceRun home"
+              aria-label="CUHK home"
             >
               <AppLogo size={36} className="h-9 w-9" />
               <span className="hidden text-sm font-extrabold tracking-tight text-gray-900 sm:block">
                 GraceRun
               </span>
+            </Link>
+            <Link
+              href="/cuhk"
+              className="hidden shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-800 hover:border-[#ED1C24] hover:text-[#ED1C24] sm:inline-flex"
+            >
+              CUHK home
             </Link>
 
             <div className="hidden min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex">
@@ -471,14 +481,13 @@ export function ShopHome() {
             </div>
 
             <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
-              }}
-              className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex"
+              href={runnerEntry.href}
+              aria-busy={runnerEntry.loading || undefined}
+              aria-disabled={runnerEntry.loading || undefined}
+              onClick={runnerEntry.onClick}
+              className={`hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex ${
+                runnerEntry.loading ? "opacity-60" : ""
+              }`}
             >
               Runner
             </Link>
@@ -507,7 +516,7 @@ export function ShopHome() {
               )}
             </Link>
 
-            <div className="hidden shrink-0 sm:block">
+            <div className="shrink-0">
               <AccountMenu hideThemeChip />
             </div>
           </div>
@@ -545,7 +554,8 @@ export function ShopHome() {
             {categoryList}
           </aside>
 
-          <main className="min-w-0 px-3 py-4 pb-36 sm:px-4">
+          <main className="min-w-0 px-3 py-4 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 md:pb-28">
+            <StoreHoursBanner isAdmin={isAdmin} />
             {guestBrowse && (
               <div className="mb-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800">
                 <p className="font-semibold text-gray-900">Ordering as guest</p>

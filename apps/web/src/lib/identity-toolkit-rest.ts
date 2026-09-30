@@ -283,3 +283,104 @@ export async function repairAuthEmailForUidRest(uid: string): Promise<{
 
   return { uid: trimmedUid, email, username, previousAuthEmail };
 }
+
+export type AuthAccountRow = {
+  uid: string;
+  email: string;
+  displayName: string;
+};
+
+/** Paginated Identity Toolkit user dump (avoids firebase-admin/auth). */
+export async function listAuthAccountsRest(): Promise<AuthAccountRow[]> {
+  const ctx = await adminAccessToken();
+  if (!ctx) {
+    throw new Error("Admin Auth list is not configured on the server.");
+  }
+
+  const out: AuthAccountRow[] = [];
+  let nextPageToken: string | undefined;
+  do {
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/projects/${ctx.project}/accounts:batchDownload`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ctx.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          maxResults: 1000,
+          ...(nextPageToken ? { nextPageToken } : {}),
+        }),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Auth list failed (${res.status}): ${text.slice(0, 300)}`);
+    }
+    const data = (await res.json()) as {
+      users?: Array<{
+        localId?: string;
+        email?: string;
+        displayName?: string;
+      }>;
+      nextPageToken?: string;
+    };
+    for (const user of data.users ?? []) {
+      const uid = user.localId?.trim();
+      if (!uid) continue;
+      out.push({
+        uid,
+        email: (user.email ?? "").trim().toLowerCase(),
+        displayName: (user.displayName ?? "").trim(),
+      });
+    }
+    nextPageToken = data.nextPageToken?.trim() || undefined;
+  } while (nextPageToken);
+
+  return out;
+}
+
+/** Auth email and display name for directory rows whose Firestore profile is blank. */
+export async function lookupAuthContactsRest(
+  uids: string[],
+): Promise<Record<string, { email: string; displayName: string }>> {
+  const ctx = await adminAccessToken();
+  if (!ctx) return {};
+  const unique = [...new Set(uids.map((uid) => uid.trim()).filter(Boolean))].slice(
+    0,
+    200,
+  );
+  const out: Record<string, { email: string; displayName: string }> = {};
+  for (let i = 0; i < unique.length; i += 100) {
+    const chunk = unique.slice(i, i + 100);
+    const res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/projects/${ctx.project}/accounts:lookup`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ctx.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ localId: chunk }),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("directory auth lookup failed", res.status, text.slice(0, 200));
+      continue;
+    }
+    const data = (await res.json()) as {
+      users?: Array<{ localId?: string; email?: string; displayName?: string }>;
+    };
+    for (const user of data.users ?? []) {
+      const uid = user.localId?.trim();
+      if (!uid) continue;
+      out[uid] = {
+        email: (user.email ?? "").trim(),
+        displayName: (user.displayName ?? "").trim(),
+      };
+    }
+  }
+  return out;
+}

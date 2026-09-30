@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CAMPUS } from "@/ptero/config/campus";
+import { UserAvatar } from "@/components/UserAvatar";
 import { useUser as useSharedUser } from "@/context/UserContext";
 import {
   appUserFromSharedProfile,
@@ -10,8 +11,19 @@ import {
   useUser,
 } from "@/ptero/context/AppState";
 
-/** Account control — My Orders count, avatar initials, outside-click (gracerun.fit). */
-export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
+/** Account control — My Orders count, same avatar as GraceRun header. */
+export function AccountMenu({
+  tone = "light",
+  placement = "down",
+  avatarSize,
+  label,
+}: {
+  tone?: "light" | "dark";
+  /** Bottom nav opens above the icon so it stays on screen. */
+  placement?: "down" | "up";
+  avatarSize?: number;
+  label?: string;
+}) {
   const { user, signOut } = useUser();
   const shared = useSharedUser();
   // Shared Firebase session is what /login already trusts. Without this,
@@ -20,7 +32,10 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
     user && !user.isGuest ? user : appUserFromSharedProfile(shared.user);
   const { orders } = useAppState();
   const [open, setOpen] = useState(false);
+  /** Ignore the tap that opened the menu so it cannot land on Sign out. */
+  const [actionsReady, setActionsReady] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const size = avatarSize ?? (tone === "dark" ? 44 : 40);
 
   const activeOrders = useMemo(() => {
     if (!session || session.isGuest) return 0;
@@ -31,18 +46,12 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
     ).length;
   }, [orders, session]);
 
-  const initials = useMemo(() => {
-    if (!session?.name) return "?";
-    return session.name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase() ?? "")
-      .join("");
-  }, [session?.name]);
-
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setActionsReady(false);
+      return;
+    }
+    const arm = window.setTimeout(() => setActionsReady(true), 350);
     function onDown(event: MouseEvent | TouchEvent) {
       const root = rootRef.current;
       if (!root) return;
@@ -50,42 +59,53 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
         setOpen(false);
       }
     }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", onDown);
     document.addEventListener("touchstart", onDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
+      window.clearTimeout(arm);
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("touchstart", onDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
+  const panelClass =
+    placement === "up"
+      ? "absolute right-0 bottom-full z-[80] mb-2 w-60 overflow-hidden rounded-2xl border border-gray-100 bg-white py-1 text-sm shadow-lg"
+      : "absolute right-0 top-full z-[80] mt-2 w-60 overflow-hidden rounded-2xl border border-gray-100 bg-white py-1 text-sm shadow-lg";
+
   return (
-    <div ref={rootRef} className="relative">
+    <div
+      ref={rootRef}
+      className={label ? "relative flex flex-col items-center justify-center gap-0.5" : "relative"}
+    >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={
-          tone === "dark"
-            ? "flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#161616] text-xs font-bold text-white hover:bg-[#1f1f1f]"
-            : "flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-xs font-bold text-gray-800 hover:bg-gray-100"
-        }
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className="rounded-full hover:opacity-90"
         aria-label="Account menu"
         aria-expanded={open}
+        aria-haspopup="menu"
       >
-        {session && !session.isGuest ? (
-          <span>{initials || "Me"}</span>
-        ) : (
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
-            <path
-              d="M5 19.5c1.8-3.2 4.2-4.5 7-4.5s5.2 1.3 7 4.5"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
-        )}
+        <UserAvatar
+          user={shared.user}
+          size={size}
+          name={session && !session.isGuest ? session.name : null}
+        />
       </button>
+      {label ? (
+        <span className="text-[11px] font-medium leading-tight text-gray-500">{label}</span>
+      ) : null}
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-gray-100 bg-white py-1 text-sm shadow-lg">
+        <div className={`${panelClass}${actionsReady ? "" : " pointer-events-none"}`}>
           <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
             {CAMPUS.brandName}
           </p>
@@ -116,7 +136,11 @@ export function AccountMenu({ tone = "light" }: { tone?: "light" | "dark" }) {
               </Link>
               <button
                 type="button"
-                onClick={() => {
+                role="menuitem"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (!actionsReady) return;
                   setOpen(false);
                   void (async () => {
                     await signOut();

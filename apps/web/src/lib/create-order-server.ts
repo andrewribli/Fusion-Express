@@ -9,6 +9,7 @@ export type ServerOrderResult = {
   deliverySurcharge: number;
   deliveryTotal: number;
   deliveryFee: number;
+  platformFee: number;
   total: number;
 };
 
@@ -19,13 +20,31 @@ export async function createOrderOnServer(
   const auth = getAuthClient();
   const token = await auth.currentUser?.getIdToken();
   if (!token) throw new Error("Sign in to place an order.");
-  const { deliveryFee: _fee, deliveryBase: _base, deliverySurcharge: _surcharge, deliveryTotal: _quoted, total: _total, ...rest } =
-    body;
+  const {
+    deliveryFee: _fee,
+    deliveryBase: _base,
+    deliverySurcharge: _surcharge,
+    deliveryTotal: _quoted,
+    platformFee: _platform,
+    total: _total,
+    discountAmount: _discountAmount,
+    discountSplit: _discountSplit,
+    platformDiscountFee: _platformDiscountFee,
+    discountCollege: _discountCollege,
+    collegeDiscountStatus: _collegeDiscountStatus,
+    ...rest
+  } = body;
   void _fee;
   void _base;
   void _surcharge;
   void _quoted;
+  void _platform;
   void _total;
+  void _discountAmount;
+  void _discountSplit;
+  void _platformDiscountFee;
+  void _discountCollege;
+  void _collegeDiscountStatus;
   const res = await fetch("/api/orders/create", {
     method: "POST",
     headers: {

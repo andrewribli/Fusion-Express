@@ -143,6 +143,18 @@ function finiteMoney(value: unknown): number | undefined {
   return Math.round(amount * 100) / 100;
 }
 
+function parseDiscountSplit(
+  value: unknown,
+): Order["discountSplit"] | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const row = value as Record<string, unknown>;
+  const customer = Number(row.customer);
+  const runner = Number(row.runner);
+  const platform = Number(row.platform);
+  if (![customer, runner, platform].every((n) => Number.isFinite(n))) return undefined;
+  return { customer, runner, platform };
+}
+
 function parseOrder(id: string, data: Record<string, unknown>): Order {
   const loc = data.runnerLocation as Record<string, unknown> | undefined;
   const items = parseItems(data.items);
@@ -208,6 +220,19 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
       data.discountApplied != null ? Boolean(data.discountApplied) : undefined,
     discountAmount:
       data.discountAmount != null ? Number(data.discountAmount) : undefined,
+    discountCollege: data.discountCollege ? String(data.discountCollege) : undefined,
+    discountSplit: parseDiscountSplit(data.discountSplit),
+    collegeDiscountStatus:
+      data.collegeDiscountStatus === "pending" ||
+      data.collegeDiscountStatus === "applied" ||
+      data.collegeDiscountStatus === "void"
+        ? data.collegeDiscountStatus
+        : undefined,
+    platformDiscountFee:
+      data.platformDiscountFee != null ? Number(data.platformDiscountFee) : undefined,
+    platformDiscountFeeAt: data.platformDiscountFeeAt
+      ? toDate(data.platformDiscountFeeAt)
+      : undefined,
     runnerCollege: data.runnerCollege ? String(data.runnerCollege) : undefined,
     canteenCollege: data.canteenCollege ? String(data.canteenCollege) : undefined,
     paymentReceived: Boolean(data.paymentReceived),
@@ -273,6 +298,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     estimatedDeliveryAt: data.estimatedDeliveryAt
       ? toDate(data.estimatedDeliveryAt)
       : undefined,
+    scheduledFor: data.scheduledFor ? toDate(data.scheduledFor) : undefined,
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
@@ -356,8 +382,9 @@ export function orderGrandTotal(
   subtotal: number,
   deliveryFee: number,
   tip = 0,
+  platformFee = 0,
 ): number {
-  return round2(subtotal + deliveryFee + tip);
+  return round2(subtotal + deliveryFee + tip + platformFee);
 }
 
 export async function createOrder(
@@ -391,6 +418,7 @@ export async function createOrder(
     deliveryDestination: priced.deliveryDestination,
     deliveryFeeRaw: priced.deliveryFeeRaw,
     deliveryPath: priced.deliveryPath,
+    platformFee: priced.platformFee,
     total: priced.total,
     zone: priced.zone ?? order.zone,
     totalWeight: priced.totalWeight,
@@ -1358,7 +1386,12 @@ export async function submitTillPrices(
 
   if (priceDifference < 0) {
     subtotal = actualSubtotal;
-    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    total = orderGrandTotal(
+      actualSubtotal,
+      order.deliveryFee,
+      tip,
+      order.platformFee ?? 0,
+    );
     if (order.paymentReceived) {
       priceAdjustmentStatus = "refund_pending";
       refundAmount = round2(-priceDifference);
@@ -1370,7 +1403,12 @@ export async function submitTillPrices(
     priceAdjustmentStatus = "pending_customer";
   } else {
     subtotal = actualSubtotal;
-    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    total = orderGrandTotal(
+      actualSubtotal,
+      order.deliveryFee,
+      tip,
+      order.platformFee ?? 0,
+    );
   }
 
   const firestoreUpdates: Record<string, unknown> = {
@@ -1412,7 +1450,12 @@ export async function approvePriceIncrease(
     throw new Error("This order is not waiting for a price approval");
   }
   const actualSubtotal = order.actualSubtotal ?? orderActualSubtotal(order.items);
-  const total = orderGrandTotal(actualSubtotal, order.deliveryFee, order.tip ?? 0);
+  const total = orderGrandTotal(
+    actualSubtotal,
+    order.deliveryFee,
+    order.tip ?? 0,
+    order.platformFee ?? 0,
+  );
   const now = new Date();
   await patchOrder(
     orderId,

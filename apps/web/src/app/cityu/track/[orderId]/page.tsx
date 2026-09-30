@@ -23,6 +23,7 @@ import {
   resolveOrderChannel,
 } from "@/ptero/lib/types";
 import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing";
+import { formatScheduledLabel } from "@/lib/order-window";
 
 export default function TrackOrderPage({
   params,
@@ -110,6 +111,11 @@ export default function TrackOrderPage({
             {order.compound} → {order.hall}
           </p>
           <p className="text-xs text-gray-500">Lobby: {order.lobby}</p>
+          {order.scheduledFor ? (
+            <p className="mt-2 text-sm font-semibold text-[#ED1C24]">
+              Scheduled for {formatScheduledLabel(new Date(order.scheduledFor))}
+            </p>
+          ) : null}
           <div className="mt-4">
             <OrderProgressBar status={order.status} />
           </div>
@@ -171,6 +177,12 @@ export default function TrackOrderPage({
                 })}
               </span>
             </div>
+            {(order.platformFee ?? 0) > 0 && (
+              <div className="flex justify-between">
+                <span>Platform fee</span>
+                <span>{formatHkd(order.platformFee ?? 0)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold">
               <span>Amount due</span>
               <span className="text-[#ED1C24]">{formatHkd(due)}</span>

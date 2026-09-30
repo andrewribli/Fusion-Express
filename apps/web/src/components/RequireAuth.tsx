@@ -8,6 +8,9 @@ import { roleAllowsCustomer, roleAllowsRunner } from "@/lib/roles";
 
 function loginNext(pathname: string, search: string): string {
   const path = `${pathname}${search}`;
+  if (pathname.startsWith("/cityu/admin")) {
+    return `/login?next=${encodeURIComponent(path)}`;
+  }
   if (pathname.startsWith("/cityu")) {
     if (pathname.startsWith("/cityu/login")) return "/cityu";
     return `/cityu/login?next=${encodeURIComponent(path)}`;

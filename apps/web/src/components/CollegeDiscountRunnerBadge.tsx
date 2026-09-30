@@ -1,18 +1,19 @@
 "use client";
 
 import {
-  canteenCollegeForRestaurant,
-  canteenNameForRestaurant,
-  collegeLabel,
-  getCollege,
-  normalizeCollegeId,
-  restaurantIdFromOrderItems,
-} from "@/data/canteen/colleges";
+  collegesMatch,
+  matchingRunnerBanner,
+  nonMatchingRunnerNote,
+  normalizeRunnerCollegeId,
+  orderMatchesRunnerCollege,
+} from "@fusion-express/shared/college-discount";
+import { restaurantIdFromOrderItems } from "@/data/canteen/colleges";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
 
 /**
- * Shown when a runner from a matching college views/accepts a canteen order.
+ * Matching runners see the student-card bonus. Other runners still see the
+ * order, with a short note that their college does not get the discount.
  */
 export function CollegeDiscountRunnerBadge({
   order,
@@ -22,28 +23,23 @@ export function CollegeDiscountRunnerBadge({
   runnerCollege?: string | null;
 }) {
   if (resolveOrderChannel(order) !== "canteen") return null;
+  if (order.campus === "cityu") return null;
+  if (!orderMatchesRunnerCollege(order, order.discountCollege)) return null;
 
   const restaurantId =
     order.canteenRestaurantId || restaurantIdFromOrderItems(order.items);
-  const canteenCollege =
-    normalizeCollegeId(order.canteenCollege) ||
-    canteenCollegeForRestaurant(restaurantId);
-  const runner = normalizeCollegeId(runnerCollege);
-  if (!canteenCollege || !runner || runner !== canteenCollege) return null;
+  const runner = normalizeRunnerCollegeId(runnerCollege);
+  const matching = collegesMatch(order.discountCollege, runner);
 
-  const college = getCollege(canteenCollege);
-  const short = college?.shortName ?? canteenCollege;
-  const canteenName = canteenNameForRestaurant(restaurantId);
+  if (matching) {
+    return (
+      <div className="rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-emerald-50 px-3 py-2.5 text-sm text-amber-950">
+        <p className="font-semibold">{matchingRunnerBanner(order.discountCollege)}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-emerald-50 px-3 py-2.5 text-sm text-amber-950">
-      <p className="font-semibold">
-        You&apos;re a {short} runner. Pick up from {canteenName} to give the
-        customer a 10% discount.
-      </p>
-      <p className="mt-0.5 text-xs text-amber-800/80">
-        {collegeLabel(canteenCollege)} · food only (delivery fee unchanged)
-      </p>
-    </div>
+    <p className="text-xs text-gray-500">{nonMatchingRunnerNote(restaurantId)}</p>
   );
 }

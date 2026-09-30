@@ -125,6 +125,8 @@ export interface Order {
   deliverySurcharge?: number;
   deliveryTotal?: number;
   tip: number;
+  /** Flat GraceRun platform charge. Missing on older orders. */
+  platformFee?: number;
   /** Exact Taste till total entered by the runner. */
   receiptTotal?: number;
   runnerId?: string;
@@ -134,6 +136,8 @@ export interface Order {
   discountApplied?: boolean;
   discountAmount?: number;
   createdAt: string;
+  /** ISO time when the customer scheduled delivery. Absent means deliver now. */
+  scheduledFor?: string;
   paidAt?: string;
   paidVia?: "airwallex";
 }
@@ -174,7 +178,12 @@ export function groceryAmountDue(order: Order): number {
 }
 
 export function customerAmountDue(order: Order): number {
-  return groceryAmountDue(order) + order.deliveryFee + order.tip;
+  return (
+    groceryAmountDue(order) +
+    order.deliveryFee +
+    order.tip +
+    (order.platformFee ?? 0)
+  );
 }
 
 export function resolveOrderChannel(order: Order): OrderChannel {

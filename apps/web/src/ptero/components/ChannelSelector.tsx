@@ -9,7 +9,7 @@ import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
 import { GROCERY_SOURCES } from "@/lib/grocerySources";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useUser } from "@/ptero/context/AppState";
-import { runnerEntryHref } from "@/ptero/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
 const headerIconClass =
@@ -19,13 +19,16 @@ const headerIconClass =
  * Landing: Taste supermarket vs CityU canteens — mirrors CUHK CampusSelector.
  */
 export function ChannelSelector() {
-  const { user, setMode, canRunnerMode } = useUser();
-  const loggedIn = Boolean(user && !user.isGuest);
-  const runnerHref = runnerEntryHref({ loggedIn, canRunnerMode });
-  const runnerCtaLabel = canRunnerMode
-    ? "Open runner dashboard"
-    : "Become a runner";
-  const runnerHeaderLabel = canRunnerMode ? "Runner" : "Become a runner";
+  const { setMode } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
+  const runnerCtaLabel =
+    runnerEntry.decision.status === "ready" && runnerEntry.decision.runner
+      ? "Runner mode"
+      : "Become a runner";
+  const runnerHeaderLabel =
+    runnerEntry.decision.status === "ready" && runnerEntry.decision.runner
+      ? "Runner"
+      : "Become a runner";
 
   return (
     <div className="relative min-h-screen bg-[#0c0c0c] text-white">
@@ -37,18 +40,27 @@ export function ChannelSelector() {
           </Link>
           <div className="flex items-center gap-2">
             <Link
-              href={runnerHref}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
+              href={runnerEntry.href}
+              aria-busy={runnerEntry.loading || undefined}
+              aria-disabled={runnerEntry.loading || undefined}
+              onClick={(event) => {
+                if (runnerEntry.loading) {
+                  event.preventDefault();
+                  return;
+                }
+                runnerEntry.onClick(event);
+                if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+                  setMode("runner");
+                }
               }}
               className="inline-flex min-h-11 items-center rounded-full border-2 border-emerald-400/60 bg-emerald-500 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-400"
             >
               {runnerHeaderLabel}
             </Link>
-            {canRunnerMode ? (
+            {runnerEntry.decision.status === "ready" && runnerEntry.decision.runner ? (
               <RunnerQueueBell tone="dark" className={headerIconClass} />
             ) : null}
-            {canRunnerMode ? (
+            {runnerEntry.decision.status === "ready" && runnerEntry.decision.runner ? (
               <RunnerHeaderShortcuts
                 ordersOnly
                 tone="dark"
@@ -136,9 +148,18 @@ export function ChannelSelector() {
           </Link>
 
           <Link
-            href={runnerHref}
-            onClick={() => {
-              if (canRunnerMode) setMode("runner");
+            href={runnerEntry.href}
+            aria-busy={runnerEntry.loading || undefined}
+            aria-disabled={runnerEntry.loading || undefined}
+            onClick={(event) => {
+              if (runnerEntry.loading) {
+                event.preventDefault();
+                return;
+              }
+              runnerEntry.onClick(event);
+              if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+                setMode("runner");
+              }
             }}
             className="group relative overflow-hidden rounded-3xl border border-emerald-500/35 bg-gradient-to-br from-[#0f1a14] via-[#121212] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-emerald-400/70 sm:col-span-2"
           >
@@ -149,7 +170,7 @@ export function ChannelSelector() {
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
               Earn on campus
             </p>
-            <h2 className="mt-2 text-2xl font-bold">Run for {CAMPUS.brandName}</h2>
+            <h2 className="mt-2 text-2xl font-bold">{runnerCtaLabel}</h2>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">
               Pick up Taste, Wellcome, or canteen orders and deliver to dorm lobbies.
               CityU email + HK mobile required.

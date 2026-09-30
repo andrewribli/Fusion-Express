@@ -4,6 +4,7 @@ import {
   computeDeliveryFee,
   formatDeliveryQuote,
   formatHkdAmount,
+  lockedDeliveryPricing,
 } from "./delivery-pricing.ts";
 import { CUHK_COLLEGE_HALLS } from "./locations.ts";
 import {
@@ -188,19 +189,33 @@ describe("CUHK delivery graph", () => {
   });
 
   it("maps halls onto nodes and leaves an unknown hall unmapped", () => {
-    assert.equal(cuhkDestinationNode("United College", "Adam Schall"), "uc");
-    assert.equal(cuhkDestinationNode("Shaw College", "Kuo Mou Hall"), "shaw");
+    assert.equal(cuhkDestinationNode("United College", "Adam Schall Residence"), "uc");
+    assert.equal(cuhkDestinationNode("Shaw College", "Shaw College Hostel A"), "shaw");
+    assert.equal(cuhkDestinationNode("International House", "International House"), "i-house-12");
     assert.equal(cuhkDestinationNode("International House (I-House)", "I-House 1"), "i-house-12");
     assert.equal(cuhkDestinationNode("International House (I-House)", "I-House 5"), "i-house-345");
-    assert.equal(cuhkDestinationNode("Postgraduate Halls (PGH)", "PGH 3"), "pg-halls");
-    assert.equal(cuhkDestinationNode("Chung Chi College", "Ming Hua"), "shho-mc-chungchi");
-    assert.equal(cuhkDestinationNode("Campus Facilities", "University Library"), "lsk");
+    assert.equal(cuhkDestinationNode("Postgraduate Halls (PGH)", "Postgraduate Hall 3"), "pg-halls");
+    assert.equal(cuhkDestinationNode("Chung Chi College", "Ming Hua Tang"), "shho-mc-chungchi");
+    assert.equal(cuhkDestinationNode("Campus Facilities", "Learning Garden"), "lsk");
+    // I-House must not appear under Chung Chi.
+    assert.equal(
+      CUHK_COLLEGE_HALLS["Chung Chi College"].some((h) =>
+        h.toLowerCase().includes("i-house") || h.toLowerCase().includes("international"),
+      ),
+      false,
+    );
+    assert.ok(
+      CUHK_COLLEGE_HALLS["United College"].includes("Choi Kai Yau Residence"),
+    );
   });
 
-  it("prices University Library as the LSK stop", () => {
+  it("prices Learning Garden (and legacy University Library) as the LSK stop", () => {
+    assert.equal(resolveCuhkNode("Learning Garden"), "lsk");
+    assert.equal(resolveCuhkNode("learning-garden"), "lsk");
     assert.equal(resolveCuhkNode("University Library"), "lsk");
     assert.equal(resolveCuhkNode("university library"), "lsk");
     assert.equal(resolveCuhkNode("university-library"), "lsk");
+    assert.equal(cuhkDestinationNode("Campus Facilities", "Learning Garden"), "lsk");
     assert.equal(cuhkDestinationNode("Campus Facilities", "university-library"), "lsk");
     assert.equal(resolveCuhkNode("Campus Facilities"), null);
     assert.equal(cuhkDestinationNode("Campus Facilities", undefined), null);
@@ -216,21 +231,21 @@ describe("CUHK delivery graph", () => {
     );
 
     for (const origin of ["fusion", "uc", "paper-coffee"]) {
-      const library = computeCuhkFee(origin, "University Library");
+      const library = computeCuhkFee(origin, "Learning Garden");
       const lsk = computeCuhkFee(origin, "lsk");
       assert.deepEqual(library, lsk);
       assert.equal(library?.fee, lsk?.fee);
       assert.deepEqual(library?.path, lsk?.path);
     }
 
-    const sameStop = computeCuhkFee("lsk", "University Library");
+    const sameStop = computeCuhkFee("lsk", "Learning Garden");
     assert.deepEqual(sameStop, { fee: 0, rawFee: 0, path: ["lsk"], floored: false });
 
     const quote = computeDeliveryFee({
       campus: "cuhk",
       sourceId: "fusion",
       college: "Campus Facilities",
-      hallId: "University Library",
+      hallId: "Learning Garden",
     });
     const lskQuote = computeDeliveryFee({
       campus: "cuhk",
@@ -252,7 +267,7 @@ describe("CUHK delivery graph", () => {
     assert.equal(resolveCuhkNode("srrs"), "srrs");
     assert.equal(cuhkDestinationNode("srrs", "srrs"), null);
     assert.equal(cuhkDestinationNode("Shaw College", "srrs"), null);
-    assert.equal(cuhkDestinationNode("srrs", "Kuo Mou Hall"), null);
+    assert.equal(cuhkDestinationNode("srrs", "Shaw College Hostel A"), null);
     const labels = Object.entries(CUHK_COLLEGE_HALLS).flatMap(([college, halls]) => [
       college,
       ...halls,
@@ -288,7 +303,7 @@ describe("CUHK delivery graph", () => {
       campus: "cuhk",
       sourceId: "paper-and-coffee",
       college: "United College",
-      hallId: "Adam Schall",
+      hallId: "Adam Schall Residence",
     });
     assert.equal(quote.available, true);
     assert.equal(quote.deliveryOrigin, "paper-coffee");
@@ -313,7 +328,7 @@ describe("CUHK delivery graph", () => {
       campus: "cuhk",
       sourceId: "uc-canteen",
       college: "United College",
-      hallId: "Adam Schall",
+      hallId: "Adam Schall Residence",
     });
     assert.equal(quote.available, true);
     assert.equal(quote.deliveryOrigin, "uc");
@@ -326,10 +341,119 @@ describe("CUHK delivery graph", () => {
       campus: "cuhk",
       sourceId: "uc-canteen",
       college: "Shaw College",
-      hallId: "Kuo Mou Hall",
+      hallId: "Shaw College Hostel A",
     });
     assert.equal(quote.available, true);
     assert.equal(quote.deliveryOrigin, "uc");
     assert.equal(quote.total, CUHK_BASE_FEE);
+  });
+
+  it("prices the same hall differently for each CUHK canteen origin", () => {
+    const hall = {
+      college: "Shaw College",
+      hallId: "Shaw College Hostel A",
+    };
+    const fusion = computeDeliveryFee({ campus: "cuhk", sourceId: "fusion", ...hall });
+    const sorazen = computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen", ...hall });
+    const eben = computeDeliveryFee({ campus: "cuhk", sourceId: "ebeneezers", ...hall });
+    const paper = computeDeliveryFee({ campus: "cuhk", sourceId: "paper-and-coffee", ...hall });
+    const uc = computeDeliveryFee({ campus: "cuhk", sourceId: "uc-canteen", ...hall });
+
+    assert.equal(fusion.available, true);
+    const ebenAlias = computeDeliveryFee({ campus: "cuhk", sourceId: "eben", ...hall });
+    assert.equal(sorazen.deliveryOrigin, "fusion");
+    assert.equal(sorazen.total, fusion.total);
+    assert.equal(eben.deliveryOrigin, "paper-coffee");
+    assert.equal(ebenAlias.deliveryOrigin, "paper-coffee");
+    assert.equal(eben.total, paper.total);
+    assert.equal(ebenAlias.total, paper.total);
+    assert.equal(paper.deliveryOrigin, "paper-coffee");
+    assert.equal(uc.deliveryOrigin, "uc");
+    assert.equal(uc.total, CUHK_BASE_FEE);
+    assert.notEqual(paper.total, fusion.total);
+    assert.notEqual(uc.total, paper.total);
+    assert.notEqual(uc.total, fusion.total);
+  });
+
+  it("locks the origin-specific delivery fee from the canteen item id", () => {
+    const hall = {
+      hallId: "Shaw College Hostel A",
+      college: "Shaw College",
+    };
+    const paper = lockedDeliveryPricing({
+      campus: "cuhk",
+      items: [{ itemId: "canteen:paper-and-coffee:latte", quantity: 1, weightKg: 0.4 }],
+      subtotal: 40,
+      orderChannel: "canteen",
+      ...hall,
+    });
+    const eben = lockedDeliveryPricing({
+      campus: "cuhk",
+      items: [{ itemId: "canteen:ebeneezers:doner", quantity: 1, weightKg: 0.4 }],
+      subtotal: 40,
+      orderChannel: "canteen",
+      ...hall,
+    });
+    const ebenAlias = lockedDeliveryPricing({
+      campus: "cuhk",
+      sourceId: "eben",
+      items: [{ itemId: "custom-item", quantity: 1, weightKg: 0.4 }],
+      subtotal: 40,
+      orderChannel: "canteen",
+      ...hall,
+    });
+    assert.equal(paper.sourceId, "paper-and-coffee");
+    assert.equal(paper.deliveryOrigin, "paper-coffee");
+    assert.equal(paper.deliveryFee, paper.quote.total);
+    assert.equal(eben.sourceId, "ebeneezers");
+    assert.equal(eben.deliveryOrigin, "paper-coffee");
+    assert.equal(eben.deliveryFee, eben.quote.total);
+    assert.equal(eben.deliveryFee, paper.deliveryFee);
+    assert.equal(ebenAlias.deliveryOrigin, "paper-coffee");
+    assert.equal(ebenAlias.deliveryFee, paper.deliveryFee);
+  });
+
+  it("keeps CityU store bases apart from each other and off the CUHK graph", () => {
+    const taste = computeDeliveryFee({
+      campus: "cityu",
+      sourceId: "taste",
+      hallId: "cityu-10",
+    });
+    const wellcome = computeDeliveryFee({
+      campus: "cityu",
+      sourceId: "wellcome",
+      hallId: "cityu-10",
+    });
+    const ac1 = computeDeliveryFee({
+      campus: "cityu",
+      sourceId: "city-express-ac1",
+      hallId: "cityu-10",
+    });
+    const eben = computeDeliveryFee({
+      campus: "cityu",
+      sourceId: "ebeneezers-5380",
+      hallId: "cityu-10",
+    });
+    assert.equal(taste.pricing, "cityu-tier");
+    assert.equal(taste.total, 18);
+    assert.equal(wellcome.total, 23);
+    assert.equal(ac1.total, 10.5);
+    const cityuSlug = computeDeliveryFee({
+      campus: "cityu",
+      sourceId: "ebeneezers",
+      hallId: "cityu-10",
+    });
+    const cityuAlias = computeDeliveryFee({
+      campus: "cityu",
+      sourceId: "eben",
+      hallId: "cityu-10",
+    });
+    assert.equal(eben.total, ac1.total);
+    assert.equal(eben.deliveryOrigin, undefined);
+    assert.equal(eben.deliveryPath, undefined);
+    assert.equal(cityuSlug.pricing, "cityu-tier");
+    assert.equal(cityuSlug.total, ac1.total);
+    assert.equal(cityuAlias.total, ac1.total);
+    assert.equal(cityuAlias.deliveryOrigin, undefined);
   });
 });

@@ -15,6 +15,9 @@ import { updateUserProfileDoc } from "@/lib/users";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { roleLabel } from "@/lib/roles";
+import { RunnerCollegeSelect } from "@/components/RunnerCollegeSelect";
+import { getAuthClient } from "@/lib/firebase";
+import { runnerCollegeLabel } from "@fusion-express/shared/college-discount";
 
 export function ProfileView() {
   const {
@@ -35,6 +38,10 @@ export function ProfileView() {
   const [accountBusy, setAccountBusy] = useState(false);
   const [accountError, setAccountError] = useState("");
   const [accountSaved, setAccountSaved] = useState(false);
+  const [collegeId, setCollegeId] = useState("");
+  const [collegeNote, setCollegeNote] = useState("");
+  const [collegeError, setCollegeError] = useState("");
+  const [collegeBusy, setCollegeBusy] = useState(false);
   const canChangePassword = firebaseEnabled && !demoAuth && Boolean(user?.email);
   const isGuest = Boolean(user?.isGuest);
 
@@ -195,6 +202,86 @@ export function ProfileView() {
                 <p className="mt-2 text-sm text-gray-700">
                   Registered runner · Payout via {user.runnerPaymentMethod}
                 </p>
+                {user.campus !== "cityu" && user.runnerCollege ? (
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-800">
+                      College: {runnerCollegeLabel(user.runnerCollege)}
+                    </p>
+                    <p className="mt-1 text-xs text-amber-800">
+                      This is permanent. You can only change it by appealing to GraceRun.
+                    </p>
+                    <Link
+                      href="/runner/appeal-college"
+                      className="mt-2 inline-block text-sm font-semibold text-fusion-red underline"
+                    >
+                      Appeal college
+                    </Link>
+                  </div>
+                ) : null}
+                {user.campus !== "cityu" && !user.runnerCollege ? (
+                  <form
+                    className="mt-3 space-y-3"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (!collegeId || !user.uid) return;
+                      setCollegeBusy(true);
+                      setCollegeError("");
+                      void (async () => {
+                        try {
+                          const token = await getAuthClient().currentUser?.getIdToken();
+                          if (!token) throw new Error("Sign in again.");
+                          const res = await fetch("/api/runner/college", {
+                            method: "POST",
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ runnerCollege: collegeId }),
+                          });
+                          const data = (await res.json()) as {
+                            error?: string;
+                            confirmation?: string;
+                            runnerCollege?: string;
+                            emailSent?: boolean;
+                          };
+                          if (!res.ok) throw new Error(data.error || "Could not save college.");
+                          rememberProfile({
+                            ...user,
+                            runnerCollege: data.runnerCollege ?? collegeId,
+                            runnerCollegeLockedAt: new Date().toISOString(),
+                          });
+                          const note = data.confirmation ?? "Your college is set.";
+                          setCollegeNote(
+                            data.emailSent
+                              ? note
+                              : `${note} We could not send the email, so keep this message.`,
+                          );
+                        } catch (err) {
+                          setCollegeError(
+                            err instanceof Error ? err.message : "Could not save college.",
+                          );
+                        } finally {
+                          setCollegeBusy(false);
+                        }
+                      })();
+                    }}
+                  >
+                    <RunnerCollegeSelect value={collegeId} onChange={setCollegeId} />
+                    {collegeError && (
+                      <p className="text-sm text-red-700">{collegeError}</p>
+                    )}
+                    {collegeNote && (
+                      <p className="text-sm text-green-800">{collegeNote}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={collegeBusy || !collegeId}
+                      className="rounded-xl bg-[#ED1C24] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                    >
+                      {collegeBusy ? "Saving…" : "Lock my college"}
+                    </button>
+                  </form>
+                ) : null}
                 <Link
                   href="/runner/earnings"
                   className="mt-3 inline-block text-sm font-semibold text-fusion-red underline"

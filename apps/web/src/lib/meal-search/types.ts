@@ -5,7 +5,15 @@ export type MealSearchCampus = "cuhk" | "cityu";
 /** User-facing category chips (Part 2). */
 export type MealBucket = "all" | "meals" | "drinks" | "snacks" | "desserts";
 
-export type MealSort = "best" | "price-asc" | "price-desc" | "az" | "favorites";
+export type MealSort =
+  | "best"
+  | "price-asc"
+  | "price-desc"
+  | "distance"
+  | "az"
+  | "favorites";
+
+export type DistanceFilter = "any" | "under10" | "10-15" | "15-20" | "20plus";
 
 export type PriceFilter =
   | { kind: "none" }
@@ -36,6 +44,8 @@ export type RankedDish = SearchableDish & {
   /** coming soon or outside hours — greyed, not clickable. */
   interactive: boolean;
   matchTier: number;
+  /** Minutes from the student's hall. Null when no hall is set or no path. */
+  walkMinutes: number | null;
 };
 
 export type MealSearchFilters = {
@@ -44,6 +54,7 @@ export type MealSearchFilters = {
   openNowOnly: boolean;
   /** Empty = all canteens that appear in text/filter matches. */
   canteenIds: string[] | null;
+  distance: DistanceFilter;
   sort: MealSort;
   favoritesOnly: boolean;
 };

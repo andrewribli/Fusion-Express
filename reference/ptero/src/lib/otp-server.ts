@@ -85,5 +85,5 @@ export function jsonError(message: string, status: number) {
 }
 
 export function otpFromAddress(): string {
-  return process.env.RESEND_FROM?.trim() || "Ptero <verify@gracerun.fit>";
+  return process.env.RESEND_FROM?.trim() || "GraceRun CityU <verify@gracerun.fit>";
 }

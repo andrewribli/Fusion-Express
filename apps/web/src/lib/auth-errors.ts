@@ -3,6 +3,28 @@
  * Never surface raw `Firebase: Error (auth/...)` strings in the UI.
  */
 
+export function isEmailAlreadyInUse(err: unknown): boolean {
+  const code = errorCode(err);
+  const raw = rawMessage(err);
+  return (
+    code === "auth/email-already-in-use" || /email-already-in-use/i.test(raw)
+  );
+}
+
+export function isPermissionDenied(err: unknown): boolean {
+  const code = errorCode(err);
+  const raw = rawMessage(err);
+  return (
+    code === "permission-denied" ||
+    code === "firestore/permission-denied" ||
+    /permission-denied|missing or insufficient permissions/i.test(raw)
+  );
+}
+
+const ALREADY_REGISTERED = "This email is already registered. Sign in instead.";
+const PROFILE_SAVE_FAILED =
+  "We couldn't save your account. Please try again.";
+
 function errorCode(err: unknown): string {
   if (err && typeof err === "object" && "code" in err) {
     return String((err as { code: string }).code);
@@ -30,7 +52,7 @@ export function friendlyAuthError(
     case "auth/invalid-email":
       return "Wrong email or password";
     case "auth/email-already-in-use":
-      return "Account already exists";
+      return ALREADY_REGISTERED;
     case "auth/weak-password":
       return "Password must be at least 6 characters";
     case "auth/too-many-requests":
@@ -45,8 +67,11 @@ export function friendlyAuthError(
       break;
   }
 
-  if (/email-already-in-use|already exists|already in use/i.test(raw)) {
-    return "Account already exists";
+  if (isPermissionDenied(err)) {
+    return PROFILE_SAVE_FAILED;
+  }
+  if (isEmailAlreadyInUse(err) || /already exists|already in use/i.test(raw)) {
+    return ALREADY_REGISTERED;
   }
   if (/invalid-credential|wrong-password|user-not-found/i.test(raw)) {
     return "Wrong email or password";

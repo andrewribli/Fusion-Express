@@ -28,10 +28,14 @@ import { useUser } from "@/context/UserContext";
 import { useCampus } from "@/context/CampusContext";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { previewCustomerSavings } from "@fusion-express/shared";
+import { restaurantIdFromCanteenItemId } from "@fusion-express/shared/canteen-college";
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
+  const isAdmin = useIsAdmin(user?.uid);
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
   const { campus: activeCampus } = useCampus();
   const campus = cartCampus(items) ?? activeCampus;
@@ -40,11 +44,20 @@ export default function CartPage() {
     if (campus === "cityu") setHall(readCityuHall());
   }, [campus]);
   const mixedError = cartCampusError(items, null);
-  const canteenGate = getCanteenCheckoutGate(items);
+  const canteenGate = getCanteenCheckoutGate(items, { adminBypass: isAdmin });
   const canteenError =
-    isCanteenCart(items) && !canteenGate.allowed ? canteenGate.message : null;
+    isCanteenCart(items) && !canteenGate.allowed && !canteenGate.hoursClosed
+      ? canteenGate.message
+      : null;
   const fee = resolveOrderDeliveryFee(items, "", campus, campus === "cityu" ? hall : "");
-  const total = subtotal + fee.deliveryFee;
+  const canteenRestaurantId = items
+    .map(({ item }) => restaurantIdFromCanteenItemId(item.id))
+    .find((id): id is string => Boolean(id));
+  const collegeSavings =
+    campus === "cuhk"
+      ? previewCustomerSavings({ campus, restaurantId: canteenRestaurantId })
+      : 0;
+  const total = subtotal + fee.deliveryFee - collegeSavings;
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
 
@@ -172,6 +185,17 @@ export default function CartPage() {
                     <p className="text-xs text-gray-500">
                         Delivery fee is confirmed at checkout from your hall.
                       </p>
+                    {collegeSavings > 0 && (
+                      <div className="flex justify-between font-medium text-emerald-800">
+                        <span>College discount</span>
+                        <span>
+                          −HK${collegeSavings.toFixed(2)}
+                          <span className="mt-0.5 block text-[11px] font-normal text-gray-500">
+                            When a matching-college runner accepts
+                          </span>
+                        </span>
+                      </div>
+                    )}
                     <div
                       className={`flex justify-between pt-2 text-base font-bold ${
                         overLimit ? "text-[#ED1C24]" : "text-gray-900"
@@ -207,6 +231,12 @@ export default function CartPage() {
                     {canteenError}
                   </p>
                 )}
+                {canteenGate.hoursClosed && canteenGate.message ? (
+                  <p className="mt-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                    {canteenGate.message} You can schedule a later opening-hours
+                    delivery at checkout.
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   disabled={overLimit || Boolean(mixedError) || Boolean(canteenError)}

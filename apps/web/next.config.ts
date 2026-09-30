@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         destination: "/canteen/uc-canteen",
         permanent: false,
       },
+      {
+        source: "/canteen/na-canteen",
+        destination: "/canteen/na-webbites",
+        permanent: false,
+      },
       { source: "/taste", destination: "/cityu/taste", permanent: false },
     ];
   },
@@ -78,6 +83,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "spics.wantu.cn",
       },
       {
         protocol: "https",

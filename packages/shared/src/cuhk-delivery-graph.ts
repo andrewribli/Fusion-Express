@@ -16,9 +16,13 @@
  * Every edge has a route tag. There are no untagged edges.
  *
  * fusion and sorazen are the same building. sorazen is an alias, not a node.
- * University Library is the same delivery stop as LSK. That hall name is an
- * alias, not a node. The college label "Campus Facilities" is only a group.
- * srrs is a hub only. It is not a customer hall.
+ * CUHK Ebeneezer's (`eben` / `ebeneezers`) is the same node as Paper & Coffee
+ * (`paper-coffee`). No separate origin and no new edge.
+ * CityU Ebeneezer's (`ebeneezers-5380`) is not on this graph.
+ * Learning Garden (and legacy University Library) is the same delivery stop
+ * as LSK. Those hall names are aliases, not nodes. The college label
+ * "Campus Facilities" is only a group. srrs is a hub only. It is not a
+ * customer hall.
  *
  * When BUS_ONLY[origin] includes the destination, walks that leave the origin
  * are dropped except edges whose `to` is in HUB_WALKS[origin]. Dijkstra then
@@ -162,16 +166,59 @@ function isNode(value: string): value is CuhkNode {
 }
 
 /**
- * sorazen is Fusion. University Library is LSK. Ids the shop already uses are
- * accepted here. srrs stays a hub.
+ * Canteen slugs that are not themselves graph nodes. The fee is the mapped
+ * node's existing Dijkstra (or the UC flat rate). Do not add edges here.
+ *
+ * fusion — Benjamin Franklin Centre. SoraZen is the documented alias.
+ *   Benjamin Franklin Canteen is that building and has no node of its own.
+ * paper-coffee — Paper & Coffee (`paper-and-coffee`) and CUHK Ebeneezer's
+ *   (`eben`, `ebeneezers`). Same node, same fee. CityU `ebeneezers-5380`
+ *   is priced on the CityU hall tier before this map is consulted.
+ * uc — UC Canteen. Flat CUHK_BASE_FEE; HK$0 in the same building.
+ * lsk — CU Cafe (Lee Shau Kee Building).
+ * College canteens use the node the hall picker already uses for that college
+ * (Chung Chi, S.H. Ho, and Morningside share `shho-mc-chungchi`).
+ * `wys` and `lws` are already nodes.
+ */
+const RESTAURANT_ORIGIN: Record<string, CuhkNode> = {
+  sorazen: "fusion",
+  "sora-zen": "fusion",
+  eben: "paper-coffee",
+  ebeneezers: "paper-coffee",
+  ebeneezer: "paper-coffee",
+  "ebeneezers-kebabs": "paper-coffee",
+  "benjamin-franklin": "fusion",
+  "paper-and-coffee": "paper-coffee",
+  "uc-canteen": "uc",
+  "cu-cafe": "lsk",
+  "orchid-lodge": "shho-mc-chungchi",
+  "sh-ho-canteen": "shho-mc-chungchi",
+  "shho-canteen": "shho-mc-chungchi",
+  "na-canteen": "na",
+  "na-webbites": "na",
+  "cc-canteen": "shho-mc-chungchi",
+  "shaw-canteen": "shaw",
+  "chung-chi-tang": "shho-mc-chungchi",
+};
+
+/**
+ * sorazen is Fusion. Learning Garden / University Library are LSK.
+ * Ids the shop already uses are accepted here. srrs stays a hub.
  */
 export function resolveCuhkNode(id: string | null | undefined): CuhkNode | null {
   const raw = (id ?? "").trim().toLowerCase();
   if (!raw) return null;
-  if (raw === "sorazen") return "fusion";
-  if (raw === "paper-and-coffee") return "paper-coffee";
-  if (raw === "uc-canteen") return "uc";
-  if (raw === "university library" || raw === "university-library") return "lsk";
+  const restaurant = RESTAURANT_ORIGIN[raw];
+  if (restaurant) return restaurant;
+  if (
+    raw === "university library" ||
+    raw === "university-library" ||
+    raw === "learning garden" ||
+    raw === "learning-garden"
+  ) {
+    return "lsk";
+  }
+  if (raw === "i-house" || raw === "international house") return "i-house-12";
   if (isNode(raw)) return raw;
   return null;
 }
@@ -199,19 +246,29 @@ const COLLEGE_NODE: Record<string, CuhkNode> = {
   "lee woo sing college": "lws",
   "postgraduate halls pgh": "pg-halls",
   "postgraduate halls": "pg-halls",
+  "international house": "i-house-12",
+  "international house i house": "i-house-12",
 };
 
 function iHouseNode(label: string): CuhkNode | null {
-  const match = squash(label).match(/\bi\s*house\s*([1-5])\b/);
-  if (!match) return null;
-  const block = Number(match[1]);
-  if (block === 1 || block === 2) return "i-house-12";
-  return "i-house-345";
+  const text = squash(label);
+  const match = text.match(/\bi\s*house\s*([1-5])\b/);
+  if (match) {
+    const block = Number(match[1]);
+    if (block === 1 || block === 2) return "i-house-12";
+    return "i-house-345";
+  }
+  if (text === "i house" || text === "international house") return "i-house-12";
+  return null;
 }
 
 function pgHallNode(label: string): CuhkNode | null {
   const text = squash(label);
-  if (text === "pgh" || text.startsWith("pgh ") || text.includes("postgraduate")) {
+  if (
+    text === "pgh" ||
+    text.startsWith("pgh ") ||
+    text.includes("postgraduate")
+  ) {
     return "pg-halls";
   }
   return null;
@@ -263,6 +320,7 @@ export function cuhkOriginLabel(sourceId: string | null | undefined): string {
   if (id === "uc" || id === "uc-canteen") return "UC Canteen";
   if (id === "eben" || id === "ebeneezers" || id === "ebeneezers-5380") return "Ebeneezer's";
   if (id === "orchid-lodge") return "Orchid Lodge";
+  if (id === "na-canteen" || id === "na-webbites") return "NA WebBites";
   return id || "this shop";
 }
 
@@ -422,4 +480,22 @@ function cheapestPath(
   }
   path.reverse();
   return { rawFee, path };
+}
+
+/**
+ * Shortest-path distance on the delivery graph (the raw edge cost, before
+ * the flat-rate and base-fee overrides). Same building is raw 0.
+ * Callers turn this into walk minutes. It is not a maps lookup.
+ */
+export function cuhkRouteDistance(
+  origin: string,
+  destination: string,
+): { raw: number; sameNode: boolean } | null {
+  const start = resolveCuhkNode(origin);
+  const end = resolveCuhkNode(destination);
+  if (!start || !end) return null;
+  if (start === end) return { raw: 0, sameNode: true };
+  const found = cheapestPath(start, end, edgesForSearch(start, end));
+  if (!found) return null;
+  return { raw: found.rawFee, sameNode: false };
 }

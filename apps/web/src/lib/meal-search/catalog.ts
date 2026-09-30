@@ -79,9 +79,12 @@ function buildCuhkIndex(): SearchableDish[] {
         canteenId: r.id,
         canteenName: r.name,
         canteenShortName: r.shortName,
-        name: item.name,
+        name:
+          item.nameZh && item.nameZh !== item.name
+            ? `${item.name} (${item.nameZh})`
+            : item.name,
         description: item.description ?? "",
-        category: item.category,
+        category: item.sourceCategory || item.category,
         price: item.price,
         imageUrl: item.image || null,
       });

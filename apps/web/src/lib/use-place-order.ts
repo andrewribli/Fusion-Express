@@ -23,6 +23,7 @@ import { isCanteenCart } from "@/lib/canteen/cart";
 import { cartCampusError } from "@/lib/cart-campus";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrderOnServer } from "@/lib/create-order-server";
+import { getAuthClient } from "@/lib/firebase";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import type { CampusId } from "@fusion-express/shared/campus";
 
@@ -40,6 +41,7 @@ export function usePlaceOrder() {
       hall: string;
       customerNote?: string;
       tip?: number;
+      scheduledFor?: string;
     }) => {
       if (!opts.campus || !opts.college || !opts.hall || items.length === 0) {
         setError("Add items and choose your campus and dorm first.");
@@ -108,12 +110,17 @@ export function usePlaceOrder() {
             : ("fusion" as const);
 
         if (canteen && restaurantId) {
+          const token = await getAuthClient().currentUser?.getIdToken();
           const validation = await fetch("/api/canteen/validate-order", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify({
               canteenId: restaurantId,
               itemIds: orderItems.map((item) => item.itemId),
+              scheduledFor: opts.scheduledFor,
             }),
           });
           if (!validation.ok) {
@@ -157,6 +164,7 @@ export function usePlaceOrder() {
           ),
           subtotal: orderSubtotal,
           tip: tipAmount || undefined,
+          scheduledFor: opts.scheduledFor,
         });
         const orderId = placed.id;
         const total = placed.total;

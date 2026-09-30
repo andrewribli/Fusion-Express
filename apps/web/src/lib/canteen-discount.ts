@@ -1,14 +1,15 @@
 import {
-  canteenCollegeForRestaurant,
-  computeCollegeDiscount,
-  normalizeCollegeId,
-  restaurantIdFromOrderItems,
-  roundMoney,
-} from "@/data/canteen/colleges";
+  customerCollegeSavingsView,
+  settleCollegeDiscountOnAccept,
+  type StoredCollegeOrder,
+} from "@fusion-express/shared/college-discount";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
 
-/** Build discount fields to persist when a runner accepts a canteen order. */
+/**
+ * Preview of the server settlement. The accept API ignores this and
+ * recalculates from the order document plus the runner's locked college.
+ */
 export function buildAcceptDiscount(
   order: Order,
   runnerCollegeRaw: string | null | undefined,
@@ -23,46 +24,40 @@ export function buildAcceptDiscount(
     }
   | undefined {
   if (resolveOrderChannel(order) !== "canteen") return undefined;
-
-  const restaurantId =
-    order.canteenRestaurantId || restaurantIdFromOrderItems(order.items);
-  const canteenCollege =
-    normalizeCollegeId(order.canteenCollege) ||
-    canteenCollegeForRestaurant(restaurantId);
-  const runnerCollege = normalizeCollegeId(runnerCollegeRaw);
-
-  const foodSubtotal =
-    order.estimatedSubtotal != null && order.estimatedSubtotal > 0
-      ? order.estimatedSubtotal
-      : order.subtotal + (order.discountAmount ?? 0);
-
-  const { discountApplied, discountAmount } = computeCollegeDiscount(
-    foodSubtotal,
-    runnerCollege,
-    canteenCollege,
-  );
-
-  if (!discountApplied) {
-    return {
-      discountApplied: false,
-      discountAmount: 0,
-      runnerCollege: runnerCollege ?? undefined,
-      canteenCollege: canteenCollege ?? undefined,
-      subtotal: roundMoney(foodSubtotal),
-      total: roundMoney(
-        foodSubtotal + order.deliveryFee + (order.tip ?? 0),
-      ),
-    };
-  }
-
-  const subtotal = roundMoney(foodSubtotal - discountAmount);
-  const total = roundMoney(subtotal + order.deliveryFee + (order.tip ?? 0));
+  if (order.campus === "cityu") return undefined;
+  const stored: StoredCollegeOrder = {
+    campus: order.campus,
+    orderChannel: order.orderChannel,
+    canteenRestaurantId: order.canteenRestaurantId,
+    discountCollege: order.discountCollege,
+    discountAmount: order.discountAmount,
+    discountSplit: order.discountSplit,
+    discountApplied: order.discountApplied,
+    platformDiscountFee: order.platformDiscountFee,
+    collegeDiscountStatus: order.collegeDiscountStatus,
+    subtotal: order.subtotal,
+    estimatedSubtotal: order.estimatedSubtotal,
+    deliveryFee: order.deliveryFee,
+    tip: order.tip,
+    platformFee: order.platformFee,
+    total: order.total,
+    status: order.status,
+  };
+  const settled = settleCollegeDiscountOnAccept(stored, runnerCollegeRaw);
+  if (!settled.eligible) return undefined;
+  const view = customerCollegeSavingsView({
+    ...stored,
+    discountApplied: settled.discountApplied,
+    collegeDiscountStatus: settled.collegeDiscountStatus,
+    subtotal: settled.subtotal,
+    total: settled.total,
+  });
   return {
-    discountApplied: true,
-    discountAmount,
-    runnerCollege: runnerCollege ?? undefined,
-    canteenCollege: canteenCollege ?? undefined,
-    subtotal,
-    total,
+    discountApplied: settled.discountApplied,
+    discountAmount: view.amount,
+    runnerCollege: settled.runnerCollege ?? undefined,
+    canteenCollege: order.canteenCollege,
+    subtotal: settled.subtotal,
+    total: settled.total,
   };
 }

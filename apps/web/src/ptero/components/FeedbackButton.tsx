@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/ptero/context/CartContext";
 
 /**
@@ -9,6 +10,7 @@ import { useCart } from "@/ptero/context/CartContext";
  */
 export function FeedbackButton() {
   const { itemCount } = useCart();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -37,13 +39,13 @@ export function FeedbackButton() {
     }, 1600);
   }
 
-  const bottomClass =
-    itemCount > 0
-      ? "bottom-[11.5rem] md:bottom-8"
-      : "bottom-24 md:bottom-6";
+  const aboveNav = !pathname.startsWith("/cityu/canteen");
+  const bottomClass = aboveNav
+    ? `bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] ${itemCount > 0 ? "md:bottom-28" : "md:bottom-6"}`
+    : "bottom-[max(1rem,env(safe-area-inset-bottom,0px))]";
 
   return (
-    <div className={`fixed right-4 z-[70] ${bottomClass}`}>
+    <div className={`fixed right-4 z-30 ${bottomClass}`}>
       {open && (
         <form
           onSubmit={submit}

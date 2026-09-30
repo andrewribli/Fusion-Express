@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { OrderLimitNotice } from "@/ptero/components/OrderLimitNotice";
 import { useCart } from "@/ptero/context/CartContext";
 import { isCanteenCart, primaryCanteenRestaurantId } from "@/ptero/lib/canteen/cart";
@@ -13,6 +13,7 @@ import { readCityuHall } from "@/lib/cityu-hall";
 /** Mobile sticky checkout bar — delivery total comes from the pricing engine. */
 export function OrderActionBar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { itemCount, subtotal, items } = useCart();
   const [hall, setHall] = useState("");
   useEffect(() => {
@@ -31,7 +32,13 @@ export function OrderActionBar() {
   if (itemCount === 0) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[4.25rem] z-40 px-3 md:bottom-4 xl:hidden">
+    <div
+      className={`pointer-events-none fixed inset-x-4 z-40 md:bottom-4 xl:hidden ${
+        pathname.startsWith("/cityu/canteen")
+          ? "bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))]"
+          : "bottom-[calc(7.75rem+env(safe-area-inset-bottom,0px))]"
+      }`}
+    >
       <div className="pointer-events-auto mx-auto flex max-w-lg flex-col gap-1.5">
         <OrderLimitNotice subtotal={subtotal} />
         <button

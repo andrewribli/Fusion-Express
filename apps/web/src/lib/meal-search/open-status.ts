@@ -1,5 +1,6 @@
 import { hktParts } from "@/data/canteen/canteen-config";
 import { isOrderableCanteen } from "@/lib/canteenConfig";
+import { isHkPublicHoliday } from "@/lib/hk-public-holidays";
 import { isOpen } from "@/lib/openingHours";
 import { isOrderableRestaurant } from "@/ptero/config/canteen/restaurants";
 import type { MealSearchCampus } from "@/lib/meal-search/types";
@@ -25,8 +26,9 @@ export function isCanteenOpenNow(
   if (day === 0) return false;
 
   if (canteenId === "ebeneezers-5380") {
-    // Mon–Sat 10:00 AM – 8:00 PM
-    return minutes >= 10 * 60 && minutes < 20 * 60;
+    // Mon–Sat 10:00–20:00 restaurant; orders stop 15 minutes early.
+    if (isHkPublicHoliday(date)) return false;
+    return minutes >= 10 * 60 && minutes < 19 * 60 + 45;
   }
 
   if (canteenId === "city-express-ac1") {

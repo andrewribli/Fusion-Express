@@ -14,10 +14,13 @@ import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { formatScheduledLabel } from "@/lib/order-window";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
 import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
 import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing";
+import { customerCollegeSavingsView } from "@fusion-express/shared/college-discount";
+import { clearCollegeDiscountAfterCancel } from "@/lib/clear-college-discount";
 import {
   customerAmountDue,
   groceryAmountDue,
@@ -112,6 +115,7 @@ function TrackContent() {
     setCancelling(true);
     try {
       await cancelOrder(order.id, getUserAccountId(user));
+      void clearCollegeDiscountAfterCancel(order.id);
       void notifyOrderStatusEmail({
         customerEmail: user.email ?? order.customerEmail,
         orderId: order.id,
@@ -205,6 +209,11 @@ function TrackContent() {
               {formatDeliveryAddress(order.college, order.hall)}
             </p>
             <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
+            {order.scheduledFor ? (
+              <p className="mt-2 text-sm font-semibold text-[#ED1C24]">
+                Scheduled for {formatScheduledLabel(order.scheduledFor)}
+              </p>
+            ) : null}
 
             {order.customerNote && (
               <p className="mt-2 text-xs text-gray-600">
@@ -238,23 +247,27 @@ function TrackContent() {
                 const isCanteen =
                   order.orderChannel === "canteen" ||
                   order.items.some((i) => i.itemId.startsWith("canteen:"));
-                const foodBeforeDiscount =
-                  order.discountApplied && (order.discountAmount ?? 0) > 0
-                    ? (order.estimatedSubtotal ??
-                        order.subtotal + (order.discountAmount ?? 0))
-                    : order.subtotal;
+                const savings = customerCollegeSavingsView(order);
+                const foodBeforeDiscount = savings.show
+                  ? (order.estimatedSubtotal ?? order.subtotal + savings.amount)
+                  : order.subtotal;
                 return (
                   <>
                     <div className="flex justify-between text-gray-600">
                       <span>{isCanteen ? "Food subtotal" : "Estimated Subtotal"}</span>
                       <span>${foodBeforeDiscount}</span>
                     </div>
-                    {order.discountApplied && (order.discountAmount ?? 0) > 0 && (
+                    {savings.show && (
                       <div className="flex justify-between font-medium text-emerald-700">
-                        <span>College Discount (10%)</span>
                         <span>
-                          −HK${Number(order.discountAmount).toFixed(2)}
+                          College discount
+                          {savings.pending ? (
+                            <span className="mt-0.5 block text-[11px] font-normal text-gray-500">
+                              When a matching-college runner accepts
+                            </span>
+                          ) : null}
                         </span>
+                        <span>−HK${savings.amount.toFixed(2)}</span>
                       </div>
                     )}
                     {!isCanteen && (
@@ -294,6 +307,12 @@ function TrackContent() {
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>
                   <span>${order.tip}</span>
+                </div>
+              )}
+              {(order.platformFee ?? 0) > 0 && (
+                <div className="flex justify-between text-gray-600">
+                  <span>Platform fee</span>
+                  <span>${Number(order.platformFee).toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between font-bold">

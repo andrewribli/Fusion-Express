@@ -175,6 +175,8 @@ export async function POST(request: Request) {
       if (apiKey) {
         const brand = campus === "cityu" ? campusConfig.cityu.brandLabel : "GraceRun";
         const campusName = campusConfig[campus].name;
+        // CityU brandLabel already includes the campus ("GraceRun CityU").
+        const branded = campus === "cityu" ? brand : `${brand} ${campusName}`;
         const subject =
           purpose === "reset"
             ? `Your ${brand} password reset code`
@@ -182,7 +184,7 @@ export async function POST(request: Request) {
         const text =
           purpose === "reset"
             ? `Your ${brand} password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
-            : `Your ${brand} ${campusName} verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
+            : `Your ${branded} verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
 
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",

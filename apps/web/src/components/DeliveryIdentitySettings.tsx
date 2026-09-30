@@ -9,6 +9,7 @@ import {
   uploadAvatar,
   type DeliveryIdentityState,
 } from "@/lib/delivery-identity-client";
+import { UserAvatar } from "@/components/UserAvatar";
 import { PartyAvatar } from "@/components/DeliveryIdentity";
 
 const TOOLTIP =
@@ -19,6 +20,8 @@ function applyIdentity(user: UserProfile, identity: DeliveryIdentityState): User
     ...user,
     displayName: identity.displayName,
     photoUrl: identity.photoUrl,
+    // Keep Auth-style field in sync so every avatar reader sees the same photo.
+    photoURL: identity.photoUrl ?? undefined,
     isAnonymous: identity.isAnonymous,
     pseudonym: identity.pseudonym,
     pseudonymChangedAt: identity.pseudonymChangedAt,
@@ -193,7 +196,16 @@ export function DeliveryIdentitySettings() {
       ) : null}
 
       <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3">
-        <PartyAvatar name={avatarName} photoUrl={ownPhoto} />
+        {showReal ? (
+          <UserAvatar
+            user={user}
+            size={44}
+            photoUrl={ownPhoto}
+            name={previewName}
+          />
+        ) : (
+          <PartyAvatar name={avatarName} photoUrl={ownPhoto} size={44} />
+        )}
         <span className="sr-only">Profile photo</span>
         <input
           type="file"

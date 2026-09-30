@@ -13,6 +13,7 @@ import { BG_ORDERS } from "@/data/page-backgrounds";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
+import { clearCollegeDiscountAfterCancel } from "@/lib/clear-college-discount";
 import { isChatActive } from "@/lib/constants";
 import { loadAllProducts } from "@/lib/firestore";
 import { menuItemFromOrderLine } from "@/lib/reorder";
@@ -59,6 +60,7 @@ export default function OrdersPage() {
     setCancellingId(order.id);
     try {
       await cancelOrder(order.id, getUserAccountId(user));
+      void clearCollegeDiscountAfterCancel(order.id);
       await load();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Could not cancel");

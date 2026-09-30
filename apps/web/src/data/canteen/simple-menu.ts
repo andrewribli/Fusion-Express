@@ -1,6 +1,6 @@
 import type { MenuCategory } from "@/data/canteen/bf-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
-import { NA_MENU } from "@/data/canteen/na-menu";
+import { NA_WEBBITES_MENU } from "@/data/canteen/na-webbites-menu";
 import { PAPER_AND_COFFEE_MENU } from "@/data/canteen/paper-and-coffee-menu";
 import { EBENEEZERS_MENU } from "@/data/canteen/ebeneezers-menu";
 import { ORCHID_LODGE_MENU } from "@/data/canteen/orchid-lodge-menu";
@@ -14,6 +14,12 @@ export type SimpleMenuItem = {
   /** True when the venue has not published a price. `price` is then 0. */
   priceOnRequest?: boolean;
   category: MenuCategory;
+  /** Pin2Eat (or other source) section title, shown instead of the canonical bucket. */
+  sourceCategory?: string;
+  /** Chinese name when `name` is the English label. */
+  nameZh?: string;
+  /** False when the source marks the dish out of stock. Omitted means available. */
+  isAvailable?: boolean;
   image: string;
   /** Featured / house specialty badge when true. */
   signature?: boolean;
@@ -122,7 +128,7 @@ export type SimpleRestaurantId =
   | "sh-ho-canteen"
   | "paper-and-coffee"
   | "sorazen"
-  | "na-canteen"
+  | "na-webbites"
   | "ebeneezers"
   | "orchid-lodge";
 
@@ -131,7 +137,7 @@ export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "sh-ho-canteen": SH_HO_MENU,
   "paper-and-coffee": PAPER_AND_COFFEE_MENU,
   sorazen: SORAZEN_MENU,
-  "na-canteen": NA_MENU,
+  "na-webbites": NA_WEBBITES_MENU,
   ebeneezers: EBENEEZERS_MENU,
   "orchid-lodge": ORCHID_LODGE_MENU,
 };

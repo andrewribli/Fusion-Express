@@ -1,5 +1,8 @@
 export const ESTIMATED_DELIVERY_MINUTES = 30;
 
+/** Flat GraceRun fee on every placed order. Shown only at final checkout. */
+export const PLATFORM_FEE = 1.5;
+
 /** Cart grocery subtotal cap. Runners front Fusion, so keep tickets small. */
 export const MAX_ORDER_VALUE = 200;
 

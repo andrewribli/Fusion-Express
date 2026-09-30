@@ -14,12 +14,13 @@ import { MenuItemCard } from "@/ptero/components/MenuItemCard";
 import { OrderActionBar } from "@/ptero/components/OrderActionBar";
 import { PreviousOrderChecklist } from "@/ptero/components/PreviousOrderChecklist";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
-import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { CAMPUS } from "@/ptero/config/campus";
 import { TASTE_PRODUCTS } from "@/ptero/config/products";
 import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
-import { runnerEntryHref } from "@/ptero/lib/nav";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { ADMIN_ORDERING_NOTE } from "@/lib/order-window";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import type { MenuItem } from "@/ptero/lib/types";
 import { loadWellcomeMenu } from "@/lib/loadWellcomeMenu";
 import {
@@ -35,7 +36,9 @@ import {
 
 export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
   const { itemCount } = useCart();
-  const { user, setMode, canRunnerMode } = useUser();
+  const { user, setMode } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
+  const isAdmin = useIsAdmin(user?.uid);
   const [search, setSearch] = useState("");
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
@@ -86,6 +89,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
 
   const store = source ? grocerySourceById(source) : null;
   const storeOpen = source ? isGroceryOpen(source) : false;
+  const canOrderStore = storeOpen || isAdmin;
   const catalog = source === "wellcome" ? wellcomeItems : source === "taste" ? TASTE_PRODUCTS : [];
 
   const searching = Boolean(search.trim());
@@ -158,7 +162,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
         <PrototypeBanner />
 
         {/* Foodpanda-style top header */}
-        <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+        <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
             <button
               type="button"
@@ -232,20 +236,27 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
             </div>
 
             <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user && !user.isGuest),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
+              href={runnerEntry.href}
+              aria-busy={runnerEntry.loading || undefined}
+              aria-disabled={runnerEntry.loading || undefined}
+              onClick={(event) => {
+                if (runnerEntry.loading) {
+                  event.preventDefault();
+                  return;
+                }
+                runnerEntry.onClick(event);
+                if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+                  setMode("runner");
+                }
               }}
-              className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex"
+              className={`hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex ${
+                runnerEntry.loading ? "opacity-60" : ""
+              }`}
             >
               Runner
             </Link>
 
             <CustomerNotificationBell className="h-10 w-10 rounded-lg" />
-            <RunnerQueueBell className="h-10 w-10 rounded-lg" />
 
             <button
               type="button"
@@ -270,9 +281,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
               )}
             </button>
 
-            <div className="hidden sm:block">
-              <AccountMenu />
-            </div>
+            <AccountMenu />
           </div>
         </header>
         <GrocerySourcePicker selected={source} onSelect={chooseSource} />
@@ -340,7 +349,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
           </aside>
 
           {/* Center content */}
-          <main className="min-w-0 px-3 py-4 pb-28 sm:px-4">
+          <main className="min-w-0 px-3 py-4 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 md:pb-28">
             {!store ? (
               <p className="text-sm text-gray-600">
                 Pick Taste or Wellcome. Your last choice is remembered next time.
@@ -357,7 +366,13 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
                 {!storeOpen ? (
                   <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
                     {store.name} is closed ({store.hours.open}–{store.hours.close}). The menu
-                    stays visible and checkout is locked until it opens.
+                    stays visible. Deliver now waits until it opens. You can schedule a
+                    time during opening hours.
+                    {isAdmin ? (
+                      <span className="mt-1 block font-medium text-gray-800">
+                        {ADMIN_ORDERING_NOTE}
+                      </span>
+                    ) : null}
                   </p>
                 ) : null}
                 <div className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
@@ -427,7 +442,7 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
                         {menuItems.slice(0, visibleCount).map((item) => (
                           <MenuItemCard
                             key={item.id}
-                            item={{ ...item, inStock: storeOpen && item.inStock }}
+                            item={{ ...item, inStock: canOrderStore && item.inStock }}
                           />
                         ))}
                       </div>

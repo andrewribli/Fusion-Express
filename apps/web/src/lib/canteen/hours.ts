@@ -38,7 +38,7 @@ export function isSorazenOpen(now = new Date()): boolean {
 }
 
 export function isNaCanteenOpen(now = new Date()): boolean {
-  return isOpen("na-canteen", now);
+  return isOpen("na-webbites", now);
 }
 
 export function isSimpleCanteenOpen(

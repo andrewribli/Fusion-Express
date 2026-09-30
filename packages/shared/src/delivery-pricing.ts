@@ -1,4 +1,5 @@
 import type { CampusId } from "./campus";
+import { PLATFORM_FEE } from "./constants";
 import {
   BASE_DELIVERY_FEE,
   calculateDeliveryFee,
@@ -468,6 +469,7 @@ export function lockedDeliveryPricing(input: {
   deliverySurcharge: number;
   deliveryTotal: number;
   deliveryFee: number;
+  platformFee: number;
   total: number;
   zone?: DeliveryZone;
   totalWeight: number;
@@ -495,6 +497,7 @@ export function lockedDeliveryPricing(input: {
     weightKg: totalWeight,
   });
   const tip = Math.max(0, input.tip ?? 0);
+  const platformFee = PLATFORM_FEE;
   return {
     sourceId: normalizeDeliverySourceId(campus, sourceId),
     quote,
@@ -502,7 +505,8 @@ export function lockedDeliveryPricing(input: {
     deliverySurcharge: quote.surcharge,
     deliveryTotal: quote.total,
     deliveryFee: quote.total,
-    total: round2(input.subtotal + quote.total + tip),
+    platformFee,
+    total: round2(input.subtotal + quote.total + tip + platformFee),
     zone: quote.zone,
     totalWeight,
     deliveryOrigin: quote.deliveryOrigin,

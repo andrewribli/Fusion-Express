@@ -2,7 +2,7 @@
   "name": "ptero",
   "version": "0.1.0",
   "private": true,
-  "description": "Ptero (CityU) prototype — Taste groceries to CityU hall lobbies",
+  "description": "GraceRun CityU prototype — Taste groceries to CityU hall lobbies",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

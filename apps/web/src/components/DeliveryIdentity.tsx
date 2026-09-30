@@ -51,15 +51,21 @@ export function PartyAvatar({
   photoUrl?: string | null;
   size?: number;
 }) {
-  const letter = (name.trim()[0] || "?").toUpperCase();
+  const trimmed = name.trim();
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  const letters =
+    parts.length >= 2
+      ? `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase()
+      : trimmed.slice(0, 2).toUpperCase() || "?";
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-white"
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold text-white"
       style={{
         width: size,
         height: size,
         minWidth: size,
         minHeight: size,
+        fontSize: Math.max(10, Math.round(size * 0.31)),
         backgroundColor: colorFor(name),
       }}
       aria-hidden
@@ -68,7 +74,7 @@ export function PartyAvatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={photoUrl} alt="" className="h-full w-full object-cover" />
       ) : (
-        letter
+        letters
       )}
     </span>
   );

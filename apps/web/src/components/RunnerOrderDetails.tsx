@@ -1,6 +1,11 @@
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { runnerEarningsForOrder } from "@/lib/order-status";
+import {
+  COLLEGE_DISCOUNT_SPLIT,
+  orderMatchesRunnerCollege,
+  runnerCollegeBonus,
+} from "@fusion-express/shared/college-discount";
 import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
@@ -8,6 +13,7 @@ import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import { supermarketForCampus } from "@fusion-express/shared/campus";
+import { ScheduledDeliveryNote } from "@/components/ScheduledDeliveryNote";
 
 function formatKg(kg: number): string {
   return `${Math.round(kg * 100) / 100} kg`;
@@ -29,7 +35,14 @@ export function RunnerOrderDetails({
     order.totalWeight ??
     order.items.reduce((sum, item) => sum + (lineWeight(item) ?? 0), 0);
   const store = supermarketForCampus(order.campus);
-  const earn = runnerEarningsForOrder(order.deliveryFee);
+  const baseEarn = runnerEarningsForOrder(order.deliveryFee);
+  const previewMatch =
+    !order.discountApplied &&
+    orderMatchesRunnerCollege(order, runnerCollege);
+  const collegeBonus = previewMatch
+    ? (order.discountSplit?.runner ?? COLLEGE_DISCOUNT_SPLIT.runner)
+    : runnerCollegeBonus(order);
+  const earn = baseEarn + collegeBonus;
   const lockedDelivery = formatStoredDeliveryFee(order);
 
   return (
@@ -63,6 +76,9 @@ export function RunnerOrderDetails({
           <p className="text-xs text-gray-600">Room: {order.roomNumber}</p>
         )}
         <p className="text-xs text-gray-600">Lobby: {order.lobbyPoint}</p>
+        <div className="mt-2">
+          <ScheduledDeliveryNote at={order.scheduledFor} />
+        </div>
         <div className="mt-3">
           <OrderCounterparty orderId={order.id} label="Customer:" />
         </div>
@@ -87,12 +103,6 @@ export function RunnerOrderDetails({
           {isCanteen ? "Canteen food total" : "Estimated grocery cost"}
         </h3>
         <p className="mt-1 text-lg font-bold text-gray-900">${order.subtotal}</p>
-        {order.discountApplied && (order.discountAmount ?? 0) > 0 && (
-          <p className="mt-1 text-xs font-semibold text-emerald-800">
-            College Discount (10%): −HK$
-            {Number(order.discountAmount).toFixed(2)}
-          </p>
-        )}
         <p className="text-xs text-amber-900">
           {isCanteen ? (
             "Pay this at the canteen counter, then deliver to the lobby."
@@ -138,7 +148,17 @@ export function RunnerOrderDetails({
         {showEarnings && (
           <div className="mt-3 rounded-xl bg-[#ED1C24]/10 px-3 py-2">
             <p className="text-xs text-gray-600">You will receive</p>
-            <p className="text-lg font-bold text-[#ED1C24]">${earn}</p>
+            {collegeBonus > 0 ? (
+              <div className="mt-1 space-y-0.5 text-sm text-gray-800">
+                <p>Base runner fee: HK${baseEarn.toFixed(2)}</p>
+                <p>College discount bonus: HK${collegeBonus.toFixed(2)}</p>
+                <p className="text-lg font-bold text-[#ED1C24]">
+                  Total earnings: HK${earn.toFixed(2)}
+                </p>
+              </div>
+            ) : (
+              <p className="text-lg font-bold text-[#ED1C24]">${earn}</p>
+            )}
             {(order.tip ?? 0) > 0 && (
               <p className="text-xs text-gray-600">
                 Customer also added a ${order.tip} tip with the order.

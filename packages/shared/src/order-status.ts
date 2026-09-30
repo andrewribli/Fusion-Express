@@ -153,10 +153,15 @@ export function customerAmountDue(order: {
   subtotal: number;
   deliveryFee: number;
   tip?: number;
+  platformFee?: number;
 }): number {
   return (
     Math.round(
-      (groceryAmountDue(order) + order.deliveryFee + (order.tip ?? 0)) * 100,
+      (groceryAmountDue(order) +
+        order.deliveryFee +
+        (order.tip ?? 0) +
+        (order.platformFee ?? 0)) *
+        100,
     ) / 100
   );
 }

@@ -41,7 +41,7 @@ export function clearStoredCampusPreference(): void {
 
 /**
  * Campus implied by the URL. Route wins over profile/localStorage so CUHK
- * shop paths never show CityU (Ptero) chrome and vice versa.
+ * shop paths never show CityU chrome and vice versa.
  */
 export function campusFromPathname(pathname: string): CampusId | null {
   if (pathname === "/cityu" || pathname.startsWith("/cityu/")) {

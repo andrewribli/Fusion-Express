@@ -24,7 +24,7 @@ export type CanteenId =
   | "benjamin-franklin"
   | "cu-cafe"
   | "sh-ho-canteen"
-  | "na-canteen"
+  | "na-webbites"
   | "cc-canteen"
   | "shaw-canteen"
   | "wys"
@@ -51,7 +51,8 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
     status: "open",
     collegeId: null,
     menuSource: "data/canteen/ebeneezers-menu.ts",
-    hoursLabel: "Mon–Sat 11:00 – 21:00",
+    hoursLabel:
+      "Mon–Sat 10:00 – 19:45 (orders) · restaurant to 20:00 · closed Sun & PH",
   },
   {
     id: "sorazen",
@@ -79,6 +80,16 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
     collegeId: "UC",
     menuSource: "data/canteen/uc-menu.ts",
     hoursLabel: "Mon–Sat until 20:45 · closed Sunday",
+  },
+  {
+    id: "na-webbites",
+    name: "NA WebBites",
+    shortName: "NA WebBites",
+    status: "open",
+    collegeId: "NA",
+    menuSource: "data/canteen/na-webbites-menu.ts",
+    hoursLabel:
+      "Daily 8:00 AM – 7:45 PM (orders) · restaurant to 8:00 PM",
   },
   {
     id: "orchid-lodge",
@@ -114,15 +125,6 @@ export const CANTEEN_CATALOG: CanteenMeta[] = [
     status: "coming_soon",
     collegeId: "SHHO",
     menuSource: "data/canteen/simple-menu.ts (SH_HO_MENU)",
-    hoursLabel: "Coming soon",
-  },
-  {
-    id: "na-canteen",
-    name: "NA Canteen",
-    shortName: "NA Canteen",
-    status: "coming_soon",
-    collegeId: "NA",
-    menuSource: "data/canteen/na-menu.ts",
     hoursLabel: "Coming soon",
   },
   {

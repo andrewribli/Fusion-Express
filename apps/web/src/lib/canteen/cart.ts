@@ -31,12 +31,17 @@ export function canteenDeliveryFeeHkd(items: CartItem[]): number {
 export type CanteenCheckoutGate = {
   allowed: boolean;
   message: string | null;
+  /** Closed for hours or a holiday. Coming-soon and mixed carts are not this. */
+  hoursClosed: boolean;
 };
 
 /** Block checkout for stale carts (closed / coming-soon canteens, mixed canteens). */
-export function getCanteenCheckoutGate(items: CartItem[]): CanteenCheckoutGate {
+export function getCanteenCheckoutGate(
+  items: CartItem[],
+  opts?: { adminBypass?: boolean },
+): CanteenCheckoutGate {
   if (!isCanteenCart(items)) {
-    return { allowed: true, message: null };
+    return { allowed: true, message: null, hoursClosed: false };
   }
 
   let restaurantId: string | null = null;
@@ -46,12 +51,14 @@ export function getCanteenCheckoutGate(items: CartItem[]): CanteenCheckoutGate {
     if (!rid) {
       return {
         allowed: false,
+        hoursClosed: false,
         message: "Some cart items are invalid. Remove them to continue.",
       };
     }
     if (restaurantId && restaurantId !== rid) {
       return {
         allowed: false,
+        hoursClosed: false,
         message:
           "Your cart mixes different canteens. Remove items so everything is from one canteen.",
       };
@@ -60,13 +67,14 @@ export function getCanteenCheckoutGate(items: CartItem[]): CanteenCheckoutGate {
   }
 
   if (!restaurantId) {
-    return { allowed: false, message: "Invalid canteen cart." };
+    return { allowed: false, hoursClosed: false, message: "Invalid canteen cart." };
   }
 
   if (!isOrderableCanteen(restaurantId)) {
     const name = canteenNameForRestaurant(restaurantId);
     return {
       allowed: false,
+      hoursClosed: false,
       message: `${name} isn't accepting orders yet. Remove these items to checkout.`,
     };
   }
@@ -78,13 +86,14 @@ export function getCanteenCheckoutGate(items: CartItem[]): CanteenCheckoutGate {
 
   if (!withinHours) {
     return {
-      allowed: false,
+      allowed: Boolean(opts?.adminBypass),
+      hoursClosed: true,
       message:
         closedBanner(restaurantId) ?? "This canteen is closed right now.",
     };
   }
 
-  return { allowed: true, message: null };
+  return { allowed: true, message: null, hoursClosed: false };
 }
 
 export function toCartMenuItemFromBf(
@@ -132,16 +141,20 @@ export function toCartMenuItemFromSimple(
   item: SimpleMenuItem,
   restaurantId: RestaurantId,
 ): MenuItem {
+  const name =
+    item.nameZh && item.nameZh !== item.name
+      ? `${item.name} (${item.nameZh})`
+      : item.name;
   return {
     id: `${PREFIX}${restaurantId}:${item.id}`,
-    name: item.name,
+    name,
     category: "other",
     price: item.price,
     unit: "each",
     image: item.image,
     priceType: "fixed",
     runnerInputsPrice: false,
-    inStock: true,
+    inStock: item.isAvailable !== false,
     sortOrder: 0,
     weightKg: 0.4,
     itemNote: item.description,

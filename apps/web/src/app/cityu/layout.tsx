@@ -8,12 +8,16 @@ export const metadata: Metadata = {
   description: CAMPUS.tagline,
   icons: {
     icon: [
-      { url: "/ptero/images/ptero-icon.png?v=4", type: "image/png" },
-      { url: "/ptero/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg?v=4", type: "image/svg+xml" },
+      { url: "/favicon-32.png?v=4", type: "image/png", sizes: "32x32" },
+      { url: "/images/gracerun-icon.png?v=4", type: "image/png", sizes: "512x512" },
     ],
-    apple: [
-      { url: "/ptero/images/ptero-icon.png?v=4", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-touch-icon.png?v=4", sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: {
+    title: CAMPUS.brandName,
+    description: CAMPUS.tagline,
+    images: [{ url: "/images/gracerun-icon.png?v=4" }],
   },
   appleWebApp: {
     capable: true,
@@ -22,7 +26,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PteroLayout({ children }: { children: React.ReactNode }) {
+export default function CityULayout({ children }: { children: React.ReactNode }) {
   return (
     <AppStateProvider>
       <CartProvider>{children}</CartProvider>

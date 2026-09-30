@@ -28,15 +28,21 @@ export function TrackOrderFab() {
 
   const href =
     active.length === 1 ? `/cityu/track/${active[0].id}` : "/cityu/orders";
-  const bottomClass =
-    itemCount > 0
-      ? "bottom-[9.75rem] md:bottom-24"
-      : "bottom-[5.75rem] md:bottom-6";
+  const aboveNav = !pathname.startsWith("/cityu/canteen");
+  const activeLabel =
+    active.length === 1 ? "1 active order" : `${active.length} active orders`;
 
   return (
     <Link
       href={href}
-      className={`fixed left-3 z-40 flex min-h-11 items-center gap-2 rounded-full bg-[#ED1C24] px-4 py-2.5 text-sm font-bold text-white shadow-lg hover:bg-[#d11920] sm:left-1/2 sm:-translate-x-1/2 ${bottomClass}`}
+      aria-label={`Track Order, ${activeLabel}`}
+      className={`fixed left-4 z-30 flex min-h-11 items-center gap-2 rounded-full bg-[#ED1C24] px-4 py-2.5 text-base font-bold text-white shadow-lg hover:bg-[#d11920] ${
+        !aboveNav
+          ? "bottom-[max(1rem,env(safe-area-inset-bottom,0px))]"
+          : itemCount > 0
+            ? "bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-28"
+            : "bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6"
+      }`}
     >
       Track Order
       <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1.5 text-[11px] font-bold text-[#ED1C24]">

@@ -9,11 +9,16 @@ import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { canteenNameForRestaurant, restaurantIdFromOrderItems } from "@/data/canteen/colleges";
 import { orderCampus } from "@/lib/orders";
 import { runnerEarningsForOrder } from "@/lib/order-status";
+import {
+  customerCollegeSavingsView,
+  runnerCollegeBonus,
+} from "@fusion-express/shared/college-discount";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
 import { isCityuCanteenOrder, parseHkdAmount } from "@fusion-express/shared";
+import { formatScheduledLabel } from "@/lib/order-window";
 
 function orderPickedUp(order: Order): boolean {
   return (
@@ -174,23 +179,36 @@ export function CanteenDeliveryFlow({
                   {formatDeliveryAddress(order.college, order.hall)}
                 </p>
                 <p className="text-xs text-[#c4c4c4]">Lobby: {order.lobbyPoint}</p>
+                {order.scheduledFor ? (
+                  <p className="mt-2 text-sm font-semibold text-amber-200">
+                    Scheduled for {formatScheduledLabel(order.scheduledFor)}
+                  </p>
+                ) : null}
                 <div className="mt-3">
                   <OrderCounterparty orderId={order.id} label="Customer:" tone="dark" />
                 </div>
               </div>
               <RunnerOrderItemList items={order.items} dark />
-              {order.discountApplied && (order.discountAmount ?? 0) > 0 && (
-                <p className="rounded-xl bg-amber-950/60 px-3 py-2 text-amber-100">
-                  College discount applied: −HK${(order.discountAmount ?? 0).toFixed(2)}
-                </p>
-              )}
+              {(() => {
+                const savings = customerCollegeSavingsView(order);
+                if (!savings.show || savings.pending) return null;
+                return (
+                  <p className="rounded-xl bg-amber-950/60 px-3 py-2 text-amber-100">
+                    College discount applied: −HK${savings.amount.toFixed(2)}
+                  </p>
+                );
+              })()}
               <p className="rounded-xl bg-[#2a2418] px-3 py-2 text-[#f5e6c8]">
                 {resolveSpecialInstructions(order.customerNote)}
               </p>
               <p className="text-[#c4c4c4]">
                 Food{" "}
                 <span className="font-bold text-white">${order.subtotal}</span>
-                {" · "}You earn ${runnerEarningsForOrder(order.deliveryFee)}
+                {" · "}You earn $
+                {(
+                  runnerEarningsForOrder(order.deliveryFee) +
+                  runnerCollegeBonus(order)
+                ).toFixed(2)}
               </p>
               <Link
                 href={

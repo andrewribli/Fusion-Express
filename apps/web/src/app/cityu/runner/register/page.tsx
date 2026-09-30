@@ -7,21 +7,41 @@ import { AppShell } from "@/ptero/components/AppShell";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { formInputClassName } from "@/ptero/components/DeliveryAddressFields";
 import { CAMPUS } from "@/ptero/config/campus";
-import { COLLEGES, type CollegeId } from "@/ptero/config/canteen/colleges";
-import { useAppState, useUser } from "@/ptero/context/AppState";
+import { COLLEGES, getCollege, type CollegeId } from "@/ptero/config/canteen/colleges";
+import { useUser as useLocalUser } from "@/ptero/context/AppState";
+import { useUser } from "@/context/UserContext";
+import { commitRunnerActivation } from "@/lib/runners";
+import {
+  studentIdHint,
+  studentIdPlaceholder,
+  validateStudentId,
+} from "@/lib/runner-signup";
 import { validatePhone } from "@/ptero/lib/auth";
 
 export default function RunnerRegisterPage() {
   const router = useRouter();
-  const { user } = useUser();
-  const { registerRunner } = useAppState();
-  const [phone, setPhone] = useState("");
+  const shared = useUser();
+  const { setMode } = useLocalUser();
+  const account = shared.user && !shared.user.isGuest ? shared.user : null;
+  const [phone, setPhone] = useState(account?.phone ?? "");
+  const [studentId, setStudentId] = useState(account?.studentId ?? "");
+  const [studentIdError, setStudentIdError] = useState("");
   const [college, setCollege] = useState<CollegeId | "">("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!account?.uid) {
+      setError("Sign up with your CityU email before becoming a runner.");
+      return;
+    }
+    const sidErr = validateStudentId(studentId);
+    if (sidErr) {
+      setStudentIdError(sidErr || "Student ID is required to become a runner.");
+      setError("");
+      return;
+    }
     const phoneErr = validatePhone(phone);
     if (phoneErr) {
       setError(phoneErr);
@@ -31,10 +51,39 @@ export default function RunnerRegisterPage() {
       setError("Select your CityU residence (KLNT or MOS).");
       return;
     }
+    setStudentIdError("");
     setLoading(true);
     setError("");
     try {
-      await registerRunner({ phone, college });
+      const residence = getCollege(college);
+      const saved = await commitRunnerActivation({
+        uid: account.uid,
+        fullName: account.fullName?.trim() || "Runner",
+        studentId: studentId.replace(/\s+/g, ""),
+        phone,
+        college,
+        hall: residence?.compound ?? "",
+        paymentMethod: "PayMe",
+        paymentId: phone.replace(/\D/g, ""),
+      });
+      const paymentId = phone.replace(/\D/g, "");
+      shared.rememberProfile({
+        ...account,
+        phone: paymentId,
+        studentId: studentId.replace(/\s+/g, ""),
+        role: saved.role,
+        isRunner: true,
+        runnerId: saved.runnerId,
+        runnerPaymentMethod: "PayMe",
+        runnerPaymentId: paymentId,
+      });
+      shared.setRunnerRegistered(
+        saved.runnerId,
+        { method: "PayMe", id: paymentId },
+        { remote: false, role: saved.role },
+      );
+      shared.setMode("runner");
+      setMode("runner");
       router.push("/cityu/runner/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not register as runner.");
@@ -54,15 +103,42 @@ export default function RunnerRegisterPage() {
           hall drop-off can be coordinated. Your residence unlocks 10% canteen
           discounts when you pick up matching hall canteens.
         </p>
-        {!user || user.isGuest ? (
+        {!account ? (
           <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
             Sign up with your CityU email first, then come back to add a phone.
           </p>
         ) : (
           <form onSubmit={submit} className="mt-4 space-y-3 rounded-2xl bg-white p-4 shadow-sm">
-            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="text-xs text-gray-500">{account.email}</p>
             {error && (
               <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+            )}
+            <label className="block text-xs font-medium text-gray-600">
+              Student ID
+              <input
+                id="cityu-runner-student-id"
+                required
+                inputMode="numeric"
+                autoComplete="off"
+                value={studentId}
+                onChange={(e) => {
+                  setStudentId(e.target.value);
+                  if (studentIdError) setStudentIdError("");
+                }}
+                placeholder={studentIdPlaceholder("cityu")}
+                aria-invalid={studentIdError ? true : undefined}
+                aria-describedby={
+                  studentIdError ? "cityu-runner-student-id-error" : undefined
+                }
+                className={formInputClassName}
+              />
+            </label>
+            {studentIdError ? (
+              <p id="cityu-runner-student-id-error" className="text-sm text-red-700">
+                {studentIdError}
+              </p>
+            ) : (
+              <p className="text-[11px] text-gray-500">{studentIdHint("cityu")}</p>
             )}
             <label className="block text-xs font-medium text-gray-600">
               Hong Kong mobile

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { isOwnCustomerOrder } from "@fusion-express/shared/orders";
 import { useAppState, useUser } from "@/ptero/context/AppState";
 import { CAMPUS_ID } from "@/ptero/config/campus";
-import { runnerEntryHref } from "@/ptero/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { CustomerPartyName } from "@/components/DeliveryIdentity";
 
 type RunnerQueueBellProps = {
@@ -26,8 +26,9 @@ export function RunnerQueueBell({
   className = "",
   tone = "light",
 }: RunnerQueueBellProps) {
-  const { orders, setMode, canRunnerMode } = useAppState();
+  const { orders, setMode } = useAppState();
   const { user } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
   const [open, setOpen] = useState(false);
   const [hoverCapable, setHoverCapable] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -56,10 +57,7 @@ export function RunnerQueueBell({
   );
   const count = queue.length;
 
-  const href = runnerEntryHref({
-    loggedIn: Boolean(user && !user.isGuest),
-    canRunnerMode,
-  });
+  const href = runnerEntry.loading ? "#runner" : runnerEntry.href;
 
   useEffect(() => {
     const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -99,7 +97,10 @@ export function RunnerQueueBell({
         : `${count} available deliveries`;
 
   function goRunner() {
-    if (canRunnerMode) setMode("runner");
+    if (runnerEntry.loading) return;
+    if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+      setMode("runner");
+    }
     setOpen(false);
   }
 
@@ -184,7 +185,13 @@ export function RunnerQueueBell({
                   <Link
                     href={href}
                     role="menuitem"
-                    onClick={goRunner}
+                    onClick={(event) => {
+                      if (href === "#runner") {
+                        event.preventDefault();
+                        return;
+                      }
+                      goRunner();
+                    }}
                     className="shrink-0 rounded-lg bg-[#ED1C24] px-2.5 py-1.5 text-xs font-bold text-white hover:bg-[#c9171e]"
                   >
                     View

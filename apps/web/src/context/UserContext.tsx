@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -17,6 +18,7 @@ import {
   getAuthClient,
   isFirebaseConfigured,
 } from "@/lib/firebase";
+import { isEmailAlreadyInUse } from "@/lib/auth-errors";
 import { isDemoAuth } from "@/lib/constants";
 import {
   clearRunnerFromProfile,
@@ -72,6 +74,15 @@ export interface UserProfile {
   college?: string;
   hall?: string;
   roomNumber?: string;
+  /** Permanent CUHK runner college. Null until the runner locks one. */
+  runnerCollege?: string | null;
+  runnerCollegeLockedAt?: string | null;
+  runnerCollegeAppeal?: {
+    requestedCollege: string;
+    reason: string;
+    submittedAt: string;
+    status: "pending" | "approved" | "rejected";
+  } | null;
 }
 
 const USER_STORAGE_KEY = "fusion_user_profile";
@@ -124,6 +135,7 @@ interface UserContextValue {
   setRunnerRegistered: (
     runnerId: string,
     payment: { method: "PayMe" | "FPS"; id: string },
+    options?: { remote?: boolean; role?: UserRole },
   ) => void;
   bootError: string | null;
 }
@@ -244,6 +256,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [savedMode, setSavedMode] = useState<AppMode | null>(null);
   const [isGuestBrowsing, setIsGuestBrowsing] = useState(false);
   const firebaseEnabled = isFirebaseConfigured();
+  const logoutRequestedRef = useRef(false);
 
   useEffect(() => {
     setTermsAccepted(loadTermsAccepted());
@@ -314,6 +327,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
             if (!firebaseUser) {
               // Ignore a null that arrives before local persistence restores.
               if (!persistenceReady) return;
+              // A refresh / second tab / Auth blip is not Sign out. Keep the
+              // last real account until the user explicitly logs out.
+              if (!logoutRequestedRef.current) {
+                const kept = loadUser();
+                if (kept && !kept.isGuest) {
+                  setUser(kept);
+                  markReady();
+                  return;
+                }
+              }
+              logoutRequestedRef.current = false;
               setUser(null);
               cacheProfile(null);
               markReady();
@@ -425,17 +449,35 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       const emailErr = validateEmail(profile.email);
       if (emailErr) throw new Error(emailErr);
-      const firebaseUser = await signUpWithEmail(profile.email, password);
-      const fullProfile = await createUserProfile(firebaseUser.uid, {
+      const fields = {
         fullName: profile.fullName,
         email: profile.email,
         campus: profile.campus,
+        phone: profile.phone,
+        studentId: profile.studentId,
         cuhkEmail: profile.cuhkEmail ?? profile.email,
         cuhkVerifiedAt: profile.cuhkVerifiedAt ?? new Date().toISOString(),
         isGuest: false,
         isRunner: false,
-      });
-      persist(fullProfile);
+      };
+      try {
+        const firebaseUser = await signUpWithEmail(profile.email, password);
+        await firebaseUser.getIdToken();
+        persist(await createUserProfile(firebaseUser.uid, fields));
+      } catch (err) {
+        if (!isEmailAlreadyInUse(err)) throw err;
+        const current = getAuthClient().currentUser;
+        const email = profile.email.trim().toLowerCase();
+        if (current?.email?.toLowerCase() === email) {
+          await current.getIdToken(true);
+          const existing = await fetchUserProfile(current.uid);
+          if (!existing) {
+            persist(await createUserProfile(current.uid, fields));
+            return;
+          }
+        }
+        throw new Error("This email is already registered. Sign in instead.");
+      }
     },
     [persist],
   );
@@ -554,6 +596,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    logoutRequestedRef.current = true;
     // Clear the remembered campus before Firebase notifies listeners.
     // Otherwise a CityU session left `gracerun_campus=cityu` and the next
     // visit to `/` still opened the CityU shop.
@@ -609,11 +652,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [firebaseEnabled]);
 
   const setRunnerRegistered = useCallback(
-    (runnerId: string, payment: { method: "PayMe" | "FPS"; id: string }) => {
+    (
+      runnerId: string,
+      payment: { method: "PayMe" | "FPS"; id: string },
+      options?: { remote?: boolean; role?: UserRole },
+    ) => {
       setUser((prev) => {
         if (!prev) return prev;
         const termsAcceptedAt = prev.termsAcceptedAt ?? new Date().toISOString();
-        const role = roleWithRunner(normalizeRole(prev.role, prev.isRunner));
+        const role =
+          options?.role ?? roleWithRunner(normalizeRole(prev.role, prev.isRunner));
         const updated: UserProfile = {
           ...prev,
           role,
@@ -624,7 +672,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
           termsAcceptedAt,
         };
         cacheProfile(updated);
-        if (prev.uid && firebaseEnabled && !isDemoAuth()) {
+        if (
+          options?.remote !== false &&
+          prev.uid &&
+          firebaseEnabled &&
+          !isDemoAuth()
+        ) {
           void updateUserProfileDoc(prev.uid, {
             role,
             isRunner: true,

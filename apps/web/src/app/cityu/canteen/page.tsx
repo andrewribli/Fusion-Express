@@ -65,11 +65,11 @@ export default function CanteenIndexPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {RESTAURANTS.map((r) => {
           const college = r.collegeId ? getCollege(r.collegeId) : undefined;
           const body = (
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 {r.logo ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -83,7 +83,7 @@ export default function CanteenIndexPage() {
                 ) : null}
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-bold text-gray-900">{r.name}</p>
+                    <p className="break-words text-base font-bold text-gray-900">{r.name}</p>
                     {college ? (
                       <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
                         {college.shortName} · 10% off
@@ -107,7 +107,7 @@ export default function CanteenIndexPage() {
                 </div>
               </div>
               <span
-                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                className={`inline-flex min-h-11 shrink-0 items-center self-start rounded-lg px-3 text-sm font-semibold ${
                   r.menuReady
                     ? "bg-[#ED1C24] text-white"
                     : "border border-gray-200 bg-gray-100 text-gray-500"
@@ -122,7 +122,7 @@ export default function CanteenIndexPage() {
               <div
                 key={r.id}
                 aria-disabled="true"
-                className="block rounded-2xl border border-gray-100 bg-white p-4 opacity-95 shadow-sm"
+                className="block min-w-0 rounded-2xl border border-gray-100 bg-white p-3 opacity-95 shadow-sm"
               >
                 {body}
               </div>
@@ -132,7 +132,7 @@ export default function CanteenIndexPage() {
             <Link
               key={r.id}
               href={`/cityu/canteen/${r.id}`}
-              className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[#ED1C24]/40 hover:shadow-md"
+              className="block min-w-0 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition hover:border-[#ED1C24]/40 hover:shadow-md"
             >
               {body}
             </Link>

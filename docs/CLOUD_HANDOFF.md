@@ -14,7 +14,7 @@
 | https://gracerun.fit | Marketing / alias (same deployment) |
 | https://servecart.vercel.app | Legacy host redirect → same deployment |
 
-**CityU (Ptero):** `/cityu`, `/cityu/taste`, `/cityu/wellcome`, `/cityu/checkout`, runner dashboard under `/cityu/runner/*`.
+**CityU (GraceRun CityU):** `/cityu`, `/cityu/taste`, `/cityu/wellcome`, `/cityu/checkout`, runner dashboard under `/cityu/runner/*`.
 
 **CUHK canteen:** https://gracerun.vercel.app/canteen and `/canteen/[slug]`.
 
@@ -42,7 +42,7 @@ Build check locally: `cd apps/web && npm run build`.
 
 ## Product rules (do not guess)
 
-1. **Brands:** CUHK campus experience = **GraceRun** (`/cuhk`, `/canteen`, `/fusion` legacy paths). CityU = **Ptero** (`/cityu/*`).
+1. **Brands:** CUHK campus experience = **GraceRun CUHK** (`/cuhk`, `/canteen`, `/fusion` legacy paths). CityU = **GraceRun CityU** (`/cityu/*`).
 2. **Canteens:** Only **four** venues are **open / orderable**: SoraZen, Paper & Coffee, UC Canteen, Ebeneezer's. All others stay **coming soon** in `CANTEEN_CATALOG` — do **not** flip everything to open.
 3. **CityU channels:** **Taste** and **Wellcome** are separate product surfaces (not mixed into CUHK canteen list).
 4. **Checkout:** Shared `/cart` → `/checkout` for canteen. **No university/campus picker on locked checkout** when cart campus is fixed. Use `cartCampus` / `cartCampusError` and canteen gates (below).

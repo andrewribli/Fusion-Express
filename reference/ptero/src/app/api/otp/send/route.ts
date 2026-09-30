@@ -32,9 +32,9 @@ async function sendOtpEmail(email: string, code: string): Promise<boolean> {
     body: JSON.stringify({
       from: otpFromAddress(),
       to: [email],
-      subject: "Your Ptero verification code",
-      text: `Your Ptero CityU verification code is ${code}. It expires in 10 minutes.`,
-      html: `<p>Your Ptero CityU verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
+      subject: "Your GraceRun CityU verification code",
+      text: `Your GraceRun CityU verification code is ${code}. It expires in 10 minutes.`,
+      html: `<p>Your GraceRun CityU verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
     }),
   });
   if (!res.ok) {

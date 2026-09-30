@@ -60,6 +60,7 @@ export function sharedOrderToPtero(order: SharedOrder): PteroOrder {
     deliverySurcharge: order.deliverySurcharge,
     deliveryTotal: order.deliveryTotal,
     tip: order.tip ?? 0,
+    platformFee: order.platformFee,
     receiptTotal: order.finalTotal,
     runnerId: order.runnerUid ?? order.runnerId,
     runnerName: order.runnerName,
@@ -67,6 +68,7 @@ export function sharedOrderToPtero(order: SharedOrder): PteroOrder {
     discountApplied: order.discountApplied,
     discountAmount: order.discountAmount,
     createdAt: order.createdAt.toISOString(),
+    scheduledFor: order.scheduledFor?.toISOString(),
     paidAt: order.customerPaidAt?.toISOString(),
   };
 }
@@ -110,11 +112,13 @@ export async function persistPteroOrderToFirestore(
     customerNote: draft.customerNote,
     subtotal: draft.subtotal,
     tip: draft.tip,
+    scheduledFor: draft.scheduledFor,
   });
   draft.deliveryFee = placed.deliveryFee;
   draft.deliveryBase = placed.deliveryBase;
   draft.deliverySurcharge = placed.deliverySurcharge;
   draft.deliveryTotal = placed.deliveryTotal;
+  draft.platformFee = placed.platformFee;
   return placed.id;
 }
 

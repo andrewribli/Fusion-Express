@@ -160,7 +160,25 @@ service cloud.firestore {
         'runnerPaymentMethod', 'runnerPaymentId',
         'isRunner', 'runnerId',
         'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt',
-        'favorites'
+        'favorites', 'campus',
+        'runnerCollege', 'runnerCollegeLockedAt', 'runnerCollegeAppeal'
+      ]);
+    }
+
+    /** Signup stamps CUHK or CityU. Other values are rejected. */
+    function campusValueOk() {
+      return !('campus' in request.resource.data)
+        || request.resource.data.campus == 'cuhk'
+        || request.resource.data.campus == 'cityu';
+    }
+
+    /**
+     * College is written by the server. A locked runnerCollege cannot be
+     * changed from the client, including the appeal record.
+     */
+    function collegeFieldsUnchanged() {
+      return !changedKeys().hasAny([
+        'runnerCollege', 'runnerCollegeLockedAt', 'runnerCollegeAppeal'
       ]);
     }
 
@@ -232,12 +250,18 @@ service cloud.firestore {
       );
     }
 
+    /**
+     * Runner flags are allowed when the runners doc is already theirs or is
+     * created in the same batch/transaction. get/exists miss that uncommitted
+     * doc; getAfter/existsAfter see it. A locked runnerCollege still cannot
+     * change — collegeFieldsUnchanged does not use this helper.
+     */
     function ownsRunnerDoc(runnerDocId) {
       return runnerDocId is string
         && runnerDocId.size() > 0
         && runnerDocId.size() < 128
-        && exists(/databases/$(database)/documents/runners/$(runnerDocId))
-        && get(/databases/$(database)/documents/runners/$(runnerDocId))
+        && existsAfter(/databases/$(database)/documents/runners/$(runnerDocId))
+        && getAfter(/databases/$(database)/documents/runners/$(runnerDocId))
           .data.get('uid', '') == uid();
     }
 
@@ -273,7 +297,15 @@ service cloud.firestore {
         && photoUrlOk()
         && isAnonymousOk()
         && anonymousHasPseudonym()
-        && pseudonymCreateOk();
+        && pseudonymCreateOk()
+        && campusValueOk()
+        && (
+          !('role' in data)
+          || data.role == 'customer'
+        )
+        && !('runnerCollege' in data)
+        && !('runnerCollegeLockedAt' in data)
+        && !('runnerCollegeAppeal' in data);
     }
 
     function userUpdateOk(userId) {
@@ -307,7 +339,9 @@ service cloud.firestore {
         && photoUrlOk()
         && isAnonymousOk()
         && anonymousHasPseudonym()
-        && pseudonymUpdateOk();
+        && pseudonymUpdateOk()
+        && (!changedKeys().hasAny(['campus']) || campusValueOk())
+        && collegeFieldsUnchanged();
     }
 
     match /users/{userId} {
@@ -364,7 +398,11 @@ service cloud.firestore {
         && request.resource.data.get('runnerId', '') == ''
         && request.resource.data.get('runnerUid', '') == ''
         && request.resource.data.subtotal is number
-        && request.resource.data.subtotal <= 200;
+        && request.resource.data.subtotal <= 200
+        && !('discountSplit' in request.resource.data)
+        && !('platformDiscountFee' in request.resource.data)
+        && !('discountCollege' in request.resource.data)
+        && !('collegeDiscountStatus' in request.resource.data);
 
       allow update: if isOrderCustomer(resource.data)
         && resource.data.status in ['delivered', 'runner_paid']
@@ -410,7 +448,8 @@ service cloud.firestore {
           'canteenCollege', 'subtotal', 'total'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
-        && request.resource.data.runnerUid == uid();
+        && request.resource.data.runnerUid == uid()
+        && resource.data.get('collegeDiscountStatus', '') != 'pending';
 
       // The assigned runner drives the order to delivery.
       allow update: if isOrderRunner(resource.data)
@@ -426,7 +465,14 @@ service cloud.firestore {
           'adminMissedNotifiedAt',
           'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege'
         ])
-        && !(request.resource.data.status in ['pending', 'paid']);
+        && !(request.resource.data.status in ['pending', 'paid'])
+        && (
+          resource.data.get('collegeDiscountStatus', '') == ''
+          || !changedKeys().hasAny([
+            'discountApplied', 'discountAmount', 'subtotal', 'total',
+            'runnerCollege', 'canteenCollege'
+          ])
+        );
 
       allow update: if isAdmin()
         && changedKeys().hasOnly([

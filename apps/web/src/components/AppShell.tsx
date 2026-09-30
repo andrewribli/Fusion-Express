@@ -16,7 +16,7 @@ interface AppShellProps {
 export function AppShell({ children, hideNav, hideTrackFab }: AppShellProps) {
   return (
     <ActiveOrdersProvider>
-      <div className={hideNav ? "" : "pb-20 md:pb-0"}>
+      <div className={hideNav ? "" : "pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"}>
         {children}
         <SiteFooter />
       </div>

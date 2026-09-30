@@ -49,7 +49,7 @@ export const campusConfig: Record<CampusId, CampusConfig> = {
   cityu: {
     id: "cityu",
     name: "CityU",
-    brandLabel: "Ptero",
+    brandLabel: "GraceRun CityU",
     supermarket: "Taste",
     supermarketLocation: "Citygate",
     groceryChannel: "taste",
@@ -109,12 +109,20 @@ export function isOwnerLoginEmail(email: string): boolean {
   );
 }
 
-export function isCampusEmail(email: string, campus: CampusId): boolean {
-  if (campus === "cityu" && isOwnerLoginEmail(email)) return true;
+/** University domain only — does not treat owner Gmail as CityU. */
+export function isUniversityEmailForCampus(
+  email: string,
+  campus: CampusId,
+): boolean {
   const domain = emailDomain(email);
   return (campusConfig[campus].emailDomains as readonly string[]).includes(
     domain,
   );
+}
+
+export function isCampusEmail(email: string, campus: CampusId): boolean {
+  if (campus === "cityu" && isOwnerLoginEmail(email)) return true;
+  return isUniversityEmailForCampus(email, campus);
 }
 
 /** Returns an error message, or null when the email matches the campus. */

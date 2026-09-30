@@ -69,6 +69,7 @@ const RESTAURANT_COLLEGE: Record<string, CollegeId | null> = {
   ebeneezers: null,
   "orchid-lodge": "CC",
   "na-canteen": "NA",
+  "na-webbites": "NA",
   "cc-canteen": "CC",
   "shaw-canteen": "Shaw",
   wys: "WYS",
@@ -86,6 +87,7 @@ const RESTAURANT_NAMES: Record<string, string> = {
   ebeneezers: "Ebeneezer's",
   "orchid-lodge": "Orchid Lodge",
   "na-canteen": "NA Canteen",
+  "na-webbites": "NA WebBites",
   "cc-canteen": "CC Canteen",
   "shaw-canteen": "Shaw Canteen",
   wys: "WYS Canteen",
@@ -148,23 +150,20 @@ export function restaurantIdFromOrderItems(
   return null;
 }
 
-/** 10% off canteen food when runner college matches canteen college. */
-export const COLLEGE_CANTEEN_DISCOUNT_RATE = 0.1;
+/**
+ * Retired for CUHK canteen orders. A matching runner used to take 10% off
+ * food. Eligible canteens now use the fixed HK$2 / HK$2 / HK$1 split in
+ * college-discount.ts. This stays at zero so the old percentage cannot
+ * stack on top of that split. CityU residence discounts are separate.
+ */
+export const COLLEGE_CANTEEN_DISCOUNT_RATE = 0;
 
 export function computeCollegeDiscount(
-  foodSubtotal: number,
-  runnerCollege: string | null | undefined,
-  canteenCollege: string | null | undefined,
+  _foodSubtotal: number,
+  _runnerCollege: string | null | undefined,
+  _canteenCollege: string | null | undefined,
 ): { discountApplied: boolean; discountAmount: number } {
-  const runner = normalizeCollegeId(runnerCollege);
-  const canteen = normalizeCollegeId(canteenCollege);
-  if (!runner || !canteen || runner !== canteen) {
-    return { discountApplied: false, discountAmount: 0 };
-  }
-  const food = Math.max(0, Number(foodSubtotal) || 0);
-  const discountAmount =
-    Math.round(food * COLLEGE_CANTEEN_DISCOUNT_RATE * 100) / 100;
-  return { discountApplied: discountAmount > 0, discountAmount };
+  return { discountApplied: false, discountAmount: 0 };
 }
 
 export function roundMoney(amount: number): number {

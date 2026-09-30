@@ -9,6 +9,7 @@ import {
   type WeekdayRule,
 } from "@/data/canteen/canteen-config";
 import { canteenStatus, getCanteenMeta } from "@/lib/canteenConfig";
+import { isHkPublicHoliday } from "@/lib/hk-public-holidays";
 
 export { hktParts };
 
@@ -38,6 +39,7 @@ export function isOpen(canteenId: string, date: Date = new Date()): boolean {
   if (!cfg) return false;
   const { minutes, day } = hktParts(date);
   if (!dayAllowed(cfg.weekdays, day)) return false;
+  if (cfg.closedOnPublicHolidays && isHkPublicHoliday(date)) return false;
 
   // Orchid Lodge: Sat closes at 17:00 (OpenRice).
   if (canteenId === "orchid-lodge" && day === 6) {
@@ -60,6 +62,9 @@ export function closedBanner(canteenId: string, date: Date = new Date()): string
   const cfg = getCanteenConfig(canteenId);
   if (!cfg) return `${name} is currently closed.`;
   const { minutes, day } = hktParts(date);
+  if (cfg.closedOnPublicHolidays && isHkPublicHoliday(date)) {
+    return `${name} is closed on public holidays. ${cfg.hoursLabel}`;
+  }
   if (!dayAllowed(cfg.weekdays, day)) {
     return `${name} is closed today. ${cfg.hoursLabel}`;
   }

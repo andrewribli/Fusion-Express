@@ -23,7 +23,7 @@ export default function RunnerIntroPage() {
         <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-600">
           <li>CityU email required (@cityu.edu.hk or @my.cityu.edu.hk)</li>
           <li>Hong Kong mobile required so customers can reach you after accept</li>
-          <li>You front the Taste bill; Ptero reimburses after the customer pays via Airwallex</li>
+          <li>You front the Taste bill; GraceRun reimburses after the customer pays via Airwallex</li>
         </ul>
         {canRunnerMode ? (
           <Link

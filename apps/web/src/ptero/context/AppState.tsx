@@ -564,7 +564,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         ? Math.max(0, current.subtotal - discountAmount)
         : current.subtotal;
       const discountedTotal =
-        discountedSubtotal + current.deliveryFee + current.tip;
+        discountedSubtotal +
+        current.deliveryFee +
+        current.tip +
+        (current.platformFee ?? 0);
 
       if (isCloudOrderId(id)) {
         const runnerDoc =

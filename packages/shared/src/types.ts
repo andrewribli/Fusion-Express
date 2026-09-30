@@ -238,12 +238,32 @@ export interface Order {
   /** taste, wellcome, ac1, eben, fusion, or a canteen id. */
   sourceId?: string;
   tip?: number;
+  /**
+   * Flat GraceRun platform charge (HK$1.50 on new orders).
+   * Missing on older orders — treat as 0 when summing.
+   */
+  platformFee?: number;
   total: number;
-  /** True when a same-college runner unlocked the 10% canteen food discount. */
+  /** True when a matching-college runner unlocked the customer slice. */
   discountApplied?: boolean;
-  /** HK$ amount subtracted from canteen food subtotal (not delivery). */
+  /**
+   * Canteen's documented discount in HKD (5 for an eligible order).
+   * Older orders stored the customer savings here (the retired 10%).
+   */
   discountAmount?: number;
-  /** Normalized college id of the assigned runner (e.g. UC). */
+  /** College whose student card unlocks the canteen discount. */
+  discountCollege?: string;
+  /** Stored split. Customer savings are `customer`, not the full discount. */
+  discountSplit?: { customer: number; runner: number; platform: number };
+  /** pending until accept, applied on a match, void when a non-match accepts. */
+  collegeDiscountStatus?: "pending" | "applied" | "void";
+  /**
+   * Platform slice of the canteen discount. HK$1 only after a matching
+   * runner accepts. Not added to the customer total. Separate from platformFee.
+   */
+  platformDiscountFee?: number;
+  platformDiscountFeeAt?: Date;
+  /** Normalized college id of the assigned runner. */
   runnerCollege?: string;
   /** Normalized college id of the canteen (e.g. UC). */
   canteenCollege?: string;
@@ -285,6 +305,8 @@ export interface Order {
   runnerRating?: number;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;
+  /** Customer-chosen Hong Kong delivery time. Absent means deliver now. */
+  scheduledFor?: Date;
   createdAt: Date;
   updatedAt: Date;
   pickedUpAt?: Date;

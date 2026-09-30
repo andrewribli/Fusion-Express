@@ -2,19 +2,24 @@ import { dishMatchesBucket } from "@/lib/meal-search/category-buckets";
 import { getCampusDishes } from "@/lib/meal-search/catalog";
 import { isCanteenOpenNow } from "@/lib/meal-search/open-status";
 import type {
+  DistanceFilter,
   MealSearchCampus,
   MealSearchFilters,
   PriceFilter,
   RankedDish,
   SearchableDish,
 } from "@/lib/meal-search/types";
+import {
+  distanceAvailable,
+  walkMinutesForCanteen,
+} from "@/lib/meal-search/walk";
 
 export const MEAL_SEARCH_MIN_CHARS = 2;
 export const MEAL_SEARCH_DEBOUNCE_MS = 250;
 export const MEAL_SEARCH_PAGE_SIZE = 20;
 export const MEAL_SEARCH_PRICE_CEILING = 100;
 
-export const SUGGESTION_QUERIES = ["chicken", "rice", "noodles", "coffee"] as const;
+export const SUGGESTION_QUERIES = ["spicy", "chicken", "rice", "coffee"] as const;
 
 function matchesPrice(price: number, filter: PriceFilter): boolean {
   switch (filter.kind) {
@@ -42,26 +47,42 @@ function matchesPrice(price: number, filter: PriceFilter): boolean {
   }
 }
 
-/** Partial-word match: "chick" → "chicken". */
-function textIncludes(haystack: string, needle: string): boolean {
-  return haystack.toLowerCase().includes(needle.toLowerCase());
+function queryTokens(q: string): string[] {
+  return q.toLowerCase().split(/\s+/).filter(Boolean);
 }
 
+/** Every word must match (so "spicy chicken" is not one exact phrase). */
 function matchesQuery(dish: SearchableDish, q: string): boolean {
-  if (!q) return true;
-  return (
-    textIncludes(dish.name, q) ||
-    textIncludes(dish.description, q) ||
-    textIncludes(dish.category, q) ||
-    textIncludes(dish.canteenName, q) ||
-    textIncludes(dish.canteenShortName, q)
-  );
+  const tokens = queryTokens(q);
+  if (tokens.length === 0) return true;
+  const blob = `${dish.name}\n${dish.description}\n${dish.category}`.toLowerCase();
+  return tokens.every((token) => blob.includes(token));
+}
+
+function matchesDistance(
+  minutes: number | null,
+  filter: DistanceFilter,
+): boolean {
+  if (filter === "any") return true;
+  if (minutes == null) return false;
+  switch (filter) {
+    case "under10":
+      return minutes < 10;
+    case "10-15":
+      return minutes >= 10 && minutes < 15;
+    case "15-20":
+      return minutes >= 15 && minutes < 20;
+    case "20plus":
+      return minutes >= 20;
+    default:
+      return true;
+  }
 }
 
 /**
  * Default ranking tiers when sort === "best" and query is non-empty:
  * 0 exact name, 1 name starts with, 2 name contains, 3 description/category.
- * Within a tier: open canteens first, then cheaper.
+ * Within a tier: open canteens first, then cheaper, then closer when a hall is set.
  *
  * TODO: do not rank by popularity (no order data).
  */
@@ -71,7 +92,8 @@ function matchTier(dish: SearchableDish, q: string): number {
   const query = q.toLowerCase();
   if (name === query) return 0;
   if (name.startsWith(query)) return 1;
-  if (name.includes(query)) return 2;
+  const tokens = queryTokens(q);
+  if (name.includes(query) || tokens.every((token) => name.includes(token))) return 2;
   return 3;
 }
 
@@ -79,8 +101,11 @@ function enrich(
   campus: MealSearchCampus,
   dish: SearchableDish,
   q: string,
+  now: Date,
+  hall: string | null,
+  college: string | null,
 ): RankedDish {
-  const openNow = isCanteenOpenNow(campus, dish.canteenId);
+  const openNow = isCanteenOpenNow(campus, dish.canteenId, now);
   // Interactive only when currently open (coming soon + closed hours: not clickable).
   const interactive = dish.orderable && openNow;
   return {
@@ -88,13 +113,23 @@ function enrich(
     openNow,
     interactive,
     matchTier: matchTier(dish, q),
+    walkMinutes: walkMinutesForCanteen(campus, dish.canteenId, hall, college),
   };
+}
+
+function compareCloser(a: RankedDish, b: RankedDish): number {
+  if (a.walkMinutes == null && b.walkMinutes == null) return 0;
+  if (a.walkMinutes == null) return 1;
+  if (b.walkMinutes == null) return -1;
+  return a.walkMinutes - b.walkMinutes;
 }
 
 function compareBest(a: RankedDish, b: RankedDish): number {
   if (a.matchTier !== b.matchTier) return a.matchTier - b.matchTier;
   if (a.openNow !== b.openNow) return a.openNow ? -1 : 1;
   if (a.price !== b.price) return a.price - b.price;
+  const closer = compareCloser(a, b);
+  if (closer !== 0) return closer;
   return a.name.localeCompare(b.name);
 }
 
@@ -112,11 +147,18 @@ function compareAz(a: RankedDish, b: RankedDish): number {
   return a.name.localeCompare(b.name) || a.price - b.price;
 }
 
+function compareDistance(a: RankedDish, b: RankedDish): number {
+  const closer = compareCloser(a, b);
+  if (closer !== 0) return closer;
+  return comparePriceAsc(a, b);
+}
+
 export function hasActiveFilters(filters: MealSearchFilters): boolean {
   if (filters.bucket !== "all") return true;
   if (filters.price.kind !== "none") return true;
   if (filters.openNowOnly) return true;
   if (filters.canteenIds !== null) return true;
+  if ((filters.distance ?? "any") !== "any") return true;
   if (filters.favoritesOnly) return true;
   return false;
 }
@@ -127,6 +169,7 @@ export function countActiveFilters(filters: MealSearchFilters): number {
   if (filters.price.kind !== "none") n += 1;
   if (filters.openNowOnly) n += 1;
   if (filters.canteenIds !== null) n += 1;
+  if ((filters.distance ?? "any") !== "any") n += 1;
   if (filters.favoritesOnly) n += 1;
   return n;
 }
@@ -137,6 +180,7 @@ export function defaultFilters(): MealSearchFilters {
     price: { kind: "none" },
     openNowOnly: false,
     canteenIds: null,
+    distance: "any",
     sort: "best",
     favoritesOnly: false,
   };
@@ -146,16 +190,27 @@ export function defaultFilters(): MealSearchFilters {
  * Effective sort: Best match only while a query is typed.
  * If query empty but filters active → Price ↑.
  */
+export type MealSearchContext = {
+  now?: Date;
+  hall?: string | null;
+  college?: string | null;
+};
+
 export function effectiveSort(
   query: string,
   filters: MealSearchFilters,
+  hasHall = true,
 ): MealSearchFilters["sort"] {
+  let sort = filters.sort;
+  if (sort === "distance" && !hasHall) {
+    sort = query.trim() ? "best" : "price-asc";
+  }
   const q = query.trim();
   if (!q && hasActiveFilters(filters)) {
     // User may still pick Best — coerce only the default "best" when empty query.
-    return filters.sort === "best" ? "price-asc" : filters.sort;
+    return sort === "best" ? "price-asc" : sort;
   }
-  return filters.sort;
+  return sort;
 }
 
 export type MealSearchResult = {
@@ -172,13 +227,23 @@ export function searchCampusDishes(
   rawQuery: string,
   filters: MealSearchFilters,
   favoriteIds: ReadonlySet<string> | readonly string[] = [],
+  context: MealSearchContext = {},
 ): MealSearchResult {
   const catalog = getCampusDishes(campus);
+  // TODO: if catalog.length exceeds 500, move this filter/sort to a server
+  // query. Keep it in-app — no Algolia, Elasticsearch, or new collection.
   const q = rawQuery.trim();
   const queryActive = q.length >= MEAL_SEARCH_MIN_CHARS;
   const filtersActive = hasActiveFilters(filters);
   const fav =
     favoriteIds instanceof Set ? favoriteIds : new Set(favoriteIds);
+  const now = context.now ?? new Date();
+  const hall = context.hall?.trim() || null;
+  const college = context.college?.trim() || null;
+  const hasHall = distanceAvailable(campus, hall, college);
+  const distanceFilter: DistanceFilter = hasHall
+    ? (filters.distance ?? "any")
+    : "any";
 
   if (!queryActive && !filtersActive) {
     return {
@@ -190,16 +255,35 @@ export function searchCampusDishes(
     };
   }
 
-  // Text + category + price (before canteen multi-select) — drives canteen chip list.
-  const base = catalog.filter((dish) => {
-    if (queryActive && !matchesQuery(dish, q)) return false;
+  const textHits = queryActive
+    ? catalog.filter((dish) => matchesQuery(dish, q))
+    : catalog;
+
+  // Text + category + price (before canteen multi-select and distance).
+  const base = textHits.filter((dish) => {
     if (!dishMatchesBucket(dish.category, filters.bucket)) return false;
     if (!matchesPrice(dish.price, filters.price)) return false;
     return true;
   });
 
+  let ranked = base.map((d) =>
+    enrich(campus, d, queryActive ? q : "", now, hasHall ? hall : null, college),
+  );
+
+  if (filters.openNowOnly) {
+    ranked = ranked.filter((d) => d.openNow);
+  }
+
+  if (filters.favoritesOnly) {
+    ranked = ranked.filter((d) => fav.has(`canteen:${d.canteenId}:${d.itemId}`));
+  }
+
+  if (distanceFilter !== "any") {
+    ranked = ranked.filter((d) => matchesDistance(d.walkMinutes, distanceFilter));
+  }
+
   const canteenMap = new Map<string, { id: string; name: string; shortName: string }>();
-  for (const d of base) {
+  for (const d of ranked) {
     if (!canteenMap.has(d.canteenId)) {
       canteenMap.set(d.canteenId, {
         id: d.canteenId,
@@ -212,23 +296,12 @@ export function searchCampusDishes(
     a.shortName.localeCompare(b.shortName),
   );
 
-  let filtered = base;
   if (filters.canteenIds !== null) {
     const allow = new Set(filters.canteenIds);
-    filtered = filtered.filter((d) => allow.has(d.canteenId));
+    ranked = ranked.filter((d) => allow.has(d.canteenId));
   }
 
-  let ranked = filtered.map((d) => enrich(campus, d, queryActive ? q : ""));
-
-  if (filters.openNowOnly) {
-    ranked = ranked.filter((d) => d.openNow);
-  }
-
-  if (filters.favoritesOnly) {
-    ranked = ranked.filter((d) => fav.has(`canteen:${d.canteenId}:${d.itemId}`));
-  }
-
-  const sort = effectiveSort(q, filters);
+  const sort = effectiveSort(q, filters, hasHall);
   ranked.sort((a, b) => {
     if (sort === "favorites") {
       const aFav = fav.has(`canteen:${a.canteenId}:${a.itemId}`) ? 0 : 1;
@@ -241,6 +314,8 @@ export function searchCampusDishes(
         return comparePriceAsc(a, b);
       case "price-desc":
         return comparePriceDesc(a, b);
+      case "distance":
+        return compareDistance(a, b);
       case "az":
         return compareAz(a, b);
       case "best":
@@ -254,7 +329,7 @@ export function searchCampusDishes(
 
   let emptyReason: MealSearchResult["emptyReason"] = null;
   if (ranked.length === 0) {
-    emptyReason = queryActive && !filtersActive ? "query" : "filters";
+    emptyReason = queryActive && textHits.length === 0 ? "query" : "filters";
   }
 
   return {

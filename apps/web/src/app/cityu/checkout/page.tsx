@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/ptero/components/AppHeader";
@@ -42,6 +42,14 @@ import {
   formatDeliveryQuote,
   formatHkdAmount,
 } from "@fusion-express/shared/delivery-pricing";
+import { PLATFORM_FEE } from "@fusion-express/shared";
+import { ScheduleDelivery } from "@/components/ScheduleDelivery";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import {
+  formatScheduledLabel,
+  resolveDeliveryTiming,
+  resolveOrderVenue,
+} from "@/lib/order-window";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -79,15 +87,44 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState<"now" | "schedule">("now");
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const isAdmin = useIsAdmin(user?.uid);
+  const onDeliveryMode = useCallback((mode: "now" | "schedule") => {
+    setDeliveryMode(mode);
+  }, []);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
+  const venue = useMemo(
+    () =>
+      resolveOrderVenue({
+        campus: "cityu",
+        itemIds: items.map(({ item }) => item.id),
+        sourceId: canteen ? restaurantId ?? undefined : groceryId ?? "taste",
+        orderChannel: canteen ? "canteen" : groceryId === "wellcome" ? "wellcome" : "taste",
+        canteenRestaurantId: restaurantId ?? undefined,
+      }),
+    [items, canteen, restaurantId, groceryId],
+  );
+  const timing = useMemo(
+    () =>
+      resolveDeliveryTiming({
+        venue,
+        isAdmin,
+        mode: deliveryMode,
+        date: scheduleDate,
+        time: scheduleTime,
+      }),
+    [venue, isAdmin, deliveryMode, scheduleDate, scheduleTime],
+  );
   const quote = useMemo(() => {
     const sourceId = canteen
       ? restaurantId || "ac1"
       : groceryId || "taste";
     return computeDeliveryFee({ campus: "cityu", sourceId, hallId: hall });
   }, [canteen, restaurantId, groceryId, hall]);
-  const total = subtotal + quote.total + tip;
+  const total = subtotal + quote.total + tip + PLATFORM_FEE;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
     compound &&
@@ -96,8 +133,8 @@ export default function CheckoutPage() {
       guestName.trim() &&
       !overLimit &&
       !mixedGrocery &&
-      !groceryClosed &&
-      !canteenBlocked,
+      !canteenBlocked &&
+      timing.allowed,
   );
   useEffect(() => {
     rememberCityuHall(hall);
@@ -112,8 +149,8 @@ export default function CheckoutPage() {
       setError(MIXED_GROCERY_CHECKOUT_MESSAGE);
       return;
     }
-    if (groceryClosed) {
-      setError("This store is closed. Checkout opens with the shop.");
+    if (!timing.allowed) {
+      setError(timing.error ?? "This store is closed right now.");
       return;
     }
     if (canteenBlocked) {
@@ -156,7 +193,9 @@ export default function CheckoutPage() {
         customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
         subtotal,
         deliveryFee: quote.total,
+        platformFee: PLATFORM_FEE,
         tip,
+        scheduledFor: timing.scheduledFor ?? undefined,
         discountApplied: false,
         discountAmount: 0,
       });
@@ -177,9 +216,9 @@ export default function CheckoutPage() {
         <PrototypeBanner />
         <AppHeader showBack backHref="/cityu/cart" title="Checkout" />
         <main className="mx-auto max-w-[480px] px-4 py-8 text-center">
-          <p className="text-sm text-gray-600">Nothing to checkout yet.</p>
-          <Link href="/cityu" className="mt-4 inline-block text-sm font-semibold text-[#ED1C24] underline">
-            Go shopping
+          <p className="text-base text-gray-600">Add items to place an order</p>
+          <Link href="/cityu/canteen" className="mt-4 inline-flex min-h-11 items-center text-base font-semibold text-[#ED1C24] underline">
+            Browse the menu
           </Link>
         </main>
       </AppShell>
@@ -213,8 +252,8 @@ export default function CheckoutPage() {
         )}
         {groceryClosed && grocery && (
           <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            {grocery.name} is closed ({grocery.hours.open}–{grocery.hours.close}). Checkout is
-            locked until it opens.
+            {grocery.name} is closed ({grocery.hours.open}–{grocery.hours.close}). Deliver now
+            waits until it opens. You can schedule a time during opening hours.
           </p>
         )}
         {canteenBlocked && canteenBlockedMessage && (
@@ -223,7 +262,10 @@ export default function CheckoutPage() {
           </p>
         )}
         {error && (
-          <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+          <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-base text-red-700">
+            <p>{error}</p>
+            <p className="mt-2">Try again, or contact support.</p>
+          </div>
         )}
         {overLimit && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -231,9 +273,21 @@ export default function CheckoutPage() {
           </p>
         )}
         <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-[#ED1C24]">
-          Est. delivery by {formatEta(estimatedDeliveryAt)} (~
-          {ESTIMATED_DELIVERY_MINUTES} min after order)
+          {timing.scheduledFor
+            ? `Scheduled for ${formatScheduledLabel(new Date(timing.scheduledFor))}`
+            : `Est. delivery by ${formatEta(estimatedDeliveryAt)} (~${ESTIMATED_DELIVERY_MINUTES} min after order)`}
         </div>
+        <ScheduleDelivery
+          venue={venue}
+          isAdmin={isAdmin}
+          mode={deliveryMode}
+          date={scheduleDate}
+          time={scheduleTime}
+          onMode={onDeliveryMode}
+          onDate={setScheduleDate}
+          onTime={setScheduleTime}
+          error={deliveryMode === "schedule" ? timing.error : null}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -329,11 +383,23 @@ export default function CheckoutPage() {
               <span>HK${subtotal.toFixed(2)}</span>
             </div>
             <div className="mt-3">
-              <DeliveryQuote quote={quote} large />
+              <DeliveryQuote
+                quote={quote}
+                large
+                fromLabel={
+                  canteen
+                    ? getRestaurant(restaurantId ?? "")?.shortName ?? "Canteen"
+                    : grocery?.name ?? "Taste"
+                }
+              />
             </div>
             <div className="mt-1 flex justify-between">
               <span>Tip</span>
               <span>HK${tip.toFixed(2)}</span>
+            </div>
+            <div className="mt-1 flex justify-between">
+              <span>Platform fee</span>
+              <span>HK${PLATFORM_FEE.toFixed(2)}</span>
             </div>
             <div className="mt-2 flex justify-between font-bold">
               <span>Estimated total</span>

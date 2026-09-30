@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShopLayout } from "@/components/ShopLayout";
 import { MealSearch } from "@/components/canteen/MealSearch";
-import { getCollege } from "@/data/canteen/colleges";
 import { RESTAURANTS } from "@/data/canteen/restaurants";
 import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
@@ -55,79 +54,63 @@ export default function CanteenIndexPage() {
           GraceRun Canteen
         </h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
-          Your canteen favorites, delivered to your dorm lobby. Flat delivery
-          HK${canteenBase} · 10% college canteen discount when your runner matches.
+          Your canteen favorites, delivered to your dorm lobby. Delivery depends
+          on the canteen and your hall (from HK${canteenBase}, or HK$0 in the
+          same building). At UC Canteen you save HK$2 when a United College runner accepts.
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {RESTAURANTS.map((r) => {
-          const college = r.collegeId ? getCollege(r.collegeId) : undefined;
-          const className = `flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition ${
-            r.menuReady
-              ? "hover:border-[#ED1C24]/40 hover:shadow-md"
-              : "opacity-95"
-          }`;
-          const body = (
-            <>
-              <div className="flex items-start gap-3">
-                {r.logoSrc ? (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-50 ring-1 ring-gray-100">
-                    <Image
-                      src={r.logoSrc}
-                      alt=""
-                      fill
-                      sizes="48px"
-                      className="object-contain p-1"
-                    />
-                  </div>
+          const card = (
+            <article
+              className={`group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition ${
+                r.menuReady
+                  ? "hover:border-[#ED1C24]/40 hover:shadow-md"
+                  : "opacity-90"
+              }`}
+            >
+              <div className="relative flex h-[120px] w-full items-center justify-center overflow-hidden bg-[#f7f6f4] lg:aspect-[4/3] lg:h-auto">
+                <Image
+                  src={r.coverImage}
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 50vw, 25vw"
+                  className="object-contain p-3"
+                />
+                {!r.menuReady ? (
+                  <span className="absolute right-2 top-2 rounded-md bg-black/55 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    Soon
+                  </span>
                 ) : null}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-bold text-gray-900">{r.name}</p>
-                    {college ? (
-                      <span className="rounded-md bg-[#ED1C24]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[#ED1C24]">
-                        {college.shortName} · 10% off
-                      </span>
-                    ) : null}
-                    {!r.menuReady ? (
-                      <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
-                        Soon
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-gray-600">{r.blurb}</p>
-              {r.location ? (
-                <p className="mt-1.5 text-xs text-gray-500">{r.location}</p>
-              ) : null}
-              <p className="mt-2 text-xs text-gray-500">
-                {r.hoursLabel} · HK${r.deliveryFee} delivery
-              </p>
-              <div className="mt-4 flex justify-end">
+              <div className="flex items-center justify-between gap-2 px-3 py-3">
+                <h2 className="line-clamp-2 min-w-0 text-base font-bold leading-snug text-gray-900">
+                  {r.shortName}
+                </h2>
                 <span
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                  className={`inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-semibold ${
                     r.menuReady
                       ? "bg-[#ED1C24] text-white"
-                      : "border border-gray-200 bg-gray-100 text-gray-500"
+                      : "bg-gray-100 text-gray-500"
                   }`}
                 >
                   {r.menuReady ? "Menu" : "Soon"}
                 </span>
               </div>
-            </>
+            </article>
           );
+
           if (!r.menuReady) {
             return (
-              <div key={r.id} aria-disabled="true" className={className}>
-                {body}
+              <div key={r.id} aria-disabled="true">
+                {card}
               </div>
             );
           }
           return (
-            <Link key={r.id} href={`/canteen/${r.id}`} className={className}>
-              {body}
+            <Link key={r.id} href={`/canteen/${r.id}`} className="block">
+              {card}
             </Link>
           );
         })}

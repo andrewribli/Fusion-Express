@@ -18,9 +18,9 @@ import { DeadlineBanner } from "@/components/DeadlineBanner";
 import { OrderChannelBadge, resolveOrderChannel } from "@/components/OrderChannelBadge";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { formatScheduledLabel } from "@/lib/order-window";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import {
-  acceptOrder,
   awaitingCustomerPriceApproval,
   fetchDeliveredOrdersByRunner,
   fetchRunnerOrders,
@@ -38,7 +38,13 @@ import {
   uploadDeliveryPhoto,
   uploadReceiptPhoto,
 } from "@/lib/orders";
-import { buildAcceptDiscount } from "@/lib/canteen-discount";
+import { getAuthClient } from "@/lib/firebase";
+import {
+  runnerCollegeBonus,
+  sortOrdersForRunner,
+  COLLEGE_DISCOUNT_SPLIT,
+  orderMatchesRunnerCollege,
+} from "@fusion-express/shared/college-discount";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import { RUNNER_BOARD_REFRESH_EVENT } from "@/lib/runner-board-refresh";
 import { compressImage } from "@/lib/compress-image";
@@ -254,6 +260,9 @@ function AvailableOrderCard({
   const preview = order.items.slice(0, 2);
   const extra = order.items.length - preview.length;
   const earn = runnerEarningsForOrder(order.deliveryFee);
+  const collegeBonus = orderMatchesRunnerCollege(order, runnerCollege)
+    ? (order.discountSplit?.runner ?? COLLEGE_DISCOUNT_SPLIT.runner)
+    : 0;
 
   return (
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -268,6 +277,11 @@ function AvailableOrderCard({
         {formatDeliveryAddress(order.college, order.hall)}
       </p>
       <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
+      {order.scheduledFor ? (
+        <p className="mt-1 text-sm font-semibold text-[#ED1C24]">
+          Scheduled for {formatScheduledLabel(order.scheduledFor)}
+        </p>
+      ) : null}
       <div className="mt-2">
         <CollegeDiscountRunnerBadge order={order} runnerCollege={runnerCollege} />
       </div>
@@ -282,7 +296,8 @@ function AvailableOrderCard({
         )}
       </ul>
       <p className="mt-2 text-sm font-semibold text-[#ED1C24]">
-        You earn ${earn} · {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
+        You earn ${earn}
+        {collegeBonus > 0 ? ` + HK$${collegeBonus} college bonus` : ""} · {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
       </p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <button
@@ -329,6 +344,13 @@ export function RunnerWorkspace({
   const [bankFiles, setBankFiles] = useState<Record<string, File>>({});
   const [finalTotals, setFinalTotals] = useState<Record<string, string>>({});
   const [acceptError, setAcceptError] = useState("");
+  const [collegeNote, setCollegeNote] = useState("");
+  useEffect(() => {
+    const note = sessionStorage.getItem("gr_college_confirmation");
+    if (!note) return;
+    sessionStorage.removeItem("gr_college_confirmation");
+    setCollegeNote(note);
+  }, []);
   const [previewOrder, setPreviewOrder] = useState<Order | null>(null);
   const [confirmOrder, setConfirmOrder] = useState<Order | null>(null);
   const [accepting, setAccepting] = useState(false);
@@ -695,48 +717,38 @@ export function RunnerWorkspace({
     setAccepting(true);
     setAcceptError("");
     try {
-      const runnerCollege =
-        runnerProfile?.college || user.college || undefined;
-      const discount = buildAcceptDiscount(confirmOrder, runnerCollege);
-      await acceptOrder(
-        confirmOrder.id,
-        found.id,
-        user.fullName,
-        getUserAccountId(user),
-        {
-          method: user.runnerPaymentMethod ?? "PayMe",
-          id: user.runnerPaymentId ?? user.phone ?? "",
-          email: user.email,
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Sign in again to accept this order.");
+      const res = await fetch("/api/orders/accept", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        discount,
-        scope === "cityu" ? "cityu" : runnerCampusOf(user),
-      );
+        body: JSON.stringify({
+          orderId: confirmOrder.id,
+          runnerId: found.id,
+          paymentMethod: user.runnerPaymentMethod ?? "PayMe",
+          paymentId: user.runnerPaymentId ?? user.phone ?? "",
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        const message = data.error || "Could not accept order. Try again.";
+        if (/own order/i.test(message)) throw new SelfPickupError();
+        if (/already accepted/i.test(message)) throw new OrderAlreadyTakenError();
+        throw new Error(message);
+      }
       setConfirmOrder(null);
       router.push(
         scope === "cityu" ? "/cityu/runner/deliveries" : "/runner/deliveries",
       );
-      void notifyOrderStatus({
-        customerEmail: confirmOrder.customerEmail,
-        orderId: confirmOrder.id,
-        status: "accepted",
-        runnerEmail: user.email,
-        runnerName: user.fullName,
-        customerName: confirmOrder.customerName,
-        deliveryLocation: `${formatDeliveryAddress(confirmOrder.college, confirmOrder.hall)} · Lobby: ${confirmOrder.lobbyPoint}`,
-        estimate: discount?.total ?? confirmOrder.total,
-      });
-      if (discount?.discountApplied) {
-        void notifyCanteenEvent({
-          orderId: confirmOrder.id,
-          event: "discount_received",
-        });
-      }
       await refresh();
     } catch (err) {
       if (err instanceof SelfPickupError || err instanceof OrderAlreadyTakenError) {
         setAcceptError(err.message);
       } else {
-        setAcceptError("Could not accept order. Try again.");
+        setAcceptError(err instanceof Error ? err.message : "Could not accept order. Try again.");
       }
       setConfirmOrder(null);
     } finally {
@@ -1165,10 +1177,15 @@ export function RunnerWorkspace({
     const stamp = order.deliveredAt ?? order.updatedAt;
     return stamp.getTime() >= weekStart;
   });
-  const weekEarned = weekDelivered.reduce(
+  const weekBase = weekDelivered.reduce(
     (sum, order) => sum + runnerEarningsForOrder(order.deliveryFee),
     0,
   );
+  const weekBonus = weekDelivered.reduce(
+    (sum, order) => sum + runnerCollegeBonus(order),
+    0,
+  );
+  const weekEarned = Math.round((weekBase + weekBonus) * 100) / 100;
 
   return (
     <RequireRunner>
@@ -1212,6 +1229,11 @@ export function RunnerWorkspace({
               ))}
             </div>
 
+            {collegeNote && (
+              <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
+                {collegeNote}
+              </p>
+            )}
             {loadError && (
               <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {loadError}
@@ -1237,13 +1259,14 @@ export function RunnerWorkspace({
                   </div>
                 ) : (
                   <ul className="space-y-3">
-                    {pending.map((order) => (
+                    {(scope === "cityu"
+                      ? pending
+                      : sortOrdersForRunner(pending, user?.runnerCollege)
+                    ).map((order) => (
                       <AvailableOrderCard
                         key={order.id}
                         order={order}
-                        runnerCollege={
-                          runnerProfile?.college || user?.college
-                        }
+                        runnerCollege={user?.runnerCollege}
                         onViewDetails={() => setPreviewOrder(order)}
                         onAccept={() => requestAccept(order)}
                       />
@@ -1295,9 +1318,7 @@ export function RunnerWorkspace({
                           <CollegeDiscountRunnerBadge
                             order={order}
                             runnerCollege={
-                              order.runnerCollege ||
-                              runnerProfile?.college ||
-                              user?.college
+                              order.runnerCollege || user?.runnerCollege
                             }
                           />
                         </div>
@@ -1358,6 +1379,9 @@ export function RunnerWorkspace({
                     ${weekEarned}
                   </p>
                   <p className="mt-2 text-xs text-white/80">
+                    Base deliveries HK${weekBase.toFixed(2)} · College discount bonus HK${weekBonus.toFixed(2)} · Total HK${weekEarned.toFixed(2)}
+                  </p>
+                  <p className="mt-1 text-xs text-white/80">
                     You keep {RUNNER_EARNINGS_RATE * 100}% of each order&apos;s delivery fee.
                   </p>
                 </div>
@@ -1395,7 +1419,13 @@ export function RunnerWorkspace({
                           </p>
                         </div>
                         <p className="mt-1 text-sm font-semibold text-green-700">
-                          +${runnerEarningsForOrder(order.deliveryFee)}
+                          +${(
+                            runnerEarningsForOrder(order.deliveryFee) +
+                            runnerCollegeBonus(order)
+                          ).toFixed(2)}
+                          {runnerCollegeBonus(order) > 0
+                            ? ` (base HK$${runnerEarningsForOrder(order.deliveryFee).toFixed(2)} + college bonus HK$${runnerCollegeBonus(order).toFixed(2)})`
+                            : ""}
                         </p>
                         <div className="mt-3">
                           <RunnerOrderDetails order={order} />
@@ -1421,7 +1451,7 @@ export function RunnerWorkspace({
         (resolveOrderChannel(flowOrder) === "canteen" ? (
           <CanteenDeliveryFlow
             order={orderWithProgress(flowOrder.id) ?? flowOrder}
-            runnerCollege={runnerProfile?.college || user?.college}
+            runnerCollege={flowOrder.runnerCollege || user?.runnerCollege}
             photoFile={photoFiles[flowOrder.id]}
             busy={purchasingId === flowOrder.id}
             uploading={uploading === "photo" ? "photo" : ""}

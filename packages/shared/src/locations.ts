@@ -1,51 +1,19 @@
 import type { CampusId } from "./campus";
+import {
+  buildCuhkCollegeHalls,
+  findCuhkDeliveryLocation,
+} from "./deliveryLocations";
 
-export const CUHK_COLLEGE_HALLS = {
-  "Shaw College": ["Kuo Mou Hall", "Student Hostel II"],
-  "United College": [
-    "Adam Schall",
-    "Bethlehem Hall",
-    "William M.W. Mong",
-    "Wu Chung",
-    "Y.C. Liang",
-  ],
-  "Chung Chi College": [
-    "Ming Hua",
-    "Ying Lin",
-    "Wen Lin",
-    "Siu Kwan",
-    "Madam S.H. Ho Hall",
-  ],
-  "New Asia College": [
-    "Chih Hsing Hall",
-    "Xuesi Hall",
-    "Grace Tien Hall",
-    "Daisy Li Hall",
-    "Mei Yun Tan",
-  ],
-  "S.H. Ho College (SHHO)": ["Ho Tim Hall", "Lee Quo Wei Hall"],
-  "Morningside College": ["Hostel 1", "Hostel 2"],
-  "C.W. Chu College": [
-    "Ina Chan Ho Building",
-    "Feng Yu Building",
-    "David & Marina Chu Building",
-  ],
-  "Wu Yee Sun College (WYS)": ["East Block", "West Block"],
-  "Lee Woo Sing College (LWS)": [
-    "Dorothy and Ti-Hua KOO Building",
-    "North Block",
-  ],
-  "International House (I-House)": [
-    "I-House 1",
-    "I-House 2",
-    "I-House 3",
-    "I-House 4",
-    "I-House 5",
-  ],
-  "Postgraduate Halls (PGH)": ["PGH 1", "PGH 2", "PGH 3", "PGH 4"],
-  /** Non-hall campus drop-off (central campus, near Fusion / Chung Chi). */
-  "Campus Facilities": ["University Library"],
-} as const;
+/**
+ * CUHK college → hall names for the delivery picker.
+ * Source of truth: `CUHK_DELIVERY_LOCATIONS` in deliveryLocations.ts.
+ *
+ * Chung Chi does not include International House — I-House is standalone.
+ * United College includes Choi Kai Yau Residence.
+ */
+export const CUHK_COLLEGE_HALLS: Readonly<
+  Record<string, readonly string[]>
+> = buildCuhkCollegeHalls();
 
 /**
  * CityU halls 1–12 in two compounds.
@@ -118,11 +86,15 @@ export function residenceGroupLabel(campus: CampusId): string {
   return campus === "cityu" ? "Compound" : "College";
 }
 
-/** Runner delivers to the hall lobby (or library entrance). */
+/** Runner delivers to the hall lobby (or face-to-face meeting spot). */
 export function getLobbyForHall(hall: string, campus: CampusId = "cuhk"): string {
-  if (hall === "University Library") return "University Library entrance";
   if (!hall) return "";
   if (campus === "cityu") return `${hall} Lobby`;
+  const spot = findCuhkDeliveryLocation(hall);
+  if (spot?.faceToFaceAvailable) return `${spot.name} (meet here)`;
+  if (hall === "Learning Garden" || hall === "University Library") {
+    return `${hall} entrance`;
+  }
   return `${hall} lobby`;
 }
 
@@ -132,3 +104,4 @@ export function formatDeliveryAddress(
 ): string {
   return [college, hall].filter(Boolean).join(" → ");
 }
+

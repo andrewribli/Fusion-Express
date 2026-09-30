@@ -1,6 +1,6 @@
 import { CAMPUS } from "@/config/campus";
 
-/** Ptero mark (pterodactyl + bag + wordmark) on light background. */
+/** GraceRun mark used by the CityU archive. Image files under public stay in place. */
 export const APP_LOGO_SRC = "/images/ptero-logo.png?v=4";
 export const APP_ICON_SRC = "/images/ptero-icon.png?v=4";
 

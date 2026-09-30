@@ -8,11 +8,9 @@ import { AppLogo } from "@/components/AppLogo";
 import { AppShell } from "@/components/AppShell";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { OrderActionBar } from "@/components/OrderActionBar";
-import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { useCart } from "@/context/CartContext";
-import { useUser } from "@/context/UserContext";
-import { runnerEntryHref } from "@/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { formatMenuPrice, type MenuItem } from "@/lib/types";
 
 function priceLabel(item: MenuItem): string {
@@ -199,14 +197,14 @@ export function ShopLayout({
   hideTrackFab = false,
   orderingEnabled = true,
 }: ShopLayoutProps) {
-  const { user, setMode, canRunnerMode } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
   const { itemCount, addItem } = useCart();
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
 
   return (
     <AppShell hideTrackFab={hideTrackFab}>
       <div className="shop-page min-h-screen bg-[#f5f5f5]">
-        <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+        <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
             <button
               type="button"
@@ -225,9 +223,9 @@ export function ShopLayout({
             </button>
 
             <Link
-              href="/"
+              href="/cuhk"
               className="flex shrink-0 items-center gap-2"
-              aria-label="GraceRun home"
+              aria-label="CUHK home"
             >
               <AppLogo size={36} className="h-9 w-9" />
               <span className="hidden text-sm font-extrabold tracking-tight text-gray-900 sm:block">
@@ -270,19 +268,17 @@ export function ShopLayout({
             </div>
 
             <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
-              }}
-              className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex"
+              href={runnerEntry.href}
+              aria-busy={runnerEntry.loading || undefined}
+              aria-disabled={runnerEntry.loading || undefined}
+              onClick={runnerEntry.onClick}
+              className={`hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex ${
+                runnerEntry.loading ? "opacity-60" : ""
+              }`}
             >
               Runner
             </Link>
 
-            {canRunnerMode ? <RunnerQueueBell /> : null}
             <CustomerNotificationBell />
 
             <Link
@@ -307,7 +303,7 @@ export function ShopLayout({
               )}
             </Link>
 
-            <div className="hidden shrink-0 sm:block">
+            <div className="shrink-0">
               <AccountMenu hideThemeChip />
             </div>
           </div>
@@ -352,7 +348,9 @@ export function ShopLayout({
             {sidebar}
           </aside>
 
-          <main className="min-w-0 px-3 py-4 pb-36 sm:px-4">{children}</main>
+          <main className="min-w-0 px-3 py-4 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 md:pb-28">
+            {children}
+          </main>
 
           <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] p-3 xl:block">
             <MenuCartSummary

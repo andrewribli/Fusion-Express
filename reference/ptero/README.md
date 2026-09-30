@@ -1,8 +1,8 @@
-# Ptero (CityU)
+# GraceRun CityU
 
 Standalone CityU grocery delivery prototype. Separate from the live CUHK GraceRun app — this site does not share Firebase, Airwallex keys, or orders with CUHK.
 
-**Brand:** Ptero · Flying with grace.  
+**Brand:** GraceRun CityU · Groceries. Delivered with grace.  
 **Supermarket:** Taste, Festival Walk  
 **Tagline:** Groceries from Taste to your CityU dorm lobby.
 

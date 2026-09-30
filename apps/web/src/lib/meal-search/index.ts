@@ -1,4 +1,4 @@
-export type { MealSearchCampus, MealBucket, MealSort, PriceFilter, SearchableDish, RankedDish, MealSearchFilters } from "@/lib/meal-search/types";
+export type { MealSearchCampus, MealBucket, MealSort, DistanceFilter, PriceFilter, SearchableDish, RankedDish, MealSearchFilters } from "@/lib/meal-search/types";
 export { categoryToBucket, dishMatchesBucket } from "@/lib/meal-search/category-buckets";
 export { getCampusDishes, campusMenuHref } from "@/lib/meal-search/catalog";
 export { isCanteenOpenNow, isCanteenOrderable } from "@/lib/meal-search/open-status";
@@ -14,4 +14,10 @@ export {
   defaultFilters,
   effectiveSort,
   formatEstPrice,
+  type MealSearchContext,
 } from "@/lib/meal-search/search";
+export {
+  distanceAvailable,
+  formatWalkMinutes,
+  walkMinutesForCanteen,
+} from "@/lib/meal-search/walk";
