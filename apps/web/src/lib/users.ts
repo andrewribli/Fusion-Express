@@ -161,21 +161,64 @@ export async function updateUserProfileDoc(
 }
 
 /**
+ * Local session from Auth only. Used when Firestore read/write fails so a
+ * successful password sign-in is never treated as signed-out.
+ * Never invents runnerCollege.
+ */
+export function sessionFromAuthIdentity(opts: {
+  uid: string;
+  email?: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+}): UserProfile {
+  const email = opts.email?.trim().toLowerCase() || undefined;
+  const campus = email ? detectCampusFromEmail(email) ?? undefined : undefined;
+  const fullName =
+    opts.displayName?.trim() ||
+    email?.split("@")[0]?.trim() ||
+    "Student";
+  return {
+    uid: opts.uid,
+    email,
+    fullName,
+    campus,
+    cuhkEmail: email,
+    isGuest: false,
+    isRunner: false,
+    role: "customer",
+    photoURL: opts.photoURL || undefined,
+  };
+}
+
+/**
  * After Auth sign-in: load users/{uid}, or create a minimal customer profile
  * when Auth succeeded but the profile write never landed (e.g. older campus
- * rules). Never touches runnerCollege.
+ * rules). On permission errors, return a local session so Auth stays signed in.
+ * Never touches runnerCollege.
  */
 export async function ensureSignedInUserProfile(opts: {
   uid: string;
   email: string;
   displayName?: string | null;
+  photoURL?: string | null;
 }): Promise<UserProfile> {
   const email = opts.email.trim().toLowerCase();
   const campus = detectCampusFromEmail(email) ?? undefined;
+  const local = () =>
+    sessionFromAuthIdentity({
+      uid: opts.uid,
+      email,
+      displayName: opts.displayName,
+      photoURL: opts.photoURL,
+    });
 
   const current = getAuthClient().currentUser;
   if (current?.uid === opts.uid) {
-    await current.getIdToken(true);
+    try {
+      await current.getIdToken(true);
+    } catch {
+      // Token refresh is best-effort; Auth already succeeded.
+    }
   }
 
   let profile = await fetchUserProfile(opts.uid);
@@ -208,24 +251,26 @@ export async function ensureSignedInUserProfile(opts: {
     }
   } catch (err) {
     if (isPermissionDenied(err)) {
-      throw new Error("We couldn't load your account. Please try again.");
+      // Own-doc read denied — keep the Auth session in the app.
+      return local();
     }
-    throw err;
+    // Transient network: still land in the app with Auth identity.
+    return local();
   }
 
-  const fallbackName =
-    opts.displayName?.trim() ||
-    email.split("@")[0]?.trim() ||
-    "Student";
-
-  return createUserProfile(opts.uid, {
-    email,
-    fullName: fallbackName,
-    campus,
-    cuhkEmail: email,
-    isGuest: false,
-    isRunner: false,
-  });
+  try {
+    return await createUserProfile(opts.uid, {
+      email,
+      fullName: local().fullName,
+      campus,
+      cuhkEmail: email,
+      isGuest: false,
+      isRunner: false,
+    });
+  } catch {
+    // Profile create denied or flaky — Auth already succeeded.
+    return local();
+  }
 }
 
 export async function clearRunnerFromProfile(uid: string): Promise<void> {

@@ -25,6 +25,7 @@ import {
   createUserProfile,
   ensureSignedInUserProfile,
   fetchUserProfile,
+  sessionFromAuthIdentity,
   updateUserProfileDoc,
 } from "@/lib/users";
 import { findRunnerForUser } from "@/lib/runners";
@@ -355,27 +356,62 @@ export function UserProvider({ children }: { children: ReactNode }) {
             }
 
             markReady();
+
+            const cached = loadUser();
+
+            // Anonymous Auth is guest checkout only — never invent a customer
+            // account or clear an in-progress guest profile.
+            if (firebaseUser.isAnonymous) {
+              if (cached?.uid === firebaseUser.uid) {
+                setUser(cached);
+              }
+              void (async () => {
+                try {
+                  const profile = await fetchUserProfile(firebaseUser.uid);
+                  if (!profile || cancelled) return;
+                  setUser(profile);
+                  cacheProfile(profile);
+                } catch (err) {
+                  console.error("Guest auth restore failed", err);
+                }
+              })();
+              return;
+            }
+
             setGuestBrowseFlag(false);
             setIsGuestBrowsing(false);
 
-            const cached = loadUser();
-            if (cached?.uid === firebaseUser.uid) {
+            // Always put a session in React as soon as Auth has a user.
+            // Waiting on Firestore left Become a runner on "Loading…" and the
+            // profile icon linking to /login while Firebase was already signed in.
+            const authSession = sessionFromAuthIdentity({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+            });
+            if (cached?.uid === firebaseUser.uid && !cached.isGuest) {
               setUser({
                 ...cached,
                 photoURL: firebaseUser.photoURL || cached.photoURL,
               });
+            } else {
+              setUser(authSession);
+              cacheProfile(authSession);
             }
 
             void (async () => {
               try {
-                const profile = await fetchUserProfile(firebaseUser.uid);
-                const base =
-                  profile ??
-                  (cached?.uid === firebaseUser.uid ? cached : null);
-                if (!base || cancelled) return;
+                const profile = await ensureSignedInUserProfile({
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email ?? authSession.email ?? "",
+                  displayName: firebaseUser.displayName,
+                  photoURL: firebaseUser.photoURL,
+                });
+                if (cancelled) return;
                 const hydrated = await restoreRunnerProfile({
-                  ...base,
-                  photoURL: firebaseUser.photoURL || base.photoURL,
+                  ...profile,
+                  photoURL: firebaseUser.photoURL || profile.photoURL,
                 });
                 if (cancelled) return;
                 setUser(hydrated);
@@ -386,7 +422,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 }
               } catch (err) {
                 console.error("Auth restore failed", err);
-                setBootError(firebaseErrorText(err));
+                // Keep the Auth session — do not clear user or boot to login.
+                if (!cancelled) {
+                  setUser((prev) =>
+                    prev?.uid === firebaseUser.uid && !prev.isGuest
+                      ? prev
+                      : authSession,
+                  );
+                  cacheProfile(authSession);
+                }
               }
             })();
           },
@@ -511,17 +555,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       const { signInWithEmail } = await import("@/lib/auth");
       const firebaseUser = await signInWithEmail(email, password);
-      // Auth alone is not enough: without users/{uid} the app stays signed out
-      // and /login looks like the button did nothing. Hydrate (or repair) here.
+      // Auth succeeded — land in the app even if Firestore profile read/write
+      // is denied. ensureSignedInUserProfile already falls back locally.
       const profile = await ensureSignedInUserProfile({
         uid: firebaseUser.uid,
         email: firebaseUser.email ?? email,
         displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
       });
-      const hydrated = await restoreRunnerProfile({
-        ...profile,
-        photoURL: firebaseUser.photoURL || profile.photoURL,
-      });
+      let hydrated = profile;
+      try {
+        hydrated = await restoreRunnerProfile({
+          ...profile,
+          photoURL: firebaseUser.photoURL || profile.photoURL,
+        });
+      } catch (err) {
+        console.warn("Runner profile sync after sign-in:", err);
+      }
       persist(hydrated);
       if (hydrated.isRunner || hydrated.termsAcceptedAt) {
         profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");

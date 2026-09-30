@@ -10,8 +10,8 @@ import {
 } from "@/lib/runner-entry";
 
 /** Firebase session exists, but UserContext has not applied that profile yet. */
-function profileStillLoading(isReady: boolean, hasUser: boolean): boolean {
-  if (!isReady || hasUser || typeof window === "undefined") return false;
+function firebaseSessionPresent(): boolean {
+  if (typeof window === "undefined") return false;
   try {
     return Boolean(getAuthClient().currentUser);
   } catch {
@@ -33,10 +33,15 @@ export type RunnerEntryControl = {
  */
 export function useRunnerEntry(campus: RunnerCampus): RunnerEntryControl {
   const { user, isReady, canRunnerMode, setMode } = useUser();
+  const authSession = Boolean(user) || firebaseSessionPresent();
+  // Only block navigation while Auth itself is still restoring. A Firebase
+  // user with a null React profile is still signed in (signup profile write
+  // may have failed) — do not leave the card on "Loading…" forever.
+  const profilePending = !isReady && !user && authSession;
   const decision = resolveRunnerEntry({
-    authReady: isReady,
-    profilePending: profileStillLoading(isReady, Boolean(user)),
-    signedIn: Boolean(user),
+    authReady: isReady || authSession,
+    profilePending,
+    signedIn: authSession,
     runner: Boolean(user && !user.isGuest && (canRunnerMode || user.isRunner)),
     campus,
   });

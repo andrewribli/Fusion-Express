@@ -4,7 +4,6 @@ import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { AccountMenu } from "@/components/AccountMenu";
-import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
@@ -134,7 +133,6 @@ export function CampusSelector() {
             </span>
           </Link>
         </div>
-        <GuestCampusSwitch />
       </main>
     </div>
   );

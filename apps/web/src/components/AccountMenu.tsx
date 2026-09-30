@@ -5,7 +5,17 @@ import Link from "next/link";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useUser } from "@/context/UserContext";
+import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
+
+function firebaseSessionPresent(): boolean {
+  if (!isFirebaseConfigured() || typeof window === "undefined") return false;
+  try {
+    return Boolean(getAuthClient().currentUser);
+  } catch {
+    return false;
+  }
+}
 
 export function AccountMenu({
   hideThemeChip: _hideThemeChip = false,
@@ -20,7 +30,7 @@ export function AccountMenu({
   avatarSize?: number;
   label?: string;
 }) {
-  const { user, logout } = useUser();
+  const { user, logout, isReady } = useUser();
   const { href: trackHref, count: activeCount } = useActiveCustomerOrders();
   const [open, setOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -58,7 +68,30 @@ export function AccountMenu({
 
   const labelClass = "text-[11px] font-medium leading-tight text-gray-500";
 
+  // Auth still restoring, or Firebase has a user while React profile catches up:
+  // never send the silhouette to /login — that was the bounce Andrew hit.
   if (!user) {
+    const authPending = !isReady || firebaseSessionPresent();
+    if (authPending) {
+      return (
+        <div
+          className={
+            label
+              ? "flex flex-col items-center justify-center gap-0.5"
+              : "flex items-center gap-1.5"
+          }
+        >
+          <span
+            aria-label="Account loading"
+            aria-busy="true"
+            className="flex items-center justify-center rounded-full opacity-70"
+          >
+            <UserAvatar user={null} size={avatarSize} />
+          </span>
+          {label ? <span className={labelClass}>{label}</span> : null}
+        </div>
+      );
+    }
     return (
       <div className={label ? "flex flex-col items-center justify-center gap-0.5" : "flex items-center gap-1.5"}>
         <Link
