@@ -5,6 +5,8 @@ import { isUserRole } from "@/lib/roles";
 import { isPermissionDenied } from "@/lib/auth-errors";
 import { getAuthClient, getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, getDoc, getDocs, collection, setDoc, Timestamp, deleteField } from "firebase/firestore";
+import { detectCampusFromEmail } from "@fusion-express/shared/campus";
+import { pickClientWritableUserFields } from "@/lib/user-writable-fields";
 import {
   isCityUDirectoryUser,
   isOrphanUserProfile,
@@ -20,6 +22,7 @@ export type UserProfileDoc = UserProfile & {
 };
 
 export { isOrphanUserProfile, parseUserDoc, isCityUDirectoryUser };
+export { pickClientWritableUserFields } from "@/lib/user-writable-fields";
 
 export async function fetchUserProfile(uid: string): Promise<UserProfile | null> {
   if (!isFirebaseConfigured()) return null;
@@ -138,26 +141,91 @@ export async function updateUserProfileDoc(
   partial: Partial<UserProfile>,
 ): Promise<void> {
   if (!isFirebaseConfigured()) return;
-  const rest = { ...partial } as Record<string, unknown>;
-  // Pseudonym and its cooldown are written by the delivery-identity API.
-  // Nulls must not be stored: rules only allow a real string or a missing field.
-  delete rest.pseudonym;
-  delete rest.pseudonymChangedAt;
-  // College lock and appeals are server-only.
-  delete rest.runnerCollege;
-  delete rest.runnerCollegeLockedAt;
-  delete rest.runnerCollegeAppeal;
-  if (rest.displayName == null) delete rest.displayName;
-  if (rest.photoUrl == null) delete rest.photoUrl;
-  if (rest.isAnonymous == null) delete rest.isAnonymous;
-  await setDoc(
-    doc(getDb(), USERS_COLLECTION, uid),
-    omitUndefined({
-      ...rest,
-      updatedAt: Timestamp.fromDate(new Date()),
-    }),
-    { merge: true },
-  );
+  const rest = pickClientWritableUserFields({
+    ...(partial as Record<string, unknown>),
+  });
+  const payload = omitUndefined({
+    ...rest,
+    updatedAt: Timestamp.fromDate(new Date()),
+  });
+  const ref = doc(getDb(), USERS_COLLECTION, uid);
+  try {
+    await setDoc(ref, payload, { merge: true });
+  } catch (err) {
+    if (!isPermissionDenied(err)) throw err;
+    const current = getAuthClient().currentUser;
+    if (!current || current.uid !== uid) throw err;
+    await current.getIdToken(true);
+    await setDoc(ref, payload, { merge: true });
+  }
+}
+
+/**
+ * After Auth sign-in: load users/{uid}, or create a minimal customer profile
+ * when Auth succeeded but the profile write never landed (e.g. older campus
+ * rules). Never touches runnerCollege.
+ */
+export async function ensureSignedInUserProfile(opts: {
+  uid: string;
+  email: string;
+  displayName?: string | null;
+}): Promise<UserProfile> {
+  const email = opts.email.trim().toLowerCase();
+  const campus = detectCampusFromEmail(email) ?? undefined;
+
+  const current = getAuthClient().currentUser;
+  if (current?.uid === opts.uid) {
+    await current.getIdToken(true);
+  }
+
+  let profile = await fetchUserProfile(opts.uid);
+  if (profile) {
+    if (campus && !profile.campus) {
+      try {
+        await updateUserProfileDoc(opts.uid, { campus });
+        profile = { ...profile, campus };
+      } catch {
+        // Campus backfill is best-effort; sign-in still proceeds.
+      }
+    }
+    return profile;
+  }
+
+  // Distinguish a missing doc from a denied read before creating.
+  try {
+    const snap = await getDoc(doc(getDb(), USERS_COLLECTION, opts.uid));
+    if (snap.exists()) {
+      profile = parseUserDoc(opts.uid, snap.data() as Record<string, unknown>);
+      if (campus && !profile.campus) {
+        try {
+          await updateUserProfileDoc(opts.uid, { campus });
+          profile = { ...profile, campus };
+        } catch {
+          // ignore
+        }
+      }
+      return profile;
+    }
+  } catch (err) {
+    if (isPermissionDenied(err)) {
+      throw new Error("We couldn't load your account. Please try again.");
+    }
+    throw err;
+  }
+
+  const fallbackName =
+    opts.displayName?.trim() ||
+    email.split("@")[0]?.trim() ||
+    "Student";
+
+  return createUserProfile(opts.uid, {
+    email,
+    fullName: fallbackName,
+    campus,
+    cuhkEmail: email,
+    isGuest: false,
+    isRunner: false,
+  });
 }
 
 export async function clearRunnerFromProfile(uid: string): Promise<void> {

@@ -291,20 +291,6 @@ export default function LoginPage() {
           <AppLogo size={96} className="mx-auto h-24 w-24" priority />
         </div>
 
-        <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
-          <button
-            type="button"
-            onClick={continueAsGuest}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
-          >
-            {itemCount > 0 ? "Continue as Guest · Checkout" : "Continue as Guest"}
-          </button>
-          <p className="mt-2 text-xs leading-snug text-gray-700">
-            Browse and order without signing in — checkout only needs your
-            dorm and lobby.
-          </p>
-        </div>
-
         <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
           Ordering groceries?{" "}
           <button
@@ -393,7 +379,12 @@ export default function LoginPage() {
               )}
             </div>
             {error && (
-              <p className="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+              <p
+                role="alert"
+                className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700"
+              >
+                {error}
+              </p>
             )}
             <button
               type="submit"

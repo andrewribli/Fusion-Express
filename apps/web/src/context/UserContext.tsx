@@ -23,6 +23,7 @@ import { isDemoAuth } from "@/lib/constants";
 import {
   clearRunnerFromProfile,
   createUserProfile,
+  ensureSignedInUserProfile,
   fetchUserProfile,
   updateUserProfileDoc,
 } from "@/lib/users";
@@ -205,20 +206,28 @@ async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> 
         profile.termsAcceptedAt ?? found.termsAcceptedAt.toISOString(),
     };
     if (profile.uid) {
-      void updateUserProfileDoc(profile.uid, {
-        role: updated.role,
-        isRunner: true,
-        runnerId: found.id,
-        runnerPaymentMethod: found.paymentMethod,
-        runnerPaymentId: found.paymentId,
-        termsAcceptedAt: updated.termsAcceptedAt,
-      });
+      try {
+        await updateUserProfileDoc(profile.uid, {
+          role: updated.role,
+          isRunner: true,
+          runnerId: found.id,
+          runnerPaymentMethod: found.paymentMethod,
+          runnerPaymentId: found.paymentId,
+          termsAcceptedAt: updated.termsAcceptedAt,
+        });
+      } catch (err) {
+        console.warn("Runner profile sync on sign-in:", err);
+      }
     }
     return updated;
   }
   if (!profile.isRunner && !profile.runnerId) return profile;
   if (profile.uid) {
-    void clearRunnerFromProfile(profile.uid);
+    try {
+      await clearRunnerFromProfile(profile.uid);
+    } catch (err) {
+      console.warn("Clear stale runner flags on sign-in:", err);
+    }
   }
   return {
     ...profile,
@@ -501,7 +510,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { signInWithEmail } = await import("@/lib/auth");
-      await signInWithEmail(email, password);
+      const firebaseUser = await signInWithEmail(email, password);
+      // Auth alone is not enough: without users/{uid} the app stays signed out
+      // and /login looks like the button did nothing. Hydrate (or repair) here.
+      const profile = await ensureSignedInUserProfile({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? email,
+        displayName: firebaseUser.displayName,
+      });
+      const hydrated = await restoreRunnerProfile({
+        ...profile,
+        photoURL: firebaseUser.photoURL || profile.photoURL,
+      });
+      persist(hydrated);
+      if (hydrated.isRunner || hydrated.termsAcceptedAt) {
+        profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
+        setTermsAccepted(true);
+      }
     },
     [persist],
   );

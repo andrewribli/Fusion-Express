@@ -165,6 +165,24 @@ service cloud.firestore {
       ]);
     }
 
+    /**
+     * Updates only check changed keys. Older profiles may carry extra fields
+     * from Admin SDK writes; requiring hasOnly on the whole doc blocked every
+     * post-login merge (role heal, campus backfill) and looked like a dead
+     * Sign In button.
+     */
+    function userUpdateKeysAllowed() {
+      return changedKeys().hasOnly([
+        'uid', 'fullName', 'email', 'phone', 'isGuest', 'createdAt', 'updatedAt',
+        'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
+        'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
+        'runnerPaymentMethod', 'runnerPaymentId',
+        'isRunner', 'runnerId',
+        'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt',
+        'favorites', 'campus'
+      ]);
+    }
+
     /** Signup stamps CUHK or CityU. Other values are rejected. */
     function campusValueOk() {
       return !('campus' in request.resource.data)
@@ -312,7 +330,7 @@ service cloud.firestore {
       let keys = changedKeys();
       return signedIn()
         && uid() == userId
-        && userKeysAllowed()
+        && userUpdateKeysAllowed()
         && roleIsValid()
         && request.resource.data.get('uid', uid()) == uid()
         && (
