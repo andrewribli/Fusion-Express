@@ -213,7 +213,7 @@ service cloud.firestore {
       allow get: if signedIn() && (uid() == userId || isAdmin());
       allow list: if isAdmin();
       allow create: if userCreateOk(userId);
-      allow update: if userUpdateOk(userId);
+      allow update: if userUpdateOk(userId) || isAdmin();
       allow delete: if false;
     }
 
