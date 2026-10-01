@@ -136,18 +136,18 @@ export async function fetchAdminDashboardStats(): Promise<AdminDashboardStats> {
 
   if (!isFirebaseConfigured()) {
     return {
-      pendingPayoutHkd: 0,
-      pendingPayoutCount: 0,
-      ordersToday: 0,
-      activeRunners: 0,
-      newUsers7d: 0,
-      revenueMonthHkd: 0,
-      discountFeesMonthHkd: 0,
-      missingReceiptCount: 0,
+      pendingPayoutHkd: 128.5,
+      pendingPayoutCount: 2,
+      ordersToday: 5,
+      activeRunners: 3,
+      newUsers7d: 4,
+      revenueMonthHkd: 420,
+      discountFeesMonthHkd: 36,
+      missingReceiptCount: 1,
       noPayoutMethodCount: 0,
       missingInfoCount: 0,
       statsMs: performance.now() - started,
-      warnings: ["Firebase is not configured"],
+      warnings: ["Local preview — Firebase not configured; showing sample metrics"],
     };
   }
 
@@ -280,6 +280,56 @@ export function runnerMissingPayout(user: UserProfile): boolean {
 }
 
 export async function fetchAdminUsers(): Promise<UserProfile[]> {
+  if (!isFirebaseConfigured()) {
+    const now = Date.now();
+    return [
+      {
+        uid: "local-1",
+        fullName: "Pauline Sidharta",
+        email: "1155233599@link.cuhk.edu.hk",
+        isRunner: true,
+        role: "both",
+        createdAt: new Date(now - 2 * 86400000).toISOString(),
+        runnerPaymentMethod: "FPS",
+        runnerPaymentId: "91234567",
+        payoutMethod: "fps",
+        payoutDetails: { fpsId: "91234567", accountHolderName: "Pauline Sidharta" },
+      },
+      {
+        uid: "local-2",
+        fullName: "",
+        email: "newstudent@my.cityu.edu.hk",
+        isRunner: false,
+        role: "customer",
+        createdAt: new Date(now - 1 * 86400000).toISOString(),
+      },
+      {
+        uid: "local-3",
+        fullName: "Demo Runner",
+        email: "demo@my.cityu.edu.hk",
+        isRunner: true,
+        role: "runner",
+        createdAt: new Date(now - 10 * 86400000).toISOString(),
+      },
+      {
+        uid: "local-4",
+        fullName: "Alex Chen",
+        email: "alex.chen@link.cuhk.edu.hk",
+        isRunner: true,
+        role: "both",
+        createdAt: new Date(now - 40 * 86400000).toISOString(),
+      },
+      {
+        uid: "local-5",
+        fullName: "Jordan Lee",
+        email: "jordan.lee@my.cityu.edu.hk",
+        phone: "51234567",
+        isRunner: false,
+        role: "customer",
+        createdAt: new Date(now - 3 * 86400000).toISOString(),
+      },
+    ];
+  }
   return fetchAllUsers();
 }
 
