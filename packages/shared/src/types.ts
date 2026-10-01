@@ -233,8 +233,17 @@ export interface Order {
   runnerEmail?: string;
   acceptedAt?: Date;
   purchasedAt?: Date;
-  runnerPaymentMethod?: "PayMe" | "FPS";
+  runnerPaymentMethod?: "PayMe" | "FPS" | "Bank";
   runnerPaymentId?: string;
+  /** Rich payout snapshot at accept (admin Verify & pay). */
+  runnerPayoutMethod?: "fps" | "payme" | "bank";
+  runnerPayoutDetails?: {
+    fpsId?: string;
+    paymePhone?: string;
+    bankName?: string;
+    bankAccount?: string;
+    accountHolderName?: string;
+  };
   /** Doc id in /runners. */
   runnerId?: string;
   /**
@@ -281,8 +290,18 @@ export interface Runner {
   phone: string;
   college: string;
   hall: string;
-  paymentMethod: "PayMe" | "FPS";
+  paymentMethod: "PayMe" | "FPS" | "Bank";
   paymentId: string;
+  /** Preferred payout channel (richer than paymentMethod/paymentId). */
+  payoutMethod?: "fps" | "payme" | "bank" | null;
+  payoutDetails?: {
+    fpsId?: string;
+    paymePhone?: string;
+    bankName?: string;
+    bankAccount?: string;
+    accountHolderName?: string;
+  };
+  payoutUpdatedAt?: Date;
   termsAcceptedAt: Date;
   active: boolean;
   totalEarned: number;
@@ -312,8 +331,16 @@ export interface RunnerRegistrationInput {
   phone: string;
   college: string;
   hall: string;
-  paymentMethod: "PayMe" | "FPS";
+  paymentMethod: "PayMe" | "FPS" | "Bank";
   paymentId: string;
+  payoutMethod?: "fps" | "payme" | "bank" | null;
+  payoutDetails?: {
+    fpsId?: string;
+    paymePhone?: string;
+    bankName?: string;
+    bankAccount?: string;
+    accountHolderName?: string;
+  };
 }
 
 export { BASE_DELIVERY_FEE as DELIVERY_FEE } from "./delivery";

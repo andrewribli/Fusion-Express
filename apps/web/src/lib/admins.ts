@@ -1,10 +1,11 @@
+import { isAdminEmail } from "@/lib/adminAccess";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Admin rights are a document in /admins keyed by auth uid. They deliberately
- * do not live on the user's own profile, which the user can write themselves.
- * Grant one from the Firebase console or the Admin SDK.
+ * Admin rights: /admins/{uid} document OR email on the founder allowlist.
+ * UI shortcuts use the same check; Firestore rules still require /admins
+ * for privileged reads — founders should have an /admins doc in prod.
  */
 export async function isAdminUid(uid?: string): Promise<boolean> {
   if (!uid || !isFirebaseConfigured()) return false;
@@ -14,4 +15,13 @@ export async function isAdminUid(uid?: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** True if the signed-in user may see admin chrome / open /admin. */
+export async function isAdminUser(opts: {
+  uid?: string;
+  email?: string | null;
+}): Promise<boolean> {
+  if (isAdminEmail(opts.email)) return true;
+  return isAdminUid(opts.uid);
 }

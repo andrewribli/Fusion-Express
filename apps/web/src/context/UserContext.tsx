@@ -19,7 +19,12 @@ import {
   fetchUserProfile,
   updateUserProfileDoc,
 } from "@/lib/users";
-import { findRunnerForUser } from "@/lib/runners";
+import { findRunnerForUser, updateRunnerPayout } from "@/lib/runners";
+import type { PayoutDetails, PayoutMethod } from "@fusion-express/shared/payout";
+import {
+  primaryPayoutId,
+  toRunnerPaymentLabel,
+} from "@fusion-express/shared/payout";
 import {
   defaultModeForRole,
   normalizeRole,
@@ -41,8 +46,17 @@ export interface UserProfile {
   /** Which experiences this account signed up for. */
   role?: UserRole;
   runnerId?: string;
-  runnerPaymentMethod?: "PayMe" | "FPS";
+  runnerPaymentMethod?: "PayMe" | "FPS" | "Bank";
   runnerPaymentId?: string;
+  payoutMethod?: "fps" | "payme" | "bank" | null;
+  payoutDetails?: {
+    fpsId?: string;
+    paymePhone?: string;
+    bankName?: string;
+    bankAccount?: string;
+    accountHolderName?: string;
+  };
+  payoutUpdatedAt?: string;
   termsAcceptedAt?: string;
   cuhkEmail?: string;
   cuhkVerifiedAt?: string;
@@ -102,8 +116,18 @@ interface UserContextValue {
   acceptRunnerTerms: () => void;
   setRunnerRegistered: (
     runnerId: string,
-    payment: { method: "PayMe" | "FPS"; id: string },
+    payment: {
+      method: "PayMe" | "FPS" | "Bank";
+      id: string;
+      payoutMethod?: PayoutMethod;
+      payoutDetails?: PayoutDetails;
+    },
   ) => void;
+  /** Persist FPS / PayMe / bank payout destination on user + runners docs. */
+  savePayoutDetails: (
+    method: PayoutMethod,
+    details: PayoutDetails,
+  ) => Promise<void>;
   bootError: string | null;
 }
 
@@ -168,6 +192,9 @@ async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> 
       runnerId: found.id,
       runnerPaymentMethod: found.paymentMethod,
       runnerPaymentId: found.paymentId,
+      payoutMethod: found.payoutMethod ?? undefined,
+      payoutDetails: found.payoutDetails,
+      payoutUpdatedAt: found.payoutUpdatedAt?.toISOString(),
       termsAcceptedAt:
         profile.termsAcceptedAt ?? found.termsAcceptedAt.toISOString(),
     };
@@ -178,6 +205,9 @@ async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> 
         runnerId: found.id,
         runnerPaymentMethod: found.paymentMethod,
         runnerPaymentId: found.paymentId,
+        payoutMethod: found.payoutMethod ?? null,
+        payoutDetails: found.payoutDetails,
+        payoutUpdatedAt: updated.payoutUpdatedAt,
         termsAcceptedAt: updated.termsAcceptedAt,
       });
     }
@@ -193,6 +223,9 @@ async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> 
     runnerId: undefined,
     runnerPaymentMethod: undefined,
     runnerPaymentId: undefined,
+    payoutMethod: undefined,
+    payoutDetails: undefined,
+    payoutUpdatedAt: undefined,
   };
 }
 
@@ -534,11 +567,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [firebaseEnabled]);
 
   const setRunnerRegistered = useCallback(
-    (runnerId: string, payment: { method: "PayMe" | "FPS"; id: string }) => {
+    (
+      runnerId: string,
+      payment: {
+        method: "PayMe" | "FPS" | "Bank";
+        id: string;
+        payoutMethod?: PayoutMethod;
+        payoutDetails?: PayoutDetails;
+      },
+    ) => {
       setUser((prev) => {
         if (!prev) return prev;
         const termsAcceptedAt = prev.termsAcceptedAt ?? new Date().toISOString();
         const role = roleWithRunner(normalizeRole(prev.role, prev.isRunner));
+        const payoutUpdatedAt = payment.payoutMethod
+          ? new Date().toISOString()
+          : prev.payoutUpdatedAt;
         const updated: UserProfile = {
           ...prev,
           role,
@@ -546,6 +590,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
           runnerId,
           runnerPaymentMethod: payment.method,
           runnerPaymentId: payment.id,
+          payoutMethod: payment.payoutMethod ?? prev.payoutMethod,
+          payoutDetails: payment.payoutDetails ?? prev.payoutDetails,
+          payoutUpdatedAt,
           termsAcceptedAt,
         };
         cacheProfile(updated);
@@ -556,6 +603,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
             runnerId,
             runnerPaymentMethod: payment.method,
             runnerPaymentId: payment.id,
+            payoutMethod: payment.payoutMethod ?? null,
+            payoutDetails: payment.payoutDetails,
+            payoutUpdatedAt,
             termsAcceptedAt,
           });
         }
@@ -565,6 +615,46 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setTermsAccepted(true);
     },
     [firebaseEnabled],
+  );
+
+  const savePayoutDetails = useCallback(
+    async (method: PayoutMethod, details: PayoutDetails) => {
+      const label = toRunnerPaymentLabel(method)!;
+      const paymentId = primaryPayoutId(method, details);
+      const payoutUpdatedAt = new Date().toISOString();
+
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated: UserProfile = {
+          ...prev,
+          runnerPaymentMethod: label,
+          runnerPaymentId: paymentId,
+          payoutMethod: method,
+          payoutDetails: details,
+          payoutUpdatedAt,
+        };
+        cacheProfile(updated);
+        return updated;
+      });
+
+      const uid = user?.uid;
+      const runnerId = user?.runnerId;
+      if (uid && firebaseEnabled && !isDemoAuth()) {
+        await updateUserProfileDoc(uid, {
+          runnerPaymentMethod: label,
+          runnerPaymentId: paymentId,
+          payoutMethod: method,
+          payoutDetails: details,
+          payoutUpdatedAt,
+        });
+      }
+      if (runnerId && firebaseEnabled && !isDemoAuth()) {
+        await updateRunnerPayout(runnerId, method, details);
+      } else if (runnerId && isDemoAuth()) {
+        await updateRunnerPayout(runnerId, method, details);
+      }
+    },
+    [firebaseEnabled, user?.uid, user?.runnerId],
   );
 
   const hasAcceptedTerms =
@@ -600,6 +690,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       updateProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
+      savePayoutDetails,
     }),
     [
       user,
@@ -622,6 +713,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       updateProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
+      savePayoutDetails,
     ],
   );
 

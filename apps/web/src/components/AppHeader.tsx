@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AccountMenu } from "@/components/AccountMenu";
+import { AdminShortcutButton } from "@/components/AdminShortcutButton";
 import { AppLogo } from "@/components/AppLogo";
 import { NavIcon } from "@/components/NavIcon";
 import { RunnerModeBanner } from "@/components/RunnerModeBanner";
@@ -194,6 +195,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               </Link>
             )}
 
+            <AdminShortcutButton />
             <AccountMenu />
           </nav>
         </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { BootScreen } from "@/components/BootScreen";
 import { AccountMenu } from "@/components/AccountMenu";
+import { AdminShortcutButton } from "@/components/AdminShortcutButton";
 import { AppLogo } from "@/components/AppLogo";
 import { useBothCarts } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
@@ -26,7 +27,10 @@ export default function RootChooserPage() {
             <AppLogo size={44} className="h-11 w-11" />
             <span className="text-sm font-bold tracking-tight">GraceRun</span>
           </Link>
-          <AccountMenu />
+          <div className="flex items-center gap-2">
+            <AdminShortcutButton />
+            <AccountMenu />
+          </div>
         </div>
       </header>
 

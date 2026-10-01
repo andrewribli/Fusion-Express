@@ -139,35 +139,23 @@ export default function AdminUsersPage() {
               <p className="mt-1 text-sm text-gray-500">
                 {loading
                   ? "Loading…"
-                  : `${users.length} account${users.length === 1 ? "" : "s"}, sorted by name`}
+                  : `${users.length} account${users.length === 1 ? "" : "s"} · classic table`}
               </p>
-              <p className="mt-2 text-sm">
-                <Link href="/admin/payouts" className="font-medium text-[#ED1C24] underline">
+              <p className="mt-2 text-sm text-gray-600">
+                <Link href="/admin" className="font-medium text-gray-800 hover:underline">
+                  ← Daily ops dashboard
+                </Link>
+                {" · "}
+                <Link href="/admin/payouts" className="hover:underline">
                   Runner payouts
                 </Link>
                 {" · "}
-                <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
+                <Link href="/admin/messaging" className="hover:underline">
                   Messaging
                 </Link>
                 {" · "}
-                <Link href="/admin/refunds" className="font-medium text-[#ED1C24] underline">
-                  Pending Fusion price refunds
-                </Link>
-                {" · "}
-                <Link href="/admin/feedback" className="font-medium text-[#ED1C24] underline">
-                  Feedback
-                </Link>
-                {" · "}
-                <Link href="/admin/support" className="font-medium text-[#ED1C24] underline">
-                  Support chat
-                </Link>
-                {" · "}
-                <Link href="/admin/payments" className="font-medium text-[#ED1C24] underline">
-                  Payment submissions
-                </Link>
-                {" · "}
-                <Link href="/admin/warnings" className="font-medium text-[#ED1C24] underline">
-                  Warnings
+                <Link href="/admin/support" className="hover:underline">
+                  Support
                 </Link>
               </p>
 

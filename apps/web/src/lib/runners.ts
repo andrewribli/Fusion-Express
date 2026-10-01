@@ -1,4 +1,9 @@
 import type { Runner, RunnerRegistrationInput } from "@/lib/types";
+import type { PayoutDetails, PayoutMethod } from "@fusion-express/shared/payout";
+import {
+  primaryPayoutId,
+  toRunnerPaymentLabel,
+} from "@fusion-express/shared/payout";
 import { collectionName, isDemoAuth } from "@/lib/constants";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { omitUndefined } from "@/lib/omit-undefined";
@@ -29,6 +34,14 @@ function parseRunner(id: string, data: Record<string, unknown>): Runner {
     hall: String(data.hall ?? ""),
     paymentMethod: data.paymentMethod as Runner["paymentMethod"],
     paymentId: String(data.paymentId ?? ""),
+    payoutMethod: (data.payoutMethod as Runner["payoutMethod"]) ?? null,
+    payoutDetails: data.payoutDetails
+      ? (data.payoutDetails as Runner["payoutDetails"])
+      : undefined,
+    payoutUpdatedAt: data.payoutUpdatedAt
+      ? (data.payoutUpdatedAt as Timestamp).toDate?.() ??
+        new Date(String(data.payoutUpdatedAt))
+      : undefined,
     termsAcceptedAt: data.termsAcceptedAt
       ? (data.termsAcceptedAt as Timestamp).toDate?.() ??
         new Date(String(data.termsAcceptedAt))
@@ -83,13 +96,55 @@ export async function registerRunner(
     const ref = await addDoc(collection(getDb(), RUNNERS_COLLECTION), {
       ...omitUndefined({ ...payload } as Record<string, unknown>),
       termsAcceptedAt: Timestamp.fromDate(now),
+      ...(input.payoutMethod
+        ? { payoutUpdatedAt: Timestamp.fromDate(now) }
+        : {}),
     });
     return ref.id;
   }
 
   const id = `runner-${crypto.randomUUID().slice(0, 8)}`;
-  mockRunners.set(id, { id, ...payload, termsAcceptedAt: now });
+  mockRunners.set(id, {
+    id,
+    ...payload,
+    termsAcceptedAt: now,
+    payoutUpdatedAt: input.payoutMethod ? now : undefined,
+  });
   return id;
+}
+
+export async function updateRunnerPayout(
+  runnerId: string,
+  method: PayoutMethod,
+  details: PayoutDetails,
+): Promise<void> {
+  const label = toRunnerPaymentLabel(method)!;
+  const paymentId = primaryPayoutId(method, details);
+  const now = new Date();
+  const patch = {
+    paymentMethod: label,
+    paymentId,
+    payoutMethod: method,
+    payoutDetails: details,
+    payoutUpdatedAt: now,
+  };
+
+  if (isDemoAuth()) {
+    const existing = mockRunners.get(runnerId);
+    if (existing) mockRunners.set(runnerId, { ...existing, ...patch });
+    return;
+  }
+
+  if (isFirebaseConfigured()) {
+    await updateDoc(doc(getDb(), RUNNERS_COLLECTION, runnerId), {
+      ...patch,
+      payoutUpdatedAt: Timestamp.fromDate(now),
+    });
+    return;
+  }
+
+  const existing = mockRunners.get(runnerId);
+  if (existing) mockRunners.set(runnerId, { ...existing, ...patch });
 }
 
 export async function fetchRunner(runnerId: string): Promise<Runner | null> {

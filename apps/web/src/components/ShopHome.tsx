@@ -10,6 +10,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
+import { AdminShortcutButton } from "@/components/AdminShortcutButton";
 import { AppShell } from "@/components/AppShell";
 import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { CustomItemCard } from "@/components/CustomItemCard";
@@ -382,6 +383,7 @@ export function ShopHome() {
             >
               Switch to Runner
             </Link>
+            <AdminShortcutButton dark />
             <div className="hidden shrink-0 sm:block">
               <AccountMenu hideThemeChip />
             </div>

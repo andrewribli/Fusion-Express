@@ -1,58 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { AppHeader } from "@/components/AppHeader";
-import { AppShell } from "@/components/AppShell";
 import { BootScreen } from "@/components/BootScreen";
-import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
-import { isAdminUid } from "@/lib/admins";
+import { isAdminUser } from "@/lib/admins";
 
 function AdminGate({ children }: { children: ReactNode }) {
   const { user } = useUser();
+  const router = useRouter();
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void isAdminUid(user?.uid).then((result) => {
-      if (!cancelled) setAllowed(result);
+    void isAdminUser({ uid: user?.uid, email: user?.email }).then((result) => {
+      if (cancelled) return;
+      setAllowed(result);
+      if (!result) router.replace("/");
     });
     return () => {
       cancelled = true;
     };
-  }, [user?.uid]);
+  }, [user?.uid, user?.email, router]);
 
   if (allowed === null) {
     return <BootScreen />;
   }
 
   if (!allowed) {
-    return (
-      <AppShell hideNav>
-        <LakersWallpaper>
-          <AppHeader showBack backHref="/" title="Admin" />
-          <main className="mx-auto max-w-md px-4 py-16 text-center">
-            <div className="rounded-2xl bg-white/95 p-6 shadow-sm">
-              <h1 className="text-lg font-bold text-gray-900">
-                Admin access only
-              </h1>
-              <p className="mt-2 text-sm text-gray-600">
-                This page is limited to GraceRun admins. If you need access, ask
-                for your account to be added.
-              </p>
-              <Link
-                href="/"
-                className="mt-5 inline-block rounded-xl bg-[#ED1C24] px-5 py-2.5 text-sm font-semibold text-white"
-              >
-                Back to home
-              </Link>
-            </div>
-          </main>
-        </LakersWallpaper>
-      </AppShell>
-    );
+    return <BootScreen />;
   }
 
   return <>{children}</>;
@@ -63,5 +41,14 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
     <RequireAuth>
       <AdminGate>{children}</AdminGate>
     </RequireAuth>
+  );
+}
+
+/** Kept so accidental imports of the old denied UI still typecheck. */
+export function AdminAccessDeniedLink() {
+  return (
+    <Link href="/" className="text-sm font-semibold text-[#ED1C24] underline">
+      Back to home
+    </Link>
   );
 }
