@@ -9,18 +9,38 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { ModeSwitchButton } from "@/components/ModeSwitchButton";
+import { RunnerPayoutSettings } from "@/components/RunnerPayoutSettings";
 import { useUser } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { roleLabel } from "@/lib/roles";
+import {
+  hasPayoutOnFile,
+  payoutMethodLabel,
+} from "@fusion-express/shared/payout";
 
 export function ProfileView() {
-  const { user, logout, firebaseEnabled, role, canRunnerMode, canSwitchModes, mode } = useUser();
+  const {
+    user,
+    logout,
+    firebaseEnabled,
+    role,
+    canRunnerMode,
+    canSwitchModes,
+    mode,
+    savePayoutDetails,
+  } = useUser();
   const { href: trackHref } = useActiveCustomerOrders();
   const demoAuth = useDemoAuth();
   const [changeOpen, setChangeOpen] = useState(false);
   const canChangePassword = firebaseEnabled && !demoAuth && Boolean(user?.email);
   const isGuest = Boolean(user?.isGuest);
+  const payoutOk = hasPayoutOnFile({
+    payoutMethod: user?.payoutMethod,
+    payoutDetails: user?.payoutDetails,
+    runnerPaymentMethod: user?.runnerPaymentMethod,
+    runnerPaymentId: user?.runnerPaymentId,
+  });
 
   useEffect(() => {
     if (!canChangePassword) return;
@@ -79,10 +99,31 @@ export function ProfileView() {
 
             {user?.isRunner && mode === "runner" ? (
               <section className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-5">
-                <h2 className="text-sm font-semibold text-fusion-red">Runner Profile</h2>
+                <h2 className="text-sm font-semibold text-fusion-red">
+                  Runner Profile
+                </h2>
                 <p className="mt-2 text-sm text-gray-700">
-                  Registered runner · Payout via {user.runnerPaymentMethod}
+                  Registered runner
+                  {payoutOk
+                    ? ` · Payout via ${
+                        payoutMethodLabel(user.payoutMethod) ||
+                        user.runnerPaymentMethod ||
+                        "—"
+                      }`
+                    : " · No payment method on file"}
                 </p>
+                {!payoutOk && (
+                  <p className="mt-2 rounded-lg bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-900">
+                    Add a payout method below before you can accept orders.
+                  </p>
+                )}
+                <div className="mt-4 rounded-xl border border-white/80 bg-white p-4">
+                  <RunnerPayoutSettings
+                    initialMethod={user.payoutMethod}
+                    initialDetails={user.payoutDetails}
+                    onSave={savePayoutDetails}
+                  />
+                </div>
                 <Link
                   href="/runner/earnings"
                   className="mt-3 inline-block text-sm font-semibold text-fusion-red underline"
