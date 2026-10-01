@@ -21,6 +21,7 @@ import {
   filterAndSortUsers,
   runnerMissingPayout,
   userCampus,
+  userIsDemo,
   userMissingInfo,
   type AdminDashboardStats,
   type AdminListFilter,
@@ -282,7 +283,8 @@ export function AdminDashboard() {
       fetchAdminDashboardStats(),
       fetchAdminUsers(),
     ]);
-    const extras = countActionExtras(nextUsers);
+    const forCounts = nextUsers.filter((u) => !userIsDemo(u));
+    const extras = countActionExtras(forCounts);
     setStats({ ...nextStats, ...extras });
     setUsers(nextUsers);
     try {
@@ -497,12 +499,16 @@ export function AdminDashboard() {
                       : "Admin home"}
                 </p>
               </div>
-              <div className="relative">
+              <div className="relative z-[60]">
                 <button
                   type="button"
-                  onClick={() => setSettingsOpen((v) => !v)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSettingsOpen((v) => !v);
+                  }}
                   className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                   aria-label="Settings"
+                  aria-expanded={settingsOpen}
                 >
                   Settings
                 </button>
@@ -510,11 +516,17 @@ export function AdminDashboard() {
                   <>
                     <button
                       type="button"
-                      className="fixed inset-0 z-40"
+                      className="fixed inset-0 z-[55] cursor-default bg-transparent"
                       aria-label="Close settings"
-                      onClick={() => setSettingsOpen(false)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setSettingsOpen(false);
+                      }}
                     />
-                    <div className="absolute right-0 z-50 mt-1 w-56 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg">
+                    <div
+                      className="absolute right-0 z-[70] mt-1 w-56 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
                       <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
