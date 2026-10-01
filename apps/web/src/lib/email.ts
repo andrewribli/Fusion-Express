@@ -54,8 +54,10 @@ function brandedEmail(opts: {
   heading: string;
   bodyHtml: string;
   trackUrl: string;
+  ctaLabel?: string;
 }): string {
   const heading = escapeHtml(opts.heading);
+  const ctaLabel = escapeHtml(opts.ctaLabel ?? "Track your order");
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,7 +82,7 @@ function brandedEmail(opts: {
               <h1 style="margin:0 0 16px;font-size:20px;color:#111827;">${heading}</h1>
               ${opts.bodyHtml}
               <p style="margin:24px 0 0;">
-                <a href="${escapeHtml(opts.trackUrl)}" style="display:inline-block;background:${ACCENT};color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;">Track your order</a>
+                <a href="${escapeHtml(opts.trackUrl)}" style="display:inline-block;background:${ACCENT};color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;">${ctaLabel}</a>
               </p>
             </td>
           </tr>
@@ -212,6 +214,39 @@ export async function sendOrderStatusUpdate(
     subject: `GraceRun: ${copy.heading} (${orderId})`,
     html,
     text: `${copy.heading}\nOrder ${orderId}\n${copy.body}\nTrack: ${trackUrl}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** One notice when an order-chat burst stays unread. Subject is fixed. */
+export async function sendUnreadChatEmail(opts: {
+  to: string;
+  orderId: string;
+  campus?: string;
+}): Promise<void> {
+  const orderId = opts.orderId.trim();
+  const to = opts.to.trim();
+  if (!orderId || !to.includes("@")) {
+    throw new Error("A recipient and order are required");
+  }
+  const path =
+    opts.campus === "cityu"
+      ? `/cityu/chat/${encodeURIComponent(orderId)}`
+      : `/chat/${encodeURIComponent(orderId)}`;
+  const chatUrl = `${appOrigin()}${path}`;
+  const html = brandedEmail({
+    preheader: "You have a new message",
+    heading: "You have a new message",
+    trackUrl: chatUrl,
+    ctaLabel: "Open chat",
+    bodyHtml: `<p style="margin:0;font-size:14px;color:#111827;">You have a new message about order ${escapeHtml(orderId)}. Open the chat to read it.</p>`,
+  });
+  const { error } = await getResend().emails.send({
+    from: fromAddress(),
+    to,
+    subject: "You have a new message",
+    html,
+    text: `You have a new message about order ${orderId}.\nOpen the chat: ${chatUrl}\n\n${FOOTER}`,
   });
   if (error) throw new Error(error.message);
 }
