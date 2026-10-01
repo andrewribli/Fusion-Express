@@ -16,3 +16,4 @@ export * from "./orders";
 export * from "./cuhk-email";
 export * from "./shop-kind";
 export * from "./canteen";
+export * from "./payout";

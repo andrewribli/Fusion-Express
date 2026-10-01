@@ -147,6 +147,7 @@ service cloud.firestore {
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
         'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
+        'payoutMethod', 'payoutDetails', 'payoutUpdatedAt',
         'isRunner', 'runnerId'
       ]);
     }
@@ -302,7 +303,8 @@ service cloud.firestore {
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
           'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
-          'runnerPaymentId', 'runnerEmail'
+          'runnerPaymentId', 'runnerEmail', 'runnerPayoutMethod',
+          'runnerPayoutDetails'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
         && request.resource.data.runnerUid == uid();

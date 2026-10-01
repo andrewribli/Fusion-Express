@@ -27,7 +27,8 @@
     "./data/canteen/uc-menu.json": "./data/canteen/uc-menu.json",
     "./data/canteen/restaurants.json": "./data/canteen/restaurants.json",
     "./canteen": "./src/canteen.ts",
-    "./shop-kind": "./src/shop-kind.ts"
+    "./shop-kind": "./src/shop-kind.ts",
+    "./payout": "./src/payout.ts"
   },
   "dependencies": {
     "firebase": "^12.17.1"

@@ -167,6 +167,10 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerPaymentId: data.runnerPaymentId
       ? String(data.runnerPaymentId)
       : undefined,
+    runnerPayoutMethod: data.runnerPayoutMethod as Order["runnerPayoutMethod"],
+    runnerPayoutDetails: data.runnerPayoutDetails
+      ? (data.runnerPayoutDetails as Order["runnerPayoutDetails"])
+      : undefined,
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
     runnerUid: data.runnerUid ? String(data.runnerUid) : undefined,
     runnerName: data.runnerName ? String(data.runnerName) : undefined,
@@ -506,13 +510,27 @@ export async function acceptOrder(
   runnerId: string,
   runnerName: string,
   runnerUid: string,
-  payment?: { method: "PayMe" | "FPS"; id: string; email?: string },
+  payment?: {
+    method: "PayMe" | "FPS" | "Bank";
+    id: string;
+    email?: string;
+    payoutMethod?: "fps" | "payme" | "bank";
+    payoutDetails?: {
+      fpsId?: string;
+      paymePhone?: string;
+      bankName?: string;
+      bankAccount?: string;
+      accountHolderName?: string;
+    };
+  },
 ): Promise<void> {
   const now = new Date();
   const paymentFields = omitUndefined({
     runnerPaymentMethod: payment?.method,
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
+    runnerPayoutMethod: payment?.payoutMethod,
+    runnerPayoutDetails: payment?.payoutDetails,
   });
   if (isFirebaseConfigured()) {
     const db = getDb();
@@ -560,6 +578,8 @@ export async function acceptOrder(
     runnerPaymentMethod: payment?.method,
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
+    runnerPayoutMethod: payment?.payoutMethod,
+    runnerPayoutDetails: payment?.payoutDetails,
   });
 }
 
@@ -581,6 +601,8 @@ export async function updateOrderStatus(
       | "runnerPaymentMethod"
       | "runnerPaymentId"
       | "runnerEmail"
+      | "runnerPayoutMethod"
+      | "runnerPayoutDetails"
     >
   >,
 ): Promise<void> {
@@ -635,6 +657,12 @@ export async function updateOrderStatus(
       if (extras?.runnerPaymentId) {
         updates.runnerPaymentId = extras.runnerPaymentId;
       }
+      if (extras?.runnerPayoutMethod) {
+        updates.runnerPayoutMethod = extras.runnerPayoutMethod;
+      }
+      if (extras?.runnerPayoutDetails) {
+        updates.runnerPayoutDetails = extras.runnerPayoutDetails;
+      }
       await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined(updates));
       return;
     } catch (err) {
@@ -676,6 +704,12 @@ export async function updateOrderStatus(
       order.runnerPaymentMethod = extras.runnerPaymentMethod;
     }
     if (extras?.runnerPaymentId) order.runnerPaymentId = extras.runnerPaymentId;
+    if (extras?.runnerPayoutMethod) {
+      order.runnerPayoutMethod = extras.runnerPayoutMethod;
+    }
+    if (extras?.runnerPayoutDetails) {
+      order.runnerPayoutDetails = extras.runnerPayoutDetails;
+    }
   }
 }
 

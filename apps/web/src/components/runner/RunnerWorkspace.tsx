@@ -48,6 +48,11 @@ import {
 } from "@/lib/order-status";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
+import {
+  hasPayoutOnFile,
+  primaryPayoutId,
+  toRunnerPaymentLabel,
+} from "@fusion-express/shared/payout";
 
 type Tab = "available" | "active" | "expired" | "completed";
 
@@ -477,11 +482,38 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
   function requestAccept(order: Order) {
     setAcceptError("");
     setPreviewOrder(null);
+    if (
+      !hasPayoutOnFile({
+        payoutMethod: user?.payoutMethod,
+        payoutDetails: user?.payoutDetails,
+        runnerPaymentMethod: user?.runnerPaymentMethod,
+        runnerPaymentId: user?.runnerPaymentId,
+      })
+    ) {
+      setAcceptError(
+        "Add a payout method (FPS, PayMe, or bank) on Profile before accepting orders.",
+      );
+      return;
+    }
     setConfirmOrder(order);
   }
 
   async function handleConfirmAccept() {
     if (!user || !confirmOrder) return;
+    if (
+      !hasPayoutOnFile({
+        payoutMethod: user.payoutMethod,
+        payoutDetails: user.payoutDetails,
+        runnerPaymentMethod: user.runnerPaymentMethod,
+        runnerPaymentId: user.runnerPaymentId,
+      })
+    ) {
+      setAcceptError(
+        "Add a payout method on Profile before accepting orders.",
+      );
+      setConfirmOrder(null);
+      return;
+    }
     const found = user.runnerId
       ? { id: user.runnerId }
       : await findRunnerForUser({
@@ -496,15 +528,25 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     setAccepting(true);
     setAcceptError("");
     try {
+      const methodLabel =
+        toRunnerPaymentLabel(user.payoutMethod) ??
+        user.runnerPaymentMethod ??
+        "PayMe";
+      const paymentId =
+        primaryPayoutId(user.payoutMethod, user.payoutDetails) ||
+        user.runnerPaymentId ||
+        "";
       await acceptOrder(
         confirmOrder.id,
         found.id,
         user.fullName,
         getUserAccountId(user),
         {
-          method: user.runnerPaymentMethod ?? "PayMe",
-          id: user.runnerPaymentId ?? user.phone ?? "",
+          method: methodLabel,
+          id: paymentId,
           email: user.email,
+          payoutMethod: user.payoutMethod ?? undefined,
+          payoutDetails: user.payoutDetails,
         },
       );
       setConfirmOrder(null);
@@ -868,9 +910,17 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
             {!loading && tab === "available" && (
               <section className="mt-4">
                 {acceptError && (
-                  <p className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {acceptError}
-                  </p>
+                  <div className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <p>{acceptError}</p>
+                    {/payout method/i.test(acceptError) && (
+                      <Link
+                        href="/runner/profile"
+                        className="mt-2 inline-block font-semibold underline"
+                      >
+                        Add payout details →
+                      </Link>
+                    )}
+                  </div>
                 )}
                 {pending.length === 0 ? (
                   <div className="rounded-2xl bg-white px-6 py-12 text-center shadow-sm">

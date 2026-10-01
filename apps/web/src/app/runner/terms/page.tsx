@@ -6,8 +6,15 @@ import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
+import { RunnerPayoutSettings } from "@/components/RunnerPayoutSettings";
 import { useUser } from "@/context/UserContext";
 import { registerRunner } from "@/lib/runners";
+import type { PayoutDetails, PayoutMethod } from "@fusion-express/shared/payout";
+import {
+  hasCompletePayout,
+  primaryPayoutId,
+  toRunnerPaymentLabel,
+} from "@fusion-express/shared/payout";
 
 const SECTIONS = [
   {
@@ -39,6 +46,7 @@ const SECTIONS = [
       "You pay Fusion at the till. GraceRun reimburses the receipt total plus your delivery fee after you deliver and the owner verifies your uploads.",
       "Customers pay GraceRun (not you) within 24 hours of delivery.",
       "Earnings and pending payouts are tracked in the Runner Dashboard and admin payouts page.",
+      "You must provide FPS, PayMe, or bank details so GraceRun can reimburse you.",
     ],
   },
   {
@@ -93,6 +101,8 @@ export default function RunnerTermsPage() {
   const { user, isReady, setRunnerRegistered, setMode } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [payoutMethod, setPayoutMethod] = useState<PayoutMethod | null>(null);
+  const [payoutDetails, setPayoutDetails] = useState<PayoutDetails | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
@@ -100,7 +110,6 @@ export default function RunnerTermsPage() {
       router.replace("/runner/dashboard");
       return;
     }
-    // Guest checkout accounts need a full customer/runner profile first.
     if (user?.isGuest) {
       router.replace("/profile?complete=runner");
     }
@@ -121,14 +130,15 @@ export default function RunnerTermsPage() {
       setError("Add your student ID on Profile before becoming a runner.");
       return;
     }
+    if (!payoutMethod || !hasCompletePayout(payoutMethod, payoutDetails)) {
+      setError("Add how you want to be paid (FPS, PayMe, or bank) before continuing.");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
-      const paymentId =
-        user.runnerPaymentId ||
-        user.phone?.trim() ||
-        user.email ||
-        user.uid;
+      const paymentId = primaryPayoutId(payoutMethod, payoutDetails);
+      const paymentMethod = toRunnerPaymentLabel(payoutMethod)!;
       const runnerId = await registerRunner({
         uid: user.uid,
         fullName: user.fullName.trim() || "Runner",
@@ -136,12 +146,16 @@ export default function RunnerTermsPage() {
         phone: user.phone?.trim() || paymentId,
         college: user.college ?? "",
         hall: user.hall ?? "",
-        paymentMethod: user.runnerPaymentMethod ?? "PayMe",
+        paymentMethod,
         paymentId,
+        payoutMethod,
+        payoutDetails: payoutDetails ?? undefined,
       });
       setRunnerRegistered(runnerId, {
-        method: user.runnerPaymentMethod ?? "PayMe",
+        method: paymentMethod,
         id: paymentId,
+        payoutMethod,
+        payoutDetails: payoutDetails ?? undefined,
       });
       setMode("runner");
       router.push("/runner/dashboard");
@@ -157,35 +171,47 @@ export default function RunnerTermsPage() {
       <LakersWallpaper>
         <AppHeader showBack backHref="/" title="Runner Terms" />
 
-        <main className="mx-auto max-w-[480px] px-4 py-6 pb-32">
+        <main className="mx-auto max-w-[480px] px-4 py-6 pb-40">
           <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
-          <h1 className="text-xl font-bold text-gray-900">
-            Runner Terms &amp; Conditions
-          </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Read these terms, then tap I Agree. That is all you need to start
-            picking up orders.
-          </p>
-
-          <div className="mt-6 space-y-8">
-            {SECTIONS.map((section) => (
-              <section key={section.title}>
-                <h2 className="text-base font-bold text-fusion-red">
-                  {section.title}
-                </h2>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-gray-700">
-                  {section.body.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-          {error && (
-            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+            <h1 className="text-xl font-bold text-gray-900">
+              Runner Terms &amp; Conditions
+            </h1>
+            <p className="mt-2 text-sm text-gray-500">
+              Read these terms, add your payout details, then tap I Agree.
             </p>
-          )}
+
+            <div className="mt-6 space-y-8">
+              {SECTIONS.map((section) => (
+                <section key={section.title}>
+                  <h2 className="text-base font-bold text-fusion-red">
+                    {section.title}
+                  </h2>
+                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-gray-700">
+                    {section.body.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+
+            <div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+              <RunnerPayoutSettings
+                initialMethod={payoutMethod}
+                initialDetails={payoutDetails}
+                submitLabel="Save payout method"
+                onSave={(method, details) => {
+                  setPayoutMethod(method);
+                  setPayoutDetails(details);
+                }}
+              />
+            </div>
+
+            {error && (
+              <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
           </div>
 
           <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white p-4 md:static md:mt-10 md:border-0 md:p-0">

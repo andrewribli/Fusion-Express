@@ -32,6 +32,17 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
     runnerPaymentMethod: data.runnerPaymentMethod as UserProfile["runnerPaymentMethod"],
     runnerPaymentId: data.runnerPaymentId ? String(data.runnerPaymentId) : undefined,
+    payoutMethod: (data.payoutMethod as UserProfile["payoutMethod"]) ?? null,
+    payoutDetails: data.payoutDetails
+      ? (data.payoutDetails as UserProfile["payoutDetails"])
+      : undefined,
+    payoutUpdatedAt: data.payoutUpdatedAt
+      ? typeof data.payoutUpdatedAt === "object" &&
+        data.payoutUpdatedAt &&
+        "toDate" in data.payoutUpdatedAt
+        ? (data.payoutUpdatedAt as Timestamp).toDate().toISOString()
+        : String(data.payoutUpdatedAt)
+      : undefined,
     termsAcceptedAt: data.termsAcceptedAt
       ? typeof data.termsAcceptedAt === "object" &&
         data.termsAcceptedAt &&
@@ -142,6 +153,9 @@ export async function clearRunnerFromProfile(uid: string): Promise<void> {
       runnerId: deleteField(),
       runnerPaymentMethod: deleteField(),
       runnerPaymentId: deleteField(),
+      payoutMethod: deleteField(),
+      payoutDetails: deleteField(),
+      payoutUpdatedAt: deleteField(),
       updatedAt: Timestamp.fromDate(new Date()),
     },
     { merge: true },

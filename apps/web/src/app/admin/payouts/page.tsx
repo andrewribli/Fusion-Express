@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { AdminRunnerPayoutDetails } from "@/components/AdminRunnerPayoutDetails";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import {
@@ -163,7 +164,20 @@ export default function AdminPayoutsPage() {
                           <div>
                             <p className="font-bold text-gray-900">{order.id}</p>
                             <p className="text-xs text-gray-500">
-                              {order.runnerName ?? "Runner"} ·{" "}
+                              <span className="font-semibold text-gray-800">
+                                {order.runnerName ?? "Runner"}
+                              </span>
+                              {order.runnerPaymentMethod || order.runnerPayoutMethod ? (
+                                <span className="ml-1.5 inline-flex rounded-full bg-gray-900 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                                  {order.runnerPaymentMethod ??
+                                    (order.runnerPayoutMethod === "fps"
+                                      ? "FPS"
+                                      : order.runnerPayoutMethod === "payme"
+                                        ? "PayMe"
+                                        : "Bank")}
+                                </span>
+                              ) : null}
+                              {" · "}
                               {adminPayoutLabel(order.status)}
                             </p>
                             <p className="text-xs text-gray-500">
@@ -231,13 +245,8 @@ export default function AdminPayoutsPage() {
                               <p className="font-semibold text-gray-900">
                                 Send ${reimburse} to {order.runnerName ?? "runner"}
                               </p>
-                              <p className="mt-1 text-gray-700">
-                                {order.runnerPaymentMethod ?? "PayMe"}
-                                {order.runnerPaymentId
-                                  ? `: ${order.runnerPaymentId}`
-                                  : " — ID missing"}
-                              </p>
-                              <p className="mt-1 text-xs text-gray-500">
+                              <AdminRunnerPayoutDetails order={order} />
+                              <p className="mt-2 text-xs text-gray-500">
                                 Groceries ${spent} + delivery ${order.deliveryFee}
                               </p>
                               <button
