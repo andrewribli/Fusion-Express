@@ -316,7 +316,7 @@ export function ShopHome() {
 
   return (
     <AppShell>
-      <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
+      <div className="shop-page min-h-screen" style={{ backgroundColor: "#ffffff" }}>
         <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
           <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
             <Link
@@ -410,8 +410,8 @@ export function ShopHome() {
           <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
             <div className="min-w-0 space-y-4">
               <section
-                className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
-                style={{ backgroundColor: "#ffffff" }}
+                className="shop-bubble rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
+                style={{ backgroundColor: "#ED1C24" }}
                 aria-label="Categories"
               >
                 <div className="scrollbar-hide flex gap-2 overflow-x-auto px-1">
@@ -428,14 +428,14 @@ export function ShopHome() {
                       >
                         <span
                           className="flex h-14 w-14 items-center justify-center rounded-2xl text-[26px]"
-                          style={{ backgroundColor: "#ffe4e6" }}
+                          style={{ backgroundColor: "#ffffff" }}
                           aria-hidden
                         >
                           {cat.emoji}
                         </span>
                         <span
                           className="shop-label line-clamp-2 text-[12px] font-semibold leading-tight"
-                          style={{ color: "#111111" }}
+                          style={{ color: "#ffffff" }}
                         >
                           {cat.label}
                         </span>
@@ -449,14 +449,14 @@ export function ShopHome() {
                       >
                         <span
                           className="flex h-14 w-14 items-center justify-center rounded-2xl text-[26px]"
-                          style={{ backgroundColor: "#ffe4e6" }}
+                          style={{ backgroundColor: "#ffffff" }}
                           aria-hidden
                         >
                           {cat.emoji}
                         </span>
                         <span
                           className="shop-label line-clamp-2 text-[12px] font-semibold leading-tight"
-                          style={{ color: "#111111" }}
+                          style={{ color: "#ffffff" }}
                         >
                           {cat.label}
                         </span>
@@ -468,10 +468,10 @@ export function ShopHome() {
 
               {searching ? (
                 <section
-                  className="shop-surface rounded-2xl px-4 py-4 shadow-sm"
-                  style={{ backgroundColor: "#ffffff" }}
+                  className="shop-bubble rounded-2xl px-4 py-4 shadow-sm"
+                  style={{ backgroundColor: "#ED1C24" }}
                 >
-                  <h2 className="text-base font-bold" style={{ color: "#111111" }}>
+                  <h2 className="shop-heading text-base font-bold" style={{ color: "#ffffff" }}>
                     Results for “{search.trim()}”
                   </h2>
                   {searchResults.length === 0 ? (
@@ -491,17 +491,17 @@ export function ShopHome() {
               ) : (
                 <>
                   <section
-                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
-                    style={{ backgroundColor: "#ffffff" }}
+                    className="shop-bubble rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    style={{ backgroundColor: "#ED1C24" }}
                   >
                     <div className="mb-3 flex items-center justify-between gap-2">
-                      <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
+                      <h2 className="shop-heading text-lg font-extrabold" style={{ color: "#ffffff" }}>
                         TOP Picks
                       </h2>
                       <Link
                         href="/browse/dry"
-                        className="shrink-0 text-sm font-semibold"
-                        style={{ color: "#ED1C24" }}
+                        className="shop-link shrink-0 text-sm font-semibold"
+                        style={{ color: "#ffffff" }}
                       >
                         Curated ›
                       </Link>
@@ -544,10 +544,10 @@ export function ShopHome() {
                   </div>
 
                   <section
-                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
-                    style={{ backgroundColor: "#ffffff" }}
+                    className="shop-bubble rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    style={{ backgroundColor: "#ED1C24" }}
                   >
-                    <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
+                    <h2 className="shop-heading text-lg font-extrabold" style={{ color: "#ffffff" }}>
                       You may also like
                     </h2>
                     {productsLoading ? (
