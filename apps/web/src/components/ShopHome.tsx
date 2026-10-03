@@ -44,7 +44,15 @@ function priceLabel(item: MenuItem): string {
   return raw.startsWith("HK") ? raw : `HK${raw}`;
 }
 
-function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
+function TopPickCard({
+  item,
+  index,
+  catalog,
+}: {
+  item: MenuItem;
+  index: number;
+  catalog?: MenuItem[];
+}) {
   const [open, setOpen] = useState(false);
   const { addItem, items, setQuantity } = useCart();
   const quantity = items.find((c) => c.item.id === item.id)?.quantity ?? 0;
@@ -152,7 +160,12 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
           </div>
         </div>
       </div>
-      <ProductQuickAddModal item={item} open={open} onClose={() => setOpen(false)} />
+      <ProductQuickAddModal
+        item={item}
+        catalog={catalog}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </>
   );
 }
@@ -621,7 +634,7 @@ export function ShopHome() {
                     <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                       {searchResults.map((item) => (
                         <li key={item.id}>
-                          <MenuItemCard item={item} />
+                          <MenuItemCard item={item} catalog={products} />
                         </li>
                       ))}
                     </ul>
@@ -650,7 +663,12 @@ export function ShopHome() {
                     </div>
                     <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-1">
                       {popularItems.map((item, index) => (
-                        <TopPickCard key={item.id} item={item} index={index} />
+                        <TopPickCard
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          catalog={products}
+                        />
                       ))}
                       {!productsLoading && popularItems.length === 0 && (
                         <p className="shop-muted px-2 text-sm">
@@ -697,7 +715,7 @@ export function ShopHome() {
                         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                           {feedVisible.map((item) => (
                             <li key={item.id}>
-                              <MenuItemCard item={item} />
+                              <MenuItemCard item={item} catalog={products} />
                             </li>
                           ))}
                         </ul>

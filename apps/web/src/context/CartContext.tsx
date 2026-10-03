@@ -22,7 +22,17 @@ interface ShopCartBucket {
   items: CartItem[];
   itemCount: number;
   subtotal: number;
-  addItem: (item: MenuItem, quantity?: number) => void;
+  addItem: (
+    item: MenuItem,
+    quantity?: number,
+    selectedOptions?: Record<string, string | number>,
+  ) => void;
+  /** Set absolute quantity + options for a line (creates if missing). */
+  upsertItem: (
+    item: MenuItem,
+    quantity: number,
+    selectedOptions?: Record<string, string | number>,
+  ) => void;
   removeItem: (itemId: string) => void;
   setQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -109,7 +119,11 @@ function useShopCartState(kind: ShopKind, sessionId: string): ShopCartBucket {
   }, [items, kind, sessionId, ready]);
 
   const addItem = useCallback(
-    (item: MenuItem, quantity = 1) => {
+    (
+      item: MenuItem,
+      quantity = 1,
+      selectedOptions?: Record<string, string | number>,
+    ) => {
       const isCanteen = item.id.startsWith("canteen:");
       if (kind === "canteen" ? !isCanteen : isCanteen) {
         console.warn(
@@ -123,11 +137,61 @@ function useShopCartState(kind: ShopKind, sessionId: string): ShopCartBucket {
         if (existing) {
           return prev.map((c) =>
             c.item.id === item.id
-              ? { ...c, quantity: c.quantity + addBy }
+              ? {
+                  ...c,
+                  quantity: c.quantity + addBy,
+                  selectedOptions: selectedOptions ?? c.selectedOptions,
+                }
               : c,
           );
         }
-        return [...prev, { item, quantity: addBy }];
+        return [
+          ...prev,
+          {
+            item,
+            quantity: addBy,
+            ...(selectedOptions ? { selectedOptions } : {}),
+          },
+        ];
+      });
+    },
+    [kind],
+  );
+
+  const upsertItem = useCallback(
+    (
+      item: MenuItem,
+      quantity: number,
+      selectedOptions?: Record<string, string | number>,
+    ) => {
+      const isCanteen = item.id.startsWith("canteen:");
+      if (kind === "canteen" ? !isCanteen : isCanteen) return;
+      if (quantity <= 0) {
+        setItems((prev) => prev.filter((c) => c.item.id !== item.id));
+        return;
+      }
+      setItems((prev) => {
+        const exists = prev.some((c) => c.item.id === item.id);
+        if (!exists) {
+          return [
+            ...prev,
+            {
+              item,
+              quantity,
+              ...(selectedOptions ? { selectedOptions } : {}),
+            },
+          ];
+        }
+        return prev.map((c) =>
+          c.item.id === item.id
+            ? {
+                ...c,
+                item,
+                quantity,
+                selectedOptions: selectedOptions ?? c.selectedOptions,
+              }
+            : c,
+        );
       });
     },
     [kind],
@@ -175,6 +239,7 @@ function useShopCartState(kind: ShopKind, sessionId: string): ShopCartBucket {
       itemCount,
       subtotal,
       addItem,
+      upsertItem,
       removeItem,
       setQuantity,
       clearCart,
@@ -185,6 +250,7 @@ function useShopCartState(kind: ShopKind, sessionId: string): ShopCartBucket {
       itemCount,
       subtotal,
       addItem,
+      upsertItem,
       removeItem,
       setQuantity,
       clearCart,

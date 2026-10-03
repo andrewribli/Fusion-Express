@@ -93,6 +93,20 @@ export type PriceType = "fixed" | "variable" | "range";
 /** Pantry vs chilled store area (Excel top-level Category). */
 export type StoreSection = "refrigerated" | "dry";
 
+export interface ProductOptionChoice {
+  id: string;
+  label: string;
+  value: string | number;
+}
+
+export interface ProductOptionGroup {
+  id: string;
+  label: string;
+  type: "single";
+  choices: ProductOptionChoice[];
+  defaultValue?: string | number;
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -101,6 +115,8 @@ export interface MenuItem {
   storeSection?: StoreSection;
   price: number;
   salePrice?: number;
+  /** Pre-discount / compare-at price when different from `price`. */
+  originalPrice?: number;
   bulkDealQty?: number;
   bulkDealPrice?: number;
   unit: string;
@@ -109,6 +125,10 @@ export interface MenuItem {
   priceRange?: string;
   runnerInputsPrice: boolean;
   itemNote?: string;
+  description?: string;
+  ingredients?: string;
+  storage?: string;
+  options?: ProductOptionGroup[];
   inStock: boolean;
   sortOrder: number;
   weightKg: number;
@@ -118,6 +138,8 @@ export interface MenuItem {
 export interface CartItem {
   item: MenuItem;
   quantity: number;
+  /** Option selections (e.g. ripeness) captured at add-to-cart. */
+  selectedOptions?: Record<string, string | number>;
 }
 
 export type { OrderStatus };
