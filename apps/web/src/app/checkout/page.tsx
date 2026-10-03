@@ -2,13 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { CustomItemCard } from "@/components/CustomItemCard";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
-import { ProductSearchPanel } from "@/components/ProductSearchPanel";
-import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
@@ -31,10 +28,20 @@ import {
 } from "@/lib/payment-method";
 import { usePlaceOrder } from "@/lib/use-place-order";
 import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
-import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { validatePhone } from "@/lib/auth";
+import {
+  adjustedDeliveryFee,
+  DELIVERY_MODES,
+  type DeliveryMode,
+} from "@/lib/delivery-modes";
+import {
+  computeCartFees,
+  PACKAGING_FEE,
+  PLATFORM_FEE,
+} from "@/lib/cart-fees";
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const { user } = useUser();
   const { items, subtotal } = useCart();
   const { placeOrder, loading, error: placeError } = usePlaceOrder("fusion");
@@ -43,9 +50,14 @@ export default function CheckoutPage() {
   const [hall, setHall] = useState("");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [customerNote, setCustomerNote] = useState("");
-  const [tip, setTip] = useState(0);
+  const [leaveAtDoor, setLeaveAtDoor] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("standard");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [tipSelected, setTipSelected] = useState<number | null>(null);
   const [customTip, setCustomTip] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
+  const [paymentMethod, setPaymentMethod] =
+    useState<CustomerPaymentMethod>("PayMe");
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     setPaymentMethod(loadPaymentMethod());
@@ -56,174 +68,145 @@ export default function CheckoutPage() {
   }, [user, phone]);
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
-  const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
+  const tipAmount = Math.max(
+    0,
+    customTip ? Number(customTip) || 0 : tipSelected ?? 0,
+  );
   const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const fee = useMemo(
     () => calculateDeliveryFee({ weightKg, college }),
     [weightKg, college],
   );
-  const total = subtotal + fee.deliveryFee + tipAmount;
+  const deliveryFee = adjustedDeliveryFee(fee.deliveryFee, deliveryMode);
+  const cartExtras = computeCartFees({
+    items,
+    subtotal,
+    college,
+    fulfillment: "delivery",
+  });
+  /** Extra line fees folded into deliveryFee for the existing place-order API. */
+  const deliveryFeeCharged =
+    Math.round(
+      (deliveryFee +
+        cartExtras.smallOrderFee +
+        PACKAGING_FEE +
+        PLATFORM_FEE) *
+        100,
+    ) / 100;
+  const total =
+    Math.round((subtotal + deliveryFeeCharged + tipAmount) * 100) / 100;
   const overLimit = isOverOrderLimit(subtotal);
   const phoneOk = !validatePhone(phone);
-  const canSubmit = Boolean(college && hall && phoneOk && !overLimit);
+  const scheduledOk =
+    deliveryMode !== "scheduled" || Boolean(scheduledFor.trim());
+  const canSubmit = Boolean(
+    college && hall && phoneOk && !overLimit && scheduledOk,
+  );
   const address =
-    college && hall
-      ? formatDeliveryAddress(college, hall)
-      : null;
+    college && hall ? formatDeliveryAddress(college, hall) : null;
   const lobby = hall ? getLobbyForHall(hall) : "";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const noteParts = [
+      customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
+      leaveAtDoor ? "Leave at door / lobby desk if I’m not there." : "",
+    ].filter(Boolean);
     void placeOrder({
       college,
       hall,
       phone,
       paymentMethod,
-      customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
+      customerNote: noteParts.join("\n"),
       tip: tipAmount,
+      deliveryFeeOverride: deliveryFeeCharged,
+      deliveryModeLabel: DELIVERY_MODES.find((m) => m.id === deliveryMode)?.label,
+      scheduledFor:
+        deliveryMode === "scheduled" && scheduledFor
+          ? new Date(scheduledFor).toISOString()
+          : undefined,
     });
   }
 
   if (items.length === 0) {
     return (
-      <AppShell>
-        <LakersWallpaper>
-          <AppHeader showBack backHref="/cart" title="Fusion checkout" />
-          <main className="mx-auto max-w-[480px] px-4 py-8">
-            <p className="text-center text-sm text-white/80">
-              Nothing in your Fusion cart yet. Search below, add a custom item,
-              or keep shopping Fusion (canteen food has its own checkout).
-            </p>
-            <ProductSearchPanel
-              className="mt-4"
-              placeholder="Search to add an item…"
-            />
-            <CustomItemCard className="mt-4" />
-            <p className="mt-4 text-center">
-              <Link href="/fusion" className="text-lakers-gold underline">
-                Shop Fusion
-              </Link>
-              {" · "}
-              <Link href="/canteen" className="text-lakers-gold underline">
-                Browse canteens
-              </Link>
-            </p>
-          </main>
-        </LakersWallpaper>
+      <AppShell hideNav>
+        <div className="mx-auto max-w-lg px-4 py-12 text-center">
+          <p className="text-sm text-gray-600">Your Fusion cart is empty.</p>
+          <Link
+            href="/fusion"
+            className="mt-4 inline-flex h-12 items-center rounded-full bg-[#ED1C24] px-6 text-sm font-bold text-white"
+          >
+            Shop Fusion
+          </Link>
+        </div>
       </AppShell>
     );
   }
 
   return (
-    <AppShell>
-      <LakersWallpaper>
-        <AppHeader showBack backHref="/cart" title="Fusion checkout" />
-
-        <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
-          <div className="mb-4 rounded-xl border border-[#ED1C24]/40 bg-[#ED1C24]/10 px-4 py-3 text-sm text-white">
-            Fusion grocery checkout — canteen orders use{" "}
-            <Link href="/canteen/checkout" className="underline">
-              /canteen/checkout
-            </Link>
-            .
-          </div>
-          {!user && (
-            <div className="mb-4 rounded-xl border border-lakers-gold/40 bg-lakers-navy/80 px-4 py-3 text-sm text-lakers-gold">
-              No account needed. Enter your dorm, lobby, and phone — we&apos;ll
-              create your account when you order.{" "}
-              <Link href="/login?next=/checkout" className="underline">
-                Already have an account? Sign in
-              </Link>
+    <AppShell hideNav>
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
+        <header className="sticky top-0 z-40 border-b border-gray-100 bg-white px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push("/cart")}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-gray-800 hover:bg-gray-50"
+              aria-label="Back to cart"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
+                <path
+                  d="M15 6L9 12l6 6"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-extrabold text-gray-900">Checkout</p>
+              <p className="truncate text-xs text-gray-500">Fusion@CUHK</p>
             </div>
-          )}
-          {placeError && (
-            <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {placeError}
-            </p>
-          )}
-          <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
-            Est. delivery by {formatEta(estimatedDeliveryAt)} (~
-            {ESTIMATED_DELIVERY_MINUTES} min after order)
-          </div>
-
-          <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-900">Order Summary</h2>
-            <ul className="mt-3 space-y-2">
-              {items.map(({ item, quantity }) => (
-                <li key={item.id} className="flex justify-between text-sm">
-                  <span>
-                    {quantity}× {item.name}
-                  </span>
-                  <span>${lineTotal(item, quantity)}</span>
+            <ol className="flex items-center gap-1.5" aria-label="Checkout progress">
+              {["Cart", "Checkout", "Done"].map((label, i) => (
+                <li key={label} className="flex items-center gap-1.5">
+                  <span
+                    className="flex h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: i <= 1 ? "#ED1C24" : "#d1d5db" }}
+                    aria-current={i === 1 ? "step" : undefined}
+                    title={label}
+                  />
+                  {i < 2 && <span className="h-px w-3 bg-gray-200" aria-hidden />}
                 </li>
               ))}
-            </ul>
-            {address && (
-              <div className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium">{address}</p>
-                    <p className="text-xs text-gray-500">Lobby: {lobby}</p>
-                    {phoneOk && (
-                      <p className="text-xs text-gray-500">Phone: {phone}</p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      document
-                        .getElementById("delivery-address-editor")
-                        ?.scrollIntoView({ behavior: "smooth", block: "center" })
-                    }
-                    className="shrink-0 text-xs font-bold text-[#ED1C24] hover:underline"
-                  >
-                    Edit
-                  </button>
-                </div>
+            </ol>
+          </div>
+        </header>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <main className="flex-1 space-y-4 overflow-y-auto px-3 py-3 pb-36">
+            {!user && (
+              <div className="rounded-xl bg-gray-50 px-3 py-3 text-sm text-gray-700">
+                No account needed — we create your guest profile when you order.{" "}
+                <Link href="/login?next=/checkout" className="font-semibold text-[#ED1C24] underline">
+                  Sign in
+                </Link>
               </div>
             )}
-            <div className="mt-4 space-y-1 border-t pt-3 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>Subtotal</span>
-                <span className={overLimit ? "font-bold text-[#ED1C24]" : undefined}>
-                  ${subtotal}
-                </span>
-              </div>
-              <DeliveryFeeBreakdown breakdown={fee} />
-              {tipAmount > 0 && (
-                <div className="flex justify-between text-gray-600">
-                  <span>Tip</span>
-                  <span>${tipAmount}</span>
-                </div>
-              )}
-              <div
-                className={`flex justify-between pt-1 text-base font-bold ${
-                  overLimit ? "text-[#ED1C24]" : ""
-                }`}
-              >
-                <span>Total</span>
-                <span>${total}</span>
-              </div>
-            </div>
-          </section>
-
-          <ProductSearchPanel
-            className="mt-4"
-            placeholder="Search to add an item…"
-          />
-
-          <CustomItemCard className="mt-4" />
-
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-            <section
-              id="delivery-address-editor"
-              className="scroll-mt-28 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
-            >
-              <h2 className="text-sm font-semibold">Delivery details</h2>
-              <p className="mt-1 text-xs text-gray-500">
-                Only three things we need: dorm (college + hall), lobby, and phone.
+            {placeError && (
+              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {placeError}
               </p>
+            )}
+
+            <section className="rounded-2xl border border-gray-100 p-4">
+              <h2 className="text-sm font-bold text-gray-900">Delivery address</h2>
               <div className="mt-3">
                 <DeliveryAddressFields
                   college={college}
@@ -232,17 +215,12 @@ export default function CheckoutPage() {
                   onHallChange={setHall}
                 />
               </div>
-              {hall ? (
-                <div className="mt-3 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                  <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                    Lobby
-                  </span>
-                  <p className="mt-0.5 font-semibold">{lobby}</p>
-                  <p className="text-xs text-gray-500">
-                    Delivery is to your hall lobby — no room number needed.
-                  </p>
+              {address && (
+                <div className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm">
+                  <p className="font-semibold text-gray-900">{address}</p>
+                  <p className="text-xs text-gray-500">Lobby: {lobby}</p>
                 </div>
-              ) : null}
+              )}
               <div className="mt-3">
                 <label
                   htmlFor="guest-phone"
@@ -259,46 +237,132 @@ export default function CheckoutPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="e.g. 9123 4567"
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
+                  className="mt-1 min-h-11 w-full rounded-xl border border-gray-200 px-4 text-sm focus:border-[#ED1C24] focus:outline-none"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Used to create your account and for the runner to reach you.
-                </p>
               </div>
               <div className="mt-3">
-                <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
-                  Special instructions
+                <label className="block text-xs font-medium text-gray-600">
+                  Delivery instructions
                 </label>
                 <textarea
                   value={customerNote}
                   onChange={(e) => setCustomerNote(e.target.value)}
                   placeholder={DEFAULT_SPECIAL_INSTRUCTIONS}
-                  rows={3}
-                  className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
+                  rows={2}
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-[#ED1C24] focus:outline-none"
                 />
               </div>
+              <label className="mt-3 flex min-h-11 items-center gap-3 text-sm text-gray-800">
+                <input
+                  type="checkbox"
+                  checked={leaveAtDoor}
+                  onChange={(e) => setLeaveAtDoor(e.target.checked)}
+                  className="h-5 w-5 rounded border-gray-300 text-[#ED1C24]"
+                />
+                Leave at door / lobby desk
+              </label>
             </section>
 
-            <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <h2 className="text-sm font-semibold">Add a tip (optional)</h2>
+            <section className="rounded-2xl border border-gray-100 p-4">
+              <h2 className="text-sm font-bold text-gray-900">Delivery speed</h2>
+              <p className="mt-1 text-xs text-gray-500">
+                Est. ~{ESTIMATED_DELIVERY_MINUTES} min · by{" "}
+                {formatEta(estimatedDeliveryAt)} (Standard)
+              </p>
+              <div className="mt-3 space-y-2" role="radiogroup" aria-label="Delivery mode">
+                {DELIVERY_MODES.map((mode) => {
+                  const price = adjustedDeliveryFee(fee.deliveryFee, mode.id);
+                  const selected = deliveryMode === mode.id;
+                  return (
+                    <label
+                      key={mode.id}
+                      className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2"
+                      style={{
+                        borderColor: selected ? "#ED1C24" : "#e5e7eb",
+                        backgroundColor: selected ? "rgba(237,28,36,0.04)" : "#ffffff",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="delivery-mode"
+                        checked={selected}
+                        onChange={() => setDeliveryMode(mode.id)}
+                        className="h-4 w-4 text-[#ED1C24]"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-bold text-gray-900">
+                          {mode.label}
+                        </span>
+                        <span className="block text-xs text-gray-500">{mode.hint}</span>
+                      </span>
+                      <span className="text-sm font-bold text-gray-900">
+                        HK${price}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              {deliveryMode === "scheduled" && (
+                <div className="mt-3">
+                  <label
+                    htmlFor="scheduled-for"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Drop-off time
+                  </label>
+                  <input
+                    id="scheduled-for"
+                    type="datetime-local"
+                    value={scheduledFor}
+                    onChange={(e) => setScheduledFor(e.target.value)}
+                    className="mt-1 min-h-11 w-full rounded-xl border border-gray-200 px-3 text-sm"
+                    required={deliveryMode === "scheduled"}
+                  />
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-2xl border border-gray-100 p-4">
+              <h2 className="text-sm font-bold text-gray-900">Tip your runner</h2>
+              <p className="mt-1 text-xs text-gray-500">
+                100% of tips go to your runner. No tip is selected by default.
+              </p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {TIP_PRESETS.map((amount) => (
+                {TIP_PRESETS.filter((amount) => amount > 0).map((amount) => (
                   <button
                     key={amount}
                     type="button"
                     onClick={() => {
-                      setTip(amount);
+                      setTipSelected(amount);
                       setCustomTip("");
                     }}
-                    className={`rounded-full px-4 py-2 text-sm font-medium ${
-                      tip === amount && !customTip
-                        ? "bg-fusion-red text-white"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
+                    className="min-h-11 rounded-full px-4 text-sm font-bold"
+                    style={{
+                      backgroundColor:
+                        tipSelected === amount && !customTip ? "#ED1C24" : "#f3f4f6",
+                      color:
+                        tipSelected === amount && !customTip ? "#ffffff" : "#374151",
+                    }}
                   >
-                    {amount === 0 ? "None" : `$${amount}`}
+                    HK${amount}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTipSelected(null);
+                    setCustomTip("");
+                  }}
+                  className="min-h-11 rounded-full px-4 text-sm font-bold"
+                  style={{
+                    backgroundColor:
+                      tipSelected == null && !customTip ? "#ED1C24" : "#f3f4f6",
+                    color:
+                      tipSelected == null && !customTip ? "#ffffff" : "#374151",
+                  }}
+                >
+                  No tip
+                </button>
               </div>
               <input
                 type="number"
@@ -306,18 +370,22 @@ export default function CheckoutPage() {
                 value={customTip}
                 onChange={(e) => {
                   setCustomTip(e.target.value);
-                  setTip(0);
+                  setTipSelected(null);
                 }}
-                placeholder="Custom tip ($)"
-                className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-2 text-sm"
+                placeholder="Custom tip (HK$)"
+                className="mt-2 min-h-11 w-full rounded-xl border border-gray-200 px-4 text-sm"
               />
+              {tipAmount > 0 && (
+                <p className="mt-2 text-xs font-semibold text-emerald-700">
+                  Tip HK${tipAmount} → 100% to runner
+                </p>
+              )}
             </section>
 
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-              <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
-              <p className="mt-1 text-sm font-semibold text-blue-900">
-                PayMe is pre-selected. You pay after delivery when the runner
-                shares the details.
+              <h2 className="text-sm font-bold text-blue-900">Payment</h2>
+              <p className="mt-1 text-sm text-blue-900">
+                Pay after delivery when the runner shares details.
               </p>
               <div className="mt-3 rounded-xl bg-white p-3">
                 <PaymentMethodPicker
@@ -335,36 +403,96 @@ export default function CheckoutPage() {
               </ul>
             </section>
 
-            <p className="text-sm text-white/80">
-              Completing an order agrees to our{" "}
+            <section className="rounded-2xl border border-gray-100">
+              <button
+                type="button"
+                onClick={() => setSummaryOpen((v) => !v)}
+                className="flex min-h-12 w-full items-center justify-between px-4 text-left text-sm font-bold text-gray-900"
+                aria-expanded={summaryOpen}
+              >
+                Order summary ({items.length})
+                <span className="text-gray-400">{summaryOpen ? "▴" : "▾"}</span>
+              </button>
+              {summaryOpen && (
+                <div className="space-y-2 border-t border-gray-100 px-4 py-3 text-sm">
+                  {items.map(({ item, quantity, selectedOptions }) => (
+                    <div key={item.id} className="flex justify-between gap-2">
+                      <span className="min-w-0">
+                        {quantity}× {item.name}
+                        {selectedOptions?.ripeness != null && (
+                          <span className="block text-xs text-gray-500">
+                            Ripeness {selectedOptions.ripeness}
+                          </span>
+                        )}
+                      </span>
+                      <span className="shrink-0">HK${lineTotal(item, quantity)}</span>
+                    </div>
+                  ))}
+                  <div className="space-y-1 border-t border-gray-100 pt-2 text-gray-600">
+                    <div className="flex justify-between">
+                      <span>Subtotal</span>
+                      <span>HK${subtotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery ({deliveryMode})</span>
+                      <span>HK${deliveryFee}</span>
+                    </div>
+                    {cartExtras.smallOrderFee > 0 && (
+                      <div className="flex justify-between">
+                        <span>Small order fee</span>
+                        <span>HK${cartExtras.smallOrderFee}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span>Packaging</span>
+                      <span>HK${PACKAGING_FEE}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Platform fee</span>
+                      <span>HK${PLATFORM_FEE}</span>
+                    </div>
+                    {tipAmount > 0 && (
+                      <div className="flex justify-between">
+                        <span>Tip (100% to runner)</span>
+                        <span>HK${tipAmount}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <OrderLimitNotice subtotal={subtotal} />
+          </main>
+
+          <div
+            className="sticky bottom-0 border-t border-gray-100 bg-white px-3 py-3"
+            style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+          >
+            <p className="mb-2 text-center text-xs text-gray-500">
+              By placing an order you agree to our{" "}
               <LegalLink href="/terms">Terms &amp; Conditions</LegalLink>.
             </p>
-
-            <div className="fixed inset-x-0 bottom-16 z-40 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none">
-              <div className="mx-auto max-w-[480px]">
-                <OrderLimitNotice subtotal={subtotal} />
-                <button
-                  type="submit"
-                  disabled={!canSubmit || loading}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
-                >
-                  <span>
-                    {loading ? "Placing…" : `Complete Order · ${paymentMethod}`}
-                  </span>
-                  <span className="text-sm font-normal">· ${total}</span>
-                </button>
-                {!canSubmit && (
-                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
-                    {!college || !hall
-                      ? "Choose your college and hall to continue."
-                      : "Enter a valid phone number to continue."}
-                  </p>
-                )}
-              </div>
-            </div>
-          </form>
-        </main>
-      </LakersWallpaper>
+            <button
+              type="submit"
+              disabled={!canSubmit || loading}
+              className="flex h-[52px] w-full items-center justify-center rounded-full text-sm font-bold text-white disabled:opacity-50"
+              style={{ backgroundColor: "#ED1C24" }}
+            >
+              {loading ? "Placing…" : `Place Order · HK$${total}`}
+            </button>
+            {!canSubmit && (
+              <p className="mt-1.5 text-center text-xs text-gray-500">
+                {!college || !hall
+                  ? "Choose your college and hall to continue."
+                  : !scheduledOk
+                    ? "Pick a scheduled drop-off time."
+                    : "Enter a valid phone number to continue."}
+              </p>
+            )}
+          </div>
+        </form>
+      </div>
     </AppShell>
   );
 }
