@@ -16,7 +16,6 @@ import { CustomItemCard } from "@/components/CustomItemCard";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { OrderActionBar } from "@/components/OrderActionBar";
-import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 import { SECTION_META } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
@@ -47,6 +46,8 @@ function priceLabel(item: MenuItem): string {
 
 function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
   const [open, setOpen] = useState(false);
+  const { addItem, items, setQuantity } = useCart();
+  const quantity = items.find((c) => c.item.id === item.id)?.quantity ?? 0;
   const badge = pickBadge(item, index);
   const image = getItemImage(item);
 
@@ -62,14 +63,14 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
             setOpen(true);
           }
         }}
-        className="shop-surface flex w-[148px] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl text-left sm:w-[156px]"
+        className="shop-surface flex h-[248px] w-[calc((100%-0.75rem)/2.3)] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl text-left sm:w-[168px]"
         style={{
           backgroundColor: "#ffffff",
           boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
         }}
       >
         <div
-          className="relative aspect-square w-full"
+          className="relative h-[140px] w-full shrink-0"
           style={{ backgroundColor: "#fafafa" }}
         >
           {image ? (
@@ -78,7 +79,7 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
               alt=""
               fill
               className="object-contain p-3"
-              sizes="160px"
+              sizes="180px"
             />
           ) : null}
           <span
@@ -87,22 +88,151 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
           >
             {badge}
           </span>
-          <ProductCardQtyControl item={item} size="sm" />
         </div>
-        <div className="flex flex-col gap-1.5 px-3 pb-3 pt-2">
+        <div className="relative flex min-h-0 flex-1 flex-col px-3 pb-2 pt-2">
           <p
-            className="line-clamp-2 min-h-[2.5rem] text-[12px] font-semibold leading-snug"
+            className="line-clamp-2 text-[13px] font-semibold leading-snug"
             style={{ color: "#111111" }}
           >
             {item.name}
           </p>
-          <p className="text-lg font-extrabold leading-none" style={{ color: "#ED1C24" }}>
-            {priceLabel(item)}
-          </p>
+          <div className="mt-auto flex items-end justify-between gap-1 pt-2">
+            <p className="text-base font-extrabold leading-none" style={{ color: "#ED1C24" }}>
+              {priceLabel(item)}
+            </p>
+            {quantity <= 0 ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  addItem(item);
+                }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-md"
+                style={{ backgroundColor: "#ED1C24" }}
+                aria-label={`Add ${item.name} to cart`}
+              >
+                +
+              </button>
+            ) : (
+              <div
+                className="flex h-11 items-center rounded-full shadow-md"
+                style={{ backgroundColor: "#ffffff" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.id, quantity - 1)}
+                  className="flex h-11 w-11 items-center justify-center font-bold"
+                  style={{ color: "#ED1C24" }}
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <span
+                  className="min-w-5 text-center text-sm font-extrabold tabular-nums"
+                  style={{ color: "#111111" }}
+                >
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.id, quantity + 1)}
+                  className="flex h-11 w-11 items-center justify-center rounded-full font-bold text-white"
+                  style={{ backgroundColor: "#ED1C24" }}
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <ProductQuickAddModal item={item} open={open} onClose={() => setOpen(false)} />
     </>
+  );
+}
+
+function CampusBar() {
+  return (
+    <div
+      className="flex items-center gap-2 border-b border-gray-100 px-3 py-2.5 text-sm sm:rounded-2xl sm:border sm:px-4"
+      style={{ backgroundColor: "#ffffff", color: "#374151" }}
+      aria-label="Delivery campus"
+    >
+      <span aria-hidden className="text-base leading-none">
+        📍
+      </span>
+      <p className="min-w-0 truncate">
+        <span className="font-semibold" style={{ color: "#111111" }}>
+          Deliver to CUHK hall lobby
+        </span>
+        <span className="text-gray-400"> · </span>
+        <span>Fusion supermarket</span>
+      </p>
+    </div>
+  );
+}
+
+function HomeInfoBanner() {
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setDismissed(sessionStorage.getItem("gracerun-home-info-dismissed") === "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function dismiss() {
+    setDismissed(true);
+    try {
+      sessionStorage.setItem("gracerun-home-info-dismissed", "1");
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className="relative mx-3 flex items-start gap-2 rounded-xl px-3 py-2.5 text-[13px] leading-snug sm:mx-0"
+      style={{ backgroundColor: "rgba(200, 16, 46, 0.10)", color: "#111111" }}
+      role="note"
+    >
+      <p className="min-w-0 flex-1 pr-6">
+        <span aria-hidden>🎁 </span>
+        Apply a voucher at checkout · Can&apos;t find something? DM{" "}
+        <a
+          href="https://instagram.com/graceruncuhk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold underline"
+          style={{ color: "#C8102E" }}
+        >
+          @graceruncuhk
+        </a>{" "}
+        or call{" "}
+        <a href="tel:+85295181085" className="font-semibold underline" style={{ color: "#C8102E" }}>
+          +852-95181085
+        </a>
+      </p>
+      <button
+        type="button"
+        onClick={dismiss}
+        className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold"
+        style={{ color: "#6b7280" }}
+        aria-label="Dismiss banner"
+      >
+        ×
+      </button>
+    </div>
   );
 }
 
@@ -392,6 +522,12 @@ export function ShopHome() {
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-0 pb-36 sm:px-4">
+          {/* Order: campus bar → info banner → categories → products → can't-find */}
+          <div className="space-y-3 pt-0 sm:space-y-4 sm:pt-4">
+            <CampusBar />
+            <HomeInfoBanner />
+          </div>
+
           {guestBrowse && (
             <div className="mx-3 mt-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800 sm:mx-0">
               <p className="font-semibold text-gray-900">Ordering as guest</p>
@@ -410,10 +546,10 @@ export function ShopHome() {
               )}
             </div>
           )}
-          <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
+          <div className="mt-3 space-y-4 sm:mt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
             <div className="min-w-0 space-y-4">
               <section
-                className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
+                className="shop-surface rounded-none px-3 py-3 shadow-sm sm:rounded-2xl sm:py-4"
                 style={{ backgroundColor: "#ffffff" }}
                 aria-label="Categories"
               >
@@ -490,16 +626,19 @@ export function ShopHome() {
                       ))}
                     </ul>
                   )}
+                  <div id="manual-item" className="mt-4">
+                    <CustomItemCard />
+                  </div>
                 </section>
               ) : (
                 <>
                   <section
-                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl sm:px-4"
                     style={{ backgroundColor: "#ffffff" }}
                   >
-                    <div className="mb-3 flex items-center justify-between gap-2">
+                    <div className="mb-3 flex items-center justify-between gap-2 px-1">
                       <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
-                        TOP Picks
+                        Recommended
                       </h2>
                       <Link
                         href="/browse/dry"
@@ -509,7 +648,7 @@ export function ShopHome() {
                         Curated ›
                       </Link>
                     </div>
-                    <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
+                    <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-1">
                       {popularItems.map((item, index) => (
                         <TopPickCard key={item.id} item={item} index={index} />
                       ))}
@@ -542,10 +681,6 @@ export function ShopHome() {
                     />
                   </section>
 
-                  <div id="manual-item" className="px-3 sm:px-0">
-                    <CustomItemCard />
-                  </div>
-
                   <section
                     className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
                     style={{ backgroundColor: "#ffffff" }}
@@ -575,6 +710,10 @@ export function ShopHome() {
                       </>
                     )}
                   </section>
+
+                  <div id="manual-item" className="px-3 sm:px-0">
+                    <CustomItemCard />
+                  </div>
                 </>
               )}
             </div>
