@@ -130,8 +130,9 @@ function HomeSearchBar({
 
   return (
     <div className="relative min-w-[140px] flex-1 sm:min-w-[400px]">
-      <div
-        className="flex h-11 w-full min-w-0 items-center gap-2 rounded-full pl-3 pr-1.5"
+      <label
+        htmlFor="home-search"
+        className="flex h-11 w-full min-w-0 cursor-text items-center gap-2 rounded-full px-3"
         style={{ backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
       >
         <svg
@@ -157,25 +158,13 @@ function HomeSearchBar({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
-          placeholder="Search products"
+          placeholder="Search"
           className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
           style={{ backgroundColor: "transparent", color: "#111111" }}
           autoComplete="off"
           aria-label="Search products"
         />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.focus()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#ff6a00" }}
-          aria-label="Focus search"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" aria-hidden>
-            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
-            <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
+      </label>
       {focused && suggestions.length > 0 && (
         <ul
           className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
@@ -331,7 +320,7 @@ export function ShopHome() {
             <Link
               href="/"
               onClick={() => setSearch("")}
-              className="hidden max-h-5 shrink-0 items-center min-[360px]:inline-flex"
+              className="hidden max-h-5 shrink-0 items-center min-[361px]:inline-flex"
               aria-label="GraceRun home"
             >
               <span className="max-h-5 text-[13px] font-extrabold leading-5 tracking-tight text-white sm:text-base">

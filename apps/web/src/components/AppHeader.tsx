@@ -97,7 +97,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               aria-label="GraceRun home"
             >
               {/* Wordmark on narrow viewports; square mark only from sm up to free space for back/cart/avatar */}
-              <span className="hidden max-h-5 text-[13px] font-extrabold leading-5 tracking-tight text-gray-900 min-[360px]:inline sm:hidden">
+              <span className="hidden max-h-5 text-[13px] font-extrabold leading-5 tracking-tight text-gray-900 min-[361px]:inline sm:hidden">
                 GraceRun
               </span>
               <AppLogo size={44} className="hidden h-11 w-11 shrink-0 sm:block" />
