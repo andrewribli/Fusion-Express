@@ -96,25 +96,38 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
     }
   }
 
+  const lastPreview = messages.length > 0 ? messages[messages.length - 1] : null;
+
   if (compact && !expanded) {
     return (
-      <button
-        type="button"
-        onClick={() => setExpanded(true)}
-        className={`mt-3 flex w-full items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-md ${
-          unread > 0 ? "bg-fusion-red" : "bg-gray-800"
-        }`}
-      >
-        <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg">
-          💬
-          {unread > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-fusion-red">
-              {unread > 9 ? "9+" : unread}
-            </span>
-          )}
-        </span>
-        {chatLabel}
-      </button>
+      <div className="mt-3 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        {lastPreview && (
+          <div className="border-b border-gray-50 px-3 py-2">
+            <p className="text-[11px] font-semibold text-gray-500">Chat preview</p>
+            <p className="mt-0.5 line-clamp-2 text-sm text-gray-800">
+              <span className="font-semibold">{lastPreview.senderName}: </span>
+              {lastPreview.message}
+            </p>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className={`flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-white ${
+            unread > 0 ? "bg-[#ED1C24]" : "bg-gray-900"
+          }`}
+        >
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg">
+            💬
+            {unread > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[#ED1C24]">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            )}
+          </span>
+          {chatLabel}
+        </button>
+      </div>
     );
   }
 
