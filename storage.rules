@@ -5,6 +5,10 @@ rules_version = '2';
  *
  * Default deny: only the path prefixes below are reachable. There is no
  * catch-all `/{allPaths=**}` open-read rule.
+ *
+ * Chat images are uploaded by the client before the Firestore message doc
+ * exists, so rules authorize from the parent order / user id in the path —
+ * not by looking up the message.
  */
 service firebase.storage {
   match /b/{bucket}/o {
@@ -12,9 +16,55 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    function uid() {
+      return request.auth.uid;
+    }
+
     function isImageUnder10mb() {
       return request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/admins/$(uid()));
+    }
+
+    function orderData(orderId) {
+      return firestore.get(/databases/(default)/documents/orders/$(orderId)).data;
+    }
+
+    function profileData() {
+      return firestore.get(/databases/(default)/documents/users/$(uid())).data;
+    }
+
+    function isOrderCustomer(orderId) {
+      return signedIn() && orderData(orderId).customerId == uid();
+    }
+
+    /**
+     * Prefer runnerUid (auth uid). Fall back to runners doc id on the profile
+     * for older orders that only store runnerId.
+     */
+    function isOrderRunner(orderId) {
+      let order = orderData(orderId);
+      let runnerUid = order.keys().hasAny(['runnerUid']) ? order.runnerUid : '';
+      let orderRunnerId = order.keys().hasAny(['runnerId']) ? order.runnerId : '';
+      let myRunnerId = firestore.exists(/databases/(default)/documents/users/$(uid()))
+        ? profileData().get('runnerId', '')
+        : '';
+      return signedIn() && (
+        runnerUid == uid()
+        || (myRunnerId != '' && orderRunnerId == myRunnerId)
+      );
+    }
+
+    function canAccessOrderChat(orderId) {
+      return isOrderCustomer(orderId) || isOrderRunner(orderId) || isAdmin();
+    }
+
+    function canAccessAdminChat(userId) {
+      return signedIn() && (uid() == userId || isAdmin());
     }
 
     match /delivery-proofs/{orderId}/{fileName} {
@@ -40,6 +90,56 @@ service firebase.storage {
       allow write: if signedIn()
         && request.auth.uid == userId
         && isImageUnder10mb();
+    }
+
+    // Order chat photos: chats/{orderId}/{messageId}/{fileName}
+    // Writes match Firestore chat create (customer / assigned runner only).
+    match /chats/{orderId}/{messageId}/{fileName} {
+      allow read: if canAccessOrderChat(orderId);
+      allow write: if (isOrderCustomer(orderId) || isOrderRunner(orderId))
+        && isImageUnder10mb();
+    }
+
+    // Admin ↔ user support chat photos: adminChats/{userId}/{messageId}/{fileName}
+    match /adminChats/{userId}/{messageId}/{fileName} {
+      allow read: if canAccessAdminChat(userId);
+      allow write: if canAccessAdminChat(userId) && isImageUnder10mb();
+    }
+
+    // ---------------------------------------------------------------- staging
+    // storagePath() prefixes staging objects with test/. Firestore staging
+    // twins (*_test) are intentionally looser, so these match that posture.
+
+    match /test/delivery-proofs/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /test/receipts/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /test/bank-statements/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /test/payment-submissions/{userId}/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && request.auth.uid == userId
+        && isImageUnder10mb();
+    }
+
+    match /test/chats/{orderId}/{messageId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /test/adminChats/{userId}/{messageId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isImageUnder10mb();
     }
   }
 }
