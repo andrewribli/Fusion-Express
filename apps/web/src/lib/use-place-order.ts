@@ -45,6 +45,10 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
       tip?: number;
       /** Required for guests; optional when already signed in with a saved phone. */
       phone?: string;
+      /** Final delivery fee after Direct/Saver/Standard/Scheduled adjustments. */
+      deliveryFeeOverride?: number;
+      deliveryModeLabel?: string;
+      scheduledFor?: string;
     }) => {
       if (!opts.college || !opts.hall || items.length === 0) {
         setError("Add items and choose your college and hall first.");
@@ -139,8 +143,14 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
               });
 
         const tipAmount = Math.max(0, opts.tip ?? 0);
-        const total = orderSubtotal + fee.deliveryFee + tipAmount;
-        const estimatedDeliveryAt = getEstimatedDeliveryTime();
+        const deliveryFee =
+          opts.deliveryFeeOverride != null
+            ? Math.max(0, opts.deliveryFeeOverride)
+            : fee.deliveryFee;
+        const total = orderSubtotal + deliveryFee + tipAmount;
+        const estimatedDeliveryAt = opts.scheduledFor
+          ? new Date(opts.scheduledFor)
+          : getEstimatedDeliveryTime();
         const digits = normalizePhone(phone);
         const lobbyPoint = getLobbyForHall(opts.hall);
         const customerName =
@@ -184,6 +194,12 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
           customerNote: resolveSpecialInstructions(
             [
               opts.customerNote?.trim(),
+              opts.deliveryModeLabel
+                ? `Delivery mode: ${opts.deliveryModeLabel}`
+                : "",
+              opts.scheduledFor
+                ? `Scheduled for: ${new Date(opts.scheduledFor).toLocaleString()}`
+                : "",
               shopKind === "canteen" && canteenName
                 ? `Pickup: ${canteenName}`
                 : "",
@@ -197,7 +213,7 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
               .join("\n"),
           ),
           subtotal: orderSubtotal,
-          deliveryFee: fee.deliveryFee,
+          deliveryFee,
           tip: tipAmount || undefined,
           total,
           paymentReceived: false,

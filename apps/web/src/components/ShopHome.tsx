@@ -16,7 +16,6 @@ import { CustomItemCard } from "@/components/CustomItemCard";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { OrderActionBar } from "@/components/OrderActionBar";
-import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 import { SECTION_META } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
@@ -45,8 +44,18 @@ function priceLabel(item: MenuItem): string {
   return raw.startsWith("HK") ? raw : `HK${raw}`;
 }
 
-function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
+function TopPickCard({
+  item,
+  index,
+  catalog,
+}: {
+  item: MenuItem;
+  index: number;
+  catalog?: MenuItem[];
+}) {
   const [open, setOpen] = useState(false);
+  const { addItem, items, setQuantity } = useCart();
+  const quantity = items.find((c) => c.item.id === item.id)?.quantity ?? 0;
   const badge = pickBadge(item, index);
   const image = getItemImage(item);
 
@@ -62,14 +71,14 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
             setOpen(true);
           }
         }}
-        className="shop-surface flex w-[148px] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl text-left sm:w-[156px]"
+        className="shop-surface flex h-[248px] w-[calc((100%-0.75rem)/2.3)] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl text-left sm:w-[168px]"
         style={{
           backgroundColor: "#ffffff",
           boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
         }}
       >
         <div
-          className="relative aspect-square w-full"
+          className="relative h-[140px] w-full shrink-0"
           style={{ backgroundColor: "#fafafa" }}
         >
           {image ? (
@@ -78,7 +87,7 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
               alt=""
               fill
               className="object-contain p-3"
-              sizes="160px"
+              sizes="180px"
             />
           ) : null}
           <span
@@ -87,22 +96,156 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
           >
             {badge}
           </span>
-          <ProductCardQtyControl item={item} size="sm" />
         </div>
-        <div className="flex flex-col gap-1.5 px-3 pb-3 pt-2">
+        <div className="relative flex min-h-0 flex-1 flex-col px-3 pb-2 pt-2">
           <p
-            className="line-clamp-2 min-h-[2.5rem] text-[12px] font-semibold leading-snug"
+            className="line-clamp-2 text-[13px] font-semibold leading-snug"
             style={{ color: "#111111" }}
           >
             {item.name}
           </p>
-          <p className="text-lg font-extrabold leading-none" style={{ color: "#ED1C24" }}>
-            {priceLabel(item)}
-          </p>
+          <div className="mt-auto flex items-end justify-between gap-1 pt-2">
+            <p className="text-base font-extrabold leading-none" style={{ color: "#ED1C24" }}>
+              {priceLabel(item)}
+            </p>
+            {quantity <= 0 ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  addItem(item);
+                }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-md"
+                style={{ backgroundColor: "#ED1C24" }}
+                aria-label={`Add ${item.name} to cart`}
+              >
+                +
+              </button>
+            ) : (
+              <div
+                className="flex h-11 items-center rounded-full shadow-md"
+                style={{ backgroundColor: "#ffffff" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.id, quantity - 1)}
+                  className="flex h-11 w-11 items-center justify-center font-bold"
+                  style={{ color: "#ED1C24" }}
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <span
+                  className="min-w-5 text-center text-sm font-extrabold tabular-nums"
+                  style={{ color: "#111111" }}
+                >
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.id, quantity + 1)}
+                  className="flex h-11 w-11 items-center justify-center rounded-full font-bold text-white"
+                  style={{ backgroundColor: "#ED1C24" }}
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      <ProductQuickAddModal item={item} open={open} onClose={() => setOpen(false)} />
+      <ProductQuickAddModal
+        item={item}
+        catalog={catalog}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </>
+  );
+}
+
+function CampusBar() {
+  return (
+    <div
+      className="flex items-center gap-2 border-b border-gray-100 px-3 py-2.5 text-sm sm:rounded-2xl sm:border sm:px-4"
+      style={{ backgroundColor: "#ffffff", color: "#374151" }}
+      aria-label="Delivery campus"
+    >
+      <span aria-hidden className="text-base leading-none">
+        📍
+      </span>
+      <p className="min-w-0 truncate">
+        <span className="font-semibold" style={{ color: "#111111" }}>
+          Deliver to CUHK hall lobby
+        </span>
+        <span className="text-gray-400"> · </span>
+        <span>Fusion supermarket</span>
+      </p>
+    </div>
+  );
+}
+
+function HomeInfoBanner() {
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setDismissed(sessionStorage.getItem("gracerun-home-info-dismissed") === "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function dismiss() {
+    setDismissed(true);
+    try {
+      sessionStorage.setItem("gracerun-home-info-dismissed", "1");
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className="relative mx-3 flex items-start gap-2 rounded-xl px-3 py-2.5 text-[13px] leading-snug sm:mx-0"
+      style={{ backgroundColor: "rgba(200, 16, 46, 0.10)", color: "#111111" }}
+      role="note"
+    >
+      <p className="min-w-0 flex-1 pr-6">
+        <span aria-hidden>🎁 </span>
+        Apply a voucher at checkout · Can&apos;t find something? DM{" "}
+        <a
+          href="https://instagram.com/graceruncuhk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold underline"
+          style={{ color: "#C8102E" }}
+        >
+          @graceruncuhk
+        </a>{" "}
+        or call{" "}
+        <a href="tel:+85295181085" className="font-semibold underline" style={{ color: "#C8102E" }}>
+          +852-95181085
+        </a>
+      </p>
+      <button
+        type="button"
+        onClick={dismiss}
+        className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold"
+        style={{ color: "#6b7280" }}
+        aria-label="Dismiss banner"
+      >
+        ×
+      </button>
+    </div>
   );
 }
 
@@ -120,7 +263,6 @@ function HomeSearchBar({
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const [focused, setFocused] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const suggestions = useMemo(() => {
     const q = value.trim().toLowerCase();
     if (!q) return [];
@@ -130,11 +272,27 @@ function HomeSearchBar({
   }, [products, value]);
 
   return (
-    <div className="relative min-w-0 flex-1">
-      <div
-        className="flex h-11 w-full min-w-0 items-center gap-1 rounded-full pl-3 pr-1.5"
+    <div className="relative min-w-[140px] flex-1 sm:min-w-[400px]">
+      <label
+        htmlFor="home-search"
+        className="flex h-11 w-full min-w-0 cursor-text items-center gap-2 rounded-full px-3"
         style={{ backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
       >
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4 shrink-0"
+          style={{ color: "#6b7280" }}
+          fill="none"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="m16 16 4 4"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
         <input
           ref={inputRef}
           id="home-search"
@@ -143,51 +301,13 @@ function HomeSearchBar({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
-          placeholder="Search products"
+          placeholder="Search"
           className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
           style={{ backgroundColor: "transparent", color: "#111111" }}
           autoComplete="off"
+          aria-label="Search products"
         />
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ color: "#555555" }}
-          aria-label="Scan or upload a product photo"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <path
-              d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.8A1 1 0 0 1 10 4h4a1 1 0 0 1 .8.4L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            />
-            <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.focus()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#ff6a00" }}
-          aria-label="Search"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" aria-hidden>
-            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
-            <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={() => {
-          onChange("");
-          inputRef.current?.focus();
-        }}
-      />
+      </label>
       {focused && suggestions.length > 0 && (
         <ul
           className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
@@ -318,23 +438,45 @@ export function ShopHome() {
     <AppShell>
       <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
         <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
-          <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
+          {/*
+            Mobile <640: [←] [GraceRun wordmark ≥360px] [search flex-1] [cart] [avatar]
+            No square logo; camera removed from search; ≥8px gaps; ≥44px targets.
+          */}
+          <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <Link
               href="/"
               onClick={() => setSearch("")}
-              className="hidden shrink-0 sm:block"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 sm:hidden"
+              aria-label="Go back"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
+                <path
+                  d="M15 6L9 12l6 6"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+
+            <Link
+              href="/"
+              onClick={() => setSearch("")}
+              className="hidden max-h-5 shrink-0 items-center min-[361px]:inline-flex"
               aria-label="GraceRun home"
             >
-              <span className="text-base font-extrabold tracking-tight text-white">
+              <span className="max-h-5 text-[13px] font-extrabold leading-5 tracking-tight text-white sm:text-base">
                 GraceRun
               </span>
             </Link>
             <Link
               href="/"
-              className="hidden rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:inline"
+              className="hidden shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:inline"
             >
               Fusion
             </Link>
+
             <HomeSearchBar
               products={products}
               value={search}
@@ -345,10 +487,26 @@ export function ShopHome() {
                 setSearch("");
               }}
             />
+
+            {/* Desktop-only runner entry — kept out of the mobile row so search+cart stay visible */}
+            <Link
+              href={runnerEntryHref({
+                loggedIn: Boolean(user),
+                canRunnerMode,
+              })}
+              onClick={() => {
+                if (canRunnerMode) setMode("runner");
+              }}
+              className="hidden h-11 shrink-0 items-center rounded-full bg-white px-3 text-xs font-bold shadow-sm hover:bg-red-50 sm:inline-flex"
+              style={{ color: "#ED1C24" }}
+            >
+              Switch to Runner
+            </Link>
+
             <Link
               href="/cart"
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-              aria-label="Cart"
+              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/15"
+              aria-label={itemCount > 0 ? `Cart, ${itemCount} items` : "Cart"}
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
                 <path
@@ -369,26 +527,20 @@ export function ShopHome() {
                 </span>
               )}
             </Link>
-            <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
-              }}
-              className="hidden min-h-10 shrink-0 items-center rounded-full bg-white px-3 py-2 text-xs font-bold shadow-sm hover:bg-red-50 sm:inline-flex"
-              style={{ color: "#ED1C24" }}
-            >
-              Switch to Runner
-            </Link>
-            <div className="hidden shrink-0 sm:block">
+
+            <div className="shrink-0">
               <AccountMenu hideThemeChip />
             </div>
           </div>
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-0 pb-36 sm:px-4">
+          {/* Order: campus bar → info banner → categories → products → can't-find */}
+          <div className="space-y-3 pt-0 sm:space-y-4 sm:pt-4">
+            <CampusBar />
+            <HomeInfoBanner />
+          </div>
+
           {guestBrowse && (
             <div className="mx-3 mt-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800 sm:mx-0">
               <p className="font-semibold text-gray-900">Ordering as guest</p>
@@ -407,10 +559,10 @@ export function ShopHome() {
               )}
             </div>
           )}
-          <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
+          <div className="mt-3 space-y-4 sm:mt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
             <div className="min-w-0 space-y-4">
               <section
-                className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
+                className="shop-surface rounded-none px-3 py-3 shadow-sm sm:rounded-2xl sm:py-4"
                 style={{ backgroundColor: "#ffffff" }}
                 aria-label="Categories"
               >
@@ -482,21 +634,24 @@ export function ShopHome() {
                     <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                       {searchResults.map((item) => (
                         <li key={item.id}>
-                          <MenuItemCard item={item} />
+                          <MenuItemCard item={item} catalog={products} />
                         </li>
                       ))}
                     </ul>
                   )}
+                  <div id="manual-item" className="mt-4">
+                    <CustomItemCard />
+                  </div>
                 </section>
               ) : (
                 <>
                   <section
-                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl sm:px-4"
                     style={{ backgroundColor: "#ffffff" }}
                   >
-                    <div className="mb-3 flex items-center justify-between gap-2">
+                    <div className="mb-3 flex items-center justify-between gap-2 px-1">
                       <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
-                        TOP Picks
+                        Recommended
                       </h2>
                       <Link
                         href="/browse/dry"
@@ -506,9 +661,14 @@ export function ShopHome() {
                         Curated ›
                       </Link>
                     </div>
-                    <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
+                    <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-1">
                       {popularItems.map((item, index) => (
-                        <TopPickCard key={item.id} item={item} index={index} />
+                        <TopPickCard
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          catalog={products}
+                        />
                       ))}
                       {!productsLoading && popularItems.length === 0 && (
                         <p className="shop-muted px-2 text-sm">
@@ -539,10 +699,6 @@ export function ShopHome() {
                     />
                   </section>
 
-                  <div id="manual-item" className="px-3 sm:px-0">
-                    <CustomItemCard />
-                  </div>
-
                   <section
                     className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
                     style={{ backgroundColor: "#ffffff" }}
@@ -559,7 +715,7 @@ export function ShopHome() {
                         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                           {feedVisible.map((item) => (
                             <li key={item.id}>
-                              <MenuItemCard item={item} />
+                              <MenuItemCard item={item} catalog={products} />
                             </li>
                           ))}
                         </ul>
@@ -572,6 +728,10 @@ export function ShopHome() {
                       </>
                     )}
                   </section>
+
+                  <div id="manual-item" className="px-3 sm:px-0">
+                    <CustomItemCard />
+                  </div>
                 </>
               )}
             </div>

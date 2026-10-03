@@ -1,66 +1,77 @@
 import type { OrderStatus } from "@/lib/types";
-import { TRACKING_STEPS, getStepIndex } from "@/lib/order-status";
+
+const COMPACT_STEPS = [
+  { id: "placed", label: "Placed" },
+  { id: "accepted", label: "Accepted" },
+  { id: "on_the_way", label: "On the way" },
+  { id: "delivered", label: "Delivered" },
+] as const;
+
+function compactStepIndex(status: OrderStatus): number {
+  if (status === "cancelled") return -1;
+  if (status === "pending") return 0;
+  if (status === "accepted") return 1;
+  if (status === "purchased") return 2;
+  // delivered / runner_paid / customer_paid
+  return 3;
+}
 
 interface OrderProgressBarProps {
   status: OrderStatus;
 }
 
+/** Compact 4-state horizontal progress (not 7 grey dots). */
 export function OrderProgressBar({ status }: OrderProgressBarProps) {
-  const currentIndex = getStepIndex(status);
+  const current = compactStepIndex(status);
+
+  if (status === "cancelled") {
+    return (
+      <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+        Order cancelled
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <ol className="space-y-0">
-        {TRACKING_STEPS.map((step, index) => {
-          const isComplete = index <= currentIndex;
-          const isLast = index === TRACKING_STEPS.length - 1;
-
+    <div className="rounded-2xl border border-gray-100 bg-white px-3 py-4 shadow-sm">
+      <ol className="flex items-start justify-between gap-1">
+        {COMPACT_STEPS.map((step, index) => {
+          const done = current >= index;
+          const active = current === index;
           return (
-            <li key={step.status} className="relative flex gap-4">
-              {!isLast && (
+            <li key={step.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+              <div className="flex w-full items-center">
+                {index > 0 && (
+                  <span
+                    className="h-0.5 flex-1 rounded-full"
+                    style={{ backgroundColor: current >= index ? "#ED1C24" : "#e5e7eb" }}
+                    aria-hidden
+                  />
+                )}
                 <span
-                  className={`absolute left-[15px] top-8 h-[calc(100%-8px)] w-0.5 ${
-                    index < currentIndex ? "bg-green-500" : "bg-gray-200"
-                  }`}
-                  aria-hidden
+                  className="flex h-3 w-3 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: done ? "#ED1C24" : "#d1d5db",
+                    boxShadow: active ? "0 0 0 4px rgba(237,28,36,0.18)" : "none",
+                  }}
+                  aria-current={active ? "step" : undefined}
                 />
-              )}
-              <div className="relative z-10 shrink-0">
-                {isComplete ? (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white shadow-sm">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      aria-hidden
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white">
-                    <div className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-                  </div>
+                {index < COMPACT_STEPS.length - 1 && (
+                  <span
+                    className="h-0.5 flex-1 rounded-full"
+                    style={{
+                      backgroundColor: current > index ? "#ED1C24" : "#e5e7eb",
+                    }}
+                    aria-hidden
+                  />
                 )}
               </div>
-              <div className={`pb-6 ${isLast ? "pb-0" : ""}`}>
-                <p
-                  className={`text-sm font-semibold ${
-                    isComplete ? "text-gray-900" : "text-gray-400"
-                  }`}
-                >
-                  {step.label}
-                </p>
-                {index === currentIndex && (
-                  <p className="mt-0.5 text-xs text-fusion-red">Current status</p>
-                )}
-              </div>
+              <span
+                className="max-w-full truncate text-center text-[11px] font-semibold"
+                style={{ color: done ? "#111111" : "#9ca3af" }}
+              >
+                {step.label}
+              </span>
             </li>
           );
         })}

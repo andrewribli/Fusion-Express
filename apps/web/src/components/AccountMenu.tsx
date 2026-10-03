@@ -40,8 +40,8 @@ function HeaderAvatar({
 
   if (!user) {
     return (
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2a2a2a] text-gray-300">
-        <DefaultUserIcon className="h-4 w-4" />
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2a2a2a] text-gray-300">
+        <DefaultUserIcon className="h-5 w-5" />
       </span>
     );
   }
@@ -52,15 +52,15 @@ function HeaderAvatar({
       <img
         src={photoURL}
         alt=""
-        className="h-9 w-9 rounded-full object-cover"
+        className="h-11 w-11 rounded-full object-cover"
         onError={() => setImageFailed(true)}
       />
     );
   }
 
   return (
-    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ED1C24] text-[11px] font-bold text-white">
-      {letters || <DefaultUserIcon className="h-4 w-4 text-white" />}
+    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ED1C24] text-[11px] font-bold text-white">
+      {letters || <DefaultUserIcon className="h-5 w-5 text-white" />}
     </span>
   );
 }
@@ -103,7 +103,7 @@ export function AccountMenu({
         <Link
           href="/login"
           aria-label="Sign in"
-          className="flex h-9 w-9 items-center justify-center rounded-full hover:opacity-90"
+          className="flex h-11 w-11 items-center justify-center rounded-full hover:opacity-90"
         >
           <HeaderAvatar user={null} />
         </Link>

@@ -11,7 +11,12 @@ export function CustomerOrderHeading({
   return (
     <div className="min-w-0">
       <p className={titleClassName}>{formatOrderPlacedAt(order.createdAt)}</p>
-      <p className="mt-0.5 break-all text-xs text-gray-400">{order.id}</p>
+      {/* Order token is intentionally not prominent — shown truncated at page bottom */}
     </div>
   );
+}
+
+export function truncateOrderId(id: string): string {
+  if (id.length <= 14) return id;
+  return `${id.slice(0, 8)}…${id.slice(-4)}`;
 }

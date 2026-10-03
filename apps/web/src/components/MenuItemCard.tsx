@@ -10,9 +10,10 @@ import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 
 interface MenuItemCardProps {
   item: MenuItem;
+  catalog?: MenuItem[];
 }
 
-export function MenuItemCard({ item }: MenuItemCardProps) {
+export function MenuItemCard({ item, catalog }: MenuItemCardProps) {
   const [open, setOpen] = useState(false);
 
   function onCardActivate() {
@@ -73,7 +74,12 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
         </div>
       </div>
 
-      <ProductQuickAddModal item={item} open={open} onClose={() => setOpen(false)} />
+      <ProductQuickAddModal
+        item={item}
+        catalog={catalog}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </>
   );
 }

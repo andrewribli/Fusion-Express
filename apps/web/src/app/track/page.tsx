@@ -14,13 +14,17 @@ import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
-import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
+import {
+  CustomerOrderHeading,
+  truncateOrderId,
+} from "@/components/CustomerOrderHeading";
 import { CustomerPayPanel } from "@/components/CustomerPayPanel";
 import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
 import {
   customerAmountDue,
   groceryAmountDue,
   hasConfirmedGroceryTotal,
+  formatOrderPlacedAt,
 } from "@/lib/order-status";
 import { OrderProofPhotos } from "@/components/CustomerPayPanel";
 import { notifyOrderStatus as notifyOrderStatusEmail } from "@/lib/notify-email";
@@ -29,6 +33,8 @@ import {
   requestNotificationPermission,
 } from "@/lib/notifications";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
+import { shouldShowLiveMap } from "@/lib/live-tracking";
+import { formatEta } from "@/lib/constants";
 import type { Order } from "@/lib/types";
 
 function TrackContent() {
@@ -136,13 +142,29 @@ function TrackContent() {
         <div className="mt-6 space-y-4">
           <GuestAccountPrompt />
 
+          {/* ETA bar up top */}
+          <div
+            className="rounded-2xl px-4 py-3 text-white shadow-sm"
+            style={{ backgroundColor: "#ED1C24" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
+              Estimated arrival
+            </p>
+            <p className="mt-0.5 text-lg font-extrabold">
+              {order.estimatedDeliveryAt
+                ? formatEta(order.estimatedDeliveryAt)
+                : "Calculating…"}
+            </p>
+            <p className="mt-0.5 text-xs text-white/85">
+              {formatDeliveryAddress(order.college, order.hall)} · Lobby{" "}
+              {order.lobbyPoint}
+            </p>
+          </div>
+
+          <OrderProgressBar status={order.status} />
+
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <CustomerOrderHeading order={order} />
-
-            <p className="mt-2 text-sm text-gray-700">
-              {formatDeliveryAddress(order.college, order.hall)}
-            </p>
-            <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
 
             {order.customerNote && (
               <p className="mt-2 text-xs text-gray-600">
@@ -155,17 +177,32 @@ function TrackContent() {
               </p>
             )}
 
-            <ul className="mt-3 space-y-1 border-t border-gray-100 pt-3 text-sm">
+            {shouldShowLiveMap(order) ? (
+              <div className="mt-3">
+                <RunnerLocationMap location={order.runnerLocation} />
+              </div>
+            ) : (
+              (order.status === "accepted" ||
+                order.status === "purchased" ||
+                order.status === "pending") && (
+                <p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-xs text-gray-500">
+                  Live tracking not available
+                </p>
+              )
+            )}
+
+            <h3 className="mt-4 text-sm font-bold text-gray-900">Order summary</h3>
+            <ul className="mt-2 space-y-1 text-sm">
               {order.items.map((item) => (
-                <li key={item.itemId} className="flex justify-between">
-                  <span>{item.quantity}× {item.name}</span>
+                <li key={item.itemId} className="flex justify-between gap-2">
                   <span>
-                    ${((item.actualPrice ?? item.price) * item.quantity).toFixed(1)}
-                    {item.actualPrice != null && item.actualPrice !== item.price && (
-                      <span className="ml-1 text-[11px] text-gray-400">
-                        (was ${item.price * item.quantity})
-                      </span>
-                    )}
+                    {item.quantity}× {item.name}
+                  </span>
+                  <span>
+                    $
+                    {(
+                      (item.actualPrice ?? item.price) * item.quantity
+                    ).toFixed(1)}
                   </span>
                 </li>
               ))}
@@ -197,7 +234,7 @@ function TrackContent() {
               </div>
               {order.tip != null && order.tip > 0 && (
                 <div className="flex justify-between text-gray-600">
-                  <span>Tip</span>
+                  <span>Tip (100% to runner)</span>
                   <span>${order.tip}</span>
                 </div>
               )}
@@ -215,9 +252,9 @@ function TrackContent() {
 
             {order.priceAdjustmentStatus === "refund_pending" && (
               <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-800">
-                Fusion prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
-                estimate. You will be refunded ${order.refundAmount} within 3–5 business
-                days via PayMe/FPS.
+                Fusion prices were ${Math.abs(order.priceDifference ?? 0)} lower
+                than the app estimate. You will be refunded ${order.refundAmount}{" "}
+                within 3–5 business days via PayMe/FPS.
               </p>
             )}
             {order.priceAdjustmentStatus === "refunded" && (
@@ -232,10 +269,12 @@ function TrackContent() {
                   <p className="text-xs text-amber-900">
                     Fusion prices are higher than the app estimate. New total $
                     {order.actualSubtotal != null
-                      ? order.actualSubtotal + order.deliveryFee + (order.tip ?? 0)
+                      ? order.actualSubtotal +
+                        order.deliveryFee +
+                        (order.tip ?? 0)
                       : order.total}
-                    . Approve to continue, or cancel for a full refund of anything already
-                    paid.
+                    . Approve to continue, or cancel for a full refund of
+                    anything already paid.
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -258,12 +297,6 @@ function TrackContent() {
                 </div>
               )}
 
-            {(order.status === "accepted" || order.status === "purchased") && (
-              <div className="mt-3">
-                <RunnerLocationMap location={order.runnerLocation} />
-              </div>
-            )}
-
             {order.status === "pending" && (
               <button
                 type="button"
@@ -278,13 +311,12 @@ function TrackContent() {
             <OrderProofPhotos order={order} />
           </div>
 
+          <OrderChatPanel order={order} compact />
+
           {user &&
             getUserAccountId(user) === order.customerId &&
             (order.status === "delivered" || order.status === "runner_paid") && (
-              <CustomerPayPanel
-                order={order}
-                userId={user.uid}
-              />
+              <CustomerPayPanel order={order} userId={user.uid} />
             )}
 
           {order.status === "customer_paid" && (
@@ -299,10 +331,6 @@ function TrackContent() {
               .
             </p>
           )}
-
-          <OrderProgressBar status={order.status} />
-
-          <OrderChatPanel order={order} compact />
 
           {(order.status === "delivered" ||
             order.status === "runner_paid" ||
@@ -324,6 +352,19 @@ function TrackContent() {
               You rated this delivery {order.runnerRating}★
             </p>
           )}
+
+          {/* Truncated order token at bottom — tap to copy */}
+          <button
+            type="button"
+            onClick={() => {
+              void navigator.clipboard?.writeText(order.id);
+            }}
+            className="flex w-full flex-col items-center gap-0.5 rounded-xl px-3 py-3 text-center text-xs text-gray-400 hover:bg-gray-50"
+            title="Tap to copy order ID"
+          >
+            <span>Order {truncateOrderId(order.id)}</span>
+            <span className="text-[10px]">Tap to copy · {formatOrderPlacedAt(order.createdAt)}</span>
+          </button>
         </div>
       )}
     </main>

@@ -96,9 +96,13 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               className="flex min-w-0 items-center gap-2"
               aria-label="GraceRun home"
             >
-              <AppLogo size={44} className="h-11 w-11 shrink-0" />
+              {/* Wordmark on narrow viewports; square mark only from sm up to free space for back/cart/avatar */}
+              <span className="hidden max-h-5 text-[13px] font-extrabold leading-5 tracking-tight text-gray-900 min-[361px]:inline sm:hidden">
+                GraceRun
+              </span>
+              <AppLogo size={44} className="hidden h-11 w-11 shrink-0 sm:block" />
               {runnerMode && (
-                <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
+                <span className="hidden text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24] sm:block">
                   Runner
                 </span>
               )}

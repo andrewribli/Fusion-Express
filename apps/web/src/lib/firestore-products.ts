@@ -26,6 +26,14 @@ export function firestoreProductToMenuItem(
     name: String(data.name ?? "Product"),
     category: categorySlug(String(data.category ?? "meat")),
     price: Number(data.price ?? 0),
+    salePrice:
+      data.salePrice != null && data.salePrice !== ""
+        ? Number(data.salePrice)
+        : undefined,
+    originalPrice:
+      data.originalPrice != null && data.originalPrice !== ""
+        ? Number(data.originalPrice)
+        : undefined,
     unit: String(data.unit ?? "each"),
     image,
     priceType: "fixed",
@@ -34,6 +42,12 @@ export function firestoreProductToMenuItem(
     sortOrder: Number(data.sourceIndex ?? data.sortOrder ?? 0),
     weightKg: data.weightKg != null ? Number(data.weightKg) : 0.2,
     itemNote: data.brand ? String(data.brand) : undefined,
+    description: data.description ? String(data.description) : undefined,
+    ingredients: data.ingredients ? String(data.ingredients) : undefined,
+    storage: data.storage ? String(data.storage) : undefined,
+    options: Array.isArray(data.options)
+      ? (data.options as MenuItem["options"])
+      : undefined,
   };
 }
 
