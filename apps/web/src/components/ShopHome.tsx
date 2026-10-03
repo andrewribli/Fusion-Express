@@ -410,7 +410,7 @@ export function ShopHome() {
           <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
             <div className="min-w-0 space-y-4">
               <section
-                className="shop-bubble rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
+                className="shop-bubble mx-3 rounded-2xl px-3 py-4 shadow-sm sm:mx-0"
                 style={{ backgroundColor: "#ED1C24" }}
                 aria-label="Categories"
               >
@@ -468,7 +468,7 @@ export function ShopHome() {
 
               {searching ? (
                 <section
-                  className="shop-bubble rounded-2xl px-4 py-4 shadow-sm"
+                  className="shop-bubble mx-3 rounded-2xl px-4 py-4 shadow-sm sm:mx-0"
                   style={{ backgroundColor: "#ED1C24" }}
                 >
                   <h2 className="shop-heading text-base font-bold" style={{ color: "#ffffff" }}>
@@ -491,7 +491,7 @@ export function ShopHome() {
               ) : (
                 <>
                   <section
-                    className="shop-bubble rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    className="shop-bubble mx-3 rounded-2xl px-4 py-4 shadow-sm sm:mx-0"
                     style={{ backgroundColor: "#ED1C24" }}
                   >
                     <div className="mb-3 flex items-center justify-between gap-2">
@@ -544,7 +544,7 @@ export function ShopHome() {
                   </div>
 
                   <section
-                    className="shop-bubble rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
+                    className="shop-bubble mx-3 rounded-2xl px-4 py-4 shadow-sm sm:mx-0"
                     style={{ backgroundColor: "#ED1C24" }}
                   >
                     <h2 className="shop-heading text-lg font-extrabold" style={{ color: "#ffffff" }}>
