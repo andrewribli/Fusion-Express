@@ -120,7 +120,6 @@ function HomeSearchBar({
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const [focused, setFocused] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const suggestions = useMemo(() => {
     const q = value.trim().toLowerCase();
     if (!q) return [];
@@ -130,11 +129,26 @@ function HomeSearchBar({
   }, [products, value]);
 
   return (
-    <div className="relative min-w-0 flex-1">
+    <div className="relative min-w-[140px] flex-1 sm:min-w-[400px]">
       <div
-        className="flex h-11 w-full min-w-0 items-center gap-1 rounded-full pl-3 pr-1.5"
+        className="flex h-11 w-full min-w-0 items-center gap-2 rounded-full pl-3 pr-1.5"
         style={{ backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
       >
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4 shrink-0"
+          style={{ color: "#6b7280" }}
+          fill="none"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="m16 16 4 4"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
         <input
           ref={inputRef}
           id="home-search"
@@ -147,29 +161,14 @@ function HomeSearchBar({
           className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
           style={{ backgroundColor: "transparent", color: "#111111" }}
           autoComplete="off"
+          aria-label="Search products"
         />
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ color: "#555555" }}
-          aria-label="Scan or upload a product photo"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <path
-              d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.8A1 1 0 0 1 10 4h4a1 1 0 0 1 .8.4L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            />
-            <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-          </svg>
-        </button>
         <button
           type="button"
           onClick={() => inputRef.current?.focus()}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
           style={{ backgroundColor: "#ff6a00" }}
-          aria-label="Search"
+          aria-label="Focus search"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" aria-hidden>
             <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
@@ -177,17 +176,6 @@ function HomeSearchBar({
           </svg>
         </button>
       </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={() => {
-          onChange("");
-          inputRef.current?.focus();
-        }}
-      />
       {focused && suggestions.length > 0 && (
         <ul
           className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
@@ -318,23 +306,45 @@ export function ShopHome() {
     <AppShell>
       <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
         <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
-          <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
+          {/*
+            Mobile <640: [←] [GraceRun wordmark ≥360px] [search flex-1] [cart] [avatar]
+            No square logo; camera removed from search; ≥8px gaps; ≥44px targets.
+          */}
+          <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <Link
               href="/"
               onClick={() => setSearch("")}
-              className="hidden shrink-0 sm:block"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 sm:hidden"
+              aria-label="Go back"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
+                <path
+                  d="M15 6L9 12l6 6"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+
+            <Link
+              href="/"
+              onClick={() => setSearch("")}
+              className="hidden max-h-5 shrink-0 items-center min-[360px]:inline-flex"
               aria-label="GraceRun home"
             >
-              <span className="text-base font-extrabold tracking-tight text-white">
+              <span className="max-h-5 text-[13px] font-extrabold leading-5 tracking-tight text-white sm:text-base">
                 GraceRun
               </span>
             </Link>
             <Link
               href="/"
-              className="hidden rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:inline"
+              className="hidden shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:inline"
             >
               Fusion
             </Link>
+
             <HomeSearchBar
               products={products}
               value={search}
@@ -345,10 +355,26 @@ export function ShopHome() {
                 setSearch("");
               }}
             />
+
+            {/* Desktop-only runner entry — kept out of the mobile row so search+cart stay visible */}
+            <Link
+              href={runnerEntryHref({
+                loggedIn: Boolean(user),
+                canRunnerMode,
+              })}
+              onClick={() => {
+                if (canRunnerMode) setMode("runner");
+              }}
+              className="hidden h-11 shrink-0 items-center rounded-full bg-white px-3 text-xs font-bold shadow-sm hover:bg-red-50 sm:inline-flex"
+              style={{ color: "#ED1C24" }}
+            >
+              Switch to Runner
+            </Link>
+
             <Link
               href="/cart"
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-              aria-label="Cart"
+              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/15"
+              aria-label={itemCount > 0 ? `Cart, ${itemCount} items` : "Cart"}
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
                 <path
@@ -369,20 +395,8 @@ export function ShopHome() {
                 </span>
               )}
             </Link>
-            <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
-              }}
-              className="hidden min-h-10 shrink-0 items-center rounded-full bg-white px-3 py-2 text-xs font-bold shadow-sm hover:bg-red-50 sm:inline-flex"
-              style={{ color: "#ED1C24" }}
-            >
-              Switch to Runner
-            </Link>
-            <div className="hidden shrink-0 sm:block">
+
+            <div className="shrink-0">
               <AccountMenu hideThemeChip />
             </div>
           </div>
