@@ -35,6 +35,7 @@ import {
   getRestaurant,
 } from "@fusion-express/shared/canteen";
 import { parseCanteenItemId } from "@fusion-express/shared/shop-kind";
+import type { CampusId } from "@fusion-express/shared/campus";
 
 export default function CanteenCheckoutPage() {
   const { user } = useUser();
@@ -79,20 +80,21 @@ export default function CanteenCheckoutPage() {
   const phoneOk = !validatePhone(phone);
   const singleCanteen = Boolean(canteenId);
   const canSubmit = Boolean(
-    college && hall && phoneOk && !overLimit && singleCanteen,
+    college && hall && !overLimit && singleCanteen,
   );
   const address =
     college && hall ? formatDeliveryAddress(college, hall) : null;
-  const lobby = hall ? getLobbyForHall(hall) : "";
+  const lobby = hall ? getLobbyForHall(hall, user?.campus === "cityu" ? "cityu" : "cuhk") : "";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const campus: CampusId =
+      user?.campus === "cityu" ? "cityu" : "cuhk";
     void placeOrder({
+      campus,
       college,
       hall,
-      phone,
-      paymentMethod,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
     });
@@ -194,6 +196,7 @@ export default function CanteenCheckoutPage() {
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <div className="mt-3">
                 <DeliveryAddressFields
+                  campus={user?.campus === "cityu" ? "cityu" : "cuhk"}
                   college={college}
                   hall={hall}
                   onCollegeChange={setCollege}
