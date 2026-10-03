@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  repairAuthEmailForUid,
-  verifyAdminIdToken,
-} from "@/lib/firebase-admin";
+  repairAuthEmailForUidRest,
+  verifyAdminIdTokenRest,
+} from "@/lib/identity-toolkit-rest";
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const token = authHeader.startsWith("Bearer ")
     ? authHeader.slice("Bearer ".length).trim()
     : null;
-  const admin = await verifyAdminIdToken(token);
+  const admin = await verifyAdminIdTokenRest(token);
   if (!admin) {
     return jsonError("Admin access required.", 403);
   }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   if (!uid) return jsonError("Missing uid", 400);
 
   try {
-    const result = await repairAuthEmailForUid(uid);
+    const result = await repairAuthEmailForUidRest(uid);
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
     console.error("admin repair auth email failed", err);

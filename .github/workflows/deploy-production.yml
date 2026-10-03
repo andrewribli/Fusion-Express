@@ -1,0 +1,31 @@
+name: Deploy production (servecart)
+
+# One-shot: fires when this workflow file lands on cursor/ptero-cityu-match.
+# Uses repo secret VERCEL_TOKEN. Does not store the token in git.
+# Only production deploy — www.gracerun.fit is the project production domain.
+on:
+  push:
+    branches:
+      - cursor/ptero-cityu-match
+    paths:
+      - .github/workflows/deploy-production.yml
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy servecart to production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN}" ]; then
+            echo "VERCEL_TOKEN is empty. Add it as a GitHub Actions secret on this repo."
+            exit 1
+          fi
+          npx --yes vercel@59.3.0 link --yes --team fusion-1468 --project servecart --token "$VERCEL_TOKEN"
+          npx --yes vercel@59.3.0 --prod --yes --scope fusion-1468 --token "$VERCEL_TOKEN" | tee /tmp/vercel-deploy.txt
+          echo "---- deploy output (tail) ----"
+          tail -40 /tmp/vercel-deploy.txt

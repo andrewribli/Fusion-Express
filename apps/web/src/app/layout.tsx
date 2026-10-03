@@ -1,8 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { CampusAccessGuard } from "@/components/CampusAccessGuard";
 import { StagingBanner } from "@/components/StagingBanner";
+import { CampusProvider } from "@/context/CampusContext";
 import { CartProvider } from "@/context/CartContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import { UserProvider } from "@/context/UserContext";
+import { FavoritesToastHost } from "@/components/FavoriteHeart";
 import { ManualItemModalProvider } from "@/lib/manual-item-modal";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
@@ -37,7 +41,11 @@ export const viewport: Viewport = {
   themeColor: "#ED1C24",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${geist.variable} h-full`}>
       <body className="lite-mode min-h-full bg-[#f3f4f6] font-sans text-gray-900 antialiased">
@@ -49,12 +57,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <ThemeProvider>
           <UserProvider>
-            <CartProvider>
-              <ManualItemModalProvider>
-                <StagingBanner />
-                {children}
-              </ManualItemModalProvider>
-            </CartProvider>
+            <FavoritesProvider>
+              <CampusProvider>
+                <CartProvider>
+                  <ManualItemModalProvider>
+                    <StagingBanner />
+                    <CampusAccessGuard>{children}</CampusAccessGuard>
+                    <FavoritesToastHost />
+                  </ManualItemModalProvider>
+                </CartProvider>
+              </CampusProvider>
+            </FavoritesProvider>
           </UserProvider>
         </ThemeProvider>
       </body>

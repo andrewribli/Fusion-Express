@@ -184,7 +184,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     bullets: [
       "Name",
       "Email address",
-      "Phone number (if you provide it)",
+      "Phone number (runners only — customers and guests are not asked for one)",
       "Order delivery address (college, hall, lobby) collected at checkout",
       "Order history, cart contents, payment confirmation status, and in-app messages about an order",
       "Approximate GPS location of a runner while they are completing your order",

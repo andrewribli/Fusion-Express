@@ -35,4 +35,5 @@ export {
   formatExpiredAgo,
   runnerWarningTotal,
   isCustomerPaymentOpen,
+  isClaimableOrderStatus,
 } from "@fusion-express/shared/types";

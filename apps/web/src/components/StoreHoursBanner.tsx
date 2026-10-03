@@ -1,8 +1,9 @@
 "use client";
 
 import { isServiceOpen, SERVICE_HOURS } from "@/lib/constants";
+import { ADMIN_ORDERING_NOTE } from "@/lib/order-window";
 
-export function StoreHoursBanner() {
+export function StoreHoursBanner({ isAdmin = false }: { isAdmin?: boolean }) {
   const open = isServiceOpen();
 
   return (
@@ -24,7 +25,10 @@ export function StoreHoursBanner() {
         Student runners pick up at Fusion {SERVICE_HOURS.label}.{" "}
         {open
           ? "Runners are taking orders now — place one and a student on campus can accept it."
-          : "Runners are offline until 8:00pm. You can still browse and fill a cart; checkout for delivery opens with pickup hours."}
+          : "Runners are offline until 8:00pm. You can still browse and fill a cart, or schedule a delivery during pickup hours."}
+        {!open && isAdmin ? (
+          <span className="mt-1 block font-medium">{ADMIN_ORDERING_NOTE}</span>
+        ) : null}
       </p>
     </div>
   );

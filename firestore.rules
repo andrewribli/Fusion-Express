@@ -103,6 +103,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Canteen / cafe catalog (seeded via Admin SDK). Public read for browse.
+    match /canteens/{canteenId} {
+      allow get, list: if true;
+      allow write: if false;
+
+      match /items/{itemId} {
+        allow get, list: if true;
+        allow write: if false;
+      }
+    }
+
     // -------------------------------------------------------------- usernames
 
     // Sign-in resolves a username to an email before the user is authenticated,
@@ -147,16 +158,128 @@ service cloud.firestore {
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
         'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
-        'isRunner', 'runnerId'
+        'isRunner', 'runnerId',
+        'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt',
+        'favorites', 'campus',
+        'runnerCollege', 'runnerCollegeLockedAt', 'runnerCollegeAppeal'
       ]);
     }
 
+    /**
+     * Updates only check changed keys. Older profiles may carry extra fields
+     * from Admin SDK writes; requiring hasOnly on the whole doc blocked every
+     * post-login merge (role heal, campus backfill) and looked like a dead
+     * Sign In button.
+     */
+    function userUpdateKeysAllowed() {
+      return changedKeys().hasOnly([
+        'uid', 'fullName', 'email', 'phone', 'isGuest', 'createdAt', 'updatedAt',
+        'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
+        'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
+        'runnerPaymentMethod', 'runnerPaymentId',
+        'isRunner', 'runnerId',
+        'displayName', 'photoUrl', 'isAnonymous', 'pseudonym', 'pseudonymChangedAt',
+        'favorites', 'campus'
+      ]);
+    }
+
+    /** Signup stamps CUHK or CityU. Other values are rejected. */
+    function campusValueOk() {
+      return !('campus' in request.resource.data)
+        || request.resource.data.campus == 'cuhk'
+        || request.resource.data.campus == 'cityu';
+    }
+
+    /**
+     * College is written by the server. A locked runnerCollege cannot be
+     * changed from the client, including the appeal record.
+     */
+    function collegeFieldsUnchanged() {
+      return !changedKeys().hasAny([
+        'runnerCollege', 'runnerCollegeLockedAt', 'runnerCollegeAppeal'
+      ]);
+    }
+
+    /**
+     * Delivery identity. Only the account owner reaches this function.
+     * Pseudonym format is "Anonymous <adjective> <animal>" and can change
+     * only when the previous timestamp is at least 30 days old.
+     */
+    function pseudonymShapeOk(value) {
+      return value is string
+        && value.matches('Anonymous (Amber|Bold|Brave|Bright|Calm|Clever|Cosmic|Cozy|Daring|Dizzy|Dreamy|Eager|Fancy|Fluffy|Gentle|Happy|Jolly|Kind|Lively|Lucky|Merry|Misty|Noble|Plucky|Proud|Quiet|Rapid|Silly|Sleepy|Snappy|Sunny|Swift|Tiny|Trusty|Vivid|Warm|Wise|Witty|Zesty|Zippy) (Badger|Bear|Crane|Deer|Dolphin|Dove|Duck|Eagle|Falcon|Finch|Fox|Frog|Gecko|Goose|Hare|Heron|Koala|Lark|Lynx|Mole|Moose|Mouse|Newt|Otter|Owl|Panda|Piper|Quail|Rabbit|Robin|Seal|Shrew|Snail|Sparrow|Swan|Tiger|Toad|Turtle|Wren|Yak)');
+    }
+
+    function displayNameOk() {
+      return !('displayName' in request.resource.data)
+        || (
+          request.resource.data.displayName is string
+          && request.resource.data.displayName.size() > 0
+          && request.resource.data.displayName.size() <= 40
+          && !request.resource.data.displayName.matches('.*@.*')
+        );
+    }
+
+    function photoUrlOk() {
+      return !('photoUrl' in request.resource.data)
+        || (
+          request.resource.data.photoUrl is string
+          && request.resource.data.photoUrl.size() < 2048
+          && request.resource.data.photoUrl.matches('https://.*')
+          && request.resource.data.photoUrl.matches('.*avatars(%2F|/)' + uid() + '(%2F|/)avatar\\.jpg.*')
+        );
+    }
+
+    function isAnonymousOk() {
+      return !('isAnonymous' in request.resource.data)
+        || request.resource.data.isAnonymous is bool;
+    }
+
+    function anonymousHasPseudonym() {
+      return request.resource.data.get('isAnonymous', false) != true
+        || pseudonymShapeOk(request.resource.data.get('pseudonym', ''));
+    }
+
+    function pseudonymCreateOk() {
+      return !('pseudonym' in request.resource.data)
+        || (
+          pseudonymShapeOk(request.resource.data.pseudonym)
+          && request.resource.data.pseudonymChangedAt == request.time
+        );
+    }
+
+    function pseudonymUpdateOk() {
+      let keys = changedKeys();
+      return (
+        !keys.hasAny(['pseudonym', 'pseudonymChangedAt'])
+        || (
+          keys.hasAny(['pseudonym'])
+          && pseudonymShapeOk(request.resource.data.pseudonym)
+          && request.resource.data.pseudonymChangedAt == request.time
+          && (
+            !('pseudonym' in resource.data)
+            || !(resource.data.pseudonym is string)
+            || resource.data.pseudonym.size() == 0
+            || !('pseudonymChangedAt' in resource.data)
+            || !(resource.data.pseudonymChangedAt is timestamp)
+            || request.time > resource.data.pseudonymChangedAt + duration.value(30, 'd')
+          )
+        )
+      );
+    }
+
+    /**
+     * Runner flags are allowed when the runners doc is already theirs or is
+     * created in the same batch/transaction. get/exists miss that uncommitted
+     * doc; getAfter/existsAfter see it. A locked runnerCollege still cannot
+     * change — collegeFieldsUnchanged does not use this helper.
+     */
     function ownsRunnerDoc(runnerDocId) {
       return runnerDocId is string
         && runnerDocId.size() > 0
         && runnerDocId.size() < 128
-        && exists(/databases/$(database)/documents/runners/$(runnerDocId))
-        && get(/databases/$(database)/documents/runners/$(runnerDocId))
+        && existsAfter(/databases/$(database)/documents/runners/$(runnerDocId))
+        && getAfter(/databases/$(database)/documents/runners/$(runnerDocId))
           .data.get('uid', '') == uid();
     }
 
@@ -169,22 +292,45 @@ service cloud.firestore {
         && (!hasRunnerId || ownsRunnerDoc(data.runnerId));
     }
 
+    /** Customers and guests may omit phone. Runners must store one. */
+    function phoneOkForRole() {
+      return request.resource.data.get('isRunner', false) != true
+        || (
+          request.resource.data.phone is string
+          && request.resource.data.phone.size() >= 8
+        );
+    }
+
     function userCreateOk(userId) {
       let data = request.resource.data;
       return signedIn()
         && uid() == userId
         && userKeysAllowed()
         && roleIsValid()
+        && phoneOkForRole()
         && data.get('uid', uid()) == uid()
         && data.get('isRunner', false) == false
-        && !('runnerId' in data);
+        && !('runnerId' in data)
+        && displayNameOk()
+        && photoUrlOk()
+        && isAnonymousOk()
+        && anonymousHasPseudonym()
+        && pseudonymCreateOk()
+        && campusValueOk()
+        && (
+          !('role' in data)
+          || data.role == 'customer'
+        )
+        && !('runnerCollege' in data)
+        && !('runnerCollegeLockedAt' in data)
+        && !('runnerCollegeAppeal' in data);
     }
 
     function userUpdateOk(userId) {
       let keys = changedKeys();
       return signedIn()
         && uid() == userId
-        && userKeysAllowed()
+        && userUpdateKeysAllowed()
         && roleIsValid()
         && request.resource.data.get('uid', uid()) == uid()
         && (
@@ -205,7 +351,15 @@ service cloud.firestore {
             && 'runnerId' in request.resource.data
             && ownsRunnerDoc(request.resource.data.runnerId)
           )
-        );
+        )
+        && phoneOkForRole()
+        && displayNameOk()
+        && photoUrlOk()
+        && isAnonymousOk()
+        && anonymousHasPseudonym()
+        && pseudonymUpdateOk()
+        && (!changedKeys().hasAny(['campus']) || campusValueOk())
+        && collegeFieldsUnchanged();
     }
 
     match /users/{userId} {
@@ -231,7 +385,10 @@ service cloud.firestore {
         || isAdmin()
       );
       allow list: if resource.data.uid == uid();
-      allow create: if signedIn() && request.resource.data.uid == uid();
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 8;
       allow update: if signedIn() && (
         resource.data.get('uid', '') == uid()
         || myRunnerDocId() == runnerId
@@ -242,16 +399,15 @@ service cloud.firestore {
     // ----------------------------------------------------------------- orders
 
     match /orders/{orderId} {
-      // A runner has to read a pending order to decide whether to accept it,
-      // which also covers the transaction read inside acceptOrder().
+      // Runners browse claimable orders (paid via Airwallex, or legacy pending).
       allow get: if isOrderCustomer(resource.data)
         || isOrderRunner(resource.data)
-        || (isRunner() && resource.data.status == 'pending')
+        || (isRunner() && resource.data.status in ['pending', 'paid'])
         || isAdmin();
 
       allow list: if resource.data.customerId == uid()
         || resource.data.runnerUid == uid()
-        || (isRunner() && resource.data.status == 'pending')
+        || (isRunner() && resource.data.status in ['pending', 'paid'])
         || isAdmin();
 
       allow create: if signedIn()
@@ -260,7 +416,11 @@ service cloud.firestore {
         && request.resource.data.get('runnerId', '') == ''
         && request.resource.data.get('runnerUid', '') == ''
         && request.resource.data.subtotal is number
-        && request.resource.data.subtotal <= 200;
+        && request.resource.data.subtotal <= 200
+        && !('discountSplit' in request.resource.data)
+        && !('platformDiscountFee' in request.resource.data)
+        && !('discountCollege' in request.resource.data)
+        && !('collegeDiscountStatus' in request.resource.data);
 
       allow update: if isOrderCustomer(resource.data)
         && resource.data.status in ['delivered', 'runner_paid']
@@ -289,23 +449,25 @@ service cloud.firestore {
           && changedKeys().hasOnly([
             'status', 'customerPaidAt', 'paymentReceived', 'updatedAt'
           ])
-          && request.resource.data.status in ['customer_paid', 'paid']
+          && request.resource.data.status in ['customer_paid', 'paid', 'completed']
           && request.resource.data.paymentReceived == true
         )
       );
 
-      // Claiming an unassigned order. Self-pickup is blocked here as well as
-      // in the client so it cannot be bypassed.
+      // Claiming a paid (or legacy unpaid pending) order.
       allow update: if isRunner()
-        && resource.data.status == 'pending'
+        && resource.data.status in ['pending', 'paid']
         && resource.data.customerId != uid()
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
           'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
-          'runnerPaymentId', 'runnerEmail'
+          'runnerPaymentId', 'runnerEmail',
+          'discountApplied', 'discountAmount', 'runnerCollege',
+          'canteenCollege', 'subtotal', 'total'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
-        && request.resource.data.runnerUid == uid();
+        && request.resource.data.runnerUid == uid()
+        && resource.data.get('collegeDiscountStatus', '') != 'pending';
 
       // The assigned runner drives the order to delivery.
       allow update: if isOrderRunner(resource.data)
@@ -318,9 +480,17 @@ service cloud.firestore {
           'priceAdjustmentStatus', 'refundAmount', 'subtotal', 'total',
           'tillPricesSubmittedAt', 'runnerDeadline', 'customerDeadline',
           'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
-          'adminMissedNotifiedAt'
+          'adminMissedNotifiedAt',
+          'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege'
         ])
-        && request.resource.data.status != 'pending';
+        && !(request.resource.data.status in ['pending', 'paid'])
+        && (
+          resource.data.get('collegeDiscountStatus', '') == ''
+          || !changedKeys().hasAny([
+            'discountApplied', 'discountAmount', 'subtotal', 'total',
+            'runnerCollege', 'canteenCollege'
+          ])
+        );
 
       allow update: if isAdmin()
         && changedKeys().hasOnly([
@@ -330,7 +500,10 @@ service cloud.firestore {
           'customerWarningCount', 'runnerExpiredAt', 'customerOverdueAt',
           'runnerReminderSentAt', 'customerReminderSentAt',
           'adminMissedNotifiedAt', 'lastEscalatedAt',
-          'customerPaidAt', 'paymentReceived'
+          'customerPaidAt', 'paymentReceived', 'awaitingOnlinePayment',
+          'airwallexPaymentIntentId', 'airwallexPaidAmount',
+          'airwallexPaidCurrency', 'airwallexWebhookEventId',
+          'airwallexPaidNotifiedAt', 'paymentProvider'
         ]);
 
       allow delete: if false;
@@ -345,6 +518,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Customer in-app bell. Created server-side (Admin REST); customers mark read.
+    match /notifications/{notifId} {
+      allow get: if signedIn() && resource.data.userId == uid();
+      allow list: if signedIn() && resource.data.userId == uid();
+      allow create: if false;
+      allow update: if signedIn()
+        && resource.data.userId == uid()
+        && changedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
+      allow delete: if false;
+    }
+
     // Order chat is between the customer and the assigned runner only.
     // senderId must be the Auth uid — no studentId / runnerDocId spoofing.
     match /chats/{orderId}/messages/{messageId} {
@@ -355,6 +540,31 @@ service cloud.firestore {
           isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
         )
         && request.resource.data.senderId == uid();
+      allow update: if signedIn()
+        && (isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId)) || isAdmin())
+        && request.auth.uid != resource.data.senderId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+        && request.resource.data.seen == true;
+      allow delete: if false;
+    }
+
+    match /adminChats/{userId}/messages/{messageId} {
+      allow read: if signedIn() && (uid() == userId || isAdmin());
+      allow create: if signedIn()
+        && (uid() == userId || isAdmin())
+        && request.resource.data.senderId == uid()
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000;
+      allow update: if signedIn()
+        && (uid() == userId || isAdmin())
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']);
+      allow delete: if false;
+    }
+
+    match /adminBroadcasts/{broadcastId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
       allow update, delete: if false;
     }
 
@@ -512,6 +722,10 @@ service cloud.firestore {
     }
 
     match /orders_test/{orderId} {
+      allow read, write: if signedIn();
+    }
+
+    match /notifications_test/{notifId} {
       allow read, write: if signedIn();
     }
 

@@ -3,28 +3,24 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { AccountMenu } from "@/components/AccountMenu";
 import { NavIcon } from "@/components/NavIcon";
 import { useUser } from "@/context/UserContext";
 import { countRunnerActiveOrders } from "@/lib/orders";
 import {
   homeForMode,
   isTabActive,
-  runnerEntryHref,
   tabsForMode,
   type NavTab,
 } from "@/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useBothCarts } from "@/context/CartContext";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 import { navModeForPath, useModeSync } from "@/lib/use-mode-sync";
 
 const GUEST_TABS: NavTab[] = [
-  {
-    href: "/",
-    label: "Home",
-    iconId: "home",
-    match: ["/", "/home", "/fusion", "/canteen"],
-  },
+  { href: "/", label: "Home", iconId: "home", match: ["/", "/home"] },
   { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
     href: "#runner",
@@ -44,7 +40,8 @@ const GUEST_TABS: NavTab[] = [
 export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, mode, setMode, canRunnerMode } = useUser();
+  const { user, mode, setMode } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
   const { fusion, canteen } = useBothCarts();
   const { openManualItem } = useManualItemModal();
   const [activeCount, setActiveCount] = useState(0);
@@ -82,12 +79,12 @@ export function BottomNav() {
     }
     if (tab.action === "switch-runner") {
       event.preventDefault();
-      const href = runnerEntryHref({
-        loggedIn: Boolean(user),
-        canRunnerMode,
-      });
-      if (canRunnerMode) setMode("runner");
-      router.push(href);
+      if (runnerEntry.loading) return;
+      runnerEntry.onClick(event);
+      if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+        setMode("runner");
+      }
+      router.push(runnerEntry.href);
       return;
     }
     if (tab.action === "switch-customer") {
@@ -99,13 +96,13 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t px-4 pb-[env(safe-area-inset-bottom,0px)] md:hidden"
       style={{
         backgroundColor: "#ffffff",
         borderColor: "#e5e7eb",
       }}
     >
-      <div className="mx-auto flex max-w-[480px]">
+      <div className="mx-auto flex max-w-[480px] gap-2">
         {tabs.map((tab) => {
           const active = isTabActive(tab, pathname);
           const isTrack = tab.href === "/track";
@@ -119,6 +116,16 @@ export function BottomNav() {
                   ? itemCount
                   : 0;
           const color = active ? "#ED1C24" : "#6b7280";
+          if (tab.iconId === "profile") {
+            return (
+              <div
+                key={`${chromeMode}-${tab.label}-${tab.href}`}
+                className="flex min-h-11 min-w-11 flex-1 items-center justify-center"
+              >
+                <AccountMenu placement="up" avatarSize={28} label={tab.label} />
+              </div>
+            );
+          }
           return (
             <Link
               key={`${chromeMode}-${tab.label}-${tab.href}`}
@@ -127,14 +134,20 @@ export function BottomNav() {
                   ? customerActive.href
                   : isCart
                     ? cartHref
-                    : tab.action
-                      ? "#"
-                      : tab.href
+                    : tab.action === "switch-runner"
+                      ? runnerEntry.href
+                      : tab.action
+                        ? "#"
+                        : tab.href
               }
+              aria-busy={tab.action === "switch-runner" && runnerEntry.loading ? true : undefined}
+              aria-disabled={tab.action === "switch-runner" && runnerEntry.loading ? true : undefined}
               aria-label={tab.label}
               aria-current={active ? "page" : undefined}
               onClick={(event) => onTabClick(tab, event)}
-              className="relative flex min-h-[3.5rem] flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5 text-center text-[10px] font-medium leading-tight"
+              className={`relative flex min-h-11 min-w-11 flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-center text-[11px] font-medium leading-tight ${
+                tab.action === "switch-runner" && runnerEntry.loading ? "opacity-60" : ""
+              }`}
               style={{ color }}
             >
               {active ? (

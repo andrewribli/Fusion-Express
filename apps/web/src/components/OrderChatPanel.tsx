@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { useUser } from "@/context/UserContext";
+import { publicDeliveryName } from "@fusion-express/shared/delivery-identity";
 import { isChatActive } from "@/lib/constants";
 import {
   canAccessOrderChat,
@@ -75,7 +77,7 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   if (!canAccessOrderChat(order, user)) return null;
 
   const senderId = user.uid ?? "";
-  const senderName = user.fullName;
+  const senderName = publicDeliveryName(user, user.fullName || "Customer");
   const viewingAsCustomer = Boolean(user.uid && order.customerId === user.uid);
   const otherParty = viewingAsCustomer ? "runner" : "customer";
   const chatLabel =
@@ -121,9 +123,13 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   return (
     <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-white/10 bg-[#1e1e1e] px-4 py-2">
-        <p className="text-sm font-semibold text-white">
-          Chat with {otherParty}
-        </p>
+        <div className="min-w-0 text-white">
+          <OrderCounterparty
+            orderId={order.id}
+            label={viewingAsCustomer ? "Your runner:" : "Customer:"}
+            tone="dark"
+          />
+        </div>
         {compact && (
           <button
             type="button"

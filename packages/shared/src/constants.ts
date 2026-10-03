@@ -1,5 +1,8 @@
 export const ESTIMATED_DELIVERY_MINUTES = 30;
 
+/** Flat GraceRun fee on every placed order. Shown only at final checkout. */
+export const PLATFORM_FEE = 1.5;
+
 /** Cart grocery subtotal cap. Runners front Fusion, so keep tickets small. */
 export const MAX_ORDER_VALUE = 200;
 
@@ -69,10 +72,10 @@ export const PRICES_DISCLAIMER =
 export const CUSTOM_ITEM_DEFAULT_WEIGHT_KG = 1;
 
 export const PAYMENT_FLOW_STEPS = [
-  "You pay nothing now. Order first, pay after delivery.",
-  "The runner pays Fusion at the till, then delivers to your lobby.",
-  "GraceRun reimburses the runner right after delivery.",
-  "You pay GraceRun the receipt total plus delivery (PayMe or FPS) within 24 hours.",
+  "You pay nothing now. Order first — app prices are estimates.",
+  "A runner accepts, buys the groceries, and enters the receipt total.",
+  "They deliver to your lobby.",
+  "You then pay the exact receipt total plus delivery via card, FPS, or PayMe.",
 ] as const;
 
 /** Fusion pickup hours. Runners shop then deliver to hall lobbies. */

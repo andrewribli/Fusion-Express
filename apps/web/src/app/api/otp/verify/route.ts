@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
+import {
+  detectCampusFromEmail,
+  isAnyCampusEmail,
+  normalizeEmail,
+} from "@fusion-express/shared";
 import {
   clearOtpFailures,
   getOtpFailCount,
@@ -43,8 +47,8 @@ export async function POST(request: NextRequest) {
     const purpose: OtpPurpose =
       body.purpose === "reset" ? "reset" : "signup";
 
-    if (!isCuhkStudentEmail(email)) {
-      return jsonError("Use your @link.cuhk.edu.hk email", 400);
+    if (!isAnyCampusEmail(email) || !detectCampusFromEmail(email)) {
+      return jsonError("Please use your CUHK or CityU email", 400);
     }
     if (!/^\d{6}$/.test(code)) {
       return jsonError("Enter the 6-digit code", 400);

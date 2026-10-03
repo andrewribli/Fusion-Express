@@ -1,6 +1,12 @@
 import { getAuthClient } from "@/lib/firebase";
 
-export type BroadcastGroup = "new_users" | "runners" | "long_term";
+export type BroadcastGroup = "everyone" | "new_users" | "runners" | "long_term";
+
+export type BroadcastPerson = {
+  email: string;
+  name: string;
+  isRunner: boolean;
+};
 
 export type BroadcastResult = {
   ok: boolean;
@@ -8,6 +14,7 @@ export type BroadcastResult = {
   count?: number;
   sent?: number;
   failed?: { email: string; error: string }[];
+  recipients?: BroadcastPerson[];
   test?: boolean;
   to?: string;
   error?: string;
@@ -45,9 +52,9 @@ async function parseBroadcastResponse(
   }
 }
 
-export async function previewBroadcastCount(
+export async function loadBroadcastRecipients(
   group: BroadcastGroup,
-): Promise<number> {
+): Promise<BroadcastPerson[]> {
   const res = await fetch("/api/email/broadcast", {
     method: "POST",
     headers: await authHeaders(),
@@ -55,16 +62,18 @@ export async function previewBroadcastCount(
   });
   const data = await parseBroadcastResponse(res);
   if (!res.ok) {
-    throw new Error(data.error ?? "Could not load recipient count.");
+    throw new Error(data.error ?? "Could not load recipients.");
   }
-  return data.count ?? 0;
+  return data.recipients ?? [];
 }
 
 export async function sendBroadcast(opts: {
   group: BroadcastGroup;
   subject: string;
   body: string;
+  emails?: string[];
   test?: boolean;
+  audience?: "all" | "customers" | "runners" | "cuhk" | "cityu";
 }): Promise<BroadcastResult> {
   const res = await fetch("/api/email/broadcast", {
     method: "POST",
@@ -73,7 +82,9 @@ export async function sendBroadcast(opts: {
       group: opts.group,
       subject: opts.subject,
       body: opts.body,
+      emails: opts.emails,
       test: Boolean(opts.test),
+      audience: opts.audience,
     }),
   });
   const data = await parseBroadcastResponse(res);

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { RunnerOrderDetails } from "@/components/RunnerOrderDetails";
+import { useUser } from "@/context/UserContext";
 import type { Order } from "@/lib/types";
 
 export function RunnerOrderPreviewModal({
@@ -13,6 +14,7 @@ export function RunnerOrderPreviewModal({
   onClose: () => void;
   onAccept?: () => void;
 }) {
+  const { user } = useUser();
   useEffect(() => {
     if (!order) return;
     const prev = document.body.style.overflow;
@@ -51,7 +53,7 @@ export function RunnerOrderPreviewModal({
           <p className="mt-0.5 text-xs text-gray-500">{order.id}</p>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <RunnerOrderDetails order={order} />
+          <RunnerOrderDetails order={order} runnerCollege={user?.college} />
         </div>
         <div className="flex gap-3 border-t border-gray-100 p-4">
           <button

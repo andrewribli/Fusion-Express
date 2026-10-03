@@ -1,6 +1,7 @@
 import "server-only";
 import { Resend } from "resend";
 import { isStagingApp } from "@fusion-express/shared";
+import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
 
 const ACCENT = "#ED1C24";
 const FOOTER = "Thanks for using GraceRun — groceries delivered with grace.";
@@ -112,23 +113,35 @@ function itemsTable(items: OrderEmailItem[]): string {
 const STATUS_COPY: Record<string, { heading: string; body: string }> = {
   pending: {
     heading: "We received your order",
-    body: "A runner will pick it up from Fusion soon.",
+    body: "A runner can accept it now. You pay the exact receipt total after delivery.",
+  },
+  paid: {
+    heading: "Payment received",
+    body: "Thanks — GraceRun has your payment for this delivery.",
   },
   accepted: {
-    heading: "A runner accepted your order",
-    body: "Your runner is heading to Fusion to collect your groceries.",
+    heading: "Your runner is on the way",
+    body: "A runner accepted your order and is heading to {store}.",
   },
   purchased: {
     heading: "Your order has been purchased",
     body: "Your groceries are on the way to your dorm lobby.",
   },
+  receipt_uploaded: {
+    heading: "Receipt uploaded",
+    body: "Your runner photographed the {store} receipt.",
+  },
   delivered: {
-    heading: "Order delivered — receipt ready",
-    body: "The runner uploaded the Fusion receipt. Reimburse them via PayMe/FPS, then mark runner paid. The customer should pay GraceRun within 24 hours.",
+    heading: "Your order has arrived",
+    body: "Your order has arrived — please pay and collect it from the lobby.",
   },
   runner_paid: {
     heading: "GraceRun reimbursed you",
     body: "The owner marked your grocery spend and delivery fee as paid.",
+  },
+  completed: {
+    heading: "Order complete",
+    body: "Thanks for ordering with GraceRun.",
   },
   customer_paid: {
     heading: "Payment received",
@@ -174,12 +187,14 @@ export async function sendOrderStatusUpdate(
   customerEmail: string,
   orderId: string,
   status: string,
+  store = "Fusion",
 ): Promise<void> {
   const trackUrl = orderTrackUrl(orderId);
-  const copy = STATUS_COPY[status] ?? {
+  const template = STATUS_COPY[status] ?? {
     heading: "Your order was updated",
     body: `Status is now ${status}.`,
   };
+  const copy = { ...template, body: template.body.replace("{store}", store) };
   const html = brandedEmail({
     preheader: `${copy.heading} (${orderId})`,
     heading: copy.heading,
@@ -233,7 +248,10 @@ export async function sendNonRunnerOrderNudge(
   email: string,
   orderId: string,
   pickupLocation: string,
+  campus: CampusId = "cuhk",
 ): Promise<void> {
+  const campusName = campusConfig[campus].name;
+  const supermarket = campusConfig[campus].supermarket;
   const origin = appOrigin();
   const registerUrl = `${origin}/runner/register`;
   const trackUrl = orderTrackUrl(orderId);
@@ -243,7 +261,7 @@ export async function sendNonRunnerOrderNudge(
     trackUrl: registerUrl,
     bodyHtml: `
       <p style="margin:0 0 12px;font-size:14px;color:#111827;">
-        Someone at CUHK just ordered groceries from Fusion — and GraceRun needs a hero (that's you, maybe?) to pick it up.
+        Someone at ${campusName} just ordered from ${supermarket} — and GraceRun needs a hero (that's you, maybe?) to pick it up.
       </p>
       <p style="margin:0 0 12px;font-size:14px;color:#111827;">
         You're signed up as a customer, so you can't grab this one yet. Create a runner account (takes a minute), then accept orders and earn delivery fees between classes.
@@ -252,7 +270,7 @@ export async function sendNonRunnerOrderNudge(
       <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(orderId)}</p>
       <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#111827;">Pickup</p>
       <p style="margin:0 0 16px;font-size:14px;color:#111827;">${escapeHtml(pickupLocation)}</p>
-      <p style="margin:0;font-size:13px;color:#6b7280;">No cape required. Just comfortable shoes and a CUHK email.</p>
+      <p style="margin:0;font-size:13px;color:#6b7280;">No cape required. Just comfortable shoes and a ${campusName} email.</p>
     `,
   });
   const { error } = await getResend().emails.send({
@@ -264,9 +282,6 @@ export async function sendNonRunnerOrderNudge(
   });
   if (error) throw new Error(error.message);
 }
-
-export const FUSION_PICKUP_LOCATION =
-  "Fusion supermarket, Benjamin Franklin Centre, CUHK";
 
 const DEADLINE_COPY: Record<string, { heading: string; body: string }> = {
   runner_reminder: {
@@ -337,14 +352,22 @@ function formatHk(amount: number): string {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
-const DEFAULT_ADMIN_OPS_EMAIL = "1155233599@link.cuhk.edu.hk";
+const DEFAULT_ADMIN_OPS_EMAILS = [
+  "andrew.ribli@gmail.com",
+  "1155233599@link.cuhk.edu.hk",
+];
 
 export function adminOpsEmails(): string[] {
   const extras = (process.env.OWNER_ALERT_EMAIL ?? "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
-  return [...new Set([DEFAULT_ADMIN_OPS_EMAIL.toLowerCase(), ...extras])];
+  return [
+    ...new Set([
+      ...DEFAULT_ADMIN_OPS_EMAILS.map((email) => email.toLowerCase()),
+      ...extras,
+    ]),
+  ];
 }
 
 async function sendFromHello(opts: {
@@ -510,6 +533,211 @@ Thanks for running with GraceRun!
     subject,
     html,
     text: `${body}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Runner-only expiry warning. Returns the Resend message id. */
+export async function sendRunnerExpiredWarningEmail(opts: {
+  to: string;
+  cc: string;
+  subject: string;
+  text: string;
+}): Promise<string> {
+  const html = brandedBroadcastEmail({
+    preheader: opts.subject,
+    heading: "Your delivery has expired",
+    bodyHtml: bodyTextToHtml(opts.text),
+  });
+  const cc =
+    opts.cc.trim().toLowerCase() === opts.to.trim().toLowerCase()
+      ? undefined
+      : opts.cc.trim();
+  const { data, error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    cc,
+    replyTo: "hello@gracerun.fit",
+    subject: opts.subject,
+    html,
+    text: opts.text,
+  });
+  if (error) throw new Error(error.message);
+  if (!data?.id) throw new Error("Resend did not return a message id");
+  return data.id;
+}
+
+export async function sendCanteenPickedUpEmail(opts: {
+  to: string;
+  orderId: string;
+  canteenName: string;
+}): Promise<void> {
+  const canteenName = opts.canteenName.trim() || "the canteen";
+  const message = `Your runner just picked up your order from ${canteenName}.`;
+  const subject = "Your order has been picked up!";
+  const trackUrl = orderTrackUrl(opts.orderId);
+  const html = brandedEmail({
+    preheader: message,
+    heading: subject,
+    trackUrl,
+    bodyHtml: `
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">Order number</p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(opts.orderId)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(message)}</p>
+    `,
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${message}\nOrder ${opts.orderId}\nTrack: ${trackUrl}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendCollegeDiscountEmail(opts: {
+  to: string;
+  orderId: string;
+  collegeLabel: string;
+  /** Customer savings in HKD. Omit for the retired percentage wording. */
+  customerSavings?: number;
+}): Promise<void> {
+  const college = opts.collegeLabel.trim() || "your college";
+  const savings = opts.customerSavings;
+  const message =
+    savings != null && savings > 0
+      ? `Discount received! Your runner is from ${college}, so you save HK$${savings.toFixed(0)} on this canteen order.`
+      : `Discount received! Your runner is from ${college}, so you got 10% off your canteen order.`;
+  const subject =
+    savings != null && savings > 0
+      ? `You save HK$${savings.toFixed(0)}`
+      : "You got a 10% discount!";
+  const trackUrl = orderTrackUrl(opts.orderId);
+  const html = brandedEmail({
+    preheader: message,
+    heading: subject,
+    trackUrl,
+    bodyHtml: `
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">Order number</p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(opts.orderId)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(message)}</p>
+    `,
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${message}\nOrder ${opts.orderId}\nTrack: ${trackUrl}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendRunnerCollegeSetEmail(
+  to: string,
+  collegeLabel: string,
+): Promise<void> {
+  const college = collegeLabel.trim() || "your college";
+  const message = `Your college is set to ${college}. This is permanent. If you selected the wrong college, appeal at hello@gracerun.fit.`;
+  const subject = "Your GraceRun college is set";
+  const html = brandedBroadcastEmail({
+    preheader: message,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(message),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to,
+    replyTo: "hello@gracerun.fit",
+    subject,
+    html,
+    text: `${message}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendCollegeAppealInboxEmail(opts: {
+  runnerName: string;
+  runnerEmail: string;
+  currentCollege: string;
+  requestedCollege: string;
+  reason: string;
+}): Promise<void> {
+  const message = `${opts.runnerName} (${opts.runnerEmail}) appealed a college change.
+Current: ${opts.currentCollege}
+Requested: ${opts.requestedCollege}
+
+${opts.reason.trim()}`;
+  const subject = "Runner college appeal";
+  const html = brandedBroadcastEmail({
+    preheader: subject,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(message),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: "hello@gracerun.fit",
+    replyTo: opts.runnerEmail,
+    subject,
+    html,
+    text: message,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendCollegeAppealDecisionEmail(opts: {
+  to: string;
+  approved: boolean;
+  collegeLabel: string;
+}): Promise<void> {
+  const college = opts.collegeLabel.trim() || "your college";
+  const message = opts.approved
+    ? `Your college appeal was approved. Your college is now ${college}.`
+    : `Your college appeal was not approved. Your college stays ${college}.`;
+  const subject = opts.approved
+    ? "College appeal approved"
+    : "College appeal not approved";
+  const html = brandedBroadcastEmail({
+    preheader: message,
+    heading: subject,
+    bodyHtml: bodyTextToHtml(message),
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    replyTo: "hello@gracerun.fit",
+    subject,
+    html,
+    text: `${message}\n\n${FOOTER}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendNoCollegeDiscountEmail(opts: {
+  to: string;
+  orderId: string;
+}): Promise<void> {
+  const message =
+    "No matching-college runner was available. Discount not applied.";
+  const subject = "College discount not applied";
+  const trackUrl = orderTrackUrl(opts.orderId);
+  const html = brandedEmail({
+    preheader: message,
+    heading: subject,
+    trackUrl,
+    bodyHtml: `
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">Order number</p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:${ACCENT};">${escapeHtml(opts.orderId)}</p>
+      <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(message)}</p>
+    `,
+  });
+  const { error } = await getResend().emails.send({
+    from: helloFrom(),
+    to: opts.to,
+    subject,
+    html,
+    text: `${message}\nOrder ${opts.orderId}\nTrack: ${trackUrl}\n\n${FOOTER}`,
   });
   if (error) throw new Error(error.message);
 }

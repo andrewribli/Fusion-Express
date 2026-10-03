@@ -6,10 +6,14 @@ import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
 import { NavIcon } from "@/components/NavIcon";
 import { RunnerModeBanner } from "@/components/RunnerModeBanner";
+import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
+import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { isOverOrderLimit } from "@/lib/constants";
-import { homeForMode, isTabActive, runnerEntryHref, tabsForMode, type NavTab } from "@/lib/nav";
+import { homeForMode, isTabActive, tabsForMode, type NavTab } from "@/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 import { navModeForPath, useModeSync } from "@/lib/use-mode-sync";
@@ -25,6 +29,9 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const { itemCount, subtotal } = useCart();
   const overLimit = isOverOrderLimit(subtotal);
   const { user, mode, setMode, canRunnerMode } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
+  const { config } = useCampus();
+  const brandLabel = config.brandLabel;
   const pathname = usePathname();
   const router = useRouter();
   const { openManualItem } = useManualItemModal();
@@ -36,7 +43,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const customerActive = useActiveCustomerOrders();
   const home = homeForMode(chromeMode);
   const activeTab = tabs.find((tab) => isTabActive(tab, pathname));
-  const pageLabel = title ?? activeTab?.label ?? "GraceRun";
+  const pageLabel = title ?? activeTab?.label ?? brandLabel;
 
   const navLink = (active: boolean) =>
     `hidden h-11 w-11 items-center justify-center rounded-full md:inline-flex ${
@@ -53,12 +60,12 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
     }
     if (tab.action === "switch-runner") {
       event.preventDefault();
-      const href = runnerEntryHref({
-        loggedIn: Boolean(user),
-        canRunnerMode,
-      });
-      if (canRunnerMode) setMode("runner");
-      router.push(href);
+      if (runnerEntry.loading) return;
+      runnerEntry.onClick(event);
+      if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+        setMode("runner");
+      }
+      router.push(runnerEntry.href);
       return;
     }
     if (tab.action === "switch-customer") {
@@ -92,11 +99,14 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               </Link>
             )}
             <Link
-              href={runnerMode ? home : "/"}
+              href={runnerMode ? home : "/cuhk"}
               className="flex min-w-0 items-center gap-2"
-              aria-label="GraceRun home"
+              aria-label={`${brandLabel} home`}
             >
               <AppLogo size={44} className="h-11 w-11 shrink-0" />
+              <span className="hidden max-w-[9.5rem] truncate text-sm font-bold tracking-tight text-gray-900 sm:block">
+                {brandLabel}
+              </span>
               {runnerMode && (
                 <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#ED1C24]">
                   Runner
@@ -114,35 +124,53 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
           <nav className="flex shrink-0 items-center gap-1.5">
             {!runnerMode ? (
               <Link
-                href={runnerEntryHref({
-                  loggedIn: Boolean(user),
-                  canRunnerMode,
-                })}
-                onClick={() => {
-                  if (canRunnerMode) setMode("runner");
+                href={runnerEntry.href}
+                aria-busy={runnerEntry.loading || undefined}
+                aria-disabled={runnerEntry.loading || undefined}
+                onClick={(event) => {
+                  if (runnerEntry.loading) {
+                    event.preventDefault();
+                    return;
+                  }
+                  runnerEntry.onClick(event);
+                  if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+                    setMode("runner");
+                  }
                 }}
-                className="hidden min-h-11 items-center rounded-full border-2 border-emerald-300 bg-emerald-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-600 sm:inline-flex"
+                className={`hidden min-h-11 items-center rounded-full border-2 border-emerald-300 bg-emerald-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-600 sm:inline-flex ${
+                  runnerEntry.loading ? "opacity-60" : ""
+                }`}
               >
                 Switch to Runner
               </Link>
             ) : (
               <Link
-                href="/"
+                href="/cuhk"
                 onClick={() => setMode("customer")}
                 className="hidden min-h-11 items-center rounded-full bg-[#ED1C24] px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#c9171e] sm:inline-flex"
               >
                 Switch to Customer
               </Link>
             )}
+            {canRunnerMode ? (
+              <RunnerHeaderShortcuts className="h-11 w-11 rounded-full" />
+            ) : !runnerMode ? (
+              <CustomerNotificationBell className="h-11 w-11 rounded-full" />
+            ) : null}
             {tabs
               .filter(
                 (tab) =>
-                  tab.label !== "Profile" &&
                   tab.action !== "switch-runner" &&
                   tab.action !== "switch-customer",
               )
               .map((tab) => {
                 const isTrack = tab.href === "/track";
+                const isProfile =
+                  tab.iconId === "profile" ||
+                  tab.href === "/profile" ||
+                  tab.href === "/runner/profile";
+                // AccountMenu already opens profile — skip a second silhouette.
+                if (isProfile) return null;
                 const href = isTrack
                   ? customerActive.href
                   : tab.action

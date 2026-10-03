@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { AdminSupportChat } from "@/components/AdminSupportChat";
@@ -12,30 +12,47 @@ import { RunnerAcceptConfirmModal } from "@/components/RunnerAcceptConfirmModal"
 import { RunnerOrderDetails } from "@/components/RunnerOrderDetails";
 import { RunnerOrderPreviewModal } from "@/components/RunnerOrderPreviewModal";
 import { RunnerDeliveryFlow } from "@/components/runner/RunnerDeliveryFlow";
+import { CanteenDeliveryFlow } from "@/components/runner/CanteenDeliveryFlow";
+import { RunnerOrderHistory } from "@/components/runner/RunnerOrderHistory";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
+import { OrderChannelBadge, resolveOrderChannel } from "@/components/OrderChannelBadge";
+import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { formatScheduledLabel } from "@/lib/order-window";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import {
-  acceptOrder,
   awaitingCustomerPriceApproval,
   fetchDeliveredOrdersByRunner,
-  fetchPendingOrders,
   fetchRunnerOrders,
+  orderCampus,
+  markCanteenDelivered,
+  markCanteenPickedUp,
   markDeliveredWithTotal,
   markPurchased,
   OrderAlreadyTakenError,
   saveRunnerDeliveryProgress,
   SelfPickupError,
+  subscribePendingOrders,
   updateRunnerLocation,
   uploadBankStatementPhoto,
   uploadDeliveryPhoto,
   uploadReceiptPhoto,
 } from "@/lib/orders";
+import { getAuthClient } from "@/lib/firebase";
+import {
+  runnerCollegeBonus,
+  sortOrdersForRunner,
+  COLLEGE_DISCOUNT_SPLIT,
+  orderMatchesRunnerCollege,
+} from "@fusion-express/shared/college-discount";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
+import { RUNNER_BOARD_REFRESH_EVENT } from "@/lib/runner-board-refresh";
 import { compressImage } from "@/lib/compress-image";
 import { notifyOrderStatus } from "@/lib/notify-email";
+import { notifyCanteenEvent } from "@/lib/notify-canteen";
 import { fetchRunner, findRunnerForUser } from "@/lib/runners";
 import { ownerPaymentDetails } from "@/lib/owner-payment";
+import { lookupRunnerCustomerName } from "@/lib/runner-customer-name";
 import {
   EXPIRED_DELIVERIES_NOTICE,
   formatExpiredAgo,
@@ -45,31 +62,95 @@ import {
   runnerExpiredAtOf,
   runnerWarningTotal,
   RUNNER_EARNINGS_RATE,
+  ORDER_STATUS_LABELS,
 } from "@/lib/order-status";
+import { CustomerPartyName } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
+import {
+  isCityuCanteenOrder,
+  parseHkdAmount,
+} from "@fusion-express/shared";
+import {
+  resolveCampus,
+  supermarketForCampus,
+} from "@fusion-express/shared/campus";
 
-type Tab = "available" | "active" | "expired" | "completed";
+function runnerCampusOf(user: { campus?: unknown }) {
+  return resolveCampus(user.campus);
+}
+
+type Tab = "available" | "active" | "expired" | "completed" | "history";
 
 /** One runner nav destination per view. */
-export type RunnerView = "available" | "deliveries" | "expired" | "earnings";
+export type RunnerView = "available" | "deliveries" | "expired" | "earnings" | "history";
 
 const VIEW_TABS: Record<RunnerView, Tab> = {
   available: "available",
   deliveries: "active",
   expired: "expired",
   earnings: "completed",
+  history: "history",
 };
 
-const VIEW_NAV: { view: RunnerView; label: string; href: string }[] = [
-  { view: "available", label: "Available", href: "/runner/dashboard" },
-  { view: "deliveries", label: "My Deliveries", href: "/runner/deliveries" },
-  { view: "expired", label: "Expired Deliveries", href: "/runner/expired" },
-  { view: "earnings", label: "Earnings", href: "/runner/earnings" },
-];
+/** CUHK `/runner/*` or CityU `/cityu/runner/*`. Same workspace, campus-scoped routes. */
+export type RunnerWorkspaceScope = "cuhk" | "cityu";
+
+const RUNNER_NAV: Record<
+  RunnerWorkspaceScope,
+  { view: RunnerView; label: string; href: string }[]
+> = {
+  cuhk: [
+    { view: "available", label: "Available", href: "/runner/dashboard" },
+    { view: "deliveries", label: "My Deliveries", href: "/runner/deliveries" },
+    { view: "expired", label: "Expired Deliveries", href: "/runner/expired" },
+    { view: "history", label: "History", href: "/runner/history" },
+    { view: "earnings", label: "Earnings", href: "/runner/earnings" },
+  ],
+  cityu: [
+    { view: "available", label: "Available", href: "/cityu/runner/dashboard" },
+    { view: "deliveries", label: "My Deliveries", href: "/cityu/runner/deliveries" },
+    { view: "expired", label: "Expired Deliveries", href: "/cityu/runner/expired" },
+    { view: "history", label: "History", href: "/cityu/runner/history" },
+    { view: "earnings", label: "Earnings", href: "/cityu/runner/earnings" },
+  ],
+};
+
+function runnerSetupHref(scope: RunnerWorkspaceScope): string {
+  return scope === "cityu" ? "/cityu/runner/register" : "/runner/terms";
+}
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
+}
+
+const HK_WEEKDAY: Record<string, number> = {
+  Mon: 0,
+  Tue: 1,
+  Wed: 2,
+  Thu: 3,
+  Fri: 4,
+  Sat: 5,
+  Sun: 6,
+};
+
+/** Monday 00:00 Asia/Hong_Kong, as a UTC timestamp. */
+function startOfWeekHkMs(now: number): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Hong_Kong",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).formatToParts(new Date(now));
+  const value = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  const year = Number(value("year"));
+  const month = Number(value("month"));
+  const day = Number(value("day"));
+  const offset = HK_WEEKDAY[value("weekday")] ?? 0;
+  const mondayUtc = Date.UTC(year, month - 1, day) - offset * 86_400_000;
+  return mondayUtc - 8 * 3_600_000;
 }
 
 function itemCount(order: Order): number {
@@ -97,8 +178,8 @@ function ExpiredDeliveryCard({
       }}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="break-all font-bold" style={{ color: "#e5e5e5" }}>
-          {order.id}
+        <p className="min-w-0 font-bold" style={{ color: "#e5e5e5" }}>
+          <CustomerPartyName orderId={order.id} className="text-inherit" />
         </p>
         <span
           className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
@@ -107,9 +188,6 @@ function ExpiredDeliveryCard({
           Expired
         </span>
       </div>
-      <p className="mt-2 text-sm font-medium" style={{ color: "#e5e5e5" }}>
-        {order.customerName || "Customer"}
-      </p>
       <p className="mt-1 text-sm" style={{ color: "#a3a3a3" }}>
         {formatDeliveryAddress(order.college, order.hall)}
       </p>
@@ -170,27 +248,43 @@ function ExpiredDeliveriesColumn({
 
 function AvailableOrderCard({
   order,
+  runnerCollege,
   onViewDetails,
   onAccept,
 }: {
   order: Order;
+  runnerCollege?: string | null;
   onViewDetails: () => void;
   onAccept: () => void;
 }) {
   const preview = order.items.slice(0, 2);
   const extra = order.items.length - preview.length;
   const earn = runnerEarningsForOrder(order.deliveryFee);
+  const collegeBonus = orderMatchesRunnerCollege(order, runnerCollege)
+    ? (order.discountSplit?.runner ?? COLLEGE_DISCOUNT_SPLIT.runner)
+    : 0;
 
   return (
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="flex justify-between gap-3">
-        <p className="font-bold text-gray-900">{order.id}</p>
+        <p className="flex min-w-0 flex-wrap items-center gap-2 font-bold text-gray-900">
+          <CustomerPartyName orderId={order.id} />
+          <OrderChannelBadge order={order} />
+        </p>
         <p className="shrink-0 text-xs text-gray-500">{formatTime(order.createdAt)}</p>
       </div>
       <p className="mt-2 text-sm font-medium text-gray-800">
         {formatDeliveryAddress(order.college, order.hall)}
       </p>
       <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
+      {order.scheduledFor ? (
+        <p className="mt-1 text-sm font-semibold text-[#ED1C24]">
+          Scheduled for {formatScheduledLabel(order.scheduledFor)}
+        </p>
+      ) : null}
+      <div className="mt-2">
+        <CollegeDiscountRunnerBadge order={order} runnerCollege={runnerCollege} />
+      </div>
       <ul className="mt-2 space-y-0.5 text-sm text-gray-600">
         {preview.map((item) => (
           <li key={item.itemId}>
@@ -202,7 +296,8 @@ function AvailableOrderCard({
         )}
       </ul>
       <p className="mt-2 text-sm font-semibold text-[#ED1C24]">
-        You earn ${earn} · {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
+        You earn ${earn}
+        {collegeBonus > 0 ? ` + HK$${collegeBonus} college bonus` : ""} · {itemCount(order)} item{itemCount(order) === 1 ? "" : "s"}
       </p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <button
@@ -224,10 +319,20 @@ function AvailableOrderCard({
   );
 }
 
-export function RunnerWorkspace({ view }: { view: RunnerView }) {
+export function RunnerWorkspace({
+  view,
+  scope = "cuhk",
+}: {
+  view: RunnerView;
+  scope?: RunnerWorkspaceScope;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, setRunnerRegistered } = useUser();
-  const tab = VIEW_TABS[view];
+  const nav = RUNNER_NAV[scope];
+  const [pane, setPane] = useState<RunnerView>(view);
+  const [boardNonce, setBoardNonce] = useState(0);
+  const tab = VIEW_TABS[pane];
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
   const [delivered, setDelivered] = useState<Order[]>([]);
@@ -239,6 +344,13 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
   const [bankFiles, setBankFiles] = useState<Record<string, File>>({});
   const [finalTotals, setFinalTotals] = useState<Record<string, string>>({});
   const [acceptError, setAcceptError] = useState("");
+  const [collegeNote, setCollegeNote] = useState("");
+  useEffect(() => {
+    const note = sessionStorage.getItem("gr_college_confirmation");
+    if (!note) return;
+    sessionStorage.removeItem("gr_college_confirmation");
+    setCollegeNote(note);
+  }, []);
   const [previewOrder, setPreviewOrder] = useState<Order | null>(null);
   const [confirmOrder, setConfirmOrder] = useState<Order | null>(null);
   const [accepting, setAccepting] = useState(false);
@@ -257,6 +369,8 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       string,
       {
         receiptUrl?: string;
+        receiptAmount?: number;
+        receiptUploadedAt?: Date;
         bankStatementUrl?: string;
         deliveryPhotoUrl?: string;
         finalTotal?: number;
@@ -272,6 +386,10 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     isRunnerDeliveryExpired(order, now),
   );
   useDeadlineWatch(active);
+
+  useEffect(() => {
+    setPane(view);
+  }, [view]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
@@ -347,17 +465,38 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
 
   async function maybeMarkPurchased(orderId: string) {
     const order = orderWithProgress(orderId);
-    if (!order?.receiptUrl || !order.bankStatementUrl) return;
-    if (order.status === "purchased" || order.status === "delivered") return;
-    await markPurchased(orderId, {
-      receiptUrl: order.receiptUrl,
-      bankStatementUrl: order.bankStatementUrl,
-    });
-    patchActiveOrder(orderId, { status: "purchased" });
+    const cityu = order?.campus === "cityu";
+    // CityU canteen stores the receipt URL here, then the HKD total on step 1.
+    if (order && isCityuCanteenOrder(order)) return;
+    if (!order?.receiptUrl || (!cityu && !order.bankStatementUrl)) return;
+    if (
+      order.status === "delivered" ||
+      order.status === "receipt_uploaded" ||
+      (order.status === "purchased" && !cityu)
+    ) {
+      return;
+    }
+    if (order.status !== "purchased") {
+      await markPurchased(orderId, {
+        receiptUrl: order.receiptUrl,
+        bankStatementUrl: order.bankStatementUrl,
+      });
+      patchActiveOrder(orderId, { status: "purchased" });
+    }
+    if (cityu) {
+      const { postOrderTransition } = await import("@/lib/order-transition");
+      await postOrderTransition({
+        orderId,
+        to: "receipt_uploaded",
+        receiptUrl: order.receiptUrl,
+        receiptAmount: order.finalTotal,
+      });
+      patchActiveOrder(orderId, { status: "receipt_uploaded" });
+    }
     void notifyOrderStatus({
       customerEmail: order.customerEmail,
       orderId,
-      status: "purchased",
+      status: cityu ? "receipt_uploaded" : "purchased",
     });
   }
 
@@ -385,34 +524,40 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
 
       // Runner order queries filter on the auth uid, not the /runners doc id.
       const runnerUid = user.uid;
-      const [p, a, d, r] = await Promise.all([
-        fetchPendingOrders(getUserAccountId(user)),
+      const [a, d, r] = await Promise.all([
         runnerUid ? fetchRunnerOrders(runnerUid) : Promise.resolve([]),
         runnerUid
           ? fetchDeliveredOrdersByRunner(runnerUid)
           : Promise.resolve([]),
         runnerId ? fetchRunner(runnerId) : Promise.resolve(null),
       ]);
-      setPending(p);
+      const onCampus = (rows: Order[]) =>
+        scope === "cityu"
+          ? rows.filter((order) => orderCampus(order) === "cityu")
+          : rows;
       setActive(
-        a.map((order) => {
+        onCampus(a).map((order) => {
           const local = progressRef.current[order.id];
           if (!local) return order;
           return {
             ...order,
             receiptUrl: order.receiptUrl ?? local.receiptUrl,
+            receiptAmount: order.receiptAmount ?? local.receiptAmount,
+            receiptUploadedAt: order.receiptUploadedAt ?? local.receiptUploadedAt,
             bankStatementUrl: order.bankStatementUrl ?? local.bankStatementUrl,
             deliveryPhotoUrl: order.deliveryPhotoUrl ?? local.deliveryPhotoUrl,
             finalTotal: order.finalTotal ?? local.finalTotal,
             runnerVerified: order.runnerVerified || local.runnerVerified,
             status:
-              order.status === "accepted" && local.status === "purchased"
-                ? "purchased"
-                : order.status,
+              order.status === "purchased" && local.status === "receipt_uploaded"
+                ? "receipt_uploaded"
+                : order.status === "accepted" && local.status === "purchased"
+                  ? "purchased"
+                  : order.status,
           };
         }),
       );
-      setDelivered(d);
+      setDelivered(onCampus(d));
       setRunnerProfile(r);
     } catch (err) {
       setLoadError(
@@ -422,7 +567,17 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       setLoading(false);
       initialLoad.current = false;
     }
-  }, [user, setRunnerRegistered]);
+  }, [user, setRunnerRegistered, scope]);
+
+  useEffect(() => {
+    function onRefresh() {
+      setPane("available");
+      setBoardNonce((value) => value + 1);
+      void refresh();
+    }
+    window.addEventListener(RUNNER_BOARD_REFRESH_EVENT, onRefresh);
+    return () => window.removeEventListener(RUNNER_BOARD_REFRESH_EVENT, onRefresh);
+  }, [refresh]);
 
   useEffect(() => {
     if (!user) return;
@@ -447,13 +602,67 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         });
         return;
       }
-      router.replace("/runner/terms");
+      router.replace(runnerSetupHref(scope));
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [user, router, refresh, setRunnerRegistered]);
+  }, [user, router, refresh, setRunnerRegistered, scope]);
+
+  useEffect(() => {
+    if (!user?.isRunner) {
+      setPending([]);
+      return;
+    }
+    return subscribePendingOrders(
+      (orders) => {
+        setPending(orders);
+      },
+      {
+        excludeCustomerId: getUserAccountId(user),
+        excludeCustomerEmail: user.email,
+        campus: scope === "cityu" ? "cityu" : runnerCampusOf(user),
+        onError: (err) => {
+          setLoadError(err.message || "Could not load available orders.");
+        },
+      },
+    );
+  }, [user, scope, boardNonce]);
+
+  useEffect(() => {
+    const missing = pending.filter((order) => {
+      const name = order.customerName?.trim();
+      return !name || name === order.id;
+    });
+    if (missing.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missing.map(async (order) => ({
+        id: order.id,
+        name: (await lookupRunnerCustomerName(order.id)).trim(),
+      })),
+    ).then((rows) => {
+      if (cancelled) return;
+      const byId = new Map(
+        rows
+          .filter((row) => row.name && row.name !== row.id)
+          .map((row) => [row.id, row.name]),
+      );
+      if (byId.size === 0) return;
+      setPending((prev) =>
+        prev.map((order) => {
+          const name = byId.get(order.id);
+          const current = order.customerName?.trim();
+          if (!name || (current && current !== order.id)) return order;
+          return { ...order, customerName: name };
+        }),
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pending]);
 
   const activeIds = openDeliveries.map((o) => o.id).join(",");
   useEffect(() => {
@@ -493,38 +702,53 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       setConfirmOrder(null);
       return;
     }
+    if (
+      scope === "cityu" &&
+      openDeliveries.some((order) =>
+        order.status === "accepted" ||
+        order.status === "purchased" ||
+        order.status === "receipt_uploaded",
+      )
+    ) {
+      setAcceptError("Finish your current delivery before accepting another order.");
+      setConfirmOrder(null);
+      return;
+    }
     setAccepting(true);
     setAcceptError("");
     try {
-      await acceptOrder(
-        confirmOrder.id,
-        found.id,
-        user.fullName,
-        getUserAccountId(user),
-        {
-          method: user.runnerPaymentMethod ?? "PayMe",
-          id: user.runnerPaymentId ?? user.phone ?? "",
-          email: user.email,
+      const token = await getAuthClient().currentUser?.getIdToken();
+      if (!token) throw new Error("Sign in again to accept this order.");
+      const res = await fetch("/api/orders/accept", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
-      setConfirmOrder(null);
-      router.push("/runner/deliveries");
-      void notifyOrderStatus({
-        customerEmail: confirmOrder.customerEmail,
-        orderId: confirmOrder.id,
-        status: "accepted",
-        runnerEmail: user.email,
-        runnerName: user.fullName,
-        customerName: confirmOrder.customerName,
-        deliveryLocation: `${formatDeliveryAddress(confirmOrder.college, confirmOrder.hall)} · Lobby: ${confirmOrder.lobbyPoint}`,
-        estimate: confirmOrder.total,
+        body: JSON.stringify({
+          orderId: confirmOrder.id,
+          runnerId: found.id,
+          paymentMethod: user.runnerPaymentMethod ?? "PayMe",
+          paymentId: user.runnerPaymentId ?? user.phone ?? "",
+        }),
       });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        const message = data.error || "Could not accept order. Try again.";
+        if (/own order/i.test(message)) throw new SelfPickupError();
+        if (/already accepted/i.test(message)) throw new OrderAlreadyTakenError();
+        throw new Error(message);
+      }
+      setConfirmOrder(null);
+      router.push(
+        scope === "cityu" ? "/cityu/runner/deliveries" : "/runner/deliveries",
+      );
       await refresh();
     } catch (err) {
       if (err instanceof SelfPickupError || err instanceof OrderAlreadyTakenError) {
         setAcceptError(err.message);
       } else {
-        setAcceptError("Could not accept order. Try again.");
+        setAcceptError(err instanceof Error ? err.message : "Could not accept order. Try again.");
       }
       setConfirmOrder(null);
     } finally {
@@ -693,13 +917,15 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     let bankStatementUrl = order?.bankStatementUrl;
     let deliveryPhotoUrl = order?.deliveryPhotoUrl;
     const verified = Boolean(bagConfirmed[orderId] || order?.runnerVerified);
+    const store = supermarketForCampus(order?.campus);
 
     if (!receiptUrl && !receipt) {
-      setDeliverError("Upload the Fusion receipt photo.");
+      setDeliverError(`Upload the ${store} receipt photo.`);
       return false;
     }
-    if (!bankStatementUrl && !bank) {
-      setDeliverError("Upload a bank statement of the Fusion payment.");
+    const cityuOrder = order?.campus === "cityu";
+    if (!cityuOrder && !bankStatementUrl && !bank) {
+      setDeliverError(`Upload a bank statement of the ${store} payment.`);
       return false;
     }
     if (!deliveryPhotoUrl && !file) {
@@ -707,7 +933,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
       return false;
     }
     if (!(finalTotal > 0)) {
-      setDeliverError("Enter the final Fusion receipt total before marking delivered.");
+      setDeliverError(`Enter the final ${store} receipt total before marking delivered.`);
       return false;
     }
     if (!verified) {
@@ -762,22 +988,40 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         patchActiveOrder(orderId, { deliveryPhotoUrl });
       }
 
-      if (!receiptUrl || !bankStatementUrl || !deliveryPhotoUrl) {
+      if (!receiptUrl || (!cityuOrder && !bankStatementUrl) || !deliveryPhotoUrl) {
         setDeliverError("Missing proof photos. Re-upload and try again.");
         return false;
       }
 
-      await withTimeout(
-        markDeliveredWithTotal(orderId, {
-          finalTotal,
-          deliveryPhotoUrl,
-          bankStatementUrl,
+      if (cityuOrder) {
+        const { postOrderTransition } = await import("@/lib/order-transition");
+        if (order?.status !== "receipt_uploaded") {
+          await postOrderTransition({
+            orderId,
+            to: "receipt_uploaded",
+            receiptUrl,
+            receiptAmount: finalTotal,
+          });
+        }
+        await postOrderTransition({
+          orderId,
+          to: "delivered",
           receiptUrl,
-          runnerVerified: true,
-        }),
-        20000,
-        "Mark delivered",
-      );
+          dropoffPhotoUrl: deliveryPhotoUrl,
+        });
+      } else {
+        await withTimeout(
+          markDeliveredWithTotal(orderId, {
+            finalTotal,
+            deliveryPhotoUrl,
+            bankStatementUrl: bankStatementUrl ?? "",
+            receiptUrl,
+            runnerVerified: true,
+          }),
+          20000,
+          "Mark delivered",
+        );
+      }
 
       if (order) {
         const owner = ownerPaymentDetails();
@@ -817,32 +1061,162 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     }
   }
 
+  async function handleCanteenPickedUp(orderId: string): Promise<boolean> {
+    const order = orderWithProgress(orderId);
+    if (!order) return false;
+    if (
+      order.status === "purchased" ||
+      order.status === "receipt_uploaded" ||
+      order.status === "delivered"
+    ) {
+      return true;
+    }
+    setPurchasingId(orderId);
+    setDeliverError("");
+    try {
+      await withTimeout(markCanteenPickedUp(orderId), 15000, "Mark picked up");
+      patchActiveOrder(orderId, { status: "purchased" });
+      void notifyCanteenEvent({ orderId, event: "picked_up" });
+      void refresh();
+      return true;
+    } catch (err) {
+      console.error("Canteen pick up failed", err);
+      setDeliverError(
+        err instanceof Error ? err.message : "Could not mark as picked up.",
+      );
+      return false;
+    } finally {
+      setPurchasingId("");
+    }
+  }
+
+  async function handleCanteenDelivered(orderId: string): Promise<boolean> {
+    const order = orderWithProgress(orderId);
+    if (!order) return false;
+    setDeliverError("");
+    let deliveryPhotoUrl =
+      order.deliveryPhotoUrl ?? progressRef.current[orderId]?.deliveryPhotoUrl;
+    const file = photoFiles[orderId];
+    if (!deliveryPhotoUrl && !file) {
+      setDeliverError("A lobby photo is required before you mark delivered.");
+      return false;
+    }
+
+    setPurchasingId(orderId);
+    try {
+      if (!deliveryPhotoUrl && file) {
+        const compressed = await withTimeout(
+          compressImage(file),
+          20000,
+          "Photo compress",
+        );
+        deliveryPhotoUrl = await withTimeout(
+          uploadDeliveryPhoto(orderId, compressed),
+          45000,
+          "Lobby photo upload",
+        );
+        await saveRunnerDeliveryProgress(orderId, { deliveryPhotoUrl });
+        patchActiveOrder(orderId, { deliveryPhotoUrl });
+      }
+      if (!deliveryPhotoUrl) {
+        setDeliverError("Missing lobby photo. Re-upload and try again.");
+        return false;
+      }
+
+      const finalTotal = order.subtotal;
+      await withTimeout(
+        markCanteenDelivered(orderId, {
+          finalTotal,
+          deliveryPhotoUrl,
+        }),
+        20000,
+        "Mark delivered",
+      );
+
+      const owner = ownerPaymentDetails();
+      const runnerPay = [
+        order.runnerPaymentMethod ?? user?.runnerPaymentMethod ?? "",
+        order.runnerPaymentId ?? user?.runnerPaymentId ?? "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      void notifyOrderStatus({
+        customerEmail: order.customerEmail,
+        orderId,
+        status: "delivered",
+        customerName: order.customerName,
+        total: customerAmountDue({
+          ...order,
+          finalTotal,
+          amountPaidByRunner: finalTotal,
+        }),
+        paymentInfo:
+          runnerPay ||
+          (owner.id ? `${owner.method} ${owner.id}` : user?.phone ?? ""),
+      });
+      delete progressRef.current[orderId];
+      setFlowOrderId(null);
+      void refresh();
+      return true;
+    } catch (err) {
+      console.error("Canteen deliver failed", err);
+      setDeliverError(
+        err instanceof Error ? err.message : "Could not mark as delivered.",
+      );
+      return false;
+    } finally {
+      setPurchasingId("");
+    }
+  }
+
   const flowOrder =
     openDeliveries.find((order) => order.id === flowOrderId) ?? null;
 
-  const totalFromDeliveries = delivered.reduce(
+  const weekStart = startOfWeekHkMs(now);
+  const weekDelivered = delivered.filter((order) => {
+    const stamp = order.deliveredAt ?? order.updatedAt;
+    return stamp.getTime() >= weekStart;
+  });
+  const weekBase = weekDelivered.reduce(
     (sum, order) => sum + runnerEarningsForOrder(order.deliveryFee),
     0,
   );
+  const weekBonus = weekDelivered.reduce(
+    (sum, order) => sum + runnerCollegeBonus(order),
+    0,
+  );
+  const weekEarned = Math.round((weekBase + weekBonus) * 100) / 100;
 
   return (
     <RequireRunner>
-      <AppShell>
+      <AppShell hideNav={scope === "cityu"}>
         <LakersWallpaper>
-          <AppHeader title="Runner Dashboard" />
+          <AppHeader
+            title={pane === "history" ? "Order history" : "Runner Dashboard"}
+          />
 
           <main
             className={`mx-auto px-4 py-4 ${
-              view === "deliveries" ? "max-w-[480px] lg:max-w-5xl" : "max-w-[480px]"
+              pane === "deliveries" ? "max-w-[480px] lg:max-w-5xl" : "max-w-[480px]"
             }`}
           >
-            <div className="grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4">
-              {VIEW_NAV.map((item) => (
-                <Link
+            <div
+              role="tablist"
+              aria-label="Runner dashboard"
+              className="relative z-20 grid grid-cols-2 gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:grid-cols-3 lg:grid-cols-5"
+            >
+              {nav.map((item) => (
+                <button
                   key={item.view}
-                  href={item.href}
+                  type="button"
+                  role="tab"
+                  aria-selected={pane === item.view}
+                  onClick={() => {
+                    setPane(item.view);
+                    if (pathname !== item.href) router.push(item.href);
+                  }}
                   className={`rounded-lg px-1 py-2.5 text-center text-xs font-semibold leading-tight transition-colors ${
-                    view === item.view
+                    pane === item.view
                       ? "bg-[#ED1C24] text-white shadow-sm"
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
@@ -851,10 +1225,15 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                   {item.view === "expired" && expiredDeliveries.length > 0
                     ? ` (${expiredDeliveries.length})`
                     : ""}
-                </Link>
+                </button>
               ))}
             </div>
 
+            {collegeNote && (
+              <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
+                {collegeNote}
+              </p>
+            )}
             {loadError && (
               <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {loadError}
@@ -880,10 +1259,14 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                   </div>
                 ) : (
                   <ul className="space-y-3">
-                    {pending.map((order) => (
+                    {(scope === "cityu"
+                      ? pending
+                      : sortOrdersForRunner(pending, user?.runnerCollege)
+                    ).map((order) => (
                       <AvailableOrderCard
                         key={order.id}
                         order={order}
+                        runnerCollege={user?.runnerCollege}
                         onViewDetails={() => setPreviewOrder(order)}
                         onAccept={() => requestAccept(order)}
                       />
@@ -906,7 +1289,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                 )}
                 {openDeliveries.length === 0 ? (
                   <div className="rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
-                    <p className="text-sm text-gray-600">No accepted orders.</p>
+                    <p className="text-sm text-gray-600">You have no active deliveries.</p>
                   </div>
                 ) : (
                   <ul className="space-y-3">
@@ -920,13 +1303,25 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                             <p className="font-bold text-gray-900">
                               {formatDeliveryAddress(order.college, order.hall)}
                             </p>
-                            <p className="mt-0.5 text-xs text-gray-500">{order.id}</p>
+                            <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                              <CustomerPartyName orderId={order.id} />
+                            </p>
                           </div>
                           <p className="shrink-0 text-xs font-semibold text-[#ED1C24]">
-                            {order.status === "purchased" ? "Ready to deliver" : "Accepted"}
+                            {order.status === "purchased"
+                              ? "Ready to deliver"
+                              : ORDER_STATUS_LABELS[order.status]}
                           </p>
                         </div>
                         <DeadlineBanner order={order} party="runner" />
+                        <div className="mt-2">
+                          <CollegeDiscountRunnerBadge
+                            order={order}
+                            runnerCollege={
+                              order.runnerCollege || user?.runnerCollege
+                            }
+                          />
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
@@ -935,8 +1330,22 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                           }}
                           className="mt-3 min-h-12 w-full rounded-xl bg-[#ED1C24] text-sm font-bold text-white"
                         >
-                          {order.status === "purchased" ? "Continue delivery" : "Start order"}
+                          {order.status === "purchased"
+                            ? "Continue delivery"
+                            : resolveOrderChannel(order) === "canteen"
+                              ? "Pick up order"
+                              : "Start order"}
                         </button>
+                        <Link
+                          href={
+                            orderCampus(order) === "cityu"
+                              ? `/cityu/chat/${order.id}`
+                              : `/chat/${order.id}`
+                          }
+                          className="mt-2 flex min-h-11 items-center justify-center rounded-xl border border-[#ED1C24] text-sm font-semibold text-[#ED1C24]"
+                        >
+                          Chat with customer
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -958,14 +1367,21 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
               </div>
             )}
 
+            {!loading && tab === "history" && (
+              <RunnerOrderHistory orders={delivered} />
+            )}
+
             {!loading && tab === "completed" && (
               <section className="mt-4 space-y-4">
                 <div className="rounded-2xl bg-[#ED1C24] p-5 text-white shadow-md">
-                  <p className="text-sm text-white/80">Total Earned</p>
+                  <p className="text-sm text-white/80">Earned this week</p>
                   <p className="mt-1 text-3xl font-bold">
-                    ${runnerProfile?.totalEarned ?? totalFromDeliveries}
+                    ${weekEarned}
                   </p>
                   <p className="mt-2 text-xs text-white/80">
+                    Base deliveries HK${weekBase.toFixed(2)} · College discount bonus HK${weekBonus.toFixed(2)} · Total HK${weekEarned.toFixed(2)}
+                  </p>
+                  <p className="mt-1 text-xs text-white/80">
                     You keep {RUNNER_EARNINGS_RATE * 100}% of each order&apos;s delivery fee.
                   </p>
                 </div>
@@ -995,13 +1411,21 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                         className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                       >
                         <div className="flex justify-between gap-3">
-                          <p className="font-bold text-gray-900">{order.id}</p>
+                          <p className="font-bold text-gray-900">
+                            <CustomerPartyName orderId={order.id} />
+                          </p>
                           <p className="text-xs text-gray-500">
                             {formatTime(order.deliveredAt ?? order.updatedAt)}
                           </p>
                         </div>
                         <p className="mt-1 text-sm font-semibold text-green-700">
-                          +${runnerEarningsForOrder(order.deliveryFee)}
+                          +${(
+                            runnerEarningsForOrder(order.deliveryFee) +
+                            runnerCollegeBonus(order)
+                          ).toFixed(2)}
+                          {runnerCollegeBonus(order) > 0
+                            ? ` (base HK$${runnerEarningsForOrder(order.deliveryFee).toFixed(2)} + college bonus HK$${runnerCollegeBonus(order).toFixed(2)})`
+                            : ""}
                         </p>
                         <div className="mt-3">
                           <RunnerOrderDetails order={order} />
@@ -1023,36 +1447,53 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
           previewOrder ? () => requestAccept(previewOrder) : undefined
         }
       />
-      {flowOrder && (
-        <RunnerDeliveryFlow
-          order={orderWithProgress(flowOrder.id) ?? flowOrder}
-          receiptFile={receiptFiles[flowOrder.id]}
-          bankFile={bankFiles[flowOrder.id]}
-          photoFile={photoFiles[flowOrder.id]}
-          finalTotal={
-            finalTotals[flowOrder.id] ??
-            (flowOrder.finalTotal != null ? String(flowOrder.finalTotal) : "")
-          }
-          bagConfirmed={Boolean(
-            bagConfirmed[flowOrder.id] || flowOrder.runnerVerified,
-          )}
-          busy={purchasingId === flowOrder.id}
-          uploading={uploading}
-          error={deliverError}
-          onReceipt={(file) => void handleReceiptUpload(flowOrder.id, file)}
-          onBank={(file) => void handleBankUpload(flowOrder.id, file)}
-          onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
-          onFinalTotal={(value) => handleFinalTotalChange(flowOrder.id, value)}
-          onBagConfirmed={(value) =>
-            void handleBagConfirmed(flowOrder.id, value)
-          }
-          onDelivered={() => handleDelivered(flowOrder.id)}
-          onClose={() => {
-            setDeliverError("");
-            setFlowOrderId(null);
-          }}
-        />
-      )}
+      {flowOrder &&
+        (resolveOrderChannel(flowOrder) === "canteen" ? (
+          <CanteenDeliveryFlow
+            order={orderWithProgress(flowOrder.id) ?? flowOrder}
+            runnerCollege={flowOrder.runnerCollege || user?.runnerCollege}
+            photoFile={photoFiles[flowOrder.id]}
+            busy={purchasingId === flowOrder.id}
+            uploading={uploading === "photo" ? "photo" : ""}
+            error={deliverError}
+            onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
+            onPickedUp={() => handleCanteenPickedUp(flowOrder.id)}
+            onDelivered={() => handleCanteenDelivered(flowOrder.id)}
+            onClose={() => {
+              setDeliverError("");
+              setFlowOrderId(null);
+            }}
+          />
+        ) : (
+          <RunnerDeliveryFlow
+            order={orderWithProgress(flowOrder.id) ?? flowOrder}
+            receiptFile={receiptFiles[flowOrder.id]}
+            bankFile={bankFiles[flowOrder.id]}
+            photoFile={photoFiles[flowOrder.id]}
+            finalTotal={
+              finalTotals[flowOrder.id] ??
+              (flowOrder.finalTotal != null ? String(flowOrder.finalTotal) : "")
+            }
+            bagConfirmed={Boolean(
+              bagConfirmed[flowOrder.id] || flowOrder.runnerVerified,
+            )}
+            busy={purchasingId === flowOrder.id}
+            uploading={uploading}
+            error={deliverError}
+            onReceipt={(file) => void handleReceiptUpload(flowOrder.id, file)}
+            onBank={(file) => void handleBankUpload(flowOrder.id, file)}
+            onPhoto={(file) => void handleLobbyUpload(flowOrder.id, file)}
+            onFinalTotal={(value) => handleFinalTotalChange(flowOrder.id, value)}
+            onBagConfirmed={(value) =>
+              void handleBagConfirmed(flowOrder.id, value)
+            }
+            onDelivered={() => handleDelivered(flowOrder.id)}
+            onClose={() => {
+              setDeliverError("");
+              setFlowOrderId(null);
+            }}
+          />
+        ))}
       <RunnerAcceptConfirmModal
         order={confirmOrder}
         loading={accepting}

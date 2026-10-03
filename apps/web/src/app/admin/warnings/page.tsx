@@ -5,7 +5,9 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
+import { AdminRealPerson } from "@/components/DeliveryIdentity";
 import {
   escalateDeadlineWarning,
   fetchDeadlineWatchOrders,
@@ -139,10 +141,21 @@ export default function AdminWarningsPage() {
                             key={`r-${order.id}`}
                             className="rounded-2xl border border-gray-100 bg-white p-4"
                           >
-                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                              {order.id}
+                              <OrderChannelBadge order={order} />
+                              {order.expiredWarningSentAt ? (
+                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">
+                                  Warned
+                                </span>
+                              ) : null}
+                            </p>
+                            <AdminRealPerson
+                              uid={order.runnerUid}
+                              fallbackName={order.runnerName || "Runner"}
+                            />
                             <p className="mt-1 text-xs text-gray-500">
-                              {order.runnerName ?? "Runner"} · expired{" "}
-                              {formatWhen(order.runnerExpiredAt)} · warnings{" "}
+                              Expired {formatWhen(order.runnerExpiredAt)} · warnings{" "}
                               {order.runnerWarningCount ?? 0}
                             </p>
                             <button
@@ -175,10 +188,16 @@ export default function AdminWarningsPage() {
                             key={`c-${order.id}`}
                             className="rounded-2xl border border-gray-100 bg-white p-4"
                           >
-                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                              {order.id}
+                              <OrderChannelBadge order={order} />
+                            </p>
+                            <AdminRealPerson
+                              uid={order.customerId}
+                              fallbackName={order.customerName || "Customer"}
+                            />
                             <p className="mt-1 text-xs text-gray-500">
-                              {order.customerName ?? "Customer"} · overdue{" "}
-                              {formatWhen(order.customerOverdueAt)} · warnings{" "}
+                              Overdue {formatWhen(order.customerOverdueAt)} · warnings{" "}
                               {order.customerWarningCount ?? 0}
                             </p>
                             <button

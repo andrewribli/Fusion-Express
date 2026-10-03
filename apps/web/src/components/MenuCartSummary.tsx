@@ -1,47 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CustomItemCard } from "@/components/CustomItemCard";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { PreviousOrderChecklist } from "@/components/PreviousOrderChecklist";
 import { useCart } from "@/context/CartContext";
-import { useUser } from "@/context/UserContext";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
+import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { useUser } from "@/context/UserContext";
+import { formatDeliveryQuote } from "@fusion-express/shared/delivery-pricing";
 
-export function MenuCartSummary() {
+export function MenuCartSummary({
+  channel = "fusion",
+  orderingEnabled = true,
+}: {
+  channel?: "fusion" | "canteen";
+  orderingEnabled?: boolean;
+}) {
   const router = useRouter();
   const { user } = useUser();
+  const isAdmin = useIsAdmin(user?.uid);
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
 
-  useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
-
-  const fee = calculateDeliveryFee({
-    weightKg: cartTotalWeightKg(items),
-    college: "",
-  });
+  const fee = resolveOrderDeliveryFee(items, "");
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
-
-  function choosePayment(method: CustomerPaymentMethod) {
-    setPaymentMethod(method);
-    savePaymentMethod(method);
-  }
+  const canteenGate = getCanteenCheckoutGate(items, { adminBypass: isAdmin });
+  const canteenCheckoutBlocked =
+    isCanteenCart(items) && !canteenGate.allowed && !canteenGate.hoursClosed;
+  const checkoutBlocked =
+    canteenCheckoutBlocked ||
+    overLimit ||
+    itemCount === 0 ||
+    (!orderingEnabled && !isAdmin && !canteenGate.hoursClosed);
+  const mixedCart = Boolean(
+    canteenGate.message?.toLowerCase().includes("different canteens"),
+  );
+  const checkoutPauseMessage = mixedCart
+    ? "Please order from one canteen at a time."
+    : (canteenGate.message ??
+      "This canteen is closed — checkout is paused until it opens.");
 
   function goCheckout() {
-    if (itemCount === 0) return;
-    // Guests finish on checkout (phone + dorm + lobby) — no login required.
+    if (checkoutBlocked) return;
     router.push("/checkout");
   }
 
@@ -51,16 +56,27 @@ export function MenuCartSummary() {
         className="shop-surface overflow-hidden rounded-2xl border border-gray-100 shadow-lg"
         style={{ backgroundColor: "#ffffff" }}
       >
-        <div className="flex items-center justify-between bg-[#ED1C24] px-4 py-3 text-white">
-          <h2 className="text-sm font-bold">Your order</h2>
-          <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold">
+        <div className="border-b border-gray-100 px-4 py-3">
+          <h2 className="text-sm font-bold text-gray-900">Your cart</h2>
+          <p className="text-xs text-gray-500">
             {itemCount} item{itemCount === 1 ? "" : "s"}
-          </span>
+            {channel === "canteen" ? " · Canteen" : ""}
+          </p>
         </div>
 
         <div className="space-y-3 p-4">
           {items.length === 0 ? (
-            <p className="text-sm text-gray-500">Your cart is empty.</p>
+            <div className="py-6 text-center">
+              <p className="text-base text-gray-600">
+                Add items to place an order
+              </p>
+              <Link
+                href={channel === "canteen" ? "/canteen" : "/cuhk"}
+                className="mt-3 inline-flex min-h-11 items-center justify-center rounded-full px-4 text-base font-semibold text-[#ED1C24]"
+              >
+                Browse the menu
+              </Link>
+            </div>
           ) : (
             <ul className="max-h-48 space-y-2 overflow-y-auto">
               {items.map(({ item, quantity }) => (
@@ -100,8 +116,6 @@ export function MenuCartSummary() {
         </div>
 
         <div className="space-y-3 border-t border-gray-100 p-3">
-          <PaymentMethodPicker value={paymentMethod} onChange={choosePayment} />
-
           <div className="flex justify-between text-xs text-gray-600">
             <span>Subtotal</span>
             <span className={overLimit ? "font-bold text-[#ED1C24]" : undefined}>
@@ -113,30 +127,48 @@ export function MenuCartSummary() {
               overLimit ? "text-[#ED1C24]" : "text-gray-900"
             }`}
           >
-            <span>Total w/ delivery</span>
+            <span>Total (incl. fees)</span>
             <span>${total}</span>
           </div>
           <p className="text-[10px] leading-snug text-gray-500">
-            Hall and delivery fee are confirmed at checkout.
+            {formatDeliveryQuote(fee.quote)}
           </p>
           <OrderLimitNotice subtotal={subtotal} />
+          {(canteenGate.hoursClosed && !isAdmin) ||
+          canteenCheckoutBlocked ||
+          (!orderingEnabled && !isAdmin) ? (
+            <div className="rounded-lg bg-amber-50 px-3 py-2 text-base font-medium text-amber-900">
+              <p>
+                {canteenGate.hoursClosed && !isAdmin
+                  ? `${canteenGate.message ?? "This canteen is closed."} You can schedule a later delivery at checkout.`
+                  : checkoutPauseMessage}
+              </p>
+              {mixedCart ? (
+                <Link
+                  href="/cart"
+                  className="mt-2 inline-flex min-h-11 items-center font-semibold text-gray-900 underline"
+                >
+                  View cart
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
           <button
             type="button"
-            disabled={overLimit || itemCount === 0}
+            disabled={checkoutBlocked}
             onClick={goCheckout}
             className="block w-full rounded-xl bg-[#ED1C24] py-3 text-center text-sm font-bold text-white disabled:bg-gray-100 disabled:text-gray-400"
           >
-            {user ? "Continue to checkout" : "Checkout — no account needed"}
+            Go to checkout
           </button>
           <p className="text-[10px] leading-snug text-gray-500">
-            Pay with {paymentMethod} after delivery. Completing an order agrees to
-            our Terms.
+            Pay after delivery. Completing an order agrees to our Terms.
           </p>
         </div>
       </section>
 
-      <PreviousOrderChecklist />
-      <CustomItemCard />
+      <PreviousOrderChecklist channel={channel} />
+      {channel === "fusion" ? <CustomItemCard /> : null}
     </aside>
   );
 }

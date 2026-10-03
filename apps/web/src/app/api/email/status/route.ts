@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
 import {
   sendCustomerPaymentReminder,
   sendOrderStatusUpdate,
   sendRunnerPickupReminder,
 } from "@/lib/email";
+import { publicNameForUser } from "@/lib/delivery-identity-server";
 import {
   AdminAuthError,
   assertOrderPartyOrAdmin,
   fetchOrderForEmail,
+  getAdminDb,
   paymentInfoFromOrder,
   requireAuthFromRequest,
 } from "@/lib/firebase-admin";
@@ -73,12 +76,16 @@ export async function POST(request: Request) {
     const jobs: Promise<void>[] = [];
 
     if (status === "accepted" && runnerEmail) {
+      const db = getAdminDb();
+      const customerName = db
+        ? await publicNameForUser(db, order.customerId, "Customer")
+        : "Customer";
       jobs.push(
         sendRunnerPickupReminder({
           to: runnerEmail,
           runnerName: order.runnerName,
           orderId: order.id,
-          customerName: order.customerName,
+          customerName,
           deliveryLocation: order.deliveryLocation || "See the app",
           estimate: order.total || 0,
         }),
@@ -111,8 +118,12 @@ export async function POST(request: Request) {
       statusRecipients.add(runnerEmail);
     }
 
+    const store =
+      order.orderChannel === "canteen"
+        ? "the canteen"
+        : supermarketForCampus(order.campus);
     for (const email of statusRecipients) {
-      jobs.push(sendOrderStatusUpdate(email, order.id, status));
+      jobs.push(sendOrderStatusUpdate(email, order.id, status, store));
     }
 
     if (jobs.length === 0) {

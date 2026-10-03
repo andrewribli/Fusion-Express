@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { sendAdminBroadcast } from "@/lib/email";
 import {
-  AdminAuthError,
+  createAdminDocumentRest,
   filterBroadcastRecipients,
-  listBroadcastRecipients,
-  requireAdminFromRequest,
+  listBroadcastRecipientsRest,
+  requireAdminRest,
+  RestAuthError,
   type BroadcastGroup,
-} from "@/lib/firebase-admin";
+} from "@/lib/firestore-rest";
 
-const GROUPS = new Set<BroadcastGroup>(["new_users", "runners", "long_term"]);
+const GROUPS = new Set<BroadcastGroup>([
+  "everyone",
+  "new_users",
+  "runners",
+  "long_term",
+]);
 
 async function mapPool<T, R>(
   items: T[],
@@ -46,9 +52,9 @@ export async function POST(request: Request) {
 async function handleBroadcast(request: Request) {
   let admin: { uid: string; email: string | null; idToken: string };
   try {
-    admin = await requireAdminFromRequest(request);
+    admin = await requireAdminRest(request);
   } catch (err) {
-    if (err instanceof AdminAuthError) {
+    if (err instanceof RestAuthError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     const status =
@@ -68,8 +74,10 @@ async function handleBroadcast(request: Request) {
     group?: string;
     subject?: string;
     body?: string;
+    emails?: string[];
     test?: boolean;
     dryRun?: boolean;
+    audience?: "all" | "customers" | "runners" | "cuhk" | "cityu";
   };
   try {
     body = (await request.json()) as typeof body;
@@ -80,7 +88,7 @@ async function handleBroadcast(request: Request) {
   const group = body.group as BroadcastGroup | undefined;
   if (!group || !GROUPS.has(group)) {
     return NextResponse.json(
-      { error: "group must be new_users, runners, or long_term" },
+      { error: "group must be everyone, new_users, runners, or long_term" },
       { status: 400 },
     );
   }
@@ -98,14 +106,32 @@ async function handleBroadcast(request: Request) {
   }
 
   try {
-    const all = await listBroadcastRecipients(admin.idToken);
-    const filtered = filterBroadcastRecipients(all, group);
+    const all = await listBroadcastRecipientsRest();
+    const audience = body.audience ?? "all";
+    const filtered = filterBroadcastRecipients(all, group).filter((person) => {
+      if (audience === "customers") return !person.isRunner;
+      if (audience === "runners") return person.isRunner;
+      if (audience === "cuhk" || audience === "cityu") return person.campus === audience;
+      return true;
+    });
+    const recipients = filtered
+      .map((person) => ({
+        email: person.email,
+        name: person.name,
+        isRunner: person.isRunner,
+      }))
+      .sort((a, b) =>
+        (a.name || a.email).localeCompare(b.name || b.email, "en", {
+          sensitivity: "base",
+        }),
+      );
 
     if (dryRun) {
       return NextResponse.json({
         ok: true,
         group,
-        count: filtered.length,
+        count: recipients.length,
+        recipients,
       });
     }
 
@@ -127,7 +153,27 @@ async function handleBroadcast(request: Request) {
       });
     }
 
-    if (filtered.length === 0) {
+    const requested = Array.isArray(body.emails)
+      ? [
+          ...new Set(
+            body.emails
+              .map((email) => String(email).trim().toLowerCase())
+              .filter((email) => email.includes("@")),
+          ),
+        ]
+      : null;
+    if (requested && requested.length === 0) {
+      return NextResponse.json(
+        { error: "Select at least one recipient." },
+        { status: 400 },
+      );
+    }
+    const allowed = new Set(recipients.map((person) => person.email));
+    const targets = (requested ?? recipients.map((person) => person.email))
+      .filter((email) => allowed.has(email))
+      .map((email) => ({ email }));
+
+    if (targets.length === 0) {
       return NextResponse.json({
         ok: true,
         group,
@@ -137,7 +183,7 @@ async function handleBroadcast(request: Request) {
       });
     }
 
-    const outcomes = await mapPool(filtered, 5, async (person) => {
+    const outcomes = await mapPool(targets, 5, async (person) => {
       try {
         await sendAdminBroadcast(person.email, subject, message);
         return { ok: true as const, email: person.email };
@@ -155,10 +201,21 @@ async function handleBroadcast(request: Request) {
       .map((o) => ({ email: o.email, error: o.error }));
     const sent = outcomes.filter((o) => o.ok).length;
 
+    try {
+      await createAdminDocumentRest("adminBroadcasts", {
+        message,
+        sentAt: new Date().toISOString(),
+        recipientCount: sent,
+        audience,
+      });
+    } catch (err) {
+      console.error("broadcast log failed", err);
+    }
+
     return NextResponse.json({
       ok: failed.length === 0,
       group,
-      count: filtered.length,
+      count: targets.length,
       sent,
       failed,
     });

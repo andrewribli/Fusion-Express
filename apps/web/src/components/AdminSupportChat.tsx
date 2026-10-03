@@ -232,17 +232,13 @@ export function AdminSupportChat({
     );
   }
 
-  const onCartOrCheckout =
-    pathname.startsWith("/cart") || pathname.startsWith("/checkout");
   const fabBottom =
-    mode === "runner"
-      ? "bottom-28 md:bottom-6"
-      : onCartOrCheckout || itemCount > 0
-        ? "bottom-[11.5rem] md:bottom-6"
-        : "bottom-28 md:bottom-6";
+    mode === "runner" || itemCount > 0
+      ? "bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-28"
+      : "bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6";
 
   return (
-    <div ref={rootRef} className={`fixed right-3 z-40 md:right-6 ${fabBottom}`}>
+    <div ref={rootRef} className={`fixed right-4 z-30 ${fabBottom}`}>
       {open ? (
         panel
       ) : (

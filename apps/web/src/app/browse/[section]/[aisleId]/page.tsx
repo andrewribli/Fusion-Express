@@ -25,21 +25,34 @@ import {
   topPopularItems,
 } from "@/lib/popular-items";
 import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
+import {
+  filterFavoritesOnly,
+  sortFavoritesFirst,
+} from "@/lib/favorites";
 import type { MenuItem } from "@/lib/types";
 
-type SortMode = "popular" | "price-asc" | "price-desc" | "name";
+type SortMode = "popular" | "price-asc" | "price-desc" | "name" | "favorites";
 
 function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-function sortItems(items: MenuItem[], mode: SortMode): MenuItem[] {
+function sortItems(
+  items: MenuItem[],
+  mode: SortMode,
+  favoriteSet: Set<string>,
+): MenuItem[] {
+  const byPriceAsc = (a: MenuItem, b: MenuItem) => a.price - b.price;
   if (mode === "popular") return items;
+  if (mode === "favorites") {
+    return sortFavoritesFirst(items, (item) => item.id, favoriteSet, byPriceAsc);
+  }
   const copy = [...items];
   if (mode === "name") {
     copy.sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
   } else if (mode === "price-asc") {
-    copy.sort((a, b) => a.price - b.price);
+    copy.sort(byPriceAsc);
   } else {
     copy.sort((a, b) => b.price - a.price);
   }
@@ -60,6 +73,8 @@ export default function AisleItemsPage({
   const [subFilter, setSubFilter] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("popular");
   const [offersOnly, setOffersOnly] = useState(false);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const { favoriteSet } = useFavorites();
 
   const section = isValidSection(sectionParam)
     ? (sectionParam as StoreSection)
@@ -107,6 +122,7 @@ export default function AisleItemsPage({
     setSearch("");
     setSubFilter(null);
     setOffersOnly(false);
+    setFavoritesOnly(false);
     setSortMode("popular");
   }, [aisleId]);
 
@@ -119,9 +135,12 @@ export default function AisleItemsPage({
   const items = useMemo(() => {
     const pool = search.trim() ? aisleItems : browsingItems;
     const matched = searchItems(pool, search);
-    const offered = offersOnly ? matched.filter((item) => hasSale(item)) : matched;
-    return sortItems(offered, sortMode);
-  }, [aisleItems, browsingItems, search, offersOnly, sortMode]);
+    let offered = offersOnly ? matched.filter((item) => hasSale(item)) : matched;
+    if (favoritesOnly) {
+      offered = filterFavoritesOnly(offered, (item) => item.id, favoriteSet);
+    }
+    return sortItems(offered, sortMode, favoriteSet);
+  }, [aisleItems, browsingItems, search, offersOnly, favoritesOnly, favoriteSet, sortMode]);
 
   const groups = useMemo(() => {
     const map = new Map<string, MenuItem[]>();
@@ -216,12 +235,25 @@ export default function AisleItemsPage({
                     onChange={(e) => setSortMode(e.target.value as SortMode)}
                     className="appearance-none rounded-full border border-gray-200 bg-white py-1.5 pl-3 pr-7 text-xs font-semibold text-gray-800"
                   >
+                    <option value="favorites">Sort: Favorites first</option>
                     <option value="popular">Sort: Popular</option>
-                    <option value="price-asc">Sort: Price low–high</option>
-                    <option value="price-desc">Sort: Price high–low</option>
-                    <option value="name">Sort: Name</option>
+                    <option value="price-asc">Sort: Price ↑</option>
+                    <option value="price-desc">Sort: Price ↓</option>
+                    <option value="name">Sort: A–Z</option>
                   </select>
                 </label>
+                <button
+                  type="button"
+                  onClick={() => setFavoritesOnly((v) => !v)}
+                  aria-pressed={favoritesOnly}
+                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ${
+                    favoritesOnly
+                      ? "bg-[#ED1C24] text-white"
+                      : "border border-gray-200 bg-white text-gray-700"
+                  }`}
+                >
+                  ♥ Favorites only
+                </button>
                 <button
                   type="button"
                   onClick={() => setOffersOnly((v) => !v)}
@@ -265,11 +297,13 @@ export default function AisleItemsPage({
             ) : items.length === 0 ? (
               <div className="mt-4 rounded-2xl border border-gray-100 bg-white px-6 py-12 text-center shadow-sm">
                 <p className="text-sm text-gray-600">
-                  {offersOnly
-                    ? "No offers in this aisle right now."
-                    : search
-                      ? "No items match your search."
-                      : "No items found in this aisle yet."}
+                  {favoritesOnly
+                    ? "You haven't favorited anything yet. Tap the ♥ on any item to save it here."
+                    : offersOnly
+                      ? "No offers in this aisle right now."
+                      : search
+                        ? "No items match your search."
+                        : "No items found in this aisle yet."}
                 </p>
               </div>
             ) : (

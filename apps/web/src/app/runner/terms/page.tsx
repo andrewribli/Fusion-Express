@@ -7,7 +7,16 @@ import { AppHeader } from "@/components/AppHeader";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useUser } from "@/context/UserContext";
-import { registerRunner } from "@/lib/runners";
+import { RunnerCollegeSelect } from "@/components/RunnerCollegeSelect";
+import { commitRunnerActivation } from "@/lib/runners";
+import { getAuthClient } from "@/lib/firebase";
+import {
+  routeAfterRunnerAgree,
+  studentIdHint,
+  studentIdPlaceholder,
+  submitRunnerAgreement,
+  validateStudentId,
+} from "@/lib/runner-signup";
 
 const SECTIONS = [
   {
@@ -90,9 +99,16 @@ const SECTIONS = [
 
 export default function RunnerTermsPage() {
   const router = useRouter();
-  const { user, isReady, setRunnerRegistered, setMode } = useUser();
+  const { user, isReady, setRunnerRegistered, setMode, rememberProfile } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [studentIdError, setStudentIdError] = useState("");
+  const [studentId, setStudentId] = useState(user?.studentId ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [collegeId, setCollegeId] = useState(user?.runnerCollege ?? "");
+  const [confirmation, setConfirmation] = useState("");
+  const needsCollege = user?.campus !== "cityu";
+  const campus = user?.campus === "cityu" ? "cityu" : "cuhk";
 
   useEffect(() => {
     if (!isReady) return;
@@ -104,49 +120,98 @@ export default function RunnerTermsPage() {
     if (user?.isGuest) {
       router.replace("/profile?complete=runner");
     }
+    setStudentId((current) => current || user?.studentId || "");
+    setPhone((current) => current || user?.phone || "");
+    setCollegeId((current) => current || user?.runnerCollege || "");
   }, [isReady, user, router]);
 
   async function handleAgree() {
-    if (!user?.uid) {
+    if (!user || !user.uid) {
       setError("Please sign in again before becoming a runner.");
       return;
     }
-    if (user.isGuest || !user.fullName?.trim() || user.fullName === "Guest") {
-      setError(
-        "Finish a full customer account (name + student ID) before becoming a runner.",
+    const sidErr = validateStudentId(studentId);
+    if (sidErr) {
+      setStudentIdError(
+        sidErr || "Student ID is required to become a runner.",
       );
+      setError("");
       return;
     }
-    if (!user.studentId?.trim()) {
-      setError("Add your student ID on Profile before becoming a runner.");
-      return;
-    }
+    setStudentIdError("");
     setError("");
     setLoading(true);
     try {
-      const paymentId =
-        user.runnerPaymentId ||
-        user.phone?.trim() ||
-        user.email ||
-        user.uid;
-      const runnerId = await registerRunner({
-        uid: user.uid,
-        fullName: user.fullName.trim() || "Runner",
-        studentId: user.studentId?.trim() || user.uid.slice(0, 8),
-        phone: user.phone?.trim() || paymentId,
-        college: user.college ?? "",
-        hall: user.hall ?? "",
-        paymentMethod: user.runnerPaymentMethod ?? "PayMe",
-        paymentId,
+      const result = await submitRunnerAgreement(
+        { ...user, uid: user.uid },
+        { studentId, phone, collegeId },
+        {
+          getIdToken: async () =>
+            (await getAuthClient().currentUser?.getIdToken()) ?? null,
+          saveCollege: async (token, nextCollege) => {
+            const res = await fetch("/api/runner/college", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ runnerCollege: nextCollege }),
+            });
+            const data = (await res.json()) as {
+              error?: string;
+              confirmation?: string;
+              runnerCollege?: string;
+              emailSent?: boolean;
+            };
+            if (!res.ok) {
+              throw new Error(data.error || "Could not save your college.");
+            }
+            return data;
+          },
+          activateRunner: async (input) => {
+            const saved = await commitRunnerActivation(input);
+            return { runnerId: saved.runnerId, role: "both" as const };
+          },
+        },
+      );
+      if (!result.ok) {
+        if (/student id/i.test(result.error)) {
+          setStudentIdError(result.error);
+          setError("");
+        } else {
+          setError(result.error);
+        }
+        return;
+      }
+      rememberProfile({
+        ...user,
+        phone: result.phone,
+        studentId: result.studentId,
+        role: result.role,
+        isRunner: true,
+        runnerId: result.runnerId,
+        runnerCollege: result.runnerCollege ?? user.runnerCollege,
+        runnerCollegeLockedAt:
+          result.runnerCollegeLockedAt ?? user.runnerCollegeLockedAt,
       });
-      setRunnerRegistered(runnerId, {
-        method: user.runnerPaymentMethod ?? "PayMe",
-        id: paymentId,
+      if (result.collegeNote) {
+        setConfirmation(result.collegeNote);
+        sessionStorage.setItem("gr_college_confirmation", result.collegeNote);
+      }
+      setRunnerRegistered(result.runnerId, result.payment, {
+        remote: false,
+        role: result.role,
       });
       setMode("runner");
-      router.push("/runner/dashboard");
-    } catch {
-      setError("Could not activate runner access. Try again.");
+      if (routeAfterRunnerAgree(true)) {
+        router.push("/runner/dashboard");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not activate runner access. Try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -157,7 +222,7 @@ export default function RunnerTermsPage() {
       <LakersWallpaper>
         <AppHeader showBack backHref="/" title="Runner Terms" />
 
-        <main className="mx-auto max-w-[480px] px-4 py-6 pb-32">
+        <main className="mx-auto max-w-[480px] px-4 py-6 pb-64">
           <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
           <h1 className="text-xl font-bold text-gray-900">
             Runner Terms &amp; Conditions
@@ -181,14 +246,75 @@ export default function RunnerTermsPage() {
               </section>
             ))}
           </div>
-          {error && (
-            <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+          <div className="mt-6 scroll-mb-64">
+            <label htmlFor="runner-student-id" className="block text-base font-semibold text-gray-900">
+              Student ID
+            </label>
+            <input
+              id="runner-student-id"
+              name="studentId"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              required
+              value={studentId}
+              onChange={(e) => {
+                setStudentId(e.target.value);
+                if (studentIdError) setStudentIdError("");
+              }}
+              placeholder={studentIdPlaceholder(campus)}
+              aria-invalid={studentIdError ? true : undefined}
+              aria-describedby={
+                studentIdError ? "runner-student-id-error" : undefined
+              }
+              className="mt-1 w-full min-h-12 rounded-xl border border-gray-200 bg-white px-4 py-3 text-[16px] text-gray-900"
+            />
+            {studentIdError ? (
+              <p id="runner-student-id-error" className="mt-1 text-sm text-red-700">
+                {studentIdError}
+              </p>
+            ) : null}
+            <p className="mt-1 text-xs text-gray-500">{studentIdHint(campus)}</p>
+          </div>
+          {needsCollege && (
+            <div className="mt-6 scroll-mb-64">
+              <RunnerCollegeSelect value={collegeId} onChange={setCollegeId} />
+            </div>
+          )}
+          {confirmation && (
+            <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
+              {confirmation}
             </p>
           )}
+          <div className="mt-6 scroll-mb-64">
+            <label htmlFor="runner-phone" className="block text-xs font-medium text-gray-600">
+              Phone number
+            </label>
+            <input
+              id="runner-phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g. 9123 4567"
+              className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Required for runners. We use it for payouts and to reach you about orders.
+            </p>
+          </div>
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white p-4 md:static md:mt-10 md:border-0 md:p-0">
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:static md:mt-10 md:border-0 md:p-0">
+            {error && (
+              <p className="mx-auto mb-3 max-w-[480px] rounded-xl bg-red-50 px-4 py-3 text-base text-red-700">
+                {error}
+              </p>
+            )}
             <div className="mx-auto flex max-w-[480px] flex-col gap-3 sm:flex-row">
               <button
                 type="button"

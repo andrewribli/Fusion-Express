@@ -97,6 +97,11 @@ export async function notifyOrderStatus(opts: {
   });
 }
 
+/** Server sends the runner expiry warning. The browser only passes the order id. */
+export async function notifyExpiredWarning(orderId: string): Promise<void> {
+  await postJson("/api/orders/expired-warning", { orderId });
+}
+
 export async function notifyDeadlineEvent(opts: {
   kind:
     | "runner_reminder"

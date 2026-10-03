@@ -14,9 +14,13 @@ import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { formatScheduledLabel } from "@/lib/order-window";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
-import { CustomerPayPanel } from "@/components/CustomerPayPanel";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
+import { formatStoredDeliveryFee } from "@fusion-express/shared/delivery-pricing";
+import { customerCollegeSavingsView } from "@fusion-express/shared/college-discount";
+import { clearCollegeDiscountAfterCancel } from "@/lib/clear-college-discount";
 import {
   customerAmountDue,
   groceryAmountDue,
@@ -30,7 +34,24 @@ import {
 } from "@/lib/notifications";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import type { Order } from "@/lib/types";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
+import { redirectToAirwallexCheckout } from "@/lib/airwallex-checkout";
+import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 
+async function paymentAuthHeaders(): Promise<HeadersInit> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (!isFirebaseConfigured()) return headers;
+  const current = getAuthClient().currentUser;
+  if (!current) return headers;
+  try {
+    headers.Authorization = `Bearer ${await current.getIdToken()}`;
+  } catch {
+    /* ignore */
+  }
+  return headers;
+}
 function TrackContent() {
   const searchParams = useSearchParams();
   const { user } = useUser();
@@ -94,6 +115,7 @@ function TrackContent() {
     setCancelling(true);
     try {
       await cancelOrder(order.id, getUserAccountId(user));
+      void clearCollegeDiscountAfterCancel(order.id);
       void notifyOrderStatusEmail({
         customerEmail: user.email ?? order.customerEmail,
         orderId: order.id,
@@ -104,6 +126,47 @@ function TrackContent() {
       alert(err instanceof Error ? err.message : "Could not cancel");
     } finally {
       setCancelling(false);
+    }
+  }
+
+  const [paying, setPaying] = useState(false);
+
+  async function handleResumePayment() {
+    if (!order) return;
+    setPaying(true);
+    try {
+      const res = await fetch("/api/payments/create-intent", {
+        method: "POST",
+        headers: await paymentAuthHeaders(),
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        intentId?: string;
+        clientSecret?: string;
+        currency?: string;
+        env?: "demo" | "prod";
+        alreadyPaid?: boolean;
+      };
+      if (data.alreadyPaid) {
+        await lookup(order.id);
+        return;
+      }
+      if (!res.ok || !data.intentId || !data.clientSecret || !data.env) {
+        throw new Error(data.error ?? "Could not start payment.");
+      }
+      const successUrl = `${window.location.origin}/checkout/payment-return?orderId=${encodeURIComponent(order.id)}`;
+      await redirectToAirwallexCheckout({
+        intentId: data.intentId,
+        clientSecret: data.clientSecret,
+        currency: data.currency ?? "HKD",
+        env: data.env,
+        successUrl,
+      });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not open Airwallex.");
+    } finally {
+      setPaying(false);
     }
   }
 
@@ -138,11 +201,19 @@ function TrackContent() {
 
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <CustomerOrderHeading order={order} />
+            <div className="mt-3">
+              <OrderCounterparty orderId={order.id} label="Your runner:" />
+            </div>
 
             <p className="mt-2 text-sm text-gray-700">
               {formatDeliveryAddress(order.college, order.hall)}
             </p>
             <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
+            {order.scheduledFor ? (
+              <p className="mt-2 text-sm font-semibold text-[#ED1C24]">
+                Scheduled for {formatScheduledLabel(order.scheduledFor)}
+              </p>
+            ) : null}
 
             {order.customerNote && (
               <p className="mt-2 text-xs text-gray-600">
@@ -172,33 +243,76 @@ function TrackContent() {
             </ul>
 
             <div className="mt-2 space-y-1.5 border-t border-gray-100 pt-2 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>Estimated Subtotal</span>
-                <span>${order.subtotal}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-gray-600">
-                  Exact subtotal
-                  <span className="mt-0.5 block text-[11px] font-normal text-gray-400">
-                    To be confirmed by runner
-                  </span>
-                </span>
-                {hasConfirmedGroceryTotal(order) ? (
-                  <span className="shrink-0 font-medium text-gray-900">
-                    ${groceryAmountDue(order)}
-                  </span>
-                ) : (
-                  <span className="shrink-0 text-gray-400">Pending</span>
-                )}
-              </div>
+              {(() => {
+                const isCanteen =
+                  order.orderChannel === "canteen" ||
+                  order.items.some((i) => i.itemId.startsWith("canteen:"));
+                const savings = customerCollegeSavingsView(order);
+                const foodBeforeDiscount = savings.show
+                  ? (order.estimatedSubtotal ?? order.subtotal + savings.amount)
+                  : order.subtotal;
+                return (
+                  <>
+                    <div className="flex justify-between text-gray-600">
+                      <span>{isCanteen ? "Food subtotal" : "Estimated Subtotal"}</span>
+                      <span>${foodBeforeDiscount}</span>
+                    </div>
+                    {savings.show && (
+                      <div className="flex justify-between font-medium text-emerald-700">
+                        <span>
+                          College discount
+                          {savings.pending ? (
+                            <span className="mt-0.5 block text-[11px] font-normal text-gray-500">
+                              When a matching-college runner accepts
+                            </span>
+                          ) : null}
+                        </span>
+                        <span>−HK${savings.amount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {!isCanteen && (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-gray-600">
+                          Exact subtotal
+                          <span className="mt-0.5 block text-[11px] font-normal text-gray-400">
+                            To be confirmed by runner
+                          </span>
+                        </span>
+                        {hasConfirmedGroceryTotal(order) ? (
+                          <span className="shrink-0 font-medium text-gray-900">
+                            ${groceryAmountDue(order)}
+                          </span>
+                        ) : (
+                          <span className="shrink-0 text-gray-400">Pending</span>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               <div className="flex justify-between text-gray-600">
                 <span>Delivery</span>
-                <span>${order.deliveryFee}</span>
+                <span>
+                  {formatStoredDeliveryFee({
+                    deliveryFee: order.deliveryFee,
+                    deliveryOrigin: order.deliveryOrigin,
+                    deliveryBase: order.deliveryBase,
+                    deliverySurcharge: order.deliverySurcharge,
+                    deliveryTotal: order.deliveryTotal,
+                    hall: order.hall,
+                  })}
+                </span>
               </div>
               {order.tip != null && order.tip > 0 && (
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>
                   <span>${order.tip}</span>
+                </div>
+              )}
+              {(order.platformFee ?? 0) > 0 && (
+                <div className="flex justify-between text-gray-600">
+                  <span>Platform fee</span>
+                  <span>${Number(order.platformFee).toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between font-bold">
@@ -215,9 +329,9 @@ function TrackContent() {
 
             {order.priceAdjustmentStatus === "refund_pending" && (
               <p className="mt-3 rounded-xl bg-green-50 px-3 py-2 text-xs text-green-800">
-                Fusion prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
+                {supermarketForCampus(order.campus)} prices were ${Math.abs(order.priceDifference ?? 0)} lower than the app
                 estimate. You will be refunded ${order.refundAmount} within 3–5 business
-                days via PayMe/FPS.
+                days via card, PayMe, or FPS.
               </p>
             )}
             {order.priceAdjustmentStatus === "refunded" && (
@@ -230,7 +344,7 @@ function TrackContent() {
               getUserAccountId(user) === order.customerId && (
                 <div className="mt-3 space-y-2 rounded-xl bg-amber-50 px-3 py-3">
                   <p className="text-xs text-amber-900">
-                    Fusion prices are higher than the app estimate. New total $
+                    {supermarketForCampus(order.campus)} prices are higher than the app estimate. New total $
                     {order.actualSubtotal != null
                       ? order.actualSubtotal + order.deliveryFee + (order.tip ?? 0)
                       : order.total}
@@ -275,19 +389,35 @@ function TrackContent() {
               </button>
             )}
 
+            {order.status === "delivered" &&
+              !order.paymentReceived &&
+              hasConfirmedGroceryTotal(order) && (
+                <button
+                  type="button"
+                  disabled={paying}
+                  onClick={() => void handleResumePayment()}
+                  className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {paying
+                    ? "Opening Airwallex…"
+                    : `Pay now · $${customerAmountDue(order)}`}
+                </button>
+              )}
+
+            {order.status === "delivered" && !hasConfirmedGroceryTotal(order) && (
+              <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                Waiting for the runner to enter the {supermarketForCampus(order.campus)} receipt total. You pay
+                that exact amount after it is in.
+              </p>
+            )}
+
             <OrderProofPhotos order={order} />
           </div>
 
-          {user &&
-            getUserAccountId(user) === order.customerId &&
-            (order.status === "delivered" || order.status === "runner_paid") && (
-              <CustomerPayPanel
-                order={order}
-                userId={user.uid}
-              />
-            )}
-
-          {order.status === "customer_paid" && (
+          {(order.status === "paid" ||
+            order.status === "customer_paid" ||
+            order.status === "runner_paid" ||
+            order.status === "completed") && (
             <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-800">
               This order is marked paid
               {order.customerPaidAt
@@ -306,7 +436,8 @@ function TrackContent() {
 
           {(order.status === "delivered" ||
             order.status === "runner_paid" ||
-            order.status === "customer_paid") &&
+            order.status === "customer_paid" ||
+            order.status === "completed") &&
             !order.runnerRating &&
             !rated &&
             user &&

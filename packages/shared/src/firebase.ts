@@ -1,5 +1,11 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import {
+  browserLocalPersistence,
+  getAuth,
+  initializeAuth,
+  setPersistence,
+  type Auth,
+} from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
@@ -46,6 +52,8 @@ let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let db: Firestore | undefined;
 let storage: FirebaseStorage | undefined;
+/** True when this module created Auth with `browserLocalPersistence`. */
+let authCreatedWithLocalPersistence = false;
 
 export function getFirebaseApp(): FirebaseApp {
   if (!isFirebaseConfigured()) {
@@ -59,11 +67,51 @@ export function getFirebaseApp(): FirebaseApp {
   return app;
 }
 
+function isBrowserDocument(): boolean {
+  return typeof window !== "undefined" && typeof document !== "undefined";
+}
+
+/**
+ * One Auth instance for the whole app. `browserLocalPersistence` is registered
+ * here, before any `onAuthStateChanged` listener, so a refresh restores the
+ * same account instead of starting from an empty in-memory session.
+ * Do not use `browserSessionPersistence` — that dies when the tab closes.
+ */
 export function getAuthClient(): Auth {
   if (!auth) {
-    auth = getAuth(getFirebaseApp());
+    const firebaseApp = getFirebaseApp();
+    if (isBrowserDocument()) {
+      try {
+        auth = initializeAuth(firebaseApp, {
+          persistence: browserLocalPersistence,
+        });
+        authCreatedWithLocalPersistence = true;
+      } catch (err) {
+        const code =
+          err && typeof err === "object" && "code" in err
+            ? String((err as { code: unknown }).code)
+            : "";
+        // Another caller already initialized this app's Auth.
+        if (code !== "auth/already-initialized") throw err;
+        auth = getAuth(firebaseApp);
+      }
+    } else {
+      auth = getAuth(firebaseApp);
+    }
   }
   return auth;
+}
+
+/**
+ * Await this before `onAuthStateChanged`. `initializeAuth` already set local
+ * persistence; the fallback path (Auth created earlier) still needs
+ * `setPersistence` so a refresh does not use an in-memory or session user.
+ */
+export function ensureBrowserLocalPersistence(): Promise<void> {
+  if (!isBrowserDocument()) return Promise.resolve();
+  const client = getAuthClient();
+  if (authCreatedWithLocalPersistence) return Promise.resolve();
+  return setPersistence(client, browserLocalPersistence);
 }
 
 export function getDb(): Firestore {

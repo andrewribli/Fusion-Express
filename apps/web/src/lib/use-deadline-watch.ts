@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { syncOrderDeadlines } from "@/lib/orders";
-import { notifyDeadlineEvent } from "@/lib/notify-email";
+import { notifyDeadlineEvent, notifyExpiredWarning } from "@/lib/notify-email";
 import type { Order } from "@/lib/types";
 
 export function useDeadlineWatch(orders: Order[]) {
@@ -16,6 +16,9 @@ export function useDeadlineWatch(orders: Order[]) {
       for (const order of orders) {
         const result = await syncOrderDeadlines(order);
         if (cancelled) return;
+        if (result.runnerExpired) {
+          void notifyExpiredWarning(order.id);
+        }
         if (result.runnerReminderDue && order.runnerEmail) {
           void notifyDeadlineEvent({
             kind: "runner_reminder",

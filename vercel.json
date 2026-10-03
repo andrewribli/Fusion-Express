@@ -3,6 +3,12 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "buildCommand": "npx turbo run build --filter=@fusion-express/web",
+  "crons": [
+    {
+      "path": "/api/cron/expire-deliveries",
+      "schedule": "15 4 * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/:path*",

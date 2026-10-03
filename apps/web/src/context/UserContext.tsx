@@ -6,17 +6,26 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOutUser } from "@/lib/auth";
-import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
+import { clearStoredCampusPreference } from "@/lib/campus-routes";
+import {
+  ensureBrowserLocalPersistence,
+  getAuthClient,
+  isFirebaseConfigured,
+} from "@/lib/firebase";
+import { isEmailAlreadyInUse } from "@/lib/auth-errors";
 import { isDemoAuth } from "@/lib/constants";
 import {
   clearRunnerFromProfile,
   createUserProfile,
+  ensureSignedInUserProfile,
   fetchUserProfile,
+  sessionFromAuthIdentity,
   updateUserProfileDoc,
 } from "@/lib/users";
 import { findRunnerForUser } from "@/lib/runners";
@@ -30,6 +39,8 @@ import {
   type UserRole,
 } from "@/lib/roles";
 
+import type { CampusId } from "@fusion-express/shared/campus";
+
 export interface UserProfile {
   uid?: string;
   email?: string;
@@ -38,6 +49,8 @@ export interface UserProfile {
   isRunner?: boolean;
   isGuest?: boolean;
   createdAt?: string;
+  /** University campus (CUHK | CityU). */
+  campus?: CampusId;
   /** Which experiences this account signed up for. */
   role?: UserRole;
   runnerId?: string;
@@ -47,6 +60,15 @@ export interface UserProfile {
   cuhkEmail?: string;
   cuhkVerifiedAt?: string;
   photoURL?: string;
+  /** Name shown to the other person on an active delivery. Null uses the account name. */
+  displayName?: string | null;
+  /** Delivery avatar. Hidden from the other person while anonymous. */
+  photoUrl?: string | null;
+  /** When true, the other person on a delivery sees the stored pseudonym and no photo. */
+  isAnonymous?: boolean;
+  /** Stable "Anonymous Adjective Animal" name. Set once, then every 30 days. */
+  pseudonym?: string | null;
+  pseudonymChangedAt?: string | null;
   /** Legacy fields kept for old Firestore docs; not written on new signups. */
   username?: string;
   chineseName?: string;
@@ -54,6 +76,15 @@ export interface UserProfile {
   college?: string;
   hall?: string;
   roomNumber?: string;
+  /** Permanent CUHK runner college. Null until the runner locks one. */
+  runnerCollege?: string | null;
+  runnerCollegeLockedAt?: string | null;
+  runnerCollegeAppeal?: {
+    requestedCollege: string;
+    reason: string;
+    submittedAt: string;
+    status: "pending" | "approved" | "rejected";
+  } | null;
 }
 
 const USER_STORAGE_KEY = "fusion_user_profile";
@@ -89,9 +120,10 @@ interface UserContextValue {
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   ensureGuestCheckout: (opts: {
-    phone: string;
+    fullName: string;
     college: string;
     hall: string;
+    campus?: CampusId;
   }) => Promise<UserProfile>;
   /** Enter guest browse mode (no account) — shop + checkout without forced login. */
   startGuestBrowse: () => void;
@@ -99,10 +131,13 @@ interface UserContextValue {
   isGuestBrowsing: boolean;
   logout: () => Promise<void>;
   updateProfile: (profile: UserProfile) => void;
+  /** Update the signed-in profile in this browser without writing Firestore. */
+  rememberProfile: (profile: UserProfile) => void;
   acceptRunnerTerms: () => void;
   setRunnerRegistered: (
     runnerId: string,
     payment: { method: "PayMe" | "FPS"; id: string },
+    options?: { remote?: boolean; role?: UserRole },
   ) => void;
   bootError: string | null;
 }
@@ -172,20 +207,28 @@ async function restoreRunnerProfile(profile: UserProfile): Promise<UserProfile> 
         profile.termsAcceptedAt ?? found.termsAcceptedAt.toISOString(),
     };
     if (profile.uid) {
-      void updateUserProfileDoc(profile.uid, {
-        role: updated.role,
-        isRunner: true,
-        runnerId: found.id,
-        runnerPaymentMethod: found.paymentMethod,
-        runnerPaymentId: found.paymentId,
-        termsAcceptedAt: updated.termsAcceptedAt,
-      });
+      try {
+        await updateUserProfileDoc(profile.uid, {
+          role: updated.role,
+          isRunner: true,
+          runnerId: found.id,
+          runnerPaymentMethod: found.paymentMethod,
+          runnerPaymentId: found.paymentId,
+          termsAcceptedAt: updated.termsAcceptedAt,
+        });
+      } catch (err) {
+        console.warn("Runner profile sync on sign-in:", err);
+      }
     }
     return updated;
   }
   if (!profile.isRunner && !profile.runnerId) return profile;
   if (profile.uid) {
-    void clearRunnerFromProfile(profile.uid);
+    try {
+      await clearRunnerFromProfile(profile.uid);
+    } catch (err) {
+      console.warn("Clear stale runner flags on sign-in:", err);
+    }
   }
   return {
     ...profile,
@@ -223,6 +266,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [savedMode, setSavedMode] = useState<AppMode | null>(null);
   const [isGuestBrowsing, setIsGuestBrowsing] = useState(false);
   const firebaseEnabled = isFirebaseConfigured();
+  const logoutRequestedRef = useRef(false);
 
   useEffect(() => {
     setTermsAccepted(loadTermsAccepted());
@@ -247,8 +291,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Show the last real account while IndexedDB/local persistence restores.
+    // A transient null from Auth must not wipe this — that was the refresh logout.
+    const cachedOnBoot = loadUser();
+    if (cachedOnBoot && !cachedOnBoot.isGuest) {
+      setUser(cachedOnBoot);
+    }
+
     let cancelled = false;
     let becameReady = false;
+    /** True only after `authStateReady()` — local persistence has finished. */
+    let persistenceReady = false;
     const markReady = () => {
       becameReady = true;
       if (!cancelled) setIsReady(true);
@@ -263,70 +316,138 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }, 5000);
 
     let unsub: (() => void) | undefined;
-    try {
-      unsub = onAuthStateChanged(
-        getAuthClient(),
-        (firebaseUser) => {
-          window.clearTimeout(failOpen);
-          if (cancelled) return;
-          setBootError(null);
-          markReady();
 
-          if (!firebaseUser) {
-            setUser(null);
-            cacheProfile(null);
-            // Keep guest-browse flag so Continue as Guest survives auth null.
-            return;
-          }
+    void (async () => {
+      try {
+        // Local persistence is registered before the listener. A null user
+        // before `authStateReady()` is IndexedDB still opening, not a sign-out.
+        await ensureBrowserLocalPersistence();
+        const auth = getAuthClient();
+        await auth.authStateReady();
+        if (cancelled) return;
+        persistenceReady = true;
 
-          setGuestBrowseFlag(false);
-          setIsGuestBrowsing(false);
+        unsub = onAuthStateChanged(
+          auth,
+          (firebaseUser) => {
+            window.clearTimeout(failOpen);
+            if (cancelled) return;
+            setBootError(null);
 
-          const cached = loadUser();
-          if (cached?.uid === firebaseUser.uid) {
-            setUser({
-              ...cached,
-              photoURL: firebaseUser.photoURL || cached.photoURL,
-            });
-          }
-
-          void (async () => {
-            try {
-              const profile = await fetchUserProfile(firebaseUser.uid);
-              const base =
-                profile ??
-                (cached?.uid === firebaseUser.uid ? cached : null);
-              if (!base || cancelled) return;
-              const hydrated = await restoreRunnerProfile({
-                ...base,
-                photoURL: firebaseUser.photoURL || base.photoURL,
-              });
-              if (cancelled) return;
-              setUser(hydrated);
-              cacheProfile(hydrated);
-              if (hydrated.isRunner || hydrated.termsAcceptedAt) {
-                profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
-                setTermsAccepted(true);
+            if (!firebaseUser) {
+              // Ignore a null that arrives before local persistence restores.
+              if (!persistenceReady) return;
+              // A refresh / second tab / Auth blip is not Sign out. Keep the
+              // last real account until the user explicitly logs out.
+              if (!logoutRequestedRef.current) {
+                const kept = loadUser();
+                if (kept && !kept.isGuest) {
+                  setUser(kept);
+                  markReady();
+                  return;
+                }
               }
-            } catch (err) {
-              console.error("Auth restore failed", err);
-              setBootError(firebaseErrorText(err));
+              logoutRequestedRef.current = false;
+              setUser(null);
+              cacheProfile(null);
+              markReady();
+              // Keep guest-browse flag so Continue as Guest survives auth null.
+              return;
             }
-          })();
-        },
-        (err) => {
-          console.error("Auth listener failed", err);
-          window.clearTimeout(failOpen);
-          setBootError(firebaseErrorText(err));
-          markReady();
-        },
-      );
-    } catch (err) {
-      console.error("Auth init failed", err);
-      window.clearTimeout(failOpen);
-      setBootError(firebaseErrorText(err));
-      markReady();
-    }
+
+            markReady();
+
+            const cached = loadUser();
+
+            // Anonymous Auth is guest checkout only — never invent a customer
+            // account or clear an in-progress guest profile.
+            if (firebaseUser.isAnonymous) {
+              if (cached?.uid === firebaseUser.uid) {
+                setUser(cached);
+              }
+              void (async () => {
+                try {
+                  const profile = await fetchUserProfile(firebaseUser.uid);
+                  if (!profile || cancelled) return;
+                  setUser(profile);
+                  cacheProfile(profile);
+                } catch (err) {
+                  console.error("Guest auth restore failed", err);
+                }
+              })();
+              return;
+            }
+
+            setGuestBrowseFlag(false);
+            setIsGuestBrowsing(false);
+
+            // Always put a session in React as soon as Auth has a user.
+            // Waiting on Firestore left Become a runner on "Loading…" and the
+            // profile icon linking to /login while Firebase was already signed in.
+            const authSession = sessionFromAuthIdentity({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+            });
+            if (cached?.uid === firebaseUser.uid && !cached.isGuest) {
+              setUser({
+                ...cached,
+                photoURL: firebaseUser.photoURL || cached.photoURL,
+              });
+            } else {
+              setUser(authSession);
+              cacheProfile(authSession);
+            }
+
+            void (async () => {
+              try {
+                const profile = await ensureSignedInUserProfile({
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email ?? authSession.email ?? "",
+                  displayName: firebaseUser.displayName,
+                  photoURL: firebaseUser.photoURL,
+                });
+                if (cancelled) return;
+                const hydrated = await restoreRunnerProfile({
+                  ...profile,
+                  photoURL: firebaseUser.photoURL || profile.photoURL,
+                });
+                if (cancelled) return;
+                setUser(hydrated);
+                cacheProfile(hydrated);
+                if (hydrated.isRunner || hydrated.termsAcceptedAt) {
+                  profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
+                  setTermsAccepted(true);
+                }
+              } catch (err) {
+                console.error("Auth restore failed", err);
+                // Keep the Auth session — do not clear user or boot to login.
+                if (!cancelled) {
+                  setUser((prev) =>
+                    prev?.uid === firebaseUser.uid && !prev.isGuest
+                      ? prev
+                      : authSession,
+                  );
+                  cacheProfile(authSession);
+                }
+              }
+            })();
+          },
+          (err) => {
+            console.error("Auth listener failed", err);
+            window.clearTimeout(failOpen);
+            setBootError(firebaseErrorText(err));
+            markReady();
+          },
+        );
+      } catch (err) {
+        console.error("Auth init failed", err);
+        window.clearTimeout(failOpen);
+        setBootError(firebaseErrorText(err));
+        markReady();
+      }
+    })();
 
     return () => {
       cancelled = true;
@@ -381,17 +502,35 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       const emailErr = validateEmail(profile.email);
       if (emailErr) throw new Error(emailErr);
-      const firebaseUser = await signUpWithEmail(profile.email, password);
-      const fullProfile = await createUserProfile(firebaseUser.uid, {
+      const fields = {
         fullName: profile.fullName,
         email: profile.email,
+        campus: profile.campus,
         phone: profile.phone,
+        studentId: profile.studentId,
         cuhkEmail: profile.cuhkEmail ?? profile.email,
         cuhkVerifiedAt: profile.cuhkVerifiedAt ?? new Date().toISOString(),
         isGuest: false,
         isRunner: false,
-      });
-      persist(fullProfile);
+      };
+      try {
+        const firebaseUser = await signUpWithEmail(profile.email, password);
+        await firebaseUser.getIdToken();
+        persist(await createUserProfile(firebaseUser.uid, fields));
+      } catch (err) {
+        if (!isEmailAlreadyInUse(err)) throw err;
+        const current = getAuthClient().currentUser;
+        const email = profile.email.trim().toLowerCase();
+        if (current?.email?.toLowerCase() === email) {
+          await current.getIdToken(true);
+          const existing = await fetchUserProfile(current.uid);
+          if (!existing) {
+            persist(await createUserProfile(current.uid, fields));
+            return;
+          }
+        }
+        throw new Error("This email is already registered. Sign in instead.");
+      }
     },
     [persist],
   );
@@ -415,71 +554,113 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { signInWithEmail } = await import("@/lib/auth");
-      await signInWithEmail(email, password);
+      const firebaseUser = await signInWithEmail(email, password);
+      // Auth succeeded — land in the app even if Firestore profile read/write
+      // is denied. ensureSignedInUserProfile already falls back locally.
+      const profile = await ensureSignedInUserProfile({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+      });
+      let hydrated = profile;
+      try {
+        hydrated = await restoreRunnerProfile({
+          ...profile,
+          photoURL: firebaseUser.photoURL || profile.photoURL,
+        });
+      } catch (err) {
+        console.warn("Runner profile sync after sign-in:", err);
+      }
+      persist(hydrated);
+      if (hydrated.isRunner || hydrated.termsAcceptedAt) {
+        profileStore()?.setItem(TERMS_ACCEPTED_KEY, "true");
+        setTermsAccepted(true);
+      }
     },
     [persist],
   );
 
   const ensureGuestCheckout = useCallback(
-    async (opts: { phone: string; college: string; hall: string }) => {
-      const { ensureGuestAuthForPhone, normalizePhone, validatePhone, phoneToEmail } =
-        await import("@/lib/auth");
-      const phoneErr = validatePhone(opts.phone);
-      if (phoneErr) throw new Error(phoneErr);
+    async (opts: {
+      fullName: string;
+      college: string;
+      hall: string;
+      campus?: CampusId;
+    }) => {
+      const name = opts.fullName.trim();
+      if (!name) throw new Error("Enter your full name");
       if (!opts.college.trim() || !opts.hall.trim()) {
         throw new Error("Choose your college and hall");
       }
-      const digits = normalizePhone(opts.phone);
 
-      if (user?.phone && normalizePhone(user.phone) === digits && user.uid) {
+      if (user?.uid) {
         const updated: UserProfile = {
           ...user,
-          phone: digits,
-          isGuest: user.isGuest ?? true,
+          fullName: name,
+          college: opts.college,
+          hall: opts.hall,
+          campus: opts.campus ?? user.campus,
+          isGuest: user.isGuest ?? false,
           role: normalizeRole(user.role, Boolean(user.isRunner)),
         };
         persist(updated);
-        if (user.uid && firebaseEnabled && !isDemoAuth()) {
-          void updateUserProfileDoc(user.uid, { phone: digits });
+        if (firebaseEnabled && !isDemoAuth()) {
+          void updateUserProfileDoc(user.uid, {
+            fullName: name,
+            college: opts.college,
+            hall: opts.hall,
+            campus: updated.campus,
+          });
         }
         return updated;
       }
 
       if (isDemoAuth() || !firebaseEnabled) {
         const demoProfile: UserProfile = {
-          uid: `guest_${digits}`,
-          email: phoneToEmail(digits),
-          fullName: "Guest",
-          phone: digits,
+          uid: `guest_${Date.now()}`,
+          fullName: name,
           isGuest: true,
           isRunner: false,
           role: "customer",
+          campus: opts.campus,
+          college: opts.college,
+          hall: opts.hall,
           createdAt: new Date().toISOString(),
         };
         persist(demoProfile);
         return demoProfile;
       }
 
-      const auth = await ensureGuestAuthForPhone(digits);
+      const { ensureGuestSession } = await import("@/lib/auth");
+      const auth = await ensureGuestSession();
       const existing = await fetchUserProfile(auth.uid);
       const profile: UserProfile = existing
         ? {
             ...existing,
-            phone: digits,
+            fullName: name,
+            college: opts.college,
+            hall: opts.hall,
+            campus: opts.campus ?? existing.campus,
             isGuest: existing.isGuest ?? true,
             role: normalizeRole(existing.role, Boolean(existing.isRunner)),
           }
         : await createUserProfile(auth.uid, {
             email: auth.email,
-            fullName: "Guest",
-            phone: digits,
+            fullName: name,
             isGuest: true,
             isRunner: false,
+            campus: opts.campus,
+            college: opts.college,
+            hall: opts.hall,
           });
 
       if (existing) {
         await updateUserProfileDoc(auth.uid, {
-          phone: digits,
+          fullName: name,
+          college: opts.college,
+          hall: opts.hall,
+          campus: profile.campus,
           isGuest: profile.isGuest,
         });
       }
@@ -490,6 +671,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    logoutRequestedRef.current = true;
+    // Clear the remembered campus before Firebase notifies listeners.
+    // Otherwise a CityU session left `gracerun_campus=cityu` and the next
+    // visit to `/` still opened the CityU shop.
+    clearStoredCampusPreference();
     if (firebaseEnabled && !isDemoAuth()) {
       await signOutUser();
     }
@@ -513,6 +699,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     [firebaseEnabled, persist],
   );
 
+  const rememberProfile = useCallback(
+    (profile: UserProfile) => {
+      persist(profile);
+    },
+    [persist],
+  );
+
   const setMode = useCallback((next: AppMode) => {
     profileStore()?.setItem(APP_MODE_KEY, next);
     setSavedMode(next);
@@ -534,11 +727,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [firebaseEnabled]);
 
   const setRunnerRegistered = useCallback(
-    (runnerId: string, payment: { method: "PayMe" | "FPS"; id: string }) => {
+    (
+      runnerId: string,
+      payment: { method: "PayMe" | "FPS"; id: string },
+      options?: { remote?: boolean; role?: UserRole },
+    ) => {
       setUser((prev) => {
         if (!prev) return prev;
         const termsAcceptedAt = prev.termsAcceptedAt ?? new Date().toISOString();
-        const role = roleWithRunner(normalizeRole(prev.role, prev.isRunner));
+        const role =
+          options?.role ?? roleWithRunner(normalizeRole(prev.role, prev.isRunner));
         const updated: UserProfile = {
           ...prev,
           role,
@@ -549,7 +747,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
           termsAcceptedAt,
         };
         cacheProfile(updated);
-        if (prev.uid && firebaseEnabled && !isDemoAuth()) {
+        if (
+          options?.remote !== false &&
+          prev.uid &&
+          firebaseEnabled &&
+          !isDemoAuth()
+        ) {
           void updateUserProfileDoc(prev.uid, {
             role,
             isRunner: true,
@@ -598,6 +801,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isGuestBrowsing,
       logout,
       updateProfile,
+      rememberProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
     }),
@@ -620,6 +824,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isGuestBrowsing,
       logout,
       updateProfile,
+      rememberProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
     ],
