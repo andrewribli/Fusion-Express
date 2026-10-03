@@ -1,7 +1,9 @@
 import type { OrderStatus } from "./order-status";
 import type { CampusId } from "./campus";
+import type { ShopKind } from "./shop-kind";
 
 export type { CampusId };
+export type { ShopKind } from "./shop-kind";
 
 export const MENU_CATEGORIES = [
   "seasonings",
@@ -207,6 +209,14 @@ export interface Order {
   orderChannel?: OrderChannel;
   /** Canteen restaurant slug (e.g. uc-canteen) when orderChannel is canteen. */
   canteenRestaurantId?: string;
+  /**
+   * Fusion grocery vs campus canteen. Kept separate so carts/checkouts never
+   * mix pickup locations or fee rules. Prefer alongside orderChannel.
+   */
+  shopKind?: ShopKind;
+  /** Canteen restaurant id when shopKind is canteen (main dual-cart field). */
+  canteenId?: string;
+  canteenName?: string;
   items: OrderItem[];
   status: OrderStatus;
   /** CUHK college or CityU compound. */

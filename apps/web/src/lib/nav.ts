@@ -32,7 +32,7 @@ export const CUSTOMER_TABS: NavTab[] = [
     iconId: "runner",
     action: "switch-runner",
   },
-  { href: "/cart", label: "Cart", iconId: "cart", match: ["/checkout"] },
+  { href: "/cart", label: "Cart", iconId: "cart", match: ["/checkout", "/canteen/cart", "/canteen/checkout"] },
   { href: "/profile", label: "Account", iconId: "profile" },
 ];
 

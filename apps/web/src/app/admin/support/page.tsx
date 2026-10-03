@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
-import { useUser, type UserProfile } from "@/context/UserContext";
+import { useUser } from "@/context/UserContext";
 import {
   fetchDirectThreads,
   markThreadRead,
@@ -44,9 +44,7 @@ export default function AdminSupportPage() {
       try {
         const [rows, users] = await Promise.all([
           fetchDirectThreads(),
-          fetchAllUsers()
-            .then((result) => result.users)
-            .catch(() => [] as UserProfile[]),
+          fetchAllUsers().catch(() => []),
         ]);
         if (cancelled) return;
         setThreads(rows);

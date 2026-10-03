@@ -26,11 +26,17 @@ import { createOrderOnServer } from "@/lib/create-order-server";
 import { getAuthClient } from "@/lib/firebase";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import type { CampusId } from "@fusion-express/shared/campus";
+import {
+  parseCanteenItemId,
+  type ShopKind,
+} from "@fusion-express/shared/shop-kind";
+import { getRestaurant } from "@fusion-express/shared/canteen";
 
-export function usePlaceOrder() {
+export function usePlaceOrder(forcedShopKind?: ShopKind) {
   const router = useRouter();
   const { user, ensureGuestCheckout } = useUser();
-  const { items, sessionId, clearCart } = useCart();
+  const { items, sessionId, clearCart, shopKind: cartShopKind } = useCart();
+  const shopKind = forcedShopKind ?? cartShopKind;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -50,6 +56,28 @@ export function usePlaceOrder() {
       const campusError = cartCampusError(items, opts.campus);
       if (campusError) {
         setError(campusError);
+        return;
+      }
+
+      // Guardrail: never place a mixed or wrong-shop order from this cart.
+      const hasCanteen = items.some((line) =>
+        line.item.id.startsWith("canteen:"),
+      );
+      const hasFusion = items.some(
+        (line) => !line.item.id.startsWith("canteen:"),
+      );
+      if (hasCanteen && hasFusion) {
+        setError(
+          "Fusion groceries and canteen food can’t be in the same order. Clear one cart and try again.",
+        );
+        return;
+      }
+      if (shopKind === "fusion" && hasCanteen) {
+        setError("This is Fusion checkout — remove canteen items first.");
+        return;
+      }
+      if (shopKind === "canteen" && hasFusion) {
+        setError("This is canteen checkout — remove Fusion grocery items first.");
         return;
       }
 
@@ -109,6 +137,25 @@ export function usePlaceOrder() {
             ? ("taste" as const)
             : ("fusion" as const);
 
+        const canteenIds = new Set(
+          items
+            .map((line) => parseCanteenItemId(line.item.id)?.restaurantId)
+            .filter((id): id is string => Boolean(id)),
+        );
+        if (shopKind === "canteen" && canteenIds.size > 1) {
+          setError(
+            "One canteen per order — clear items from the other canteen first.",
+          );
+          return;
+        }
+        const canteenId =
+          shopKind === "canteen"
+            ? [...canteenIds][0] ?? restaurantId ?? undefined
+            : undefined;
+        const canteenName = canteenId
+          ? getRestaurant(canteenId)?.name
+          : undefined;
+
         if (canteen && restaurantId) {
           const token = await getAuthClient().currentUser?.getIdToken();
           const validation = await fetch("/api/canteen/validate-order", {
@@ -146,6 +193,9 @@ export function usePlaceOrder() {
           orderChannel,
           canteenRestaurantId: restaurantId ?? undefined,
           canteenCollege,
+          shopKind,
+          canteenId,
+          canteenName,
           items: orderItems,
           college: opts.college,
           hall: opts.hall,
@@ -153,6 +203,9 @@ export function usePlaceOrder() {
           customerNote: resolveSpecialInstructions(
             [
               opts.customerNote?.trim(),
+              shopKind === "canteen" && canteenName
+                ? `Pickup: ${canteenName}`
+                : "",
               ...new Set(
                 items
                   .map(({ item }) => item.itemNote)
@@ -191,8 +244,16 @@ export function usePlaceOrder() {
         setLoading(false);
       }
     },
-    [clearCart, ensureGuestCheckout, items, router, sessionId, user],
+    [
+      clearCart,
+      ensureGuestCheckout,
+      items,
+      router,
+      sessionId,
+      shopKind,
+      user,
+    ],
   );
 
-  return { placeOrder, loading, error, setError };
+  return { placeOrder, loading, error, setError, shopKind };
 }
