@@ -218,7 +218,26 @@ export function resolveCuhkNode(id: string | null | undefined): CuhkNode | null 
   ) {
     return "lsk";
   }
-  if (raw === "i-house" || raw === "international house") return "i-house-12";
+  if (
+    raw === "i-house" ||
+    raw === "international house" ||
+    raw === "i-house-1" ||
+    raw === "i-house-2" ||
+    raw === "i-house 1" ||
+    raw === "i-house 2"
+  ) {
+    return "i-house-12";
+  }
+  if (
+    raw === "i-house-3" ||
+    raw === "i-house-4" ||
+    raw === "i-house-5" ||
+    raw === "i-house 3" ||
+    raw === "i-house 4" ||
+    raw === "i-house 5"
+  ) {
+    return "i-house-345";
+  }
   if (isNode(raw)) return raw;
   return null;
 }
@@ -248,10 +267,15 @@ const COLLEGE_NODE: Record<string, CuhkNode> = {
   "postgraduate halls": "pg-halls",
   "international house": "i-house-12",
   "international house i house": "i-house-12",
+  "i house 1 2": "i-house-12",
+  "i house 3 4 5": "i-house-345",
 };
 
 function iHouseNode(label: string): CuhkNode | null {
   const text = squash(label);
+  // Split college labels (must run before the single-block regex).
+  if (text === "i house 1 2" || text === "i house12") return "i-house-12";
+  if (text === "i house 3 4 5" || text === "i house345") return "i-house-345";
   const match = text.match(/\bi\s*house\s*([1-5])\b/);
   if (match) {
     const block = Number(match[1]);
@@ -260,6 +284,16 @@ function iHouseNode(label: string): CuhkNode | null {
   }
   if (text === "i house" || text === "international house") return "i-house-12";
   return null;
+}
+
+/** Bare combined I-House college with no hall/block stays unpriced. */
+function isAmbiguousIHouseCollege(label: string): boolean {
+  const text = squash(label);
+  return (
+    text === "i house" ||
+    text === "international house" ||
+    text === "international house i house"
+  );
 }
 
 function pgHallNode(label: string): CuhkNode | null {
@@ -281,8 +315,10 @@ function customerNode(node: CuhkNode | null): CuhkNode | null {
 }
 
 /**
- * Map a CUHK dorm onto a graph node. International House needs a block
- * number (1–2 vs 3–5). The SRRS hub and anything else unmatched stay unpriced.
+ * Map a CUHK dorm onto a graph node. Split I-House colleges (1/2 vs 3/4/5)
+ * resolve without a hall. The legacy combined "International House" college
+ * still needs a hall/block (or defaults via resolveCuhkNode on the old stop
+ * name). The SRRS hub and anything else unmatched stay unpriced.
  */
 export function cuhkDestinationNode(
   college: string | null | undefined,
@@ -305,7 +341,13 @@ export function cuhkDestinationNode(
     null;
   if (fromHall) return customerNode(fromHall);
 
-  if (iHouseNode(collegeLabel)) return null;
+  const fromCollegeIHouse = iHouseNode(collegeLabel);
+  if (fromCollegeIHouse) {
+    if (isAmbiguousIHouseCollege(collegeLabel) && !hallLabel.trim()) {
+      return null;
+    }
+    return customerNode(fromCollegeIHouse);
+  }
   return customerNode(
     pgHallNode(collegeLabel) ??
       COLLEGE_NODE[squash(collegeLabel)] ??

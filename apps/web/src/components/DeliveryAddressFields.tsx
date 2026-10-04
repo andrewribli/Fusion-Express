@@ -3,6 +3,7 @@
 import {
   getHallsForResidence,
   getResidenceGroups,
+  migrateCuhkCollegeLabel,
   residenceGroupLabel,
   type CampusId,
 } from "@fusion-express/shared";
@@ -31,7 +32,11 @@ export function DeliveryAddressFields({
   showPricing = true,
 }: DeliveryAddressFieldsProps) {
   const groups = getResidenceGroups(campus);
-  const halls = college ? getHallsForResidence(campus, college) : [];
+  const collegeValue =
+    campus === "cuhk" ? migrateCuhkCollegeLabel(college) : college;
+  const halls = collegeValue
+    ? getHallsForResidence(campus, collegeValue)
+    : [];
   const groupLabel = residenceGroupLabel(campus);
 
   return (
@@ -43,7 +48,7 @@ export function DeliveryAddressFields({
         <select
           id="residence"
           required={required}
-          value={college}
+          value={collegeValue}
           onChange={(e) => {
             onCollegeChange(e.target.value);
             onHallChange("");
@@ -74,12 +79,12 @@ export function DeliveryAddressFields({
           id="hall"
           required={required}
           value={hall}
-          disabled={!college}
+          disabled={!collegeValue}
           onChange={(e) => onHallChange(e.target.value)}
           className={selectClassName}
         >
           <option value="">
-            {college
+            {collegeValue
               ? "Select hall"
               : `Select ${groupLabel.toLowerCase()} first`}
           </option>

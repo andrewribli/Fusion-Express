@@ -80,5 +80,89 @@ service firebase.storage {
       );
       allow write: if fileName == 'avatar.jpg' && avatarWrite(userId);
     }
+
+    function orderExists(orderId) {
+      return firestore.exists(
+        /databases/(default)/documents/orders/$(orderId)
+      );
+    }
+
+    function orderDoc(orderId) {
+      return firestore.get(
+        /databases/(default)/documents/orders/$(orderId)
+      ).data;
+    }
+
+    function hasUserProfile() {
+      return firestore.exists(
+        /databases/(default)/documents/users/$(request.auth.uid)
+      );
+    }
+
+    function userProfile() {
+      return firestore.get(
+        /databases/(default)/documents/users/$(request.auth.uid)
+      ).data;
+    }
+
+    // Mirrors Firestore isOrderCustomer / isOrderRunner (+ admin).
+    // customerId / runnerUid are Auth uids; runnerId is a /runners doc id.
+    // Admin is checked first so a missing/unreadable order cannot block admins.
+    function isChatOrderParty(orderId) {
+      return signedIn() && (
+        isStorageAdmin() || isChatOrderCustomerOrRunner(orderId)
+      );
+    }
+
+    function isChatOrderCustomerOrRunner(orderId) {
+      return orderExists(orderId) && (
+        orderDoc(orderId).get('customerId', '') == request.auth.uid
+        || orderDoc(orderId).get('runnerUid', '') == request.auth.uid
+        || (
+          hasUserProfile()
+          && userProfile().get('runnerId', '') != ''
+          && orderDoc(orderId).get('runnerId', '')
+            == userProfile().get('runnerId', '')
+        )
+      );
+    }
+
+    function isChatMediaObject() {
+      return request.resource.size < 10 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+        );
+    }
+
+    // Order chat photos/videos: chats/{orderId}/{messageId}/{file}
+    match /chats/{orderId}/{messageId}/{fileName} {
+      allow read: if isChatOrderParty(orderId);
+      allow write: if isChatOrderParty(orderId) && isChatMediaObject();
+    }
+
+    match /test/chats/{orderId}/{messageId}/{fileName} {
+      allow read: if isChatOrderParty(orderId);
+      allow write: if isChatOrderParty(orderId) && isChatMediaObject();
+    }
+
+    // Admin 1:1 chat media: adminChats/{userId}/{messageId}/{file}
+    match /adminChats/{userId}/{messageId}/{fileName} {
+      allow read: if signedIn() && (
+        request.auth.uid == userId || isStorageAdmin()
+      );
+      allow write: if signedIn()
+        && (request.auth.uid == userId || isStorageAdmin())
+        && isChatMediaObject();
+    }
+
+    match /test/adminChats/{userId}/{messageId}/{fileName} {
+      allow read: if signedIn() && (
+        request.auth.uid == userId || isStorageAdmin()
+      );
+      allow write: if signedIn()
+        && (request.auth.uid == userId || isStorageAdmin())
+        && isChatMediaObject();
+    }
   }
 }

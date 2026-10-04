@@ -69,11 +69,15 @@ export async function syncAndListCityUUsers(): Promise<{
     const fullName =
       existingName || orderNames.get(row.uid) || row.displayName;
     const payload: Record<string, unknown> = {
+      uid: row.uid,
       email: row.email,
       campus: "cityu",
       updatedAt: now,
     };
-    if (fullName) payload.fullName = fullName;
+    if (fullName) {
+      payload.fullName = fullName;
+      if (!asString(existing.displayName)) payload.displayName = fullName;
+    }
     if (!existing.createdAt) payload.createdAt = now;
     if (!existing.cityuVerifiedAt) payload.cityuVerifiedAt = now;
     if (!existing.role) payload.role = "customer";

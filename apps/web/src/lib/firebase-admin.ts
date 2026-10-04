@@ -10,6 +10,7 @@ import {
 } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { collectionName } from "@/lib/constants";
+import { isDoNotEmailAddress } from "@fusion-express/shared/demo-account";
 
 /**
  * Do not statically import `firebase-admin/auth`. Loading it pulls
@@ -56,7 +57,12 @@ function getAdminApp(): App | null {
   if (existing) return existing;
   const account = loadServiceAccount();
   if (!account) return null;
-  return initializeApp({ credential: cert(account) });
+  const storageBucket =
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || undefined;
+  return initializeApp({
+    credential: cert(account),
+    ...(storageBucket ? { storageBucket } : {}),
+  });
 }
 
 export function getAdminAuth(): Auth | null {
@@ -77,6 +83,20 @@ export function getAdminAuth(): Auth | null {
 export function getAdminDb(): Firestore | null {
   const app = getAdminApp();
   return app ? getFirestore(app) : null;
+}
+
+export function getAdminStorage(): import("firebase-admin/storage").Storage | null {
+  const app = getAdminApp();
+  if (!app) return null;
+  try {
+    // Lazy require — keep storage off the critical path for most routes.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getStorage } = require("firebase-admin/storage") as typeof import("firebase-admin/storage");
+    return getStorage(app);
+  } catch (err) {
+    console.error("firebase-admin/storage unavailable", err);
+    return null;
+  }
 }
 
 export class AdminAuthError extends Error {
@@ -314,6 +334,7 @@ export async function listBroadcastRecipients(
       .trim()
       .toLowerCase();
     if (!email.includes("@") || seen.has(email)) continue;
+    if (isDoNotEmailAddress(email)) continue;
     seen.add(email);
     out.push({
       email,
@@ -401,6 +422,7 @@ async function listBroadcastRecipientsViaRest(
         restString(fields, "email") || restString(fields, "cuhkEmail")
       ).toLowerCase();
       if (!email.includes("@") || seen.has(email)) continue;
+      if (isDoNotEmailAddress(email)) continue;
       seen.add(email);
       out.push({
         email,
@@ -774,21 +796,22 @@ export function filterBroadcastRecipients(
   group: BroadcastGroup,
   now = new Date(),
 ): BroadcastRecipient[] {
+  const eligible = recipients.filter((r) => !isDoNotEmailAddress(r.email));
   const msDay = 24 * 60 * 60 * 1000;
   if (group === "everyone") {
-    return recipients.filter((r) => !r.email.endsWith("@fusion-express.app"));
+    return eligible.filter((r) => !r.email.endsWith("@fusion-express.app"));
   }
   if (group === "runners") {
-    return recipients.filter((r) => r.isRunner);
+    return eligible.filter((r) => r.isRunner);
   }
   if (group === "new_users") {
     const cutoff = now.getTime() - 7 * msDay;
-    return recipients.filter(
+    return eligible.filter(
       (r) => r.createdAt != null && r.createdAt.getTime() >= cutoff,
     );
   }
   const cutoff = now.getTime() - 30 * msDay;
-  return recipients.filter(
+  return eligible.filter(
     (r) => r.createdAt != null && r.createdAt.getTime() < cutoff,
   );
 }

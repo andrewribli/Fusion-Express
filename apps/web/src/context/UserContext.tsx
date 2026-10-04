@@ -516,7 +516,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
       try {
         const firebaseUser = await signUpWithEmail(profile.email, password);
         await firebaseUser.getIdToken();
-        persist(await createUserProfile(firebaseUser.uid, fields));
+        const created = await createUserProfile(firebaseUser.uid, fields);
+        persist(created);
+        const { notifyNewUser } = await import("@/lib/notify-email");
+        notifyNewUser({
+          fullName: created.fullName,
+          email: created.email,
+          isRunner: false,
+        });
       } catch (err) {
         if (!isEmailAlreadyInUse(err)) throw err;
         const current = getAuthClient().currentUser;
@@ -525,7 +532,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
           await current.getIdToken(true);
           const existing = await fetchUserProfile(current.uid);
           if (!existing) {
-            persist(await createUserProfile(current.uid, fields));
+            const created = await createUserProfile(current.uid, fields);
+            persist(created);
+            const { notifyNewUser } = await import("@/lib/notify-email");
+            notifyNewUser({
+              fullName: created.fullName,
+              email: created.email,
+              isRunner: false,
+            });
             return;
           }
         }

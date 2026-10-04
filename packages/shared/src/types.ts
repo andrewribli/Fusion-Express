@@ -346,6 +346,8 @@ export interface Order {
   customerApprovedPriceAt?: Date;
   fusionPaidByPlatform?: boolean;
   runnerLocation?: RunnerLocation;
+  /** Seeded demo history. Hidden from the customer UI. */
+  isSeed?: boolean;
 }
 
 export interface Runner {
@@ -371,15 +373,32 @@ export interface RunnerPayout {
   paidAt: Date;
 }
 
+export type ChatMessageType = "text" | "image" | "video";
+
 export interface ChatMessage {
   id: string;
   orderId: string;
   senderId: string;
   senderName: string;
+  /** Display / preview text. Legacy messages always have this. */
   message: string;
   /** Same text as `message`. Stored for the shared chat schema. */
   text?: string;
+  /**
+   * Message kind. Missing / unknown values are treated as `"text"` for
+   * back-compat with older docs that only stored `message`.
+   */
+  type?: ChatMessageType;
   senderRole?: "customer" | "runner" | "admin";
+  /** Primary media URL (first image, or the video). */
+  mediaUrl?: string;
+  /** All image URLs when a single message carries multiple photos. */
+  mediaUrls?: string[];
+  mediaThumbnailUrl?: string;
+  mediaDuration?: number;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  mediaSize?: number;
   seen?: boolean;
   timestamp: Date;
 }
@@ -398,6 +417,10 @@ export interface RunnerRegistrationInput {
 export { BASE_DELIVERY_FEE as DELIVERY_FEE } from "./delivery";
 
 export function formatMenuPrice(item: MenuItem): string {
+  const hasPositiveSale = item.salePrice != null && item.salePrice > 0;
+  if (!(item.price > 0) && !hasPositiveSale) {
+    return "Price on request";
+  }
   if (item.priceType !== "fixed" && item.priceRange) {
     return item.priceRange;
   }
@@ -408,4 +431,10 @@ export function formatMenuPrice(item: MenuItem): string {
     return `$${item.salePrice}`;
   }
   return `$${item.price}`;
+}
+
+/** Shelf price with an HK prefix. Leaves "Price on request" unprefixed. */
+export function formatMenuPriceLabel(item: MenuItem): string {
+  const raw = formatMenuPrice(item);
+  return raw.startsWith("$") ? `HK${raw}` : raw;
 }

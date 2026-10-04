@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supermarketForCampus } from "@fusion-express/shared/campus";
+import { adminOpsEmails } from "@/lib/admin-ops-emails";
 import {
   sendCustomerPaymentReminder,
   sendOrderStatusUpdate,
@@ -14,16 +15,6 @@ import {
   paymentInfoFromOrder,
   requireAuthFromRequest,
 } from "@/lib/firebase-admin";
-
-function ownerAlertEmails(): string[] {
-  const raw =
-    process.env.OWNER_ALERT_EMAIL ?? process.env.RUNNER_ALERT_EMAIL ?? "";
-  return raw
-    .split(",")
-    .map((email) => email.trim())
-    .filter(Boolean)
-    .slice(0, 10);
-}
 
 function isDeliveredStatus(status: string): boolean {
   return status === "delivered" || status === "completed";
@@ -108,7 +99,7 @@ export async function POST(request: Request) {
       statusRecipients.add(customerEmail);
     }
     if (isDeliveredStatus(status)) {
-      for (const email of ownerAlertEmails()) statusRecipients.add(email);
+      for (const email of adminOpsEmails()) statusRecipients.add(email);
     }
     // Runner payout / status pings when the runner email is on the order.
     if (

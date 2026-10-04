@@ -6,16 +6,17 @@ import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
 import { AppShell } from "@/components/AppShell";
+import { GraceRunWordmark } from "@/components/GraceRunWordmark";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
+import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { useCart } from "@/context/CartContext";
 import { useRunnerEntry } from "@/lib/use-runner-entry";
-import { formatMenuPrice, type MenuItem } from "@/lib/types";
+import { formatMenuPriceLabel, type MenuItem } from "@/lib/types";
 
 function priceLabel(item: MenuItem): string {
-  const raw = formatMenuPrice(item);
-  return raw.startsWith("HK") ? raw : `HK${raw}`;
+  return formatMenuPriceLabel(item);
 }
 
 export function ShopSearchBar({
@@ -23,7 +24,7 @@ export function ShopSearchBar({
   value,
   onChange,
   onSelect,
-  placeholder = "Search products",
+  placeholder = "Search your meal",
 }: {
   products: MenuItem[];
   value: string;
@@ -33,7 +34,6 @@ export function ShopSearchBar({
 }) {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const suggestions = useMemo(() => {
     const q = value.trim().toLowerCase();
     if (!q) return [];
@@ -44,13 +44,21 @@ export function ShopSearchBar({
 
   return (
     <div className="relative min-w-0 flex-1">
-      <div
-        className="flex h-11 w-full min-w-0 items-center gap-1 rounded-full pl-3 pr-1.5"
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-        }}
-      >
+      <label className="flex h-10 w-full min-w-0 items-center gap-2 rounded-full border border-gray-200 bg-white pl-3 pr-3 shadow-sm sm:h-11">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4 shrink-0 text-gray-400"
+          fill="none"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="m16 16 4 4"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
         <input
           ref={inputRef}
           type="search"
@@ -59,66 +67,11 @@ export function ShopSearchBar({
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
           placeholder={placeholder}
-          className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
-          style={{ backgroundColor: "transparent", color: "#111111" }}
+          className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
           autoComplete="off"
+          aria-label={placeholder}
         />
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ color: "#555555" }}
-          aria-label="Scan or upload a product photo"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <path
-              d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.8A1 1 0 0 1 10 4h4a1 1 0 0 1 .8.4L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            />
-            <circle
-              cx="12"
-              cy="12.5"
-              r="3.2"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.focus()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#ff6a00" }}
-          aria-label="Search"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-4 w-4 text-white"
-            fill="none"
-            aria-hidden
-          >
-            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
-            <path
-              d="m16 16 4 4"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-      </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={() => {
-          onChange("");
-          inputRef.current?.focus();
-        }}
-      />
+      </label>
       {focused && suggestions.length > 0 && (
         <ul
           className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
@@ -205,10 +158,10 @@ export function ShopLayout({
     <AppShell hideTrackFab={hideTrackFab}>
       <div className="shop-page min-h-screen bg-[#f5f5f5]">
         <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
+          <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <button
               type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
               aria-label={`Open ${mobileSidebarTitle.toLowerCase()}`}
               onClick={() => setMobileCatsOpen(true)}
             >
@@ -222,18 +175,20 @@ export function ShopLayout({
               </svg>
             </button>
 
+            <GraceRunWordmark href="/cuhk" className="sm:hidden" />
+
             <Link
               href="/cuhk"
-              className="flex shrink-0 items-center gap-2"
+              className="hidden shrink-0 items-center gap-2 sm:flex"
               aria-label="CUHK home"
             >
               <AppLogo size={36} className="h-9 w-9" />
-              <span className="hidden text-sm font-extrabold tracking-tight text-gray-900 sm:block">
+              <span className="text-sm font-extrabold tracking-tight text-gray-900">
                 GraceRun
               </span>
             </Link>
 
-            <div className="hidden min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex">
+            <div className="hidden min-w-0 max-w-[240px] flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex xl:max-w-[320px]">
               {deliveryLogoSrc ? (
                 <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md bg-white ring-1 ring-gray-200">
                   <Image
@@ -252,7 +207,7 @@ export function ShopLayout({
               <span className="truncate text-gray-700">{deliveryLabel}</span>
             </div>
 
-            <div className="relative min-w-0 flex-1 md:max-w-md">
+            <div className="relative min-w-[140px] flex-1 md:min-w-[400px] md:max-w-xl">
               {searchSlot ?? (
                 <ShopSearchBar
                   products={searchProducts}
@@ -262,7 +217,7 @@ export function ShopLayout({
                     onSearchSelect?.(item);
                     addItem(item);
                   }}
-                  placeholder={searchPlaceholder}
+                  placeholder={searchPlaceholder ?? "Search your meal"}
                 />
               )}
             </div>
@@ -279,11 +234,14 @@ export function ShopLayout({
               Runner
             </Link>
 
-            <CustomerNotificationBell />
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <CustomerNotificationBell className="h-11 w-11 rounded-full" />
+              <RunnerQueueBell className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700" />
+            </div>
 
             <Link
               href="/cart"
-              className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
+              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
               aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -303,8 +261,8 @@ export function ShopLayout({
               )}
             </Link>
 
-            <div className="shrink-0">
-              <AccountMenu hideThemeChip />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center">
+              <AccountMenu hideThemeChip avatarSize={36} />
             </div>
           </div>
         </header>
@@ -318,17 +276,21 @@ export function ShopLayout({
               onClick={() => setMobileCatsOpen(false)}
             />
             <div className="absolute inset-y-0 left-0 flex w-[min(88vw,320px)] flex-col bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b border-gray-100 px-3 py-3">
+              <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-3">
                 <p className="text-sm font-bold text-gray-900">
                   {mobileSidebarTitle}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setMobileCatsOpen(false)}
-                  className="rounded-lg px-2 py-1 text-sm font-semibold text-gray-500"
-                >
-                  Close
-                </button>
+                <div className="flex items-center gap-2">
+                  <CustomerNotificationBell className="!h-11 !w-11" />
+                  <RunnerQueueBell className="h-11 w-11 rounded-lg border border-gray-200 bg-white text-gray-700" />
+                  <button
+                    type="button"
+                    onClick={() => setMobileCatsOpen(false)}
+                    className="flex h-11 min-w-11 items-center justify-center rounded-lg px-2 text-sm font-semibold text-gray-500"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
               <div
                 className="flex-1 overflow-y-auto"
@@ -348,7 +310,7 @@ export function ShopLayout({
             {sidebar}
           </aside>
 
-          <main className="min-w-0 px-3 py-4 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 md:pb-28">
+          <main className="min-w-0 px-3 py-4 pr-14 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 sm:pr-4 md:pb-28">
             {children}
           </main>
 

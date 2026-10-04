@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { RequireAdmin } from "@/components/RequireAdmin";
-import { sendBroadcast } from "@/lib/admin-broadcast";
+import {
+  broadcastConfirmMessage,
+  sendBroadcast,
+} from "@/lib/admin-broadcast";
 import { emailDirectMessage, sendDirectMessage } from "@/lib/direct-messages";
 import { useUser } from "@/context/UserContext";
 
@@ -34,17 +37,45 @@ function AdminChats() {
   const [direct, setDirect] = useState("");
 
   async function sendAll() {
+    if (!message.trim()) {
+      setError("Write a message first.");
+      return;
+    }
     setSending(true);
     setError("");
-    setStatus("");
+    setStatus("Loading recipients…");
     try {
+      // Dry-run happens inside sendBroadcast when emails are omitted; confirm
+      // after a quick load so the count is real.
+      const { loadBroadcastRecipients } = await import("@/lib/admin-broadcast");
+      const listed = await loadBroadcastRecipients("everyone");
+      const emails = listed.people
+        .filter((person) => {
+          if (audience === "customers") return !person.isRunner;
+          if (audience === "runners") return person.isRunner;
+          return true;
+        })
+        .map((person) => person.email);
+      const ok = window.confirm(broadcastConfirmMessage(emails.length));
+      if (!ok) {
+        setStatus("");
+        return;
+      }
+      setStatus(`Sending to ${emails.length} people…`);
       const result = await sendBroadcast({
         group: "everyone",
         subject: "Message from GraceRun",
         body: message,
+        emails,
         audience,
       });
-      setStatus(`Sent to ${result.sent ?? result.count ?? 0} people.`);
+      const sent = result.sent ?? 0;
+      const failed = result.failed?.length ?? 0;
+      setStatus(
+        failed === 0
+          ? `Sent to ${sent} people (scanned ${result.scannedDocs ?? listed.scannedDocs} docs).`
+          : `Sent to ${sent}; ${failed} failed and were logged to emailFailures.`,
+      );
       setMessage("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send.");

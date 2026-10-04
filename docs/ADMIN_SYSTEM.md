@@ -152,19 +152,19 @@ Access: Firestore `/admins/{yourAuthUid}` must exist. `RequireAdmin` gates every
 
 ```mermaid
 flowchart LR
-  placed[Customer places order] --> adminOps[1155233599@link.cuhk.edu.hk]
+  placed[Customer places order] --> adminOps[ADMIN_EMAIL / hello@gracerun.fit]
   placed --> runners[RUNNER_ALERT_EMAIL]
   signup[New user registers] --> adminOps
-  delivered[Runner marks delivered] --> owner[OWNER_ALERT_EMAIL or RUNNER_ALERT_EMAIL]
+  delivered[Runner marks delivered] --> owner[ADMIN_EMAIL or OWNER_ALERT_EMAIL]
   runnerPaid[You mark runner paid] --> runnerInbox[order.runnerEmail]
   customerPaid[Customer marks paid] --> customerInbox[order.customerEmail]
 ```
 
 | Event | Who is emailed |
 | --- | --- |
-| New order | `1155233599@link.cuhk.edu.hk` (admin ops) plus `RUNNER_ALERT_EMAIL` / runner roster |
-| New signup | `1155233599@link.cuhk.edu.hk` |
-| Delivered | `OWNER_ALERT_EMAIL`, falling back to `RUNNER_ALERT_EMAIL` |
+| New order | `ADMIN_EMAIL` (default `hello@gracerun.fit`) plus `RUNNER_ALERT_EMAIL` / runner roster |
+| New signup | `ADMIN_EMAIL` (default `hello@gracerun.fit`) |
+| Delivered | `ADMIN_EMAIL`, plus optional `OWNER_ALERT_EMAIL` |
 | You marked runner paid | Runner email stored on the order at accept |
 | Customer marked paid | Customer email on the order |
 
@@ -191,7 +191,8 @@ flowchart LR
 ## Env vars to set on Vercel
 
 ```
-OWNER_ALERT_EMAIL=you@example.com
+ADMIN_EMAIL=hello@gracerun.fit
+OWNER_ALERT_EMAIL=
 NEXT_PUBLIC_OWNER_PAYMENT_METHOD=PayMe
 NEXT_PUBLIC_OWNER_PAYME_ID=your-payme-id
 RUNNER_ALERT_EMAIL=optional-runner-broadcast@example.com

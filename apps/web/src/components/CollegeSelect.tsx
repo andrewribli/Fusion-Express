@@ -1,11 +1,7 @@
 "use client";
 
 import { CUHK_COLLEGES } from "@/data/cuhk-locations";
-import {
-  getDeliveryZone,
-  ZONE_DISTANCE_SURCHARGE,
-  ZONE_LABELS,
-} from "@/lib/delivery";
+import { zoneSurchargeForCollege } from "@/lib/delivery";
 
 const selectClassName =
   "mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20";
@@ -23,12 +19,12 @@ export function CollegeSelect({
   id?: string;
   showPricing?: boolean;
 }) {
-  const zone = value ? getDeliveryZone(value) : null;
+  const surcharge = value ? zoneSurchargeForCollege(value) : null;
 
   return (
     <div>
       <label htmlFor={id} className="block text-xs font-medium text-gray-600">
-        {showPricing ? "College / dorm (distance zone)" : "College / dorm"}
+        {showPricing ? "College / dorm (distance surcharge)" : "College / dorm"}
       </label>
       <select
         id={id}
@@ -39,25 +35,23 @@ export function CollegeSelect({
       >
         <option value="">Select college</option>
         {CUHK_COLLEGES.map((name) => {
-          const z = getDeliveryZone(name);
-          const extra = ZONE_DISTANCE_SURCHARGE[z];
+          const extra = zoneSurchargeForCollege(name);
           return (
             <option key={name} value={name}>
               {showPricing
-                ? `${name} — Zone ${z}${
-                    extra > 0 ? ` (+$${extra})` : " (+$0 nearby)"
-                  }`
+                ? extra > 0
+                  ? `${name} (+HK$${extra})`
+                  : name
                 : name}
             </option>
           );
         })}
       </select>
-      {showPricing && zone && (
+      {showPricing && surcharge != null && (
         <p className="mt-1 text-xs text-gray-500">
-          Zone {zone}: {ZONE_LABELS[zone]}
-          {ZONE_DISTANCE_SURCHARGE[zone] > 0
-            ? ` · +$${ZONE_DISTANCE_SURCHARGE[zone]} distance`
-            : " · no distance surcharge"}
+          {surcharge > 0
+            ? `+HK$${surcharge} distance surcharge`
+            : "No distance surcharge"}
         </p>
       )}
     </div>

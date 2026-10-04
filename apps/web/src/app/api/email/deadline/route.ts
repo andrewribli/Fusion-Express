@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adminOpsEmails } from "@/lib/admin-ops-emails";
 import { sendDeadlineNotice } from "@/lib/email";
 import {
   AdminAuthError,
@@ -6,16 +7,6 @@ import {
   fetchOrderForEmail,
   requireAuthFromRequest,
 } from "@/lib/firebase-admin";
-
-function ownerAlertEmails(): string[] {
-  const raw =
-    process.env.OWNER_ALERT_EMAIL ?? process.env.RUNNER_ALERT_EMAIL ?? "";
-  return raw
-    .split(",")
-    .map((email) => email.trim())
-    .filter(Boolean)
-    .slice(0, 10);
-}
 
 const ALLOWED_KINDS = new Set([
   "runner_reminder",
@@ -69,7 +60,7 @@ export async function POST(request: Request) {
       if (order.customerEmail) recipients.add(order.customerEmail);
     }
     if (kind.startsWith("admin_")) {
-      for (const email of ownerAlertEmails()) recipients.add(email);
+      for (const email of adminOpsEmails()) recipients.add(email);
     }
 
     if (recipients.size === 0) {

@@ -376,6 +376,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
             updatedAt: loc.updatedAt ? toDate(loc.updatedAt) : new Date(),
           }
         : undefined,
+    isSeed: data.isSeed === true,
   };
 }
 
@@ -814,7 +815,7 @@ export async function fetchOrdersByCustomer(
           limit(ORDER_PAGE_SIZE),
         ),
       );
-      return parseSnapshotDocs(snap.docs);
+      return parseSnapshotDocs(snap.docs).filter((order) => !order.isSeed);
     } catch (err) {
       console.error("fetchOrdersByCustomer Firestore failed", err);
       throw err instanceof Error

@@ -3,19 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import {
   fetchUnreadForUser,
   markThreadRead,
+  sendDirectMediaMessage,
   sendDirectMessage,
   subscribeDirectMessages,
 } from "@/lib/direct-messages";
 import type { DirectMessage } from "@/lib/direct-messages";
-
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
-}
 
 export function AdminSupportChat({
   forceOpen,
@@ -32,9 +31,6 @@ export function AdminSupportChat({
   const { itemCount } = useCart();
   const [open, setOpen] = useState(Boolean(forceOpen));
   const [messages, setMessages] = useState<DirectMessage[]>([]);
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const [unread, setUnread] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -92,28 +88,8 @@ export function AdminSupportChat({
     return null;
   }
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!user?.uid || !text.trim()) return;
-    setError("");
-    setSending(true);
-    try {
-      await sendDirectMessage({
-        userId: user.uid,
-        senderId: user.uid,
-        message: text,
-      });
-      setText("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send.");
-    } finally {
-      setSending(false);
-    }
-  }
-
   const panel = (
-    <form
-      onSubmit={(e) => void onSubmit(e)}
+    <div
       className={
         embedded
           ? "flex h-[22rem] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
@@ -160,56 +136,56 @@ export function AdminSupportChat({
             {messages.map((msg) => {
               const mine = msg.senderId === user.uid;
               return (
-                <div
+                <ChatMessageBubble
                   key={msg.id}
-                  className={`flex ${mine ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                      mine
-                        ? "bg-[#ED1C24] text-white"
-                        : "bg-white text-gray-900 shadow-sm"
-                    }`}
-                  >
-                    {!mine && (
-                      <p className="mb-0.5 text-[10px] font-semibold opacity-70">
-                        Admin
-                      </p>
-                    )}
-                    <p className="whitespace-pre-wrap break-words">{msg.message}</p>
-                    <p
-                      className={`mt-1 text-[10px] ${
-                        mine ? "text-white/70" : "text-gray-400"
-                      }`}
-                    >
-                      {formatTime(msg.createdAt)}
-                    </p>
-                  </div>
-                </div>
+                  message={{
+                    id: msg.id,
+                    senderId: msg.senderId,
+                    senderName: mine ? undefined : "Admin",
+                    message: msg.message,
+                    text: msg.text,
+                    type: msg.type,
+                    mediaUrl: msg.mediaUrl,
+                    mediaUrls: msg.mediaUrls,
+                    mediaThumbnailUrl: msg.mediaThumbnailUrl,
+                    timestamp: msg.createdAt,
+                  }}
+                  isMine={mine}
+                  accent="admin"
+                  showSender={!mine}
+                />
               );
             })}
             <div ref={bottomRef} />
           </div>
-          {error && <p className="px-3 text-xs text-red-600">{error}</p>}
-          <div className="flex gap-2 border-t border-gray-100 p-2">
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Message admin…"
-              className="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={sending || !text.trim()}
-              className="rounded-full px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-              style={{ backgroundColor: "#ED1C24" }}
-            >
-              Send
-            </button>
-          </div>
+          <ChatComposer
+            placeholder="Message admin…"
+            mediaEnabled
+            accent="admin"
+            inputClassName="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
+            onSend={async ({ text, pending, signal, onProgress }) => {
+              if (!user.uid) throw new Error("Sign in required.");
+              if (pending.length) {
+                await sendDirectMediaMessage({
+                  userId: user.uid,
+                  senderId: user.uid,
+                  caption: text,
+                  pending,
+                  signal,
+                  onProgress,
+                });
+              } else {
+                await sendDirectMessage({
+                  userId: user.uid,
+                  senderId: user.uid,
+                  message: text,
+                });
+              }
+            }}
+          />
         </>
       )}
-    </form>
+    </div>
   );
 
   if (embedded) {
@@ -232,24 +208,31 @@ export function AdminSupportChat({
     );
   }
 
+  // Sit above bottom nav (+ OrderActionBar when cart has items). Main content
+  // uses extra right padding on mobile so cards clear this FAB.
   const fabBottom =
     mode === "runner" || itemCount > 0
-      ? "bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-28"
-      : "bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:bottom-6";
+      ? "bottom-[calc(9.5rem+env(safe-area-inset-bottom,0px))] md:bottom-28"
+      : "bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6";
 
   return (
-    <div ref={rootRef} className={`fixed right-4 z-30 ${fabBottom}`}>
+    <div ref={rootRef} className={`fixed right-2 z-30 sm:right-4 ${fabBottom}`}>
       {open ? (
         panel
       ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="relative flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg sm:h-12 sm:w-12"
           style={{ backgroundColor: mode === "runner" ? "#1d1160" : "#ED1C24" }}
           aria-label="Chat with Admin"
         >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5 sm:h-6 sm:w-6"
+            fill="currentColor"
+            aria-hidden
+          >
             <path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8.4L4 20.4V6a2 2 0 0 1 2-2Zm2 4v2h12V8H6Zm0 4v2h8v-2H6Z" />
           </svg>
           {unread > 0 && (

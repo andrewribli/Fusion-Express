@@ -72,6 +72,7 @@ export async function createUserProfile(
   const now = new Date();
   const phone = profile.phone?.trim();
   const studentId = profile.studentId?.trim();
+  const chineseName = profile.chineseName?.trim();
   const campus =
     profile.campus === "cuhk" || profile.campus === "cityu"
       ? profile.campus
@@ -82,6 +83,7 @@ export async function createUserProfile(
     email: profile.email?.trim().toLowerCase(),
     phone: phone || undefined,
     studentId: studentId || undefined,
+    chineseName: chineseName || undefined,
     // New accounts are customers. Runner access is a later terms-sheet write.
     role: "customer" as const,
     isRunner: false,
@@ -104,6 +106,7 @@ export async function createUserProfile(
     email: profile.email,
     phone: phone || profile.phone,
     studentId: studentId || undefined,
+    chineseName: chineseName || undefined,
     role: "customer",
     isRunner: false,
     isGuest: Boolean(profile.isGuest),

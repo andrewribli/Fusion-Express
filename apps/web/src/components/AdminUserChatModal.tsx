@@ -1,24 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import type { UserProfile } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
 import {
   emailDirectMessage,
   markThreadRead,
+  sendDirectMediaMessage,
   sendDirectMessage,
   subscribeDirectMessages,
   type DirectMessage,
 } from "@/lib/direct-messages";
-
-function formatTime(date: Date): string {
-  return date.toLocaleString("en-HK", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function AdminUserChatModal({
   target,
@@ -30,10 +24,7 @@ export function AdminUserChatModal({
   const { user } = useUser();
   const threadId = target.uid ?? "";
   const [messages, setMessages] = useState<DirectMessage[]>([]);
-  const [text, setText] = useState("");
   const [alsoEmail, setAlsoEmail] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,33 +53,6 @@ export function AdminUserChatModal({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  async function send(event: React.FormEvent) {
-    event.preventDefault();
-    if (!user?.uid || !threadId || !text.trim()) return;
-    setSending(true);
-    setError("");
-    const body = text.trim();
-    try {
-      await sendDirectMessage({
-        userId: threadId,
-        senderId: user.uid,
-        message: body,
-      });
-      if (alsoEmail && target.email) {
-        await emailDirectMessage({
-          to: target.email,
-          recipientName: target.fullName,
-          message: body,
-        });
-      }
-      setText("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send.");
-    } finally {
-      setSending(false);
-    }
-  }
 
   return (
     <div
@@ -137,39 +101,29 @@ export function AdminUserChatModal({
               {messages.map((msg) => {
                 const mine = msg.senderId === user?.uid;
                 return (
-                  <div
+                  <ChatMessageBubble
                     key={msg.id}
-                    className={`flex ${mine ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                        mine
-                          ? "bg-[#ED1C24] text-white"
-                          : "bg-white text-gray-900 shadow-sm"
-                      }`}
-                    >
-                      <p className="whitespace-pre-wrap break-words">{msg.message}</p>
-                      <p
-                        className={`mt-1 text-[10px] ${
-                          mine ? "text-white/70" : "text-gray-400"
-                        }`}
-                      >
-                        {formatTime(msg.createdAt)}
-                      </p>
-                    </div>
-                  </div>
+                    message={{
+                      id: msg.id,
+                      senderId: msg.senderId,
+                      message: msg.message,
+                      text: msg.text,
+                      type: msg.type,
+                      mediaUrl: msg.mediaUrl,
+                      mediaUrls: msg.mediaUrls,
+                      mediaThumbnailUrl: msg.mediaThumbnailUrl,
+                      timestamp: msg.createdAt,
+                    }}
+                    isMine={mine}
+                    accent="admin"
+                    showSender={false}
+                  />
                 );
               })}
               <div ref={bottomRef} />
             </div>
-            {error && (
-              <p className="px-3 py-1 text-xs text-red-600">{error}</p>
-            )}
-            <form
-              onSubmit={(e) => void send(e)}
-              className="border-t border-gray-100 p-3"
-            >
-              <label className="mb-2 flex items-center gap-2 text-xs text-gray-600">
+            <div className="border-t border-gray-100">
+              <label className="flex items-center gap-2 px-3 pt-2 text-xs text-gray-600">
                 <input
                   type="checkbox"
                   checked={alsoEmail}
@@ -179,22 +133,49 @@ export function AdminUserChatModal({
                 Also send to email
                 {!target.email ? " (no address)" : ""}
               </label>
-              <div className="flex gap-2">
-                <input
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Write a message…"
-                  className="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={sending || !text.trim()}
-                  className="rounded-full bg-[#ED1C24] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-                >
-                  {sending ? "Sending…" : "Send"}
-                </button>
-              </div>
-            </form>
+              <ChatComposer
+                placeholder="Write a message…"
+                mediaEnabled
+                accent="admin"
+                inputClassName="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
+                onSend={async ({ text, pending, signal, onProgress }) => {
+                  if (!user?.uid || !threadId) {
+                    throw new Error("Sign in required.");
+                  }
+                  if (pending.length) {
+                    const sent = await sendDirectMediaMessage({
+                      userId: threadId,
+                      senderId: user.uid,
+                      caption: text,
+                      pending,
+                      signal,
+                      onProgress,
+                    });
+                    if (alsoEmail && target.email) {
+                      await emailDirectMessage({
+                        to: target.email,
+                        recipientName: target.fullName,
+                        message: sent.message,
+                        hasPhoto: true,
+                      });
+                    }
+                  } else {
+                    await sendDirectMessage({
+                      userId: threadId,
+                      senderId: user.uid,
+                      message: text,
+                    });
+                    if (alsoEmail && target.email) {
+                      await emailDirectMessage({
+                        to: target.email,
+                        recipientName: target.fullName,
+                        message: text,
+                      });
+                    }
+                  }
+                }}
+              />
+            </div>
           </>
         )}
       </div>

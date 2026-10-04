@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { useUser } from "@/context/UserContext";
 import { publicDeliveryName } from "@fusion-express/shared/delivery-identity";
@@ -8,6 +10,7 @@ import { isChatActive } from "@/lib/constants";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
+  sendChatMediaMessage,
   sendChatMessage,
   subscribeChatMessages,
 } from "@/lib/chat";
@@ -18,10 +21,6 @@ interface OrderChatPanelProps {
   compact?: boolean;
 }
 
-function formatMessageTime(date: Date): string {
-  return date.toLocaleTimeString("en-HK", { hour: "2-digit", minute: "2-digit" });
-}
-
 function readKey(orderId: string, accountId: string): string {
   return `fusion_chat_read_${orderId}_${accountId}`;
 }
@@ -29,8 +28,6 @@ function readKey(orderId: string, accountId: string): string {
 export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   const { user } = useUser();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [text, setText] = useState("");
-  const [sendError, setSendError] = useState("");
   const [expanded, setExpanded] = useState(!compact);
   const [lastReadAt, setLastReadAt] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -80,23 +77,12 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   const senderName = publicDeliveryName(user, user.fullName || "Customer");
   const viewingAsCustomer = Boolean(user.uid && order.customerId === user.uid);
   const otherParty = viewingAsCustomer ? "runner" : "customer";
+  const role =
+    order.runnerUid && order.runnerUid === senderId ? "runner" : "customer";
   const chatLabel =
     unread > 0
       ? `${unread} new message${unread === 1 ? "" : "s"} from ${otherParty}`
       : `Chat with ${otherParty}`;
-
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    if (!text.trim() || !senderId) return;
-    setSendError("");
-    try {
-      await sendChatMessage(order.id, senderId, senderName, text);
-      setText("");
-      setExpanded(true);
-    } catch {
-      setSendError("Could not send. Try again.");
-    }
-  }
 
   if (compact && !expanded) {
     return (
@@ -148,52 +134,49 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
             Coordinate pickup, substitutes, lobby location, etc.
           </p>
         ) : (
-          messages.map((msg) => {
-            const isMine = isOwnChatMessage(msg, user);
-            return (
-              <div
-                key={msg.id}
-                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className="max-w-[85%] rounded-2xl px-3 py-2 text-sm"
-                  style={{
-                    backgroundColor: isMine ? "#FDB927" : "#2a2a2a",
-                    color: isMine ? "#111827" : "#ffffff",
-                  }}
-                >
-                  <p className="text-[10px] opacity-75">
-                    {msg.senderName} · {formatMessageTime(msg.timestamp)}
-                  </p>
-                  <p className="mt-0.5">{msg.message}</p>
-                </div>
-              </div>
-            );
-          })
+          messages.map((msg) => (
+            <ChatMessageBubble
+              key={msg.id}
+              message={msg}
+              isMine={isOwnChatMessage(msg, user)}
+              accent="order"
+              showSender
+            />
+          ))
         )}
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSend} className="border-t border-gray-100 p-2">
-        {sendError && (
-          <p className="mb-2 px-1 text-xs text-red-600">{sendError}</p>
-        )}
-        <div className="flex gap-2">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={`Message ${otherParty}…`}
-            className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-fusion-red focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={!text.trim()}
-            className="rounded-xl bg-fusion-red px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            Send
-          </button>
-        </div>
-      </form>
+      <ChatComposer
+        placeholder={`Message ${otherParty}…`}
+        mediaEnabled
+        accent="order"
+        inputClassName="min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-fusion-red focus:outline-none"
+        onSend={async ({ text, pending, signal, onProgress }) => {
+          if (!senderId) throw new Error("Sign in required.");
+          setExpanded(true);
+          if (pending.length) {
+            await sendChatMediaMessage({
+              orderId: order.id,
+              senderId,
+              senderName,
+              senderRole: role,
+              caption: text,
+              pending,
+              signal,
+              onProgress,
+            });
+          } else {
+            await sendChatMessage(
+              order.id,
+              senderId,
+              senderName,
+              text,
+              role,
+            );
+          }
+        }}
+      />
     </div>
   );
 }

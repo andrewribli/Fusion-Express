@@ -16,6 +16,7 @@ import {
   applyAuthContacts,
   directoryEmailLabel,
   directoryNameLabel,
+  filterDemoDirectoryUsers,
   isIncompleteDirectoryProfile,
   MISSING_DIRECTORY_EMAIL,
   MISSING_DIRECTORY_NAME,
@@ -114,6 +115,7 @@ export function AdminUsersDirectory({ campus }: { campus: DirectoryCampus }) {
   const [repairingUid, setRepairingUid] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState("");
   const [expiredCounts, setExpiredCounts] = useState<Record<string, number>>({});
+  const [showDemo, setShowDemo] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -230,7 +232,8 @@ export function AdminUsersDirectory({ campus }: { campus: DirectoryCampus }) {
     }
   }
 
-  const incompleteCount = users.filter(isIncompleteDirectoryProfile).length;
+  const visibleUsers = filterDemoDirectoryUsers(users, showDemo);
+  const incompleteCount = visibleUsers.filter(isIncompleteDirectoryProfile).length;
 
   return (
     <RequireAdmin>
@@ -250,8 +253,17 @@ export function AdminUsersDirectory({ campus }: { campus: DirectoryCampus }) {
               <p className="mt-1 text-sm text-gray-500">
                 {loading
                   ? "Loading…"
-                  : `${users.length} account${users.length === 1 ? "" : "s"}, sorted by name`}
+                  : `${visibleUsers.length} account${visibleUsers.length === 1 ? "" : "s"}, sorted by name`}
               </p>
+              <label className="mt-2 inline-flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={showDemo}
+                  onChange={(e) => setShowDemo(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                Show demo
+              </label>
               {cityu ? (
                 <p className="mt-2 text-sm text-gray-600">
                   Same users collection as CUHK, filtered to CityU emails.
@@ -336,11 +348,11 @@ export function AdminUsersDirectory({ campus }: { campus: DirectoryCampus }) {
                 </p>
               )}
 
-              {!loading && users.length === 0 && !error && (
+              {!loading && visibleUsers.length === 0 && !error && (
                 <p className="mt-4 text-sm text-gray-600">No accounts found.</p>
               )}
 
-              {!loading && users.length > 0 && (
+              {!loading && visibleUsers.length > 0 && (
                 <div className="mt-4 overflow-x-auto">
                   <table className="min-w-full text-left text-sm">
                     <thead>
@@ -357,7 +369,7 @@ export function AdminUsersDirectory({ campus }: { campus: DirectoryCampus }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((u) => {
+                      {visibleUsers.map((u) => {
                         const nameLabel = directoryNameLabel(u);
                         const emailLabel = directoryEmailLabel(u);
                         return (

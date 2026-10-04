@@ -7,6 +7,7 @@ import {
   directoryEmailLabel,
   directoryNameLabel,
   isCityUDirectoryUser,
+  filterDemoDirectoryUsers,
   isIncompleteDirectoryProfile,
   isOrphanUserProfile,
   MISSING_DIRECTORY_EMAIL,
@@ -144,5 +145,27 @@ describe("selectAdminDirectoryUsers", () => {
     );
     assert.equal(directoryNameLabel(student), "No name");
     assert.equal(directoryEmailLabel(stamped), "No email");
+  });
+});
+
+describe("filterDemoDirectoryUsers", () => {
+  it("hides demo@gracerun.fit unless showDemo is on", () => {
+    const demo = profile({
+      uid: "demo-uid",
+      email: "demo@gracerun.fit",
+      fullName: "Demo Student",
+    });
+    const real = profile({
+      uid: "real-uid",
+      email: "a@link.cuhk.edu.hk",
+      fullName: "Real",
+    });
+    const hidden = filterDemoDirectoryUsers([demo, real], false);
+    assert.deepEqual(
+      hidden.map((row) => row.uid),
+      ["real-uid"],
+    );
+    const shown = filterDemoDirectoryUsers([demo, real], true);
+    assert.equal(shown.length, 2);
   });
 });

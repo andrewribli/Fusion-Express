@@ -19,6 +19,8 @@ type RunnerHeaderShortcutsProps = {
   tone?: "light" | "dark";
   /** Customer hubs already have the available-orders bell. */
   ordersOnly?: boolean;
+  /** Mobile headers: only the available-orders bell (no current-order bag). */
+  availableOnly?: boolean;
 };
 
 function headerCampus(pathname: string, profileCampus?: string | null): CampusId {
@@ -73,6 +75,7 @@ export function RunnerHeaderShortcuts({
   className = "h-11 w-11 rounded-full",
   tone = "light",
   ordersOnly = false,
+  availableOnly = false,
 }: RunnerHeaderShortcutsProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -212,6 +215,7 @@ export function RunnerHeaderShortcuts({
       </div>
       )}
 
+      {!availableOnly && (
       <div ref={rootRef} className="relative self-center">
         <button
           type="button"
@@ -303,6 +307,7 @@ export function RunnerHeaderShortcuts({
           </div>
         )}
       </div>
+      )}
     </>
   );
 }

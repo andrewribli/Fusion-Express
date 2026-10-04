@@ -86,7 +86,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [chineseName, setChineseName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -94,6 +97,13 @@ export default function LoginPage() {
   const [cuhkVerified, setCuhkVerified] = useState(false);
   /** Email that passed OTP — must match the address registered at submit. */
   const [verifiedEmail, setVerifiedEmail] = useState("");
+
+  function composedFullName(): string {
+    return [firstName, middleName, lastName]
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(" ");
+  }
 
   function continueAsGuest() {
     startGuestBrowse();
@@ -144,8 +154,12 @@ export default function LoginPage() {
   function goSignupNext() {
     setError("");
     if (signupStep === 1) {
-      if (!fullName.trim()) {
-        setError("Enter your full name");
+      if (!firstName.trim()) {
+        setError("Enter your first name");
+        return;
+      }
+      if (!lastName.trim()) {
+        setError("Enter your last name");
         return;
       }
       setSignupStep(2);
@@ -172,8 +186,15 @@ export default function LoginPage() {
     const registeringEmail = email.trim().toLowerCase();
     const campus = detectCampusFromEmail(registeringEmail);
     const passErr = validatePassword(password);
-    if (!fullName.trim()) {
-      setError("Enter your full name");
+    const fullName = composedFullName();
+    if (!firstName.trim() || !lastName.trim() || !fullName) {
+      setError(
+        !firstName.trim()
+          ? "Enter your first name"
+          : !lastName.trim()
+            ? "Enter your last name"
+            : "Enter your name",
+      );
       setSignupStep(1);
       return;
     }
@@ -213,9 +234,11 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
+      const chinese = chineseName.trim();
       const profile = {
         email: registeringEmail,
         fullName: fullName.trim(),
+        ...(chinese ? { chineseName: chinese } : {}),
         campus,
         isGuest: false,
         isRunner: false,
@@ -438,19 +461,75 @@ export default function LoginPage() {
             </div>
 
             {signupStep === 1 && (
-              <div>
-                <label htmlFor="fullName" className="block text-xs font-medium text-gray-600">
-                  Full Name
-                </label>
-                <input
-                  id="fullName"
-                  required
-                  autoComplete="name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Felix Wong"
-                  className={inputClassName}
-                />
+              <div className="space-y-3">
+                <div>
+                  <label
+                    htmlFor="firstName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    First name
+                  </label>
+                  <input
+                    id="firstName"
+                    required
+                    autoComplete="given-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="e.g. Felix"
+                    className={inputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="lastName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Last name
+                  </label>
+                  <input
+                    id="lastName"
+                    required
+                    autoComplete="family-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="e.g. Wong"
+                    className={inputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="middleName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Middle name{" "}
+                    <span className="font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="middleName"
+                    autoComplete="additional-name"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    placeholder="If any"
+                    className={inputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="chineseName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Chinese name{" "}
+                    <span className="font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="chineseName"
+                    autoComplete="off"
+                    value={chineseName}
+                    onChange={(e) => setChineseName(e.target.value)}
+                    placeholder="中文姓名（如有）"
+                    className={inputClassName}
+                  />
+                </div>
               </div>
             )}
 

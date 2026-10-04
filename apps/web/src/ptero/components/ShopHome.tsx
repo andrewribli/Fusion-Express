@@ -163,10 +163,10 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
 
         {/* Foodpanda-style top header */}
         <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
+          <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <button
               type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
               aria-label="Open categories"
               onClick={() => setMobileCatsOpen(true)}
             >
@@ -182,22 +182,32 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
 
             <Link
               href="/cityu"
-              className="flex shrink-0 items-center justify-center"
+              className="hidden max-h-5 shrink-0 items-center text-[13px] font-extrabold leading-5 tracking-tight text-gray-900 min-[361px]:inline-flex sm:hidden"
               aria-label={`${CAMPUS.brandName} home`}
             >
-              <AppLogo size={48} className="h-12 w-12" />
+              {CAMPUS.brandName}
+            </Link>
+            <Link
+              href="/cityu"
+              className="hidden shrink-0 items-center gap-2 sm:flex"
+              aria-label={`${CAMPUS.brandName} home`}
+            >
+              <AppLogo size={36} className="h-9 w-9" />
+              <span className="text-sm font-extrabold tracking-tight text-gray-900">
+                {CAMPUS.brandName}
+              </span>
             </Link>
 
             <Link
               href="/cityu/canteen"
-              className="inline-flex shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[11px] font-bold text-emerald-800 sm:px-3 sm:text-xs"
+              className="hidden shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex"
             >
               Canteens
             </Link>
 
             <button
               type="button"
-              className="hidden min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm lg:flex"
+              className="hidden min-w-0 max-w-[240px] flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex xl:max-w-[320px]"
               onClick={() => document.getElementById("delivery-hint")?.scrollIntoView()}
             >
               <span className="text-gray-400" aria-hidden>
@@ -209,30 +219,36 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
               </span>
             </button>
 
-            <div className="relative min-w-0 flex-1 md:max-w-md">
-              <input
-                ref={searchRef}
-                type="search"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setVisibleCount(48);
-                }}
-                placeholder={store ? `Search ${store.name}` : "Search groceries"}
-                className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 pr-10 text-sm outline-none focus:border-[#ED1C24]"
-                autoComplete="off"
-              />
-              <button
-                type="button"
-                onClick={() => searchRef.current?.focus()}
-                className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-[#ED1C24] text-white"
-                aria-label="Search"
-              >
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+            <div className="relative min-w-[140px] flex-1 md:min-w-[400px] md:max-w-xl">
+              <label className="flex h-10 w-full min-w-0 items-center gap-2 rounded-full border border-gray-200 bg-white pl-3 pr-3 shadow-sm sm:h-11">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 shrink-0 text-gray-400"
+                  fill="none"
+                  aria-hidden
+                >
                   <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
-                  <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path
+                    d="m16 16 4 4"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
-              </button>
+                <input
+                  ref={searchRef}
+                  type="search"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setVisibleCount(48);
+                  }}
+                  placeholder={store ? `Search ${store.name}` : "Search groceries"}
+                  className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
+                  autoComplete="off"
+                  aria-label={store ? `Search ${store.name}` : "Search groceries"}
+                />
+              </label>
             </div>
 
             <Link
@@ -256,12 +272,14 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
               Runner
             </Link>
 
-            <CustomerNotificationBell className="h-10 w-10 rounded-lg" />
+            <div className="hidden sm:block">
+              <CustomerNotificationBell className="!h-11 !w-11" />
+            </div>
 
             <button
               type="button"
               onClick={() => setMobileCartOpen(true)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
+              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
               aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>

@@ -3,24 +3,42 @@
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   limit,
   onSnapshot,
   orderBy,
   query,
+  setDoc,
   Timestamp,
   where,
   writeBatch,
   type Unsubscribe,
 } from "firebase/firestore";
+import {
+  assertUploadRateLimit,
+  chatMediaPreviewText,
+  markUploadRateLimit,
+  uploadChatMediaFiles,
+  type PendingChatMedia,
+} from "@/lib/chat-media";
 import { collectionName } from "@/lib/constants";
 import { getAuthClient, getDb, isFirebaseConfigured } from "@/lib/firebase";
+import type { ChatMessageType } from "@/lib/types";
 
 export type DirectMessage = {
   id: string;
   userId: string;
   senderId: string;
   message: string;
+  text?: string;
+  type?: ChatMessageType;
+  mediaUrl?: string;
+  mediaUrls?: string[];
+  mediaThumbnailUrl?: string;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  mediaSize?: number;
   createdAt: Date;
   read: boolean;
 };
@@ -31,13 +49,42 @@ function col() {
   return collectionName("messages");
 }
 
+function parseType(raw: unknown): ChatMessageType {
+  if (raw === "image" || raw === "video") return raw;
+  return "text";
+}
+
 function parse(id: string, data: Record<string, unknown>): DirectMessage {
   const ts = data.createdAt;
+  const type = parseType(data.type);
+  const mediaUrls = Array.isArray(data.mediaUrls)
+    ? data.mediaUrls.map((u) => String(u)).filter(Boolean)
+    : undefined;
+  const mediaUrl =
+    typeof data.mediaUrl === "string" && data.mediaUrl
+      ? data.mediaUrl
+      : mediaUrls?.[0];
+  const textRaw = String(data.text ?? data.message ?? "");
+  const preview = chatMediaPreviewText(type, textRaw);
   return {
     id,
     userId: String(data.userId ?? ""),
     senderId: String(data.senderId ?? ""),
-    message: String(data.message ?? ""),
+    message: preview,
+    text: textRaw || preview,
+    type,
+    mediaUrl,
+    mediaUrls,
+    mediaThumbnailUrl:
+      typeof data.mediaThumbnailUrl === "string"
+        ? data.mediaThumbnailUrl
+        : undefined,
+    mediaWidth:
+      typeof data.mediaWidth === "number" ? data.mediaWidth : undefined,
+    mediaHeight:
+      typeof data.mediaHeight === "number" ? data.mediaHeight : undefined,
+    mediaSize:
+      typeof data.mediaSize === "number" ? data.mediaSize : undefined,
     read: Boolean(data.read),
     createdAt:
       ts && typeof ts === "object" && "toDate" in ts
@@ -59,6 +106,8 @@ export async function sendDirectMessage(opts: {
     userId: opts.userId,
     senderId: opts.senderId,
     message: trimmed,
+    text: trimmed,
+    type: "text",
     createdAt: now,
     read: false,
   };
@@ -68,6 +117,8 @@ export async function sendDirectMessage(opts: {
       userId: opts.userId,
       senderId: opts.senderId,
       message: trimmed,
+      text: trimmed,
+      type: "text",
       createdAt: Timestamp.fromDate(now),
       read: false,
     });
@@ -79,10 +130,77 @@ export async function sendDirectMessage(opts: {
   return row;
 }
 
+export async function sendDirectMediaMessage(opts: {
+  userId: string;
+  senderId: string;
+  caption?: string;
+  pending: PendingChatMedia[];
+  signal?: AbortSignal;
+  onProgress?: (ratio: number) => void;
+}): Promise<DirectMessage> {
+  if (!opts.pending.length) throw new Error("No photos to send.");
+  assertUploadRateLimit(opts.senderId);
+
+  const caption = (opts.caption ?? "").trim();
+  const preview = chatMediaPreviewText("image", caption);
+  const now = new Date();
+  const messageId = crypto.randomUUID();
+
+  const uploaded = await uploadChatMediaFiles({
+    thread: "admin",
+    threadId: opts.userId,
+    messageId,
+    files: opts.pending,
+    signal: opts.signal,
+    onProgress: opts.onProgress,
+  });
+
+  const row: DirectMessage = {
+    id: messageId,
+    userId: opts.userId,
+    senderId: opts.senderId,
+    message: preview,
+    text: caption,
+    type: "image",
+    mediaUrl: uploaded.mediaUrl,
+    mediaUrls: uploaded.mediaUrls,
+    mediaWidth: uploaded.mediaWidth,
+    mediaHeight: uploaded.mediaHeight,
+    mediaSize: uploaded.mediaSize,
+    createdAt: now,
+    read: false,
+  };
+
+  if (isFirebaseConfigured()) {
+    await setDoc(doc(getDb(), col(), messageId), {
+      userId: opts.userId,
+      senderId: opts.senderId,
+      message: preview,
+      text: caption,
+      type: "image",
+      mediaUrl: uploaded.mediaUrl,
+      mediaUrls: uploaded.mediaUrls,
+      mediaWidth: uploaded.mediaWidth ?? null,
+      mediaHeight: uploaded.mediaHeight ?? null,
+      mediaSize: uploaded.mediaSize,
+      createdAt: Timestamp.fromDate(now),
+      read: false,
+    });
+    markUploadRateLimit(opts.senderId);
+    return row;
+  }
+
+  markUploadRateLimit(opts.senderId);
+  const existing = mockByUser.get(opts.userId) ?? [];
+  mockByUser.set(opts.userId, [...existing, row]);
+  return row;
+}
+
 export async function emailDirectMessage(opts: {
   to: string;
   recipientName: string;
   message: string;
+  hasPhoto?: boolean;
 }): Promise<void> {
   const user = getAuthClient().currentUser;
   if (!user) throw new Error("Sign in required.");
@@ -97,6 +215,7 @@ export async function emailDirectMessage(opts: {
       to: opts.to,
       recipientName: opts.recipientName,
       message: opts.message,
+      hasPhoto: Boolean(opts.hasPhoto),
     }),
   });
   const text = await res.text();

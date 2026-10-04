@@ -28,21 +28,28 @@ export function CampusSelector() {
   return (
     <div className="min-h-screen bg-[#0c0c0c] text-white">
       <header className="border-b border-white/10 bg-[#0c0c0c]/95">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2" aria-label={`${brand} home`}>
-            <AppLogo size={44} className="h-11 w-11" />
-            <span className="text-sm font-bold tracking-tight">{brand}</span>
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+          <Link href="/" className="flex min-w-0 items-center gap-2" aria-label={`${brand} home`}>
+            <AppLogo size={44} className="hidden h-11 w-11 sm:block" />
+            <span className="hidden max-h-5 text-[13px] font-extrabold leading-5 tracking-tight min-[361px]:inline sm:text-sm">
+              {brand}
+            </span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
+            {/* One runner available-order bell only on mobile; current-order bag on desktop. */}
             <RunnerQueueBell className={headerIconClass} />
             {canRunnerMode ? (
-              <RunnerHeaderShortcuts
-                ordersOnly
-                tone="dark"
-                className="h-11 w-11 rounded-full"
-              />
+              <div className="hidden sm:block">
+                <RunnerHeaderShortcuts
+                  ordersOnly
+                  tone="dark"
+                  className="h-11 w-11 rounded-full"
+                />
+              </div>
             ) : null}
-            <AccountMenu />
+            <div className="flex h-11 w-11 items-center justify-center">
+              <AccountMenu />
+            </div>
           </div>
         </div>
       </header>

@@ -14,6 +14,9 @@ export type CuhkDeliveryCollegeId =
   | "wys"
   | "lws"
   | "pg"
+  | "i-house-12"
+  | "i-house-345"
+  /** @deprecated Legacy combined I-House. Kept for old orders / location lookup. */
   | "other"
   | "ulib";
 
@@ -47,9 +50,47 @@ export const CUHK_COLLEGE_LABELS: Record<CuhkDeliveryCollegeId, string> = {
   wys: "Wu Yee Sun College (WYS)",
   lws: "Lee Woo Sing College (LWS)",
   pg: "Postgraduate Halls (PGH)",
+  "i-house-12": "I-House 1/2",
+  "i-house-345": "I-House 3/4/5",
   other: "International House",
   ulib: "Campus Facilities",
 };
+
+/**
+ * Old combined I-House college labels → current selectable college.
+ * Defaults to I-House 1/2 (same graph node the old combined entry used).
+ * When a hall/block is known, pick 1/2 vs 3/4/5 from that block number.
+ */
+export const LEGACY_IHOUSE_COLLEGE_LABELS = [
+  "International House",
+  "International House (I-House)",
+] as const;
+
+function iHouseGroupFromHall(hall: string | null | undefined): "i-house-12" | "i-house-345" | null {
+  const text = (hall ?? "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  const match = text.match(/\bi\s*house\s*([1-5])\b/);
+  if (!match) return null;
+  const block = Number(match[1]);
+  return block === 1 || block === 2 ? "i-house-12" : "i-house-345";
+}
+
+export function migrateCuhkCollegeLabel(
+  college: string,
+  hall?: string | null,
+): string {
+  const trimmed = college.trim();
+  if (
+    (LEGACY_IHOUSE_COLLEGE_LABELS as readonly string[]).includes(trimmed)
+  ) {
+    const fromHall = iHouseGroupFromHall(hall);
+    return CUHK_COLLEGE_LABELS[fromHall ?? "i-house-12"];
+  }
+  return trimmed;
+}
 
 export const CUHK_DELIVERY_LOCATIONS: readonly CuhkDeliveryLocation[] = [
   // ── Chung Chi College ──
@@ -109,13 +150,21 @@ export const CUHK_DELIVERY_LOCATIONS: readonly CuhkDeliveryLocation[] = [
   loc("pg-hall-5", "Postgraduate Hall 5", "pg"),
   loc("pg-hall-6", "Postgraduate Hall 6", "pg"),
 
-  // ── Standalone ──
+  // ── I-House (split selectable colleges) ──
+  loc("i-house-1", "I-House 1", "i-house-12"),
+  loc("i-house-2", "I-House 2", "i-house-12"),
+  loc("i-house-3", "I-House 3", "i-house-345"),
+  loc("i-house-4", "I-House 4", "i-house-345"),
+  loc("i-house-5", "I-House 5", "i-house-345"),
+
+  // ── Legacy combined I-House stop (lookup only; not in picker order) ──
   loc("i-house", "International House", "other"),
 
   // ── Study / public spaces (face-to-face) ──
   loc("learning-garden", "Learning Garden", "ulib", true),
 ];
 
+/** Colleges shown in the delivery picker (excludes legacy `other`). */
 const COLLEGE_ORDER: readonly CuhkDeliveryCollegeId[] = [
   "chung-chi",
   "new-asia",
@@ -127,7 +176,8 @@ const COLLEGE_ORDER: readonly CuhkDeliveryCollegeId[] = [
   "wys",
   "lws",
   "pg",
-  "other",
+  "i-house-12",
+  "i-house-345",
   "ulib",
 ];
 

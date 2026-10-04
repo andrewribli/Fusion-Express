@@ -17,6 +17,7 @@ import { MenuItemCard } from "@/components/MenuItemCard";
 import { OrderActionBar } from "@/components/OrderActionBar";
 import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
+import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { DRY_AISLES, REFRIGERATED_AISLES } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
@@ -28,11 +29,11 @@ import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 import { getAisleItems, searchItems } from "@/lib/menu";
 import { popularityScore, topPopularItems } from "@/lib/popular-items";
-import { formatMenuPrice, type MenuItem } from "@/lib/types";
+import { formatMenuPriceLabel, type MenuItem } from "@/lib/types";
 import { AppLogo } from "@/components/AppLogo";
-import { StoreHoursBanner } from "@/components/StoreHoursBanner";
-import { useIsAdmin } from "@/lib/use-is-admin";
+import { GraceRunWordmark } from "@/components/GraceRunWordmark";
 import type { Aisle, StoreSection } from "@/data/aisles";
+import { rankItemsByQuery } from "@fusion-express/shared/search-rank";
 
 const BATCH = 24;
 const BADGES = ["Highly rated", "In demand", "Lowest price"] as const;
@@ -44,8 +45,7 @@ function pickBadge(item: MenuItem, index: number): string {
 }
 
 function priceLabel(item: MenuItem): string {
-  const raw = formatMenuPrice(item);
-  return raw.startsWith("HK") ? raw : `HK${raw}`;
+  return formatMenuPriceLabel(item);
 }
 
 function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
@@ -123,21 +123,29 @@ function HomeSearchBar({
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const [focused, setFocused] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const suggestions = useMemo(() => {
-    const q = value.trim().toLowerCase();
+    const q = value.trim();
     if (!q) return [];
-    return products
-      .filter((item) => item.name.toLowerCase().includes(q))
-      .slice(0, 10);
+    return rankItemsByQuery(products, q).slice(0, 10);
   }, [products, value]);
 
   return (
     <div className="relative min-w-0 flex-1">
-      <div
-        className="flex h-11 w-full min-w-0 items-center gap-1 rounded-full pl-3 pr-1.5"
-        style={{ backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
-      >
+      <label className="flex h-10 w-full min-w-0 items-center gap-2 rounded-full border border-gray-200 bg-white pl-3 pr-3 shadow-sm sm:h-11">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4 shrink-0 text-gray-400"
+          fill="none"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="m16 16 4 4"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
         <input
           ref={inputRef}
           id="home-search"
@@ -146,51 +154,12 @@ function HomeSearchBar({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
-          placeholder="Search products"
-          className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
-          style={{ backgroundColor: "transparent", color: "#111111" }}
+          placeholder="Search your meal"
+          className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
           autoComplete="off"
+          aria-label="Search your meal"
         />
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ color: "#555555" }}
-          aria-label="Scan or upload a product photo"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <path
-              d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.8A1 1 0 0 1 10 4h4a1 1 0 0 1 .8.4L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            />
-            <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.focus()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#ff6a00" }}
-          aria-label="Search"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" aria-hidden>
-            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
-            <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={() => {
-          onChange("");
-          inputRef.current?.focus();
-        }}
-      />
+      </label>
       {focused && suggestions.length > 0 && (
         <ul
           className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
@@ -229,7 +198,6 @@ export function ShopHome() {
   const { addItem, itemCount } = useCart();
   const { user } = useUser();
   const runnerEntry = useRunnerEntry("cuhk");
-  const isAdmin = useIsAdmin(user?.uid);
   const { openManualItem } = useManualItemModal();
   const [guestBrowse, setGuestBrowse] = useState(false);
   const [products, setProducts] = useState<MenuItem[]>([]);
@@ -417,10 +385,10 @@ export function ShopHome() {
     <AppShell>
       <div className="shop-page min-h-screen bg-[#f5f5f5]">
         <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-4">
+          <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <button
               type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
               aria-label="Open categories"
               onClick={() => setMobileCatsOpen(true)}
             >
@@ -434,28 +402,31 @@ export function ShopHome() {
               </svg>
             </button>
 
+            {/* Mobile: text wordmark only; drops below 360px so search stays ≥140px. */}
+            <GraceRunWordmark href="/cuhk" className="sm:hidden" />
+
             <Link
               href="/cuhk"
               onClick={() => {
                 setSearch("");
                 selectAisle(null);
               }}
-              className="flex shrink-0 items-center gap-2"
+              className="hidden shrink-0 items-center gap-2 sm:flex"
               aria-label="CUHK home"
             >
               <AppLogo size={36} className="h-9 w-9" />
-              <span className="hidden text-sm font-extrabold tracking-tight text-gray-900 sm:block">
+              <span className="text-sm font-extrabold tracking-tight text-gray-900">
                 GraceRun
               </span>
             </Link>
             <Link
               href="/cuhk"
-              className="hidden shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-800 hover:border-[#ED1C24] hover:text-[#ED1C24] sm:inline-flex"
+              className="hidden shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-800 hover:border-[#ED1C24] hover:text-[#ED1C24] lg:inline-flex"
             >
               CUHK home
             </Link>
 
-            <div className="hidden min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex">
+            <div className="hidden min-w-0 max-w-[240px] flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex xl:max-w-[320px]">
               <span className="text-gray-400" aria-hidden>
                 📍
               </span>
@@ -464,7 +435,7 @@ export function ShopHome() {
               </span>
             </div>
 
-            <div className="relative min-w-0 flex-1 md:max-w-md">
+            <div className="relative min-w-[140px] flex-1 md:min-w-[400px] md:max-w-xl">
               <HomeSearchBar
                 products={products}
                 value={search}
@@ -492,11 +463,15 @@ export function ShopHome() {
               Runner
             </Link>
 
-            <RunnerQueueBell />
+            {/* Desktop: both bells (distinct). Mobile: runner bell lives in hamburger so search+cart win. */}
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <CustomerNotificationBell className="!h-11 !w-11 !rounded-full" />
+              <RunnerQueueBell className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700" />
+            </div>
 
             <Link
               href="/cart"
-              className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
+              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
               aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -516,8 +491,8 @@ export function ShopHome() {
               )}
             </Link>
 
-            <div className="shrink-0">
-              <AccountMenu hideThemeChip />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center">
+              <AccountMenu hideThemeChip avatarSize={36} />
             </div>
           </div>
         </header>
@@ -531,15 +506,20 @@ export function ShopHome() {
               onClick={() => setMobileCatsOpen(false)}
             />
             <div className="absolute inset-y-0 left-0 flex w-[min(88vw,320px)] flex-col bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b border-gray-100 px-3 py-3">
+              <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-3">
                 <p className="text-sm font-bold text-gray-900">Categories</p>
-                <button
-                  type="button"
-                  onClick={() => setMobileCatsOpen(false)}
-                  className="rounded-lg px-2 py-1 text-sm font-semibold text-gray-500"
-                >
-                  Close
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Mobile: only runner available-order bell in drawer (customer notifications too for parity). */}
+                  <CustomerNotificationBell className="!h-11 !w-11" />
+                  <RunnerQueueBell className="h-11 w-11 rounded-lg border border-gray-200 bg-white text-gray-700" />
+                  <button
+                    type="button"
+                    onClick={() => setMobileCatsOpen(false)}
+                    className="flex h-11 min-w-11 items-center justify-center rounded-lg px-2 text-sm font-semibold text-gray-500"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto">{categoryList}</div>
             </div>
@@ -554,8 +534,7 @@ export function ShopHome() {
             {categoryList}
           </aside>
 
-          <main className="min-w-0 px-3 py-4 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 md:pb-28">
-            <StoreHoursBanner isAdmin={isAdmin} />
+          <main className="min-w-0 px-3 py-4 pr-14 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 sm:pr-4 md:pb-28">
             {guestBrowse && (
               <div className="mb-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800">
                 <p className="font-semibold text-gray-900">Ordering as guest</p>
@@ -614,20 +593,7 @@ export function ShopHome() {
               </section>
             ) : (
               <>
-                <section className="overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-[#ED1C24] to-[#c9171e] p-5 text-white shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
-                    GraceRun CUHK
-                  </p>
-                  <h2 className="mt-1 text-xl font-extrabold sm:text-2xl">
-                    Apply a voucher at checkout!
-                  </h2>
-                  <p className="mt-1 max-w-xl text-sm text-white/90">
-                    Groceries from Fusion to your CUHK hall lobby. Pay nothing
-                    until after delivery.
-                  </p>
-                </section>
-
-                <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
+                <section className="rounded-2xl border border-gray-200 bg-white p-4">
                   <h2 className="text-lg font-extrabold text-gray-900">
                     Recommended for you
                   </h2>

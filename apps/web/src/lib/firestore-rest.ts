@@ -1,6 +1,7 @@
 import "server-only";
 import { createSign } from "crypto";
 import { collectionName } from "@/lib/constants";
+import { isDoNotEmailAddress } from "@fusion-express/shared/demo-account";
 import { resolveCampus, type CampusId } from "@fusion-express/shared/campus";
 
 /**
@@ -471,9 +472,10 @@ export async function requireAdminRest(request: Request): Promise<RestAuthed> {
   return auth;
 }
 
-export async function listBroadcastRecipientsRest(): Promise<
-  BroadcastRecipient[]
-> {
+export async function listBroadcastRecipientsRest(): Promise<{
+  recipients: BroadcastRecipient[];
+  scannedDocs: number;
+}> {
   const ctx = await adminAccessToken();
   if (!ctx) {
     throw new RestAuthError("Could not load users from Firestore.", 503);
@@ -482,8 +484,11 @@ export async function listBroadcastRecipientsRest(): Promise<
   const out: BroadcastRecipient[] = [];
   const seen = new Set<string>();
   let pageToken = "";
+  let scannedDocs = 0;
+  // Hard ceiling so a runaway token never hangs the function. 200 × 300 = 60k docs.
+  const MAX_PAGES = 200;
 
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < MAX_PAGES; i++) {
     const url = new URL(`${documentsUrl(ctx.project)}/${col}`);
     url.searchParams.set("pageSize", "300");
     if (pageToken) url.searchParams.set("pageToken", pageToken);
@@ -503,12 +508,15 @@ export async function listBroadcastRecipientsRest(): Promise<
       documents?: { fields?: Record<string, FirestoreValue> }[];
       nextPageToken?: string;
     };
-    for (const doc of data.documents ?? []) {
+    const docs = data.documents ?? [];
+    scannedDocs += docs.length;
+    for (const doc of docs) {
       const fields = decodeFields(doc.fields);
       const email = String(fields.email ?? fields.cuhkEmail ?? "")
         .trim()
         .toLowerCase();
       if (!email.includes("@") || seen.has(email)) continue;
+      if (isDoNotEmailAddress(email)) continue;
       seen.add(email);
       const created = fields.createdAt;
       out.push({
@@ -519,11 +527,16 @@ export async function listBroadcastRecipientsRest(): Promise<
         createdAt: created instanceof Date ? created : null,
       });
     }
-    if (!data.nextPageToken) break;
+    if (!data.nextPageToken) {
+      return { recipients: out, scannedDocs };
+    }
     pageToken = data.nextPageToken;
   }
 
-  return out;
+  console.error(
+    `listBroadcastRecipientsRest hit MAX_PAGES=${MAX_PAGES}; scannedDocs=${scannedDocs}`,
+  );
+  return { recipients: out, scannedDocs };
 }
 
 export function filterBroadcastRecipients(
@@ -531,21 +544,22 @@ export function filterBroadcastRecipients(
   group: BroadcastGroup,
   now = new Date(),
 ): BroadcastRecipient[] {
+  const eligible = recipients.filter((r) => !isDoNotEmailAddress(r.email));
   const msDay = 24 * 60 * 60 * 1000;
   if (group === "everyone") {
-    return recipients.filter((r) => !r.email.endsWith("@fusion-express.app"));
+    return eligible.filter((r) => !r.email.endsWith("@fusion-express.app"));
   }
   if (group === "runners") {
-    return recipients.filter((r) => r.isRunner);
+    return eligible.filter((r) => r.isRunner);
   }
   if (group === "new_users") {
     const cutoff = now.getTime() - 7 * msDay;
-    return recipients.filter(
+    return eligible.filter(
       (r) => r.createdAt != null && r.createdAt.getTime() >= cutoff,
     );
   }
   const cutoff = now.getTime() - 30 * msDay;
-  return recipients.filter(
+  return eligible.filter(
     (r) => r.createdAt != null && r.createdAt.getTime() < cutoff,
   );
 }
@@ -585,6 +599,7 @@ export async function listUserAlertRecipientsRest(): Promise<
         .trim()
         .toLowerCase();
       if (!email.includes("@") || seen.has(email)) continue;
+      if (isDoNotEmailAddress(email)) continue;
       seen.add(email);
       out.push({
         email,

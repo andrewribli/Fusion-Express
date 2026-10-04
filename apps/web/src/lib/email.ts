@@ -2,6 +2,9 @@ import "server-only";
 import { Resend } from "resend";
 import { isStagingApp } from "@fusion-express/shared";
 import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
+import { adminOpsEmails, primaryAdminEmail } from "@/lib/admin-ops-emails";
+
+export { adminOpsEmails, primaryAdminEmail } from "@/lib/admin-ops-emails";
 
 const ACCENT = "#ED1C24";
 const FOOTER = "Thanks for using GraceRun — groceries delivered with grace.";
@@ -352,24 +355,6 @@ function formatHk(amount: number): string {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
-const DEFAULT_ADMIN_OPS_EMAILS = [
-  "andrew.ribli@gmail.com",
-  "1155233599@link.cuhk.edu.hk",
-];
-
-export function adminOpsEmails(): string[] {
-  const extras = (process.env.OWNER_ALERT_EMAIL ?? "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-  return [
-    ...new Set([
-      ...DEFAULT_ADMIN_OPS_EMAILS.map((email) => email.toLowerCase()),
-      ...extras,
-    ]),
-  ];
-}
-
 async function sendFromHello(opts: {
   to: string;
   subject: string;
@@ -677,7 +662,7 @@ ${opts.reason.trim()}`;
   });
   const { error } = await getResend().emails.send({
     from: helloFrom(),
-    to: "hello@gracerun.fit",
+    to: primaryAdminEmail(),
     replyTo: opts.runnerEmail,
     subject,
     html,
@@ -807,12 +792,27 @@ export async function sendDirectAdminEmail(
   to: string,
   recipientName: string,
   body: string,
+  opts?: { hasPhoto?: boolean },
 ): Promise<void> {
   const name = recipientName.trim() || "there";
   const trimmed = body.trim();
   if (!trimmed) throw new Error("Message is required");
-  const subject = "Message from GraceRun";
-  const full = `Hey ${name},
+  const subject = opts?.hasPhoto
+    ? "New message with photo in your GraceRun order"
+    : "Message from GraceRun";
+  const appLink = "https://www.gracerun.fit";
+  const full = opts?.hasPhoto
+    ? `Hey ${name},
+
+You have a new message with a photo in GraceRun.
+
+${trimmed}
+
+Open the app to view it: ${appLink}
+
+Thanks for using GraceRun!
+— Andrew`
+    : `Hey ${name},
 
 ${trimmed}
 
@@ -858,4 +858,86 @@ export async function sendAdminBroadcast(
     text: `${trimmedBody}\n\n${FOOTER}`,
   });
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Send one broadcast to many recipients via Resend's batch API (max 100).
+ * Returns per-address outcomes — one failure never blocks the rest.
+ */
+export async function sendAdminBroadcastBatch(
+  recipients: string[],
+  subject: string,
+  body: string,
+): Promise<{ sent: string[]; failed: { email: string; error: string }[] }> {
+  const trimmedSubject = subject.trim();
+  const trimmedBody = body.trim();
+  if (!trimmedSubject || !trimmedBody) {
+    throw new Error("Subject and body are required");
+  }
+  const emails = [
+    ...new Set(
+      recipients
+        .map((email) => email.trim().toLowerCase())
+        .filter((email) => email.includes("@")),
+    ),
+  ];
+  if (emails.length === 0) return { sent: [], failed: [] };
+  if (emails.length > 100) {
+    throw new Error("Resend batch max is 100 recipients per request");
+  }
+
+  const html = brandedBroadcastEmail({
+    preheader: trimmedSubject,
+    heading: trimmedSubject,
+    bodyHtml: bodyTextToHtml(trimmedBody),
+  });
+  const text = `${trimmedBody}\n\n${FOOTER}`;
+  const from = process.env.RESEND_BROADCAST_FROM?.trim() || BROADCAST_FROM;
+  const payload = emails.map((to) => ({
+    from,
+    to,
+    replyTo: BROADCAST_REPLY_TO,
+    subject: trimmedSubject,
+    html,
+    text,
+  }));
+
+  const { data, error } = await getResend().batch.send(payload, {
+    batchValidation: "permissive",
+  });
+
+  if (error && !data) {
+    return {
+      sent: [],
+      failed: emails.map((email) => ({
+        email,
+        error: error.message || "Batch send failed",
+      })),
+    };
+  }
+
+  const sent: string[] = [];
+  const failed: { email: string; error: string }[] = [];
+  const ids = data?.data ?? [];
+  const errors =
+    data && "errors" in data && Array.isArray(data.errors) ? data.errors : [];
+
+  const failedIndexes = new Map<number, string>();
+  for (const row of errors as { index?: number; message?: string }[]) {
+    if (typeof row.index === "number") {
+      failedIndexes.set(row.index, row.message || "Send failed");
+    }
+  }
+
+  emails.forEach((email, index) => {
+    if (failedIndexes.has(index)) {
+      failed.push({ email, error: failedIndexes.get(index)! });
+      return;
+    }
+    const id = ids[index]?.id;
+    if (id) sent.push(email);
+    else failed.push({ email, error: "Resend did not return a message id" });
+  });
+
+  return { sent, failed };
 }

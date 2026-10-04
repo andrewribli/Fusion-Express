@@ -3,7 +3,15 @@
  * Pure orchestration: Firestore and Resend are injected so tests can dry-run.
  */
 
-export const EXPIRED_WARNING_CC = "andrew.ribli@gmail.com";
+import { primaryAdminEmail } from "@/lib/admin-ops-emails";
+
+/** Ops copy of expired-delivery warnings. Override with ADMIN_EMAIL. */
+export function expiredWarningCc(): string {
+  return primaryAdminEmail();
+}
+
+/** @deprecated use expiredWarningCc() — kept for older imports/tests */
+export const EXPIRED_WARNING_CC = "hello@gracerun.fit";
 
 /**
  * Demo logins that must never receive this warning.
@@ -300,7 +308,7 @@ export async function deliverExpiredWarning(opts: {
     expiredAt: formatWarningInstant(expiredAt),
     customerName: safeCustomerName(order.customerName),
   });
-  const cc = EXPIRED_WARNING_CC;
+  const cc = expiredWarningCc();
 
   try {
     const sent = await sendWithRetry(

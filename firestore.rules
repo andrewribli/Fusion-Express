@@ -530,16 +530,45 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Order chat meta (media byte counter). Parties + admin only.
+    match /chats/{orderId} {
+      allow get: if isOrderCustomer(order(orderId))
+        || isOrderRunner(order(orderId))
+        || isAdmin();
+      allow create, update: if (
+          isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
+        )
+        && request.resource.data.keys().hasOnly(['mediaBytesUsed', 'updatedAt'])
+        && request.resource.data.mediaBytesUsed is number
+        && request.resource.data.mediaBytesUsed >= 0
+        && request.resource.data.mediaBytesUsed <= 100 * 1024 * 1024;
+      allow delete: if false;
+    }
+
     // Order chat is between the customer and the assigned runner only.
     // senderId must be the Auth uid — no studentId / runnerDocId spoofing.
     match /chats/{orderId}/messages/{messageId} {
+      function chatMessageCreate() {
+        let data = request.resource.data;
+        let msgType = data.get('type', 'text');
+        return (
+            isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
+          )
+          && data.senderId == uid()
+          && msgType in ['text', 'image', 'video']
+          && data.message is string
+          && data.message.size() <= 2000
+          && (
+            msgType == 'text'
+              ? data.message.size() > 0
+              : data.mediaUrl is string && data.mediaUrl.size() > 0
+          );
+      }
+
       allow get, list: if isOrderCustomer(order(orderId))
         || isOrderRunner(order(orderId))
         || isAdmin();
-      allow create: if (
-          isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
-        )
-        && request.resource.data.senderId == uid();
+      allow create: if chatMessageCreate();
       allow update: if signedIn()
         && (isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId)) || isAdmin())
         && request.auth.uid != resource.data.senderId
@@ -621,8 +650,13 @@ service cloud.firestore {
     match /messages/{messageId} {
       function messageCreate() {
         let data = request.resource.data;
+        let msgType = data.get('type', 'text');
         return signedIn()
-          && data.keys().hasOnly(['userId', 'senderId', 'message', 'createdAt', 'read'])
+          && data.keys().hasOnly([
+            'userId', 'senderId', 'message', 'text', 'createdAt', 'read',
+            'type', 'mediaUrl', 'mediaUrls', 'mediaThumbnailUrl',
+            'mediaDuration', 'mediaWidth', 'mediaHeight', 'mediaSize'
+          ])
           && data.senderId == uid()
           && data.userId is string
           && data.userId.size() > 0
@@ -631,6 +665,12 @@ service cloud.firestore {
           && data.message is string
           && data.message.size() > 0
           && data.message.size() <= 2000
+          && msgType in ['text', 'image', 'video']
+          && (
+            msgType == 'text'
+              ? true
+              : data.mediaUrl is string && data.mediaUrl.size() > 0
+          )
           && data.createdAt is timestamp
           && data.read is bool
           && data.read == false;

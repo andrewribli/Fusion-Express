@@ -20,6 +20,8 @@ export * from "./delivery-machine";
 export * from "./cuhk-email";
 export * from "./cityu-email";
 export * from "./campus";
+export * from "./demo-account";
+export * from "./search-rank";
 export * from "./canteen-college";
 export * from "./college-discount";
 export * from "./delivery-identity";

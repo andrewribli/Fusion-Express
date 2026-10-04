@@ -2,18 +2,21 @@ import type { CampusId } from "./campus";
 import {
   buildCuhkCollegeHalls,
   findCuhkDeliveryLocation,
+  migrateCuhkCollegeLabel,
 } from "./deliveryLocations";
 
 /**
  * CUHK college → hall names for the delivery picker.
  * Source of truth: `CUHK_DELIVERY_LOCATIONS` in deliveryLocations.ts.
  *
- * Chung Chi does not include International House — I-House is standalone.
- * United College includes Choi Kai Yau Residence.
+ * Chung Chi does not include International House — I-House is split into
+ * "I-House 1/2" and "I-House 3/4/5". United College includes Choi Kai Yau Residence.
  */
 export const CUHK_COLLEGE_HALLS: Readonly<
   Record<string, readonly string[]>
 > = buildCuhkCollegeHalls();
+
+export { migrateCuhkCollegeLabel };
 
 /**
  * CityU halls 1–12 in two compounds.
@@ -59,15 +62,17 @@ export function getHallsForResidence(
     }
     return [];
   }
-  if (residence in CUHK_COLLEGE_HALLS) {
-    return CUHK_COLLEGE_HALLS[residence as CuhkCollege];
+  const college = migrateCuhkCollegeLabel(residence);
+  if (college in CUHK_COLLEGE_HALLS) {
+    return CUHK_COLLEGE_HALLS[college as CuhkCollege];
   }
   return [];
 }
 
 export function getHallsForCollege(college: CuhkCollege | string): readonly string[] {
-  if (college in CUHK_COLLEGE_HALLS) {
-    return CUHK_COLLEGE_HALLS[college as CuhkCollege];
+  const migrated = migrateCuhkCollegeLabel(college);
+  if (migrated in CUHK_COLLEGE_HALLS) {
+    return CUHK_COLLEGE_HALLS[migrated as CuhkCollege];
   }
   return [];
 }

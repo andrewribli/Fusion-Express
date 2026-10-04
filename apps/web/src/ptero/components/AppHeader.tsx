@@ -5,7 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
 import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificationBell";
+import { RunnerQueueBell } from "@/ptero/components/RunnerQueueBell";
 import { NavIcon } from "@/ptero/components/NavIcon";
+import { GraceRunWordmark } from "@/components/GraceRunWordmark";
 import { CAMPUS } from "@/ptero/config/campus";
 import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
@@ -71,12 +73,12 @@ export function AppHeader({
         </div>
       )}
       <header className="sticky top-0 z-50 overflow-visible border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
             {showBack && (
               <Link
                 href={backHref ?? home}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]"
+                className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-white hover:bg-[#3a3a3a] min-[361px]:flex"
                 aria-label="Go back"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -90,19 +92,27 @@ export function AppHeader({
                 </svg>
               </Link>
             )}
+            <GraceRunWordmark
+              href={runnerMode ? home : "/cityu"}
+              label={CAMPUS.brandName}
+              className="sm:hidden"
+            />
             <Link
               href={runnerMode ? home : "/cityu"}
-              className="flex shrink-0 items-center justify-center"
+              className="hidden shrink-0 items-center gap-2 sm:flex"
               aria-label={`${CAMPUS.brandName} home`}
             >
-              <AppLogo size={48} className="h-12 w-12" />
+              <AppLogo size={44} className="h-11 w-11" />
+              <span className="text-sm font-bold tracking-tight text-gray-900">
+                {CAMPUS.brandName}
+              </span>
             </Link>
             <span className="hidden max-w-44 truncate rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-[#ED1C24] sm:block">
               {pageLabel}
             </span>
           </div>
 
-          <nav className="flex shrink-0 items-center gap-1.5">
+          <nav className="flex shrink-0 items-center gap-2">
             {!runnerMode ? (
               <Link
                 href={runnerEntry.href}
@@ -134,7 +144,17 @@ export function AppHeader({
               </Link>
             )}
             {!runnerMode && (
-              <CustomerNotificationBell className="h-11 w-11 rounded-full" />
+              <>
+                <div className="sm:hidden">
+                  <RunnerQueueBell
+                    tone="light"
+                    className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700"
+                  />
+                </div>
+                <div className="hidden sm:block">
+                  <CustomerNotificationBell className="!h-11 !w-11 !rounded-full" />
+                </div>
+              </>
             )}
             {tabs
               .filter(
@@ -174,7 +194,9 @@ export function AppHeader({
                 )}
               </Link>
             )}
-            <AccountMenu />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center">
+              <AccountMenu />
+            </div>
           </nav>
         </div>
       </header>

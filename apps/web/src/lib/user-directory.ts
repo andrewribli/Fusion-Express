@@ -3,6 +3,7 @@ import {
   isUniversityEmailForCampus,
   type CampusId,
 } from "@fusion-express/shared/campus";
+import { isDemoCustomerEmail } from "@fusion-express/shared/demo-account";
 import { normalizeRole } from "@/lib/roles";
 
 type FirestoreDate = { toDate: () => Date };
@@ -222,4 +223,17 @@ export function campusForAdminDirectory(
   if (campus === "all") return true;
   if (campus === "cityu") return isCityUDirectoryUser(profile);
   return !isCityUDirectoryUser(profile);
+}
+
+export function isDemoDirectoryProfile(profile: UserProfile): boolean {
+  return isDemoCustomerEmail(profile.email ?? profile.cuhkEmail);
+}
+
+/** Hide the QA demo account unless the admin turns on "Show demo". */
+export function filterDemoDirectoryUsers(
+  users: UserProfile[],
+  showDemo: boolean,
+): UserProfile[] {
+  if (showDemo) return users;
+  return users.filter((profile) => !isDemoDirectoryProfile(profile));
 }

@@ -194,6 +194,10 @@ describe("CUHK delivery graph", () => {
     assert.equal(cuhkDestinationNode("International House", "International House"), "i-house-12");
     assert.equal(cuhkDestinationNode("International House (I-House)", "I-House 1"), "i-house-12");
     assert.equal(cuhkDestinationNode("International House (I-House)", "I-House 5"), "i-house-345");
+    assert.equal(cuhkDestinationNode("I-House 1/2", "I-House 1"), "i-house-12");
+    assert.equal(cuhkDestinationNode("I-House 1/2", undefined), "i-house-12");
+    assert.equal(cuhkDestinationNode("I-House 3/4/5", "I-House 5"), "i-house-345");
+    assert.equal(cuhkDestinationNode("I-House 3/4/5", undefined), "i-house-345");
     assert.equal(cuhkDestinationNode("Postgraduate Halls (PGH)", "Postgraduate Hall 3"), "pg-halls");
     assert.equal(cuhkDestinationNode("Chung Chi College", "Ming Hua Tang"), "shho-mc-chungchi");
     assert.equal(cuhkDestinationNode("Campus Facilities", "Learning Garden"), "lsk");
@@ -204,6 +208,10 @@ describe("CUHK delivery graph", () => {
       ),
       false,
     );
+    // Combined International House is no longer a picker college.
+    assert.equal("International House" in CUHK_COLLEGE_HALLS, false);
+    assert.ok(CUHK_COLLEGE_HALLS["I-House 1/2"]?.includes("I-House 1"));
+    assert.ok(CUHK_COLLEGE_HALLS["I-House 3/4/5"]?.includes("I-House 5"));
     assert.ok(
       CUHK_COLLEGE_HALLS["United College"].includes("Choi Kai Yau Residence"),
     );

@@ -517,5 +517,9 @@ export function lockedDeliveryPricing(input: {
 }
 
 export function isKnownCuhkCollege(value: string): value is CuhkCollege {
-  return value in CUHK_COLLEGE_HALLS;
+  if (value in CUHK_COLLEGE_HALLS) return true;
+  // Legacy combined I-House still accepted (maps to I-House 1/2).
+  return (
+    value === "International House" || value === "International House (I-House)"
+  );
 }

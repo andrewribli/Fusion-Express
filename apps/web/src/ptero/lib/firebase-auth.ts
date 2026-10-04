@@ -61,10 +61,12 @@ export async function firebaseSignUp(opts: {
       opts.password,
     );
     await cred.user.getIdToken();
+    const email = opts.email.trim().toLowerCase();
+    const fullName = opts.fullName.trim();
     await setDoc(doc(getFirebaseDb(), collectionName("users"), cred.user.uid), {
       uid: cred.user.uid,
-      email: opts.email.trim().toLowerCase(),
-      fullName: opts.fullName.trim(),
+      email,
+      fullName,
       campus: "cityu",
       role: "customer",
       isGuest: false,
@@ -72,6 +74,12 @@ export async function firebaseSignUp(opts: {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    try {
+      const { notifyNewUser } = await import("@/lib/notify-email");
+      notifyNewUser({ fullName, email, isRunner: false });
+    } catch (err) {
+      console.error("welcome email notify failed after CityU signup", err);
+    }
     return cred.user;
   } catch (err) {
     throw mapAuthError(err);

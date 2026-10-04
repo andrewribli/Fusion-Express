@@ -24,7 +24,31 @@ export const CITYU_ZONE_LABELS: Record<DeliveryZone, string> = {
   3: "Far (Ma On Shan Compound)",
 };
 
-/** Colleges / residences relative to Fusion at Benjamin Franklin Centre */
+/**
+ * CUHK college distance surcharge (HK$). Explicit amounts — not derived from
+ * the coarse 0/5/8 zone buckets (those remain for CityU + zone labels).
+ *
+ * Legacy "International House" aliases map to I-House 1/2 (+HK$8).
+ */
+export const COLLEGE_DISTANCE_SURCHARGE: Record<string, number> = {
+  "Chung Chi College": 3,
+  "S.H. Ho College (SHHO)": 3,
+  "Morningside College": 3,
+  "United College": 5,
+  "Shaw College": 5,
+  "Lee Woo Sing College (LWS)": 7,
+  "C.W. Chu College": 8,
+  "Wu Yee Sun College (WYS)": 8,
+  "New Asia College": 8,
+  "I-House 1/2": 8,
+  "I-House 3/4/5": 4,
+  "International House": 8,
+  "International House (I-House)": 8,
+  "Postgraduate Halls (PGH)": 8,
+  "Campus Facilities": 0,
+};
+
+/** Approximate zone bucket for CUHK colleges (labels / legacy breakdown). */
 const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "Chung Chi College": 1,
   "S.H. Ho College (SHHO)": 1,
@@ -35,6 +59,8 @@ const COLLEGE_ZONES: Record<string, DeliveryZone> = {
   "C.W. Chu College": 3,
   "Wu Yee Sun College (WYS)": 3,
   "New Asia College": 3,
+  "I-House 1/2": 3,
+  "I-House 3/4/5": 2,
   "International House": 3,
   "International House (I-House)": 3,
   "Postgraduate Halls (PGH)": 3,
@@ -61,7 +87,13 @@ export function zoneSurchargeForCollege(
   college: string,
   campus: CampusId = "cuhk",
 ): number {
-  return ZONE_DISTANCE_SURCHARGE[getDeliveryZone(college, campus)];
+  if (campus === "cityu") {
+    return ZONE_DISTANCE_SURCHARGE[getDeliveryZone(college, campus)];
+  }
+  if (Object.prototype.hasOwnProperty.call(COLLEGE_DISTANCE_SURCHARGE, college)) {
+    return COLLEGE_DISTANCE_SURCHARGE[college];
+  }
+  return ZONE_DISTANCE_SURCHARGE[2];
 }
 
 export function zoneLabelsForCampus(
@@ -105,7 +137,7 @@ export function calculateDeliveryFee(input: {
   const weightSurcharge = extraKg * WEIGHT_SURCHARGE_PER_KG;
   const campus = input.campus ?? "cuhk";
   const zone = getDeliveryZone(input.college, campus);
-  const distanceSurcharge = ZONE_DISTANCE_SURCHARGE[zone];
+  const distanceSurcharge = zoneSurchargeForCollege(input.college, campus);
 
   return {
     baseFee: BASE_DELIVERY_FEE,

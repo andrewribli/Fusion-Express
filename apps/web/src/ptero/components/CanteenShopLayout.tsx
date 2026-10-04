@@ -56,23 +56,37 @@ export function CanteenShopLayout({
   return (
     <div className="min-h-screen bg-[#f7f7f7]">
       <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3">
-          <Link href="/cityu" className="shrink-0" aria-label={`${CAMPUS.brandName} home`}>
-            <AppLogo size={44} className="h-11 w-11" />
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:px-4">
+          <Link
+            href="/cityu"
+            className="hidden max-h-5 shrink-0 items-center text-[13px] font-extrabold leading-5 tracking-tight text-gray-900 min-[361px]:inline-flex sm:hidden"
+            aria-label={`${CAMPUS.brandName} home`}
+          >
+            {CAMPUS.brandName}
           </Link>
-          <div className="min-w-0 flex-1">
+          <Link
+            href="/cityu"
+            className="hidden shrink-0 items-center gap-2 sm:flex"
+            aria-label={`${CAMPUS.brandName} home`}
+          >
+            <AppLogo size={36} className="h-9 w-9" />
+            <span className="text-sm font-extrabold tracking-tight text-gray-900">
+              {CAMPUS.brandName}
+            </span>
+          </Link>
+          <div className="hidden min-w-0 max-w-[240px] flex-1 md:block xl:max-w-[320px]">
             <p className="truncate rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-800">
               {deliveryLabel}
             </p>
           </div>
-          <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+          <div className="flex min-w-[140px] flex-1 items-center gap-2 md:min-w-[400px] md:max-w-xl">
             {searchSlot ?? (
               <input
                 type="search"
                 value={search}
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="min-w-0 flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none focus:border-[#ED1C24] sm:w-56 sm:flex-none"
+                className="h-10 min-w-0 flex-1 rounded-full border border-gray-200 bg-white px-4 text-sm outline-none focus:border-[#ED1C24] sm:h-11"
               />
             )}
             <Link
@@ -95,10 +109,12 @@ export function CanteenShopLayout({
             >
               Runner
             </Link>
-            <CustomerNotificationBell className="h-11 w-11 rounded-full" />
+            <div className="hidden sm:block">
+              <CustomerNotificationBell className="!h-11 !w-11 !rounded-full" />
+            </div>
             <Link
               href={checkoutHref}
-              className={`relative flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
+              className={`relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
                 overLimit
                   ? "bg-gray-200 text-gray-400"
                   : "bg-[#ED1C24] text-white"
@@ -111,7 +127,9 @@ export function CanteenShopLayout({
                 </span>
               )}
             </Link>
-            <AccountMenu />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center">
+              <AccountMenu />
+            </div>
           </div>
         </div>
       </header>

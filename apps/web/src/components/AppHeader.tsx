@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
+import { GraceRunWordmark } from "@/components/GraceRunWordmark";
 import { NavIcon } from "@/components/NavIcon";
 import { RunnerModeBanner } from "@/components/RunnerModeBanner";
 import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
+import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { useCart } from "@/context/CartContext";
 import { useCampus } from "@/context/CampusContext";
@@ -28,7 +30,7 @@ interface AppHeaderProps {
 export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
   const { itemCount, subtotal } = useCart();
   const overLimit = isOverOrderLimit(subtotal);
-  const { user, mode, setMode, canRunnerMode } = useUser();
+  const { mode, setMode, canRunnerMode } = useUser();
   const runnerEntry = useRunnerEntry("cuhk");
   const { config } = useCampus();
   const brandLabel = config.brandLabel;
@@ -79,12 +81,12 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
     <>
       {runnerMode && <RunnerModeBanner />}
       <header className="sticky top-0 z-50 overflow-visible border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-2 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
             {showBack && (
               <Link
                 href={backHref ?? home}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-white hover:bg-[#3a3a3a]"
+                className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2a2a2a] text-white hover:bg-[#3a3a3a] min-[361px]:flex"
                 aria-label="Go back"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -98,13 +100,20 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                 </svg>
               </Link>
             )}
+            {/* Mobile: short text wordmark only (no square logo). */}
+            <GraceRunWordmark
+              href={runnerMode ? home : "/cuhk"}
+              label="GraceRun"
+              className="sm:hidden"
+            />
+            {/* Desktop / tablet: logo + wordmark. */}
             <Link
               href={runnerMode ? home : "/cuhk"}
-              className="flex min-w-0 items-center gap-2"
+              className="hidden min-w-0 items-center gap-2 sm:flex"
               aria-label={`${brandLabel} home`}
             >
               <AppLogo size={44} className="h-11 w-11 shrink-0" />
-              <span className="hidden max-w-[9.5rem] truncate text-sm font-bold tracking-tight text-gray-900 sm:block">
+              <span className="max-w-[9.5rem] truncate text-sm font-bold tracking-tight text-gray-900">
                 {brandLabel}
               </span>
               {runnerMode && (
@@ -121,7 +130,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
             </span>
           </div>
 
-          <nav className="flex shrink-0 items-center gap-1.5">
+          <nav className="flex shrink-0 items-center gap-2">
             {!runnerMode ? (
               <Link
                 href={runnerEntry.href}
@@ -152,11 +161,22 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
                 Switch to Customer
               </Link>
             )}
-            {canRunnerMode ? (
-              <RunnerHeaderShortcuts className="h-11 w-11 rounded-full" />
-            ) : !runnerMode ? (
-              <CustomerNotificationBell className="h-11 w-11 rounded-full" />
-            ) : null}
+
+            {/* Mobile: only the runner available-order bell. */}
+            {!runnerMode && (
+              <div className="sm:hidden">
+                <RunnerQueueBell className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700" />
+              </div>
+            )}
+            {/* Desktop: full runner shortcuts or customer notifications (distinct). */}
+            <div className="hidden items-center gap-2 sm:flex">
+              {canRunnerMode ? (
+                <RunnerHeaderShortcuts className="h-11 w-11 rounded-full" />
+              ) : !runnerMode ? (
+                <CustomerNotificationBell className="!h-11 !w-11 !rounded-full" />
+              ) : null}
+            </div>
+
             {tabs
               .filter(
                 (tab) =>
@@ -199,7 +219,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               <Link
                 href={overLimit ? "/" : itemCount > 0 ? "/checkout" : "/cart"}
                 aria-disabled={overLimit}
-                className={`relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold shadow-sm ${
+                className={`relative flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold shadow-sm ${
                   overLimit
                     ? "cursor-not-allowed bg-gray-200 text-gray-400"
                     : "bg-fusion-red text-white"
@@ -222,7 +242,9 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               </Link>
             )}
 
-            <AccountMenu />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center">
+              <AccountMenu />
+            </div>
           </nav>
         </div>
       </header>

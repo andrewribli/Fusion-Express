@@ -33,12 +33,14 @@ export function ChannelSelector() {
   return (
     <div className="relative min-h-screen bg-[#0c0c0c] text-white">
       <header className="border-b border-white/10 bg-[#0c0c0c]/95">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/cityu" className="flex items-center gap-2" aria-label={`${CAMPUS.brandName} home`}>
-            <AppLogo size={44} className="h-11 w-11" />
-            <span className="text-sm font-bold tracking-tight">{CAMPUS.brandName}</span>
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+          <Link href="/cityu" className="flex min-w-0 items-center gap-2" aria-label={`${CAMPUS.brandName} home`}>
+            <AppLogo size={44} className="hidden h-11 w-11 sm:block" />
+            <span className="hidden max-h-5 text-[13px] font-extrabold leading-5 tracking-tight min-[361px]:inline sm:text-sm">
+              {CAMPUS.brandName}
+            </span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href={runnerEntry.href}
               aria-busy={runnerEntry.loading || undefined}
@@ -53,7 +55,7 @@ export function ChannelSelector() {
                   setMode("runner");
                 }
               }}
-              className="inline-flex min-h-11 items-center rounded-full border-2 border-emerald-400/60 bg-emerald-500 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-400"
+              className="hidden min-h-11 items-center rounded-full border-2 border-emerald-400/60 bg-emerald-500 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-400 sm:inline-flex"
             >
               {runnerHeaderLabel}
             </Link>
@@ -61,13 +63,17 @@ export function ChannelSelector() {
               <RunnerQueueBell tone="dark" className={headerIconClass} />
             ) : null}
             {runnerEntry.decision.status === "ready" && runnerEntry.decision.runner ? (
-              <RunnerHeaderShortcuts
-                ordersOnly
-                tone="dark"
-                className="h-11 w-11 rounded-full"
-              />
+              <div className="hidden sm:block">
+                <RunnerHeaderShortcuts
+                  ordersOnly
+                  tone="dark"
+                  className="h-11 w-11 rounded-full"
+                />
+              </div>
             ) : null}
-            <AccountMenu tone="dark" />
+            <div className="flex h-11 w-11 items-center justify-center">
+              <AccountMenu tone="dark" />
+            </div>
           </div>
         </div>
       </header>

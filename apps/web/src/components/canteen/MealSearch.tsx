@@ -714,7 +714,18 @@ export function MealSearch({ campus }: { campus: MealSearchCampus }) {
 
   return (
     <div className="relative min-w-0 flex-1">
-      <div className="relative h-11 w-full min-w-0">
+      <div className="relative h-10 w-full min-w-0 sm:h-11">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+            <path
+              d="m16 16 4 4"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
         <input
           ref={inputRef}
           type="search"
@@ -730,31 +741,13 @@ export function MealSearch({ campus }: { campus: MealSearchCampus }) {
             }
           }}
           placeholder="Search your meal"
-          className="h-11 w-full rounded-full border border-gray-200 bg-white pl-4 pr-12 text-sm outline-none shadow-sm sm:border-0 sm:shadow-[0_1px_4px_rgba(0,0,0,0.12)]"
+          className="h-10 w-full rounded-full border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none shadow-sm sm:h-11"
           autoComplete="off"
           enterKeyHint="search"
           aria-autocomplete="list"
           aria-controls={listId}
+          aria-label="Search your meal"
         />
-        <button
-          type="button"
-          onClick={() => {
-            inputRef.current?.focus();
-            if (!desktop) setMobileOpen(true);
-          }}
-          className="absolute right-1 top-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#ff6a00] text-white"
-          aria-label="Search"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
-            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
-            <path
-              d="m16 16 4 4"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
       </div>
 
       {/* Desktop dropdown ≥640px */}

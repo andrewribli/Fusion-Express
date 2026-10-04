@@ -7,11 +7,16 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import {
+  broadcastConfirmMessage,
   loadBroadcastRecipients,
   sendBroadcast,
   type BroadcastGroup,
   type BroadcastPerson,
 } from "@/lib/admin-broadcast";
+import {
+  WELCOME_EMAIL_BODY,
+  WELCOME_EMAIL_SUBJECT,
+} from "@/lib/welcome-email";
 
 type GroupConfig = {
   id: BroadcastGroup;
@@ -38,9 +43,8 @@ const GROUPS: GroupConfig[] = [
     id: "new_users",
     title: "New Users",
     description: "Registered in the last 7 days",
-    defaultSubject: "Welcome to GraceRun!",
-    defaultBody:
-      "Hey! Saw you just made an account. Welcome to GraceRun! Ready to skip the hill? Order your groceries now and get free delivery on your first order. Just reply to this email or order at gracerun.fit",
+    defaultSubject: WELCOME_EMAIL_SUBJECT,
+    defaultBody: WELCOME_EMAIL_BODY,
   },
   {
     id: "runners",
@@ -76,6 +80,7 @@ export default function AdminMessagingPage() {
   const [error, setError] = useState("");
   const [failed, setFailed] = useState<{ email: string; error: string }[]>([]);
   const [sending, setSending] = useState(false);
+  const [scannedDocs, setScannedDocs] = useState(0);
 
   const openGroup = useCallback((group: GroupConfig) => {
     setSelected(group);
@@ -97,16 +102,18 @@ export default function AdminMessagingPage() {
     setListLoading(true);
     void (async () => {
       try {
-        const rows = await loadBroadcastRecipients(selected.id);
+        const listed = await loadBroadcastRecipients(selected.id);
         if (!cancelled) {
-          setPeople(rows);
-          setPicked(new Set(rows.map((person) => person.email)));
+          setPeople(listed.people);
+          setPicked(new Set(listed.people.map((person) => person.email)));
+          setScannedDocs(listed.scannedDocs);
           setError("");
         }
       } catch (err) {
         if (!cancelled) {
           setPeople([]);
           setPicked(new Set());
+          setScannedDocs(0);
           setError(
             err instanceof Error ? err.message : "Could not load recipients.",
           );
@@ -155,12 +162,18 @@ export default function AdminMessagingPage() {
       setError("Select at least one recipient.");
       return;
     }
+    if (!test) {
+      const ok = window.confirm(broadcastConfirmMessage(emails.length));
+      if (!ok) return;
+    }
 
     setSending(true);
     setError("");
     setFailed([]);
     setStatus(
-      test ? "Sending test to yourself…" : `Sending to ${emails.length} people…`,
+      test
+        ? "Sending test to yourself…"
+        : `Sending to ${emails.length} people (batched via Resend)…`,
     );
 
     try {
@@ -177,12 +190,21 @@ export default function AdminMessagingPage() {
       } else {
         const sent = result.sent ?? 0;
         const fails = result.failed ?? [];
+        const attempted = result.count ?? emails.length;
         setFailed(fails);
+        if (typeof result.scannedDocs === "number") {
+          setScannedDocs(result.scannedDocs);
+        }
         if (fails.length === 0) {
-          setStatus(`Sent to ${sent} people successfully.`);
+          setStatus(
+            `Sent to ${sent} of ${attempted} people successfully` +
+              (result.scannedDocs
+                ? ` (scanned ${result.scannedDocs} user docs).`
+                : "."),
+          );
         } else {
           setStatus(
-            `Sent to ${sent} of ${result.count ?? sent + fails.length} people. ${fails.length} failed.`,
+            `Sent to ${sent} of ${attempted} people. ${fails.length} failed and were logged to emailFailures.`,
           );
         }
       }
@@ -248,7 +270,7 @@ export default function AdminMessagingPage() {
                       <p className="text-sm text-gray-500">
                         {listLoading
                           ? "Loading people…"
-                          : `${picked.size} selected of ${people.length} · ${selected.description}`}
+                          : `${picked.size} selected of ${people.length} · scanned ${scannedDocs} user docs · ${selected.description}`}
                       </p>
                     </div>
                     <button

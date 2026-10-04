@@ -8,6 +8,7 @@ import {
   formatDeliveryAddress,
   getHallsForCollege,
   getLobbyForHall,
+  migrateCuhkCollegeLabel,
   type CuhkCollege,
 } from "@fusion-express/shared/locations";
 import { createOrder } from "@fusion-express/shared/orders";
@@ -16,13 +17,20 @@ import { getUnitPrice, lineTotal } from "@fusion-express/shared";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
 
+function resolveInitialCollege(
+  profileCollege: string | undefined,
+): CuhkCollege {
+  const migrated = migrateCuhkCollegeLabel(profileCollege ?? "");
+  if (migrated && CUHK_COLLEGES.includes(migrated as CuhkCollege)) {
+    return migrated as CuhkCollege;
+  }
+  return CUHK_COLLEGES[0];
+}
+
 export default function CheckoutScreen() {
   const { items, subtotal, sessionId, clearCart } = useCart();
   const { profile, user, ensureCheckoutAuth } = useAuth();
-  const initialCollege: CuhkCollege =
-    profile?.college && CUHK_COLLEGES.includes(profile.college as CuhkCollege)
-      ? (profile.college as CuhkCollege)
-      : CUHK_COLLEGES[0];
+  const initialCollege = resolveInitialCollege(profile?.college);
   const [college, setCollege] = useState<CuhkCollege>(initialCollege);
   const [hall, setHall] = useState(() => {
     const halls = getHallsForCollege(initialCollege);

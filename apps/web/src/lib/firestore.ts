@@ -14,22 +14,90 @@ const PRODUCTS_PROD = "products";
 
 /** Aisle id → category field values (Excel Sub-Category + legacy labels). */
 export const AISLE_FIRESTORE_CATEGORIES: Record<string, string[]> = {
+  produce: [
+    "Produce",
+    "produce",
+    "Fruit",
+    "fruit",
+    "Fruit & Berries",
+    "fruit-and-berries",
+    "Vegetables",
+    "vegetables",
+  ],
+  "meat-beef": ["Meat - Beef", "meat-beef", "Beef", "beef"],
+  "meat-chicken": ["Meat - Chicken", "meat-chicken", "Chicken", "chicken"],
+  "meat-pork": ["Meat - Pork", "meat-pork", "Pork", "pork"],
+  "meat-other": [
+    "Meat - Other",
+    "meat-other",
+    "Meat",
+    "meat",
+    "Others",
+    "others",
+  ],
+  seafood: ["Seafood", "seafood"],
+  milk: ["Milk", "milk", "Dairy", "dairy"],
+  cheese: ["Cheese", "cheese"],
+  yogurt: ["Yogurt", "yogurt"],
+  "butter-and-spreads": ["Butter & Spreads", "butter-and-spreads"],
+  eggs: ["Eggs", "eggs"],
+  "ready-to-cook": ["Ready to Cook", "ready-to-cook"],
+  "frozen-meals": ["Frozen Meals", "frozen-meals", "Frozen Food", "frozen-food"],
+  "frozen-meat": ["Frozen Meat", "frozen-meat"],
+  "frozen-vegetables": ["Frozen Vegetables", "frozen-vegetables"],
   seasonings: ["Seasonings", "seasonings"],
-  tea: ["Tea", "tea"],
+  "tea-and-coffee": ["Tea & Coffee", "tea-and-coffee", "Tea", "tea", "Hot Drinks", "hot-drinks"],
   toiletries: ["Toiletries", "toiletries"],
-  "instant-noodles": ["Instant Noodles", "instant-noodles"],
-  "fruit-and-berries": ["Fruit & Berries", "fruit-and-berries"],
-  condiments: ["Condiments", "condiments"],
-  household: ["Household", "household", "Household Essentials"],
+  noodles: ["Noodles", "noodles", "Instant Noodles", "instant-noodles"],
+  "rice-and-grains": [
+    "Rice & Grains",
+    "rice-and-grains",
+    "Rice & Noodles",
+    "rice-noodles",
+    "Pantry",
+    "pantry",
+  ],
+  condiments: ["Condiments", "condiments", "Sauces", "sauces", "Pickles", "pickles"],
+  cleaning: [
+    "Cleaning",
+    "cleaning",
+    "Cleaning Supplies",
+    "cleaning-supplies",
+    "Household",
+    "household",
+    "Household Essentials",
+  ],
   "canned-goods": ["Canned Goods", "canned-goods"],
-  sauces: ["Sauces", "sauces"],
-  "rice-noodles": ["Rice & Noodles", "rice-noodles"],
-  chips: ["Chips", "chips"],
-  pickles: ["Pickles", "pickles"],
-  crackers: ["Crackers", "crackers"],
-  biscuits: ["Biscuits", "biscuits"],
-  "cleaning-supplies": ["Cleaning Supplies", "cleaning-supplies"],
-  snacks: ["Snacks", "snacks", "Chips", "chips", "Biscuits", "biscuits", "Crackers", "crackers", "Confectionary", "confectionary"],
+  snacks: [
+    "Snacks",
+    "snacks",
+    "Chips",
+    "chips",
+    "Biscuits",
+    "biscuits",
+    "Crackers",
+    "crackers",
+    "Confectionary",
+    "confectionary",
+  ],
+  // Legacy ids kept for old browse URLs
+  tea: ["Tea", "tea", "Tea & Coffee", "tea-and-coffee"],
+  "instant-noodles": ["Instant Noodles", "instant-noodles", "Noodles", "noodles"],
+  "fruit-and-berries": ["Fruit & Berries", "fruit-and-berries", "Produce", "produce"],
+  household: ["Household", "household", "Cleaning", "cleaning"],
+  sauces: ["Sauces", "sauces", "Condiments", "condiments"],
+  "rice-noodles": ["Rice & Noodles", "rice-noodles", "Rice & Grains", "rice-and-grains"],
+  chips: ["Chips", "chips", "Snacks", "snacks"],
+  pickles: ["Pickles", "pickles", "Condiments", "condiments"],
+  crackers: ["Crackers", "crackers", "Snacks", "snacks"],
+  biscuits: ["Biscuits", "biscuits", "Snacks", "snacks"],
+  "cleaning-supplies": ["Cleaning Supplies", "cleaning-supplies", "Cleaning", "cleaning"],
+  beef: ["Beef", "beef", "Meat - Beef", "meat-beef"],
+  chicken: ["Chicken", "chicken", "Meat - Chicken", "meat-chicken"],
+  pork: ["Pork", "pork", "Meat - Pork", "meat-pork"],
+  meat: ["Meat", "meat", "Meat - Other", "meat-other"],
+  others: ["Others", "others", "Meat - Other", "meat-other"],
+  dairy: ["Dairy", "dairy", "Milk", "milk"],
   other: ["Other", "other"],
 };
 
@@ -55,17 +123,20 @@ export function productBelongsToAisle(
 ): boolean {
   if (item.storeSection && item.storeSection !== section) return false;
 
+  const aisle = getAisle(section, aisleId);
+  const resolvedId = aisle?.id ?? aisleId;
+
   const cat = categorySlug(item.category);
-  if (cat === aisleId) return true;
+  if (cat === resolvedId || cat === aisleId) return true;
 
   const allowed = new Set(
-    getFirestoreCategoriesForAisle(aisleId).map(categorySlug),
+    getFirestoreCategoriesForAisle(resolvedId).map(categorySlug),
   );
+  allowed.add(resolvedId);
   allowed.add(aisleId);
 
-  const aisle = getAisle(section, aisleId);
   for (const menuCat of aisle?.menuCategories ?? []) {
-    allowed.add(menuCat);
+    allowed.add(categorySlug(menuCat));
   }
 
   const snackHub = new Set([
@@ -75,13 +146,24 @@ export function productBelongsToAisle(
     "crackers",
     "confectionary",
   ]);
-  const sub = item.subcategory ? categorySlug(item.subcategory) : "";
-  if (aisleId === "snacks" && (snackHub.has(cat) || snackHub.has(sub))) {
+  const produceHub = new Set([
+    "produce",
+    "fruit",
+    "fruit-and-berries",
+    "vegetables",
+  ]);
+  const sub = item.subcategory
+    ? categorySlug(item.subcategory).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+    : "";
+  if (resolvedId === "snacks" && (snackHub.has(cat) || snackHub.has(sub))) {
+    return true;
+  }
+  if (resolvedId === "produce" && (produceHub.has(cat) || produceHub.has(sub))) {
     return true;
   }
 
   if (allowed.has(cat)) return true;
-  return sub === aisleId;
+  return sub === resolvedId || sub === aisleId || allowed.has(sub);
 }
 
 /**

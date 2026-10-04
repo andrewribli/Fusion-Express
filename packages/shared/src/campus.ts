@@ -1,3 +1,5 @@
+import { isDemoLoginEmail } from "./demo-account";
+
 /**
  * Multi-campus GraceRun config.
  *
@@ -91,6 +93,7 @@ export function emailDomain(email: string): string {
 
 export function detectCampusFromEmail(email: string): CampusId | null {
   if (isOwnerLoginEmail(email)) return "cityu";
+  if (isDemoLoginEmail(email)) return "cuhk";
   const domain = emailDomain(email);
   for (const id of CAMPUS_IDS) {
     if ((campusConfig[id].emailDomains as readonly string[]).includes(domain)) {
@@ -122,6 +125,7 @@ export function isUniversityEmailForCampus(
 
 export function isCampusEmail(email: string, campus: CampusId): boolean {
   if (campus === "cityu" && isOwnerLoginEmail(email)) return true;
+  if (campus === "cuhk" && isDemoLoginEmail(email)) return true;
   return isUniversityEmailForCampus(email, campus);
 }
 

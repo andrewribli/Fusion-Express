@@ -12,7 +12,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { to?: string; recipientName?: string; message?: string };
+  let body: {
+    to?: string;
+    recipientName?: string;
+    message?: string;
+    hasPhoto?: boolean;
+  };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -26,7 +31,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    await sendDirectAdminEmail(to, body.recipientName ?? "", message);
+    await sendDirectAdminEmail(to, body.recipientName ?? "", message, {
+      hasPhoto: Boolean(body.hasPhoto),
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("direct email failed", err);

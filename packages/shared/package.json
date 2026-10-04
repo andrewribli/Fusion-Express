@@ -21,6 +21,8 @@
     "./cuhk-email": "./src/cuhk-email.ts",
     "./cityu-email": "./src/cityu-email.ts",
     "./campus": "./src/campus.ts",
+    "./demo-account": "./src/demo-account.ts",
+    "./search-rank": "./src/search-rank.ts",
     "./canteen-college": "./src/canteen-college.ts",
     "./college-discount": "./src/college-discount.ts",
     "./delivery-identity": "./src/delivery-identity.ts",
