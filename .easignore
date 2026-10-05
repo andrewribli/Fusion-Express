@@ -1,0 +1,29 @@
+.git
+node_modules
+apps/web
+scripts
+tmp
+reference
+
+*.zip
+*.pdf
+*.exe
+
+.env
+.env.*
+!.env.example
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+
+Product List Catalog.xlsx
+FoodPanda Data2.txt
+FoodPanda Fusion Data.txt
+
+packages/shared/data/foodpanda-fusion-meat.json
+packages/shared/data/foodpanda-fusion-household.json
+packages/shared/data/foodpanda-fusion-household.raw.json
+packages/shared/data/foodpanda-fusion-assignments.json
+packages/shared/data/parknshop-enrichment.json
+packages/shared/data/parknshop-menu-audit.json
+packages/shared/data/parknshop-menu-audit.csv
+packages/shared/data/pns-snacks-seed.json
