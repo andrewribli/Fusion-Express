@@ -18,7 +18,6 @@ import {
   ESTIMATED_DELIVERY_MINUTES,
   getEstimatedDeliveryTime,
   formatEta,
-  PAYMENT_FLOW_STEPS,
   TIP_PRESETS,
   isOverOrderLimit,
   DEFAULT_SPECIAL_INSTRUCTIONS,
@@ -313,13 +312,9 @@ export default function CheckoutPage() {
               />
             </section>
 
-            <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-              <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
-              <p className="mt-1 text-sm font-semibold text-blue-900">
-                PayMe is pre-selected. You pay after delivery when the runner
-                shares the details.
-              </p>
-              <div className="mt-3 rounded-xl bg-white p-3">
+            <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <h2 className="text-sm font-semibold">Payment method</h2>
+              <div className="mt-2">
                 <PaymentMethodPicker
                   value={paymentMethod}
                   onChange={(method) => {
@@ -328,11 +323,6 @@ export default function CheckoutPage() {
                   }}
                 />
               </div>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-blue-800">
-                {PAYMENT_FLOW_STEPS.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
             </section>
 
             <p className="text-sm text-white/80">
