@@ -9,7 +9,6 @@ import { BrowseBreadcrumb } from "@/components/BrowseBreadcrumb";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
-import { OrderActionBar } from "@/components/OrderActionBar";
 import { getAisleImage } from "@/data/aisle-images";
 import {
   getAislesForSection,
@@ -114,7 +113,6 @@ export default function BrowseSectionPage({
             </div>
             </div>
           </main>
-          <OrderActionBar />
         </div>
     </AppShell>
   );

@@ -15,7 +15,6 @@ import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
-import { OrderActionBar } from "@/components/OrderActionBar";
 import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 import { SECTION_META } from "@/data/aisles";
@@ -582,7 +581,6 @@ export function ShopHome() {
           </div>
         </main>
 
-        <OrderActionBar />
       </div>
     </AppShell>
   );

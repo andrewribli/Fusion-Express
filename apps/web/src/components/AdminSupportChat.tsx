@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import {
   fetchUnreadForUser,
@@ -29,7 +28,6 @@ export function AdminSupportChat({
 } = {}) {
   const pathname = usePathname();
   const { user, mode } = useUser();
-  const { itemCount } = useCart();
   const [open, setOpen] = useState(Boolean(forceOpen));
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState("");
@@ -237,7 +235,7 @@ export function AdminSupportChat({
   const fabBottom =
     mode === "runner"
       ? "bottom-28 md:bottom-6"
-      : onCartOrCheckout || itemCount > 0
+      : onCartOrCheckout
         ? "bottom-[11.5rem] md:bottom-6"
         : "bottom-28 md:bottom-6";
 

@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { feedbackErrorMessage, submitFeedback } from "@/lib/feedback";
 
 export function FeedbackButton() {
   const { user } = useUser();
-  const { itemCount } = useCart();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -19,10 +17,10 @@ export function FeedbackButton() {
   const rootRef = useRef<HTMLDivElement>(null);
 
   const onCart = pathname.startsWith("/cart") || pathname.startsWith("/checkout");
-  const fabBottom =
-    onCart || itemCount > 0
-      ? "bottom-[11.5rem] md:bottom-6"
-      : "bottom-28 md:bottom-6";
+  // Sit above the sticky checkout CTA on cart/checkout; elsewhere clear BottomNav only.
+  const fabBottom = onCart
+    ? "bottom-[11.5rem] md:bottom-6"
+    : "bottom-28 md:bottom-6";
 
   useEffect(() => {
     if (!open) return;

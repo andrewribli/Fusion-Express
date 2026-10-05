@@ -9,7 +9,6 @@ import { CategoryTabs } from "@/components/CategoryTabs";
 import { ItemListRow } from "@/components/ItemListRow";
 import { MenuSearch } from "@/components/MenuSearch";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
-import { OrderActionBar } from "@/components/OrderActionBar";
 import {
   getAisle,
   getAislesForSection,
@@ -296,7 +295,6 @@ export default function AisleItemsPage({
             </div>
             </div>
           </main>
-          <OrderActionBar />
         </div>
     </AppShell>
   );

@@ -2,24 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 
 export function TrackOrderFab() {
   const pathname = usePathname();
   const { mode } = useUser();
-  const { itemCount } = useCart();
   const { count, href } = useActiveCustomerOrders();
 
   if (mode === "runner" || count < 1) return null;
   if (pathname.startsWith("/track") || pathname.startsWith("/orders")) return null;
 
-  // Sit above the Complete bar when the cart is non-empty so the two never overlap.
-  const bottomClass =
-    itemCount > 0
-      ? "bottom-[9.75rem] md:bottom-24"
-      : "bottom-[5.75rem] md:bottom-6";
+  // Sit above BottomNav on mobile; cart no longer has a floating shop bar.
+  const bottomClass = "bottom-[5.75rem] md:bottom-6";
 
   return (
     <Link
