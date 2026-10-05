@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import type { MenuItem } from "@/lib/types";
 import { formatMenuPrice } from "@/lib/types";
 import { getItemImage } from "@/data/aisle-images";
 import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
+import { ProductImage } from "@/components/ProductImage";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 
 interface MenuItemCardProps {
@@ -38,22 +38,16 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
         style={{ backgroundColor: "#ffffff" }}
       >
         <div className="relative aspect-square w-full" style={{ backgroundColor: "#fafafa" }}>
-          {getItemImage(item) ? (
-            <Image
-              src={getItemImage(item)}
-              alt={item.name}
-              fill
-              className="object-contain p-2"
-              sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
-            />
-          ) : null}
+          <ProductImage
+            src={getItemImage(item)}
+            alt={item.name}
+            category={item.category}
+            sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
+          />
           <ProductCardQtyControl item={item} />
         </div>
         <div className="flex flex-1 flex-col p-2.5">
-          <h3
-            className="line-clamp-2 text-xs font-semibold leading-snug"
-            style={{ color: "#111111" }}
-          >
+          <h3 className="product-title text-xs font-semibold leading-snug" style={{ color: "#111111" }}>
             {item.name}
           </h3>
           <p className="shop-muted mt-0.5 text-xs" style={{ color: "#9ca3af" }}>

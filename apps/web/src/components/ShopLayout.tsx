@@ -7,8 +7,9 @@ import { AccountMenu } from "@/components/AccountMenu";
 import { AppLogo } from "@/components/AppLogo";
 import { AppShell } from "@/components/AppShell";
 import { GraceRunWordmark } from "@/components/GraceRunWordmark";
+import { CartDropdown } from "@/components/CartDropdown";
+import { TrackOrderHeaderButton } from "@/components/TrackOrderHeaderButton";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
-import { OrderActionBar } from "@/components/OrderActionBar";
 import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
 import { useCart } from "@/context/CartContext";
@@ -147,16 +148,17 @@ export function ShopLayout({
   mobileSidebarTitle = "Categories",
   children,
   cartChannel = "fusion",
-  hideTrackFab = false,
+  hideTrackFab = true,
   orderingEnabled = true,
 }: ShopLayoutProps) {
   const runnerEntry = useRunnerEntry("cuhk");
-  const { itemCount, addItem } = useCart();
+  const { addItem } = useCart();
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
+  const browseHref = cartChannel === "canteen" ? "/canteen" : "/cuhk";
 
   return (
     <AppShell hideTrackFab={hideTrackFab}>
-      <div className="shop-page min-h-screen bg-[#f5f5f5]">
+      <div className="shop-page min-h-screen bg-[#F0F7F2]">
         <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <button
@@ -239,27 +241,13 @@ export function ShopLayout({
               <RunnerQueueBell className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700" />
             </div>
 
-            <Link
-              href="/cart"
-              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
-              aria-label="Cart"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-                <path
-                  d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H7"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <circle cx="10" cy="20" r="1.2" fill="currentColor" />
-                <circle cx="17" cy="20" r="1.2" fill="currentColor" />
-              </svg>
-              {itemCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ED1C24] px-1 text-[10px] font-bold text-white">
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              )}
-            </Link>
+            <TrackOrderHeaderButton />
+            <CartDropdown
+              className="xl:hidden"
+              channel={cartChannel}
+              orderingEnabled={orderingEnabled}
+              browseHref={browseHref}
+            />
 
             <div className="flex h-11 w-11 shrink-0 items-center justify-center">
               <AccountMenu hideThemeChip avatarSize={36} />
@@ -322,7 +310,6 @@ export function ShopLayout({
           </div>
         </div>
 
-        <OrderActionBar orderingEnabled={orderingEnabled} />
       </div>
     </AppShell>
   );

@@ -1,19 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { AccountMenu } from "@/ptero/components/AccountMenu";
 import { AppLogo } from "@/ptero/components/AppLogo";
 import { CartSidebar } from "@/ptero/components/CartSidebar";
 import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificationBell";
 import { FeedbackButton } from "@/ptero/components/FeedbackButton";
-import { OrderActionBar } from "@/ptero/components/OrderActionBar";
+import { CartDropdown } from "@/ptero/components/CartDropdown";
 import { PreviousOrderChecklist } from "@/ptero/components/PreviousOrderChecklist";
-import { TrackOrderFab } from "@/ptero/components/TrackOrderFab";
+import { TrackOrderHeaderButton } from "@/ptero/components/TrackOrderHeaderButton";
 import { CAMPUS } from "@/ptero/config/campus";
-import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
-import { isOverOrderLimit } from "@/ptero/lib/constants";
 import { useRunnerEntry } from "@/lib/use-runner-entry";
 
 type Props = {
@@ -42,19 +40,12 @@ export function CanteenShopLayout({
   mobileSidebarTitle = "Canteens",
   children,
 }: Props) {
-  const { itemCount, subtotal } = useCart();
   const { setMode } = useUser();
   const runnerEntry = useRunnerEntry("cityu");
-  const overLimit = isOverOrderLimit(subtotal);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  const checkoutHref = useMemo(() => {
-    if (overLimit) return "/cityu/canteen";
-    return itemCount > 0 ? "/cityu/checkout" : "/cityu/cart";
-  }, [overLimit, itemCount]);
-
   return (
-    <div className="min-h-screen bg-[#f7f7f7]">
+    <div className="min-h-screen bg-[#F0F7F2]">
       <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:px-4">
           <Link
@@ -112,21 +103,13 @@ export function CanteenShopLayout({
             <div className="hidden sm:block">
               <CustomerNotificationBell className="!h-11 !w-11 !rounded-full" />
             </div>
-            <Link
-              href={checkoutHref}
-              className={`relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
-                overLimit
-                  ? "bg-gray-200 text-gray-400"
-                  : "bg-[#ED1C24] text-white"
-              }`}
-            >
-              Cart
-              {itemCount > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-bold text-white">
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              )}
-            </Link>
+            <TrackOrderHeaderButton />
+            <CartDropdown
+              browseHref="/cityu/canteen"
+              cartHref="/cityu/cart"
+              checkoutHref="/cityu/checkout"
+              flatDeliveryFee
+            />
             <div className="flex h-11 w-11 shrink-0 items-center justify-center">
               <AccountMenu />
             </div>
@@ -170,8 +153,6 @@ export function CanteenShopLayout({
         </aside>
       </div>
 
-      <TrackOrderFab />
-      <OrderActionBar />
       <FeedbackButton />
     </div>
   );

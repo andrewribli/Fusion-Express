@@ -7,15 +7,16 @@ import {
   useRef,
   useState,
 } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppShell } from "@/components/AppShell";
 import { CustomItemCard } from "@/components/CustomItemCard";
+import { CartDropdown } from "@/components/CartDropdown";
+import { TrackOrderHeaderButton } from "@/components/TrackOrderHeaderButton";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
-import { OrderActionBar } from "@/components/OrderActionBar";
 import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
+import { ProductImage } from "@/components/ProductImage";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
@@ -75,15 +76,13 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
           className="relative aspect-square w-full"
           style={{ backgroundColor: "#fafafa" }}
         >
-          {image ? (
-            <Image
-              src={image}
-              alt=""
-              fill
-              className="object-contain p-3"
-              sizes="160px"
-            />
-          ) : null}
+          <ProductImage
+            src={image}
+            alt={item.name}
+            category={item.category}
+            className="object-contain p-3"
+            sizes="160px"
+          />
           <span
             className="absolute left-2 top-2 z-[1] rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
             style={{ backgroundColor: "#ED1C24" }}
@@ -94,7 +93,7 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
         </div>
         <div className="flex flex-col gap-1.5 px-3 pb-3 pt-2">
           <p
-            className="line-clamp-2 min-h-[2.5rem] text-[12px] font-semibold leading-snug"
+            className="product-title min-h-[2.5rem] text-[12px] font-semibold leading-snug"
             style={{ color: "#111111" }}
           >
             {item.name}
@@ -195,7 +194,7 @@ function HomeSearchBar({
 }
 
 export function ShopHome() {
-  const { addItem, itemCount } = useCart();
+  const { addItem } = useCart();
   const { user } = useUser();
   const runnerEntry = useRunnerEntry("cuhk");
   const { openManualItem } = useManualItemModal();
@@ -382,8 +381,8 @@ export function ShopHome() {
   );
 
   return (
-    <AppShell>
-      <div className="shop-page min-h-screen bg-[#f5f5f5]">
+    <AppShell hideTrackFab>
+      <div className="shop-page min-h-screen bg-[#F0F7F2]">
         <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
             <button
@@ -469,27 +468,8 @@ export function ShopHome() {
               <RunnerQueueBell className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700" />
             </div>
 
-            <Link
-              href="/cart"
-              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
-              aria-label="Cart"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-                <path
-                  d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H7"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <circle cx="10" cy="20" r="1.2" fill="currentColor" />
-                <circle cx="17" cy="20" r="1.2" fill="currentColor" />
-              </svg>
-              {itemCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ED1C24] px-1 text-[10px] font-bold text-white">
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              )}
-            </Link>
+            <TrackOrderHeaderButton />
+            <CartDropdown className="xl:hidden" browseHref="/cuhk" />
 
             <div className="flex h-11 w-11 shrink-0 items-center justify-center">
               <AccountMenu hideThemeChip avatarSize={36} />
@@ -643,7 +623,6 @@ export function ShopHome() {
           </div>
         </div>
 
-        <OrderActionBar />
       </div>
     </AppShell>
   );

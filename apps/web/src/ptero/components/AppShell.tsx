@@ -7,9 +7,11 @@ import { TrackOrderFab } from "@/ptero/components/TrackOrderFab";
 export function AppShell({
   children,
   hideNav,
+  hideTrackFab,
 }: {
   children: React.ReactNode;
   hideNav?: boolean;
+  hideTrackFab?: boolean;
 }) {
   return (
     <>
@@ -17,7 +19,7 @@ export function AppShell({
         {children}
         <SiteFooter />
       </div>
-      <TrackOrderFab />
+      {!hideTrackFab && <TrackOrderFab />}
       {!hideNav && <BottomNav />}
     </>
   );

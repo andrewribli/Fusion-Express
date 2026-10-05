@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { CustomItemCard } from "@/components/CustomItemCard";
@@ -24,6 +23,7 @@ import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { DeliveryQuote } from "@/components/DeliveryQuote";
 import { readCityuHall } from "@/lib/cityu-hall";
 import { getItemImage } from "@/data/aisle-images";
+import { ProductImage } from "@/components/ProductImage";
 import { useUser } from "@/context/UserContext";
 import { useCampus } from "@/context/CampusContext";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
@@ -31,6 +31,11 @@ import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
 import { useIsAdmin } from "@/lib/use-is-admin";
 import { previewCustomerSavings } from "@fusion-express/shared";
 import { restaurantIdFromCanteenItemId } from "@fusion-express/shared/canteen-college";
+import { formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
+
+function money(amount: number): string {
+  return formatHkdAmount(Number(Number(amount).toFixed(2)));
+}
 
 export default function CartPage() {
   const router = useRouter();
@@ -57,7 +62,9 @@ export default function CartPage() {
     campus === "cuhk"
       ? previewCustomerSavings({ campus, restaurantId: canteenRestaurantId })
       : 0;
-  const total = subtotal + fee.deliveryFee - collegeSavings;
+  const total = Number(
+    (subtotal + fee.deliveryFee - collegeSavings).toFixed(2),
+  );
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
 
@@ -101,15 +108,14 @@ export default function CartPage() {
                       <div className="flex justify-between gap-2">
                         <div className="flex min-w-0 gap-3">
                           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                            {getItemImage(item) ? (
-                              <Image
-                                src={getItemImage(item)}
-                                alt=""
-                                fill
-                                className="object-cover"
-                                sizes="56px"
-                              />
-                            ) : null}
+                            <ProductImage
+                              src={getItemImage(item)}
+                              alt={item.name}
+                              category={item.category}
+                              className="object-cover"
+                              sizes="56px"
+                              showLabel={false}
+                            />
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-gray-900">
@@ -163,7 +169,7 @@ export default function CartPage() {
                         </button>
                       </div>
                       <p className="mt-2 text-right text-sm font-medium text-gray-700">
-                        ${lineTotal(item, quantity)}
+                        ${money(lineTotal(item, quantity))}
                       </p>
                     </li>
                   ))}
@@ -174,7 +180,7 @@ export default function CartPage() {
                     <div className="flex justify-between">
                       <span>Subtotal</span>
                       <span className={overLimit ? "font-bold text-[#ED1C24]" : undefined}>
-                        ${subtotal}
+                        ${money(subtotal)}
                       </span>
                     </div>
                     {fee.quote.pricing === "cuhk-graph" || fee.quote.pricing.startsWith("cityu") ? (
@@ -202,7 +208,7 @@ export default function CartPage() {
                       }`}
                     >
                       <span>Total</span>
-                      <span>${total}</span>
+                      <span>${money(total)}</span>
                     </div>
                   </div>
                   <p className="mt-3 text-xs text-fusion-red">

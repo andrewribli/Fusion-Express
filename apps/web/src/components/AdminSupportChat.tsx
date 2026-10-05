@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import {
   fetchUnreadForUser,
@@ -15,6 +14,7 @@ import {
   subscribeDirectMessages,
 } from "@/lib/direct-messages";
 import type { DirectMessage } from "@/lib/direct-messages";
+import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 
 export function AdminSupportChat({
   forceOpen,
@@ -28,10 +28,10 @@ export function AdminSupportChat({
 } = {}) {
   const pathname = usePathname();
   const { user, mode } = useUser();
-  const { itemCount } = useCart();
   const [open, setOpen] = useState(Boolean(forceOpen));
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [unread, setUnread] = useState(0);
+  const { count: activeOrderCount } = useActiveCustomerOrders();
   const bottomRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -208,22 +208,24 @@ export function AdminSupportChat({
     );
   }
 
-  // Sit above bottom nav (+ OrderActionBar when cart has items). Main content
-  // uses extra right padding on mobile so cards clear this FAB.
+  const showFab = open || unread > 0 || activeOrderCount > 0;
+  if (!showFab) return null;
+
+  // 56px FAB, 72px above the bottom nav.
   const fabBottom =
-    mode === "runner" || itemCount > 0
-      ? "bottom-[calc(9.5rem+env(safe-area-inset-bottom,0px))] md:bottom-28"
-      : "bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6";
+    mode === "runner"
+      ? "bottom-[calc(5.5rem+72px+env(safe-area-inset-bottom,0px))] md:bottom-28"
+      : "bottom-[calc(5.5rem+72px+env(safe-area-inset-bottom,0px))] md:bottom-6";
 
   return (
-    <div ref={rootRef} className={`fixed right-2 z-30 sm:right-4 ${fabBottom}`}>
+    <div ref={rootRef} className={`fixed right-3 z-30 sm:right-4 ${fabBottom}`}>
       {open ? (
         panel
       ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="relative flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg sm:h-12 sm:w-12"
+          className="relative flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg"
           style={{ backgroundColor: mode === "runner" ? "#1d1160" : "#ED1C24" }}
           aria-label="Chat with Admin"
         >

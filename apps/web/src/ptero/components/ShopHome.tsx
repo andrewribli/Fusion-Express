@@ -11,12 +11,12 @@ import { CustomerNotificationBell } from "@/ptero/components/CustomerNotificatio
 import { FeedbackButton } from "@/ptero/components/FeedbackButton";
 import { GrocerySourcePicker } from "@/ptero/components/GrocerySourcePicker";
 import { MenuItemCard } from "@/ptero/components/MenuItemCard";
-import { OrderActionBar } from "@/ptero/components/OrderActionBar";
+import { CartDropdown } from "@/ptero/components/CartDropdown";
+import { TrackOrderHeaderButton } from "@/ptero/components/TrackOrderHeaderButton";
 import { PreviousOrderChecklist } from "@/ptero/components/PreviousOrderChecklist";
 import { PrototypeBanner } from "@/ptero/components/PrototypeBanner";
 import { CAMPUS } from "@/ptero/config/campus";
 import { TASTE_PRODUCTS } from "@/ptero/config/products";
-import { useCart } from "@/ptero/context/CartContext";
 import { useUser } from "@/ptero/context/AppState";
 import { useIsAdmin } from "@/lib/use-is-admin";
 import { ADMIN_ORDERING_NOTE } from "@/lib/order-window";
@@ -35,13 +35,11 @@ import {
 } from "@/lib/grocerySources";
 
 export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
-  const { itemCount } = useCart();
   const { user, setMode } = useUser();
   const runnerEntry = useRunnerEntry("cityu");
   const isAdmin = useIsAdmin(user?.uid);
   const [search, setSearch] = useState("");
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
-  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [source, setSource] = useState<GrocerySourceId | null>(null);
   const [aisle, setAisle] = useState<CanonicalGroceryCategory | "all">("all");
   const [sortDesc, setSortDesc] = useState(false);
@@ -157,8 +155,8 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
   );
 
   return (
-    <AppShell>
-      <div className="shop-page min-h-screen bg-[#f5f5f5]">
+    <AppShell hideTrackFab>
+      <div className="shop-page min-h-screen bg-[#F0F7F2]">
         <PrototypeBanner />
 
         {/* Foodpanda-style top header */}
@@ -276,28 +274,8 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
               <CustomerNotificationBell className="!h-11 !w-11" />
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMobileCartOpen(true)}
-              className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 xl:hidden"
-              aria-label="Cart"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-                <path
-                  d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H7"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <circle cx="10" cy="20" r="1.2" fill="currentColor" />
-                <circle cx="17" cy="20" r="1.2" fill="currentColor" />
-              </svg>
-              {itemCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ED1C24] px-1 text-[10px] font-bold text-white">
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              )}
-            </button>
+            <TrackOrderHeaderButton />
+            <CartDropdown className="xl:hidden" browseHref="/cityu" />
 
             <AccountMenu />
           </div>
@@ -325,34 +303,6 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">{categoryList}</div>
-            </div>
-          </div>
-        )}
-
-        {mobileCartOpen && (
-          <div className="fixed inset-0 z-[60] xl:hidden">
-            <button
-              type="button"
-              className="absolute inset-0 bg-black/40"
-              aria-label="Close cart"
-              onClick={() => setMobileCartOpen(false)}
-            />
-            <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl bg-white shadow-xl">
-              <div className="flex items-center justify-between px-3 py-2">
-                <p className="text-sm font-bold text-gray-900">Your cart</p>
-                <button
-                  type="button"
-                  onClick={() => setMobileCartOpen(false)}
-                  className="rounded-lg px-2 py-1 text-sm font-semibold text-gray-500"
-                >
-                  Close
-                </button>
-              </div>
-              <div className="min-h-0 flex-1 p-3">
-                <div className="h-[min(70vh,560px)]">
-                  <CartSidebar />
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -490,7 +440,6 @@ export function ShopHome({ routeSource }: { routeSource?: GrocerySourceId }) {
           </div>
         </div>
       </div>
-      <OrderActionBar />
       <FeedbackButton />
     </AppShell>
   );

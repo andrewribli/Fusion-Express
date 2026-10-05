@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import type { MenuItem } from "@/ptero/lib/types";
 import { formatHkd, formatMenuPrice } from "@/ptero/lib/types";
 import { FavoriteHeart } from "@/components/FavoriteHeart";
 import { ProductCardQtyControl } from "@/ptero/components/ProductCardQtyControl";
+import { ProductImage } from "@/components/ProductImage";
 
 export function MenuItemCard({ item }: { item: MenuItem }) {
   const onSale = item.salePrice != null && item.salePrice < item.price;
@@ -17,15 +17,7 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
       style={{ backgroundColor: "#ffffff" }}
     >
       <div className="relative aspect-square w-full" style={{ backgroundColor: "#fafafa" }}>
-        {item.image ? (
-          <Image
-            src={item.image}
-            alt={item.name}
-            fill
-            className="object-contain p-2"
-            sizes="(min-width: 768px) 33vw, 50vw"
-          />
-        ) : null}
+        <ProductImage src={item.image} alt={item.name} category={item.category} />
         <FavoriteHeart
           itemId={item.id}
           className="absolute right-1.5 top-1.5 z-10"
@@ -34,7 +26,7 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
       </div>
       <div className="flex flex-1 flex-col p-2.5">
         <h3
-          className="line-clamp-2 text-xs font-semibold leading-snug"
+          className="product-title text-xs font-semibold leading-snug"
           style={{ color: "#111111" }}
         >
           {item.name}
