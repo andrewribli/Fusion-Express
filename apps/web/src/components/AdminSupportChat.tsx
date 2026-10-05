@@ -237,7 +237,7 @@ export function AdminSupportChat({
   const fabBottom =
     mode === "runner"
       ? "bottom-28 md:bottom-6"
-      : onCartOrCheckout || itemCount > 0
+      : onCartOrCheckout
         ? "bottom-[11.5rem] md:bottom-6"
         : "bottom-28 md:bottom-6";
 
