@@ -22,7 +22,6 @@ import {
   ESTIMATED_DELIVERY_MINUTES,
   getEstimatedDeliveryTime,
   formatEta,
-  PAYMENT_FLOW_STEPS,
   TIP_PRESETS,
   isOverOrderLimit,
   DEFAULT_SPECIAL_INSTRUCTIONS,
@@ -490,19 +489,6 @@ export default function CheckoutPage() {
                 placeholder="Custom tip ($)"
                 className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-2 text-sm"
               />
-            </section>
-
-            <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-              <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
-              <p className="mt-1 text-sm font-semibold text-blue-900">
-                No payment now. You pay the exact receipt total with card, FPS,
-                or PayMe after the runner delivers.
-              </p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-blue-800">
-                {PAYMENT_FLOW_STEPS.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
             </section>
 
             <p className="text-sm text-white/80">
