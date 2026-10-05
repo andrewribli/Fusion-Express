@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import {
   fetchUnreadForUser,
@@ -29,7 +28,6 @@ export function AdminSupportChat({
 } = {}) {
   const pathname = usePathname();
   const { user, mode } = useUser();
-  const { itemCount } = useCart();
   const [open, setOpen] = useState(Boolean(forceOpen));
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState("");
