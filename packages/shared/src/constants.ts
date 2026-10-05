@@ -1,5 +1,8 @@
 export const ESTIMATED_DELIVERY_MINUTES = 30;
 
+/** Flat GraceRun fee on every placed order. Shown only at final checkout. */
+export const PLATFORM_FEE = 1.5;
+
 /** Cart grocery subtotal cap. Runners front Fusion, so keep tickets small. */
 export const MAX_ORDER_VALUE = 200;
 
@@ -69,35 +72,66 @@ export const PRICES_DISCLAIMER =
 export const CUSTOM_ITEM_DEFAULT_WEIGHT_KG = 1;
 
 export const PAYMENT_FLOW_STEPS = [
-  "You pay nothing now. Order first, pay after delivery.",
-  "The runner pays Fusion at the till, then delivers to your lobby.",
-  "GraceRun reimburses the runner right after delivery.",
-  "You pay GraceRun the receipt total plus delivery (PayMe or FPS) within 24 hours.",
+  "You pay nothing now. Order first — app prices are estimates.",
+  "A runner accepts, buys the groceries, and enters the receipt total.",
+  "They deliver to your lobby.",
+  "You then pay the exact receipt total plus delivery via card, FPS, or PayMe.",
 ] as const;
 
 /** Fusion pickup hours. Runners shop then deliver to hall lobbies. */
 export const SERVICE_HOURS = {
   timeZone: "Asia/Hong_Kong",
-  /** 24h clock, inclusive start */
+  /** 24h clock, inclusive start (8:00pm) */
   openHour: 20,
-  /** 24h clock, exclusive end (1am) */
+  /** 24h clock, exclusive end (1:00am) */
   closeHour: 1,
   label: "8:00pm – 1:00am, Hong Kong time",
 } as const;
 
-export function hongKongHour(at = new Date()): number {
-  const hour = new Intl.DateTimeFormat("en-GB", {
+const OPEN_MINUTE = SERVICE_HOURS.openHour * 60;
+const CLOSE_MINUTE = SERVICE_HOURS.closeHour * 60;
+
+/**
+ * Minutes since midnight in Asia/Hong_Kong.
+ * Uses formatToParts + hourCycle h23 so we never parse locale literals
+ * (e.g. "20時") or 12-hour strings into NaN / wrong hours — that would
+ * lock ordering for the whole night.
+ */
+export function hongKongMinutes(at = new Date()): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: SERVICE_HOURS.timeZone,
     hour: "numeric",
-    hour12: false,
-  }).format(at);
-  return Number(hour);
+    minute: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(at);
+  let hour = Number.parseInt(
+    parts.find((part) => part.type === "hour")?.value ?? "",
+    10,
+  );
+  const minute = Number.parseInt(
+    parts.find((part) => part.type === "minute")?.value ?? "",
+    10,
+  );
+  // Some engines still report midnight as 24 under hour12:false.
+  if (hour === 24) hour = 0;
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+    const wall = new Date(
+      at.toLocaleString("en-US", { timeZone: SERVICE_HOURS.timeZone }),
+    );
+    return wall.getHours() * 60 + wall.getMinutes();
+  }
+  return hour * 60 + minute;
 }
 
-/** True during the nightly window, including midnight to 1am. */
+export function hongKongHour(at = new Date()): number {
+  return Math.floor(hongKongMinutes(at) / 60);
+}
+
+/** True during the nightly window, including midnight up to (not including) 1:00am. */
 export function isServiceOpen(at = new Date()): boolean {
-  const hour = hongKongHour(at);
-  return hour >= SERVICE_HOURS.openHour || hour < SERVICE_HOURS.closeHour;
+  const minutes = hongKongMinutes(at);
+  // Overnight wrap: 20:00–24:00 or 00:00–01:00.
+  return minutes >= OPEN_MINUTE || minutes < CLOSE_MINUTE;
 }
 
 export const WHY_GRACERUN = [

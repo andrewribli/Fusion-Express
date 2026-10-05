@@ -63,7 +63,7 @@ body.dark-mode {
  */
 .shop-page,
 body.dark-mode .shop-page {
-  background-color: #f3f4f6 !important;
+  background-color: #f0f7f2 !important;
   color: #111111 !important;
 }
 
@@ -130,4 +130,13 @@ body.dark-mode .shop-page .hover\:bg-gray-50:hover,
 .shop-page .hover\:bg-red-50:hover,
 body.dark-mode .shop-page .hover\:bg-red-50:hover {
   background-color: #fef2f2 !important;
+}
+
+.product-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 2;
 }

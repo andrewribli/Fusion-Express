@@ -1,14 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getItemImage } from "@/data/aisle-images";
+import { ProductImage } from "@/components/ProductImage";
 import { useCart } from "@/context/CartContext";
-import { formatMenuPrice, type MenuItem } from "@/lib/types";
+import { formatMenuPriceLabel, type MenuItem } from "@/lib/types";
 
 function priceLabel(item: MenuItem): string {
-  const raw = formatMenuPrice(item);
-  return raw.startsWith("HK") ? raw : `HK${raw}`;
+  return formatMenuPriceLabel(item);
 }
 
 export function ProductQuickAddModal({
@@ -72,15 +71,13 @@ export function ProductQuickAddModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative aspect-square w-full" style={{ backgroundColor: "#fafafa" }}>
-          {image ? (
-            <Image
-              src={image}
-              alt=""
-              fill
-              className="object-contain p-5"
-              sizes="400px"
-            />
-          ) : null}
+          <ProductImage
+            src={image}
+            alt={item.name}
+            category={item.category}
+            className="object-contain p-5"
+            sizes="400px"
+          />
           <button
             type="button"
             onClick={onClose}

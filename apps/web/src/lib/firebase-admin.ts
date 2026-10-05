@@ -8,9 +8,17 @@ import {
   type App,
   type ServiceAccount,
 } from "firebase-admin/app";
-import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { collectionName } from "@/lib/constants";
+import { isDoNotEmailAddress } from "@fusion-express/shared/demo-account";
+
+/**
+ * Do not statically import `firebase-admin/auth`. Loading it pulls
+ * jwks-rsa → jose; jose@6 is ESM-only and crashes the whole route module
+ * on Vercel with ERR_REQUIRE_ESM (empty HTTP 500, no JSON body).
+ * Lazy-require so Identity Toolkit REST auth still works without Auth SDK.
+ */
+type Auth = import("firebase-admin/auth").Auth;
 
 function loadServiceAccount(): ServiceAccount | null {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
@@ -49,17 +57,46 @@ function getAdminApp(): App | null {
   if (existing) return existing;
   const account = loadServiceAccount();
   if (!account) return null;
-  return initializeApp({ credential: cert(account) });
+  const storageBucket =
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || undefined;
+  return initializeApp({
+    credential: cert(account),
+    ...(storageBucket ? { storageBucket } : {}),
+  });
 }
 
 export function getAdminAuth(): Auth | null {
   const app = getAdminApp();
-  return app ? getAuth(app) : null;
+  if (!app) return null;
+  try {
+    // Externalized package — CJS require is intentional and keeps Auth off
+    // the module's critical load path for routes that only need REST/Firestore.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getAuth } = require("firebase-admin/auth") as typeof import("firebase-admin/auth");
+    return getAuth(app);
+  } catch (err) {
+    console.error("firebase-admin/auth unavailable (jose/jwks-rsa?)", err);
+    return null;
+  }
 }
 
 export function getAdminDb(): Firestore | null {
   const app = getAdminApp();
   return app ? getFirestore(app) : null;
+}
+
+export function getAdminStorage(): import("firebase-admin/storage").Storage | null {
+  const app = getAdminApp();
+  if (!app) return null;
+  try {
+    // Lazy require — keep storage off the critical path for most routes.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getStorage } = require("firebase-admin/storage") as typeof import("firebase-admin/storage");
+    return getStorage(app);
+  } catch (err) {
+    console.error("firebase-admin/storage unavailable", err);
+    return null;
+  }
 }
 
 export class AdminAuthError extends Error {
@@ -245,7 +282,7 @@ export type AlertRecipient = {
   isRunner: boolean;
 };
 
-export type BroadcastGroup = "new_users" | "runners" | "long_term";
+export type BroadcastGroup = "everyone" | "new_users" | "runners" | "long_term";
 
 export type BroadcastRecipient = {
   email: string;
@@ -297,6 +334,7 @@ export async function listBroadcastRecipients(
       .trim()
       .toLowerCase();
     if (!email.includes("@") || seen.has(email)) continue;
+    if (isDoNotEmailAddress(email)) continue;
     seen.add(email);
     out.push({
       email,
@@ -384,6 +422,7 @@ async function listBroadcastRecipientsViaRest(
         restString(fields, "email") || restString(fields, "cuhkEmail")
       ).toLowerCase();
       if (!email.includes("@") || seen.has(email)) continue;
+      if (isDoNotEmailAddress(email)) continue;
       seen.add(email);
       out.push({
         email,
@@ -400,25 +439,28 @@ async function listBroadcastRecipientsViaRest(
 }
 
 /**
- * Verify a Firebase ID token without loading Auth SDK path as the only option.
- * Prefer Admin SDK verifyIdToken; fall back to Identity Toolkit REST.
+ * Verify a Firebase ID token. Prefer Identity Toolkit REST so we never load
+ * firebase-admin/auth (jwks-rsa/jose) on the common path. Admin SDK is a
+ * fallback only when REST cannot verify.
  */
 async function verifyIdToken(
   idToken: string,
 ): Promise<{ uid: string; email: string | null } | null> {
+  const viaRest = await verifyIdTokenViaRest(idToken);
+  if (viaRest) return viaRest;
+
   const auth = getAdminAuth();
-  if (auth) {
-    try {
-      const decoded = await auth.verifyIdToken(idToken, true);
-      return {
-        uid: decoded.uid,
-        email: decoded.email?.trim().toLowerCase() || null,
-      };
-    } catch (err) {
-      console.error("verifyIdToken Admin SDK failed; trying REST", err);
-    }
+  if (!auth) return null;
+  try {
+    const decoded = await auth.verifyIdToken(idToken, true);
+    return {
+      uid: decoded.uid,
+      email: decoded.email?.trim().toLowerCase() || null,
+    };
+  } catch (err) {
+    console.error("verifyIdToken Admin SDK failed after REST", err);
+    return null;
   }
-  return verifyIdTokenViaRest(idToken);
 }
 
 /**
@@ -466,7 +508,8 @@ export type AuthedRequest = {
 
 /**
  * Verify Firebase ID token from Authorization: Bearer.
- * Prefer Admin SDK verifyIdToken; fall back to Identity Toolkit REST.
+ * Uses Identity Toolkit REST first (see verifyIdToken) so missing/invalid
+ * tokens return JSON 401 even when firebase-admin/auth cannot load.
  */
 export async function requireAuthFromRequest(
   request: Request,
@@ -523,6 +566,8 @@ export type OrderEmailFields = {
   finalTotal: number;
   amountPaidByRunner: number;
   deliveryLocation: string;
+  campus: string;
+  orderChannel: string;
   items: { name: string; quantity: number; price: number }[];
 };
 
@@ -573,6 +618,8 @@ function orderFieldsFromAdminData(
     finalTotal: Number(data.finalTotal ?? 0) || 0,
     amountPaidByRunner: Number(data.amountPaidByRunner ?? 0) || 0,
     deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    campus: String(data.campus ?? ""),
+    orderChannel: String(data.orderChannel ?? ""),
     items,
   };
 }
@@ -666,6 +713,8 @@ export async function fetchOrderForEmail(
     total: restNumber(fields, "total"),
     finalTotal: restNumber(fields, "finalTotal"),
     amountPaidByRunner: restNumber(fields, "amountPaidByRunner"),
+    campus: restString(fields, "campus"),
+    orderChannel: restString(fields, "orderChannel"),
     deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
     items,
   };
@@ -747,18 +796,22 @@ export function filterBroadcastRecipients(
   group: BroadcastGroup,
   now = new Date(),
 ): BroadcastRecipient[] {
+  const eligible = recipients.filter((r) => !isDoNotEmailAddress(r.email));
   const msDay = 24 * 60 * 60 * 1000;
+  if (group === "everyone") {
+    return eligible.filter((r) => !r.email.endsWith("@fusion-express.app"));
+  }
   if (group === "runners") {
-    return recipients.filter((r) => r.isRunner);
+    return eligible.filter((r) => r.isRunner);
   }
   if (group === "new_users") {
     const cutoff = now.getTime() - 7 * msDay;
-    return recipients.filter(
+    return eligible.filter(
       (r) => r.createdAt != null && r.createdAt.getTime() >= cutoff,
     );
   }
   const cutoff = now.getTime() - 30 * msDay;
-  return recipients.filter(
+  return eligible.filter(
     (r) => r.createdAt != null && r.createdAt.getTime() < cutoff,
   );
 }

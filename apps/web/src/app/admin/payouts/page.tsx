@@ -5,7 +5,9 @@ import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
+import { OrderChannelBadge } from "@/components/OrderChannelBadge";
 import { RequireAdmin } from "@/components/RequireAdmin";
+import { AdminRealPerson } from "@/components/DeliveryIdentity";
 import {
   fetchAdminReviewOrders,
   markRunnerPayout,
@@ -161,14 +163,26 @@ export default function AdminPayoutsPage() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="flex flex-wrap items-center gap-2 font-bold text-gray-900">
+                              {order.id}
+                              <OrderChannelBadge order={order} />
+                              {order.expiredWarningSentAt ? (
+                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">
+                                  Warned
+                                </span>
+                              ) : null}
+                            </p>
                             <p className="text-xs text-gray-500">
-                              {order.runnerName ?? "Runner"} ·{" "}
                               {adminPayoutLabel(order.status)}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              Customer: {order.customerName ?? order.customerId}
-                            </p>
+                            <AdminRealPerson
+                              uid={order.runnerUid}
+                              fallbackName={order.runnerName || "Runner"}
+                            />
+                            <AdminRealPerson
+                              uid={order.customerId}
+                              fallbackName={order.customerName || "Customer"}
+                            />
                           </div>
                           <p className="text-right text-sm font-bold text-[#ED1C24]">
                             Pay runner ${reimburse}
@@ -186,7 +200,7 @@ export default function AdminPayoutsPage() {
                           <Proof url={order.receiptUrl} label="Receipt" />
                           <Proof url={order.bankStatementUrl} label="Bank statement" />
                         </div>
-                        {order.status === "delivered" && (
+                        {(order.status === "paid" || order.status === "customer_paid") && (
                           <>
                             <label className="mt-3 flex items-start gap-2 text-xs font-semibold text-gray-800">
                               <input

@@ -3,6 +3,14 @@
     "name": "GraceRun",
     "slug": "fusion-express",
     "version": "1.0.0",
+    "ios": {
+      "bundleIdentifier": "fit.gracerun.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
     "orientation": "portrait",
     "scheme": "fusionexpress",
     "userInterfaceStyle": "light",

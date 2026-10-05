@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CuhkEmailOtp } from "@/components/CuhkEmailOtp";
+import { CampusEmailOtp } from "@/components/CampusEmailOtp";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { AppLogo } from "@/components/AppLogo";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
@@ -11,8 +11,17 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { LegalLink } from "@/components/LegalLink";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
+import {
+  accessCampusForUser,
+  postLoginDestination,
+} from "@/lib/campus-access";
+import {
+  detectCampusFromEmail,
+  type CampusId,
+} from "@fusion-express/shared/campus";
 import { friendlyAuthError } from "@/lib/auth-errors";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { BootScreen } from "@/components/BootScreen";
@@ -31,13 +40,17 @@ function safeNextPath(): string | null {
   return next;
 }
 
-function postLoginPath(): string {
-  return safeNextPath() ?? "/";
+function postLoginPath(campus?: CampusId | null, email?: string | null): string {
+  return postLoginDestination({
+    campus,
+    next: safeNextPath(),
+    email: email ?? null,
+  });
 }
 
 /**
  * Guest browse/order path: honor ?next= (e.g. /checkout), else cart → checkout,
- * else shop with guest=1. Phone + dorm are collected at checkout via
+ * else shop with guest=1. Dorm and lobby are collected at checkout.
  * ensureGuestCheckout — guests never need an account first.
  */
 function guestContinuePath(itemCount: number): string {
@@ -58,14 +71,25 @@ export default function LoginPage() {
     startGuestBrowse,
   } = useUser();
   const { itemCount } = useCart();
+  const { setCampus: setAppCampus } = useCampus();
   const demoAuth = useDemoAuth();
 
   const [mode, setMode] = useState<Mode>("signin");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("mode") === "signup") {
+      setMode("signup");
+    }
+  }, []);
   const [signupStep, setSignupStep] = useState<SignupStep>(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [chineseName, setChineseName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -73,6 +97,13 @@ export default function LoginPage() {
   const [cuhkVerified, setCuhkVerified] = useState(false);
   /** Email that passed OTP — must match the address registered at submit. */
   const [verifiedEmail, setVerifiedEmail] = useState("");
+
+  function composedFullName(): string {
+    return [firstName, middleName, lastName]
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(" ");
+  }
 
   function continueAsGuest() {
     startGuestBrowse();
@@ -106,8 +137,10 @@ export default function LoginPage() {
     try {
       if (firebaseEnabled || demoAuth) {
         await signIn(identifier, password);
+        const campus = detectCampusFromEmail(identifier);
+        if (campus) setAppCampus(campus);
         setAppMode("customer");
-        router.push(postLoginPath());
+        router.push(postLoginPath(campus, identifier));
       } else {
         setError("Live login requires Firebase. Add env vars to .env.local.");
       }
@@ -121,8 +154,12 @@ export default function LoginPage() {
   function goSignupNext() {
     setError("");
     if (signupStep === 1) {
-      if (!fullName.trim()) {
-        setError("Enter your full name");
+      if (!firstName.trim()) {
+        setError("Enter your first name");
+        return;
+      }
+      if (!lastName.trim()) {
+        setError("Enter your last name");
         return;
       }
       setSignupStep(2);
@@ -147,10 +184,17 @@ export default function LoginPage() {
     setError("");
 
     const registeringEmail = email.trim().toLowerCase();
-    const emailErr = validateEmail(registeringEmail);
+    const campus = detectCampusFromEmail(registeringEmail);
     const passErr = validatePassword(password);
-    if (!fullName.trim()) {
-      setError("Enter your full name");
+    const fullName = composedFullName();
+    if (!firstName.trim() || !lastName.trim() || !fullName) {
+      setError(
+        !firstName.trim()
+          ? "Enter your first name"
+          : !lastName.trim()
+            ? "Enter your last name"
+            : "Enter your name",
+      );
       setSignupStep(1);
       return;
     }
@@ -164,13 +208,13 @@ export default function LoginPage() {
       setSignupStep(2);
       return;
     }
-    if (emailErr) {
-      setError(emailErr);
+    if (!campus) {
+      setError("Please use your CUHK or CityU email");
       setSignupStep(3);
       return;
     }
     if (!cuhkVerified || !verifiedEmail) {
-      setError("Verify your CUHK email before creating an account");
+      setError("Verify your university email before creating an account");
       setSignupStep(3);
       return;
     }
@@ -190,9 +234,12 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
+      const chinese = chineseName.trim();
       const profile = {
         email: registeringEmail,
         fullName: fullName.trim(),
+        ...(chinese ? { chineseName: chinese } : {}),
+        campus,
         isGuest: false,
         isRunner: false,
         cuhkEmail: registeringEmail,
@@ -204,8 +251,9 @@ export default function LoginPage() {
       } else {
         login(profile);
       }
+      setAppCampus(campus);
       setAppMode("customer");
-      router.push(postLoginPath());
+      router.push(postLoginPath(campus, registeringEmail));
     } catch (err) {
       setError(friendlyAuthError(err, "Sign up failed"));
     } finally {
@@ -213,11 +261,16 @@ export default function LoginPage() {
     }
   }
 
-  // Already signed in — never leave people stuck on the auth form.
+  // Already signed in — never leave people stuck on the auth form. Guest
+  // checkout sessions still need to reach sign-up to make a real account.
   useEffect(() => {
-    if (!isReady || !user) return;
-    router.replace("/");
-  }, [user, isReady, router]);
+    if (!isReady || !user || user.isGuest) return;
+    const campus = accessCampusForUser(user);
+    if (campus) setAppCampus(campus);
+    router.replace(
+      postLoginDestination({ campus, email: user.email, next: safeNextPath() }),
+    );
+  }, [user, isReady, router, setAppCampus]);
 
   if (!isReady) {
     return <BootScreen error={bootError} />;
@@ -227,7 +280,10 @@ export default function LoginPage() {
     return <BootScreen error={bootError} />;
   }
 
-  if (user) {
+  // Guests must still see this form. Treating every stored profile as
+  // "already signed in" left /login on "Loading…" forever, so the CityU
+  // sign-in button never appeared and never submitted.
+  if (user && !user.isGuest) {
     return <BootScreen />;
   }
 
@@ -258,20 +314,6 @@ export default function LoginPage() {
           <AppLogo size={96} className="mx-auto h-24 w-24" priority />
         </div>
 
-        <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
-          <button
-            type="button"
-            onClick={continueAsGuest}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
-          >
-            {itemCount > 0 ? "Continue as Guest · Checkout" : "Continue as Guest"}
-          </button>
-          <p className="mt-2 text-xs leading-snug text-gray-700">
-            Browse and order without signing in — checkout only needs dorm,
-            lobby, and phone.
-          </p>
-        </div>
-
         <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
           Ordering groceries?{" "}
           <button
@@ -281,7 +323,7 @@ export default function LoginPage() {
           >
             Shop now as guest
           </button>{" "}
-          and check out with just dorm, lobby, and phone — no sign-up required.
+          and check out with just your dorm and lobby — no sign-up required.
           Runners still need a full verified account.
         </p>
 
@@ -333,9 +375,12 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="1155xxxxxx@link.cuhk.edu.hk"
+                placeholder="you@link.cuhk.edu.hk or you@my.cityu.edu.hk"
                 className={inputClassName}
               />
+              <p className="mt-1 text-xs text-gray-500">
+                CUHK email goes to GraceRun CUHK. CityU email goes to GraceRun CityU.
+              </p>
             </div>
             <div>
               <PasswordInput
@@ -357,7 +402,12 @@ export default function LoginPage() {
               )}
             </div>
             {error && (
-              <p className="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+              <p
+                role="alert"
+                className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700"
+              >
+                {error}
+              </p>
             )}
             <button
               type="submit"
@@ -377,8 +427,8 @@ export default function LoginPage() {
                   : "Continue as Guest"}
               </button>
               <p className="mt-2 text-xs leading-snug text-gray-700">
-                Browse and order without signing in — checkout only needs dorm,
-                lobby, and phone.
+                Browse and order without signing in — checkout only needs your
+                dorm and lobby.
               </p>
             </div>
           </form>
@@ -411,19 +461,75 @@ export default function LoginPage() {
             </div>
 
             {signupStep === 1 && (
-              <div>
-                <label htmlFor="fullName" className="block text-xs font-medium text-gray-600">
-                  Full Name
-                </label>
-                <input
-                  id="fullName"
-                  required
-                  autoComplete="name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Felix Wong"
-                  className={inputClassName}
-                />
+              <div className="space-y-3">
+                <div>
+                  <label
+                    htmlFor="firstName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    First name
+                  </label>
+                  <input
+                    id="firstName"
+                    required
+                    autoComplete="given-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="e.g. Felix"
+                    className={inputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="lastName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Last name
+                  </label>
+                  <input
+                    id="lastName"
+                    required
+                    autoComplete="family-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="e.g. Wong"
+                    className={inputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="middleName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Middle name{" "}
+                    <span className="font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="middleName"
+                    autoComplete="additional-name"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    placeholder="If any"
+                    className={inputClassName}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="chineseName"
+                    className="block text-xs font-medium text-gray-600"
+                  >
+                    Chinese name{" "}
+                    <span className="font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="chineseName"
+                    autoComplete="off"
+                    value={chineseName}
+                    onChange={(e) => setChineseName(e.target.value)}
+                    placeholder="中文姓名（如有）"
+                    className={inputClassName}
+                  />
+                </div>
               </div>
             )}
 
@@ -450,15 +556,20 @@ export default function LoginPage() {
 
             {signupStep === 3 && (
               <>
-                <CuhkEmailOtp
+                <p className="text-sm text-gray-600">
+                  A CUHK email opens GraceRun CUHK. A CityU email opens GraceRun CityU.
+                </p>
+                <CampusEmailOtp
+                  anyCampus
                   initialEmail={email}
                   verified={cuhkVerified}
-                  hint="Use your @link.cuhk.edu.hk email. We send a one-time code to verify you are a CUHK student."
-                  onVerified={(cuhkEmail) => {
-                    const normalized = cuhkEmail.trim().toLowerCase();
+                  onVerified={(verified) => {
+                    const normalized = verified.trim().toLowerCase();
+                    const campus = detectCampusFromEmail(normalized);
                     setEmail(normalized);
                     setVerifiedEmail(normalized);
                     setCuhkVerified(true);
+                    if (campus) setAppCampus(campus);
                     setError("");
                   }}
                 />

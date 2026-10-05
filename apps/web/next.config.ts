@@ -5,7 +5,24 @@ const nextConfig: NextConfig = {
   // Keep Admin SDK + jwks-rsa/jose out of the Turbopack/webpack server bundle.
   // Bundling them caused ERR_REQUIRE_ESM (CJS require of ESM-only jose@6).
   serverExternalPackages: ["firebase-admin", "jose", "jwks-rsa"],
+  // On Vercel (monorepo root), write Next output to repo-root `.next` so the
+  // platform Output Directory matches. Local/Turbopack keep app-local `.next`.
   distDir: process.env.VERCEL ? "../../.next" : ".next",
+  async redirects() {
+    return [
+      {
+        source: "/canteen/united-college",
+        destination: "/canteen/uc-canteen",
+        permanent: false,
+      },
+      {
+        source: "/canteen/na-canteen",
+        destination: "/canteen/na-webbites",
+        permanent: false,
+      },
+      { source: "/taste", destination: "/cityu/taste", permanent: false },
+    ];
+  },
   images: {
     // Bypass Vercel Image Optimization until quota is restored (remote
     // medias.pns.hk / foodpanda URLs were returning HTTP 402).
@@ -66,6 +83,22 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "spics.wantu.cn",
+      },
+      {
+        protocol: "https",
+        hostname: "img.rtacdn-os.com",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
       },
     ],
   },

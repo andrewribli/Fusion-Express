@@ -1,6 +1,8 @@
 import type { OrderStatus } from "./order-status";
+import type { CampusId } from "./campus";
 import type { ShopKind } from "./shop-kind";
 
+export type { CampusId };
 export type { ShopKind } from "./shop-kind";
 
 export const MENU_CATEGORIES = [
@@ -99,6 +101,8 @@ export interface MenuItem {
   category: string;
   /** Excel Category: Groceries → dry, Fresh Food → refrigerated. */
   storeSection?: StoreSection;
+  /** Campus this SKU belongs to (CUHK Fusion vs CityU Taste). */
+  campus?: CampusId;
   price: number;
   salePrice?: number;
   bulkDealQty?: number;
@@ -158,6 +162,7 @@ export {
   formatExpiredAgo,
   runnerWarningTotal,
   isCustomerPaymentOpen,
+  isClaimableOrderStatus,
 } from "./order-status";
 
 
@@ -184,6 +189,8 @@ export interface RunnerLocation {
   updatedAt: Date;
 }
 
+export type OrderChannel = "fusion" | "taste" | "canteen";
+
 export interface Order {
   id: string;
   sessionId: string;
@@ -196,16 +203,23 @@ export interface Order {
   customerEmail?: string;
   /** Customer mobile for runner contact / guest checkout identity. */
   customerPhone?: string;
+  /** University campus that owns this order (CUHK vs CityU). */
+  campus?: CampusId;
+  /** Storefront channel that placed the order (grocery vs campus canteen). */
+  orderChannel?: OrderChannel;
+  /** Canteen restaurant slug (e.g. uc-canteen) when orderChannel is canteen. */
+  canteenRestaurantId?: string;
   /**
    * Fusion grocery vs campus canteen. Kept separate so carts/checkouts never
-   * mix pickup locations or fee rules.
+   * mix pickup locations or fee rules. Prefer alongside orderChannel.
    */
   shopKind?: ShopKind;
-  /** Canteen restaurant id when shopKind is canteen. */
+  /** Canteen restaurant id when shopKind is canteen (main dual-cart field). */
   canteenId?: string;
   canteenName?: string;
   items: OrderItem[];
   status: OrderStatus;
+  /** CUHK college or CityU compound. */
   college: string;
   hall: string;
   roomNumber?: string;
@@ -216,14 +230,69 @@ export interface Order {
   runnerNote?: string;
   subtotal: number;
   deliveryFee: number;
+  /**
+   * Locked when the order is created. Missing on older orders — do not backfill.
+   * deliveryFee on new orders equals deliveryTotal.
+   */
+  deliveryBase?: number;
+  deliverySurcharge?: number;
+  deliveryTotal?: number;
+  /** CUHK graph node the order left from. Not recomputed later. */
+  deliveryOrigin?: string;
+  /** CUHK graph node the order went to. Not recomputed later. */
+  deliveryDestination?: string;
+  /** Path cost before the HK$5 floor. Customers never see this. */
+  deliveryFeeRaw?: number;
+  /** Node ids along the cheapest directed path. Customers never see this. */
+  deliveryPath?: string[];
+  /** taste, wellcome, ac1, eben, fusion, or a canteen id. */
+  sourceId?: string;
   tip?: number;
+  /**
+   * Flat GraceRun platform charge (HK$1.50 on new orders).
+   * Missing on older orders — treat as 0 when summing.
+   */
+  platformFee?: number;
   total: number;
+  /** True when a matching-college runner unlocked the customer slice. */
+  discountApplied?: boolean;
+  /**
+   * Canteen's documented discount in HKD (5 for an eligible order).
+   * Older orders stored the customer savings here (the retired 10%).
+   */
+  discountAmount?: number;
+  /** College whose student card unlocks the canteen discount. */
+  discountCollege?: string;
+  /** Stored split. Customer savings are `customer`, not the full discount. */
+  discountSplit?: { customer: number; runner: number; platform: number };
+  /** pending until accept, applied on a match, void when a non-match accepts. */
+  collegeDiscountStatus?: "pending" | "applied" | "void";
+  /**
+   * Platform slice of the canteen discount. HK$1 only after a matching
+   * runner accepts. Not added to the customer total. Separate from platformFee.
+   */
+  platformDiscountFee?: number;
+  platformDiscountFeeAt?: Date;
+  /** Normalized college id of the assigned runner. */
+  runnerCollege?: string;
+  /** Normalized college id of the canteen (e.g. UC). */
+  canteenCollege?: string;
   paymentReceived: boolean;
   paymentMethod?: "PayMe" | "FPS";
+  /** Online checkout provider (e.g. airwallex). */
+  paymentProvider?: "airwallex" | string;
+  /** True while the customer still owes Airwallex for this order. */
+  awaitingOnlinePayment?: boolean;
+  airwallexPaymentIntentId?: string;
+  airwallexPaidAmount?: number;
+  airwallexPaidCurrency?: string;
   /** Grocery receipt total the runner spent at Fusion. */
   finalTotal?: number;
   amountPaidByRunner?: number;
   receiptUrl?: string;
+  /** HKD total printed on the receipt. */
+  receiptAmount?: number;
+  receiptUploadedAt?: Date;
   bankStatementUrl?: string;
   customerNameOnReceipt?: boolean;
   runnerVerified?: boolean;
@@ -246,6 +315,8 @@ export interface Order {
   runnerRating?: number;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;
+  /** Customer-chosen Hong Kong delivery time. Absent means deliver now. */
+  scheduledFor?: Date;
   createdAt: Date;
   updatedAt: Date;
   pickedUpAt?: Date;
@@ -255,6 +326,10 @@ export interface Order {
   runnerWarningCount?: number;
   customerWarningCount?: number;
   runnerExpiredAt?: Date;
+  /** Set when the runner expiry warning email was sent. */
+  expiredWarningSentAt?: Date;
+  expiredWarningSentTo?: string;
+  expiredWarningMessageId?: string;
   customerOverdueAt?: Date;
   runnerReminderSentAt?: Date;
   customerReminderSentAt?: Date;
@@ -271,6 +346,8 @@ export interface Order {
   customerApprovedPriceAt?: Date;
   fusionPaidByPlatform?: boolean;
   runnerLocation?: RunnerLocation;
+  /** Seeded demo history. Hidden from the customer UI. */
+  isSeed?: boolean;
 }
 
 export interface Runner {
@@ -296,12 +373,33 @@ export interface RunnerPayout {
   paidAt: Date;
 }
 
+export type ChatMessageType = "text" | "image" | "video";
+
 export interface ChatMessage {
   id: string;
   orderId: string;
   senderId: string;
   senderName: string;
+  /** Display / preview text. Legacy messages always have this. */
   message: string;
+  /** Same text as `message`. Stored for the shared chat schema. */
+  text?: string;
+  /**
+   * Message kind. Missing / unknown values are treated as `"text"` for
+   * back-compat with older docs that only stored `message`.
+   */
+  type?: ChatMessageType;
+  senderRole?: "customer" | "runner" | "admin";
+  /** Primary media URL (first image, or the video). */
+  mediaUrl?: string;
+  /** All image URLs when a single message carries multiple photos. */
+  mediaUrls?: string[];
+  mediaThumbnailUrl?: string;
+  mediaDuration?: number;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  mediaSize?: number;
+  seen?: boolean;
   timestamp: Date;
 }
 
@@ -319,6 +417,10 @@ export interface RunnerRegistrationInput {
 export { BASE_DELIVERY_FEE as DELIVERY_FEE } from "./delivery";
 
 export function formatMenuPrice(item: MenuItem): string {
+  const hasPositiveSale = item.salePrice != null && item.salePrice > 0;
+  if (!(item.price > 0) && !hasPositiveSale) {
+    return "Price on request";
+  }
   if (item.priceType !== "fixed" && item.priceRange) {
     return item.priceRange;
   }
@@ -329,4 +431,10 @@ export function formatMenuPrice(item: MenuItem): string {
     return `$${item.salePrice}`;
   }
   return `$${item.price}`;
+}
+
+/** Shelf price with an HK prefix. Leaves "Price on request" unprefixed. */
+export function formatMenuPriceLabel(item: MenuItem): string {
+  const raw = formatMenuPrice(item);
+  return raw.startsWith("$") ? `HK${raw}` : raw;
 }

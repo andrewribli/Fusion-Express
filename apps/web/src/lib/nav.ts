@@ -24,12 +24,7 @@ export interface NavTab {
 }
 
 export const CUSTOMER_TABS: NavTab[] = [
-  {
-    href: "/",
-    label: "Home",
-    iconId: "home",
-    match: ["/", "/home", "/fusion", "/canteen"],
-  },
+  { href: "/cuhk", label: "Home", iconId: "home", match: ["/", "/home", "/fusion", "/canteen", "/taste", "/cuhk"] },
   { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
     href: "#runner",
@@ -37,12 +32,7 @@ export const CUSTOMER_TABS: NavTab[] = [
     iconId: "runner",
     action: "switch-runner",
   },
-  {
-    href: "/cart",
-    label: "Cart",
-    iconId: "cart",
-    match: ["/checkout", "/canteen/cart", "/canteen/checkout"],
-  },
+  { href: "/cart", label: "Cart", iconId: "cart", match: ["/checkout", "/canteen/cart", "/canteen/checkout"] },
   { href: "/profile", label: "Account", iconId: "profile" },
 ];
 
@@ -90,6 +80,9 @@ export function isShopPath(pathname: string): boolean {
     pathname === "/" ||
     pathname === "/home" ||
     pathname === "/fusion" ||
+    pathname === "/taste" ||
+    pathname === "/cuhk" ||
+    pathname === "/cityu" ||
     pathname.startsWith("/canteen") ||
     pathname.startsWith("/browse") ||
     pathname.startsWith("/menu") ||
@@ -99,15 +92,7 @@ export function isShopPath(pathname: string): boolean {
 }
 
 export function homeForMode(mode: AppMode): string {
-  return mode === "runner" ? "/runner/dashboard" : "/";
+  return mode === "runner" ? "/runner/dashboard" : "/cuhk";
 }
 
-/** Where the Runner tab / Switch to Runner button should send the user. */
-export function runnerEntryHref(opts: {
-  loggedIn: boolean;
-  canRunnerMode: boolean;
-}): string {
-  if (!opts.loggedIn) return "/login?next=/runner/terms";
-  if (opts.canRunnerMode) return "/runner/dashboard";
-  return "/runner/terms";
-}
+export { resolveRunnerEntry } from "@/lib/runner-entry";

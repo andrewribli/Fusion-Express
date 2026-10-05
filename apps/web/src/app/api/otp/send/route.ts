@@ -1,6 +1,14 @@
 import { createSign } from "crypto";
 import { NextResponse } from "next/server";
-import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
+import {
+  campusConfig,
+  detectCampusFromEmail,
+  isAnyCampusEmail,
+  normalizeEmail,
+  validateCampusEmail,
+  isCampusId,
+  type CampusId,
+} from "@fusion-express/shared";
 import {
   generateOtpCode,
   issueOtpCookie,
@@ -102,16 +110,28 @@ export async function POST(request: Request) {
   try {
     requireOtpSecret();
 
-    let body: { email?: string; purpose?: string };
+    let body: { email?: string; purpose?: string; campus?: string };
     try {
-      body = (await request.json()) as { email?: string; purpose?: string };
+      body = (await request.json()) as {
+        email?: string;
+        purpose?: string;
+        campus?: string;
+      };
     } catch {
       return jsonError("Invalid request", 400);
     }
 
     const email = normalizeEmail(body.email ?? "");
-    if (!isCuhkStudentEmail(email)) {
-      return jsonError("Use your @link.cuhk.edu.hk email", 400);
+    const campusFromBody = isCampusId(body.campus) ? body.campus : null;
+    const campus: CampusId | null =
+      campusFromBody ?? detectCampusFromEmail(email);
+
+    if (!campus || !isAnyCampusEmail(email)) {
+      return jsonError("Please use your CUHK or CityU email", 400);
+    }
+    const campusErr = validateCampusEmail(email, campus);
+    if (campusErr) {
+      return jsonError(campusErr, 400);
     }
 
     const purpose: OtpPurpose =
@@ -153,14 +173,18 @@ export async function POST(request: Request) {
 
     if (shouldSend) {
       if (apiKey) {
+        const brand = campus === "cityu" ? campusConfig.cityu.brandLabel : "GraceRun";
+        const campusName = campusConfig[campus].name;
+        // CityU brandLabel already includes the campus ("GraceRun CityU").
+        const branded = campus === "cityu" ? brand : `${brand} ${campusName}`;
         const subject =
           purpose === "reset"
-            ? "Your GraceRun password reset code"
-            : "Your GraceRun verification code";
+            ? `Your ${brand} password reset code`
+            : `Your ${brand} verification code`;
         const text =
           purpose === "reset"
-            ? `Your GraceRun password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
-            : `Your GraceRun CUHK verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
+            ? `Your ${brand} password reset code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`
+            : `Your ${branded} verification code is ${code}. It expires in 10 minutes. If you did not request this, ignore this email.`;
 
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",

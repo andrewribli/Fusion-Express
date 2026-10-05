@@ -1,41 +1,42 @@
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import {
-  calculateDeliveryFee,
-  cartTotalWeightKg,
-} from "@fusion-express/shared/delivery";
+import { cartTotalWeightKg } from "@fusion-express/shared/delivery";
+import { computeDeliveryFee } from "@fusion-express/shared/delivery-pricing";
 import {
   CUHK_COLLEGES,
   formatDeliveryAddress,
   getHallsForCollege,
   getLobbyForHall,
+  migrateCuhkCollegeLabel,
   type CuhkCollege,
 } from "@fusion-express/shared/locations";
 import { createOrder } from "@fusion-express/shared/orders";
 import { getEstimatedDeliveryTime } from "@fusion-express/shared";
 import { getUnitPrice, lineTotal } from "@fusion-express/shared";
-import {
-  normalizePhone,
-  validatePhone,
-} from "@fusion-express/shared/auth";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
+
+function resolveInitialCollege(
+  profileCollege: string | undefined,
+): CuhkCollege {
+  const migrated = migrateCuhkCollegeLabel(profileCollege ?? "");
+  if (migrated && CUHK_COLLEGES.includes(migrated as CuhkCollege)) {
+    return migrated as CuhkCollege;
+  }
+  return CUHK_COLLEGES[0];
+}
 
 export default function CheckoutScreen() {
   const { items, subtotal, sessionId, clearCart } = useCart();
   const { profile, user, ensureCheckoutAuth } = useAuth();
-  const initialCollege: CuhkCollege =
-    profile?.college && CUHK_COLLEGES.includes(profile.college as CuhkCollege)
-      ? (profile.college as CuhkCollege)
-      : CUHK_COLLEGES[0];
+  const initialCollege = resolveInitialCollege(profile?.college);
   const [college, setCollege] = useState<CuhkCollege>(initialCollege);
   const [hall, setHall] = useState(() => {
     const halls = getHallsForCollege(initialCollege);
     if (profile?.hall && halls.includes(profile.hall)) return profile.hall;
     return halls[0];
   });
-  const [phone, setPhone] = useState(profile?.phone ?? "");
   const [customerName, setCustomerName] = useState(profile?.fullName ?? "");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
@@ -43,10 +44,17 @@ export default function CheckoutScreen() {
 
   const weightKg = cartTotalWeightKg(items);
   const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college }),
-    [weightKg, college],
+    () =>
+      computeDeliveryFee({
+        campus: "cuhk",
+        sourceId: "fusion",
+        hallId: hall,
+        college,
+        weightKg,
+      }),
+    [weightKg, college, hall],
   );
-  const total = subtotal + fee.deliveryFee;
+  const total = subtotal + fee.total;
 
   function pickCollege(next: CuhkCollege) {
     setCollege(next);
@@ -58,25 +66,21 @@ export default function CheckoutScreen() {
     setLoading(true);
     setError("");
     try {
-      const phoneErr = validatePhone(phone);
-      if (phoneErr) throw new Error(phoneErr);
+      if (!customerName.trim()) {
+        throw new Error("Enter your full name");
+      }
       if (!college || !hall) {
         throw new Error("Choose your college and hall");
       }
 
-      const auth = await ensureCheckoutAuth(phone);
-      const digits = normalizePhone(phone);
-      const name =
-        customerName.trim() ||
-        profile?.fullName?.trim() ||
-        (auth.isGuest ? `Guest ${digits.slice(-4)}` : "Mobile customer");
+      const auth = await ensureCheckoutAuth();
+      const name = customerName.trim();
 
       const orderId = await createOrder({
         sessionId,
         customerId: auth.uid,
         customerName: name,
         customerEmail: auth.email || user?.email || undefined,
-        customerPhone: digits,
         items: items.map(({ item, quantity }) => ({
           itemId: item.id,
           name: item.name,
@@ -95,7 +99,7 @@ export default function CheckoutScreen() {
           (sum, line) => sum + lineTotal(line.item, line.quantity),
           0,
         ),
-        deliveryFee: fee.deliveryFee,
+        deliveryFee: fee.total,
         total,
         paymentReceived: false,
         estimatedDeliveryAt: getEstimatedDeliveryTime(),
@@ -118,19 +122,6 @@ export default function CheckoutScreen() {
         onChangeText={setCustomerName}
         placeholder="Name for the runner"
         autoCapitalize="words"
-      />
-
-      <Text className="mt-4 font-semibold">Phone</Text>
-      <Text className="mt-1 text-xs text-gray-500">
-        Required so the runner can reach you. Guests are signed in with this
-        number for Firestore order rules.
-      </Text>
-      <TextInput
-        className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
-        value={phone}
-        onChangeText={setPhone}
-        placeholder="e.g. 9123 4567"
-        keyboardType="phone-pad"
       />
 
       <Text className="mt-4 font-semibold">College / zone</Text>
@@ -173,7 +164,7 @@ export default function CheckoutScreen() {
         {formatDeliveryAddress(college, hall)}
       </Text>
       <Text className="mt-1 text-sm text-gray-600">
-        Zone {fee.zone} · delivery ${fee.deliveryFee} · total ${total}
+        Zone {fee.zone} · delivery ${fee.total} · total ${total}
       </Text>
       {user ? (
         <Text className="mt-1 text-xs text-gray-500">
@@ -181,7 +172,7 @@ export default function CheckoutScreen() {
         </Text>
       ) : (
         <Text className="mt-1 text-xs text-gray-500">
-          Not signed in — checkout will create a guest account from your phone.
+          Not signed in — checkout creates a guest session. No phone number needed.
         </Text>
       )}
       {error ? <Text className="mt-2 text-red-600">{error}</Text> : null}

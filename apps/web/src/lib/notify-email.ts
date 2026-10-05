@@ -59,12 +59,17 @@ export async function notifyOrderPlaced(opts: {
   });
 }
 
-export async function notifyNewUser(opts: {
+/**
+ * Fire-and-forget after the users/{uid} doc is first written.
+ * Triggers the founder welcome email + admin new-user notice.
+ * Never throws to the caller.
+ */
+export function notifyNewUser(opts: {
   fullName: string;
   email?: string;
   isRunner?: boolean;
-}): Promise<void> {
-  await postJson("/api/email/signup", {
+}): void {
+  void postJson("/api/email/signup", {
     fullName: opts.fullName,
     email: opts.email,
     isRunner: opts.isRunner,
@@ -95,6 +100,11 @@ export async function notifyOrderStatus(opts: {
     orderId: opts.orderId,
     status: opts.status,
   });
+}
+
+/** Server sends the runner expiry warning. The browser only passes the order id. */
+export async function notifyExpiredWarning(orderId: string): Promise<void> {
+  await postJson("/api/orders/expired-warning", { orderId });
 }
 
 export async function notifyDeadlineEvent(opts: {

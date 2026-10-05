@@ -5,10 +5,14 @@ import { useEffect, useState } from "react";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
 import { FileDropzone } from "@/components/FileDropzone";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { orderCampus } from "@/lib/orders";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
+import { OrderCounterparty, useOrderParty } from "@/components/DeliveryIdentity";
 import type { Order } from "@/lib/types";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
+import { formatScheduledLabel } from "@/lib/order-window";
 
 const STEPS = [
   "Order details",
@@ -20,8 +24,9 @@ const STEPS = [
 
 /** Resume wizard at the first incomplete step based on Firestore fields. */
 export function runnerFlowStartStep(order: Order): number {
+  const cityu = order.campus === "cityu";
   const hasReceipt = Boolean(order.receiptUrl);
-  const hasBank = Boolean(order.bankStatementUrl);
+  const hasBank = cityu || Boolean(order.bankStatementUrl);
   if (!hasReceipt || !hasBank) {
     return hasReceipt || hasBank ? 1 : 0;
   }
@@ -66,11 +71,15 @@ export function RunnerDeliveryFlow({
   onClose: () => void;
 }) {
   const [step, setStep] = useState(() => runnerFlowStartStep(order));
+  const store = supermarketForCampus(order.campus);
+  const cityu = order.campus === "cityu";
   const hasReceipt = Boolean(order.receiptUrl || receiptFile);
-  const hasBank = Boolean(order.bankStatementUrl || bankFile);
+  const hasBank = cityu || Boolean(order.bankStatementUrl || bankFile);
   const hasLobby = Boolean(order.deliveryPhotoUrl || photoFile);
   const totalOk = Number(finalTotal) > 0;
   const blocked = busy || uploading !== "";
+  const customer = useOrderParty(order.id);
+  const customerLabel = customer?.name || "the customer";
 
   useEffect(() => {
     setStep(runnerFlowStartStep(order));
@@ -139,11 +148,14 @@ export function RunnerDeliveryFlow({
                   {formatDeliveryAddress(order.college, order.hall)}
                 </p>
                 <p className="text-xs text-[#c4c4c4]">Lobby: {order.lobbyPoint}</p>
-                {order.customerName && (
-                  <p className="mt-1 text-xs text-[#c4c4c4]">
-                    Customer: {order.customerName}
+                {order.scheduledFor ? (
+                  <p className="mt-2 text-sm font-semibold text-amber-200">
+                    Scheduled for {formatScheduledLabel(order.scheduledFor)}
                   </p>
-                )}
+                ) : null}
+                <div className="mt-3">
+                  <OrderCounterparty orderId={order.id} label="Customer:" tone="dark" />
+                </div>
               </div>
               <RunnerOrderItemList items={order.items} dark />
               <p className="rounded-xl bg-[#2a2418] px-3 py-2 text-[#f5e6c8]">
@@ -154,7 +166,11 @@ export function RunnerDeliveryFlow({
                 {" · "}You earn ${runnerEarningsForOrder(order.deliveryFee)}
               </p>
               <Link
-                href={`/chat/${order.id}`}
+                href={
+                  orderCampus(order) === "cityu"
+                    ? `/cityu/chat/${order.id}`
+                    : `/chat/${order.id}`
+                }
                 className="flex min-h-11 items-center justify-center rounded-xl border border-white/20 text-sm font-semibold text-white"
               >
                 Contact customer
@@ -165,37 +181,40 @@ export function RunnerDeliveryFlow({
           {step === 1 && (
             <div className="space-y-3">
               <p className="text-sm text-[#f5f5f5]">
-                Pay ${order.subtotal} at Fusion yourself, then attach the receipt and bank
-                statement. Each photo saves as soon as you pick it.
+                {cityu
+                  ? `Pay at ${store} yourself, then photograph the receipt. You cannot mark this delivered until that photo is saved.`
+                  : `Pay $${order.subtotal} at ${store} yourself, then attach the receipt and bank statement. Each photo saves as soon as you pick it.`}
               </p>
-              {order.status === "purchased" && order.receiptUrl && order.bankStatementUrl ? (
+              {order.status === "purchased" && order.receiptUrl && (cityu || order.bankStatementUrl) ? (
                 <p className="rounded-xl bg-green-950 px-3 py-2 text-sm text-green-200">
                   Purchase proof already saved. Continue to delivery.
                 </p>
               ) : null}
               <FileDropzone
-                label="Fusion receipt (required)"
+                label={`${store} receipt (required)`}
                 hint="Tap to take or choose a photo"
                 file={receiptFile}
                 existingUrl={order.receiptUrl}
                 busy={uploading === "receipt"}
                 onFile={onReceipt}
               />
+              {cityu ? null : (
               <FileDropzone
                 label="Bank statement (required)"
-                hint="Screenshot of the Fusion payment"
+                hint={`Screenshot of the ${store} payment`}
                 file={bankFile}
                 existingUrl={order.bankStatementUrl}
                 busy={uploading === "bank"}
                 onFile={onBank}
               />
+              )}
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-3">
               <p className="text-sm font-semibold text-[#f5f5f5]">
-                Write {order.customerName || "the customer's full name"} on the receipt and
+                Write {customerLabel} on the receipt and
                 attach it to the bag.
               </p>
               <label className="flex min-h-11 items-start gap-3 rounded-xl bg-[#2a2a2a] px-3 py-3 text-sm text-white">
@@ -221,10 +240,10 @@ export function RunnerDeliveryFlow({
           {step === 3 && (
             <div className="space-y-3">
               <p className="text-sm text-[#f5f5f5]">
-                Enter the exact Fusion receipt total. The customer pays this plus delivery.
+                Enter the exact {store} receipt total. The customer pays this plus delivery.
               </p>
               <label className="block text-sm font-semibold text-white" htmlFor="final-total">
-                Final Fusion total (HK$)
+                Final {store} total (HK$)
               </label>
               <input
                 id="final-total"

@@ -3,6 +3,16 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "buildCommand": "npx turbo run build --filter=@fusion-express/web",
+  "crons": [
+    {
+      "path": "/api/cron/expire-deliveries",
+      "schedule": "15 4 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-chat-media",
+      "schedule": "30 5 * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/:path*",

@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
-import { useUser } from "@/context/UserContext";
+import { useUser, type UserProfile } from "@/context/UserContext";
 import {
   fetchDirectThreads,
   markThreadRead,
+  sendDirectMediaMessage,
   sendDirectMessage,
   subscribeDirectMessages,
   type DirectMessage,
@@ -32,8 +35,6 @@ export default function AdminSupportPage() {
   const [names, setNames] = useState<Record<string, string>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -44,7 +45,9 @@ export default function AdminSupportPage() {
       try {
         const [rows, users] = await Promise.all([
           fetchDirectThreads(),
-          fetchAllUsers().catch(() => []),
+          fetchAllUsers()
+            .then((result) => result.users)
+            .catch(() => [] as UserProfile[]),
         ]);
         if (cancelled) return;
         setThreads(rows);
@@ -83,26 +86,6 @@ export default function AdminSupportPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selectedId]);
-
-  async function reply(event: React.FormEvent) {
-    event.preventDefault();
-    if (!user?.uid || !selectedId || !text.trim()) return;
-    setSending(true);
-    setError("");
-    try {
-      await sendDirectMessage({
-        userId: selectedId,
-        senderId: user.uid,
-        message: text,
-      });
-      setText("");
-      setThreads(await fetchDirectThreads());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send.");
-    } finally {
-      setSending(false);
-    }
-  }
 
   return (
     <RequireAdmin>
@@ -186,44 +169,63 @@ export default function AdminSupportPage() {
                       {messages.map((msg) => {
                         const mine = msg.senderId === user?.uid;
                         return (
-                          <div
+                          <ChatMessageBubble
                             key={msg.id}
-                            className={`flex ${mine ? "justify-end" : "justify-start"}`}
-                          >
-                            <div
-                              className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                                mine
-                                  ? "bg-[#ED1C24] text-white"
-                                  : "bg-white text-gray-900 shadow-sm"
-                              }`}
-                            >
-                              <p className="whitespace-pre-wrap break-words">
-                                {msg.message}
-                              </p>
-                            </div>
-                          </div>
+                            message={{
+                              id: msg.id,
+                              senderId: msg.senderId,
+                              message: msg.message,
+                              text: msg.text,
+                              type: msg.type,
+                              mediaUrl: msg.mediaUrl,
+                              mediaUrls: msg.mediaUrls,
+                              mediaThumbnailUrl: msg.mediaThumbnailUrl,
+                              timestamp: msg.createdAt,
+                            }}
+                            isMine={mine}
+                            accent="admin"
+                            showSender={false}
+                          />
                         );
                       })}
                       <div ref={bottomRef} />
                     </div>
-                    <form
-                      onSubmit={(e) => void reply(e)}
-                      className="flex gap-2 border-t border-gray-100 p-3"
-                    >
-                      <input
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder="Reply as admin…"
-                        className="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
-                      />
-                      <button
-                        type="submit"
-                        disabled={sending || !text.trim()}
-                        className="rounded-full bg-[#ED1C24] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-                      >
-                        Send
-                      </button>
-                    </form>
+                    <ChatComposer
+                      placeholder="Reply as admin…"
+                      mediaEnabled
+                      accent="admin"
+                      inputClassName="min-w-0 flex-1 rounded-full border border-gray-200 px-3 py-2 text-sm focus:border-[#ED1C24] focus:outline-none"
+                      onSend={async ({ text, pending, signal, onProgress }) => {
+                        if (!user?.uid || !selectedId) {
+                          throw new Error("Sign in required.");
+                        }
+                        setError("");
+                        try {
+                          if (pending.length) {
+                            await sendDirectMediaMessage({
+                              userId: selectedId,
+                              senderId: user.uid,
+                              caption: text,
+                              pending,
+                              signal,
+                              onProgress,
+                            });
+                          } else {
+                            await sendDirectMessage({
+                              userId: selectedId,
+                              senderId: user.uid,
+                              message: text,
+                            });
+                          }
+                          setThreads(await fetchDirectThreads());
+                        } catch (err) {
+                          const msg =
+                            err instanceof Error ? err.message : "Could not send.";
+                          setError(msg);
+                          throw err;
+                        }
+                      }}
+                    />
                   </>
                 )}
               </section>

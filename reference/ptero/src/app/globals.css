@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f4f6;
+  --foreground: #111827;
+  --fusion-red: #ed1c24;
+  --lakers-gold: #ed1c24;
+  --lakers-purple: #ed1c24;
+  --lakers-navy: #111827;
+  --bg-color: #f3f4f6;
+  --text-color: #111827;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --muted-text: #6b7280;
+  --border-color: #e5e7eb;
+  --hover-bg: #f9fafb;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-fusion-red: var(--fusion-red);
+  --color-lakers-gold: var(--lakers-gold);
+  --color-lakers-purple: var(--lakers-purple);
+  --color-lakers-navy: var(--lakers-navy);
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+body.lite-mode,
+body.dark-mode {
+  --bg-color: #f3f4f6;
+  --text-color: #111827;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --muted-text: #6b7280;
+  --border-color: #e5e7eb;
+  --hover-bg: #f9fafb;
+  --foreground: #111827;
+  --background: #f3f4f6;
+  color: #111827;
+  color-scheme: light;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.shop-page,
+body.dark-mode .shop-page {
+  background-color: #f3f4f6 !important;
+  color: #111111 !important;
+}
+
+.shop-page .shop-surface,
+body.dark-mode .shop-page .shop-surface,
+.shop-page .bg-white,
+body.dark-mode .shop-page .bg-white {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+.shop-page .shop-muted,
+body.dark-mode .shop-page .shop-muted {
+  color: #6b7280 !important;
+}

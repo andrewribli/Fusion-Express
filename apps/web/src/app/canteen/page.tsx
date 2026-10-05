@@ -1,85 +1,120 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { AccountMenu } from "@/components/AccountMenu";
-import { AppLogo } from "@/components/AppLogo";
-import { useCart } from "@/context/CartContext";
-import { RESTAURANTS } from "@fusion-express/shared/canteen";
+import { ShopLayout } from "@/components/ShopLayout";
+import { MealSearch } from "@/components/canteen/MealSearch";
+import { RESTAURANTS } from "@/data/canteen/restaurants";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
 
 export default function CanteenIndexPage() {
-  const { itemCount } = useCart();
+  const canteenBase = formatHkdAmount(
+    computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base,
+  );
+  const sidebar = (
+    <nav className="px-2 py-2">
+      {RESTAURANTS.map((r) =>
+        r.menuReady ? (
+          <Link
+            key={r.id}
+            href={`/canteen/${r.id}`}
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          >
+            {r.shortName}
+          </Link>
+        ) : (
+          <div
+            key={r.id}
+            aria-disabled="true"
+            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400"
+          >
+            {r.shortName}
+            <span className="ml-2 text-[10px] font-semibold uppercase text-gray-400">
+              Soon
+            </span>
+          </div>
+        ),
+      )}
+    </nav>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0c0c0c]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-lg items-center justify-between gap-2 px-4 py-3">
-          <div className="min-w-0">
-            <Link href="/" className="flex items-center gap-2" aria-label="GraceRun home">
-              <AppLogo size={36} className="h-9 w-9" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-white">GraceRun</p>
-                <p className="truncate text-[11px] text-emerald-400">Canteen</p>
-              </div>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/canteen/cart"
-              className="relative rounded-full border border-white/15 px-3 py-2 text-xs font-semibold text-white hover:bg-white/5"
-            >
-              Cart
-              {itemCount > 0 ? ` (${itemCount})` : ""}
-            </Link>
-            <AccountMenu />
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-lg px-4 pb-24 pt-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+    <ShopLayout
+      deliveryLabel="Deliver to CUHK hall lobby · Canteen"
+      searchSlot={<MealSearch campus="cuhk" />}
+      sidebar={sidebar}
+      mobileSidebarTitle="Canteens"
+      cartChannel="canteen"
+    >
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ED1C24]">
           CUHK canteens
         </p>
-        <h1 className="mt-2 text-2xl font-bold">GraceRun Canteen</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Flat delivery HK$10 · dorm lobby only · 10% college canteen discount
-          when your runner matches
+        <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-gray-900">
+          GraceRun Canteen
+        </h1>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
+          Your canteen favorites, delivered to your dorm lobby. Delivery depends
+          on the canteen and your hall (from HK${canteenBase}, or HK$0 in the
+          same building). At UC Canteen you save HK$2 when a United College runner accepts.
         </p>
-        <p className="mt-1 text-xs text-zinc-500">
-          Canteen checkout is separate from Fusion grocery checkout.
-        </p>
+      </div>
 
-        <ul className="mt-6 space-y-3">
-          {RESTAURANTS.map((r) => (
-            <li key={r.id}>
-              {r.menuReady ? (
-                <Link
-                  href={`/canteen/${r.id}`}
-                  className="block rounded-2xl border border-white/10 bg-[#141414] p-4 transition hover:border-emerald-400/40"
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {RESTAURANTS.map((r) => {
+          const card = (
+            <article
+              className={`group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition ${
+                r.menuReady
+                  ? "hover:border-[#ED1C24]/40 hover:shadow-md"
+                  : "opacity-90"
+              }`}
+            >
+              <div className="relative flex h-[120px] w-full items-center justify-center overflow-hidden bg-[#f7f6f4] lg:aspect-[4/3] lg:h-auto">
+                <Image
+                  src={r.coverImage}
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 50vw, 25vw"
+                  className="object-contain p-3"
+                />
+                {!r.menuReady ? (
+                  <span className="absolute right-2 top-2 rounded-md bg-black/55 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    Soon
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex items-center justify-between gap-2 px-3 py-3">
+                <h2 className="line-clamp-2 min-w-0 text-base font-bold leading-snug text-gray-900">
+                  {r.shortName}
+                </h2>
+                <span
+                  className={`inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-semibold ${
+                    r.menuReady
+                      ? "bg-[#ED1C24] text-white"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-lg font-bold text-white">{r.name}</h2>
-                      <p className="mt-1 text-sm text-zinc-400">{r.blurb}</p>
-                      <p className="mt-2 text-xs text-zinc-500">{r.hoursLabel}</p>
-                    </div>
-                    <span className="shrink-0 rounded-lg bg-emerald-500/20 px-2 py-1 text-[11px] font-semibold text-emerald-300">
-                      Menu
-                    </span>
-                  </div>
-                </Link>
-              ) : (
-                <div className="rounded-2xl border border-white/5 bg-[#121212] p-4 opacity-70">
-                  <h2 className="text-lg font-bold text-white">{r.name}</h2>
-                  <p className="mt-1 text-sm text-zinc-400">{r.blurb}</p>
-                  <p className="mt-2 text-xs font-semibold text-zinc-500">
-                    Coming soon
-                  </p>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </main>
-    </div>
+                  {r.menuReady ? "Menu" : "Soon"}
+                </span>
+              </div>
+            </article>
+          );
+
+          if (!r.menuReady) {
+            return (
+              <div key={r.id} aria-disabled="true">
+                {card}
+              </div>
+            );
+          }
+          return (
+            <Link key={r.id} href={`/canteen/${r.id}`} className="block">
+              {card}
+            </Link>
+          );
+        })}
+      </div>
+    </ShopLayout>
   );
 }

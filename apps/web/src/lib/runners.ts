@@ -12,10 +12,12 @@ import {
   query,
   updateDoc,
   where,
+  writeBatch,
   Timestamp,
 } from "firebase/firestore";
 
 const RUNNERS_COLLECTION = collectionName("runners");
+const USERS_COLLECTION = collectionName("users");
 const mockRunners = new Map<string, Runner>();
 
 function parseRunner(id: string, data: Record<string, unknown>): Runner {
@@ -60,6 +62,10 @@ function pickRunnerForUser(
 export async function registerRunner(
   input: RunnerRegistrationInput,
 ): Promise<string> {
+  const { validatePhone, normalizePhone } = await import("@/lib/auth");
+  const phoneErr = validatePhone(input.phone);
+  if (phoneErr) throw new Error(phoneErr);
+  const phone = normalizePhone(input.phone);
   if (isDemoAuth()) {
     return `demo-runner-${Date.now()}`;
   }
@@ -72,6 +78,7 @@ export async function registerRunner(
   const now = new Date();
   const payload = {
     ...input,
+    phone,
     termsAcceptedAt: now,
     active: true,
     totalEarned: 0,
@@ -90,6 +97,79 @@ export async function registerRunner(
   const id = `runner-${crypto.randomUUID().slice(0, 8)}`;
   mockRunners.set(id, { id, ...payload, termsAcceptedAt: now });
   return id;
+}
+
+/**
+ * Creates or updates the caller's runners doc and sets user role "both",
+ * isRunner, and runnerId in one batch. "both" keeps customer ordering.
+ * Role "runner" alone cannot open the shop.
+ */
+export async function commitRunnerActivation(input: {
+  uid: string;
+  fullName: string;
+  studentId: string;
+  phone: string;
+  college: string;
+  hall: string;
+  paymentMethod: "PayMe" | "FPS";
+  paymentId: string;
+}): Promise<{ runnerId: string; role: "both" }> {
+  const role = "both" as const;
+  const phone = input.phone.replace(/\D/g, "");
+  if (isDemoAuth() || !isFirebaseConfigured()) {
+    return { runnerId: `demo-runner-${input.uid}`, role };
+  }
+
+  const existing = await findRunnerForUser({
+    uid: input.uid,
+    studentId: input.studentId,
+  });
+  const db = getDb();
+  const runnerRef = existing
+    ? doc(db, RUNNERS_COLLECTION, existing.id)
+    : doc(db, RUNNERS_COLLECTION, input.uid);
+  const now = Timestamp.fromDate(new Date());
+  const batch = writeBatch(db);
+  batch.set(
+    runnerRef,
+    omitUndefined({
+      uid: input.uid,
+      fullName: input.fullName,
+      studentId: input.studentId,
+      phone,
+      college: input.college,
+      hall: input.hall,
+      paymentMethod: input.paymentMethod,
+      paymentId: input.paymentId,
+      termsAcceptedAt: now,
+      ...(existing
+        ? {}
+        : {
+            active: true,
+            totalEarned: 0,
+            pendingPayout: 0,
+            payoutHistory: [],
+          }),
+    }) as Record<string, unknown>,
+    { merge: true },
+  );
+  batch.set(
+    doc(db, USERS_COLLECTION, input.uid),
+    {
+      role,
+      isRunner: true,
+      runnerId: runnerRef.id,
+      studentId: input.studentId,
+      phone,
+      runnerPaymentMethod: input.paymentMethod,
+      runnerPaymentId: input.paymentId,
+      termsAcceptedAt: now,
+      updatedAt: now,
+    },
+    { merge: true },
+  );
+  await batch.commit();
+  return { runnerId: runnerRef.id, role };
 }
 
 export async function fetchRunner(runnerId: string): Promise<Runner | null> {

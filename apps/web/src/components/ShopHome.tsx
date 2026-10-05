@@ -7,29 +7,34 @@ import {
   useRef,
   useState,
 } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AppShell } from "@/components/AppShell";
-import { AislePhotoButton } from "@/components/AislePhotoButton";
 import { CustomItemCard } from "@/components/CustomItemCard";
+import { CartDropdown } from "@/components/CartDropdown";
+import { TrackOrderHeaderButton } from "@/components/TrackOrderHeaderButton";
 import { MenuCartSummary } from "@/components/MenuCartSummary";
 import { MenuItemCard } from "@/components/MenuItemCard";
-import { OrderActionBar } from "@/components/OrderActionBar";
 import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
+import { ProductImage } from "@/components/ProductImage";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
-import { SECTION_META } from "@/data/aisles";
+import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
+import { RunnerQueueBell } from "@/components/RunnerQueueBell";
+import { DRY_AISLES, REFRIGERATED_AISLES } from "@/data/aisles";
 import { getItemImage } from "@/data/aisle-images";
-import { QUICK_CATEGORIES } from "@/data/quick-categories";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { loadAllProducts } from "@/lib/firestore";
 import { resolveHomePopularItems } from "@/lib/home-popular";
-import { runnerEntryHref } from "@/lib/nav";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
 import { useManualItemModal } from "@/lib/manual-item-modal";
-import { searchItems } from "@/lib/menu";
+import { getAisleItems, searchItems } from "@/lib/menu";
 import { popularityScore, topPopularItems } from "@/lib/popular-items";
-import { formatMenuPrice, type MenuItem } from "@/lib/types";
+import { formatMenuPriceLabel, type MenuItem } from "@/lib/types";
+import { AppLogo } from "@/components/AppLogo";
+import { GraceRunWordmark } from "@/components/GraceRunWordmark";
+import type { Aisle, StoreSection } from "@/data/aisles";
+import { rankItemsByQuery } from "@fusion-express/shared/search-rank";
 
 const BATCH = 24;
 const BADGES = ["Highly rated", "In demand", "Lowest price"] as const;
@@ -41,8 +46,7 @@ function pickBadge(item: MenuItem, index: number): string {
 }
 
 function priceLabel(item: MenuItem): string {
-  const raw = formatMenuPrice(item);
-  return raw.startsWith("HK") ? raw : `HK${raw}`;
+  return formatMenuPriceLabel(item);
 }
 
 function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
@@ -72,15 +76,13 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
           className="relative aspect-square w-full"
           style={{ backgroundColor: "#fafafa" }}
         >
-          {image ? (
-            <Image
-              src={image}
-              alt=""
-              fill
-              className="object-contain p-3"
-              sizes="160px"
-            />
-          ) : null}
+          <ProductImage
+            src={image}
+            alt={item.name}
+            category={item.category}
+            className="object-contain p-3"
+            sizes="160px"
+          />
           <span
             className="absolute left-2 top-2 z-[1] rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
             style={{ backgroundColor: "#ED1C24" }}
@@ -91,7 +93,7 @@ function TopPickCard({ item, index }: { item: MenuItem; index: number }) {
         </div>
         <div className="flex flex-col gap-1.5 px-3 pb-3 pt-2">
           <p
-            className="line-clamp-2 min-h-[2.5rem] text-[12px] font-semibold leading-snug"
+            className="product-title min-h-[2.5rem] text-[12px] font-semibold leading-snug"
             style={{ color: "#111111" }}
           >
             {item.name}
@@ -120,21 +122,29 @@ function HomeSearchBar({
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const [focused, setFocused] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const suggestions = useMemo(() => {
-    const q = value.trim().toLowerCase();
+    const q = value.trim();
     if (!q) return [];
-    return products
-      .filter((item) => item.name.toLowerCase().includes(q))
-      .slice(0, 10);
+    return rankItemsByQuery(products, q).slice(0, 10);
   }, [products, value]);
 
   return (
     <div className="relative min-w-0 flex-1">
-      <div
-        className="flex h-11 w-full min-w-0 items-center gap-1 rounded-full pl-3 pr-1.5"
-        style={{ backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
-      >
+      <label className="flex h-10 w-full min-w-0 items-center gap-2 rounded-full border border-gray-200 bg-white pl-3 pr-3 shadow-sm sm:h-11">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4 shrink-0 text-gray-400"
+          fill="none"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+          <path
+            d="m16 16 4 4"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
         <input
           ref={inputRef}
           id="home-search"
@@ -143,51 +153,12 @@ function HomeSearchBar({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => window.setTimeout(() => setFocused(false), 150)}
-          placeholder="Search products"
-          className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none"
-          style={{ backgroundColor: "transparent", color: "#111111" }}
+          placeholder="Search your meal"
+          className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400"
           autoComplete="off"
+          aria-label="Search your meal"
         />
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ color: "#555555" }}
-          aria-label="Scan or upload a product photo"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <path
-              d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.2-1.8A1 1 0 0 1 10 4h4a1 1 0 0 1 .8.4L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            />
-            <circle cx="12" cy="12.5" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.focus()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#ff6a00" }}
-          aria-label="Search"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" aria-hidden>
-            <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2.2" />
-            <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        onChange={() => {
-          onChange("");
-          inputRef.current?.focus();
-        }}
-      />
+      </label>
       {focused && suggestions.length > 0 && (
         <ul
           className="shop-surface absolute z-30 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl py-1"
@@ -223,14 +194,20 @@ function HomeSearchBar({
 }
 
 export function ShopHome() {
-  const { addItem, itemCount } = useCart();
-  const { user, setMode, canRunnerMode } = useUser();
+  const { addItem } = useCart();
+  const { user } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
   const { openManualItem } = useManualItemModal();
   const [guestBrowse, setGuestBrowse] = useState(false);
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [feedCount, setFeedCount] = useState(BATCH);
+  const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
+  const [activeAisle, setActiveAisle] = useState<{
+    section: StoreSection;
+    aisle: Aisle;
+  } | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -251,6 +228,11 @@ export function ShopHome() {
     () => (searching ? searchItems(products, search).slice(0, 48) : []),
     [products, search, searching],
   );
+
+  const aisleItems = useMemo(() => {
+    if (!activeAisle) return [];
+    return getAisleItems(products, activeAisle.section, activeAisle.aisle.id);
+  }, [products, activeAisle]);
 
   useEffect(() => {
     document.title = "Shop Now — GraceRun";
@@ -311,278 +293,336 @@ export function ShopHome() {
     return () => observer.disconnect();
   }, [loadMore, searching, feedVisible.length]);
 
-  const dryMeta = SECTION_META.dry;
-  const coldMeta = SECTION_META.refrigerated;
+  function selectAisle(entry: { section: StoreSection; aisle: Aisle } | null) {
+    setActiveAisle(entry);
+    setSearch("");
+    setMobileCatsOpen(false);
+  }
+
+  const categoryList = (
+    <nav aria-label="Categories" className="flex flex-col">
+      <button
+        type="button"
+        onClick={() => selectAisle(null)}
+        className={`flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm ${
+          !activeAisle
+            ? "bg-red-50 font-bold text-[#ED1C24]"
+            : "font-medium text-gray-800 hover:bg-gray-50"
+        }`}
+      >
+        <span>All items</span>
+        <span className="text-gray-400" aria-hidden>
+          ›
+        </span>
+      </button>
+      <p className="bg-gray-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-gray-400">
+        Fresh Food
+      </p>
+      {REFRIGERATED_AISLES.map((aisle) => {
+        const active =
+          activeAisle?.section === "refrigerated" &&
+          activeAisle.aisle.id === aisle.id;
+        return (
+          <button
+            key={`cold-${aisle.id}`}
+            type="button"
+            onClick={() => selectAisle({ section: "refrigerated", aisle })}
+            className={`flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm ${
+              active
+                ? "bg-red-50 font-bold text-[#ED1C24]"
+                : "font-medium text-gray-800 hover:bg-gray-50"
+            }`}
+          >
+            <span className="pr-2 leading-snug">{aisle.label}</span>
+            <span className="shrink-0 text-gray-400" aria-hidden>
+              ›
+            </span>
+          </button>
+        );
+      })}
+      <p className="bg-gray-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-gray-400">
+        Groceries
+      </p>
+      {DRY_AISLES.map((aisle) => {
+        const active =
+          activeAisle?.section === "dry" && activeAisle.aisle.id === aisle.id;
+        return (
+          <button
+            key={`dry-${aisle.id}`}
+            type="button"
+            onClick={() => selectAisle({ section: "dry", aisle })}
+            className={`flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm ${
+              active
+                ? "bg-red-50 font-bold text-[#ED1C24]"
+                : "font-medium text-gray-800 hover:bg-gray-50"
+            }`}
+          >
+            <span className="pr-2 leading-snug">{aisle.label}</span>
+            <span className="shrink-0 text-gray-400" aria-hidden>
+              ›
+            </span>
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        onClick={() => {
+          setMobileCatsOpen(false);
+          openManualItem();
+        }}
+        className="flex w-full items-center justify-between border-b border-gray-100 px-3 py-3 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
+      >
+        <span>Custom item</span>
+        <span className="text-gray-400" aria-hidden>
+          ›
+        </span>
+      </button>
+    </nav>
+  );
 
   return (
-    <AppShell>
-      <div className="shop-page min-h-screen" style={{ backgroundColor: "#f3f4f6" }}>
-        <header className="sticky top-0 z-50" style={{ backgroundColor: "#ED1C24" }}>
-          <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:px-4">
-            <Link
-              href="/"
-              onClick={() => setSearch("")}
-              className="hidden shrink-0 sm:block"
-              aria-label="GraceRun home"
-            >
-              <span className="text-base font-extrabold tracking-tight text-white">
-                GraceRun
-              </span>
-            </Link>
-            <Link
-              href="/"
-              className="hidden rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:inline"
-            >
-              Fusion
-            </Link>
-            <HomeSearchBar
-              products={products}
-              value={search}
-              onChange={setSearch}
-              inputRef={searchRef}
-              onSelect={(item) => {
-                addItem(item);
-                setSearch("");
-              }}
-            />
-            <Link
-              href="/cart"
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-              aria-label="Cart"
+    <AppShell hideTrackFab>
+      <div className="shop-page min-h-screen bg-[#F0F7F2]">
+        <header className="sticky top-0 z-50 overflow-visible border-b border-gray-200 bg-white">
+          <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
+            <button
+              type="button"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 lg:hidden"
+              aria-label="Open categories"
+              onClick={() => setMobileCatsOpen(true)}
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
                 <path
-                  d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H7"
+                  d="M4 7h16M4 12h16M4 17h16"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />
-                <circle cx="10" cy="20" r="1.2" fill="currentColor" />
-                <circle cx="17" cy="20" r="1.2" fill="currentColor" />
               </svg>
-              {itemCount > 0 && (
-                <span
-                  className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
-                  style={{ backgroundColor: "#ffffff", color: "#ED1C24" }}
-                >
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              )}
+            </button>
+
+            {/* Mobile: text wordmark only; drops below 360px so search stays ≥140px. */}
+            <GraceRunWordmark href="/cuhk" className="sm:hidden" />
+
+            <Link
+              href="/cuhk"
+              onClick={() => {
+                setSearch("");
+                selectAisle(null);
+              }}
+              className="hidden shrink-0 items-center gap-2 sm:flex"
+              aria-label="CUHK home"
+            >
+              <AppLogo size={36} className="h-9 w-9" />
+              <span className="text-sm font-extrabold tracking-tight text-gray-900">
+                GraceRun
+              </span>
             </Link>
             <Link
-              href={runnerEntryHref({
-                loggedIn: Boolean(user),
-                canRunnerMode,
-              })}
-              onClick={() => {
-                if (canRunnerMode) setMode("runner");
-              }}
-              className="hidden min-h-10 shrink-0 items-center rounded-full bg-white px-3 py-2 text-xs font-bold shadow-sm hover:bg-red-50 sm:inline-flex"
-              style={{ color: "#ED1C24" }}
+              href="/cuhk"
+              className="hidden shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-800 hover:border-[#ED1C24] hover:text-[#ED1C24] lg:inline-flex"
             >
-              Switch to Runner
+              CUHK home
             </Link>
-            <div className="hidden shrink-0 sm:block">
-              <AccountMenu hideThemeChip />
+
+            <div className="hidden min-w-0 max-w-[240px] flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-left text-sm md:flex xl:max-w-[320px]">
+              <span className="text-gray-400" aria-hidden>
+                📍
+              </span>
+              <span className="truncate text-gray-700">
+                Deliver to CUHK hall lobby · Fusion supermarket
+              </span>
+            </div>
+
+            <div className="relative min-w-[140px] flex-1 md:min-w-[400px] md:max-w-xl">
+              <HomeSearchBar
+                products={products}
+                value={search}
+                onChange={(v) => {
+                  setSearch(v);
+                  if (v.trim()) setActiveAisle(null);
+                }}
+                inputRef={searchRef}
+                onSelect={(item) => {
+                  addItem(item);
+                  setSearch("");
+                }}
+              />
+            </div>
+
+            <Link
+              href={runnerEntry.href}
+              aria-busy={runnerEntry.loading || undefined}
+              aria-disabled={runnerEntry.loading || undefined}
+              onClick={runnerEntry.onClick}
+              className={`hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex ${
+                runnerEntry.loading ? "opacity-60" : ""
+              }`}
+            >
+              Runner
+            </Link>
+
+            {/* Desktop: both bells (distinct). Mobile: runner bell lives in hamburger so search+cart win. */}
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <CustomerNotificationBell className="!h-11 !w-11 !rounded-full" />
+              <RunnerQueueBell className="h-11 w-11 rounded-full border border-gray-200 bg-white text-gray-700" />
+            </div>
+
+            <TrackOrderHeaderButton />
+            <CartDropdown className="xl:hidden" browseHref="/cuhk" />
+
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center">
+              <AccountMenu hideThemeChip avatarSize={36} />
             </div>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl px-0 pb-36 sm:px-4">
-          {guestBrowse && (
-            <div className="mx-3 mt-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800 sm:mx-0">
-              <p className="font-semibold text-gray-900">Ordering as guest</p>
-              <p className="mt-0.5 text-xs text-gray-600">
-                Add items, then checkout with dorm, lobby, and phone — no account
-                required. We create your guest profile when you place the order.
-              </p>
-              {itemCount > 0 && (
-                <Link
-                  href="/checkout"
-                  className="mt-2 inline-flex text-xs font-bold text-[#ED1C24] underline"
-                >
-                  Continue to checkout ({itemCount} item
-                  {itemCount === 1 ? "" : "s"})
-                </Link>
-              )}
-            </div>
-          )}
-          <div className="space-y-4 pt-0 sm:pt-4 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start xl:gap-4 xl:space-y-0">
-            <div className="min-w-0 space-y-4">
-              <section
-                className="shop-surface rounded-none px-3 py-4 shadow-sm sm:rounded-2xl"
-                style={{ backgroundColor: "#ffffff" }}
-                aria-label="Categories"
-              >
-                <div className="scrollbar-hide flex gap-2 overflow-x-auto px-1">
-                  {QUICK_CATEGORIES.map((cat) =>
-                    cat.id === "manual" ? (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => {
-                          setSearch("");
-                          openManualItem();
-                        }}
-                        className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
-                      >
-                        <span
-                          className="flex h-14 w-14 items-center justify-center rounded-2xl text-[26px]"
-                          style={{ backgroundColor: "#ffe4e6" }}
-                          aria-hidden
-                        >
-                          {cat.emoji}
-                        </span>
-                        <span
-                          className="shop-label line-clamp-2 text-[12px] font-semibold leading-tight"
-                          style={{ color: "#111111" }}
-                        >
-                          {cat.label}
-                        </span>
-                      </button>
-                    ) : (
-                      <Link
-                        key={cat.id}
-                        href={cat.href}
-                        onClick={() => setSearch("")}
-                        className="flex w-[76px] shrink-0 flex-col items-center gap-2 px-0.5 text-center"
-                      >
-                        <span
-                          className="flex h-14 w-14 items-center justify-center rounded-2xl text-[26px]"
-                          style={{ backgroundColor: "#ffe4e6" }}
-                          aria-hidden
-                        >
-                          {cat.emoji}
-                        </span>
-                        <span
-                          className="shop-label line-clamp-2 text-[12px] font-semibold leading-tight"
-                          style={{ color: "#111111" }}
-                        >
-                          {cat.label}
-                        </span>
-                      </Link>
-                    ),
-                  )}
+        {mobileCatsOpen && (
+          <div className="fixed inset-0 z-[60] lg:hidden">
+            <button
+              type="button"
+              className="absolute inset-0 bg-black/40"
+              aria-label="Close categories"
+              onClick={() => setMobileCatsOpen(false)}
+            />
+            <div className="absolute inset-y-0 left-0 flex w-[min(88vw,320px)] flex-col bg-white shadow-xl">
+              <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-3">
+                <p className="text-sm font-bold text-gray-900">Categories</p>
+                <div className="flex items-center gap-2">
+                  {/* Mobile: only runner available-order bell in drawer (customer notifications too for parity). */}
+                  <CustomerNotificationBell className="!h-11 !w-11" />
+                  <RunnerQueueBell className="h-11 w-11 rounded-lg border border-gray-200 bg-white text-gray-700" />
+                  <button
+                    type="button"
+                    onClick={() => setMobileCatsOpen(false)}
+                    className="flex h-11 min-w-11 items-center justify-center rounded-lg px-2 text-sm font-semibold text-gray-500"
+                  >
+                    Close
+                  </button>
                 </div>
-              </section>
-
-              {searching ? (
-                <section
-                  className="shop-surface rounded-2xl px-4 py-4 shadow-sm"
-                  style={{ backgroundColor: "#ffffff" }}
-                >
-                  <h2 className="text-base font-bold" style={{ color: "#111111" }}>
-                    Results for “{search.trim()}”
-                  </h2>
-                  {searchResults.length === 0 ? (
-                    <p className="shop-muted mt-4 text-center text-sm">
-                      No matches. Try another name or add a custom item below.
-                    </p>
-                  ) : (
-                    <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                      {searchResults.map((item) => (
-                        <li key={item.id}>
-                          <MenuItemCard item={item} />
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              ) : (
-                <>
-                  <section
-                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
-                    style={{ backgroundColor: "#ffffff" }}
-                  >
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                      <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
-                        TOP Picks
-                      </h2>
-                      <Link
-                        href="/browse/dry"
-                        className="shrink-0 text-sm font-semibold"
-                        style={{ color: "#ED1C24" }}
-                      >
-                        Curated ›
-                      </Link>
-                    </div>
-                    <div className="scrollbar-hide -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
-                      {popularItems.map((item, index) => (
-                        <TopPickCard key={item.id} item={item} index={index} />
-                      ))}
-                      {!productsLoading && popularItems.length === 0 && (
-                        <p className="shop-muted px-2 text-sm">
-                          Popular items will show up here.
-                        </p>
-                      )}
-                    </div>
-                  </section>
-
-                  <section className="grid grid-cols-2 gap-3 px-3 sm:px-0">
-                    <AislePhotoButton
-                      href="/browse/dry"
-                      imageSrc="/images/aisle-dry.png"
-                      imageAlt="Groceries aisle"
-                      title="Groceries"
-                      subtitle={dryMeta.subtitle}
-                      sideLabel="Left aisle"
-                      compact
-                    />
-                    <AislePhotoButton
-                      href="/browse/refrigerated"
-                      imageSrc="/images/aisle-refrigerated.png"
-                      imageAlt="Fresh food counter"
-                      title="Fresh Food"
-                      subtitle={coldMeta.subtitle}
-                      sideLabel="Right aisle"
-                      compact
-                    />
-                  </section>
-
-                  <div id="manual-item" className="px-3 sm:px-0">
-                    <CustomItemCard />
-                  </div>
-
-                  <section
-                    className="shop-surface rounded-none px-4 py-4 shadow-sm sm:rounded-2xl"
-                    style={{ backgroundColor: "#ffffff" }}
-                  >
-                    <h2 className="text-lg font-extrabold" style={{ color: "#111111" }}>
-                      You may also like
-                    </h2>
-                    {productsLoading ? (
-                      <p className="shop-muted py-10 text-center text-sm">
-                        Loading products…
-                      </p>
-                    ) : (
-                      <>
-                        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                          {feedVisible.map((item) => (
-                            <li key={item.id}>
-                              <MenuItemCard item={item} />
-                            </li>
-                          ))}
-                        </ul>
-                        <div ref={sentinelRef} className="h-8" aria-hidden />
-                        <p className="shop-muted py-3 text-center text-xs">
-                          {feedCount < feedPool.length
-                            ? "Loading more…"
-                            : "You've seen everything for now."}
-                        </p>
-                      </>
-                    )}
-                  </section>
-                </>
-              )}
-            </div>
-
-            <div className="hidden px-0 xl:sticky xl:top-20 xl:block">
-              <MenuCartSummary />
+              </div>
+              <div className="flex-1 overflow-y-auto">{categoryList}</div>
             </div>
           </div>
-        </main>
+        )}
 
-        <OrderActionBar />
+        <div className="mx-auto grid max-w-[1400px] gap-0 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_300px]">
+          <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] overflow-y-auto border-r border-gray-200 bg-white lg:block">
+            <p className="sticky top-0 z-[1] border-b border-gray-100 bg-white px-3 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">
+              Categories
+            </p>
+            {categoryList}
+          </aside>
+
+          <main className="min-w-0 px-3 py-4 pr-14 pb-[calc(16rem+env(safe-area-inset-bottom,0px))] sm:px-4 sm:pr-4 md:pb-28">
+            {guestBrowse && (
+              <div className="mb-3 rounded-xl border border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-sm text-gray-800">
+                <p className="font-semibold text-gray-900">Ordering as guest</p>
+                <p className="mt-0.5 text-xs text-gray-600">
+                  Add items, then checkout with your dorm and lobby — no account
+                  required.
+                </p>
+              </div>
+            )}
+
+            {searching ? (
+              <section className="rounded-2xl border border-gray-200 bg-white p-4">
+                <h2 className="text-base font-bold text-gray-900">
+                  Results for “{search.trim()}”
+                </h2>
+                {searchResults.length === 0 ? (
+                  <p className="mt-4 text-center text-sm text-gray-500">
+                    No matches. Try another name or add a custom item.
+                  </p>
+                ) : (
+                  <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {searchResults.map((item) => (
+                      <li key={item.id}>
+                        <MenuItemCard item={item} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ) : activeAisle ? (
+              <section className="rounded-2xl border border-gray-200 bg-white p-4">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h2 className="text-lg font-extrabold text-gray-900">
+                    {activeAisle.aisle.label}
+                  </h2>
+                  <Link
+                    href={`/browse/${activeAisle.section}/${activeAisle.aisle.id}`}
+                    className="text-sm font-semibold text-[#ED1C24]"
+                  >
+                    Full aisle ›
+                  </Link>
+                </div>
+                {aisleItems.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-gray-500">
+                    No products in this aisle yet.
+                  </p>
+                ) : (
+                  <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {aisleItems.map((item) => (
+                      <li key={item.id}>
+                        <MenuItemCard item={item} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ) : (
+              <>
+                <section className="rounded-2xl border border-gray-200 bg-white p-4">
+                  <h2 className="text-lg font-extrabold text-gray-900">
+                    Recommended for you
+                  </h2>
+                  <div className="scrollbar-hide -mx-1 mt-3 flex gap-3 overflow-x-auto px-1 pb-1">
+                    {popularItems.map((item, index) => (
+                      <TopPickCard key={item.id} item={item} index={index} />
+                    ))}
+                  </div>
+                </section>
+
+                <div id="manual-item" className="mt-4">
+                  <CustomItemCard />
+                </div>
+
+                <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
+                  <h2 className="text-lg font-extrabold text-gray-900">
+                    You may also like
+                  </h2>
+                  {productsLoading ? (
+                    <p className="py-10 text-center text-sm text-gray-500">
+                      Loading products…
+                    </p>
+                  ) : (
+                    <>
+                      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {feedVisible.map((item) => (
+                          <li key={item.id}>
+                            <MenuItemCard item={item} />
+                          </li>
+                        ))}
+                      </ul>
+                      <div ref={sentinelRef} className="h-8" aria-hidden />
+                      <p className="py-3 text-center text-xs text-gray-500">
+                        {feedCount < feedPool.length
+                          ? "Loading more…"
+                          : "You've seen everything for now."}
+                      </p>
+                    </>
+                  )}
+                </section>
+              </>
+            )}
+          </main>
+
+          <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] p-3 xl:block">
+            <MenuCartSummary />
+          </div>
+        </div>
+
       </div>
     </AppShell>
   );

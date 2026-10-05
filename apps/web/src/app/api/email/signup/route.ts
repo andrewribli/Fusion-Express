@@ -1,9 +1,12 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { sendAdminNewUserNotice } from "@/lib/email";
 import {
   AdminAuthError,
   requireAuthFromRequest,
 } from "@/lib/firebase-admin";
+import { runWelcomeEmailJob } from "@/lib/welcome-email-job";
+
+export const runtime = "nodejs";
 
 function cap(value: string, max: number): string {
   return value.slice(0, max);
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const email = cap((body.email ?? "").trim().toLowerCase(), 320);
+  const email = cap((body.email ?? auth.email ?? "").trim().toLowerCase(), 320);
   const fullName = cap((body.fullName ?? "").trim(), 120);
 
   if (!email || !email.includes("@")) {
@@ -44,19 +47,28 @@ export async function POST(request: Request) {
     );
   }
 
-  try {
-    await sendAdminNewUserNotice({
-      fullName,
-      email,
-      collegeHall: "",
-      isRunner: Boolean(body.isRunner),
-    });
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("admin new-user notice failed after retry", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Could not send email" },
-      { status: 502 },
-    );
-  }
+  // Fire-and-forget: signup UI must not wait on Resend / retries.
+  after(async () => {
+    try {
+      await runWelcomeEmailJob({
+        uid: auth.uid,
+        authEmail: email,
+      });
+    } catch (err) {
+      console.error("welcome email after() failed", err);
+    }
+
+    try {
+      await sendAdminNewUserNotice({
+        fullName,
+        email,
+        collegeHall: "",
+        isRunner: Boolean(body.isRunner),
+      });
+    } catch (err) {
+      console.error("admin new-user notice failed after retry", err);
+    }
+  });
+
+  return NextResponse.json({ ok: true });
 }

@@ -1,9 +1,12 @@
 export const ORDER_STATUSES = [
   "pending",
+  "paid",
   "accepted",
   "purchased",
+  "receipt_uploaded",
   "delivered",
   "runner_paid",
+  "completed",
   "customer_paid",
   "cancelled",
 ] as const;
@@ -14,8 +17,11 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
   accepted: "Accepted",
   purchased: "Purchased",
-  delivered: "Pending payout",
+  receipt_uploaded: "Receipt uploaded",
+  delivered: "Delivered",
+  paid: "Paid",
   runner_paid: "Runner paid",
+  completed: "Completed",
   customer_paid: "Customer paid",
   cancelled: "Cancelled",
 };
@@ -29,10 +35,10 @@ export function normalizeOrderStatus(status: string): OrderStatus {
     case "picked_up":
     case "picked":
       return "purchased";
-    case "completed":
-      return "runner_paid";
-    case "paid":
-      return "customer_paid";
+    // Legacy docs sometimes stored "completed" for runner reimbursed.
+    // New flow uses completed as the terminal state after runner_paid.
+    case "complete":
+      return "completed";
     default:
       return status as OrderStatus;
   }
@@ -42,37 +48,46 @@ export const TRACKING_STEPS: { status: OrderStatus; label: string }[] = [
   { status: "pending", label: "Pending" },
   { status: "accepted", label: "Accepted" },
   { status: "purchased", label: "Purchased" },
+  { status: "receipt_uploaded", label: "Receipt uploaded" },
   { status: "delivered", label: "Delivered" },
+  { status: "paid", label: "Paid" },
   { status: "runner_paid", label: "Runner reimbursed" },
-  { status: "customer_paid", label: "You paid GraceRun" },
+  { status: "completed", label: "Completed" },
 ];
 
 export function getStepIndex(status: OrderStatus): number {
+  if (status === "customer_paid") {
+    return TRACKING_STEPS.findIndex((s) => s.status === "paid");
+  }
   const idx = TRACKING_STEPS.findIndex((s) => s.status === status);
   return idx === -1 ? 0 : idx;
 }
 
 export function isActiveRunnerStatus(status: OrderStatus): boolean {
-  return status === "accepted" || status === "purchased";
+  return (
+    status === "accepted" ||
+    status === "purchased" ||
+    status === "receipt_uploaded"
+  );
 }
 
 /**
- * Customer still needs to follow the order (including pay after delivery).
- * Used for track badges / payment-due UI — not for the new-order placement cap.
+ * Customer still needs to follow the order.
+ * Used for track badges — not for the new-order placement cap.
  */
 export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
   return (
     status === "pending" ||
     status === "accepted" ||
     status === "purchased" ||
+    status === "receipt_uploaded" ||
     status === "delivered"
   );
 }
 
 /**
- * In-flight delivery only. Payment-due (`delivered` / `runner_paid`) orders
- * show banners but must not block placing new grocery orders — otherwise
- * unpaid delivered tickets permanently hit MAX_ACTIVE_CUSTOMER_ORDERS.
+ * In-flight delivery + unpaid checkout. Payment-due delivered tickets must not
+ * permanently block new grocery orders.
  */
 export function countsTowardCustomerOrderPlacementCap(
   status: OrderStatus,
@@ -80,7 +95,8 @@ export function countsTowardCustomerOrderPlacementCap(
   return (
     status === "pending" ||
     status === "accepted" ||
-    status === "purchased"
+    status === "purchased" ||
+    status === "receipt_uploaded"
   );
 }
 
@@ -137,10 +153,15 @@ export function customerAmountDue(order: {
   subtotal: number;
   deliveryFee: number;
   tip?: number;
+  platformFee?: number;
 }): number {
   return (
     Math.round(
-      (groceryAmountDue(order) + order.deliveryFee + (order.tip ?? 0)) * 100,
+      (groceryAmountDue(order) +
+        order.deliveryFee +
+        (order.tip ?? 0) +
+        (order.platformFee ?? 0)) *
+        100,
     ) / 100
   );
 }
@@ -160,7 +181,7 @@ export function runnerReimburseTotal(order: {
 export function adminPayoutLabel(status: OrderStatus): string {
   if (status === "delivered") return "pending_payout";
   if (status === "runner_paid") return "runner_paid";
-  if (status === "customer_paid") return "customer_paid";
+  if (status === "customer_paid" || status === "completed") return "customer_paid";
   return status;
 }
 
@@ -208,7 +229,11 @@ export function customerDeadlineOf(order: {
 }
 
 export function isRunnerDeliveryOpen(status: OrderStatus): boolean {
-  return status === "accepted" || status === "purchased";
+  return (
+    status === "accepted" ||
+    status === "purchased" ||
+    status === "receipt_uploaded"
+  );
 }
 
 export function isRunnerHoldStatus(status: OrderStatus): boolean {
@@ -272,6 +297,23 @@ export function runnerWarningTotal(
   }, 0);
 }
 
-export function isCustomerPaymentOpen(status: OrderStatus): boolean {
-  return status === "delivered" || status === "runner_paid";
+/** Pay button: only after delivery, and only once the receipt total is in. */
+export function isCustomerPaymentOpen(
+  status: OrderStatus,
+  order?: {
+    paymentReceived?: boolean;
+    amountPaidByRunner?: number;
+    finalTotal?: number;
+    actualSubtotal?: number;
+  },
+): boolean {
+  if (status !== "delivered") return false;
+  if (order?.paymentReceived) return false;
+  if (!order) return false;
+  return hasConfirmedGroceryTotal(order);
+}
+
+/** Orders runners may claim from the available board. */
+export function isClaimableOrderStatus(status: OrderStatus): boolean {
+  return status === "pending";
 }

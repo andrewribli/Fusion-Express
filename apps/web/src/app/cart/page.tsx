@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { AppHeader } from "@/components/AppHeader";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
@@ -20,43 +18,65 @@ import {
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { lineTotal } from "@/lib/pricing";
 import { formatMenuPrice } from "@/lib/types";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
+import { readCityuHall } from "@/lib/cityu-hall";
 import { getItemImage } from "@/data/aisle-images";
+import { ProductImage } from "@/components/ProductImage";
 import { useUser } from "@/context/UserContext";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
+import { useCampus } from "@/context/CampusContext";
+import { cartCampus, cartCampusError } from "@/lib/cart-campus";
+import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { previewCustomerSavings } from "@fusion-express/shared";
+import { restaurantIdFromCanteenItemId } from "@fusion-express/shared/canteen-college";
+import { formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
+
+function money(amount: number): string {
+  return formatHkdAmount(Number(Number(amount).toFixed(2)));
+}
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
+  const isAdmin = useIsAdmin(user?.uid);
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
-
+  const { campus: activeCampus } = useCampus();
+  const campus = cartCampus(items) ?? activeCampus;
+  const [hall, setHall] = useState("");
   useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
-  const weightKg = cartTotalWeightKg(items);
-  const fee = calculateDeliveryFee({
-    weightKg,
-    college: "",
-  });
-  const total = subtotal + fee.deliveryFee;
+    if (campus === "cityu") setHall(readCityuHall());
+  }, [campus]);
+  const mixedError = cartCampusError(items, null);
+  const canteenGate = getCanteenCheckoutGate(items, { adminBypass: isAdmin });
+  const canteenError =
+    isCanteenCart(items) && !canteenGate.allowed && !canteenGate.hoursClosed
+      ? canteenGate.message
+      : null;
+  const fee = resolveOrderDeliveryFee(items, "", campus, campus === "cityu" ? hall : "");
+  const canteenRestaurantId = items
+    .map(({ item }) => restaurantIdFromCanteenItemId(item.id))
+    .find((id): id is string => Boolean(id));
+  const collegeSavings =
+    campus === "cuhk"
+      ? previewCustomerSavings({ campus, restaurantId: canteenRestaurantId })
+      : 0;
+  const total = Number(
+    (subtotal + fee.deliveryFee - collegeSavings).toFixed(2),
+  );
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
 
   function handleCancelOrder() {
     clearCart();
-    router.push("/fusion");
+    router.push("/");
   }
 
   return (
     <AppShell>
       <LakersWallpaper>
-          <AppHeader showBack backHref="/fusion" title="Fusion cart" />
+          <AppHeader showBack backHref="/" title="Your Cart" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
             {items.length === 0 ? (
@@ -65,18 +85,11 @@ export default function CartPage() {
                   <p className="text-4xl">🛒</p>
                   <p className="mt-3 text-sm text-gray-600">Your cart is empty.</p>
                   <Link
-                    href="/fusion"
+                    href="/"
                     className="mt-4 inline-block rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-white"
                   >
-                    Shop Fusion
+                    Start shopping
                   </Link>
-                  <p className="mt-3 text-xs text-gray-500">
-                    Canteen food uses a separate cart —{" "}
-                    <Link href="/canteen" className="underline">
-                      browse canteens
-                    </Link>
-                    .
-                  </p>
                 </div>
                 <ProductSearchPanel
                   className="mt-4"
@@ -95,15 +108,14 @@ export default function CartPage() {
                       <div className="flex justify-between gap-2">
                         <div className="flex min-w-0 gap-3">
                           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                            {getItemImage(item) ? (
-                              <Image
-                                src={getItemImage(item)}
-                                alt=""
-                                fill
-                                className="object-cover"
-                                sizes="56px"
-                              />
-                            ) : null}
+                            <ProductImage
+                              src={getItemImage(item)}
+                              alt={item.name}
+                              category={item.category}
+                              className="object-cover"
+                              sizes="56px"
+                              showLabel={false}
+                            />
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-gray-900">
@@ -157,7 +169,7 @@ export default function CartPage() {
                         </button>
                       </div>
                       <p className="mt-2 text-right text-sm font-medium text-gray-700">
-                        ${lineTotal(item, quantity)}
+                        ${money(lineTotal(item, quantity))}
                       </p>
                     </li>
                   ))}
@@ -168,20 +180,35 @@ export default function CartPage() {
                     <div className="flex justify-between">
                       <span>Subtotal</span>
                       <span className={overLimit ? "font-bold text-[#ED1C24]" : undefined}>
-                        ${subtotal}
+                        ${money(subtotal)}
                       </span>
                     </div>
-                    <DeliveryFeeBreakdown breakdown={fee} />
+                    {fee.quote.pricing === "cuhk-graph" || fee.quote.pricing.startsWith("cityu") ? (
+                      <DeliveryQuote quote={fee.quote} />
+                    ) : (
+                      <DeliveryFeeBreakdown breakdown={fee} />
+                    )}
                     <p className="text-xs text-gray-500">
                         Delivery fee is confirmed at checkout from your hall.
                       </p>
+                    {collegeSavings > 0 && (
+                      <div className="flex justify-between font-medium text-emerald-800">
+                        <span>College discount</span>
+                        <span>
+                          −HK${collegeSavings.toFixed(2)}
+                          <span className="mt-0.5 block text-[11px] font-normal text-gray-500">
+                            When a matching-college runner accepts
+                          </span>
+                        </span>
+                      </div>
+                    )}
                     <div
                       className={`flex justify-between pt-2 text-base font-bold ${
                         overLimit ? "text-[#ED1C24]" : "text-gray-900"
                       }`}
                     >
                       <span>Total</span>
-                      <span>${total}</span>
+                      <span>${money(total)}</span>
                     </div>
                   </div>
                   <p className="mt-3 text-xs text-fusion-red">
@@ -197,24 +224,31 @@ export default function CartPage() {
 
                 <CustomItemCard className="mt-4" />
 
-                <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <PaymentMethodPicker
-                    value={paymentMethod}
-                    onChange={(method) => {
-                      setPaymentMethod(method);
-                      savePaymentMethod(method);
-                    }}
-                  />
-                </div>
                 <div className="mt-2">
                   <OrderLimitNotice subtotal={subtotal} />
                 </div>
+                {mixedError && (
+                  <p className="mt-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {mixedError}
+                  </p>
+                )}
+                {canteenError && (
+                  <p className="mt-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                    {canteenError}
+                  </p>
+                )}
+                {canteenGate.hoursClosed && canteenGate.message ? (
+                  <p className="mt-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+                    {canteenGate.message} You can schedule a later opening-hours
+                    delivery at checkout.
+                  </p>
+                ) : null}
                 <button
                   type="button"
-                  disabled={overLimit}
+                  disabled={overLimit || Boolean(mixedError) || Boolean(canteenError)}
                   onClick={() => {
                     // Guests and signed-in users both finish on checkout so we
-                    // can collect phone / dorm / lobby in one place.
+                    // can collect dorm / lobby in one place.
                     router.push("/checkout");
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"

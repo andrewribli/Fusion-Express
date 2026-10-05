@@ -1,19 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { CampusPickerCards } from "@/components/CampusPickerCards";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { lineTotal } from "@/lib/pricing";
-import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
+import {
+  formatDeliveryAddress,
+  getLobbyForHall,
+} from "@/data/cuhk-locations";
 import {
   ESTIMATED_DELIVERY_MINUTES,
   getEstimatedDeliveryTime,
@@ -24,64 +28,192 @@ import {
   DEFAULT_SPECIAL_INSTRUCTIONS,
 } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
+import { PlaceOrderConfirmModal } from "@/components/PlaceOrderConfirmModal";
 import { usePlaceOrder } from "@/lib/use-place-order";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
-import { validatePhone } from "@/lib/auth";
+import { DeliveryQuote } from "@/components/DeliveryQuote";
+import { getCanteenCheckoutGate, isCanteenCart } from "@/lib/canteen/cart";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import {
+  formatScheduledLabel,
+  resolveDeliveryTiming,
+  resolveOrderVenue,
+} from "@/lib/order-window";
+import { ScheduleDelivery } from "@/components/ScheduleDelivery";
+import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
+import { PLATFORM_FEE, previewCustomerSavings } from "@fusion-express/shared";
+import { cartCampus, cartCampusError } from "@/lib/cart-campus";
+import {
+  canteenNameForRestaurant,
+  restaurantIdFromCanteenItemId,
+} from "@fusion-express/shared/canteen-college";
 
 export default function CheckoutPage() {
   const { user } = useUser();
+  const { setCampus } = useCampus();
   const { items, subtotal } = useCart();
-  const { placeOrder, loading, error: placeError } = usePlaceOrder("fusion");
+  const { placeOrder, loading, error: placeError } = usePlaceOrder();
 
+  /** Signed-in campus from signup — not a homepage picker. */
+  const lockedCampus: CampusId | null =
+    user?.campus === "cuhk" || user?.campus === "cityu" ? user.campus : null;
+  /** Guests pick campus here before dorms. */
+  const [guestCampus, setGuestCampus] = useState<CampusId | null>(null);
   const [college, setCollege] = useState("");
   const [hall, setHall] = useState("");
-  const [phone, setPhone] = useState(user?.phone ?? "");
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
-
-  useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState<"now" | "schedule">("now");
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
+  const isAdmin = useIsAdmin(user?.uid);
+  const onDeliveryMode = useCallback((mode: "now" | "schedule") => {
+    setDeliveryMode(mode);
   }, []);
 
   useEffect(() => {
-    if (user?.phone && !phone) setPhone(user.phone);
-  }, [user, phone]);
+    if (lockedCampus) {
+      setCampus(lockedCampus);
+      setGuestCampus(null);
+    }
+  }, [lockedCampus, setCampus]);
 
+  const itemsCampus = cartCampus(items);
+  /** Cart channel fixes campus (canteen / one-campus grocery); no cross-university pick. */
+  const cartLockedCampus = itemsCampus;
+  const deliveryCampusLock = lockedCampus ?? cartLockedCampus;
+
+  useEffect(() => {
+    if (deliveryCampusLock) {
+      setCampus(deliveryCampusLock);
+      if (!lockedCampus) {
+        setGuestCampus(deliveryCampusLock);
+      }
+    }
+  }, [deliveryCampusLock, lockedCampus, setCampus]);
+
+  const campus = deliveryCampusLock ?? guestCampus;
+  const canteenOrder = isCanteenCart(items);
+  const campusError = cartCampusError(items, campus);
+  const canteenGate = getCanteenCheckoutGate(items, { adminBypass: isAdmin });
+  const canteenHardError =
+    isCanteenCart(items) && !canteenGate.allowed && !canteenGate.hoursClosed
+      ? canteenGate.message
+      : null;
+  const venue = useMemo(() => {
+    const restaurantId = items
+      .map(({ item }) => restaurantIdFromCanteenItemId(item.id))
+      .find((id): id is string => Boolean(id));
+    const wellcome = items.some(({ item }) => item.id.startsWith("wellcome:"));
+    const orderCampus = campus === "cityu" ? "cityu" : "cuhk";
+    return resolveOrderVenue({
+      campus: orderCampus,
+      itemIds: items.map(({ item }) => item.id),
+      sourceId: restaurantId
+        ? restaurantId
+        : wellcome
+          ? "wellcome"
+          : orderCampus === "cityu"
+            ? "taste"
+            : "fusion",
+      orderChannel: canteenOrder
+        ? "canteen"
+        : wellcome
+          ? "wellcome"
+          : orderCampus === "cityu"
+            ? "taste"
+            : "fusion",
+      canteenRestaurantId: restaurantId,
+    });
+  }, [campus, canteenOrder, items]);
+  const timing = useMemo(
+    () =>
+      resolveDeliveryTiming({
+        venue,
+        isAdmin,
+        mode: deliveryMode,
+        date: scheduleDate,
+        time: scheduleTime,
+      }),
+    [venue, isAdmin, deliveryMode, scheduleDate, scheduleTime],
+  );
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
-  const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college }),
-    [weightKg, college],
+    () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk", hall),
+    [items, college, campus, hall],
   );
-  const total = subtotal + fee.deliveryFee + tipAmount;
+  const pickup = useMemo(() => {
+    for (const { item } of items) {
+      const restaurantId = restaurantIdFromCanteenItemId(item.id);
+      if (restaurantId) {
+        return {
+          label: canteenNameForRestaurant(restaurantId),
+          restaurantId,
+        };
+      }
+      if (item.id.startsWith("wellcome:")) {
+        return { label: "Wellcome", restaurantId: null as string | null };
+      }
+    }
+    if (campus === "cityu") return { label: "Taste", restaurantId: null };
+    return { label: "Fusion", restaurantId: null };
+  }, [items, campus]);
+  const pickupLabel = pickup.label;
+  const collegeSavings =
+    campus === "cuhk"
+      ? previewCustomerSavings({ campus, restaurantId: pickup.restaurantId })
+      : 0;
+  const total =
+    subtotal + fee.deliveryFee + tipAmount + PLATFORM_FEE - collegeSavings;
   const overLimit = isOverOrderLimit(subtotal);
-  const phoneOk = !validatePhone(phone);
-  const canSubmit = Boolean(college && hall && phoneOk && !overLimit);
+  const canSubmit = Boolean(
+    campus &&
+      college &&
+      hall &&
+      !overLimit &&
+      !campusError &&
+      !canteenHardError &&
+      timing.allowed &&
+      fee.quote.available !== false &&
+      !fee.quote.pending,
+  );
+  const shopHref = isCanteenCart(items)
+    ? "/canteen"
+    : campusConfig[campus ?? "cuhk"].groceryPath;
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
       : null;
-  const lobby = hall ? getLobbyForHall(hall) : "";
+  const lobby = hall && campus ? getLobbyForHall(hall, campus) : "";
+
+  function handleCampusChange(next: CampusId) {
+    if (deliveryCampusLock) return;
+    setGuestCampus(next);
+    setCampus(next);
+    setCollege("");
+    setHall("");
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || !campus) return;
+    setConfirmOpen(true);
+  }
+
+  function handleConfirmPlaceOrder() {
+    if (!canSubmit || !campus) return;
+    setConfirmOpen(false);
     void placeOrder({
+      campus,
       college,
       hall,
-      phone,
-      paymentMethod,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
+      scheduledFor: timing.scheduledFor ?? undefined,
     });
   }
 
@@ -89,11 +221,10 @@ export default function CheckoutPage() {
     return (
       <AppShell>
         <LakersWallpaper>
-          <AppHeader showBack backHref="/cart" title="Fusion checkout" />
+          <AppHeader showBack backHref="/cart" title="Checkout" />
           <main className="mx-auto max-w-[480px] px-4 py-8">
-            <p className="text-center text-sm text-white/80">
-              Nothing in your Fusion cart yet. Search below, add a custom item,
-              or keep shopping Fusion (canteen food has its own checkout).
+            <p className="text-center text-base text-white/80">
+              Add items to place an order
             </p>
             <ProductSearchPanel
               className="mt-4"
@@ -101,12 +232,8 @@ export default function CheckoutPage() {
             />
             <CustomItemCard className="mt-4" />
             <p className="mt-4 text-center">
-              <Link href="/fusion" className="text-lakers-gold underline">
-                Shop Fusion
-              </Link>
-              {" · "}
-              <Link href="/canteen" className="text-lakers-gold underline">
-                Browse canteens
+              <Link href={shopHref} className="text-lakers-gold underline">
+                Keep shopping
               </Link>
             </p>
           </main>
@@ -118,34 +245,57 @@ export default function CheckoutPage() {
   return (
     <AppShell>
       <LakersWallpaper>
-        <AppHeader showBack backHref="/cart" title="Fusion checkout" />
+        <AppHeader showBack backHref="/cart" title="Checkout" />
 
         <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
-          <div className="mb-4 rounded-xl border border-[#ED1C24]/40 bg-[#ED1C24]/10 px-4 py-3 text-sm text-white">
-            Fusion grocery checkout — canteen orders use{" "}
-            <Link href="/canteen/checkout" className="underline">
-              /canteen/checkout
-            </Link>
-            .
-          </div>
           {!user && (
             <div className="mb-4 rounded-xl border border-lakers-gold/40 bg-lakers-navy/80 px-4 py-3 text-sm text-lakers-gold">
-              No account needed. Enter your dorm, lobby, and phone — we&apos;ll
-              create your account when you order.{" "}
+              No account needed. Enter your dorm and lobby — we&apos;ll
+              save the order when you submit.{" "}
               <Link href="/login?next=/checkout" className="underline">
                 Already have an account? Sign in
               </Link>
             </div>
           )}
           {placeError && (
-            <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-              {placeError}
+            <div className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-base text-red-700">
+              <p>{placeError}</p>
+              <p className="mt-2">
+                Try again, or contact support with the chat button.
+              </p>
+            </div>
+          )}
+          {campusError && (
+            <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {campusError}
             </p>
           )}
+          {canteenHardError && (
+            <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              {canteenHardError}
+            </p>
+          )}
+          {canteenGate.hoursClosed && canteenGate.message ? (
+            <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              {canteenGate.message}
+            </p>
+          ) : null}
           <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
-            Est. delivery by {formatEta(estimatedDeliveryAt)} (~
-            {ESTIMATED_DELIVERY_MINUTES} min after order)
+            {timing.scheduledFor
+              ? `Scheduled for ${formatScheduledLabel(new Date(timing.scheduledFor))}`
+              : `Est. delivery by ${formatEta(estimatedDeliveryAt)} (~${ESTIMATED_DELIVERY_MINUTES} min after order)`}
           </div>
+          <ScheduleDelivery
+            venue={venue}
+            isAdmin={isAdmin}
+            mode={deliveryMode}
+            date={scheduleDate}
+            time={scheduleTime}
+            onMode={onDeliveryMode}
+            onDate={setScheduleDate}
+            onTime={setScheduleTime}
+            error={deliveryMode === "schedule" ? timing.error : null}
+          />
 
           <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <h2 className="text-sm font-semibold text-gray-900">Order Summary</h2>
@@ -165,9 +315,6 @@ export default function CheckoutPage() {
                   <div>
                     <p className="font-medium">{address}</p>
                     <p className="text-xs text-gray-500">Lobby: {lobby}</p>
-                    {phoneOk && (
-                      <p className="text-xs text-gray-500">Phone: {phone}</p>
-                    )}
                   </div>
                   <button
                     type="button"
@@ -190,20 +337,45 @@ export default function CheckoutPage() {
                   ${subtotal}
                 </span>
               </div>
-              <DeliveryFeeBreakdown breakdown={fee} />
+              {fee.quote.pricing === "cuhk-graph" || fee.quote.pricing.startsWith("cityu") ? (
+                <div className="mt-2">
+                  <DeliveryQuote quote={fee.quote} large fromLabel={pickupLabel} />
+                </div>
+              ) : (
+                <DeliveryFeeBreakdown breakdown={fee} />
+              )}
               {tipAmount > 0 && (
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>
                   <span>${tipAmount}</span>
                 </div>
               )}
+              {collegeSavings > 0 && (
+                <>
+                  <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900">
+                    College discount applied — you save HK${collegeSavings.toFixed(0)}
+                  </p>
+                  <div className="flex justify-between font-medium text-emerald-800">
+                    <span>College discount</span>
+                    <span>−HK${collegeSavings.toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Applies when a matching-college runner accepts. A runner from
+                    another college removes this HK${collegeSavings.toFixed(0)}.
+                  </p>
+                </>
+              )}
+              <div className="flex justify-between text-gray-600">
+                <span>Platform fee</span>
+                <span>${PLATFORM_FEE.toFixed(2)}</span>
+              </div>
               <div
                 className={`flex justify-between pt-1 text-base font-bold ${
                   overLimit ? "text-[#ED1C24]" : ""
                 }`}
               >
                 <span>Total</span>
-                <span>${total}</span>
+                <span>${total.toFixed(2)}</span>
               </div>
             </div>
           </section>
@@ -222,16 +394,45 @@ export default function CheckoutPage() {
             >
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <p className="mt-1 text-xs text-gray-500">
-                Only three things we need: dorm (college + hall), lobby, and phone.
+                {deliveryCampusLock
+                  ? deliveryCampusLock === "cityu"
+                    ? canteenOrder
+                      ? "CityU canteen — hall lobby delivery. No phone number."
+                      : "Delivering to your CityU hall lobby. No phone number."
+                    : canteenOrder
+                      ? "CUHK canteen — dorm lobby delivery. No phone number."
+                      : "Delivering to your CUHK dorm lobby. No phone number."
+                  : campus === "cityu"
+                    ? "Campus, compound, hall, and lobby. No phone number."
+                    : "Pick your university first, then dorm and lobby. No phone number."}
               </p>
-              <div className="mt-3">
-                <DeliveryAddressFields
-                  college={college}
-                  hall={hall}
-                  onCollegeChange={setCollege}
-                  onHallChange={setHall}
-                />
-              </div>
+              {deliveryCampusLock ? (
+                <p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-800">
+                  {deliveryCampusLock === "cityu" ? "CityU" : "CUHK"}
+                </p>
+              ) : (
+                <div className="mt-3">
+                  <CampusPickerCards
+                    value={guestCampus}
+                    onChange={handleCampusChange}
+                  />
+                </div>
+              )}
+              {campus ? (
+                <div className="mt-3">
+                  <DeliveryAddressFields
+                    campus={campus}
+                    college={college}
+                    hall={hall}
+                    onCollegeChange={setCollege}
+                    onHallChange={setHall}
+                  />
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-gray-500">
+                  Choose your university to see dorm options.
+                </p>
+              )}
               {hall ? (
                 <div className="mt-3 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
                   <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -243,28 +444,6 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               ) : null}
-              <div className="mt-3">
-                <label
-                  htmlFor="guest-phone"
-                  className="block text-xs font-medium text-gray-600"
-                >
-                  Phone number
-                </label>
-                <input
-                  id="guest-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="e.g. 9123 4567"
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Used to create your account and for the runner to reach you.
-                </p>
-              </div>
               <div className="mt-3">
                 <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
                   Special instructions
@@ -316,18 +495,9 @@ export default function CheckoutPage() {
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
               <h2 className="text-sm font-bold text-blue-900">How payment works</h2>
               <p className="mt-1 text-sm font-semibold text-blue-900">
-                PayMe is pre-selected. You pay after delivery when the runner
-                shares the details.
+                No payment now. You pay the exact receipt total with card, FPS,
+                or PayMe after the runner delivers.
               </p>
-              <div className="mt-3 rounded-xl bg-white p-3">
-                <PaymentMethodPicker
-                  value={paymentMethod}
-                  onChange={(method) => {
-                    setPaymentMethod(method);
-                    savePaymentMethod(method);
-                  }}
-                />
-              </div>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-blue-800">
                 {PAYMENT_FLOW_STEPS.map((step) => (
                   <li key={step}>{step}</li>
@@ -349,22 +519,45 @@ export default function CheckoutPage() {
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
                 >
                   <span>
-                    {loading ? "Placing…" : `Complete Order · ${paymentMethod}`}
+                    {loading ? "Placing…" : "Complete Order"}
                   </span>
                   <span className="text-sm font-normal">· ${total}</span>
                 </button>
-                {!canSubmit && (
-                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
-                    {!college || !hall
-                      ? "Choose your college and hall to continue."
-                      : "Enter a valid phone number to continue."}
+                {campusError ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24]">
+                    {campusError}
                   </p>
-                )}
+                ) : fee.quote.available === false ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24] md:text-white">
+                    {fee.quote.unavailableMessage}
+                  </p>
+                ) : timing.error ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-amber-200">
+                    {timing.error}
+                  </p>
+                ) : !canSubmit ? (
+                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
+                    Choose your {campus === "cityu" ? "compound" : "college"} and
+                    hall to continue.
+                  </p>
+                ) : null}
               </div>
             </div>
           </form>
         </main>
       </LakersWallpaper>
+      <PlaceOrderConfirmModal
+        open={confirmOpen}
+        loading={loading}
+        deliveryLine={
+          address
+            ? `${address}${lobby ? ` · ${lobby}` : ""}`
+            : null
+        }
+        totalLabel={`Estimated total · $${total.toFixed(2)}`}
+        onConfirm={handleConfirmPlaceOrder}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </AppShell>
   );
 }

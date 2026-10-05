@@ -1,6 +1,9 @@
 import catalog from "@fusion-express/shared/data/foodpanda-fusion-catalog.json";
 import { cleanBrand, cleanProductName } from "@fusion-express/shared";
-import { resolveProductImage } from "@fusion-express/shared/resolve-image";
+import {
+  isGenericImageUrl,
+  resolveProductImage,
+} from "@fusion-express/shared/resolve-image";
 import type { MenuItem, StoreSection } from "@/lib/types";
 
 interface CatalogItem {
@@ -9,10 +12,48 @@ interface CatalogItem {
   category: string;
   subcategory?: string;
   brand?: string;
+  /** Alternate shop name or brand the customer might type (shown under the name). */
+  nameAlt?: string;
   image?: string;
   weight?: number;
   bulkDealPrice?: number;
   bulkDealQty?: number;
+  priceOnRequest?: boolean;
+  sourceId?: string;
+  campus?: string;
+  isAvailable?: boolean;
+}
+
+/** Legacy subcategory → consolidated aisle label (additive safety net). */
+const SUBCATEGORY_CONSOLIDATION: Record<string, string> = {
+  Fruit: "Produce",
+  "Fruit & Berries": "Produce",
+  Vegetables: "Produce",
+  Beef: "Meat - Beef",
+  Chicken: "Meat - Chicken",
+  Pork: "Meat - Pork",
+  Meat: "Meat - Other",
+  Others: "Meat - Other",
+  Other: "Meat - Other",
+  "Frozen Food": "Frozen Meals",
+  Dairy: "Milk",
+  "Instant Noodles": "Noodles",
+  "Rice & Noodles": "Rice & Grains",
+  Tea: "Tea & Coffee",
+  "Hot Drinks": "Tea & Coffee",
+  Sauces: "Condiments",
+  Pickles: "Condiments",
+  Chips: "Snacks",
+  Crackers: "Snacks",
+  Biscuits: "Snacks",
+  Confectionary: "Snacks",
+  "Cleaning Supplies": "Cleaning",
+  Household: "Cleaning",
+  Pantry: "Rice & Grains",
+};
+
+function consolidateSubcategory(subcategory: string): string {
+  return SUBCATEGORY_CONSOLIDATION[subcategory] ?? subcategory;
 }
 
 interface CatalogNode {
@@ -94,37 +135,49 @@ export function getCatalogMenuItems(): MenuItem[] {
   cached = flattenCatalog().map((item, index) => {
     const sectionLabel = item.category;
     const storeSection = catalogStoreSection(sectionLabel);
-    const subcategory = item.subcategory ?? sectionLabel;
+    const subcategory = consolidateSubcategory(
+      item.subcategory ?? sectionLabel,
+    );
     const aisleId = slugify(subcategory) || "other";
-    const image = resolveProductImage({
+    const rawImage =
+      item.image &&
+      (item.image.startsWith("http") || item.image.startsWith("/images/")) &&
+      !item.image.includes("…") &&
+      !item.image.includes("...")
+        ? item.image
+        : undefined;
+    const resolved = resolveProductImage({
       name: item.name,
       category: aisleId,
-      image:
-        item.image &&
-        (item.image.startsWith("http") || item.image.startsWith("/images/")) &&
-        !item.image.includes("…") &&
-        !item.image.includes("...")
-          ? item.image
-          : undefined,
+      image: rawImage,
     });
+    // Prefer real retail photos only; never keep Unsplash / placehold / aisle stock.
+    const image =
+      resolved && !isGenericImageUrl(resolved) ? resolved : undefined;
     const brand = cleanBrand(item.brand);
-    const name = cleanProductName(item.name, { brand, subcategory });
+    const nameAlt = cleanBrand(item.nameAlt);
+    const name = cleanProductName(item.name, {
+      brand: brand ?? nameAlt,
+      subcategory,
+    });
+    const priceOnRequest = Boolean(item.priceOnRequest) || !(item.price > 0);
 
     return {
       id: slugId(item.name, index),
       name,
       category: aisleId,
       storeSection,
-      price: item.price,
+      campus: "cuhk" as const,
+      price: priceOnRequest ? 0 : item.price,
       unit: "each",
       image,
       priceType: "fixed" as const,
-      runnerInputsPrice: false,
-      inStock: true,
+      runnerInputsPrice: priceOnRequest,
+      inStock: item.isAvailable !== false,
       sortOrder: index,
       weightKg: item.weight ?? 0.2,
       subcategory,
-      itemNote: brand,
+      itemNote: nameAlt ?? brand,
       bulkDealPrice: item.bulkDealPrice,
       bulkDealQty: item.bulkDealQty,
     };

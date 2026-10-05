@@ -1,4 +1,7 @@
-import { resolveProductImage } from "@fusion-express/shared/resolve-image";
+import {
+  isGenericImageUrl,
+  resolveProductImage,
+} from "@fusion-express/shared/resolve-image";
 import type { MenuCategory } from "@/lib/types";
 import type { StoreSection } from "@/data/aisles";
 
@@ -29,21 +32,39 @@ export const AISLE_IMAGES: Record<string, string> = {
   "hot-drinks": "/images/aisles/coffee-tea.jpg",
   "bread-and-bakery": "/images/aisles/bread.jpg",
   meat: "/images/aisles/meat.png",
+  "meat-beef": "/images/aisles/meat.png",
+  "meat-chicken": "/images/aisles/meat.png",
+  "meat-pork": "/images/aisles/meat.png",
+  "meat-other": "/images/aisles/meat.png",
   beef: "/images/aisles/meat.png",
   pork: "/images/aisles/meat.png",
   chicken: "/images/aisles/meat.png",
   others: "/images/aisles/meat.png",
   seafood: "/images/aisles/seafood.jpg",
   dairy: "/images/aisles/dairy-eggs.jpg",
+  milk: "/images/aisles/dairy-eggs.jpg",
+  cheese: "/images/aisles/dairy-eggs.jpg",
+  yogurt: "/images/aisles/dairy-eggs.jpg",
+  "butter-and-spreads": "/images/aisles/dairy-eggs.jpg",
+  eggs: "/images/aisles/dairy-eggs.jpg",
+  "ready-to-cook": "/images/aisles/meat.png",
+  produce: "/images/aisles/fruit-veg.jpg",
   vegetables: "/images/aisles/fruit-veg.jpg",
   fruit: "/images/aisles/fruit-veg.jpg",
   "fruit-and-berries": "/images/aisles/fruit-veg.jpg",
   "frozen-food": "/images/aisles/frozen.jpg",
+  "frozen-meals": "/images/aisles/frozen.jpg",
   "frozen-meat": "/images/aisles/frozen.jpg",
   "frozen-vegetables": "/images/aisles/frozen.jpg",
   "ice-cream": "/images/aisles/frozen.jpg",
   "ready-meals": "/images/aisles/salads.jpg",
   "chilled-drinks": "/images/aisles/chilled-drinks.jpg",
+  "rice-and-grains": "/images/aisles/rice-noodles.jpg",
+  noodles: "/images/aisles/instant-noodles.png",
+  "tea-and-coffee": "/images/aisles/coffee-tea.jpg",
+  cleaning: "/images/aisles/household-essentials.jpg",
+  "paper-goods": "/images/aisles/household-essentials.jpg",
+  "oils-and-vinegar": "/images/aisles/condiments.jpg",
   // legacy
   "dairy-eggs": "/images/aisles/dairy-eggs.jpg",
   frozen: "/images/aisles/frozen.jpg",
@@ -107,7 +128,8 @@ export function getItemImage(item: {
   category: string;
 }): string {
   const resolved = resolveProductImage(item);
-  if (resolved) return resolved;
-  if (item.image) return item.image;
-  return getAisleImage(item.category);
+  // Never show Unsplash / placehold / aisle stock photos as product images.
+  if (resolved && !isGenericImageUrl(resolved)) return resolved;
+  if (item.image && !isGenericImageUrl(item.image)) return item.image;
+  return "";
 }

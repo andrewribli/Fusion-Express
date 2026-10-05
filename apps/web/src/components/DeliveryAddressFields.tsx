@@ -1,18 +1,19 @@
 "use client";
 
-import { CollegeSelect } from "@/components/CollegeSelect";
 import {
-  getHallsForCollege,
-  type CuhkCollege,
-} from "@/data/cuhk-locations";
+  getHallsForResidence,
+  getResidenceGroups,
+  migrateCuhkCollegeLabel,
+  residenceGroupLabel,
+  type CampusId,
+} from "@fusion-express/shared";
+import { zoneSurchargeForCollege } from "@fusion-express/shared/delivery";
 
 const selectClassName =
   "mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20 disabled:bg-gray-50 disabled:text-gray-400";
 
-const inputClassName =
-  "mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20";
-
 interface DeliveryAddressFieldsProps {
+  campus: CampusId;
   college: string;
   hall: string;
   onCollegeChange: (value: string) => void;
@@ -22,6 +23,7 @@ interface DeliveryAddressFieldsProps {
 }
 
 export function DeliveryAddressFields({
+  campus,
   college,
   hall,
   onCollegeChange,
@@ -29,19 +31,45 @@ export function DeliveryAddressFields({
   required = true,
   showPricing = true,
 }: DeliveryAddressFieldsProps) {
-  const halls = college ? getHallsForCollege(college as CuhkCollege) : [];
+  const groups = getResidenceGroups(campus);
+  const collegeValue =
+    campus === "cuhk" ? migrateCuhkCollegeLabel(college) : college;
+  const halls = collegeValue
+    ? getHallsForResidence(campus, collegeValue)
+    : [];
+  const groupLabel = residenceGroupLabel(campus);
 
   return (
     <div className="space-y-3">
-      <CollegeSelect
-        value={college}
-        onChange={(next) => {
-          onCollegeChange(next);
-          onHallChange("");
-        }}
-        required={required}
-        showPricing={showPricing}
-      />
+      <div>
+        <label htmlFor="residence" className="block text-xs font-medium text-gray-600">
+          {groupLabel}
+        </label>
+        <select
+          id="residence"
+          required={required}
+          value={collegeValue}
+          onChange={(e) => {
+            onCollegeChange(e.target.value);
+            onHallChange("");
+          }}
+          className={selectClassName}
+        >
+          <option value="">Select {groupLabel.toLowerCase()}</option>
+          {groups.map((name) => {
+            const surcharge = showPricing
+              ? zoneSurchargeForCollege(name, campus)
+              : 0;
+            return (
+              <option key={name} value={name}>
+                {showPricing && surcharge > 0
+                  ? `${name} (+HK$${surcharge})`
+                  : name}
+              </option>
+            );
+          })}
+        </select>
+      </div>
 
       <div>
         <label htmlFor="hall" className="block text-xs font-medium text-gray-600">
@@ -51,12 +79,14 @@ export function DeliveryAddressFields({
           id="hall"
           required={required}
           value={hall}
-          disabled={!college}
+          disabled={!collegeValue}
           onChange={(e) => onHallChange(e.target.value)}
           className={selectClassName}
         >
           <option value="">
-            {college ? "Select hall" : "Select college first"}
+            {collegeValue
+              ? "Select hall"
+              : `Select ${groupLabel.toLowerCase()} first`}
           </option>
           {halls.map((name) => (
             <option key={name} value={name}>
@@ -69,4 +99,5 @@ export function DeliveryAddressFields({
   );
 }
 
-export { inputClassName as formInputClassName };
+export const formInputClassName =
+  "mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20";

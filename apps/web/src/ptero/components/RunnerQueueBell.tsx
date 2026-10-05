@@ -1,0 +1,208 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { isOwnCustomerOrder } from "@fusion-express/shared/orders";
+import { useAppState, useUser } from "@/ptero/context/AppState";
+import { CAMPUS_ID } from "@/ptero/config/campus";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
+import { CustomerPartyName } from "@/components/DeliveryIdentity";
+
+type RunnerQueueBellProps = {
+  className?: string;
+  tone?: "light" | "dark";
+};
+
+type QueueItem = {
+  id: string;
+  dorm: string;
+};
+
+/**
+ * Header bell for available runner deliveries (CityU prototype).
+ * Hover (desktop) or tap (mobile) opens a dark dropdown of pending jobs.
+ */
+export function RunnerQueueBell({
+  className = "",
+  tone = "light",
+}: RunnerQueueBellProps) {
+  const { orders, setMode } = useAppState();
+  const { user } = useUser();
+  const runnerEntry = useRunnerEntry("cityu");
+  const [open, setOpen] = useState(false);
+  const [hoverCapable, setHoverCapable] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const queue = useMemo<QueueItem[]>(
+    () =>
+      orders
+        .filter(
+          (order) =>
+            order.status === "pending" &&
+            !order.runnerId &&
+            order.campus === CAMPUS_ID &&
+            (!user ||
+              !isOwnCustomerOrder(order, {
+                uid: user.uid,
+                email: user.email,
+              })),
+        )
+        .map((order) => ({
+          id: order.id,
+          dorm:
+            [order.compound, order.hall].filter(Boolean).join(" → ") ||
+            "Dorm TBD",
+        })),
+    [orders, user],
+  );
+  const count = queue.length;
+
+  const href = runnerEntry.loading ? "#runner" : runnerEntry.href;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setHoverCapable(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(event: MouseEvent | TouchEvent) {
+      const root = rootRef.current;
+      if (!root) return;
+      if (event.target instanceof Node && !root.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const label =
+    count <= 0
+      ? "Available deliveries"
+      : count === 1
+        ? "1 available delivery"
+        : `${count} available deliveries`;
+
+  function goRunner() {
+    if (runnerEntry.loading) return;
+    if (runnerEntry.decision.status === "ready" && runnerEntry.decision.runner) {
+      setMode("runner");
+    }
+    setOpen(false);
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      className="relative"
+      onMouseEnter={() => {
+        if (hoverCapable) setOpen(true);
+      }}
+      onMouseLeave={() => {
+        if (hoverCapable) setOpen(false);
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => {
+          if (!hoverCapable) setOpen((v) => !v);
+        }}
+        className={`relative inline-flex shrink-0 items-center justify-center ${
+          className ||
+          (tone === "dark"
+            ? "h-11 w-11 rounded-full border border-white/15 bg-[#161616] text-white transition-colors hover:bg-[#1f1f1f]"
+            : "h-10 w-10 rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24]")
+        }`}
+        aria-label={label}
+        aria-expanded={open}
+        aria-haspopup="true"
+        title={label}
+      >
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
+          <path
+            d="M6 9a6 6 0 1 1 12 0c0 3.2.8 4.6 1.5 5.5.3.4 0 1-.5 1H5c-.5 0-.8-.6-.5-1C5.2 13.6 6 12.2 6 9Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M10 18a2 2 0 0 0 4 0"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+        {count > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ED1C24] px-1 text-[10px] font-bold text-white">
+            {count > 99 ? "99+" : count}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full z-[60] pt-2">
+        <div
+          className="w-72 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-xl shadow-black/40"
+          role="menu"
+          aria-label="Available deliveries"
+        >
+          <div className="border-b border-white/10 px-3 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/60">
+              Available deliveries
+            </p>
+          </div>
+
+          {queue.length === 0 ? (
+            <p className="px-3 py-4 text-sm text-white/70">
+              No available deliveries right now.
+            </p>
+          ) : (
+            <ul className="max-h-72 overflow-y-auto py-1">
+              {queue.map((order) => (
+                <li
+                  key={order.id}
+                  className="flex items-center gap-2 border-b border-white/5 px-3 py-2.5 last:border-b-0"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold text-white">
+                      <CustomerPartyName orderId={order.id} className="max-w-full text-white" />
+                    </p>
+                    <p className="truncate text-xs text-white/60">{order.dorm}</p>
+                  </div>
+                  <Link
+                    href={href}
+                    role="menuitem"
+                    onClick={(event) => {
+                      if (href === "#runner") {
+                        event.preventDefault();
+                        return;
+                      }
+                      goRunner();
+                    }}
+                    className="shrink-0 rounded-lg bg-[#ED1C24] px-2.5 py-1.5 text-xs font-bold text-white hover:bg-[#c9171e]"
+                  >
+                    View
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        </div>
+      )}
+    </div>
+  );
+}

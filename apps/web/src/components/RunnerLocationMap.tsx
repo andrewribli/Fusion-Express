@@ -1,6 +1,5 @@
 "use client";
 
-import { FUSION_COORDS } from "@/lib/constants";
 import type { RunnerLocation } from "@/lib/types";
 
 export function RunnerLocationMap({
@@ -43,7 +42,6 @@ export function RunnerLocationMap({
         loading="lazy"
       />
       <p className="mt-1 text-[11px] text-gray-400">
-        Fusion is near {FUSION_COORDS.lat.toFixed(4)}, {FUSION_COORDS.lng.toFixed(4)}.
         Location is only shared while this order is active.
       </p>
     </div>

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import type { MenuItem } from "@/lib/types";
 import { formatMenuPrice } from "@/lib/types";
 import { getItemImage } from "@/data/aisle-images";
-import { isFavorite, toggleFavorite } from "@/lib/favorites";
 import { formatSaleLabel, hasSale } from "@/lib/pricing";
+import { FavoriteHeart } from "@/components/FavoriteHeart";
 import { ProductCardQtyControl } from "@/components/ProductCardQtyControl";
+import { ProductImage } from "@/components/ProductImage";
 import { ProductQuickAddModal } from "@/components/ProductQuickAddModal";
 
 interface ItemListRowProps {
@@ -15,7 +15,6 @@ interface ItemListRowProps {
 }
 
 export function ItemListRow({ item }: ItemListRowProps) {
-  const [fav, setFav] = useState(() => isFavorite(item.id));
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,35 +37,25 @@ export function ItemListRow({ item }: ItemListRowProps) {
         }`}
       >
         <div className="relative h-20 w-full bg-white sm:h-24">
-          {getItemImage(item) ? (
-            <Image
-              src={getItemImage(item)}
-              alt={item.name}
-              fill
-              className="object-contain p-1"
-              sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
-            />
-          ) : null}
+          <ProductImage
+            src={getItemImage(item)}
+            alt={item.name}
+            category={item.category}
+            className="object-contain p-1"
+            sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
+            showLabel={false}
+          />
+          <FavoriteHeart
+            itemId={item.id}
+            className="absolute right-1.5 top-1.5 z-10"
+          />
           <ProductCardQtyControl item={item} size="sm" />
         </div>
         <div className="flex flex-1 flex-col gap-2 p-2.5">
           <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900">
-                {item.name}
-              </h3>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFav(toggleFavorite(item.id));
-                }}
-                className="shrink-0 text-xs font-semibold text-fusion-red"
-                aria-label={fav ? "Remove from favorites" : "Add to favorites"}
-              >
-                {fav ? "Saved" : "Save"}
-              </button>
-            </div>
+            <h3 className="product-title text-xs font-semibold leading-snug text-gray-900">
+              {item.name}
+            </h3>
             <p className="mt-0.5 text-xs text-gray-400">
               per {item.unit} · ~{item.weightKg} kg
             </p>

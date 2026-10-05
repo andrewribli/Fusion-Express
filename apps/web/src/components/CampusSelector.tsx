@@ -1,0 +1,146 @@
+"use client";
+
+import Link from "next/link";
+import { AppLogo } from "@/components/AppLogo";
+import { RunnerQueueBell } from "@/components/RunnerQueueBell";
+import { AccountMenu } from "@/components/AccountMenu";
+import { useCampus } from "@/context/CampusContext";
+import { useUser } from "@/context/UserContext";
+import { RunnerHeaderShortcuts } from "@/components/RunnerHeaderShortcuts";
+import { computeDeliveryFee, formatHkdAmount } from "@fusion-express/shared/delivery-pricing";
+import { useRunnerEntry } from "@/lib/use-runner-entry";
+
+/**
+ * CUHK channel picker: Fusion groceries vs campus canteens.
+ */
+export function CampusSelector() {
+  const { config } = useCampus();
+  const { canRunnerMode } = useUser();
+  const runnerEntry = useRunnerEntry("cuhk");
+  const runnerTitle =
+    runnerEntry.decision.status === "ready" && runnerEntry.decision.runner
+      ? "Runner mode"
+      : "Become a runner";
+  const brand = config.brandLabel;
+  const headerIconClass =
+    "h-11 w-11 rounded-full border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]";
+
+  return (
+    <div className="min-h-screen bg-[#0c0c0c] text-white">
+      <header className="border-b border-white/10 bg-[#0c0c0c]/95">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+          <Link href="/" className="flex min-w-0 items-center gap-2" aria-label={`${brand} home`}>
+            <AppLogo size={44} className="hidden h-11 w-11 sm:block" />
+            <span className="hidden max-h-5 text-[13px] font-extrabold leading-5 tracking-tight min-[361px]:inline sm:text-sm">
+              {brand}
+            </span>
+          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            {/* One runner available-order bell only on mobile; current-order bag on desktop. */}
+            <RunnerQueueBell className={headerIconClass} />
+            {canRunnerMode ? (
+              <div className="hidden sm:block">
+                <RunnerHeaderShortcuts
+                  ordersOnly
+                  tone="dark"
+                  className="h-11 w-11 rounded-full"
+                />
+              </div>
+            ) : null}
+            <div className="flex h-11 w-11 items-center justify-center">
+              <AccountMenu />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-4 pb-16 pt-8 sm:pt-12">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ED1C24]">
+          CUHK campus delivery
+        </p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+          What do you want delivered?
+        </h1>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+          Groceries from Fusion, or hot food from campus canteens — both drop at
+          your dorm lobby. Same GraceRun runners, same pay-after-delivery flow.
+        </p>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/fusion"
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a1010] via-[#141414] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-[#ED1C24]/60"
+          >
+            <div
+              className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-[#ED1C24]/25 blur-3xl transition group-hover:bg-[#ED1C24]/35"
+              aria-hidden
+            />
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#ED1C24]">
+              Supermarket
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">Fusion</h2>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+              Browse Fusion groceries and get them to your hall lobby. Pay the
+              exact receipt after delivery.
+            </p>
+            <span className="mt-6 inline-flex rounded-xl bg-[#ED1C24] px-4 py-2.5 text-sm font-bold text-white group-hover:bg-[#c9171e]">
+              Shop Fusion
+            </span>
+          </Link>
+
+          <Link
+            href="/canteen"
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#10141a] via-[#121212] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-emerald-400/50"
+          >
+            <div
+              className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-emerald-500/20 blur-3xl transition group-hover:bg-emerald-500/30"
+              aria-hidden
+            />
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              Campus food
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">Canteen</h2>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+              {`Benjamin Franklin, UC, Paper & Coffee, and more. Delivery depends on the canteen and your hall (from HK$${formatHkdAmount(computeDeliveryFee({ campus: "cuhk", sourceId: "sorazen" }).base)}). At UC Canteen you save HK$2 when a United College runner accepts.`}
+            </p>
+            <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
+              Browse canteens
+            </span>
+          </Link>
+
+          <Link
+            href={runnerEntry.href}
+            aria-busy={runnerEntry.loading || undefined}
+            aria-disabled={runnerEntry.loading || undefined}
+            onClick={(event) => {
+              if (runnerEntry.loading) {
+                event.preventDefault();
+                return;
+              }
+              runnerEntry.onClick(event);
+            }}
+            className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#101a14] via-[#121212] to-[#0f0f0f] p-6 shadow-lg shadow-black/40 transition hover:border-emerald-400/70 ${
+              runnerEntry.loading ? "opacity-60" : ""
+            }`}
+          >
+            <div
+              className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-emerald-500/25 blur-3xl transition group-hover:bg-emerald-500/35"
+              aria-hidden
+            />
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              Earn on campus
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">{runnerTitle}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+              Pick up Fusion or canteen orders and deliver them to dorm lobbies.
+              CUHK email and a Hong Kong mobile number are required.
+            </p>
+            <span className="mt-6 inline-flex rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white group-hover:bg-emerald-400">
+              {runnerEntry.loading ? "Loading…" : runnerTitle}
+            </span>
+          </Link>
+        </div>
+      </main>
+    </div>
+  );
+}

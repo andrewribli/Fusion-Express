@@ -12,6 +12,7 @@ import {
   resolveSpecialInstructions,
 } from "./constants";
 import type { Order, OrderItem, OrderStatus, PriceAdjustmentStatus } from "./types";
+import type { CampusId } from "./campus";
 import {
   ACTIVE_ORDER_LIMIT_MESSAGE,
   CUSTOMER_DEADLINE_REMINDER_MS,
@@ -19,6 +20,8 @@ import {
   customerDeadlineOf,
   countsTowardCustomerOrderPlacementCap,
   isActiveCustomerOrderStatus,
+  isActiveRunnerStatus,
+  isClaimableOrderStatus,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
   MAX_ACTIVE_CUSTOMER_ORDERS,
@@ -28,7 +31,8 @@ import {
   runnerDeadlineOf,
 } from "./order-status";
 import { omitUndefined } from "./omit-undefined";
-import { getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
+import { lockedDeliveryPricing } from "./delivery-pricing";
+import { getAuthClient, getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
 import {
   addDoc,
   collection,
@@ -36,13 +40,18 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   runTransaction,
+  startAfter,
   updateDoc,
   where,
   Timestamp,
+  type QueryConstraint,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ORDERS_COLLECTION = collectionName("orders");
@@ -112,21 +121,75 @@ function parseItems(raw: unknown): Order["items"] {
   });
 }
 
+/** Order title name. Never the Firestore document id. */
+function customerNameFromOrderData(
+  orderId: string,
+  data: Record<string, unknown>,
+): string | undefined {
+  const candidates = [data.customerName, data.fullName, data.name];
+  for (const raw of candidates) {
+    if (typeof raw !== "string") continue;
+    const name = raw.trim();
+    if (!name || name === orderId) continue;
+    return name;
+  }
+  return undefined;
+}
+
+function finiteMoney(value: unknown): number | undefined {
+  if (value == null || value === "") return undefined;
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return undefined;
+  return Math.round(amount * 100) / 100;
+}
+
+function parseDiscountSplit(
+  value: unknown,
+): Order["discountSplit"] | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const row = value as Record<string, unknown>;
+  const customer = Number(row.customer);
+  const runner = Number(row.runner);
+  const platform = Number(row.platform);
+  if (![customer, runner, platform].every((n) => Number.isFinite(n))) return undefined;
+  return { customer, runner, platform };
+}
+
 function parseOrder(id: string, data: Record<string, unknown>): Order {
   const loc = data.runnerLocation as Record<string, unknown> | undefined;
+  const items = parseItems(data.items);
+  const orderChannelRaw = String(data.orderChannel ?? "").trim().toLowerCase();
+  const orderChannel =
+    orderChannelRaw === "canteen" ||
+    orderChannelRaw === "fusion" ||
+    orderChannelRaw === "taste"
+      ? (orderChannelRaw as Order["orderChannel"])
+      : items.some((item) => item.itemId.startsWith("canteen:"))
+        ? ("canteen" as const)
+        : undefined;
+  const campusRaw = String(data.campus ?? "").trim().toLowerCase();
+  const campus =
+    campusRaw === "cuhk" || campusRaw === "cityu"
+      ? (campusRaw as Order["campus"])
+      : undefined;
   return {
     id,
     sessionId: String(data.sessionId ?? ""),
     customerId: String(data.customerId ?? data.sessionId ?? ""),
-    customerName: data.customerName ? String(data.customerName) : undefined,
+    customerName: customerNameFromOrderData(id, data),
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
-    items: parseItems(data.items),
+    campus,
+    orderChannel,
+    canteenRestaurantId: data.canteenRestaurantId
+      ? String(data.canteenRestaurantId)
+      : undefined,
+    items,
     status: normalizeOrderStatus(String(data.status ?? "pending")),
-    college: String(data.college ?? ""),
+    college: String(data.college ?? data.compound ?? ""),
     hall: String(data.hall ?? ""),
     roomNumber: data.roomNumber ? String(data.roomNumber) : undefined,
-    lobbyPoint: String(data.lobbyPoint ?? ""),
+    lobbyPoint: String(data.lobbyPoint ?? data.lobby ?? ""),
     zone: (() => {
       const z = Number(data.zone);
       return z === 1 || z === 2 || z === 3 ? z : undefined;
@@ -136,10 +199,61 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerNote: data.runnerNote ? String(data.runnerNote) : undefined,
     subtotal: Number(data.subtotal ?? 0),
     deliveryFee: Number(data.deliveryFee ?? 10),
+    deliveryOrigin: data.deliveryOrigin ? String(data.deliveryOrigin) : undefined,
+    deliveryDestination: data.deliveryDestination
+      ? String(data.deliveryDestination)
+      : undefined,
+    deliveryFeeRaw:
+      data.deliveryFeeRaw != null && Number.isFinite(Number(data.deliveryFeeRaw))
+        ? Number(data.deliveryFeeRaw)
+        : undefined,
+    deliveryPath: Array.isArray(data.deliveryPath)
+      ? data.deliveryPath.map((node) => String(node))
+      : undefined,
+    deliveryBase: finiteMoney(data.deliveryBase),
+    deliverySurcharge: finiteMoney(data.deliverySurcharge),
+    deliveryTotal: finiteMoney(data.deliveryTotal),
+    sourceId: data.sourceId ? String(data.sourceId) : undefined,
     tip: data.tip != null ? Number(data.tip) : undefined,
     total: Number(data.total ?? 0),
+    discountApplied:
+      data.discountApplied != null ? Boolean(data.discountApplied) : undefined,
+    discountAmount:
+      data.discountAmount != null ? Number(data.discountAmount) : undefined,
+    discountCollege: data.discountCollege ? String(data.discountCollege) : undefined,
+    discountSplit: parseDiscountSplit(data.discountSplit),
+    collegeDiscountStatus:
+      data.collegeDiscountStatus === "pending" ||
+      data.collegeDiscountStatus === "applied" ||
+      data.collegeDiscountStatus === "void"
+        ? data.collegeDiscountStatus
+        : undefined,
+    platformDiscountFee:
+      data.platformDiscountFee != null ? Number(data.platformDiscountFee) : undefined,
+    platformDiscountFeeAt: data.platformDiscountFeeAt
+      ? toDate(data.platformDiscountFeeAt)
+      : undefined,
+    runnerCollege: data.runnerCollege ? String(data.runnerCollege) : undefined,
+    canteenCollege: data.canteenCollege ? String(data.canteenCollege) : undefined,
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
+    paymentProvider: data.paymentProvider
+      ? String(data.paymentProvider)
+      : undefined,
+    awaitingOnlinePayment:
+      data.awaitingOnlinePayment != null
+        ? Boolean(data.awaitingOnlinePayment)
+        : undefined,
+    airwallexPaymentIntentId: data.airwallexPaymentIntentId
+      ? String(data.airwallexPaymentIntentId)
+      : undefined,
+    airwallexPaidAmount:
+      data.airwallexPaidAmount != null
+        ? Number(data.airwallexPaidAmount)
+        : undefined,
+    airwallexPaidCurrency: data.airwallexPaidCurrency
+      ? String(data.airwallexPaidCurrency)
+      : undefined,
     finalTotal: data.finalTotal != null ? Number(data.finalTotal) : undefined,
     amountPaidByRunner:
       data.amountPaidByRunner != null
@@ -148,6 +262,13 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
           ? Number(data.finalTotal)
           : undefined,
     receiptUrl: data.receiptUrl ? String(data.receiptUrl) : undefined,
+    receiptAmount:
+      data.receiptAmount != null && Number(data.receiptAmount) > 0
+        ? round2(Number(data.receiptAmount))
+        : undefined,
+    receiptUploadedAt: data.receiptUploadedAt
+      ? toDate(data.receiptUploadedAt)
+      : undefined,
     bankStatementUrl: data.bankStatementUrl
       ? String(data.bankStatementUrl)
       : undefined,
@@ -177,6 +298,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     estimatedDeliveryAt: data.estimatedDeliveryAt
       ? toDate(data.estimatedDeliveryAt)
       : undefined,
+    scheduledFor: data.scheduledFor ? toDate(data.scheduledFor) : undefined,
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
@@ -193,6 +315,15 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
         : undefined,
     runnerExpiredAt: data.runnerExpiredAt
       ? toDate(data.runnerExpiredAt)
+      : undefined,
+    expiredWarningSentAt: data.expiredWarningSentAt
+      ? toDate(data.expiredWarningSentAt)
+      : undefined,
+    expiredWarningSentTo: data.expiredWarningSentTo
+      ? String(data.expiredWarningSentTo)
+      : undefined,
+    expiredWarningMessageId: data.expiredWarningMessageId
+      ? String(data.expiredWarningMessageId)
       : undefined,
     customerOverdueAt: data.customerOverdueAt
       ? toDate(data.customerOverdueAt)
@@ -245,6 +376,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
             updatedAt: loc.updatedAt ? toDate(loc.updatedAt) : new Date(),
           }
         : undefined,
+    isSeed: data.isSeed === true,
   };
 }
 
@@ -261,13 +393,47 @@ export function orderGrandTotal(
   subtotal: number,
   deliveryFee: number,
   tip = 0,
+  platformFee = 0,
 ): number {
-  return round2(subtotal + deliveryFee + tip);
+  return round2(subtotal + deliveryFee + tip + platformFee);
 }
 
 export async function createOrder(
   order: Omit<Order, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
+  const priced = lockedDeliveryPricing({
+    campus: order.campus,
+    sourceId: order.sourceId,
+    hallId: order.hall,
+    college: order.college,
+    items: order.items,
+    subtotal: order.subtotal,
+    tip: order.tip,
+    canteenRestaurantId: order.canteenRestaurantId,
+    orderChannel: order.orderChannel,
+  });
+  if (priced.quote.available === false || priced.quote.pending) {
+    throw new Error(
+      priced.quote.unavailableMessage ??
+        "Choose a delivery hall before placing this order.",
+    );
+  }
+  order = {
+    ...order,
+    sourceId: priced.sourceId,
+    deliveryBase: priced.deliveryBase,
+    deliverySurcharge: priced.deliverySurcharge,
+    deliveryTotal: priced.deliveryTotal,
+    deliveryFee: priced.deliveryFee,
+    deliveryOrigin: priced.deliveryOrigin,
+    deliveryDestination: priced.deliveryDestination,
+    deliveryFeeRaw: priced.deliveryFeeRaw,
+    deliveryPath: priced.deliveryPath,
+    platformFee: priced.platformFee,
+    total: priced.total,
+    zone: priced.zone ?? order.zone,
+    totalWeight: priced.totalWeight,
+  };
   if (isOverOrderLimit(order.subtotal)) {
     throw new Error(ORDER_LIMIT_MESSAGE);
   }
@@ -353,12 +519,70 @@ export class OrderAlreadyTakenError extends Error {
   }
 }
 
-function filterOwnOrders(orders: Order[], excludeCustomerId?: string): Order[] {
-  if (!excludeCustomerId) return orders;
-  return orders.filter((o) => o.customerId !== excludeCustomerId);
+export type RunnerSelfPickupIdentity = {
+  uid?: string;
+  email?: string | null;
+};
+
+function normalizeIdentityEmail(email?: string | null): string | undefined {
+  if (!email) return undefined;
+  const trimmed = email.trim().toLowerCase();
+  return trimmed || undefined;
+}
+
+/** Blocks runners from claiming orders they placed (uid or customer email). */
+export function isOwnCustomerOrder(
+  order: Pick<Order, "customerId" | "customerEmail">,
+  runner: RunnerSelfPickupIdentity,
+): boolean {
+  const runnerUid = runner.uid?.trim();
+  if (runnerUid && order.customerId === runnerUid) return true;
+  const orderEmail = normalizeIdentityEmail(order.customerEmail);
+  const runnerEmail = normalizeIdentityEmail(runner.email);
+  if (orderEmail && runnerEmail && orderEmail === runnerEmail) return true;
+  return false;
+}
+
+function runnerExcludeFromOptions(options?: {
+  excludeCustomerId?: string;
+  excludeCustomerEmail?: string | null;
+}): RunnerSelfPickupIdentity | undefined {
+  if (!options?.excludeCustomerId && !options?.excludeCustomerEmail) {
+    return undefined;
+  }
+  return {
+    uid: options.excludeCustomerId,
+    email: options.excludeCustomerEmail,
+  };
+}
+
+function filterOwnOrders(
+  orders: Order[],
+  exclude?: RunnerSelfPickupIdentity,
+): Order[] {
+  if (!exclude?.uid && !exclude?.email) return orders;
+  return orders.filter((o) => !isOwnCustomerOrder(o, exclude));
+}
+
+/** Orders placed before multi-campus have no `campus`; they are all CUHK. */
+export function orderCampus(order: Pick<Order, "campus">): CampusId {
+  return order.campus ?? "cuhk";
+}
+
+function filterCampusOrders(orders: Order[], campus?: CampusId): Order[] {
+  if (!campus) return orders;
+  return orders.filter((o) => orderCampus(o) === campus);
 }
 
 const ORDER_PAGE_SIZE = 100;
+/**
+ * Pending board page size. Campus is applied after the read, so stopping at
+ * one page of the newest tickets drops older CityU jobs once newer CUHK
+ * tickets fill that page. Walk the status+createdAt index (already deployed)
+ * until the board is exhausted.
+ */
+const PENDING_MAX_PAGES = 30;
+const PENDING_LISTENER_LIMIT = ORDER_PAGE_SIZE * PENDING_MAX_PAGES;
 
 function parseSnapshotDocs(
   docs: { id: string; data: () => unknown }[],
@@ -380,18 +604,61 @@ function byNewestFirst(a: Order, b: Order): number {
  */
 export async function fetchPendingOrders(
   excludeCustomerId?: string,
+  campus?: CampusId,
+  excludeCustomerEmail?: string | null,
+): Promise<Order[]> {
+  return filterCampusOrders(
+    await fetchUnscopedPendingOrders(excludeCustomerId, excludeCustomerEmail),
+    campus,
+  );
+}
+
+function pendingPageConstraints(
+  cursor?: QueryDocumentSnapshot,
+): QueryConstraint[] {
+  const constraints: QueryConstraint[] = [
+    where("status", "==", "pending"),
+    orderBy("createdAt", "desc"),
+    limit(ORDER_PAGE_SIZE),
+  ];
+  if (cursor) constraints.push(startAfter(cursor));
+  return constraints;
+}
+
+async function fetchUnscopedPendingOrders(
+  excludeCustomerId?: string,
+  excludeCustomerEmail?: string | null,
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
-      const snap = await getDocs(
-        query(
-          collection(getDb(), ORDERS_COLLECTION),
-          where("status", "==", "pending"),
-          orderBy("createdAt", "desc"),
-          limit(ORDER_PAGE_SIZE),
-        ),
+      // Paid (Airwallex) orders are claimable. Legacy unpaid pending (no online
+      // checkout) stay claimable so older tickets are not stranded.
+      // Rules require status == 'pending' on this list. Campus is not in the
+      // query: legacy CUHK tickets have no campus field, and a campus equality
+      // filter would need a new composite index.
+      const col = collection(getDb(), ORDERS_COLLECTION);
+      const docs: QueryDocumentSnapshot[] = [];
+      let cursor: QueryDocumentSnapshot | undefined;
+      for (let page = 0; page < PENDING_MAX_PAGES; page++) {
+        const snap = await getDocs(
+          query(col, ...pendingPageConstraints(cursor)),
+        );
+        docs.push(...snap.docs);
+        if (snap.size < ORDER_PAGE_SIZE) break;
+        cursor = snap.docs[snap.docs.length - 1];
+        if (page === PENDING_MAX_PAGES - 1) {
+          console.warn(
+            "fetchPendingOrders hit the pending-order page cap; older tickets may be missing",
+          );
+        }
+      }
+      return filterOwnOrders(
+        parseSnapshotDocs(docs).filter((o) => !o.runnerId),
+        runnerExcludeFromOptions({
+          excludeCustomerId,
+          excludeCustomerEmail,
+        }),
       );
-      return filterOwnOrders(parseSnapshotDocs(snap.docs), excludeCustomerId);
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
       throw err instanceof Error
@@ -400,7 +667,137 @@ export async function fetchPendingOrders(
     }
   }
 
-  return filterOwnOrders(getMockPendingOrders(), excludeCustomerId);
+  return filterOwnOrders(
+    getMockPendingOrders().filter((o) => !o.runnerId),
+    runnerExcludeFromOptions({
+      excludeCustomerId,
+      excludeCustomerEmail,
+    }),
+  );
+}
+
+/**
+ * Live pending job-board feed for runners.
+ *
+ * Rules require `status == 'pending'` on the list query. Unassigned orders and
+ * campus are filtered client-side so legacy CUHK tickets (no `campus` field)
+ * stay on the CUHK board, and so we keep the deployed status+createdAt index.
+ *
+ * Refresh loads every pending page once, then keeps a live listener on that
+ * same window. A listener limited to the newest 100 tickets dropped older
+ * CityU jobs whenever newer CUHK tickets filled the page.
+ *
+ * Orders that never reached Firestore (CityU guest checkout kept only in that
+ * browser's localStorage, ids starting with `CYU-`) cannot appear here.
+ */
+export function subscribePendingOrders(
+  onOrders: (orders: Order[]) => void,
+  options?: {
+    excludeCustomerId?: string;
+    excludeCustomerEmail?: string | null;
+    /** Only show jobs on the runner's own campus. */
+    campus?: CampusId;
+    onError?: (err: Error) => void;
+  },
+): () => void {
+  const excludeRunner = runnerExcludeFromOptions(options);
+  const emit = (orders: Order[]) => {
+    onOrders(
+      filterCampusOrders(
+        filterOwnOrders(
+          orders.filter((o) => !o.runnerId),
+          excludeRunner,
+        ),
+        options?.campus,
+      ),
+    );
+  };
+
+  if (!isFirebaseConfigured()) {
+    emit(getMockPendingOrders());
+    const interval = setInterval(() => {
+      emit(getMockPendingOrders());
+    }, 3000);
+    return () => clearInterval(interval);
+  }
+
+  let stopped = false;
+  let sawOrders = false;
+  let listenerReady = false;
+  let unsubSnap: () => void = () => undefined;
+
+  const fail = (err: unknown) => {
+    console.error("subscribePendingOrders Firestore failed", err);
+    options?.onError?.(
+      err instanceof Error ? err : new Error(String(err)),
+    );
+    if (!sawOrders) onOrders([]);
+  };
+
+  const pull = async () => {
+    try {
+      const orders = await fetchUnscopedPendingOrders(
+        options?.excludeCustomerId,
+        options?.excludeCustomerEmail,
+      );
+      if (stopped || listenerReady) return;
+      sawOrders = true;
+      emit(orders);
+    } catch (err) {
+      if (stopped || listenerReady) return;
+      fail(err);
+    }
+  };
+
+  const attach = () => {
+    unsubSnap();
+    try {
+      const q = query(
+        collection(getDb(), ORDERS_COLLECTION),
+        where("status", "==", "pending"),
+        orderBy("createdAt", "desc"),
+        limit(PENDING_LISTENER_LIMIT),
+      );
+      unsubSnap = onSnapshot(
+        q,
+        (snap) => {
+          if (stopped) return;
+          listenerReady = true;
+          sawOrders = true;
+          emit(parseSnapshotDocs(snap.docs));
+        },
+        (err) => {
+          if (!stopped) fail(err);
+        },
+      );
+    } catch (err) {
+      fail(err);
+    }
+  };
+
+  let unsubAuth: () => void = () => undefined;
+  try {
+    // Persistence restores after refresh. Querying before that fails the
+    // listener permanently, so the board never fills the backlog.
+    unsubAuth = onAuthStateChanged(getAuthClient(), (user) => {
+      if (stopped) return;
+      unsubSnap();
+      if (!user) return;
+      void user.getIdToken().then(() => {
+        if (stopped) return;
+        void pull();
+        attach();
+      }, fail);
+    });
+  } catch (err) {
+    fail(err);
+  }
+
+  return () => {
+    stopped = true;
+    unsubSnap();
+    unsubAuth();
+  };
 }
 
 /** Order history for the signed-in customer, keyed on their auth uid. */
@@ -418,7 +815,7 @@ export async function fetchOrdersByCustomer(
           limit(ORDER_PAGE_SIZE),
         ),
       );
-      return parseSnapshotDocs(snap.docs);
+      return parseSnapshotDocs(snap.docs).filter((order) => !order.isSeed);
     } catch (err) {
       console.error("fetchOrdersByCustomer Firestore failed", err);
       throw err instanceof Error
@@ -455,7 +852,13 @@ export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
         query(
           collection(getDb(), ORDERS_COLLECTION),
           where("runnerUid", "==", runnerUid),
-          where("status", "in", ["accepted", "purchased", "assigned", "picked"]),
+          where("status", "in", [
+            "accepted",
+            "purchased",
+            "receipt_uploaded",
+            "assigned",
+            "picked",
+          ]),
         ),
       );
       return parseSnapshotDocs(snap.docs).sort(byNewestFirst);
@@ -470,6 +873,82 @@ export async function fetchRunnerOrders(runnerUid: string): Promise<Order[]> {
   return getMockRunnerOrders(runnerUid);
 }
 
+/**
+ * Current Order only. In progress, before delivery.
+ * Legacy values match the same steps: assigned → accepted, picked → purchased.
+ * Delivered, paid, runner_paid, completed, and customer_paid stay out.
+ */
+const RUNNER_CURRENT_ORDER_STATUSES = [
+  "accepted",
+  "purchased",
+  "receipt_uploaded",
+  "assigned",
+  "picked",
+  "runner_assigned",
+  "picked_up",
+] as const;
+
+function isRunnerCurrentOrder(order: Order): boolean {
+  return isActiveRunnerStatus(order.status);
+}
+
+/**
+ * Live list of the runner's orders that are not delivered yet.
+ * Uses the existing runnerUid + status index.
+ */
+export function subscribeRunnerActiveOrders(
+  runnerUid: string,
+  onOrders: (orders: Order[]) => void,
+  onError?: (err: Error) => void,
+): () => void {
+  if (!runnerUid) {
+    onOrders([]);
+    return () => undefined;
+  }
+
+  const emit = (orders: Order[]) => {
+    onOrders(
+      orders
+        .filter(isRunnerCurrentOrder)
+        .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
+    );
+  };
+
+  if (!isFirebaseConfigured()) {
+    emit(getMockRunnerOrders(runnerUid));
+    return () => undefined;
+  }
+
+  let unsub = () => {
+    /* no listener */
+  };
+  try {
+    const q = query(
+      collection(getDb(), ORDERS_COLLECTION),
+      where("runnerUid", "==", runnerUid),
+      where("status", "in", [...RUNNER_CURRENT_ORDER_STATUSES]),
+    );
+    unsub = onSnapshot(
+      q,
+      (snap) => {
+        emit(parseSnapshotDocs(snap.docs));
+      },
+      (err) => {
+        console.error("subscribeRunnerActiveOrders failed", err);
+        onError?.(err);
+        onOrders([]);
+      },
+    );
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    onError?.(error);
+    onOrders([]);
+  }
+
+  return () => unsub();
+}
+
+/** Runner order history: delivered and every status after delivery. */
 export async function fetchDeliveredOrdersByRunner(
   runnerUid: string,
 ): Promise<Order[]> {
@@ -500,6 +979,8 @@ export async function fetchDeliveredOrdersByRunner(
  * @param runnerId doc id in /runners
  * @param runnerUid auth uid of the runner; stored so security rules and the
  *   runner's own order queries can match on request.auth.uid
+ * @param payment optional PayMe/FPS + email denormalized onto the order
+ * @param discount optional same-college canteen discount applied at accept
  */
 export async function acceptOrder(
   orderId: string,
@@ -507,6 +988,15 @@ export async function acceptOrder(
   runnerName: string,
   runnerUid: string,
   payment?: { method: "PayMe" | "FPS"; id: string; email?: string },
+  discount?: {
+    discountApplied: boolean;
+    discountAmount: number;
+    runnerCollege?: string;
+    canteenCollege?: string;
+    subtotal: number;
+    total: number;
+  },
+  runnerCampus?: CampusId,
 ): Promise<void> {
   const now = new Date();
   const paymentFields = omitUndefined({
@@ -514,6 +1004,16 @@ export async function acceptOrder(
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
   });
+  const discountFields = discount
+    ? omitUndefined({
+        discountApplied: discount.discountApplied,
+        discountAmount: discount.discountAmount,
+        runnerCollege: discount.runnerCollege,
+        canteenCollege: discount.canteenCollege,
+        subtotal: discount.subtotal,
+        total: discount.total,
+      })
+    : {};
   if (isFirebaseConfigured()) {
     const db = getDb();
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
@@ -521,10 +1021,18 @@ export async function acceptOrder(
       const snap = await tx.get(orderRef);
       if (!snap.exists()) throw new Error("Order not found");
       const order = parseOrder(snap.id, snap.data() as Record<string, unknown>);
-      if (order.customerId === runnerUid) {
+      if (
+        isOwnCustomerOrder(order, {
+          uid: runnerUid,
+          email: payment?.email,
+        })
+      ) {
         throw new SelfPickupError();
       }
-      if (order.status !== "pending") {
+      if (runnerCampus && orderCampus(order) !== runnerCampus) {
+        throw new Error("This order is on a different campus.");
+      }
+      if (!isClaimableOrderStatus(order.status)) {
         if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
         throw new OrderAlreadyTakenError();
       }
@@ -539,6 +1047,7 @@ export async function acceptOrder(
         ),
         updatedAt: Timestamp.fromDate(now),
         ...paymentFields,
+        ...discountFields,
       });
     });
     return;
@@ -546,10 +1055,15 @@ export async function acceptOrder(
 
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.customerId === runnerUid) {
+  if (
+    isOwnCustomerOrder(order, {
+      uid: runnerUid,
+      email: payment?.email,
+    })
+  ) {
     throw new SelfPickupError();
   }
-  if (order.status !== "pending") {
+  if (!isClaimableOrderStatus(order.status)) {
     if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
     throw new OrderAlreadyTakenError();
   }
@@ -560,6 +1074,16 @@ export async function acceptOrder(
     runnerPaymentMethod: payment?.method,
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
+    ...(discount
+      ? {
+          discountApplied: discount.discountApplied,
+          discountAmount: discount.discountAmount,
+          runnerCollege: discount.runnerCollege,
+          canteenCollege: discount.canteenCollege,
+          subtotal: discount.subtotal,
+          total: discount.total,
+        }
+      : {}),
   });
 }
 
@@ -581,6 +1105,12 @@ export async function updateOrderStatus(
       | "runnerPaymentMethod"
       | "runnerPaymentId"
       | "runnerEmail"
+      | "discountApplied"
+      | "discountAmount"
+      | "runnerCollege"
+      | "canteenCollege"
+      | "subtotal"
+      | "total"
     >
   >,
 ): Promise<void> {
@@ -608,12 +1138,17 @@ export async function updateOrderStatus(
           new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS),
         );
       }
-      if (status === "customer_paid") {
+      if (status === "paid" || status === "customer_paid") {
         updates.customerPaidAt = Timestamp.fromDate(now);
         updates.paymentReceived = true;
+        updates.awaitingOnlinePayment = false;
       }
       if (status === "runner_paid") {
         updates.runnerPaidAt = Timestamp.fromDate(now);
+      }
+      if (status === "completed") {
+        updates.runnerPaidAt = updates.runnerPaidAt ?? Timestamp.fromDate(now);
+        updates.paymentReceived = true;
       }
       if (extras?.runnerName) updates.runnerName = extras.runnerName;
       if (extras?.runnerId) updates.runnerId = extras.runnerId;
@@ -635,6 +1170,16 @@ export async function updateOrderStatus(
       if (extras?.runnerPaymentId) {
         updates.runnerPaymentId = extras.runnerPaymentId;
       }
+      if (extras?.discountApplied != null) {
+        updates.discountApplied = extras.discountApplied;
+      }
+      if (extras?.discountAmount != null) {
+        updates.discountAmount = extras.discountAmount;
+      }
+      if (extras?.runnerCollege) updates.runnerCollege = extras.runnerCollege;
+      if (extras?.canteenCollege) updates.canteenCollege = extras.canteenCollege;
+      if (extras?.subtotal != null) updates.subtotal = extras.subtotal;
+      if (extras?.total != null) updates.total = extras.total;
       await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined(updates));
       return;
     } catch (err) {
@@ -655,11 +1200,16 @@ export async function updateOrderStatus(
       order.pickedUpAt = now;
     }
     if (status === "delivered") order.deliveredAt = now;
-    if (status === "customer_paid") {
+    if (status === "paid" || status === "customer_paid") {
       order.customerPaidAt = now;
       order.paymentReceived = true;
+      order.awaitingOnlinePayment = false;
     }
     if (status === "runner_paid") order.runnerPaidAt = now;
+    if (status === "completed") {
+      order.runnerPaidAt = order.runnerPaidAt ?? now;
+      order.paymentReceived = true;
+    }
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
     if (extras?.runnerUid) order.runnerUid = extras.runnerUid;
@@ -676,6 +1226,16 @@ export async function updateOrderStatus(
       order.runnerPaymentMethod = extras.runnerPaymentMethod;
     }
     if (extras?.runnerPaymentId) order.runnerPaymentId = extras.runnerPaymentId;
+    if (extras?.discountApplied != null) {
+      order.discountApplied = extras.discountApplied;
+    }
+    if (extras?.discountAmount != null) {
+      order.discountAmount = extras.discountAmount;
+    }
+    if (extras?.runnerCollege) order.runnerCollege = extras.runnerCollege;
+    if (extras?.canteenCollege) order.canteenCollege = extras.canteenCollege;
+    if (extras?.subtotal != null) order.subtotal = extras.subtotal;
+    if (extras?.total != null) order.total = extras.total;
   }
 }
 
@@ -837,7 +1397,12 @@ export async function submitTillPrices(
 
   if (priceDifference < 0) {
     subtotal = actualSubtotal;
-    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    total = orderGrandTotal(
+      actualSubtotal,
+      order.deliveryFee,
+      tip,
+      order.platformFee ?? 0,
+    );
     if (order.paymentReceived) {
       priceAdjustmentStatus = "refund_pending";
       refundAmount = round2(-priceDifference);
@@ -849,7 +1414,12 @@ export async function submitTillPrices(
     priceAdjustmentStatus = "pending_customer";
   } else {
     subtotal = actualSubtotal;
-    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    total = orderGrandTotal(
+      actualSubtotal,
+      order.deliveryFee,
+      tip,
+      order.platformFee ?? 0,
+    );
   }
 
   const firestoreUpdates: Record<string, unknown> = {
@@ -891,7 +1461,12 @@ export async function approvePriceIncrease(
     throw new Error("This order is not waiting for a price approval");
   }
   const actualSubtotal = order.actualSubtotal ?? orderActualSubtotal(order.items);
-  const total = orderGrandTotal(actualSubtotal, order.deliveryFee, order.tip ?? 0);
+  const total = orderGrandTotal(
+    actualSubtotal,
+    order.deliveryFee,
+    order.tip ?? 0,
+    order.platformFee ?? 0,
+  );
   const now = new Date();
   await patchOrder(
     orderId,
@@ -1014,6 +1589,28 @@ export async function markPurchased(
   await updateOrderStatus(orderId, "purchased", {
     receiptUrl: opts.receiptUrl,
     bankStatementUrl: opts.bankStatementUrl,
+  });
+}
+
+/** Canteen pickup: no Fusion receipt — just mark purchased / picked up. */
+export async function markCanteenPickedUp(orderId: string): Promise<void> {
+  await updateOrderStatus(orderId, "purchased");
+}
+
+/** Canteen deliver: fixed menu total (already discounted) + optional lobby photo. */
+export async function markCanteenDelivered(
+  orderId: string,
+  opts: { finalTotal: number; deliveryPhotoUrl?: string },
+): Promise<void> {
+  if (!(opts.finalTotal > 0)) {
+    throw new Error("Enter the canteen order total.");
+  }
+  const amount = round2(opts.finalTotal);
+  await updateOrderStatus(orderId, "delivered", {
+    finalTotal: amount,
+    amountPaidByRunner: amount,
+    deliveryPhotoUrl: opts.deliveryPhotoUrl,
+    runnerVerified: true,
   });
 }
 
@@ -1176,10 +1773,11 @@ export async function verifyAdminDelivery(
 export async function markRunnerPayout(orderId: string): Promise<void> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== "delivered") {
-    throw new Error("Pay the runner after they mark delivered.");
+  if (order.status !== "paid" && order.status !== "customer_paid") {
+    throw new Error("Reimburse the runner after the customer has paid.");
   }
   await updateOrderStatus(orderId, "runner_paid");
+  await updateOrderStatus(orderId, "completed");
 }
 
 export async function fetchOrdersAwaitingPayout(): Promise<Order[]> {

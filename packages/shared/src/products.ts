@@ -3,6 +3,7 @@ import { imageForItem } from "./product-images";
 import { resolveProductImage } from "./resolve-image";
 import { collectionName } from "./app-env";
 import { getDb, isFirebaseConfigured } from "./firebase";
+import { rankItemsByQuery } from "./search-rank";
 import type { MenuCategory, MenuItem, PriceType } from "./types";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -165,5 +166,5 @@ export function getStaticMenuItems(): MenuItem[] {
 export function filterItemsByQuery(items: MenuItem[], query: string): MenuItem[] {
   const q = query.trim().toLowerCase();
   if (!q) return items;
-  return items.filter((item) => item.name.toLowerCase().includes(q));
+  return rankItemsByQuery(items, q);
 }

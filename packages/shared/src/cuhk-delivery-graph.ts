@@ -1,0 +1,543 @@
+/**
+ * CUHK delivery is a directed graph. The fee is the cheapest path, not a
+ * destination lookup. Add a route by appending to CUHK_EDGES — do not
+ * special-case a hall in the search, and do not mirror an edge that is not
+ * listed on its own.
+ *
+ * Customer fee for ordinary canteen origins:
+ *   CUHK_BASE_FEE + Dijkstra path cost
+ * UC Canteen (`uc` / `uc-canteen`) is flat CUHK_BASE_FEE to every reachable
+ * destination (no path surcharge). Same-building stays HK$0.
+ *
+ * The old HK$5 FEE_FLOOR is retired — the base replaces it so we do not
+ * double-count a minimum. BLOCK_THRESHOLD still applies to the Dijkstra path
+ * cost alone (before adding the base).
+ *
+ * Every edge has a route tag. There are no untagged edges.
+ *
+ * fusion and sorazen are the same building. sorazen is an alias, not a node.
+ * CUHK Ebeneezer's (`eben` / `ebeneezers`) is the same node as Paper & Coffee
+ * (`paper-coffee`). No separate origin and no new edge.
+ * CityU Ebeneezer's (`ebeneezers-5380`) is not on this graph.
+ * Learning Garden (and legacy University Library) is the same delivery stop
+ * as LSK. Those hall names are aliases, not nodes. The college label
+ * "Campus Facilities" is only a group. srrs is a hub only. It is not a
+ * customer hall.
+ *
+ * When BUS_ONLY[origin] includes the destination, walks that leave the origin
+ * are dropped except edges whose `to` is in HUB_WALKS[origin]. Dijkstra then
+ * runs on that filtered list. Other pairs use the full list.
+ * On a cost tie, the path with fewer edges wins (a direct edge beats a longer
+ * walk of the same cost).
+ */
+
+/** Base delivery rate from every CUHK canteen origin (HK$). */
+export const CUHK_BASE_FEE = 8.5;
+
+/**
+ * @deprecated Replaced by CUHK_BASE_FEE. Kept so older callers/tests resolve.
+ * Do not use for new fee math — that would double-count the minimum.
+ */
+export const FEE_FLOOR = CUHK_BASE_FEE;
+
+/** Dijkstra path cost above this is unavailable (checked before adding base). */
+export const BLOCK_THRESHOLD = 12;
+
+export const CUHK_NODES = [
+  "fusion",
+  "srrs",
+  "paper-coffee",
+  "uc",
+  "lsk",
+  "mmw",
+  "na",
+  "wys",
+  "shaw",
+  "lws",
+  "i-house-12",
+  "i-house-345",
+  "pg-halls",
+  "cw-chu",
+  "shho-mc-chungchi",
+] as const;
+
+export type CuhkNode = (typeof CUHK_NODES)[number];
+
+/**
+ * Origins that charge a flat fee to every reachable destination (no Dijkstra
+ * surcharge). Keys are resolved graph nodes (`uc-canteen` → `uc`).
+ */
+export const FLAT_RATE_ORIGINS: Partial<Record<CuhkNode, number>> = {
+  uc: CUHK_BASE_FEE,
+};
+
+export type CuhkRoute = "walk" | "bus-3" | "bus-3-4" | "bus-8" | "shuttle";
+
+export type CuhkEdge = {
+  from: CuhkNode;
+  to: CuhkNode;
+  /** Raw edge cost (distance component). Customer fee adds CUHK_BASE_FEE. */
+  fee: number;
+  route: CuhkRoute;
+};
+
+/** Directed. Do not mirror an edge unless it is listed on its own. */
+export const CUHK_EDGES: CuhkEdge[] = [
+  { from: "fusion", to: "lsk", fee: 0, route: "walk" },
+  { from: "fusion", to: "mmw", fee: 2, route: "walk" },
+  { from: "fusion", to: "srrs", fee: 1, route: "walk" },
+  { from: "fusion", to: "pg-halls", fee: 4, route: "walk" },
+  { from: "fusion", to: "shho-mc-chungchi", fee: 1, route: "walk" },
+  { from: "fusion", to: "uc", fee: 4, route: "walk" },
+  { from: "fusion", to: "cw-chu", fee: 3, route: "bus-8" },
+  { from: "srrs", to: "shaw", fee: 3, route: "bus-3" },
+  { from: "lsk", to: "i-house-12", fee: 1, route: "walk" },
+  { from: "lsk", to: "wys", fee: 2, route: "walk" },
+  { from: "lsk", to: "uc", fee: 3, route: "walk" },
+  { from: "lsk", to: "lws", fee: 3, route: "walk" },
+  { from: "uc", to: "na", fee: 2, route: "walk" },
+  { from: "uc", to: "fusion", fee: 4, route: "walk" },
+  { from: "uc", to: "lsk", fee: 3, route: "walk" },
+  { from: "uc", to: "lws", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "wys", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "cw-chu", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "shaw", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "i-house-12", fee: 4, route: "bus-3-4" },
+  { from: "uc", to: "shho-mc-chungchi", fee: 2, route: "bus-3-4" },
+  { from: "mmw", to: "i-house-345", fee: 0, route: "walk" },
+  { from: "mmw", to: "na", fee: 2, route: "walk" },
+  { from: "mmw", to: "shho-mc-chungchi", fee: 1, route: "walk" },
+  { from: "na", to: "mmw", fee: 0, route: "walk" },
+  { from: "i-house-345", to: "mmw", fee: 0, route: "walk" },
+  { from: "shho-mc-chungchi", to: "mmw", fee: 0, route: "walk" },
+  { from: "shho-mc-chungchi", to: "fusion", fee: 1, route: "walk" },
+  { from: "shho-mc-chungchi", to: "pg-halls", fee: 3, route: "walk" },
+  { from: "pg-halls", to: "shho-mc-chungchi", fee: 3, route: "walk" },
+  { from: "paper-coffee", to: "fusion", fee: 4, route: "bus-3-4" },
+  { from: "paper-coffee", to: "shho-mc-chungchi", fee: 0, route: "walk" },
+  { from: "paper-coffee", to: "pg-halls", fee: 1, route: "walk" },
+  { from: "paper-coffee", to: "uc", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "na", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "lws", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "shaw", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "wys", fee: 5, route: "bus-3-4" },
+  { from: "paper-coffee", to: "cw-chu", fee: 5, route: "bus-3-4" },
+  { from: "wys", to: "shaw", fee: 1, route: "walk" },
+  { from: "lws", to: "i-house-12", fee: 1, route: "walk" },
+  { from: "lws", to: "shaw", fee: 1, route: "walk" },
+];
+
+/**
+ * Destinations that must not use the origin's ordinary walks.
+ * Filtering applies only when the destination is in this list.
+ */
+export const BUS_ONLY: Partial<Record<CuhkNode, readonly CuhkNode[]>> = {
+  fusion: ["cw-chu", "shaw"],
+  "paper-coffee": ["uc", "na", "lws", "shaw", "wys", "cw-chu"],
+  uc: ["lws", "wys", "cw-chu", "shaw", "i-house-12", "shho-mc-chungchi", "pg-halls"],
+};
+
+/** Walks out of the origin that stay available on a bus-only search. */
+export const HUB_WALKS: Partial<Record<CuhkNode, readonly CuhkNode[]>> = {
+  fusion: ["srrs"],
+  "paper-coffee": [],
+  uc: [],
+};
+
+export type CuhkFeeHit = {
+  fee: number;
+  rawFee: number;
+  path: CuhkNode[];
+  floored: boolean;
+};
+
+export type CuhkFeeBlocked = {
+  fee: null;
+  rawFee: number;
+  path: CuhkNode[];
+  reason: "route_too_expensive";
+  floored: false;
+};
+
+const NODE_SET = new Set<string>(CUHK_NODES);
+
+function isNode(value: string): value is CuhkNode {
+  return NODE_SET.has(value);
+}
+
+/**
+ * Canteen slugs that are not themselves graph nodes. The fee is the mapped
+ * node's existing Dijkstra (or the UC flat rate). Do not add edges here.
+ *
+ * fusion — Benjamin Franklin Centre. SoraZen is the documented alias.
+ *   Benjamin Franklin Canteen is that building and has no node of its own.
+ * paper-coffee — Paper & Coffee (`paper-and-coffee`) and CUHK Ebeneezer's
+ *   (`eben`, `ebeneezers`). Same node, same fee. CityU `ebeneezers-5380`
+ *   is priced on the CityU hall tier before this map is consulted.
+ * uc — UC Canteen. Flat CUHK_BASE_FEE; HK$0 in the same building.
+ * lsk — CU Cafe (Lee Shau Kee Building).
+ * College canteens use the node the hall picker already uses for that college
+ * (Chung Chi, S.H. Ho, and Morningside share `shho-mc-chungchi`).
+ * `wys` and `lws` are already nodes.
+ */
+const RESTAURANT_ORIGIN: Record<string, CuhkNode> = {
+  sorazen: "fusion",
+  "sora-zen": "fusion",
+  eben: "paper-coffee",
+  ebeneezers: "paper-coffee",
+  ebeneezer: "paper-coffee",
+  "ebeneezers-kebabs": "paper-coffee",
+  "benjamin-franklin": "fusion",
+  "paper-and-coffee": "paper-coffee",
+  "uc-canteen": "uc",
+  "cu-cafe": "lsk",
+  "orchid-lodge": "shho-mc-chungchi",
+  "sh-ho-canteen": "shho-mc-chungchi",
+  "shho-canteen": "shho-mc-chungchi",
+  "na-canteen": "na",
+  "na-webbites": "na",
+  "cc-canteen": "shho-mc-chungchi",
+  "shaw-canteen": "shaw",
+  "chung-chi-tang": "shho-mc-chungchi",
+};
+
+/**
+ * sorazen is Fusion. Learning Garden / University Library are LSK.
+ * Ids the shop already uses are accepted here. srrs stays a hub.
+ */
+export function resolveCuhkNode(id: string | null | undefined): CuhkNode | null {
+  const raw = (id ?? "").trim().toLowerCase();
+  if (!raw) return null;
+  const restaurant = RESTAURANT_ORIGIN[raw];
+  if (restaurant) return restaurant;
+  if (
+    raw === "university library" ||
+    raw === "university-library" ||
+    raw === "learning garden" ||
+    raw === "learning-garden"
+  ) {
+    return "lsk";
+  }
+  if (
+    raw === "i-house" ||
+    raw === "international house" ||
+    raw === "i-house-1" ||
+    raw === "i-house-2" ||
+    raw === "i-house 1" ||
+    raw === "i-house 2"
+  ) {
+    return "i-house-12";
+  }
+  if (
+    raw === "i-house-3" ||
+    raw === "i-house-4" ||
+    raw === "i-house-5" ||
+    raw === "i-house 3" ||
+    raw === "i-house 4" ||
+    raw === "i-house 5"
+  ) {
+    return "i-house-345";
+  }
+  if (isNode(raw)) return raw;
+  return null;
+}
+
+function squash(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const COLLEGE_NODE: Record<string, CuhkNode> = {
+  "shaw college": "shaw",
+  "united college": "uc",
+  "chung chi college": "shho-mc-chungchi",
+  "new asia college": "na",
+  "s h ho college shho": "shho-mc-chungchi",
+  "s h ho college": "shho-mc-chungchi",
+  "morningside college": "shho-mc-chungchi",
+  "c w chu college": "cw-chu",
+  "wu yee sun college wys": "wys",
+  "wu yee sun college": "wys",
+  "lee woo sing college lws": "lws",
+  "lee woo sing college": "lws",
+  "postgraduate halls pgh": "pg-halls",
+  "postgraduate halls": "pg-halls",
+  "international house": "i-house-12",
+  "international house i house": "i-house-12",
+  "i house 1 2": "i-house-12",
+  "i house 3 4 5": "i-house-345",
+};
+
+function iHouseNode(label: string): CuhkNode | null {
+  const text = squash(label);
+  // Split college labels (must run before the single-block regex).
+  if (text === "i house 1 2" || text === "i house12") return "i-house-12";
+  if (text === "i house 3 4 5" || text === "i house345") return "i-house-345";
+  const match = text.match(/\bi\s*house\s*([1-5])\b/);
+  if (match) {
+    const block = Number(match[1]);
+    if (block === 1 || block === 2) return "i-house-12";
+    return "i-house-345";
+  }
+  if (text === "i house" || text === "international house") return "i-house-12";
+  return null;
+}
+
+/** Bare combined I-House college with no hall/block stays unpriced. */
+function isAmbiguousIHouseCollege(label: string): boolean {
+  const text = squash(label);
+  return (
+    text === "i house" ||
+    text === "international house" ||
+    text === "international house i house"
+  );
+}
+
+function pgHallNode(label: string): CuhkNode | null {
+  const text = squash(label);
+  if (
+    text === "pgh" ||
+    text.startsWith("pgh ") ||
+    text.includes("postgraduate")
+  ) {
+    return "pg-halls";
+  }
+  return null;
+}
+
+/** The SRRS hub is not a hall a customer can select. */
+function customerNode(node: CuhkNode | null): CuhkNode | null {
+  if (node === "srrs") return null;
+  return node;
+}
+
+/**
+ * Map a CUHK dorm onto a graph node. Split I-House colleges (1/2 vs 3/4/5)
+ * resolve without a hall. The legacy combined "International House" college
+ * still needs a hall/block (or defaults via resolveCuhkNode on the old stop
+ * name). The SRRS hub and anything else unmatched stay unpriced.
+ */
+export function cuhkDestinationNode(
+  college: string | null | undefined,
+  hall: string | null | undefined,
+): CuhkNode | null {
+  if (resolveCuhkNode(hall) === "srrs" || resolveCuhkNode(college) === "srrs") {
+    return null;
+  }
+  const hallNode = customerNode(resolveCuhkNode(hall));
+  if (hallNode) return hallNode;
+  const collegeNode = customerNode(resolveCuhkNode(college));
+  if (collegeNode) return collegeNode;
+
+  const hallLabel = hall ?? "";
+  const collegeLabel = college ?? "";
+  const fromHall =
+    iHouseNode(hallLabel) ??
+    pgHallNode(hallLabel) ??
+    COLLEGE_NODE[squash(hallLabel)] ??
+    null;
+  if (fromHall) return customerNode(fromHall);
+
+  const fromCollegeIHouse = iHouseNode(collegeLabel);
+  if (fromCollegeIHouse) {
+    if (isAmbiguousIHouseCollege(collegeLabel) && !hallLabel.trim()) {
+      return null;
+    }
+    return customerNode(fromCollegeIHouse);
+  }
+  return customerNode(
+    pgHallNode(collegeLabel) ??
+      COLLEGE_NODE[squash(collegeLabel)] ??
+      null,
+  );
+}
+
+export function cuhkOriginLabel(sourceId: string | null | undefined): string {
+  const id = (sourceId ?? "").trim().toLowerCase();
+  if (id === "fusion" || id === "sorazen") return id === "sorazen" ? "SoraZen" : "Fusion";
+  if (id === "paper-coffee" || id === "paper-and-coffee") return "Paper & Coffee";
+  if (id === "uc" || id === "uc-canteen") return "UC Canteen";
+  if (id === "eben" || id === "ebeneezers" || id === "ebeneezers-5380") return "Ebeneezer's";
+  if (id === "orchid-lodge") return "Orchid Lodge";
+  if (id === "na-canteen" || id === "na-webbites") return "NA WebBites";
+  return id || "this shop";
+}
+
+export function cuhkUnavailableMessage(origin: string, destination: string): string {
+  return `We don't currently deliver from ${origin} to ${destination}. Check back soon.`;
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * Cheapest directed path. Returns null when no path exists.
+ * UC Canteen is flat CUHK_BASE_FEE. Other origins charge
+ * CUHK_BASE_FEE + Dijkstra path cost. When the Dijkstra cost is above
+ * BLOCK_THRESHOLD, fee is null and reason is route_too_expensive.
+ */
+export function computeCuhkFee(
+  origin: string,
+  destination: string,
+): CuhkFeeHit | CuhkFeeBlocked | null {
+  const start = resolveCuhkNode(origin);
+  const end = resolveCuhkNode(destination);
+  if (!start || !end) return null;
+
+  if (start === end) {
+    return { fee: 0, rawFee: 0, path: [start], floored: false };
+  }
+
+  const found = cheapestPath(start, end, edgesForSearch(start, end));
+  if (!found) return null;
+
+  const flatFee = FLAT_RATE_ORIGINS[start];
+  if (flatFee != null) {
+    return {
+      fee: flatFee,
+      rawFee: flatFee,
+      path: found.path,
+      floored: false,
+    };
+  }
+
+  return settleCuhkFee(found.rawFee, found.path, false, `${start} → ${end}`);
+}
+
+/**
+ * Apply base + path cost. Block checks the Dijkstra cost alone (before base).
+ * `floored` stays false — the old HK$5 floor is gone; CUHK_BASE_FEE is the base.
+ */
+export function settleCuhkFee(
+  rawFee: number,
+  path: CuhkNode[],
+  sameNode: boolean,
+  _label = path.join(" → "),
+): CuhkFeeHit | CuhkFeeBlocked {
+  if (sameNode) {
+    return { fee: 0, rawFee: 0, path, floored: false };
+  }
+  if (rawFee > BLOCK_THRESHOLD) {
+    return {
+      fee: null,
+      rawFee,
+      path,
+      reason: "route_too_expensive",
+      floored: false,
+    };
+  }
+  return {
+    fee: round2(CUHK_BASE_FEE + rawFee),
+    rawFee,
+    path,
+    floored: false,
+  };
+}
+
+function edgesForSearch(origin: CuhkNode, destination: CuhkNode): CuhkEdge[] {
+  const busOnly = BUS_ONLY[origin];
+  if (!busOnly || !busOnly.includes(destination)) return CUHK_EDGES;
+  const hubs = new Set<CuhkNode>(HUB_WALKS[origin] ?? []);
+  return CUHK_EDGES.filter((edge) => {
+    if (edge.from !== origin || edge.route !== "walk") return true;
+    return hubs.has(edge.to);
+  });
+}
+
+type PathState = { cost: number; hops: number };
+
+/** True when `next` is a strictly cheaper cost, or the same cost with fewer edges. */
+function isBetterPath(next: PathState, known: PathState | undefined): boolean {
+  if (!known) return true;
+  if (next.cost !== known.cost) return next.cost < known.cost;
+  return next.hops < known.hops;
+}
+
+function cheapestPath(
+  start: CuhkNode,
+  end: CuhkNode,
+  edges: readonly CuhkEdge[],
+): { rawFee: number; path: CuhkNode[] } | null {
+  const adjacency: Record<CuhkNode, { to: CuhkNode; fee: number }[]> = {
+    fusion: [],
+    srrs: [],
+    "paper-coffee": [],
+    uc: [],
+    lsk: [],
+    mmw: [],
+    na: [],
+    wys: [],
+    shaw: [],
+    lws: [],
+    "i-house-12": [],
+    "i-house-345": [],
+    "pg-halls": [],
+    "cw-chu": [],
+    "shho-mc-chungchi": [],
+  };
+  for (const edge of edges) {
+    adjacency[edge.from].push({ to: edge.to, fee: edge.fee });
+  }
+
+  const best = new Map<CuhkNode, PathState>();
+  const prev = new Map<CuhkNode, CuhkNode>();
+  const settled = new Set<CuhkNode>();
+  best.set(start, { cost: 0, hops: 0 });
+
+  while (settled.size < CUHK_NODES.length) {
+    let current: CuhkNode | null = null;
+    let currentBest: PathState | null = null;
+    for (const node of CUHK_NODES) {
+      if (settled.has(node)) continue;
+      const candidate = best.get(node);
+      if (!candidate || !isBetterPath(candidate, currentBest ?? undefined)) continue;
+      current = node;
+      currentBest = candidate;
+    }
+    if (!current || !currentBest) break;
+    if (current === end) break;
+    settled.add(current);
+    for (const edge of adjacency[current]) {
+      const next = { cost: currentBest.cost + edge.fee, hops: currentBest.hops + 1 };
+      if (!isBetterPath(next, best.get(edge.to))) continue;
+      best.set(edge.to, next);
+      prev.set(edge.to, current);
+    }
+  }
+
+  const rawFee = best.get(end)?.cost;
+  if (rawFee == null) return null;
+
+  const path: CuhkNode[] = [end];
+  let cursor = end;
+  while (cursor !== start) {
+    const prior = prev.get(cursor);
+    if (!prior) return null;
+    path.push(prior);
+    cursor = prior;
+  }
+  path.reverse();
+  return { rawFee, path };
+}
+
+/**
+ * Shortest-path distance on the delivery graph (the raw edge cost, before
+ * the flat-rate and base-fee overrides). Same building is raw 0.
+ * Callers turn this into walk minutes. It is not a maps lookup.
+ */
+export function cuhkRouteDistance(
+  origin: string,
+  destination: string,
+): { raw: number; sameNode: boolean } | null {
+  const start = resolveCuhkNode(origin);
+  const end = resolveCuhkNode(destination);
+  if (!start || !end) return null;
+  if (start === end) return { raw: 0, sameNode: true };
+  const found = cheapestPath(start, end, edgesForSearch(start, end));
+  if (!found) return null;
+  return { raw: found.rawFee, sameNode: false };
+}

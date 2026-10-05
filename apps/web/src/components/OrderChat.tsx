@@ -2,10 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ChatComposer } from "@/components/chat/ChatComposer";
+import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
+import { OrderCounterparty } from "@/components/DeliveryIdentity";
 import { useUser } from "@/context/UserContext";
+import { publicDeliveryName } from "@fusion-express/shared/delivery-identity";
+import { isChatActive } from "@/lib/constants";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
+  markChatSeen,
+  sendChatMediaMessage,
   sendChatMessage,
   subscribeChatMessages,
 } from "@/lib/chat";
@@ -17,20 +24,10 @@ interface OrderChatProps {
   backHref?: string;
 }
 
-function formatMessageTime(date: Date): string {
-  return date.toLocaleTimeString("en-HK", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export function OrderChat({ orderId, backHref }: OrderChatProps) {
   const { user } = useUser();
   const [order, setOrder] = useState<Order | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,6 +42,11 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!user?.uid || messages.length === 0) return;
+    void markChatSeen(orderId, messages, user.uid);
+  }, [messages, orderId, user?.uid]);
 
   if (!user) return null;
 
@@ -63,27 +65,25 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
 
   const senderId = user.uid;
   if (!senderId) return null;
-
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    if (!text.trim() || !senderId) return;
-    setSending(true);
-    setError("");
-    try {
-      await sendChatMessage(orderId, senderId, user!.fullName, text);
-      setText("");
-    } catch {
-      setError("Failed to send message.");
-    } finally {
-      setSending(false);
-    }
-  }
+  const archived =
+    order?.status === "completed" &&
+    order.updatedAt instanceof Date &&
+    Date.now() - order.updatedAt.getTime() > 24 * 60 * 60 * 1000;
+  const chatActive = order ? isChatActive(order.status) && !archived : !archived;
+  const role =
+    order?.runnerUid && order.runnerUid === senderId ? "runner" : "customer";
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col rounded-2xl border border-gray-100 bg-white shadow-sm md:h-[520px]">
       <div className="border-b border-gray-100 px-4 py-3">
-        <p className="text-sm font-semibold text-gray-900">Order Chat</p>
-        <p className="text-xs text-gray-500">{orderId}</p>
+        {order ? (
+          <OrderCounterparty
+            orderId={orderId}
+            label={order.customerId === user.uid ? "Your runner:" : "Customer:"}
+          />
+        ) : (
+          <p className="text-sm font-semibold text-gray-900">Order chat</p>
+        )}
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -92,55 +92,49 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
             No messages yet. Say hi to coordinate delivery.
           </p>
         ) : (
-          messages.map((msg) => {
-            const isMine = isOwnChatMessage(msg, user);
-            return (
-              <div
-                key={msg.id}
-                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className="max-w-[80%] rounded-2xl px-3 py-2"
-                  style={{
-                    backgroundColor: isMine ? "#FDB927" : "#2a2a2a",
-                    color: isMine ? "#111827" : "#ffffff",
-                  }}
-                >
-                  <p className="text-[10px] font-medium opacity-80">
-                    {msg.senderName} · {formatMessageTime(msg.timestamp)}
-                  </p>
-                  <p className="mt-0.5 text-sm">{msg.message}</p>
-                </div>
-              </div>
-            );
-          })
+          messages.map((msg) => (
+            <ChatMessageBubble
+              key={msg.id}
+              message={msg}
+              isMine={isOwnChatMessage(msg, user)}
+              accent="order"
+              showSeen
+            />
+          ))
         )}
         <div ref={bottomRef} />
       </div>
 
-      <form
-        onSubmit={handleSend}
-        className="border-t border-gray-100 p-3"
-      >
-        {error && (
-          <p className="mb-2 text-xs text-red-600">{error}</p>
-        )}
-        <div className="flex gap-2">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Type a message…"
-            className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
-          />
-          <button
-            type="submit"
-            disabled={sending || !text.trim()}
-            className="rounded-xl bg-fusion-red px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            Send
-          </button>
-        </div>
-      </form>
+      {archived || !chatActive ? (
+        <p className="border-t border-gray-100 px-4 py-3 text-xs text-gray-500">
+          {archived
+            ? "This chat is read-only. The order was completed more than 24 hours ago."
+            : "Chat is unavailable for this order status."}
+        </p>
+      ) : (
+        <ChatComposer
+          placeholder="Type a message…"
+          mediaEnabled
+          accent="order"
+          onSend={async ({ text, pending, signal, onProgress }) => {
+            const name = publicDeliveryName(user, user.fullName || "Customer");
+            if (pending.length) {
+              await sendChatMediaMessage({
+                orderId,
+                senderId,
+                senderName: name,
+                senderRole: role,
+                caption: text,
+                pending,
+                signal,
+                onProgress,
+              });
+            } else {
+              await sendChatMessage(orderId, senderId, name, text, role);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

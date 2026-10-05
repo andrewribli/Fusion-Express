@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { MenuItem } from "@/lib/types";
+import { rankItemsByQuery } from "@fusion-express/shared/search-rank";
+import { formatMenuPrice, type MenuItem } from "@/lib/types";
 
 interface MenuSearchProps {
   items: MenuItem[];
@@ -21,11 +22,9 @@ export function MenuSearch({
   const [focused, setFocused] = useState(false);
 
   const suggestions = useMemo(() => {
-    const q = value.trim().toLowerCase();
-    if (!q || q.length < 1) return [];
-    return items
-      .filter((item) => item.name.toLowerCase().includes(q))
-      .slice(0, 12);
+    const q = value.trim();
+    if (!q) return [];
+    return rankItemsByQuery(items, q).slice(0, 12);
   }, [items, value]);
 
   return (
@@ -56,7 +55,7 @@ export function MenuSearch({
                 }}
               >
                 <span>{item.name}</span>
-                <span className="text-xs text-gray-400">${item.price}</span>
+                <span className="text-xs text-gray-400">{formatMenuPrice(item)}</span>
               </button>
             </li>
           ))}
