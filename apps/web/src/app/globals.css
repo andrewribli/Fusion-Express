@@ -58,15 +58,46 @@ body.dark-mode {
 }
 
 /*
- * Shop home is always a light Taobao-style surface.
+ * Shop home: white page, red curved section bubbles, white product cards.
  * Must beat body.dark-mode .bg-white / .text-gray-* remaps (higher specificity).
  */
 .shop-page,
 body.dark-mode .shop-page {
-  background-color: #f3f4f6 !important;
+  background-color: #ffffff !important;
   color: #111111 !important;
 }
 
+/* Large curved section bubbles (TOP Picks, custom item, feed, etc.) */
+.shop-page .shop-bubble,
+body.dark-mode .shop-page .shop-bubble {
+  background-color: #ed1c24 !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+.shop-page .shop-bubble .shop-label,
+body.dark-mode .shop-page .shop-bubble .shop-label,
+.shop-page .shop-bubble .shop-heading,
+body.dark-mode .shop-page .shop-bubble .shop-heading {
+  color: #ffffff !important;
+}
+
+.shop-page .shop-bubble .shop-muted,
+body.dark-mode .shop-page .shop-bubble .shop-muted {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.shop-page .shop-bubble .shop-link,
+body.dark-mode .shop-page .shop-bubble .shop-link {
+  color: #ffffff !important;
+}
+
+.shop-page .shop-bubble .hover\:bg-red-50:hover,
+body.dark-mode .shop-page .shop-bubble .hover\:bg-red-50:hover {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Product cards and other nested white surfaces stay white */
 .shop-page .shop-surface,
 body.dark-mode .shop-page .shop-surface,
 .shop-page .bg-white,
@@ -74,6 +105,23 @@ body.dark-mode .shop-page .bg-white,
 .shop-page .bg-white\/95,
 body.dark-mode .shop-page .bg-white\/95 {
   background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+/* Nested cards keep dark text even inside red bubbles */
+.shop-page .shop-bubble .shop-surface,
+body.dark-mode .shop-page .shop-bubble .shop-surface {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+
+.shop-page .shop-bubble .shop-surface .shop-muted,
+body.dark-mode .shop-page .shop-bubble .shop-surface .shop-muted {
+  color: #6b7280 !important;
+}
+
+.shop-page .shop-bubble .shop-surface .shop-label,
+body.dark-mode .shop-page .shop-bubble .shop-surface .shop-label {
   color: #111111 !important;
 }
 
