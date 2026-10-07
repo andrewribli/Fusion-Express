@@ -15,6 +15,7 @@
     "./resolve-image": "./src/resolve-image.ts",
     "./product-text": "./src/product-text.ts",
     "./firebase": "./src/firebase.ts",
+    "./pricing": "./src/pricing.ts",
     "./auth": "./src/auth.ts",
     "./cuhk-email": "./src/cuhk-email.ts",
     "./types": "./src/types.ts",

@@ -2,11 +2,12 @@
   "expo": {
     "name": "GraceRun",
     "slug": "fusion-express",
+    "owner": "gracerun",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "fusionexpress",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "plugins": [
       "expo-router",
       [
@@ -18,6 +19,18 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.gracerun.fusionexpress",
+      "supportsTablet": false,
+      "infoPlist": {
+        "CFBundleDisplayName": "GraceRun"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bcb10fe2-e2f2-40e6-a6dd-0c6337441e8a"
+      }
     }
   }
 }
