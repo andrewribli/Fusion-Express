@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, MenuItem } from "@fusion-express/shared/types";
-import { cartSubtotal } from "@fusion-express/shared";
+import { cartSubtotal } from "@fusion-express/shared/pricing";
 
 interface CartContextValue {
   items: CartItem[];

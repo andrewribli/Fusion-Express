@@ -25,8 +25,9 @@ export function isStagingEnvVar(): boolean {
 
 export function isStagingApp(): boolean {
   if (isStagingEnvVar()) return true;
+  // React Native defines `window` but often has no `location` — guard both.
   if (typeof window !== "undefined") {
-    const host = window.location.hostname.toLowerCase();
+    const host = window.location?.hostname?.toLowerCase?.();
     if (host === "staging-servecart.vercel.app") return true;
   }
   return false;
