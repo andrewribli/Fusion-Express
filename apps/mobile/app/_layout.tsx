@@ -1,22 +1,19 @@
 import "../global.css";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { AuthProvider } from "../src/auth";
-import { CartProvider } from "../src/cart";
+import { View, Text, StyleSheet } from "react-native";
+
+console.error("[GRACERUN_BOOT] minimal layout loaded");
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerTintColor: "#ED1C24" }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="menu" options={{ title: "Menu" }} />
-          <Stack.Screen name="cart" options={{ title: "Cart" }} />
-          <Stack.Screen name="checkout" options={{ title: "Checkout" }} />
-          <Stack.Screen name="track" options={{ title: "Track order" }} />
-        </Stack>
-      </CartProvider>
-    </AuthProvider>
+    <View style={styles.container}>
+      <Text style={styles.text}>GRACERUN BOOT TEST — step 1</Text>
+      <Stack screenOptions={{ headerShown: false }} />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 40, backgroundColor: "#fff" },
+  text: { fontSize: 18, fontWeight: "bold" },
+});
