@@ -64,7 +64,9 @@ function parseArgs(argv: string[]) {
   const apply = argv.includes("--apply");
   const emptyOnly = argv.includes("--empty-only");
   const fromReport = argv.includes("--from-report");
-  let limit = apply || fromReport ? Number.POSITIVE_INFINITY : 5;
+  const resume = argv.includes("--resume");
+  const rescrapeBad = argv.includes("--rescrape-bad");
+  let limit = apply || fromReport || resume || rescrapeBad ? Number.POSITIVE_INFINITY : 5;
   const limitIdx = argv.findIndex((a) => a === "--limit" || a === "--dry-run");
   if (limitIdx >= 0) {
     const flag = argv[limitIdx];
@@ -77,10 +79,16 @@ function parseArgs(argv: string[]) {
       limit = 5;
     }
   }
-  if (!apply && !fromReport && !argv.some((a) => a === "--dry-run" || a === "--limit")) {
+  if (
+    !apply &&
+    !fromReport &&
+    !resume &&
+    !rescrapeBad &&
+    !argv.some((a) => a === "--dry-run" || a === "--limit")
+  ) {
     limit = 5;
   }
-  return { apply, dryRun: !apply, limit, emptyOnly, fromReport };
+  return { apply, dryRun: !apply, limit, emptyOnly, fromReport, resume, rescrapeBad };
 }
 
 function isBadImage(image: string | undefined | null): boolean {
@@ -114,6 +122,12 @@ const BLOCKED_HOST_FRAGMENTS = [
   "issuu.com",
   "physiosupplies",
   "framerusercontent.com",
+  "lumiere-a.akamaihd.net",
+  "disney.com",
+  "disneyplus",
+  "skyassets.com",
+  "goat.com",
+  "image.goat.com",
 ];
 
 /** Path fragments that are almost never grocery product photos. */
@@ -129,6 +143,12 @@ const BLOCKED_PATH_FRAGMENTS = [
   "head.jpg",
   "menu-book",
   "book-tecnica",
+  "frozenanniversary",
+  "lifestyle",
+  "football",
+  "digital ecomm",
+  "digitalecomm",
+  "watchpagehero",
 ];
 
 const PREFERRED_HOST_FRAGMENTS = [
@@ -217,7 +237,9 @@ async function runPromas(query: string, site?: string): Promise<string | null> {
   try {
     const { stdout, stderr } = await execFileAsync("promas", args, {
       maxBuffer: 12 * 1024 * 1024,
-      timeout: 180_000,
+      // Keep short — hung browser scrapes otherwise stall the whole batch.
+      timeout: 75_000,
+      killSignal: "SIGKILL",
       env: process.env,
     });
     const parsed = extractJson(stdout) ?? extractJson(stderr);
@@ -234,8 +256,7 @@ async function scrapeImageForName(name: string): Promise<{ url: string | null; q
   const attempts: { query: string; site?: string }[] = [
     { query: `${cleaned} ParknShop`, site: "pns.hk" },
     { query: `${cleaned} ParknShop Hong Kong` },
-    { query: `${cleaned} supermarket` },
-    { query: cleaned },
+    { query: `${cleaned} Hong Kong supermarket product` },
   ];
 
   for (const attempt of attempts) {
@@ -364,10 +385,22 @@ async function applyFromReport(db: Firestore, limit: number): Promise<MatchResul
   return [...results, ...failed];
 }
 
+function loadPriorResults(): MatchResult[] {
+  if (!existsSync(REPORT_LOG)) return [];
+  try {
+    const saved = JSON.parse(readFileSync(REPORT_LOG, "utf8")) as { results?: MatchResult[] };
+    return saved.results ?? [];
+  } catch {
+    return [];
+  }
+}
+
 async function main() {
-  const { apply, limit, emptyOnly, fromReport } = parseArgs(process.argv.slice(2));
+  const { apply, limit, emptyOnly, fromReport, resume, rescrapeBad } = parseArgs(
+    process.argv.slice(2),
+  );
   console.log(
-    `Mode: ${apply ? "APPLY (write Firestore)" : "DRY-RUN"} · limit=${Number.isFinite(limit) ? limit : "all"}${emptyOnly ? " · empty-only" : ""}${fromReport ? " · from-report" : ""}`,
+    `Mode: ${apply ? "APPLY (write Firestore)" : "DRY-RUN"} · limit=${Number.isFinite(limit) ? limit : "all"}${emptyOnly ? " · empty-only" : ""}${fromReport ? " · from-report" : ""}${resume ? " · resume" : ""}${rescrapeBad ? " · rescrape-bad" : ""}`,
   );
 
   const db = initAdmin();
@@ -408,21 +441,44 @@ async function main() {
     `Products: ${all.length} · candidates: ${missing.length}${emptyOnly ? " (empty image only)" : " (missing/placeholder)"}`,
   );
 
-  const targets = missing.slice(0, limit);
-  console.log(`Processing ${targets.length} item(s)…\n`);
+  const prior = loadPriorResults();
+  const priorById = new Map(prior.map((r) => [r.id, r]));
 
-  const results: MatchResult[] = [];
+  let targets: ProductRow[];
+  let results: MatchResult[];
+
+  if (rescrapeBad) {
+    const badIds = new Set(
+      prior.filter((r) => !r.ok || looksSuspicious(r.after)).map((r) => r.id),
+    );
+    targets = missing.filter((p) => badIds.has(p.id)).slice(0, limit);
+    results = prior.filter((r) => !badIds.has(r.id));
+    console.log(`Rescraping ${targets.length} suspicious/failed prior match(es)…\n`);
+  } else if (resume) {
+    const doneIds = new Set(prior.map((r) => r.id));
+    targets = missing.filter((p) => !doneIds.has(p.id)).slice(0, limit);
+    results = [...prior];
+    console.log(`Resuming — ${prior.length} done, ${targets.length} remaining…\n`);
+  } else {
+    targets = missing.slice(0, limit);
+    results = [];
+    console.log(`Processing ${targets.length} item(s)…\n`);
+  }
 
   for (let i = 0; i < targets.length; i++) {
     const item = targets[i]!;
     console.log(`[${i + 1}/${targets.length}] ${item.name}`);
     const { url, query } = await scrapeImageForName(item.name);
+    // Drop any prior row for this id (rescrape replaces it).
+    const idx = results.findIndex((r) => r.id === item.id);
+    if (idx >= 0) results.splice(idx, 1);
+
     if (!url) {
       console.log("  → no image found");
       results.push({
         id: item.id,
         name: item.name,
-        before: item.image,
+        before: item.image || priorById.get(item.id)?.before || "",
         after: null,
         query,
         ok: false,
@@ -433,7 +489,7 @@ async function main() {
       results.push({
         id: item.id,
         name: item.name,
-        before: item.image,
+        before: item.image || priorById.get(item.id)?.before || "",
         after: url,
         query,
         ok: true,
