@@ -128,6 +128,8 @@ const BLOCKED_HOST_FRAGMENTS = [
   "skyassets.com",
   "goat.com",
   "image.goat.com",
+  "apple.com",
+  "jwplayer.com",
 ];
 
 /** Path fragments that are almost never grocery product photos. */
@@ -186,6 +188,11 @@ function isValidImageUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function looksSuspicious(url: string | null | undefined): boolean {
+  if (!url) return true;
+  return !isValidImageUrl(url);
 }
 
 function hostScore(url: string): number {
