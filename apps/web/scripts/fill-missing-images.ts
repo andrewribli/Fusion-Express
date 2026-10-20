@@ -106,6 +106,29 @@ const BLOCKED_HOST_FRAGMENTS = [
   "youtube.com",
   "twitter.com",
   "x.com",
+  "investopedia.com",
+  "dictionary.com",
+  "britannica.com",
+  "merriam-webster",
+  "isu.pub",
+  "issuu.com",
+  "physiosupplies",
+  "framerusercontent.com",
+];
+
+/** Path fragments that are almost never grocery product photos. */
+const BLOCKED_PATH_FRAGMENTS = [
+  "/thmb/",
+  "pv-target-images",
+  "/logo",
+  "/banner",
+  "/icon",
+  "favicon",
+  "sprite",
+  "avatar",
+  "head.jpg",
+  "menu-book",
+  "book-tecnica",
 ];
 
 const PREFERRED_HOST_FRAGMENTS = [
@@ -122,6 +145,9 @@ const PREFERRED_HOST_FRAGMENTS = [
   "7-eleven.com.hk",
   "watsons.com",
   "mannings.com.hk",
+  "aussiemeat.hk",
+  "foodcraft.hk",
+  "meatkrafters",
 ];
 
 function isValidImageUrl(url: string): boolean {
@@ -131,6 +157,10 @@ function isValidImageUrl(url: string): boolean {
     const host = parsed.hostname.toLowerCase();
     if (BLOCKED_HOST_FRAGMENTS.some((b) => host.includes(b))) return false;
     const path = parsed.pathname.toLowerCase();
+    const full = `${host}${path}${parsed.search}`.toLowerCase();
+    if (BLOCKED_PATH_FRAGMENTS.some((b) => full.includes(b))) return false;
+    // Reject webp-only CDN rewrites when the real asset isn't jpg/png.
+    if (/\.webp(\b|$)/i.test(path) && !/\.(jpe?g|png)\b/i.test(path)) return false;
     // Allow .jpg/.png before optional CDN suffixes or query strings.
     return /\.(jpe?g|png)(\b|$)/i.test(path);
   } catch {
@@ -160,10 +190,14 @@ function pickBestImage(images: string[] | undefined): string | null {
 
 /** Normalize product names so scrapers don't latch onto unrelated brands (e.g. AMG cars). */
 function normalizeSearchName(name: string): string {
-  return name
+  let n = name
     .replace(/\bAMG\b/gi, "Australian Meat Garden")
+    // "CIF" alone matches Cost-Insurance-Freight finance pages.
+    .replace(/\bCIF\b/g, "CIF cream cleaner Unilever")
+    .replace(/\bC&S\b/gi, "C&S Clean Soft tissue")
     .replace(/\s+/g, " ")
     .trim();
+  return n;
 }
 
 function extractJson(stdout: string): PromasResult | null {
