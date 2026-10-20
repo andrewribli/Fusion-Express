@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed-menu.ts",
+    "fill-images": "tsx scripts/fill-missing-images.ts",
     "test-email": "tsx scripts/send-test-email.ts"
   },
   "dependencies": {
