@@ -6,6 +6,9 @@
  *   npx tsx scripts/fill-missing-images.ts --dry-run 10
  *   npx tsx scripts/fill-missing-images.ts --apply      # write to Firestore
  *   npx tsx scripts/fill-missing-images.ts --apply --limit 50
+ *   npx tsx scripts/fill-missing-images.ts --apply --from-report
+ *     # apply previously scraped URLs from fill-images-report.json (no re-scrape)
+ *   npx tsx scripts/fill-missing-images.ts --empty-only # only blank image fields
  *
  * Requires:
  *   - `promas` + Playwright Chromium on PATH
@@ -60,7 +63,8 @@ type MatchResult = {
 function parseArgs(argv: string[]) {
   const apply = argv.includes("--apply");
   const emptyOnly = argv.includes("--empty-only");
-  let limit = apply ? Number.POSITIVE_INFINITY : 5;
+  const fromReport = argv.includes("--from-report");
+  let limit = apply || fromReport ? Number.POSITIVE_INFINITY : 5;
   const limitIdx = argv.findIndex((a) => a === "--limit" || a === "--dry-run");
   if (limitIdx >= 0) {
     const flag = argv[limitIdx];
@@ -73,10 +77,10 @@ function parseArgs(argv: string[]) {
       limit = 5;
     }
   }
-  if (!apply && !argv.some((a) => a === "--dry-run" || a === "--limit")) {
+  if (!apply && !fromReport && !argv.some((a) => a === "--dry-run" || a === "--limit")) {
     limit = 5;
   }
-  return { apply, dryRun: !apply, limit, emptyOnly };
+  return { apply, dryRun: !apply, limit, emptyOnly, fromReport };
 }
 
 function isBadImage(image: string | undefined | null): boolean {
@@ -274,10 +278,62 @@ function initAdmin(): Firestore | null {
   return getFirestore(app);
 }
 
+function writeReport(apply: boolean, results: MatchResult[]) {
+  const failed = results.filter((r) => !r.ok);
+  const missingLines = [
+    `# Missing images — ${new Date().toISOString()}`,
+    `# ${failed.length} item(s) Promas could not resolve`,
+    ...failed.map((f) => `${f.id}\t${f.name}\t${f.before || "(empty)"}`),
+    "",
+  ];
+  writeFileSync(MISSING_LOG, missingLines.join("\n"), "utf8");
+  writeFileSync(REPORT_LOG, JSON.stringify({ apply, results }, null, 2), "utf8");
+}
+
+function printReport(apply: boolean, results: MatchResult[]) {
+  const updated = results.filter((r) => r.ok);
+  const failed = results.filter((r) => !r.ok);
+  console.log("\n======== REPORT ========");
+  console.log(`Successfully matched: ${updated.length}`);
+  console.log(`Failed (logged):      ${failed.length} → ${MISSING_LOG}`);
+  console.log(`Wrote:                ${apply ? "Firestore updates applied" : "dry-run only (no writes)"}`);
+  console.log("\nSample before/after (up to 3):");
+  for (const sample of updated.slice(0, 3)) {
+    console.log(`- ${sample.name}`);
+    console.log(`    before: ${sample.before || "(empty)"}`);
+    console.log(`    after:  ${sample.after}`);
+  }
+  if (updated.length === 0) {
+    console.log("(no successful matches in this run)");
+  }
+}
+
+async function applyFromReport(db: Firestore, limit: number): Promise<MatchResult[]> {
+  if (!existsSync(REPORT_LOG)) {
+    throw new Error(`No report at ${REPORT_LOG}. Run a scrape first.`);
+  }
+  const saved = JSON.parse(readFileSync(REPORT_LOG, "utf8")) as {
+    results: MatchResult[];
+  };
+  const ready = saved.results.filter((r) => r.ok && r.after).slice(0, limit);
+  console.log(`Applying ${ready.length} URL(s) from report…\n`);
+  const results: MatchResult[] = [];
+  for (let i = 0; i < ready.length; i++) {
+    const row = ready[i]!;
+    console.log(`[${i + 1}/${ready.length}] ${row.name}`);
+    await db.collection(COLLECTION).doc(row.id).update({ image: row.after });
+    console.log(`  → Firestore updated ← ${row.after}`);
+    results.push({ ...row, ok: true });
+  }
+  // Keep failed entries from the original report for the missing log.
+  const failed = saved.results.filter((r) => !r.ok);
+  return [...results, ...failed];
+}
+
 async function main() {
-  const { apply, limit, emptyOnly } = parseArgs(process.argv.slice(2));
+  const { apply, limit, emptyOnly, fromReport } = parseArgs(process.argv.slice(2));
   console.log(
-    `Mode: ${apply ? "APPLY (write Firestore)" : "DRY-RUN"} · limit=${Number.isFinite(limit) ? limit : "all"}${emptyOnly ? " · empty-only" : ""}`,
+    `Mode: ${apply ? "APPLY (write Firestore)" : "DRY-RUN"} · limit=${Number.isFinite(limit) ? limit : "all"}${emptyOnly ? " · empty-only" : ""}${fromReport ? " · from-report" : ""}`,
   );
 
   const db = initAdmin();
@@ -286,6 +342,17 @@ async function main() {
       "Cannot --apply without FIREBASE_SERVICE_ACCOUNT_JSON or firebase-service-account.json",
     );
     process.exit(1);
+  }
+
+  if (fromReport) {
+    if (!apply || !db) {
+      console.error("--from-report requires --apply and a service account");
+      process.exit(1);
+    }
+    const results = await applyFromReport(db, limit);
+    writeReport(true, results);
+    printReport(true, results);
+    return;
   }
 
   console.log("Loading products…");
@@ -311,7 +378,6 @@ async function main() {
   console.log(`Processing ${targets.length} item(s)…\n`);
 
   const results: MatchResult[] = [];
-  const failed: ProductRow[] = [];
 
   for (let i = 0; i < targets.length; i++) {
     const item = targets[i]!;
@@ -319,7 +385,6 @@ async function main() {
     const { url, query } = await scrapeImageForName(item.name);
     if (!url) {
       console.log("  → no image found");
-      failed.push(item);
       results.push({
         id: item.id,
         name: item.name,
@@ -329,47 +394,28 @@ async function main() {
         ok: false,
         reason: "promas_no_result",
       });
-      continue;
+    } else {
+      console.log(`  → ${url}`);
+      results.push({
+        id: item.id,
+        name: item.name,
+        before: item.image,
+        after: url,
+        query,
+        ok: true,
+      });
+
+      if (apply && db) {
+        await db.collection(COLLECTION).doc(item.id).update({ image: url });
+        console.log("  → Firestore updated");
+      }
     }
-    console.log(`  → ${url}`);
-    results.push({
-      id: item.id,
-      name: item.name,
-      before: item.image,
-      after: url,
-      query,
-      ok: true,
-    });
 
-    if (apply && db) {
-      await db.collection(COLLECTION).doc(item.id).update({ image: url });
-      console.log("  → Firestore updated");
-    }
+    // Checkpoint after every item so long runs survive interruption.
+    writeReport(apply, results);
   }
 
-  const updated = results.filter((r) => r.ok);
-  const missingLines = [
-    `# Missing images — ${new Date().toISOString()}`,
-    `# ${failed.length} item(s) Promas could not resolve`,
-    ...failed.map((f) => `${f.id}\t${f.name}\t${f.image || "(empty)"}`),
-    "",
-  ];
-  writeFileSync(MISSING_LOG, missingLines.join("\n"), "utf8");
-  writeFileSync(REPORT_LOG, JSON.stringify({ apply, results }, null, 2), "utf8");
-
-  console.log("\n======== REPORT ========");
-  console.log(`Successfully matched: ${updated.length}`);
-  console.log(`Failed (logged):      ${failed.length} → ${MISSING_LOG}`);
-  console.log(`Wrote:                ${apply ? "Firestore updates applied" : "dry-run only (no writes)"}`);
-  console.log("\nSample before/after (up to 3):");
-  for (const sample of updated.slice(0, 3)) {
-    console.log(`- ${sample.name}`);
-    console.log(`    before: ${sample.before || "(empty)"}`);
-    console.log(`    after:  ${sample.after}`);
-  }
-  if (updated.length === 0) {
-    console.log("(no successful matches in this run)");
-  }
+  printReport(apply, results);
 }
 
 main().catch((err) => {
