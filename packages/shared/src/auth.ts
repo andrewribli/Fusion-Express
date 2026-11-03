@@ -1,14 +1,9 @@
-import {
-  EmailAuthProvider,
-  createUserWithEmailAndPassword,
-  reauthenticateWithCredential,
-  sendPasswordResetEmail,
-  signInAnonymously,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  updatePassword,
-  type User,
-} from "firebase/auth";
+import type { User } from "firebase/auth";
+
+function authMod() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require("firebase/auth") as typeof import("firebase/auth");
+}
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getAuthClient, getDb, isFirebaseConfigured } from "./firebase";
 import { collectionName } from "./app-env";
@@ -111,7 +106,7 @@ export async function ensureGuestSession(): Promise<{
   }
 
   try {
-    const cred = await signInAnonymously(getAuthClient());
+    const cred = await authMod().signInAnonymously(getAuthClient());
     return { uid: cred.user.uid, email: cred.user.email ?? undefined };
   } catch {
     const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
@@ -216,7 +211,7 @@ export async function signUpWithSyntheticEmail(
   if (!normalized.endsWith(`@${EMAIL_DOMAIN}`)) {
     throw new Error("Invalid account email");
   }
-  const cred = await createUserWithEmailAndPassword(
+  const cred = await authMod().createUserWithEmailAndPassword(
     getAuthClient(),
     normalized,
     password,
@@ -262,7 +257,7 @@ export async function ensureGuestAuthForPhone(phone: string): Promise<{
       };
     }
     if (storedPw) {
-      await signInWithEmailAndPassword(getAuthClient(), existing.email, storedPw);
+      await authMod().signInWithEmailAndPassword(getAuthClient(), existing.email, storedPw);
       return {
         uid: existing.uid,
         email: existing.email,
@@ -321,9 +316,9 @@ export async function setPasswordFromGuestTemp(
       "Open this on the same device you ordered from, or use Forgot password on the login page.",
     );
   }
-  const credential = EmailAuthProvider.credential(user.email, temp);
-  await reauthenticateWithCredential(user, credential);
-  await updatePassword(user, newPassword);
+  const credential = authMod().EmailAuthProvider.credential(user.email, temp);
+  await authMod().reauthenticateWithCredential(user, credential);
+  await authMod().updatePassword(user, newPassword);
   clearGuestTempPassword(phone);
 }
 
@@ -369,7 +364,7 @@ export async function signUpWithEmail(
   }
   const emailErr = validateAnyCampusEmail(email);
   if (emailErr) throw new Error(emailErr);
-  const cred = await createUserWithEmailAndPassword(
+  const cred = await authMod().createUserWithEmailAndPassword(
     getAuthClient(),
     email.trim().toLowerCase(),
     password,
@@ -392,7 +387,7 @@ export async function signInWithEmail(
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured");
   }
-  const cred = await signInWithEmailAndPassword(
+  const cred = await authMod().signInWithEmailAndPassword(
     getAuthClient(),
     email.trim().toLowerCase(),
     password,
@@ -440,7 +435,7 @@ export async function sendPasswordReset(identifier: string): Promise<void> {
   }
   // Skip continueUrl — unlisted origins (including Vercel hosts not yet in the
   // live Auth allowlist) make Firebase refuse the reset for real accounts.
-  await sendPasswordResetEmail(getAuthClient(), resolved);
+  await authMod().sendPasswordResetEmail(getAuthClient(), resolved);
 }
 
 export async function changePassword(
@@ -456,12 +451,12 @@ export async function changePassword(
   }
   const newErr = validatePassword(newPassword);
   if (newErr) throw new Error(newErr);
-  const credential = EmailAuthProvider.credential(user.email, currentPassword);
-  await reauthenticateWithCredential(user, credential);
-  await updatePassword(user, newPassword);
+  const credential = authMod().EmailAuthProvider.credential(user.email, currentPassword);
+  await authMod().reauthenticateWithCredential(user, credential);
+  await authMod().updatePassword(user, newPassword);
 }
 
 export async function signOutUser(): Promise<void> {
   if (!isFirebaseConfigured()) return;
-  await firebaseSignOut(getAuthClient());
+  await authMod().signOut(getAuthClient());
 }

@@ -1,5 +1,5 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
@@ -61,6 +61,10 @@ export function getFirebaseApp(): FirebaseApp {
 
 export function getAuthClient(): Auth {
   if (!auth) {
+    // Lazy: firebase/auth evaluates IndexedDB/window at import time and can
+    // abort a React Native launch if loaded before initializeAuth().
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getAuth } = require("firebase/auth") as typeof import("firebase/auth");
     auth = getAuth(getFirebaseApp());
   }
   return auth;

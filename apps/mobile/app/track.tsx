@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   fetchOrder,
@@ -8,9 +8,11 @@ import {
   getStepIndex,
 } from "@fusion-express/shared";
 import type { Order } from "@fusion-express/shared/types";
+import type { RootStackParamList } from "../src/navigation";
 
 export default function TrackScreen() {
-  const { orderId } = useLocalSearchParams<{ orderId?: string }>();
+  const route = useRoute<RouteProp<RootStackParamList, "Track">>();
+  const orderId = route.params?.orderId;
   const [order, setOrder] = useState<Order | null>(null);
   const [missing, setMissing] = useState(false);
 

@@ -1,0 +1,34 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development"
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview"
+    },
+    "production": {
+      "autoIncrement": true,
+      "environment": "production",
+      "ios": {
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "env": {
+        "EXPO_PUBLIC_WEB_ORIGIN": "https://www.gracerun.fit"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6819612841"
+      }
+    }
+  }
+}

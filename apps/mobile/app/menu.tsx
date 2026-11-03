@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Image,
   Pressable,
@@ -14,8 +15,11 @@ import {
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import type { MenuItem } from "@fusion-express/shared/types";
 import { useCart } from "../src/cart";
+import type { RootStackParamList } from "../src/navigation";
 
 export default function MenuScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { addItem, itemCount } = useCart();
   const [items, setItems] = useState<MenuItem[]>([]);
 
@@ -25,13 +29,14 @@ export default function MenuScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <Link href="/cart" asChild>
-        <Pressable className="mx-4 mt-3 rounded-xl bg-fusion py-3">
-          <Text className="text-center font-semibold text-white">
-            Cart ({itemCount})
-          </Text>
-        </Pressable>
-      </Link>
+      <Pressable
+        className="mx-4 mt-3 rounded-xl bg-fusion py-3"
+        onPress={() => navigation.navigate("Cart")}
+      >
+        <Text className="text-center font-semibold text-white">
+          Cart ({itemCount})
+        </Text>
+      </Pressable>
       <ScrollView className="mt-3 px-4">
         {items.map((item) => {
           const uri = resolveProductImageUrl(item.image);

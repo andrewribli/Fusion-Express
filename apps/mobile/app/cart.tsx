@@ -1,4 +1,5 @@
-import { Link } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   calculateDeliveryFee,
@@ -6,8 +7,11 @@ import {
 } from "@fusion-express/shared/delivery";
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import { useCart } from "../src/cart";
+import type { RootStackParamList } from "../src/navigation";
 
 export default function CartScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { items, subtotal, setQuantity } = useCart();
   const weightKg = cartTotalWeightKg(items);
   const fee = calculateDeliveryFee({ weightKg, college: "" });
@@ -55,13 +59,14 @@ export default function CartScreen() {
       </View>
 
       {items.length > 0 ? (
-        <Link href="/checkout" asChild>
-          <Pressable className="mt-6 rounded-2xl bg-fusion py-4">
-            <Text className="text-center text-lg font-semibold text-white">
-              Checkout
-            </Text>
-          </Pressable>
-        </Link>
+        <Pressable
+          className="mt-6 rounded-2xl bg-fusion py-4"
+          onPress={() => navigation.navigate("Checkout")}
+        >
+          <Text className="text-center text-lg font-semibold text-white">
+            Checkout
+          </Text>
+        </Pressable>
       ) : null}
     </ScrollView>
   );

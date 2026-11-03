@@ -1,0 +1,32 @@
+# EAS uses this file instead of .gitignore when present.
+# Keep upload to app source + workspace packages (see repo-root .easignore).
+
+# VCS / install artifacts (the usual 800MB+ culprits)
+.git
+.git/
+**/.git
+node_modules
+**/node_modules
+.expo
+.expo/
+dist
+*.tsbuildinfo
+
+# Generated native trees (prebuild recreates these)
+/android
+/ios
+
+# Secrets and local tooling
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage
+.turbo
+.vercel
+*.pem
+*.log
+
+# Local EAS output
+eas-archive/
+.expo-export-ios/

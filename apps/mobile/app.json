@@ -2,22 +2,60 @@
   "expo": {
     "name": "GraceRun",
     "slug": "fusion-express",
+    "owner": "gracerun",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "fusionexpress",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
     "plugins": [
-      "expo-router",
       [
         "expo-image-picker",
         {
           "photosPermission": "GraceRun uses photos for delivery proof."
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": false
+          },
+          "android": {
+            "newArchEnabled": false
+          }
+        }
       ]
     ],
-    "experiments": {
-      "typedRoutes": true
+    "extra": {
+      "eas": {
+        "projectId": "bcb10fe2-e2f2-40e6-a6dd-0c6337441e8a"
+      }
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.gracerun.fusionexpress",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "GraceRun uses photos for delivery proof.",
+        "NSCameraUsageDescription": "GraceRun uses the camera for delivery proof."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.gracerun.fusionexpress"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }

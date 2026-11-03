@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { router } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import {
   calculateDeliveryFee,
@@ -17,8 +18,11 @@ import { getEstimatedDeliveryTime } from "@fusion-express/shared";
 import { getUnitPrice, lineTotal } from "@fusion-express/shared";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
+import type { RootStackParamList } from "../src/navigation";
 
 export default function CheckoutScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { items, subtotal, sessionId, clearCart } = useCart();
   const { profile, user, ensureCheckoutAuth } = useAuth();
   const initialCollege: CuhkCollege =
@@ -92,7 +96,7 @@ export default function CheckoutScreen() {
         estimatedDeliveryAt: getEstimatedDeliveryTime(),
       });
       clearCart();
-      router.replace(`/track?orderId=${orderId}`);
+      navigation.replace("Track", { orderId });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not place order");
     } finally {

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "expo-router";
+import {
+  useNavigation,
+  type CompositeNavigationProp,
+} from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   fetchOrdersByCustomer,
@@ -7,8 +12,15 @@ import {
 } from "@fusion-express/shared";
 import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../../src/auth";
+import type { RootStackParamList, TabsParamList } from "../../src/navigation";
+
+type OrdersNav = CompositeNavigationProp<
+  BottomTabNavigationProp<TabsParamList, "Orders">,
+  NativeStackNavigationProp<RootStackParamList>
+>;
 
 export default function OrdersScreen() {
+  const navigation = useNavigation<OrdersNav>();
   const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
@@ -71,14 +83,16 @@ export default function OrdersScreen() {
         <Text className="text-gray-500">No orders for this account yet.</Text>
       ) : (
         orders.map((order) => (
-          <Link key={order.id} href={`/track?orderId=${order.id}`} asChild>
-            <Pressable className="mb-3 rounded-2xl border border-gray-200 p-4">
-              <Text className="font-bold text-fusion">{order.id}</Text>
-              <Text className="text-sm text-gray-600">
-                {ORDER_STATUS_LABELS[order.status]} · ${order.total}
-              </Text>
-            </Pressable>
-          </Link>
+          <Pressable
+            key={order.id}
+            className="mb-3 rounded-2xl border border-gray-200 p-4"
+            onPress={() => navigation.navigate("Track", { orderId: order.id })}
+          >
+            <Text className="font-bold text-fusion">{order.id}</Text>
+            <Text className="text-sm text-gray-600">
+              {ORDER_STATUS_LABELS[order.status]} · ${order.total}
+            </Text>
+          </Pressable>
         ))
       )}
     </ScrollView>

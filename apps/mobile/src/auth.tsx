@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
+import type { User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import {
   ensureGuestSession,
@@ -123,12 +123,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refreshProfile = useCallback(async () => {
-    const current = getAuthClient().currentUser;
-    if (!current) {
+    try {
+      if (!isFirebaseConfigured()) {
+        setProfile(null);
+        return;
+      }
+      const current = getAuthClient().currentUser;
+      if (!current) {
+        setProfile(null);
+        return;
+      }
+      setProfile(await loadProfile(current.uid, current.email));
+    } catch {
       setProfile(null);
-      return;
     }
-    setProfile(await loadProfile(current.uid, current.email));
   }, []);
 
   useEffect(() => {
@@ -137,19 +145,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    const unsub = onAuthStateChanged(getAuthClient(), (next) => {
-      setUser(next);
-      if (!next) {
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
-      void loadProfile(next.uid, next.email).then((p) => {
-        setProfile(p);
-        setLoading(false);
+    let unsub: (() => void) | undefined;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { onAuthStateChanged } = require("firebase/auth") as typeof import("firebase/auth");
+      unsub = onAuthStateChanged(getAuthClient(), (next) => {
+        setUser(next);
+        if (!next) {
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
+        void loadProfile(next.uid, next.email)
+          .then((p) => {
+            setProfile(p);
+            setLoading(false);
+          })
+          .catch(() => {
+            setProfile(null);
+            setLoading(false);
+          });
       });
-    });
-    return unsub;
+    } catch (err) {
+      console.warn("[auth] onAuthStateChanged failed", err);
+      setLoading(false);
+    }
+    return () => {
+      try {
+        unsub?.();
+      } catch {
+        /* ignore */
+      }
+    };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -162,6 +189,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const ensureCheckoutAuth = useCallback(async () => {
+    if (!isFirebaseConfigured()) {
+      throw new Error("Firebase is not configured on this build.");
+    }
     const current = getAuthClient().currentUser;
     if (current && !current.isAnonymous) {
       return {
