@@ -5,8 +5,18 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#ED1C24",
+        tabBarInactiveTintColor: "#9ca3af",
         headerTintColor: "#ED1C24",
-        tabBarLabelStyle: { fontSize: 12 },
+        headerTitleStyle: { fontFamily: "Montserrat_600SemiBold" },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontFamily: "Montserrat_500Medium",
+        },
+        tabBarStyle: {
+          backgroundColor: "#ffffff",
+          borderTopColor: "#f3f4f6",
+        },
+        headerStyle: { backgroundColor: "#ffffff" },
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Shop Now" }} />
