@@ -110,8 +110,8 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 pt-4">
-      <Text className="font-semibold">Your name</Text>
+    <ScrollView className="flex-1 bg-page px-4 pt-4">
+      <Text className="font-sans-semibold text-ink">Your name</Text>
       <TextInput
         className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
         value={customerName}

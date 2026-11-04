@@ -1,68 +1,90 @@
 import { useEffect, useState } from "react";
 import { Link } from "expo-router";
 import {
-  Image,
+  FlatList,
   Pressable,
-  ScrollView,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
-import {
-  loadMenuItems,
-  resolveProductImageUrl,
-} from "@fusion-express/shared/products";
+import { loadMenuItems } from "@fusion-express/shared/products";
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import type { MenuItem } from "@fusion-express/shared/types";
 import { useCart } from "../src/cart";
+import { ProductImage } from "../src/ProductImage";
+
+const GAP = 12;
+const H_PAD = 16;
 
 export default function MenuScreen() {
   const { addItem, itemCount } = useCart();
   const [items, setItems] = useState<MenuItem[]>([]);
+  const { width } = useWindowDimensions();
+  const cardWidth = (width - H_PAD * 2 - GAP) / 2;
 
   useEffect(() => {
     void loadMenuItems().then(setItems);
   }, []);
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-page">
       <Link href="/cart" asChild>
-        <Pressable className="mx-4 mt-3 rounded-xl bg-fusion py-3">
-          <Text className="text-center font-semibold text-white">
+        <Pressable className="mx-4 mt-3 rounded-2xl bg-fusion py-3.5 shadow-sm">
+          <Text className="text-center font-sans-semibold text-base text-white">
             Cart ({itemCount})
           </Text>
         </Pressable>
       </Link>
-      <ScrollView className="mt-3 px-4">
-        {items.map((item) => {
-          const uri = resolveProductImageUrl(item.image);
-          return (
+
+      <FlatList
+        className="mt-3"
+        contentContainerStyle={{ paddingHorizontal: H_PAD, paddingBottom: 24 }}
+        data={items}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={{ gap: GAP }}
+        ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
+        renderItem={({ item }) => (
+          <View
+            className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+            style={{ width: cardWidth }}
+          >
             <View
-              key={item.id}
-              className="mb-3 flex-row items-center rounded-2xl border border-gray-100 p-3"
+              className="items-center justify-center bg-gray-50"
+              style={{ width: cardWidth, height: cardWidth }}
             >
-              {uri ? (
-                <Image
-                  source={{ uri }}
-                  className="h-16 w-16 rounded-xl bg-gray-50"
-                />
-              ) : (
-                <View className="h-16 w-16 rounded-xl bg-gray-100" />
-              )}
-              <View className="ml-3 flex-1">
-                <Text className="font-semibold">{item.name}</Text>
-                <Text className="text-sm text-fusion">{formatMenuPrice(item)}</Text>
-                <Text className="text-xs text-gray-400">{item.weightKg} kg</Text>
-              </View>
+              <ProductImage image={item.image} size={cardWidth - 16} />
+            </View>
+            <View className="flex-1 p-2.5">
+              <Text
+                className="font-sans-semibold text-xs leading-snug text-ink"
+                numberOfLines={2}
+              >
+                {item.name}
+              </Text>
+              <Text className="mt-0.5 font-sans text-xs text-muted">
+                per {item.unit}
+              </Text>
+              <Text className="mt-1 font-sans-bold text-sm text-fusion">
+                {formatMenuPrice(item)}
+              </Text>
               <Pressable
-                className="rounded-xl bg-fusion px-3 py-2"
+                className="mt-2 rounded-xl bg-fusion py-2"
                 onPress={() => addItem(item)}
               >
-                <Text className="font-semibold text-white">Add</Text>
+                <Text className="text-center font-sans-semibold text-sm text-white">
+                  Add
+                </Text>
               </Pressable>
             </View>
-          );
-        })}
-      </ScrollView>
+          </View>
+        )}
+        ListEmptyComponent={
+          <Text className="mt-8 text-center font-sans text-muted">
+            Loading menu…
+          </Text>
+        }
+      />
     </View>
   );
 }

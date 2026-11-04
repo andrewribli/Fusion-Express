@@ -30,15 +30,17 @@ export default function TrackScreen() {
   const step = order ? getStepIndex(order.status) : 0;
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 pt-4">
+    <ScrollView className="flex-1 bg-page px-4 pt-4">
       {!orderId ? (
-        <Text>No order id.</Text>
+        <Text className="font-sans text-muted">No order id.</Text>
       ) : missing ? (
-        <Text>Order {orderId} not found.</Text>
+        <Text className="font-sans text-muted">
+          Order {orderId} not found.
+        </Text>
       ) : order ? (
-        <>
-          <Text className="text-2xl font-bold text-fusion">{order.id}</Text>
-          <Text className="mt-1 text-gray-600">
+        <View className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+          <Text className="font-sans-bold text-2xl text-fusion">{order.id}</Text>
+          <Text className="mt-1 font-sans text-gray-600">
             {ORDER_STATUS_LABELS[order.status]}
           </Text>
           <View className="mt-6">
@@ -50,19 +52,28 @@ export default function TrackScreen() {
                   }`}
                 />
                 <Text
-                  className={index <= step ? "font-semibold" : "text-gray-400"}
+                  className={
+                    index <= step
+                      ? "font-sans-semibold text-ink"
+                      : "font-sans text-muted"
+                  }
                 >
                   {item.label}
                 </Text>
               </View>
             ))}
           </View>
-          <Pressable className="mt-4 rounded-xl border border-gray-200 py-3" onPress={() => void load()}>
-            <Text className="text-center">Refresh</Text>
+          <Pressable
+            className="mt-4 rounded-xl border border-gray-200 py-3"
+            onPress={() => void load()}
+          >
+            <Text className="text-center font-sans-semibold text-ink">
+              Refresh
+            </Text>
           </Pressable>
-        </>
+        </View>
       ) : (
-        <Text>Loading…</Text>
+        <Text className="font-sans text-muted">Loading…</Text>
       )}
     </ScrollView>
   );
