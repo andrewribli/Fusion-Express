@@ -21,6 +21,7 @@ export function isGenericImageUrl(url?: string): boolean {
   return (
     u.includes("unsplash.com") ||
     u.includes("placehold.co") ||
+    u.includes("upload.wikimedia.org") ||
     u.includes("/images/aisles/") ||
     u.includes("aisle-dry") ||
     u.includes("aisle-refrigerated") ||

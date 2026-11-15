@@ -31,21 +31,29 @@ export async function POST(request: NextRequest) {
   try {
     requireOtpSecret();
 
-    let body: { email?: string; code?: string; purpose?: string };
+    let body: {
+      email?: string;
+      code?: string;
+      purpose?: string;
+      otpTicket?: string;
+    };
     try {
       body = (await request.json()) as {
         email?: string;
         code?: string;
         purpose?: string;
+        otpTicket?: string;
       };
     } catch {
       return jsonError("Invalid request", 400);
     }
 
     const email = normalizeEmail(body.email ?? "");
-    const code = (body.code ?? "").trim();
+    const code = (body.code ?? "").replace(/\D/g, "").slice(0, 6);
     const purpose: OtpPurpose =
       body.purpose === "reset" ? "reset" : "signup";
+    const otpTicket =
+      typeof body.otpTicket === "string" ? body.otpTicket.trim() : "";
 
     if (!isAnyCampusEmail(email) || !detectCampusFromEmail(email)) {
       return jsonError("Please use your CUHK or CityU email", 400);
@@ -77,7 +85,9 @@ export async function POST(request: NextRequest) {
     }
 
     const cookie = request.cookies.get(OTP_COOKIE)?.value;
-    if (!verifyOtpCookie(cookie, email, code, purpose)) {
+    const ticketOk = verifyOtpCookie(otpTicket || undefined, email, code, purpose);
+    const cookieOk = verifyOtpCookie(cookie, email, code, purpose);
+    if (!ticketOk && !cookieOk) {
       const fails = await recordOtpFailure(email, purpose);
       if (fails >= OTP_MAX_FAILURES) {
         const response = jsonError(

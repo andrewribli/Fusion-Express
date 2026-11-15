@@ -12,13 +12,25 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#ED1C24"
     },
     "plugins": [
+      "expo-dev-client",
+      "expo-apple-authentication",
       [
         "expo-image-picker",
         {
-          "photosPermission": "GraceRun uses photos for delivery proof."
+          "photosPermission": "GraceRun needs access to your photos to send images in chat, and for receipts and delivery proof.",
+          "cameraPermission": "GraceRun needs access to your camera to take photos in chat, and for receipts and delivery proof."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#ED1C24",
+          "sounds": [],
+          "defaultChannel": "orders"
         }
       ],
       [
@@ -31,7 +43,8 @@
             "newArchEnabled": false
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "extra": {
       "eas": {
@@ -41,16 +54,26 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.gracerun.fusionexpress",
+      "usesAppleSignIn": true,
+      "entitlements": {
+        "aps-environment": "production",
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
+      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSPhotoLibraryUsageDescription": "GraceRun uses photos for delivery proof.",
-        "NSCameraUsageDescription": "GraceRun uses the camera for delivery proof."
+        "NSPhotoLibraryUsageDescription": "GraceRun needs access to your photos to send images in chat, and for receipts and delivery proof.",
+        "NSCameraUsageDescription": "GraceRun needs access to your camera to take photos in chat, and for receipts and delivery proof.",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#ED1C24"
       },
       "package": "com.gracerun.fusionexpress"
     },

@@ -215,19 +215,19 @@ export async function POST(request: Request) {
 
       await resetOtpFailures(email, purpose);
 
+      // Cookie for same-origin web; otpTicket for native clients that cannot
+      // persist Set-Cookie from the API host.
+      const otpTicket = issueOtpCookie(email, code, purpose);
       const response = NextResponse.json({
         ok: true,
         purpose,
+        otpTicket,
         // Never return a cookie for reset when we did not actually issue a code
         // for a missing account — handled below for the no-send path.
         devCode:
           apiKey || process.env.NODE_ENV === "production" ? undefined : code,
       });
-      response.cookies.set(
-        OTP_COOKIE,
-        issueOtpCookie(email, code, purpose),
-        otpCookieOptions(),
-      );
+      response.cookies.set(OTP_COOKIE, otpTicket, otpCookieOptions());
       return response;
     }
 

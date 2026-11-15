@@ -37,6 +37,7 @@ export function CampusEmailOtp({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [devCode, setDevCode] = useState("");
+  const [otpTicket, setOtpTicket] = useState("");
 
   async function requestCode() {
     setError("");
@@ -52,7 +53,12 @@ export function CampusEmailOtp({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose: "signup", campus }),
       });
-      let data: { error?: string; message?: string; devCode?: string } = {};
+      let data: {
+        error?: string;
+        message?: string;
+        devCode?: string;
+        otpTicket?: string;
+      } = {};
       try {
         data = (await res.json()) as typeof data;
       } catch {
@@ -70,6 +76,8 @@ export function CampusEmailOtp({
         return;
       }
       setSent(true);
+      setCode("");
+      setOtpTicket(data.otpTicket ?? "");
       setDevCode(data.devCode ?? "");
     } catch {
       setError("Could not send code");
@@ -82,10 +90,16 @@ export function CampusEmailOtp({
     setError("");
     setLoading(true);
     try {
+      const digits = code.replace(/\D/g, "").slice(0, 6);
       const res = await fetch("/api/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code, purpose: "signup" }),
+        body: JSON.stringify({
+          email,
+          code: digits,
+          purpose: "signup",
+          otpTicket: otpTicket || undefined,
+        }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {

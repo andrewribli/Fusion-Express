@@ -1,9 +1,11 @@
+import type { NavigatorScreenParams } from "@react-navigation/native";
+
 export type RootStackParamList = {
-  Tabs: undefined;
+  Tabs: NavigatorScreenParams<TabsParamList> | undefined;
   Menu: undefined;
   Cart: undefined;
   Checkout: undefined;
-  Track: { orderId?: string };
+  Track: { orderId?: string; focusChat?: boolean };
 };
 
 export type TabsParamList = {

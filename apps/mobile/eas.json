@@ -6,8 +6,15 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "environment": "development"
+      "distribution": "store",
+      "autoIncrement": true,
+      "environment": "production",
+      "ios": {
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "env": {
+        "EXPO_PUBLIC_WEB_ORIGIN": "https://www.gracerun.fit"
+      }
     },
     "preview": {
       "distribution": "internal",

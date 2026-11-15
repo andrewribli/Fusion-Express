@@ -1,0 +1,172 @@
+import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
+import { FOOD_HERO } from "@/data/canteen/food-images";
+
+const img = "https://placehold.co/200x200/png";
+
+/**
+ * Ebeneezer's Kebabs & Pizzeria @ CUHK (Li Wai Chun Building G05).
+ * Core kebabs / plates from OpenRice campus menu; prices HKD.
+ */
+export const EBENEZERS_MENU: SimpleMenuItem[] = [
+  {
+    id: "chicken-tikka-kebab",
+    name: "Chicken Tikka Kebab",
+    description:
+      "Tandoori boneless chicken in Lebanese pita with salad and dressings.",
+    price: 43,
+    category: "mains",
+    image: FOOD_HERO["chicken-tikka-kebab"],
+    signature: true,
+  },
+  {
+    id: "donar-lamb-kebab",
+    name: "Donar Lamb Kebab",
+    description: "Roasted tender lamb in Lebanese pita with salad.",
+    price: 43,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "gyros-chicken-kebab",
+    name: "Gyros Chicken Kebab",
+    description: "Roasted chicken in Lebanese pita with salad.",
+    price: 41,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "falafel-kebab",
+    name: "Falafel Kebab (Veg.)",
+    description: "Deep-fried Lebanese patties in pita with salad.",
+    price: 38,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "kofta-kebab",
+    name: "Kofta Kebab",
+    description: "Meatball kebab in Lebanese pita with salad.",
+    price: 41,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "haloumi-cheese-kebab",
+    name: "Haloumi Cheese Kebab (Veg)",
+    description: "Haloumi in Lebanese pita with salad.",
+    price: 39,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "chicken-shish-kebab",
+    name: "Chicken Shish Kebab",
+    description: "Skewered grilled chicken cubes in pita with salad.",
+    price: 41,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "fish-kebab",
+    name: "Fish Kebab",
+    description: "Herb-spiced fish fillet in pita with salad.",
+    price: 44,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "chicken-tikka-salad",
+    name: "Chicken Tikka Salad",
+    description: "Garden salad topped with tandoori chicken tikka.",
+    price: 38,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "chicken-tikka-rice",
+    name: "Chicken Tikka with Rice",
+    description: "Tandoori chicken tikka served with rice and dressings.",
+    price: 38.5,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "chicken-curry-rice",
+    name: "Chicken Curry w/ Rice",
+    price: 42,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "vegetable-curry-rice",
+    name: "Vegetable Curry w/ Rice (Veg)",
+    price: 38,
+    category: "mains",
+    image: img,
+  },
+  {
+    id: "margherita-pizza-slice",
+    name: "Margherita Pizza (Slice)",
+    description: "Can upgrade to whole 12\".",
+    price: 28,
+    category: "snacks",
+    image: img,
+  },
+  {
+    id: "chicken-tikka-pizza-slice",
+    name: "Chicken Tikka Pizza (Slice)",
+    description: "Can upgrade to whole 12\".",
+    price: 32,
+    category: "snacks",
+    image: img,
+  },
+  {
+    id: "samosas",
+    name: "Samosas (Veg) (2pcs)",
+    price: 18,
+    category: "snacks",
+    image: img,
+  },
+  {
+    id: "falafels-side",
+    name: "Falafels (Veg) (3pcs)",
+    price: 18,
+    category: "snacks",
+    image: img,
+  },
+  {
+    id: "chips",
+    name: "Chips (Veg)",
+    price: 15,
+    category: "snacks",
+    image: img,
+  },
+  {
+    id: "hummus-pita",
+    name: "Hummus with Pita (Veg)",
+    price: 23,
+    category: "snacks",
+    image: img,
+  },
+  {
+    id: "masala-tea",
+    name: "Masala Tea",
+    price: 10,
+    category: "drinks",
+    image: img,
+  },
+  {
+    id: "hot-latte",
+    name: "Hot Latte",
+    price: 15,
+    category: "drinks",
+    image: img,
+  },
+  {
+    id: "hot-cappuccino",
+    name: "Hot Cappuccino",
+    price: 15,
+    category: "drinks",
+    image: img,
+  },
+];

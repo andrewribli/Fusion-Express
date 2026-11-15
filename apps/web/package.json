@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed-menu.ts",
-    "test-email": "tsx scripts/send-test-email.ts"
+    "test-email": "tsx scripts/send-test-email.ts",
+    "email:inactive": "tsx scripts/email-inactive-users.ts"
   },
   "dependencies": {
     "@fusion-express/shared": "*",

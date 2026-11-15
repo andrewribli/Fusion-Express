@@ -27,34 +27,64 @@ function isConfigured(): boolean {
   );
 }
 
-function initAuth(app: FirebaseApp): void {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const authMod = require("firebase/auth") as {
-    initializeAuth?: (
-      firebaseApp: FirebaseApp,
-      deps: { persistence: unknown },
-    ) => unknown;
-    getAuth?: (firebaseApp: FirebaseApp) => unknown;
-    getReactNativePersistence?: (storage: typeof AsyncStorage) => unknown;
-  };
+type AuthModule = {
+  initializeAuth?: (
+    firebaseApp: FirebaseApp,
+    deps: { persistence: unknown },
+  ) => unknown;
+  getAuth?: (firebaseApp: FirebaseApp) => unknown;
+  getReactNativePersistence?: (storage: typeof AsyncStorage) => unknown;
+};
 
+/**
+ * `firebase/auth` resolves to the browser bundle, which has no
+ * getReactNativePersistence. The RN entry persists the session in AsyncStorage.
+ */
+function loadAuthModule(): AuthModule {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("@firebase/auth/dist/rn/index.js") as AuthModule;
+  } catch {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("firebase/auth") as AuthModule;
+  }
+}
+
+function publishAuth(authMod: AuthModule, instance: unknown): void {
+  const g = globalThis as {
+    __fusionAuth?: unknown;
+    __fusionAuthModule?: AuthModule;
+  };
+  g.__fusionAuthModule = authMod;
+  if (instance) g.__fusionAuth = instance;
+}
+
+function initAuth(app: FirebaseApp): void {
+  const authMod = loadAuthModule();
   const makePersistence = authMod.getReactNativePersistence;
   if (typeof makePersistence === "function" && authMod.initializeAuth) {
     try {
-      authMod.initializeAuth(app, {
+      const instance = authMod.initializeAuth(app, {
         persistence: makePersistence(AsyncStorage),
       });
+      publishAuth(authMod, instance);
       return;
-    } catch {
-      // Already initialized (Fast Refresh).
+    } catch (err) {
+      // Already initialized (Fast Refresh) — reuse that instance.
+      console.warn("[firebase-init] initializeAuth reused", err);
     }
+  } else {
+    console.warn(
+      "[firebase-init] React Native persistence unavailable — session will not survive restart",
+    );
   }
 
-  authMod.getAuth?.(app);
+  publishAuth(authMod, authMod.getAuth?.(app));
 }
 
 let didInit = false;
 
+/** Runs at import time so Auth exists before App (and getAuth) load. */
 export function initMobileFirebaseAuth(): void {
   if (didInit) return;
   didInit = true;
@@ -71,3 +101,5 @@ export function initMobileFirebaseAuth(): void {
     console.warn("[firebase-init] Auth init failed", err);
   }
 }
+
+initMobileFirebaseAuth();

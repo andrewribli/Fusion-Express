@@ -6,6 +6,13 @@ module.exports = {
     extend: {
       colors: {
         fusion: "#ED1C24",
+        "fusion-red": "#ED1C24",
+        orange: "#ff6a00",
+        page: "#F5F5F5",
+        ink: "#111111",
+      },
+      borderRadius: {
+        card: "16px",
       },
     },
   },

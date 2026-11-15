@@ -1,15 +1,20 @@
 import type { CampusId } from "./campus";
 
-export const BASE_DELIVERY_FEE = 10;
+/** Halved vs original $10 / $3/kg / zone $0–$5–$8 — rounded to whole HKD. */
+export const BASE_DELIVERY_FEE = 5;
 export const WEIGHT_INCLUDED_KG = 2;
-export const WEIGHT_SURCHARGE_PER_KG = 3;
+export const WEIGHT_SURCHARGE_PER_KG = 2;
+
+/** Runner may add this when the bag is over 5 kg. */
+export const HEAVY_BAG_THRESHOLD_KG = 5;
+export const HEAVY_BAG_SURCHARGE = 5;
 
 export type DeliveryZone = 1 | 2 | 3;
 
 export const ZONE_DISTANCE_SURCHARGE: Record<DeliveryZone, number> = {
   1: 0,
-  2: 5,
-  3: 8,
+  2: 3,
+  3: 4,
 };
 
 export const ZONE_LABELS: Record<DeliveryZone, string> = {
@@ -77,6 +82,11 @@ export interface DeliveryFeeBreakdown {
   zone: DeliveryZone;
   distanceSurcharge: number;
   deliveryFee: number;
+  heavyBagEligible: boolean;
+}
+
+function roundInt(n: number): number {
+  return Math.round(n);
 }
 
 function round2(n: number): number {
@@ -101,10 +111,13 @@ export function calculateDeliveryFee(input: {
 }): DeliveryFeeBreakdown {
   const weightKg = Math.max(0, round2(input.weightKg));
   const extraKg = Math.max(0, Math.ceil(weightKg - WEIGHT_INCLUDED_KG));
-  const weightSurcharge = extraKg * WEIGHT_SURCHARGE_PER_KG;
+  const weightSurcharge = roundInt(extraKg * WEIGHT_SURCHARGE_PER_KG);
   const campus = input.campus ?? "cuhk";
   const zone = getDeliveryZone(input.college, campus);
   const distanceSurcharge = ZONE_DISTANCE_SURCHARGE[zone];
+  const deliveryFee = roundInt(
+    BASE_DELIVERY_FEE + weightSurcharge + distanceSurcharge,
+  );
 
   return {
     baseFee: BASE_DELIVERY_FEE,
@@ -113,6 +126,17 @@ export function calculateDeliveryFee(input: {
     weightSurcharge,
     zone,
     distanceSurcharge,
-    deliveryFee: BASE_DELIVERY_FEE + weightSurcharge + distanceSurcharge,
+    deliveryFee,
+    heavyBagEligible: weightKg > HEAVY_BAG_THRESHOLD_KG,
   };
+}
+
+/** Delivery fee the customer pays (zone/weight + optional heavy bag). */
+export function orderDeliveryCharge(order: {
+  deliveryFee: number;
+  heavyBagSurcharge?: number;
+}): number {
+  return roundInt(
+    Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0),
+  );
 }

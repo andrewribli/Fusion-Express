@@ -17,6 +17,7 @@ import {
 } from "@/lib/constants";
 import { friendlyPlaceOrderError } from "@/lib/auth-errors";
 import { notifyOrderPlaced } from "@/lib/notify-email";
+import { notifyOrderEvent } from "@/lib/notify-push";
 import {
   canteenCollegeForRestaurant,
   restaurantIdFromOrderItems,
@@ -161,6 +162,7 @@ export function usePlaceOrder() {
           customerName,
           deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
+        notifyOrderEvent(orderId, "created");
 
         clearCart();
         const guestFlag = customer.isGuest ? "&guest=1" : "";

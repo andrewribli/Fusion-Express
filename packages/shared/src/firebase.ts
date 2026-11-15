@@ -60,6 +60,11 @@ export function getFirebaseApp(): FirebaseApp {
 }
 
 export function getAuthClient(): Auth {
+  const persisted = (globalThis as { __fusionAuth?: Auth }).__fusionAuth;
+  if (persisted) {
+    auth = persisted;
+    return auth;
+  }
   if (!auth) {
     // Lazy: firebase/auth evaluates IndexedDB/window at import time and can
     // abort a React Native launch if loaded before initializeAuth().

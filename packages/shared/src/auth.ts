@@ -1,6 +1,9 @@
 import type { User } from "firebase/auth";
 
 function authMod() {
+  const injected = (globalThis as { __fusionAuthModule?: typeof import("firebase/auth") })
+    .__fusionAuthModule;
+  if (injected) return injected;
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require("firebase/auth") as typeof import("firebase/auth");
 }

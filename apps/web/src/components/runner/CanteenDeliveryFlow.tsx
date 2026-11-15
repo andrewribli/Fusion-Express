@@ -129,7 +129,11 @@ export function CanteenDeliveryFlow({
               <p className="text-[#c4c4c4]">
                 Food{" "}
                 <span className="font-bold text-white">${order.subtotal}</span>
-                {" · "}You earn ${runnerEarningsForOrder(order.deliveryFee)}
+                {" · "}You earn $
+                {runnerEarningsForOrder(
+                  order.deliveryFee,
+                  order.heavyBagSurcharge,
+                )}
               </p>
               <Link
                 href={`/chat/${order.id}`}

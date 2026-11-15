@@ -17,6 +17,16 @@ function cell(value: string | undefined): string {
   return trimmed ? trimmed : "—";
 }
 
+/** Firestore `createdAt` (ISO string from parseUserDoc). Local calendar date. */
+function formatSignupDate(value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return "—";
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return "—";
+  // en-CA → YYYY-MM-DD in the viewer's local timezone
+  return d.toLocaleDateString("en-CA");
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -206,6 +216,7 @@ export default function AdminUsersPage() {
                         <th className="whitespace-nowrap py-2 pr-4">Full name</th>
                         <th className="whitespace-nowrap py-2 pr-4">Email</th>
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Signed up</th>
                         <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
                         <th className="whitespace-nowrap py-2 pr-4">Guest</th>
                         <th className="whitespace-nowrap py-2 pr-4">Message</th>
@@ -226,6 +237,9 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.phone)}
+                          </td>
+                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
+                            {formatSignupDate(u.createdAt)}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {u.isRunner ? "Yes" : "No"}

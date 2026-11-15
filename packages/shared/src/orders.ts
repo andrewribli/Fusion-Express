@@ -20,6 +20,7 @@ import {
   customerDeadlineOf,
   countsTowardCustomerOrderPlacementCap,
   isActiveCustomerOrderStatus,
+  canCustomerCancelOrder,
   isClaimableOrderStatus,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
@@ -45,10 +46,16 @@ import {
   updateDoc,
   where,
   Timestamp,
+  type DocumentData,
+  type UpdateData,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ORDERS_COLLECTION = collectionName("orders");
+
+function orderPatch(data: Record<string, unknown>): UpdateData<DocumentData> {
+  return omitUndefined(data) as UpdateData<DocumentData>;
+}
 const ORDER_HISTORY_KEY = isStagingApp()
   ? "fusion_order_history_test"
   : "fusion_order_history";
@@ -158,7 +165,11 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerNote: data.customerNote ? String(data.customerNote) : undefined,
     runnerNote: data.runnerNote ? String(data.runnerNote) : undefined,
     subtotal: Number(data.subtotal ?? 0),
-    deliveryFee: Number(data.deliveryFee ?? 10),
+    deliveryFee: Number(data.deliveryFee ?? 5),
+    heavyBagSurcharge:
+      data.heavyBagSurcharge != null
+        ? Number(data.heavyBagSurcharge)
+        : undefined,
     tip: data.tip != null ? Number(data.tip) : undefined,
     total: Number(data.total ?? 0),
     discountApplied:
@@ -194,6 +205,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
           ? Number(data.finalTotal)
           : undefined,
     receiptUrl: data.receiptUrl ? String(data.receiptUrl) : undefined,
+    fpsReceiptUrl: data.fpsReceiptUrl ? String(data.fpsReceiptUrl) : undefined,
     bankStatementUrl: data.bankStatementUrl
       ? String(data.bankStatementUrl)
       : undefined,
@@ -223,6 +235,8 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     estimatedDeliveryAt: data.estimatedDeliveryAt
       ? toDate(data.estimatedDeliveryAt)
       : undefined,
+    isScheduled: data.isScheduled === true,
+    scheduledFor: data.scheduledFor ? toDate(data.scheduledFor) : undefined,
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
@@ -335,6 +349,10 @@ export async function createOrder(
         estimatedDeliveryAt: order.estimatedDeliveryAt
           ? Timestamp.fromDate(order.estimatedDeliveryAt)
           : undefined,
+        scheduledFor: order.scheduledFor
+          ? Timestamp.fromDate(order.scheduledFor)
+          : undefined,
+        isScheduled: order.isScheduled === true ? true : undefined,
       } as Record<string, unknown>);
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
       return ref.id;
@@ -373,6 +391,36 @@ export async function fetchOrder(orderId: string): Promise<Order | null> {
   }
 
   return getMockOrderById(orderId) ?? null;
+}
+
+/** Live single-order updates (payment webhooks, runner status, etc.). */
+export function subscribeOrder(
+  orderId: string,
+  onOrder: (order: Order | null) => void,
+  onError?: (err: Error) => void,
+): () => void {
+  if (!orderId) {
+    onOrder(null);
+    return () => undefined;
+  }
+  if (!isFirebaseConfigured()) {
+    onOrder(getMockOrderById(orderId) ?? null);
+    return () => undefined;
+  }
+  return onSnapshot(
+    doc(getDb(), ORDERS_COLLECTION, orderId),
+    (snap) => {
+      if (!snap.exists()) {
+        onOrder(null);
+        return;
+      }
+      onOrder(parseOrder(snap.id, snap.data() as Record<string, unknown>));
+    },
+    (err) => {
+      console.error("subscribeOrder Firestore failed", err);
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    },
+  );
 }
 
 export class SelfPickupError extends Error {
@@ -573,6 +621,33 @@ export async function fetchInFlightCustomerOrders(
   const orders = await fetchOrdersByCustomer(customerId);
   return orders.filter((order) =>
     countsTowardCustomerOrderPlacementCap(order.status),
+  );
+}
+
+/** Live list of the signed-in runner's in-progress jobs. */
+export function subscribeRunnerOrders(
+  runnerUid: string,
+  onOrders: (orders: Order[]) => void,
+  onError?: (err: Error) => void,
+): () => void {
+  if (!runnerUid || !isFirebaseConfigured()) {
+    onOrders([]);
+    return () => undefined;
+  }
+  const q = query(
+    collection(getDb(), ORDERS_COLLECTION),
+    where("runnerUid", "==", runnerUid),
+    where("status", "in", ["accepted", "purchased", "assigned", "picked"]),
+  );
+  return onSnapshot(
+    q,
+    (snap) => {
+      onOrders(parseSnapshotDocs(snap.docs).sort(byNewestFirst));
+    },
+    (err) => {
+      console.error("subscribeRunnerOrders Firestore failed", err);
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    },
   );
 }
 
@@ -820,7 +895,7 @@ export async function updateOrderStatus(
       if (extras?.canteenCollege) updates.canteenCollege = extras.canteenCollege;
       if (extras?.subtotal != null) updates.subtotal = extras.subtotal;
       if (extras?.total != null) updates.total = extras.total;
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined(updates));
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), orderPatch(updates));
       return;
     } catch (err) {
       console.error("updateOrderStatus Firestore failed", err);
@@ -918,12 +993,9 @@ export async function cancelOrder(orderId: string, customerId: string): Promise<
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
   if (order.customerId !== customerId) throw new Error("Not authorized");
-  const canCancelPending = order.status === "pending";
-  const canCancelPriceIncrease =
-    order.priceAdjustmentStatus === "pending_customer" &&
-    (order.status === "accepted" || order.status === "pending");
-  if (!canCancelPending && !canCancelPriceIncrease) {
-    throw new Error("Order can only be cancelled before pickup");
+  // Allowed while pending/accepted (before purchased / out for delivery).
+  if (!canCustomerCancelOrder(order)) {
+    throw new Error("Order can only be cancelled before the runner picks up");
   }
   await updateOrderStatus(orderId, "cancelled");
 }
@@ -991,7 +1063,7 @@ async function patchOrder(
     try {
       await updateDoc(
         doc(getDb(), ORDERS_COLLECTION, orderId),
-        omitUndefined(withTime),
+        orderPatch(withTime),
       );
       return;
     } catch {
@@ -1273,6 +1345,7 @@ export async function saveRunnerDeliveryProgress(
     deliveryPhotoUrl?: string;
     finalTotal?: number;
     runnerVerified?: boolean;
+    heavyBagSurcharge?: number;
   },
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
@@ -1292,12 +1365,18 @@ export async function saveRunnerDeliveryProgress(
   if (progress.runnerVerified != null) {
     updates.runnerVerified = progress.runnerVerified;
   }
+  if (progress.heavyBagSurcharge != null) {
+    updates.heavyBagSurcharge = Math.max(
+      0,
+      Math.round(progress.heavyBagSurcharge),
+    );
+  }
   if (Object.keys(updates).length === 0) return;
 
   const now = new Date();
   if (isFirebaseConfigured()) {
     try {
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined({
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), orderPatch({
         ...updates,
         updatedAt: Timestamp.fromDate(now),
       }));
@@ -1323,6 +1402,12 @@ export async function saveRunnerDeliveryProgress(
   if (progress.runnerVerified != null) {
     order.runnerVerified = progress.runnerVerified;
   }
+  if (progress.heavyBagSurcharge != null) {
+    order.heavyBagSurcharge = Math.max(
+      0,
+      Math.round(progress.heavyBagSurcharge),
+    );
+  }
   order.updatedAt = now;
 }
 
@@ -1332,15 +1417,12 @@ export async function markDeliveredWithTotal(
     finalTotal: number;
     deliveryPhotoUrl?: string;
     receiptUrl?: string;
-    bankStatementUrl: string;
+    bankStatementUrl?: string;
     runnerVerified: boolean;
   },
 ): Promise<void> {
   if (!(opts.finalTotal > 0)) {
     throw new Error("Enter the Fusion receipt total.");
-  }
-  if (!opts.bankStatementUrl) {
-    throw new Error("Upload a bank statement screenshot.");
   }
   if (!opts.runnerVerified) {
     throw new Error("Confirm you wrote the customer's full name on the receipt.");
@@ -1509,7 +1591,7 @@ export async function syncOrderDeadlines(order: Order): Promise<DeadlineSyncResu
     try {
       await updateDoc(
         doc(getDb(), ORDERS_COLLECTION, order.id),
-        omitUndefined(updates),
+        orderPatch(updates),
       );
     } catch (err) {
       console.error("syncOrderDeadlines failed", err);

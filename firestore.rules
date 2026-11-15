@@ -156,9 +156,13 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
         'uid', 'fullName', 'email', 'phone', 'isGuest', 'createdAt', 'updatedAt',
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
-        'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
+        'role', 'photoURL', 'photoUrl', 'campus', 'displayName', 'isAnonymous',
+        'pseudonym', 'pseudonymChangedAt',
+        'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
-        'isRunner', 'runnerId'
+        'isRunner', 'runnerId',
+        'pushToken', 'expoPushToken', 'expoPushTokens',
+        'pushPlatform', 'pushUpdatedAt'
       ]);
     }
 
@@ -318,6 +322,14 @@ service cloud.firestore {
         )
       );
 
+      // Customer FPS screenshot URL after delivery.
+      allow update: if isOrderCustomer(resource.data)
+        && resource.data.status in ['delivered', 'runner_paid']
+        && changedKeys().hasOnly(['fpsReceiptUrl', 'updatedAt'])
+        && request.resource.data.fpsReceiptUrl is string
+        && request.resource.data.fpsReceiptUrl.size() > 8
+        && request.resource.data.fpsReceiptUrl.size() < 2000;
+
       // Claiming a paid (or legacy unpaid pending) order.
       allow update: if isRunner()
         && resource.data.status in ['pending', 'paid']
@@ -344,7 +356,8 @@ service cloud.firestore {
           'tillPricesSubmittedAt', 'runnerDeadline', 'customerDeadline',
           'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
           'adminMissedNotifiedAt',
-          'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege'
+          'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege',
+          'heavyBagSurcharge'
         ])
         && !(request.resource.data.status in ['pending', 'paid']);
 

@@ -14,9 +14,11 @@ import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
+import { CancelOrderConfirmModal } from "@/components/CancelOrderConfirmModal";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
 import { cancelOrder, fetchOrder, approvePriceIncrease } from "@/lib/orders";
 import {
+  canCustomerCancelOrder,
   customerAmountDue,
   groceryAmountDue,
   hasConfirmedGroceryTotal,
@@ -57,6 +59,7 @@ function TrackContent() {
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
   const [priceActing, setPriceActing] = useState(false);
   const [rated, setRated] = useState(false);
   const lastStatus = useRef<string | null>(null);
@@ -105,7 +108,7 @@ function TrackContent() {
     }
   }
 
-  async function handleCancel() {
+  async function handleCancelConfirmed() {
     if (!order || !user) return;
     setCancelling(true);
     try {
@@ -115,6 +118,7 @@ function TrackContent() {
         orderId: order.id,
         status: "cancelled",
       });
+      setConfirmCancelOpen(false);
       await lookup(order.id);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Could not cancel");
@@ -330,7 +334,7 @@ function TrackContent() {
                     <button
                       type="button"
                       disabled={cancelling}
-                      onClick={() => void handleCancel()}
+                      onClick={() => setConfirmCancelOpen(true)}
                       className="flex-1 rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
                     >
                       Cancel order
@@ -345,10 +349,13 @@ function TrackContent() {
               </div>
             )}
 
-            {order.status === "pending" && (
+            {user &&
+              getUserAccountId(user) === order.customerId &&
+              canCustomerCancelOrder(order) &&
+              order.priceAdjustmentStatus !== "pending_customer" && (
               <button
                 type="button"
-                onClick={handleCancel}
+                onClick={() => setConfirmCancelOpen(true)}
                 disabled={cancelling}
                 className="mt-3 w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600"
               >
@@ -422,6 +429,15 @@ function TrackContent() {
               You rated this delivery {order.runnerRating}★
             </p>
           )}
+
+          <CancelOrderConfirmModal
+            open={confirmCancelOpen}
+            loading={cancelling}
+            onDismiss={() => {
+              if (!cancelling) setConfirmCancelOpen(false);
+            }}
+            onConfirm={() => void handleCancelConfirmed()}
+          />
         </div>
       )}
     </main>

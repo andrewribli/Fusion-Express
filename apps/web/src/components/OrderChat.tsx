@@ -10,6 +10,7 @@ import {
   subscribeChatMessages,
 } from "@/lib/chat";
 import { fetchOrder } from "@/lib/orders";
+import { notifyOrderEvent } from "@/lib/notify-push";
 import type { ChatMessage, Order } from "@/lib/types";
 
 interface OrderChatProps {
@@ -71,6 +72,7 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
     setError("");
     try {
       await sendChatMessage(orderId, senderId, user!.fullName, text);
+      notifyOrderEvent(orderId, "chat", text);
       setText("");
     } catch {
       setError("Failed to send message.");

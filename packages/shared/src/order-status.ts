@@ -107,8 +107,12 @@ export function formatOrderPlacedAt(date: Date | undefined): string {
 
 export const RUNNER_EARNINGS_RATE = 0.7;
 
-export function runnerEarningsForOrder(deliveryFee: number): number {
-  return Math.round(deliveryFee * RUNNER_EARNINGS_RATE * 100) / 100;
+export function runnerEarningsForOrder(
+  deliveryFee: number,
+  heavyBagSurcharge = 0,
+): number {
+  const fee = Number(deliveryFee ?? 0) + Number(heavyBagSurcharge ?? 0);
+  return Math.round(fee * RUNNER_EARNINGS_RATE * 100) / 100;
 }
 
 export function hasConfirmedGroceryTotal(order: {
@@ -143,12 +147,14 @@ export function customerAmountDue(order: {
   actualSubtotal?: number;
   subtotal: number;
   deliveryFee: number;
+  heavyBagSurcharge?: number;
   tip?: number;
 }): number {
+  const delivery =
+    Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0);
   return (
-    Math.round(
-      (groceryAmountDue(order) + order.deliveryFee + (order.tip ?? 0)) * 100,
-    ) / 100
+    Math.round((groceryAmountDue(order) + delivery + (order.tip ?? 0)) * 100) /
+    100
   );
 }
 
@@ -158,10 +164,11 @@ export function runnerReimburseTotal(order: {
   actualSubtotal?: number;
   subtotal: number;
   deliveryFee: number;
+  heavyBagSurcharge?: number;
 }): number {
-  return (
-    Math.round((groceryAmountDue(order) + order.deliveryFee) * 100) / 100
-  );
+  const delivery =
+    Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0);
+  return Math.round((groceryAmountDue(order) + delivery) * 100) / 100;
 }
 
 export function adminPayoutLabel(status: OrderStatus): string {
@@ -298,4 +305,16 @@ export function isCustomerPaymentOpen(
 /** Orders runners may claim from the available board. */
 export function isClaimableOrderStatus(status: OrderStatus): boolean {
   return status === "pending";
+}
+
+/**
+ * Customer may cancel until the runner has purchased / picked up the bag
+ * (`purchased`). After that the goods are in hand / out for delivery — no
+ * customer cancel (status-only; refunds are a separate flow).
+ * Covers price-increase declines while status is still pending/accepted.
+ */
+export function canCustomerCancelOrder(order: {
+  status: OrderStatus;
+}): boolean {
+  return order.status === "pending" || order.status === "accepted";
 }

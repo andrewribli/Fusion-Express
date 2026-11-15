@@ -128,6 +128,30 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     mealPeriods: true,
     nextOpenFallback: "7:30 AM",
   },
+  "cafe-tolo": {
+    openMin: 10 * 60,
+    closeMin: 19 * 60,
+    weekdays: "everyday",
+    hoursLabel: "10:00 AM – 7:00 PM",
+    mealPeriods: false,
+    nextOpenFallback: "10:00 AM",
+  },
+  "tuck-shop": {
+    openMin: 10 * 60,
+    closeMin: 19 * 60,
+    weekdays: "everyday",
+    hoursLabel: "10:00 AM – 7:00 PM",
+    mealPeriods: false,
+    nextOpenFallback: "10:00 AM",
+  },
+  ebenezers: {
+    openMin: 10 * 60,
+    closeMin: 20 * 60,
+    weekdays: "mon-sat",
+    hoursLabel: "10:00 AM – 8:00 PM (Mon–Sat · closed PH)",
+    mealPeriods: false,
+    nextOpenFallback: "10:00 AM Monday",
+  },
   "cc-canteen": {
     openMin: 7 * 60 + 30,
     closeMin: 20 * 60,
@@ -177,10 +201,14 @@ function dayAllowed(rule: WeekdayRule, day: number): boolean {
   }
 }
 
+/** TEMP: force all canteens open for product video recording (remove after). */
+const FORCE_CANTEENS_OPEN_FOR_RECORDING = false;
+
 export function isCanteenOpenByConfig(
   id: string,
   now = new Date(),
 ): boolean {
+  if (FORCE_CANTEENS_OPEN_FOR_RECORDING) return Boolean(getCanteenConfig(id));
   const cfg = getCanteenConfig(id);
   if (!cfg) return false;
   const { minutes, day } = hktParts(now);

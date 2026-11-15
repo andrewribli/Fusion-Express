@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   airwallexJsEnv,
+  hostedCardCheckoutUrl,
   createPaymentIntent,
   getAirwallexEnv,
 } from "@/lib/airwallex";
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
         { status: 409 },
       );
     }
-    if (status !== "delivered") {
+    if (status !== "delivered" && status !== "runner_paid") {
       return NextResponse.json(
         { error: "You can pay after the runner marks the order delivered." },
         { status: 409 },
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     });
 
+    const env = airwallexJsEnv(getAirwallexEnv());
     return NextResponse.json({
       ok: true,
       intentId: intent.id,
@@ -128,8 +130,15 @@ export async function POST(request: NextRequest) {
       amount: intent.amount,
       currency: intent.currency,
       status: intent.status,
-      env: airwallexJsEnv(getAirwallexEnv()),
+      env,
       orderId,
+      checkoutUrl: hostedCardCheckoutUrl({
+        env,
+        intentId: intent.id,
+        clientSecret: intent.clientSecret,
+        currency: intent.currency,
+        successUrl: returnUrl,
+      }),
     });
   } catch (err) {
     console.error("create-intent failed", err);

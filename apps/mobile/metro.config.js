@@ -17,9 +17,25 @@ config.resolver.nodeModulesPaths = [
 
 config.resolver.disableHierarchicalLookup = false;
 
+const firebaseAuthRn = path.resolve(
+  monorepoRoot,
+  "node_modules/firebase/node_modules/@firebase/auth",
+);
+
 config.resolver.extraNodeModules = {
+  "@firebase/auth": firebaseAuthRn,
   "@fusion-express/shared": path.resolve(monorepoRoot, "packages/shared"),
   "@fusion-express/ui": path.resolve(monorepoRoot, "packages/ui"),
+  react: path.resolve(monorepoRoot, "node_modules/react"),
+  "react-dom": path.resolve(monorepoRoot, "node_modules/react-dom"),
+  "react-native-reanimated": path.resolve(
+    monorepoRoot,
+    "node_modules/react-native-reanimated",
+  ),
+  "react-native-css-interop": path.resolve(
+    monorepoRoot,
+    "node_modules/react-native-css-interop",
+  ),
   "react-is": fs.existsSync(path.resolve(projectRoot, "node_modules/react-is"))
     ? path.resolve(projectRoot, "node_modules/react-is")
     : path.resolve(monorepoRoot, "node_modules/react-is"),

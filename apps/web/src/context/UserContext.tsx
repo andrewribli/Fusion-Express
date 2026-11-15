@@ -51,6 +51,12 @@ export interface UserProfile {
   cuhkEmail?: string;
   cuhkVerifiedAt?: string;
   photoURL?: string;
+  /** Same as photoURL; kept for older delivery-identity docs. */
+  photoUrl?: string;
+  displayName?: string | null;
+  isAnonymous?: boolean;
+  pseudonym?: string | null;
+  pseudonymChangedAt?: string | null;
   /** Legacy fields kept for old Firestore docs; not written on new signups. */
   username?: string;
   chineseName?: string;
@@ -104,6 +110,7 @@ interface UserContextValue {
   isGuestBrowsing: boolean;
   logout: () => Promise<void>;
   updateProfile: (profile: UserProfile) => void;
+  rememberProfile: (profile: UserProfile) => void;
   acceptRunnerTerms: () => void;
   setRunnerRegistered: (
     runnerId: string,
@@ -623,6 +630,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isGuestBrowsing,
       logout,
       updateProfile,
+      rememberProfile: updateProfile,
       acceptRunnerTerms,
       setRunnerRegistered,
     }),

@@ -37,7 +37,10 @@ export function RunnerOrderDetails({
     campus: resolveCampus(order.campus),
   });
   const store = supermarketForCampus(order.campus);
-  const earn = runnerEarningsForOrder(order.deliveryFee);
+  const earn = runnerEarningsForOrder(
+    order.deliveryFee,
+    order.heavyBagSurcharge,
+  );
 
   return (
     <div className="space-y-4 text-sm">

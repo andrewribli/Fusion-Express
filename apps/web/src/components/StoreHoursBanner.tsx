@@ -24,7 +24,7 @@ export function StoreHoursBanner() {
         Student runners pick up at Fusion {SERVICE_HOURS.label}.{" "}
         {open
           ? "Runners are taking orders now — place one and a student on campus can accept it."
-          : "Runners are offline until 8:00pm. You can still browse and fill a cart; checkout for delivery opens with pickup hours."}
+          : `Runners are offline outside ${SERVICE_HOURS.label}. You can still browse and fill a cart; Fusion delivery opens at 8:30am.`}
       </p>
     </div>
   );

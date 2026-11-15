@@ -10,7 +10,15 @@ import {
 
 type CustomerNotificationBellProps = {
   className?: string;
+  /** Dark hub headers need explicit tone — appending Tailwind overrides fights `bg-white`. */
+  tone?: "light" | "dark";
 };
+
+function bellSurfaceClass(tone: "light" | "dark"): string {
+  return tone === "dark"
+    ? "border border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]"
+    : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-[#ED1C24]";
+}
 
 function accentClass(n: CustomerNotification): string {
   if (n.type === "discount_received" || n.accent === "gold" || n.accent === "green") {
@@ -24,6 +32,7 @@ function accentClass(n: CustomerNotification): string {
  */
 export function CustomerNotificationBell({
   className = "",
+  tone = "light",
 }: CustomerNotificationBellProps) {
   const { user } = useUser();
   const router = useRouter();
@@ -93,13 +102,18 @@ export function CustomerNotificationBell({
         onClick={() => {
           if (!hoverCapable) setOpen((v) => !v);
         }}
-        className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#ED1C24] ${className}`}
+        className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${bellSurfaceClass(tone)} ${className}`}
         aria-label={label}
         aria-expanded={open}
         aria-haspopup="true"
         title={label}
       >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5 text-current"
+          fill="none"
+          aria-hidden
+        >
           <path
             d="M6 9a6 6 0 1 1 12 0c0 3.2.8 4.6 1.5 5.5.3.4 0 1-.5 1H5c-.5 0-.8-.6-.5-1C5.2 13.6 6 12.2 6 9Z"
             stroke="currentColor"

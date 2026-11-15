@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
 import { RunnerQueueBell } from "@/components/RunnerQueueBell";
+import { CustomerNotificationBell } from "@/components/CustomerNotificationBell";
 import { AccountMenu } from "@/components/AccountMenu";
 import { GuestCampusSwitch } from "@/components/GuestCampusSwitch";
 import { useCampus } from "@/context/CampusContext";
+import { useUser } from "@/context/UserContext";
+import { runnerEntryHref } from "@/lib/nav";
 
 /**
  * CUHK channel picker: Fusion groceries vs campus canteens.
  */
 export function CampusSelector() {
   const { config } = useCampus();
+  const { user, setMode, canRunnerMode } = useUser();
   const brand = config.brandLabel;
 
   return (
@@ -23,7 +27,26 @@ export function CampusSelector() {
             <span className="text-sm font-bold tracking-tight">{brand}</span>
           </Link>
           <div className="flex items-center gap-2">
-            <RunnerQueueBell className="h-11 w-11 rounded-full border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]" />
+            <Link
+              href={runnerEntryHref({
+                loggedIn: Boolean(user),
+                canRunnerMode,
+              })}
+              onClick={() => {
+                if (canRunnerMode) setMode("runner");
+              }}
+              className="inline-flex min-h-11 items-center rounded-full border border-emerald-400/50 bg-emerald-500 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-600"
+            >
+              Runner
+            </Link>
+            <RunnerQueueBell
+              tone="dark"
+              className="h-11 w-11 rounded-full"
+            />
+            <CustomerNotificationBell
+              tone="dark"
+              className="h-11 w-11 rounded-full"
+            />
             <AccountMenu />
           </div>
         </div>

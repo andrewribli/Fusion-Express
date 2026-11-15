@@ -35,11 +35,31 @@ service firebase.storage {
     // Path embeds the uploader uid so Storage can enforce ownership without
     // a Firestore get. Admin review uses a signed-in admin session (Storage
     // has no cheap admin-collection check here).
+    match /avatars/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && request.auth.uid == userId
+        && isImageUnder10mb();
+    }
+
     match /payment-submissions/{userId}/{orderId}/{fileName} {
       allow read: if signedIn();
       allow write: if signedIn()
         && request.auth.uid == userId
         && isImageUnder10mb();
+    }
+
+    function isChatMedia() {
+      return request.resource.size < 25 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+        );
+    }
+
+    match /chats/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isChatMedia();
     }
   }
 }

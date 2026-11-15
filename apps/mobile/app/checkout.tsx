@@ -1,10 +1,25 @@
 import { useMemo, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  InputAccessoryView,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import {
   calculateDeliveryFee,
   cartTotalWeightKg,
+  HEAVY_BAG_THRESHOLD_KG,
+  WEIGHT_INCLUDED_KG,
+  WEIGHT_SURCHARGE_PER_KG,
+  ZONE_LABELS,
 } from "@fusion-express/shared/delivery";
 import {
   CUHK_COLLEGES,
@@ -14,11 +29,33 @@ import {
   type CuhkCollege,
 } from "@fusion-express/shared/locations";
 import { createOrder } from "@fusion-express/shared/orders";
-import { getEstimatedDeliveryTime } from "@fusion-express/shared";
-import { getUnitPrice, lineTotal } from "@fusion-express/shared";
+import {
+  getEstimatedDeliveryTime,
+  getUnitPrice,
+  isOverOrderLimit,
+  lineTotal,
+  MAX_ORDER_VALUE,
+  ORDER_LIMIT_MESSAGE,
+} from "@fusion-express/shared";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
+import { notifyOrderEvent } from "../src/notify-push";
 import type { RootStackParamList } from "../src/navigation";
+import {
+  clampSchedule,
+  defaultScheduleSlot,
+  formatScheduled,
+  scheduleBounds,
+} from "../src/schedule";
+import {
+  Card,
+  Page,
+  PrimaryButton,
+  ScreenHeader,
+  SectionLabel,
+} from "../src/ui";
+
+const NOTES_ACCESSORY_ID = "checkout-notes-done";
 
 export default function CheckoutScreen() {
   const navigation =
@@ -39,6 +76,11 @@ export default function CheckoutScreen() {
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timing, setTiming] = useState<"asap" | "schedule">("asap");
+  const [scheduledFor, setScheduledFor] = useState(() =>
+    clampSchedule(defaultScheduleSlot()),
+  );
+  const [showPicker, setShowPicker] = useState(false);
 
   const weightKg = cartTotalWeightKg(items);
   const fee = useMemo(
@@ -46,6 +88,8 @@ export default function CheckoutScreen() {
     [weightKg, college],
   );
   const total = subtotal + fee.deliveryFee;
+  const overLimit = isOverOrderLimit(subtotal);
+  const bounds = scheduleBounds();
 
   function pickCollege(next: CuhkCollege) {
     setCollege(next);
@@ -54,14 +98,17 @@ export default function CheckoutScreen() {
 
   async function place() {
     if (items.length === 0) return;
+    Keyboard.dismiss();
     setLoading(true);
     setError("");
     try {
-      if (!customerName.trim()) {
-        throw new Error("Enter your full name");
-      }
-      if (!college || !hall) {
-        throw new Error("Choose your college and hall");
+      if (overLimit) throw new Error(ORDER_LIMIT_MESSAGE);
+      if (!customerName.trim()) throw new Error("Enter your full name");
+      if (!college || !hall) throw new Error("Choose your college and hall");
+      const when =
+        timing === "schedule" ? clampSchedule(scheduledFor) : undefined;
+      if (timing === "schedule" && !when) {
+        throw new Error("Pick a delivery time within the next 7 days.");
       }
 
       const auth = await ensureCheckoutAuth();
@@ -93,9 +140,12 @@ export default function CheckoutScreen() {
         deliveryFee: fee.deliveryFee,
         total,
         paymentReceived: false,
-        estimatedDeliveryAt: getEstimatedDeliveryTime(),
+        estimatedDeliveryAt: when ?? getEstimatedDeliveryTime(),
+        isScheduled: timing === "schedule",
+        scheduledFor: when,
       });
       clearCart();
+      notifyOrderEvent(orderId, "created");
       navigation.replace("Track", { orderId });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not place order");
@@ -105,78 +155,263 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 pt-4">
-      <Text className="font-semibold">Your name</Text>
-      <TextInput
-        className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
-        value={customerName}
-        onChangeText={setCustomerName}
-        placeholder="Name for the runner"
-        autoCapitalize="words"
-      />
-
-      <Text className="mt-4 font-semibold">College / zone</Text>
-      {CUHK_COLLEGES.map((name) => (
-        <Pressable
-          key={name}
-          className={`mt-2 rounded-xl border px-3 py-2 ${
-            college === name ? "border-fusion bg-red-50" : "border-gray-200"
-          }`}
-          onPress={() => pickCollege(name)}
-        >
-          <Text>{name}</Text>
-        </Pressable>
-      ))}
-
-      <Text className="mt-4 font-semibold">Hall / lobby</Text>
-      {getHallsForCollege(college).map((name) => (
-        <Pressable
-          key={name}
-          className={`mt-2 rounded-xl border px-3 py-2 ${
-            hall === name ? "border-fusion bg-red-50" : "border-gray-200"
-          }`}
-          onPress={() => setHall(name)}
-        >
-          <Text>
-            {name} · {getLobbyForHall(name)}
-          </Text>
-        </Pressable>
-      ))}
-
-      <Text className="mt-4 font-semibold">Notes for the courier (optional)</Text>
-      <TextInput
-        className="mt-2 rounded-xl border border-gray-200 px-4 py-3"
-        value={note}
-        onChangeText={setNote}
-        placeholder="e.g. Room 301, leave at the lobby desk"
-      />
-
-      <Text className="mt-4 text-sm text-gray-600">
-        {formatDeliveryAddress(college, hall)}
-      </Text>
-      <Text className="mt-1 text-sm text-gray-600">
-        Zone {fee.zone} · delivery ${fee.deliveryFee} · total ${total}
-      </Text>
-      {user ? (
-        <Text className="mt-1 text-xs text-gray-500">
-          Signed in as {user.email ?? user.uid}
-        </Text>
-      ) : (
-        <Text className="mt-1 text-xs text-gray-500">
-          Not signed in — checkout creates a guest session. No phone number needed.
-        </Text>
-      )}
-      {error ? <Text className="mt-2 text-red-600">{error}</Text> : null}
-
-      <Pressable
-        className="mb-10 mt-6 rounded-2xl bg-fusion py-4"
-        disabled={loading || items.length === 0}
-        onPress={() => void place()}
+    <Page>
+      <ScreenHeader title="Checkout" onBack={() => navigation.goBack()} />
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
       >
-        <Text className="text-center text-lg font-semibold text-white">
-          {loading ? "Placing…" : "Place order"}
-        </Text>
-      </Pressable>
-    </ScrollView>
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-4 py-4 pb-28"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onScrollBeginDrag={Keyboard.dismiss}
+        >
+          <Pressable onPress={Keyboard.dismiss} accessible={false}>
+            {items.length === 0 ? (
+              <Text className="text-gray-500">
+                Cart is empty. Add items from Shop first.
+              </Text>
+            ) : (
+              <>
+                <Card>
+                  <SectionLabel>Your name</SectionLabel>
+                  <TextInput
+                    className="mt-2 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
+                    value={customerName}
+                    onChangeText={setCustomerName}
+                    placeholder="Name for the runner"
+                    placeholderTextColor="#9CA3AF"
+                    autoCapitalize="words"
+                    returnKeyType="done"
+                    onSubmitEditing={Keyboard.dismiss}
+                  />
+                </Card>
+
+                <Card className="mt-3">
+                  <SectionLabel>When</SectionLabel>
+                  <View className="mt-2 flex-row gap-2">
+                    <Pressable
+                      className={`flex-1 rounded-xl border px-3 py-3 ${
+                        timing === "asap"
+                          ? "border-fusion bg-red-50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                      onPress={() => {
+                        setTiming("asap");
+                        setShowPicker(false);
+                      }}
+                    >
+                      <Text className="text-center text-sm font-semibold text-gray-900">
+                        ASAP
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      className={`flex-1 rounded-xl border px-3 py-3 ${
+                        timing === "schedule"
+                          ? "border-fusion bg-red-50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                      onPress={() => setTiming("schedule")}
+                    >
+                      <Text className="text-center text-sm font-semibold text-gray-900">
+                        Schedule
+                      </Text>
+                    </Pressable>
+                  </View>
+                  {timing === "schedule" ? (
+                    <View className="mt-3">
+                      <Text className="text-sm font-semibold text-gray-900">
+                        Deliver by {formatScheduled(scheduledFor)}
+                      </Text>
+                      <Text className="mt-1 text-xs text-gray-500">
+                        Exact arrival time (next 7 days). Runners can accept now;
+                        shopping unlocks 30 minutes before.
+                      </Text>
+                      <Pressable
+                        className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-3"
+                        onPress={() => setShowPicker((v) => !v)}
+                      >
+                        <Text className="text-center text-sm font-semibold text-gray-900">
+                          {showPicker ? "Hide calendar" : "Pick date & time"}
+                        </Text>
+                      </Pressable>
+                      {showPicker ? (
+                        <View className="mt-2 overflow-hidden rounded-xl bg-white">
+                          <DateTimePicker
+                            value={scheduledFor}
+                            mode="datetime"
+                            display={
+                              Platform.OS === "ios" ? "inline" : "default"
+                            }
+                            minimumDate={bounds.min}
+                            maximumDate={bounds.max}
+                            minuteInterval={5}
+                            themeVariant="light"
+                            onChange={(_, date) => {
+                              if (!date) return;
+                              setScheduledFor(clampSchedule(date));
+                              if (Platform.OS !== "ios") setShowPicker(false);
+                            }}
+                          />
+                          {Platform.OS === "ios" ? (
+                            <Pressable
+                              className="mx-3 mb-3 items-center rounded-xl bg-gray-900 py-2.5"
+                              onPress={() => setShowPicker(false)}
+                            >
+                              <Text className="text-sm font-semibold text-white">
+                                Done
+                              </Text>
+                            </Pressable>
+                          ) : null}
+                        </View>
+                      ) : null}
+                    </View>
+                  ) : (
+                    <Text className="mt-3 text-xs text-gray-500">
+                      A runner will pick this up as soon as they accept.
+                    </Text>
+                  )}
+                </Card>
+
+                <Card className="mt-3">
+                  <SectionLabel>College / zone</SectionLabel>
+                  {CUHK_COLLEGES.map((name) => (
+                    <Pressable
+                      key={name}
+                      className={`mt-2 rounded-xl border px-3 py-2 ${
+                        college === name
+                          ? "border-fusion bg-red-50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                      onPress={() => pickCollege(name)}
+                    >
+                      <Text className="text-sm text-gray-900">{name}</Text>
+                    </Pressable>
+                  ))}
+                </Card>
+
+                <Card className="mt-3">
+                  <SectionLabel>Hall / lobby</SectionLabel>
+                  {getHallsForCollege(college).map((name) => (
+                    <Pressable
+                      key={name}
+                      className={`mt-2 rounded-xl border px-3 py-2 ${
+                        hall === name
+                          ? "border-fusion bg-red-50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                      onPress={() => setHall(name)}
+                    >
+                      <Text className="text-sm text-gray-900">
+                        {name} · {getLobbyForHall(name)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </Card>
+
+                <Card className="mt-3">
+                  <SectionLabel>Notes for the courier (optional)</SectionLabel>
+                  <TextInput
+                    className="mt-2 min-h-[88px] rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
+                    value={note}
+                    onChangeText={setNote}
+                    placeholder="e.g. Room 301, leave at the lobby desk"
+                    placeholderTextColor="#9CA3AF"
+                    multiline
+                    textAlignVertical="top"
+                    blurOnSubmit={false}
+                    inputAccessoryViewID={
+                      Platform.OS === "ios" ? NOTES_ACCESSORY_ID : undefined
+                    }
+                  />
+                  {Platform.OS !== "ios" ? (
+                    <Pressable
+                      className="mt-2 self-end"
+                      onPress={Keyboard.dismiss}
+                    >
+                      <Text className="text-sm font-semibold text-fusion">
+                        Done
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </Card>
+
+                <Card className="mt-3">
+                  <Text className="text-sm text-gray-600">
+                    {formatDeliveryAddress(college, hall)}
+                  </Text>
+                  <Text className="mt-1 text-sm text-gray-600">
+                    {ZONE_LABELS[fee.zone]} · Zone {fee.zone} (+$
+                    {fee.distanceSurcharge})
+                  </Text>
+                  <Text className="mt-1 text-sm text-gray-600">
+                    Base ${fee.baseFee}
+                    {fee.extraKg > 0
+                      ? ` · weight over ${WEIGHT_INCLUDED_KG} kg (+$${fee.weightSurcharge})`
+                      : ` · up to ${WEIGHT_INCLUDED_KG} kg`}
+                    {fee.heavyBagEligible
+                      ? ` · over ${HEAVY_BAG_THRESHOLD_KG} kg (runner may add heavy-bag fee)`
+                      : ""}
+                  </Text>
+                  <Text className="mt-1 text-sm text-gray-600">
+                    Items ${subtotal} · delivery ${fee.deliveryFee}
+                    {fee.extraKg > 0
+                      ? ` (incl. $${WEIGHT_SURCHARGE_PER_KG}/extra kg)`
+                      : ""}
+                  </Text>
+                  <Text className="mt-2 text-base font-extrabold text-fusion">
+                    Total ${total}
+                  </Text>
+                  {overLimit ? (
+                    <Text className="mt-2 text-sm text-red-600">
+                      {ORDER_LIMIT_MESSAGE} (max ${MAX_ORDER_VALUE})
+                    </Text>
+                  ) : null}
+                  {user ? (
+                    <Text className="mt-2 text-xs text-gray-500">
+                      Signed in as {user.email ?? user.uid}
+                    </Text>
+                  ) : (
+                    <Text className="mt-2 text-xs text-gray-500">
+                      Guest checkout — no account required. Pay after delivery.
+                    </Text>
+                  )}
+                </Card>
+
+                {error ? (
+                  <Text className="mt-3 text-sm text-red-600">{error}</Text>
+                ) : null}
+
+                <PrimaryButton
+                  label={loading ? "Placing…" : "Place order"}
+                  busy={loading}
+                  className="mt-4"
+                  disabled={loading || items.length === 0 || overLimit}
+                  onPress={() => void place()}
+                />
+              </>
+            )}
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {Platform.OS === "ios" ? (
+        <InputAccessoryView nativeID={NOTES_ACCESSORY_ID}>
+          <View className="flex-row items-center justify-end border-t border-gray-200 bg-[#F2F2F7] px-3 py-2">
+            <Pressable
+              onPress={Keyboard.dismiss}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss keyboard"
+            >
+              <Text className="text-base font-semibold text-fusion">Done</Text>
+            </Pressable>
+          </View>
+        </InputAccessoryView>
+      ) : null}
+    </Page>
   );
 }

@@ -478,12 +478,12 @@ export function ShopHome() {
               onClick={() => {
                 if (canRunnerMode) setMode("runner");
               }}
-              className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 lg:inline-flex"
+              className="inline-flex shrink-0 items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800"
             >
               Runner
             </Link>
 
-            <RunnerQueueBell />
+            <RunnerQueueBell className="h-11 w-11 rounded-full" />
 
             <Link
               href="/cart"

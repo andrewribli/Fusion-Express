@@ -24,6 +24,7 @@ export function resolveOrderDeliveryFee(
       zone: 1,
       distanceSurcharge: 0,
       deliveryFee: CANTEEN_DELIVERY_FEE,
+      heavyBagEligible: false,
     };
   }
   return calculateDeliveryFee({ weightKg, college, campus });

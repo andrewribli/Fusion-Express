@@ -66,6 +66,14 @@ const SLUG_ALIASES: Record<string, string> = {
   na: "na-canteen",
   "new-asia": "na-canteen",
   "new-asia-canteen": "na-canteen",
+  tolo: "cafe-tolo",
+  "café-tolo": "cafe-tolo",
+  "cuhk-cafe-tolo": "cafe-tolo",
+  "cuhk-tuck-shop": "tuck-shop",
+  "swimming-pool-tuck-shop": "tuck-shop",
+  ebeneezers: "ebenezers",
+  "ebeneezers-kebabs": "ebenezers",
+  "ebeneezer": "ebenezers",
 };
 
 const BF_FILTERS: Array<"all" | MenuCategory> = [

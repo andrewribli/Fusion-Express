@@ -36,4 +36,5 @@ export {
   runnerWarningTotal,
   isCustomerPaymentOpen,
   isClaimableOrderStatus,
+  canCustomerCancelOrder,
 } from "@fusion-express/shared/types";

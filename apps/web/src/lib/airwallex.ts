@@ -43,6 +43,30 @@ export function airwallexJsEnv(env: AirwallexEnv = getAirwallexEnv()): "demo" | 
   return env === "sandbox" ? "demo" : "prod";
 }
 
+/** Card-only Hosted Payment Page. Not the FPS screenshot flow. */
+export function hostedCardCheckoutUrl(opts: {
+  env: "demo" | "prod";
+  intentId: string;
+  clientSecret: string;
+  currency: string;
+  successUrl: string;
+}): string {
+  const host =
+    opts.env === "demo"
+      ? "https://checkout-demo.airwallex.com"
+      : "https://checkout.airwallex.com";
+  const params = new URLSearchParams({
+    intent_id: opts.intentId,
+    client_secret: opts.clientSecret,
+    currency: opts.currency,
+    country_code: "HK",
+    mode: "payment",
+    methods: "card",
+    successUrl: opts.successUrl,
+  });
+  return `${host}/#/standalone/checkout?${params.toString()}`;
+}
+
 function requireCredentials(): { clientId: string; apiKey: string } {
   const clientId = process.env.AIRWALLEX_CLIENT_ID?.trim();
   const apiKey = process.env.AIRWALLEX_API_KEY?.trim();

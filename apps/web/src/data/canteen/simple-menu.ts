@@ -1,8 +1,12 @@
 import type { MenuCategory } from "@/data/canteen/bf-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
+import { CAFE_TOLO_MENU } from "@/data/canteen/cafe-tolo-menu";
+import { EBENEZERS_MENU } from "@/data/canteen/ebenezers-menu";
+import { withFoodImages } from "@/data/canteen/food-images";
 import { NA_MENU } from "@/data/canteen/na-menu";
 import { PAPER_AND_COFFEE_MENU } from "@/data/canteen/paper-and-coffee-menu";
 import { SORAZEN_MENU } from "@/data/canteen/sorazen-menu";
+import { TUCK_SHOP_MENU } from "@/data/canteen/tuck-shop-menu";
 
 /** Prefer placehold.co — via.placeholder.com is often blocked in browsers. */
 export const CANTEEN_PLACEHOLDER_IMAGE = "https://placehold.co/200x200/png";
@@ -122,7 +126,10 @@ export type SimpleRestaurantId =
   | "sh-ho-canteen"
   | "paper-and-coffee"
   | "sorazen"
-  | "na-canteen";
+  | "na-canteen"
+  | "cafe-tolo"
+  | "tuck-shop"
+  | "ebenezers";
 
 export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "cu-cafe": CU_CAFE_MENU,
@@ -130,13 +137,16 @@ export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "paper-and-coffee": PAPER_AND_COFFEE_MENU,
   sorazen: SORAZEN_MENU,
   "na-canteen": NA_MENU,
+  "cafe-tolo": CAFE_TOLO_MENU,
+  "tuck-shop": TUCK_SHOP_MENU,
+  ebenezers: EBENEZERS_MENU,
 };
 
 export function getSimpleMenu(
   restaurantId: string,
 ): SimpleMenuItem[] | undefined {
   if (restaurantId in SIMPLE_MENUS) {
-    return SIMPLE_MENUS[restaurantId as SimpleRestaurantId];
+    return withFoodImages(SIMPLE_MENUS[restaurantId as SimpleRestaurantId]);
   }
   return undefined;
 }

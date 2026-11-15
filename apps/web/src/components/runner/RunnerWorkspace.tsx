@@ -40,6 +40,7 @@ import { buildAcceptDiscount } from "@/lib/canteen-discount";
 import { useDeadlineWatch } from "@/lib/use-deadline-watch";
 import { compressImage } from "@/lib/compress-image";
 import { notifyOrderStatus } from "@/lib/notify-email";
+import { notifyOrderEvent } from "@/lib/notify-push";
 import { notifyCanteenEvent } from "@/lib/notify-canteen";
 import { fetchRunner, findRunnerForUser } from "@/lib/runners";
 import { ownerPaymentDetails } from "@/lib/owner-payment";
@@ -196,7 +197,10 @@ function AvailableOrderCard({
 }) {
   const preview = order.items.slice(0, 2);
   const extra = order.items.length - preview.length;
-  const earn = runnerEarningsForOrder(order.deliveryFee);
+  const earn = runnerEarningsForOrder(
+    order.deliveryFee,
+    order.heavyBagSurcharge,
+  );
 
   return (
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -569,6 +573,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         deliveryLocation: `${formatDeliveryAddress(confirmOrder.college, confirmOrder.hall)} · Lobby: ${confirmOrder.lobbyPoint}`,
         estimate: discount?.total ?? confirmOrder.total,
       });
+      notifyOrderEvent(confirmOrder.id, "accepted");
       if (discount?.discountApplied) {
         void notifyCanteenEvent({
           orderId: confirmOrder.id,
@@ -980,7 +985,8 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     openDeliveries.find((order) => order.id === flowOrderId) ?? null;
 
   const totalFromDeliveries = delivered.reduce(
-    (sum, order) => sum + runnerEarningsForOrder(order.deliveryFee),
+    (sum, order) =>
+      sum + runnerEarningsForOrder(order.deliveryFee, order.heavyBagSurcharge),
     0,
   );
 
@@ -1177,7 +1183,10 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                           </p>
                         </div>
                         <p className="mt-1 text-sm font-semibold text-green-700">
-                          +${runnerEarningsForOrder(order.deliveryFee)}
+                          +${runnerEarningsForOrder(
+                            order.deliveryFee,
+                            order.heavyBagSurcharge,
+                          )}
                         </p>
                         <div className="mt-3">
                           <RunnerOrderDetails order={order} />

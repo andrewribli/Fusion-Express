@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { CancelOrderConfirmModal } from "@/components/CancelOrderConfirmModal";
 import { CustomerOrderHeading } from "@/components/CustomerOrderHeading";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { PageWallpaper } from "@/components/PageWallpaper";
@@ -15,6 +16,7 @@ import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { isChatActive } from "@/lib/constants";
 import { loadAllProducts } from "@/lib/firestore";
+import { canCustomerCancelOrder } from "@/lib/order-status";
 import { menuItemFromOrderLine } from "@/lib/reorder";
 import {
   cancelOrder,
@@ -30,6 +32,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmOrder, setConfirmOrder] = useState<Order | null>(null);
 
   async function load() {
     if (!user) return;
@@ -54,11 +57,12 @@ export default function OrdersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
-  async function handleCancel(order: Order) {
-    if (!user) return;
-    setCancellingId(order.id);
+  async function handleCancelConfirmed() {
+    if (!user || !confirmOrder) return;
+    setCancellingId(confirmOrder.id);
     try {
-      await cancelOrder(order.id, getUserAccountId(user));
+      await cancelOrder(confirmOrder.id, getUserAccountId(user));
+      setConfirmOrder(null);
       await load();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Could not cancel");
@@ -124,10 +128,10 @@ export default function OrdersPage() {
                     </Link>
 
                     <div className="mt-3 flex gap-2">
-                      {order.status === "pending" && (
+                      {canCustomerCancelOrder(order) && (
                         <button
                           type="button"
-                          onClick={() => handleCancel(order)}
+                          onClick={() => setConfirmOrder(order)}
                           disabled={cancellingId === order.id}
                           className="flex-1 rounded-xl border border-red-200 py-2 text-xs font-semibold text-red-600"
                         >
@@ -162,6 +166,15 @@ export default function OrdersPage() {
               </ul>
             )}
           </main>
+
+          <CancelOrderConfirmModal
+            open={confirmOrder != null}
+            loading={cancellingId != null}
+            onDismiss={() => {
+              if (cancellingId == null) setConfirmOrder(null);
+            }}
+            onConfirm={() => void handleCancelConfirmed()}
+          />
         </PageWallpaper>
       </AppShell>
     </RequireAuth>

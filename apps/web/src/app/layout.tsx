@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   description: "Groceries. Delivered with grace. Order from Fusion supermarket to your CUHK dorm lobby.",
   icons: {
     icon: [
-      { url: "/favicon.svg?v=4", type: "image/svg+xml" },
-      { url: "/favicon-32.png?v=4", type: "image/png", sizes: "32x32" },
-      { url: "/images/gracerun-icon.png?v=4", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.png?v=5", type: "image/png", sizes: "512x512" },
+      { url: "/favicon-32.png?v=5", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.svg?v=5", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/apple-touch-icon.png?v=4", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/apple-touch-icon.png?v=5", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,

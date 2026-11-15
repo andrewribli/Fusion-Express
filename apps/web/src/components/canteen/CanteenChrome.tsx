@@ -38,7 +38,7 @@ export function CanteenChrome({
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <RunnerQueueBell className="h-10 w-10 rounded-full border-white/15 bg-[#161616] text-white hover:bg-[#1f1f1f]" />
+          <RunnerQueueBell tone="dark" className="h-10 w-10 rounded-full" />
           <Link
             href="/cart"
             className="relative rounded-full border border-white/15 px-3 py-2 text-xs font-semibold text-white hover:bg-white/5"

@@ -1,4 +1,5 @@
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
+import { FOOD_HERO } from "@/data/canteen/food-images";
 
 const img = "https://placehold.co/200x200/png";
 
@@ -446,14 +447,22 @@ export const PAPER_AND_COFFEE_MENU: SimpleMenuItem[] = [
     image: img,
   },
 
-  // —— Taiwanese pancake ——
+  // —— Taiwanese pancake / omelette ——
+  {
+    id: "taiwanese-cheesy-omelette",
+    name: "Taiwanese Cheesy Omelette",
+    description: "台式芝士蛋餅 · Cheese egg pancake (bacon / sweet corn optional)",
+    price: 25,
+    category: "snacks",
+    image: FOOD_HERO["taiwanese-cheesy-omelette"],
+  },
   {
     id: "taiwanese-pancake",
     name: "Taiwanese Pancake",
     description: "台式蛋餅 · Bacon / sweet corn / cheese",
     price: 25,
     category: "snacks",
-    image: img,
+    image: FOOD_HERO["taiwanese-pancake"],
   },
   {
     id: "taiwanese-pancake-extra-topping",

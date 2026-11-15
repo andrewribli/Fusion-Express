@@ -65,7 +65,11 @@ const RESTAURANT_COLLEGE: Record<string, CollegeId | null> = {
   "cu-cafe": null,
   "sh-ho-canteen": "SHHO",
   "paper-and-coffee": null,
+  sorazen: null,
   "na-canteen": "NA",
+  "cafe-tolo": "LWS",
+  "tuck-shop": null,
+  ebenezers: null,
   "cc-canteen": "CC",
   "shaw-canteen": "Shaw",
 };
@@ -76,7 +80,11 @@ const RESTAURANT_NAMES: Record<string, string> = {
   "cu-cafe": "CU Cafe",
   "sh-ho-canteen": "S.H. Ho College Canteen",
   "paper-and-coffee": "Paper & Coffee",
+  sorazen: "SoraZen",
   "na-canteen": "NA Canteen",
+  "cafe-tolo": "Cafe Tolo",
+  "tuck-shop": "Tuck Shop",
+  ebenezers: "Ebeneezer's Kebabs & Pizzeria",
   "cc-canteen": "CC Canteen",
   "shaw-canteen": "Shaw Canteen",
 };

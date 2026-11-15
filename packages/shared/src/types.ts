@@ -161,6 +161,7 @@ export {
   runnerWarningTotal,
   isCustomerPaymentOpen,
   isClaimableOrderStatus,
+  canCustomerCancelOrder,
 } from "./order-status";
 
 
@@ -231,6 +232,11 @@ export interface Order {
   /** Normalized college id of the canteen (e.g. UC). */
   canteenCollege?: string;
   paymentReceived: boolean;
+  /**
+   * Extra HKD when runner marks a bag over 5 kg as heavy.
+   * Added on top of deliveryFee for customer + runner earnings.
+   */
+  heavyBagSurcharge?: number;
   paymentMethod?: "PayMe" | "FPS";
   /** Online checkout provider (e.g. airwallex). */
   paymentProvider?: "airwallex" | string;
@@ -243,6 +249,8 @@ export interface Order {
   finalTotal?: number;
   amountPaidByRunner?: number;
   receiptUrl?: string;
+  /** Customer FPS transfer screenshot (pending admin confirmation). */
+  fpsReceiptUrl?: string;
   bankStatementUrl?: string;
   customerNameOnReceipt?: boolean;
   runnerVerified?: boolean;
@@ -265,6 +273,10 @@ export interface Order {
   runnerRating?: number;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;
+  /** When true, runners may accept now but shop only near scheduledFor. */
+  isScheduled?: boolean;
+  /** Customer-chosen delivery window (Hong Kong local). */
+  scheduledFor?: Date;
   createdAt: Date;
   updatedAt: Date;
   pickedUpAt?: Date;
@@ -322,6 +334,8 @@ export interface ChatMessage {
   senderName: string;
   message: string;
   timestamp: Date;
+  imageUrl?: string;
+  mediaType?: "image" | "video";
 }
 
 export interface RunnerRegistrationInput {

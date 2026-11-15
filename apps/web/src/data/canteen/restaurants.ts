@@ -8,6 +8,9 @@ export type RestaurantId =
   | "paper-and-coffee"
   | "sorazen"
   | "na-canteen"
+  | "cafe-tolo"
+  | "tuck-shop"
+  | "ebenezers"
   | "cc-canteen"
   | "shaw-canteen";
 
@@ -109,6 +112,42 @@ export const RESTAURANTS: Restaurant[] = [
     hoursLabel: "7:30 AM – 8:00 PM (breakfast · lunch · drinks)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "NA",
+    menuReady: true,
+  },
+  {
+    id: "cafe-tolo",
+    name: "Cafe Tolo",
+    shortName: "Cafe Tolo",
+    blurb:
+      "Western all-day breakfast, Spanish bites, waffles, and specialty drinks at Lee Woo Sing College. College discount when an LWS runner picks up.",
+    location: "Lee Woo Sing College (LWS)",
+    hoursLabel: "10:00 AM – 7:00 PM",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: "LWS",
+    menuReady: true,
+  },
+  {
+    id: "tuck-shop",
+    name: "Tuck Shop",
+    shortName: "Tuck Shop",
+    blurb:
+      "Campus swimming-pool tuck shop — fish balls, skewers, steamed buns, and sweet soup.",
+    location: "CUHK Swimming Pool",
+    hoursLabel: "10:00 AM – 7:00 PM",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: null,
+    menuReady: true,
+  },
+  {
+    id: "ebenezers",
+    name: "Ebeneezer's Kebabs & Pizzeria",
+    shortName: "Ebeneezer's",
+    blurb:
+      "Halal kebabs, tikka, curries, and pizza slices at Li Wai Chun Building.",
+    location: "G05, Li Wai Chun Building",
+    hoursLabel: "10:00 AM – 8:00 PM (Mon–Sat · closed PH)",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: null,
     menuReady: true,
   },
   {

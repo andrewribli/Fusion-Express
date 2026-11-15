@@ -596,3 +596,76 @@ export async function listUserAlertRecipientsRest(): Promise<
 
   return out;
 }
+
+function isExpoPushToken(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    (value.startsWith("ExponentPushToken[") ||
+      value.startsWith("ExpoPushToken["))
+  );
+}
+
+export function pushTokensFromUser(
+  fields: Record<string, unknown> | null,
+): string[] {
+  if (!fields) return [];
+  const found = new Set<string>();
+  if (isExpoPushToken(fields.pushToken)) found.add(fields.pushToken);
+  if (isExpoPushToken(fields.expoPushToken)) found.add(fields.expoPushToken);
+  if (Array.isArray(fields.expoPushTokens)) {
+    for (const item of fields.expoPushTokens) {
+      if (isExpoPushToken(item)) found.add(item);
+    }
+  }
+  return [...found];
+}
+
+/** Runners who can receive a new-order buzz. */
+export async function listRunnerPushTokensRest(): Promise<
+  { uid: string; tokens: string[] }[]
+> {
+  const ctx = await adminAccessToken();
+  if (!ctx) return [];
+  const col = collectionName("users");
+  const out: { uid: string; tokens: string[] }[] = [];
+  let pageToken = "";
+
+  for (let i = 0; i < 40; i++) {
+    const url = new URL(`${documentsUrl(ctx.project)}/${col}`);
+    url.searchParams.set("pageSize", "300");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${ctx.token}` },
+    });
+    if (!res.ok) {
+      console.error(
+        "listRunnerPushTokensRest failed",
+        res.status,
+        (await res.text()).slice(0, 300),
+      );
+      break;
+    }
+    const data = (await res.json()) as {
+      documents?: {
+        name?: string;
+        fields?: Record<string, FirestoreValue>;
+      }[];
+      nextPageToken?: string;
+    };
+    for (const doc of data.documents ?? []) {
+      const fields = decodeFields(doc.fields);
+      const isRunner = Boolean(fields.isRunner) || Boolean(fields.runnerId);
+      if (!isRunner) continue;
+      const tokens = pushTokensFromUser(fields);
+      if (tokens.length === 0) continue;
+      const uid =
+        String(fields.uid ?? "").trim() || doc.name?.split("/").pop() || "";
+      if (!uid) continue;
+      out.push({ uid, tokens });
+    }
+    if (!data.nextPageToken) break;
+    pageToken = data.nextPageToken;
+  }
+
+  return out;
+}

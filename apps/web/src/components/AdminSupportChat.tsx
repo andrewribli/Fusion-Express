@@ -43,6 +43,15 @@ export function AdminSupportChat({
     if (forceOpen != null) setOpen(forceOpen);
   }, [forceOpen]);
 
+  // Deep link from emails / marketing: /?chat=1 opens the support panel.
+  useEffect(() => {
+    if (embedded || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("chat") === "1" || params.get("openChat") === "1") {
+      setOpen(true);
+    }
+  }, [embedded]);
+
   useEffect(() => {
     onOpenChange?.(open);
   }, [open, onOpenChange]);

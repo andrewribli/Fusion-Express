@@ -87,7 +87,7 @@ export function toFirestoreMenuDoc(item: MenuItem) {
   };
 }
 
-const DEFAULT_WEB_ORIGIN = "https://gracerun.vercel.app";
+const DEFAULT_WEB_ORIGIN = "https://www.gracerun.fit";
 
 export function webAssetOrigin(): string {
   const fromEnv =

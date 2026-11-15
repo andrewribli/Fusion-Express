@@ -39,7 +39,26 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         ? (data.termsAcceptedAt as Timestamp).toDate().toISOString()
         : String(data.termsAcceptedAt)
       : undefined,
-    photoURL: data.photoURL ? String(data.photoURL) : undefined,
+    photoURL: data.photoURL
+      ? String(data.photoURL)
+      : data.photoUrl
+        ? String(data.photoUrl)
+        : undefined,
+    photoUrl: data.photoUrl
+      ? String(data.photoUrl)
+      : data.photoURL
+        ? String(data.photoURL)
+        : undefined,
+    displayName: data.displayName != null ? String(data.displayName) : undefined,
+    isAnonymous: data.isAnonymous === true,
+    pseudonym: data.pseudonym != null ? String(data.pseudonym) : undefined,
+    pseudonymChangedAt: data.pseudonymChangedAt
+      ? typeof data.pseudonymChangedAt === "object" &&
+        data.pseudonymChangedAt &&
+        "toDate" in data.pseudonymChangedAt
+        ? (data.pseudonymChangedAt as Timestamp).toDate().toISOString()
+        : String(data.pseudonymChangedAt)
+      : undefined,
     campus:
       data.campus === "cuhk" || data.campus === "cityu"
         ? data.campus
