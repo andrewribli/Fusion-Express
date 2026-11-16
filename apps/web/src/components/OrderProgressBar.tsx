@@ -1,11 +1,24 @@
 import type { OrderStatus } from "@/lib/types";
-import { TRACKING_STEPS, getStepIndex } from "@/lib/order-status";
+import { ORDER_STATUS_LABELS, TRACKING_STEPS, getStepIndex } from "@/lib/order-status";
 
 interface OrderProgressBarProps {
   status: OrderStatus;
 }
 
 export function OrderProgressBar({ status }: OrderProgressBarProps) {
+  if (status === "cancelled") {
+    return (
+      <div className="rounded-2xl border border-red-100 bg-red-50 p-5 shadow-sm">
+        <p className="text-sm font-semibold text-red-700">
+          {ORDER_STATUS_LABELS.cancelled}
+        </p>
+        <p className="mt-1 text-xs text-red-600">
+          This order was cancelled and will not be delivered.
+        </p>
+      </div>
+    );
+  }
+
   const currentIndex = getStepIndex(status);
 
   return (

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
+import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import { loadAllProducts } from "@/lib/firestore";
 import { fetchOrdersByCustomer } from "@/lib/orders";
 import { menuItemFromOrderLine } from "@/lib/reorder";
@@ -13,7 +14,11 @@ interface PreviousLine {
   quantity: number;
 }
 
-export function PreviousOrderChecklist() {
+export function PreviousOrderChecklist({
+  channel = "fusion",
+}: {
+  channel?: "fusion" | "canteen";
+}) {
   const { user } = useUser();
   const { items: cartItems, addItem, removeItem } = useCart();
   const [lines, setLines] = useState<PreviousLine[]>([]);
@@ -33,9 +38,13 @@ export function PreviousOrderChecklist() {
         const accountId = getUserAccountId(user);
         const [orders, catalog] = await Promise.all([
           fetchOrdersByCustomer(accountId),
-          loadAllProducts(),
+          channel === "fusion" ? loadAllProducts() : Promise.resolve([]),
         ]);
-        const last = orders.find((order) => order.customerId === accountId);
+        const last = orders.find(
+          (order) =>
+            order.customerId === accountId &&
+            resolveOrderChannel(order) === channel,
+        );
         if (cancelled) return;
         if (!last) {
           setLines([]);
@@ -59,7 +68,7 @@ export function PreviousOrderChecklist() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, channel]);
 
   const cartIds = useMemo(
     () => new Set(cartItems.map((entry) => entry.item.id)),
@@ -114,14 +123,18 @@ export function PreviousOrderChecklist() {
                     type="button"
                     onClick={() => {
                       removeItem(line.item.id);
-                      setLines((prev) => prev.filter((entry) => entry.item.id !== line.item.id));
+                      setLines((prev) =>
+                        prev.filter((entry) => entry.item.id !== line.item.id),
+                      );
                     }}
                     className="text-[10px] text-gray-400 hover:text-[#ED1C24]"
                   >
                     Remove
                   </button>
                 </div>
-                <p className="mt-1 text-xs font-bold text-gray-900">${line.item.price}</p>
+                <p className="mt-1 text-xs font-bold text-gray-900">
+                  ${line.item.price}
+                </p>
               </div>
             </li>
           );

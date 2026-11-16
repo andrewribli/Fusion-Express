@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { useUser, type UserProfile } from "@/context/UserContext";
+import { resolveProfilePhoto } from "@/lib/profile-photo";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 
 function initials(user: UserProfile): string {
@@ -35,7 +36,7 @@ function HeaderAvatar({
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const letters = user ? initials(user) : "";
-  const photoURL = user?.photoURL?.trim();
+  const photoURL = resolveProfilePhoto(user);
   const showPhoto = Boolean(photoURL) && !imageFailed;
 
   if (!user) {
@@ -50,7 +51,7 @@ function HeaderAvatar({
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={photoURL}
+        src={photoURL ?? undefined}
         alt=""
         className="h-9 w-9 rounded-full object-cover"
         onError={() => setImageFailed(true)}

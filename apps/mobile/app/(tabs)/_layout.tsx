@@ -1,18 +1,6 @@
-import { Tabs } from "expo-router";
-
-export default function TabsLayout() {
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "#ED1C24",
-        headerTintColor: "#ED1C24",
-        tabBarLabelStyle: { fontSize: 12 },
-      }}
-    >
-      <Tabs.Screen name="index" options={{ title: "Shop Now" }} />
-      <Tabs.Screen name="orders" options={{ title: "Orders" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
-      <Tabs.Screen name="runner" options={{ title: "Runner" }} />
-    </Tabs>
-  );
+/**
+ * Unused: tabs are defined in App.tsx via createBottomTabNavigator.
+ */
+export default function UnusedExpoRouterTabsLayout() {
+  return null;
 }

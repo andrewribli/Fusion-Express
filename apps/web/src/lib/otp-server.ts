@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { createHmac, randomInt, timingSafeEqual } from "crypto";
 import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
 import { collectionName } from "@/lib/constants";
-import { getAdminDb } from "@/lib/firebase-admin";
+import {
+  adminAccessToken,
+  deleteAdminDocumentRest,
+  getAdminDocumentRest,
+  patchAdminDocumentRest,
+} from "@/lib/firestore-rest";
 
 export const OTP_COOKIE = "gr_cuhk_otp";
 export type OtpPurpose = "signup" | "reset";
@@ -171,57 +176,75 @@ function otpDocId(email: string, purpose: OtpPurpose): string {
 
 /**
  * Reset failure counter when a fresh OTP is issued.
- * Uses Admin SDK (emailOtps is deny-all for clients).
+ * Uses Firestore REST (emailOtps is deny-all for clients). Avoids
+ * firebase-admin/jose which crashes Auth routes on Vercel.
  */
+function otpCollection(): string {
+  return collectionName("emailOtps");
+}
+
+async function assertOtpFirestoreAvailable(): Promise<void> {
+  const ctx = await adminAccessToken();
+  if (!ctx) {
+    throw new OtpConfigError(
+      "Firebase Admin REST is not configured for OTP attempt tracking.",
+    );
+  }
+}
+
 export async function resetOtpFailures(
   email: string,
   purpose: OtpPurpose,
 ): Promise<void> {
-  const db = getAdminDb();
-  if (!db) {
+  try {
+    await assertOtpFirestoreAvailable();
+    await patchAdminDocumentRest(otpCollection(), otpDocId(email, purpose), {
+      email: normalizeEmail(email),
+      purpose,
+      failCount: 0,
+      locked: false,
+      updatedAt: new Date(),
+    });
+  } catch (err) {
+    if (err instanceof OtpConfigError) {
+      if (process.env.NODE_ENV === "production") throw err;
+      return;
+    }
     if (process.env.NODE_ENV === "production") {
+      console.error("resetOtpFailures failed", err);
       throw new OtpConfigError(
-        "Firebase Admin is not configured for OTP attempt tracking.",
+        "Firebase Admin REST is not configured for OTP attempt tracking.",
       );
     }
-    return;
   }
-  await db
-    .collection(collectionName("emailOtps"))
-    .doc(otpDocId(email, purpose))
-    .set(
-      {
-        email: normalizeEmail(email),
-        purpose,
-        failCount: 0,
-        locked: false,
-        updatedAt: new Date(),
-      },
-      { merge: true },
-    );
 }
 
 export async function getOtpFailCount(
   email: string,
   purpose: OtpPurpose,
 ): Promise<number> {
-  const db = getAdminDb();
-  if (!db) {
+  try {
+    await assertOtpFirestoreAvailable();
+    const data = await getAdminDocumentRest(
+      otpCollection(),
+      otpDocId(email, purpose),
+    );
+    if (!data) return 0;
+    if (data.locked) return OTP_MAX_FAILURES;
+    return Number(data.failCount ?? 0);
+  } catch (err) {
+    if (err instanceof OtpConfigError) {
+      if (process.env.NODE_ENV === "production") throw err;
+      return 0;
+    }
     if (process.env.NODE_ENV === "production") {
+      console.error("getOtpFailCount failed", err);
       throw new OtpConfigError(
-        "Firebase Admin is not configured for OTP attempt tracking.",
+        "Firebase Admin REST is not configured for OTP attempt tracking.",
       );
     }
     return 0;
   }
-  const snap = await db
-    .collection(collectionName("emailOtps"))
-    .doc(otpDocId(email, purpose))
-    .get();
-  if (!snap.exists) return 0;
-  const data = snap.data() as { failCount?: number; locked?: boolean };
-  if (data.locked) return OTP_MAX_FAILURES;
-  return Number(data.failCount ?? 0);
 }
 
 /** Returns the new fail count after recording a bad verify attempt. */
@@ -229,53 +252,48 @@ export async function recordOtpFailure(
   email: string,
   purpose: OtpPurpose,
 ): Promise<number> {
-  const db = getAdminDb();
-  if (!db) {
+  try {
+    await assertOtpFirestoreAvailable();
+    const data = await getAdminDocumentRest(
+      otpCollection(),
+      otpDocId(email, purpose),
+    );
+    const prev = data ? Number(data.failCount ?? 0) : 0;
+    const failCount = prev + 1;
+    const locked = failCount >= OTP_MAX_FAILURES;
+    await patchAdminDocumentRest(otpCollection(), otpDocId(email, purpose), {
+      email: normalizeEmail(email),
+      purpose,
+      failCount,
+      locked,
+      updatedAt: new Date(),
+    });
+    return failCount;
+  } catch (err) {
+    if (err instanceof OtpConfigError) {
+      if (process.env.NODE_ENV === "production") throw err;
+      return 1;
+    }
     if (process.env.NODE_ENV === "production") {
+      console.error("recordOtpFailure failed", err);
       throw new OtpConfigError(
-        "Firebase Admin is not configured for OTP attempt tracking.",
+        "Firebase Admin REST is not configured for OTP attempt tracking.",
       );
     }
     return 1;
   }
-  const ref = db
-    .collection(collectionName("emailOtps"))
-    .doc(otpDocId(email, purpose));
-  return db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const prev = snap.exists
-      ? Number((snap.data() as { failCount?: number }).failCount ?? 0)
-      : 0;
-    const failCount = prev + 1;
-    const locked = failCount >= OTP_MAX_FAILURES;
-    tx.set(
-      ref,
-      {
-        email: normalizeEmail(email),
-        purpose,
-        failCount,
-        locked,
-        updatedAt: new Date(),
-      },
-      { merge: true },
-    );
-    return failCount;
-  });
 }
 
 export async function clearOtpFailures(
   email: string,
   purpose: OtpPurpose,
 ): Promise<void> {
-  const db = getAdminDb();
-  if (!db) return;
-  await db
-    .collection(collectionName("emailOtps"))
-    .doc(otpDocId(email, purpose))
-    .delete()
-    .catch(() => {
-      /* ignore */
-    });
+  await deleteAdminDocumentRest(
+    otpCollection(),
+    otpDocId(email, purpose),
+  ).catch(() => {
+    /* ignore */
+  });
 }
 
 export { isCuhkStudentEmail, normalizeEmail };

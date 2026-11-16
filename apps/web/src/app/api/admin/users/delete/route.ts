@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  deleteUserAccount,
-  verifyAdminIdToken,
-} from "@/lib/firebase-admin";
+import { deleteUserAccount } from "@/lib/firebase-admin";
+import { verifyAdminIdTokenRest } from "@/lib/identity-toolkit-rest";
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -13,7 +11,9 @@ export async function POST(request: NextRequest) {
   const token = authHeader.startsWith("Bearer ")
     ? authHeader.slice("Bearer ".length).trim()
     : null;
-  const admin = await verifyAdminIdToken(token);
+  // Prefer REST verify so this route can auth even when firebase-admin/auth
+  // fails to load (jose ESM). deleteUserAccount still needs Admin SDK.
+  const admin = await verifyAdminIdTokenRest(token);
   if (!admin) {
     return jsonError("Admin access required.", 403);
   }

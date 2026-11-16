@@ -1,17 +1,16 @@
-import {
-  EmailAuthProvider,
-  createUserWithEmailAndPassword,
-  reauthenticateWithCredential,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  updatePassword,
-  type User,
-} from "firebase/auth";
+import type { User } from "firebase/auth";
+
+function authMod() {
+  const injected = (globalThis as { __fusionAuthModule?: typeof import("firebase/auth") })
+    .__fusionAuthModule;
+  if (injected) return injected;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require("firebase/auth") as typeof import("firebase/auth");
+}
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getAuthClient, getDb, isFirebaseConfigured } from "./firebase";
 import { collectionName } from "./app-env";
-import { validateCuhkStudentEmail } from "./cuhk-email";
+import { validateAnyCampusEmail } from "./campus";
 
 const USERNAMES_COLLECTION = collectionName("usernames");
 const PHONES_COLLECTION = collectionName("phones");
@@ -91,6 +90,37 @@ function randomGuestPassword(): string {
   return `Gr!${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
 }
 
+/**
+ * Guest checkout without a phone. Reuses the current Auth user, otherwise
+ * signs in anonymously. If anonymous auth is disabled, falls back to a
+ * one-off synthetic email so the order can still be written.
+ */
+export async function ensureGuestSession(): Promise<{
+  uid: string;
+  email?: string;
+}> {
+  if (!isFirebaseConfigured()) {
+    return { uid: `guest_${Date.now()}` };
+  }
+
+  const current = getAuthClient().currentUser;
+  if (current) {
+    return { uid: current.uid, email: current.email ?? undefined };
+  }
+
+  try {
+    const cred = await authMod().signInAnonymously(getAuthClient());
+    return { uid: cred.user.uid, email: cred.user.email ?? undefined };
+  } catch {
+    const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    const email = `guest_${id}@${EMAIL_DOMAIN}`;
+    const password = randomGuestPassword();
+    const user = await signUpWithSyntheticEmail(email, password);
+    storeGuestTempPassword(id, password);
+    return { uid: user.uid, email };
+  }
+}
+
 export function validateUsername(username: string): string | null {
   const trimmed = username.trim();
   if (trimmed.length < 3) return "Username must be at least 3 characters";
@@ -101,7 +131,7 @@ export function validateUsername(username: string): string | null {
 }
 
 export function validateEmail(email: string): string | null {
-  return validateCuhkStudentEmail(email);
+  return validateAnyCampusEmail(email);
 }
 
 export function validatePassword(password: string): string | null {
@@ -184,7 +214,7 @@ export async function signUpWithSyntheticEmail(
   if (!normalized.endsWith(`@${EMAIL_DOMAIN}`)) {
     throw new Error("Invalid account email");
   }
-  const cred = await createUserWithEmailAndPassword(
+  const cred = await authMod().createUserWithEmailAndPassword(
     getAuthClient(),
     normalized,
     password,
@@ -230,7 +260,7 @@ export async function ensureGuestAuthForPhone(phone: string): Promise<{
       };
     }
     if (storedPw) {
-      await signInWithEmailAndPassword(getAuthClient(), existing.email, storedPw);
+      await authMod().signInWithEmailAndPassword(getAuthClient(), existing.email, storedPw);
       return {
         uid: existing.uid,
         email: existing.email,
@@ -289,9 +319,9 @@ export async function setPasswordFromGuestTemp(
       "Open this on the same device you ordered from, or use Forgot password on the login page.",
     );
   }
-  const credential = EmailAuthProvider.credential(user.email, temp);
-  await reauthenticateWithCredential(user, credential);
-  await updatePassword(user, newPassword);
+  const credential = authMod().EmailAuthProvider.credential(user.email, temp);
+  await authMod().reauthenticateWithCredential(user, credential);
+  await authMod().updatePassword(user, newPassword);
   clearGuestTempPassword(phone);
 }
 
@@ -335,9 +365,9 @@ export async function signUpWithEmail(
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured");
   }
-  const cuhkErr = validateCuhkStudentEmail(email);
-  if (cuhkErr) throw new Error(cuhkErr);
-  const cred = await createUserWithEmailAndPassword(
+  const emailErr = validateAnyCampusEmail(email);
+  if (emailErr) throw new Error(emailErr);
+  const cred = await authMod().createUserWithEmailAndPassword(
     getAuthClient(),
     email.trim().toLowerCase(),
     password,
@@ -360,7 +390,7 @@ export async function signInWithEmail(
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured");
   }
-  const cred = await signInWithEmailAndPassword(
+  const cred = await authMod().signInWithEmailAndPassword(
     getAuthClient(),
     email.trim().toLowerCase(),
     password,
@@ -402,13 +432,13 @@ export async function sendPasswordReset(identifier: string): Promise<void> {
   const resolved = identifier.includes("@")
     ? identifier.trim().toLowerCase()
     : await resolveSignInEmail(identifier);
-  const cuhkErr = validateCuhkStudentEmail(resolved);
-  if (cuhkErr && !resolved.endsWith(`@${EMAIL_DOMAIN}`)) {
-    throw new Error(cuhkErr);
+  const emailErr = validateAnyCampusEmail(resolved);
+  if (emailErr && !resolved.endsWith(`@${EMAIL_DOMAIN}`)) {
+    throw new Error(emailErr);
   }
   // Skip continueUrl — unlisted origins (including Vercel hosts not yet in the
   // live Auth allowlist) make Firebase refuse the reset for real accounts.
-  await sendPasswordResetEmail(getAuthClient(), resolved);
+  await authMod().sendPasswordResetEmail(getAuthClient(), resolved);
 }
 
 export async function changePassword(
@@ -424,12 +454,12 @@ export async function changePassword(
   }
   const newErr = validatePassword(newPassword);
   if (newErr) throw new Error(newErr);
-  const credential = EmailAuthProvider.credential(user.email, currentPassword);
-  await reauthenticateWithCredential(user, credential);
-  await updatePassword(user, newPassword);
+  const credential = authMod().EmailAuthProvider.credential(user.email, currentPassword);
+  await authMod().reauthenticateWithCredential(user, credential);
+  await authMod().updatePassword(user, newPassword);
 }
 
 export async function signOutUser(): Promise<void> {
   if (!isFirebaseConfigured()) return;
-  await firebaseSignOut(getAuthClient());
+  await authMod().signOut(getAuthClient());
 }

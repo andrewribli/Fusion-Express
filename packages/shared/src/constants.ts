@@ -69,35 +69,46 @@ export const PRICES_DISCLAIMER =
 export const CUSTOM_ITEM_DEFAULT_WEIGHT_KG = 1;
 
 export const PAYMENT_FLOW_STEPS = [
-  "You pay nothing now. Order first, pay after delivery.",
-  "The runner pays Fusion at the till, then delivers to your lobby.",
-  "GraceRun reimburses the runner right after delivery.",
-  "You pay GraceRun the receipt total plus delivery (PayMe or FPS) within 24 hours.",
+  "You pay nothing now. Order first — app prices are estimates.",
+  "A runner accepts, buys the groceries, and enters the receipt total.",
+  "They deliver to your lobby.",
+  "You then pay the exact receipt total plus delivery via card, FPS, or PayMe.",
 ] as const;
 
-/** Fusion pickup hours. Runners shop then deliver to hall lobbies. */
+/** Fusion pickup hours. Other shops are not gated by this window yet. */
 export const SERVICE_HOURS = {
   timeZone: "Asia/Hong_Kong",
-  /** 24h clock, inclusive start */
-  openHour: 20,
-  /** 24h clock, exclusive end (1am) */
-  closeHour: 1,
-  label: "8:00pm – 1:00am, Hong Kong time",
+  /** 24h clock. Open at 8:30am, closed from 9:30pm. */
+  openHour: 8,
+  openMinute: 30,
+  closeHour: 21,
+  closeMinute: 30,
+  label: "8:30am – 9:30pm, Hong Kong time",
 } as const;
 
 export function hongKongHour(at = new Date()): number {
-  const hour = new Intl.DateTimeFormat("en-GB", {
-    timeZone: SERVICE_HOURS.timeZone,
-    hour: "numeric",
-    hour12: false,
-  }).format(at);
-  return Number(hour);
+  return hongKongClock(at).hour;
 }
 
-/** True during the nightly window, including midnight to 1am. */
+export function hongKongClock(at = new Date()): { hour: number; minute: number } {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: SERVICE_HOURS.timeZone,
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(at);
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
+  return { hour: hour === 24 ? 0 : hour, minute };
+}
+
+/** True during Fusion hours: 8:30am inclusive through 9:30pm exclusive. */
 export function isServiceOpen(at = new Date()): boolean {
-  const hour = hongKongHour(at);
-  return hour >= SERVICE_HOURS.openHour || hour < SERVICE_HOURS.closeHour;
+  const { hour, minute } = hongKongClock(at);
+  const now = hour * 60 + minute;
+  const open = SERVICE_HOURS.openHour * 60 + SERVICE_HOURS.openMinute;
+  const close = SERVICE_HOURS.closeHour * 60 + SERVICE_HOURS.closeMinute;
+  return now >= open && now < close;
 }
 
 export const WHY_GRACERUN = [

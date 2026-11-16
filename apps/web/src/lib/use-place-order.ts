@@ -4,8 +4,11 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
-import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import {
+  formatDeliveryAddress,
+  getLobbyForHall,
+} from "@/data/cuhk-locations";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import {
   getEstimatedDeliveryTime,
   isOverOrderLimit,
@@ -14,71 +17,47 @@ import {
 } from "@/lib/constants";
 import { friendlyPlaceOrderError } from "@/lib/auth-errors";
 import { notifyOrderPlaced } from "@/lib/notify-email";
+import { notifyOrderEvent } from "@/lib/notify-push";
+import {
+  canteenCollegeForRestaurant,
+  restaurantIdFromOrderItems,
+} from "@/data/canteen/colleges";
+import { isCanteenCart } from "@/lib/canteen/cart";
+import { cartCampusError } from "@/lib/cart-campus";
 import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
-import type { CustomerPaymentMethod } from "@/lib/payment-method";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
-import { normalizePhone, validatePhone } from "@/lib/auth";
-import {
-  CANTEEN_DELIVERY_FEE,
-  getRestaurant,
-} from "@fusion-express/shared/canteen";
-import {
-  parseCanteenItemId,
-  type ShopKind,
-} from "@fusion-express/shared/shop-kind";
+import type { CampusId } from "@fusion-express/shared/campus";
 
-export function usePlaceOrder(forcedShopKind?: ShopKind) {
+export function usePlaceOrder() {
   const router = useRouter();
   const { user, ensureGuestCheckout } = useUser();
-  const { items, sessionId, clearCart, shopKind: cartShopKind } = useCart();
-  const shopKind = forcedShopKind ?? cartShopKind;
+  const { items, sessionId, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const placeOrder = useCallback(
     async (opts: {
+      campus: CampusId;
       college: string;
       hall: string;
-      paymentMethod: CustomerPaymentMethod;
       customerNote?: string;
       tip?: number;
-      /** Required for guests; optional when already signed in with a saved phone. */
-      phone?: string;
     }) => {
-      if (!opts.college || !opts.hall || items.length === 0) {
-        setError("Add items and choose your college and hall first.");
+      if (!opts.campus || !opts.college || !opts.hall || items.length === 0) {
+        setError("Add items and choose your campus and dorm first.");
+        return;
+      }
+      const campusError = cartCampusError(items, opts.campus);
+      if (campusError) {
+        setError(campusError);
         return;
       }
 
-      // Guardrail: never place a mixed or wrong-shop order from this cart.
-      const hasCanteen = items.some((line) =>
-        line.item.id.startsWith("canteen:"),
-      );
-      const hasFusion = items.some(
-        (line) => !line.item.id.startsWith("canteen:"),
-      );
-      if (hasCanteen && hasFusion) {
-        setError(
-          "Fusion groceries and canteen food can’t be in the same order. Clear one cart and try again.",
-        );
-        return;
-      }
-      if (shopKind === "fusion" && hasCanteen) {
-        setError("This is Fusion checkout — remove canteen items first.");
-        return;
-      }
-      if (shopKind === "canteen" && hasFusion) {
-        setError("This is canteen checkout — remove Fusion grocery items first.");
-        return;
-      }
-
-      const phone = (opts.phone ?? user?.phone ?? "").trim();
-      const phoneErr = validatePhone(phone);
-      if (phoneErr) {
-        setError(phoneErr);
-        return;
-      }
+      const fullName =
+        user?.fullName && user.fullName !== "Guest"
+          ? user.fullName.trim()
+          : "Guest";
 
       setLoading(true);
       setError("");
@@ -86,19 +65,12 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
       try {
         await requestNotificationPermission();
 
-        let customer = user;
-        if (
-          !customer?.uid ||
-          customer.isGuest ||
-          !customer.phone ||
-          normalizePhone(customer.phone) !== normalizePhone(phone)
-        ) {
-          customer = await ensureGuestCheckout({
-            phone,
-            college: opts.college,
-            hall: opts.hall,
-          });
-        }
+        const customer = await ensureGuestCheckout({
+          fullName,
+          campus: opts.campus,
+          college: opts.college,
+          hall: opts.hall,
+        });
 
         if (!customer?.uid) {
           setError("Could not create your account. Try again.");
@@ -120,60 +92,36 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
           setError(ORDER_LIMIT_MESSAGE);
           return;
         }
-
-        const weightKg = cartTotalWeightKg(items);
-        const fee =
-          shopKind === "canteen"
-            ? {
-                baseFee: CANTEEN_DELIVERY_FEE,
-                weightKg,
-                extraKg: 0,
-                weightSurcharge: 0,
-                zone: 1 as const,
-                distanceSurcharge: 0,
-                deliveryFee: CANTEEN_DELIVERY_FEE,
-              }
-            : calculateDeliveryFee({
-                weightKg,
-                college: opts.college,
-              });
-
+        const fee = resolveOrderDeliveryFee(items, opts.college, opts.campus);
         const tipAmount = Math.max(0, opts.tip ?? 0);
         const total = orderSubtotal + fee.deliveryFee + tipAmount;
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
-        const digits = normalizePhone(phone);
-        const lobbyPoint = getLobbyForHall(opts.hall);
-        const customerName =
-          customer.fullName?.trim() && customer.fullName !== "Guest"
-            ? customer.fullName
-            : `Guest ${digits.slice(-4)}`;
-
-        const canteenIds = new Set(
-          items
-            .map((line) => parseCanteenItemId(line.item.id)?.restaurantId)
-            .filter((id): id is string => Boolean(id)),
-        );
-        if (shopKind === "canteen" && canteenIds.size > 1) {
-          setError(
-            "One canteen per order — clear items from the other canteen first.",
-          );
-          return;
-        }
-        const canteenId =
-          shopKind === "canteen" ? [...canteenIds][0] : undefined;
-        const canteenName = canteenId
-          ? getRestaurant(canteenId)?.name
+        const lobbyPoint = getLobbyForHall(opts.hall, opts.campus);
+        const customerName = customer.fullName.trim();
+        const canteen = isCanteenCart(items);
+        const restaurantId = canteen
+          ? restaurantIdFromOrderItems(
+              orderItems.map((item) => ({ itemId: item.itemId })),
+            )
+          : null;
+        const canteenCollege = canteen
+          ? canteenCollegeForRestaurant(restaurantId) ?? undefined
           : undefined;
+        const orderChannel = canteen
+          ? ("canteen" as const)
+          : opts.campus === "cityu"
+            ? ("taste" as const)
+            : ("fusion" as const);
 
         const orderId = await createOrder({
           sessionId,
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
-          customerPhone: digits,
-          shopKind,
-          canteenId,
-          canteenName,
+          campus: opts.campus,
+          orderChannel,
+          canteenRestaurantId: restaurantId ?? undefined,
+          canteenCollege,
           items: orderItems,
           status: "pending",
           college: opts.college,
@@ -184,9 +132,6 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
           customerNote: resolveSpecialInstructions(
             [
               opts.customerNote?.trim(),
-              shopKind === "canteen" && canteenName
-                ? `Pickup: ${canteenName}`
-                : "",
               ...new Set(
                 items
                   .map(({ item }) => item.itemNote)
@@ -201,7 +146,6 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
           tip: tipAmount || undefined,
           total,
           paymentReceived: false,
-          paymentMethod: opts.paymentMethod,
           fusionPaidByPlatform: false,
           estimatedDeliveryAt,
         });
@@ -218,6 +162,7 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
           customerName,
           deliveryLocation: `${formatDeliveryAddress(opts.college, opts.hall)} · Lobby: ${lobbyPoint}`,
         });
+        notifyOrderEvent(orderId, "created");
 
         clearCart();
         const guestFlag = customer.isGuest ? "&guest=1" : "";
@@ -228,16 +173,8 @@ export function usePlaceOrder(forcedShopKind?: ShopKind) {
         setLoading(false);
       }
     },
-    [
-      clearCart,
-      ensureGuestCheckout,
-      items,
-      router,
-      sessionId,
-      shopKind,
-      user,
-    ],
+    [clearCart, ensureGuestCheckout, items, router, sessionId, user],
   );
 
-  return { placeOrder, loading, error, setError, shopKind };
+  return { placeOrder, loading, error, setError };
 }

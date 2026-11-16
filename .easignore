@@ -1,0 +1,65 @@
+# EAS CLI reads .easignore from the git root and then ignores .gitignore.
+# Copy of ignore rules plus monorepo exclusions so uploads stay ~app-sized.
+
+# --- from .gitignore ---
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/coverage
+/.next/
+/apps/web/.next/
+/out/
+/apps/mobile/.expo/
+/apps/mobile/dist/
+*.tsbuildinfo
+/build
+.DS_Store
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env*
+!.env.example
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+.vercel
+.turbo/
+next-env.d.ts
+
+# --- EAS archive bloat ---
+.git
+.git/
+**/.git
+**/node_modules
+/android
+/ios
+/apps/mobile/android
+/apps/mobile/ios
+
+# Website, tooling, and junk that mobile builds do not need
+/apps/web
+/docs
+/scripts
+/tmp
+/reference
+/functions
+
+# Untracked blobs sitting at the repo root
+*.zip
+*.pdf
+*.exe
+*.png
+!/apps/mobile/**
+!/apps/mobile-test/**
+
+# Shared catalog dumps unused by the Expo app (menu.json is enough)
+/packages/shared/data/foodpanda-fusion-*.json
+/packages/shared/data/parknshop-*.json
+/packages/shared/data/pns-snacks-seed.json
+/packages/shared/data/canteen/

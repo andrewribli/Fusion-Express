@@ -17,6 +17,16 @@ function cell(value: string | undefined): string {
   return trimmed ? trimmed : "—";
 }
 
+/** Firestore `createdAt` (ISO string from parseUserDoc). Local calendar date. */
+function formatSignupDate(value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) return "—";
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return "—";
+  // en-CA → YYYY-MM-DD in the viewer's local timezone
+  return d.toLocaleDateString("en-CA");
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,11 +86,20 @@ export default function AdminUsersPage() {
         },
         body: JSON.stringify({ uid: user.uid }),
       });
-      const data = (await res.json()) as {
+      let data: {
         error?: string;
         email?: string;
         previousAuthEmail?: string;
-      };
+      } = {};
+      try {
+        data = (await res.json()) as typeof data;
+      } catch {
+        throw new Error(
+          res.status === 500
+            ? "Server failed to load admin Auth (try again). If it keeps failing, redeploy."
+            : `Could not repair account (HTTP ${res.status}).`,
+        );
+      }
       if (!res.ok) throw new Error(data.error ?? "Could not repair account");
       setActionMsg(
         data.previousAuthEmail && data.previousAuthEmail !== data.email
@@ -141,15 +160,18 @@ export default function AdminUsersPage() {
                   ? "Loading…"
                   : `${users.length} account${users.length === 1 ? "" : "s"}, sorted by name`}
               </p>
-              <p className="mt-2 text-sm">
-                <Link href="/admin/payouts" className="font-medium text-[#ED1C24] underline">
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  href="/admin/messaging"
+                  className="inline-flex min-h-11 items-center rounded-xl bg-[#ED1C24] px-4 py-2.5 text-sm font-bold text-white"
+                >
+                  Send email
+                </Link>
+                <Link href="/admin/payouts" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-800">
                   Runner payouts
                 </Link>
-                {" · "}
-                <Link href="/admin/messaging" className="font-medium text-[#ED1C24] underline">
-                  Messaging
-                </Link>
-                {" · "}
+              </div>
+              <p className="mt-3 text-sm">
                 <Link href="/admin/refunds" className="font-medium text-[#ED1C24] underline">
                   Pending Fusion price refunds
                 </Link>
@@ -194,6 +216,7 @@ export default function AdminUsersPage() {
                         <th className="whitespace-nowrap py-2 pr-4">Full name</th>
                         <th className="whitespace-nowrap py-2 pr-4">Email</th>
                         <th className="whitespace-nowrap py-2 pr-4">Phone</th>
+                        <th className="whitespace-nowrap py-2 pr-4">Signed up</th>
                         <th className="whitespace-nowrap py-2 pr-4">Is runner</th>
                         <th className="whitespace-nowrap py-2 pr-4">Guest</th>
                         <th className="whitespace-nowrap py-2 pr-4">Message</th>
@@ -214,6 +237,9 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {cell(u.phone)}
+                          </td>
+                          <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
+                            {formatSignupDate(u.createdAt)}
                           </td>
                           <td className="whitespace-nowrap py-2.5 pr-4 text-gray-700">
                             {u.isRunner ? "Yes" : "No"}

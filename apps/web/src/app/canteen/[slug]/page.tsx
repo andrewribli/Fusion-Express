@@ -1,216 +1,549 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { AccountMenu } from "@/components/AccountMenu";
-import { AppLogo } from "@/components/AppLogo";
-import { useCart } from "@/context/CartContext";
+import { useParams, useRouter } from "next/navigation";
+import { ShopLayout } from "@/components/ShopLayout";
+import { CollegeDiscountBanner } from "@/components/canteen/CollegeDiscountBanner";
 import {
-  currentUcMealZone,
-  getCanteenMenu,
+  CATEGORY_LABELS,
+  MENU as BF_MENU,
+  type MenuCategory,
+} from "@/data/canteen/bf-menu";
+import {
   getRestaurant,
-  toCartMenuItemFromCanteen,
-  UC_MEAL_ZONES,
-  type CanteenMealZone,
-  type CanteenMenuItem,
-} from "@fusion-express/shared/canteen";
+  RESTAURANTS,
+  type Restaurant,
+} from "@/data/canteen/restaurants";
+import {
+  getSimpleMenu,
+  isSimpleMenuRestaurant,
+  type SimpleMenuItem,
+  type SimpleRestaurantId,
+} from "@/data/canteen/simple-menu";
+import Image from "next/image";
+import {
+  groupByCategory,
+  ucItemsForPeriod,
+  type MealPeriod,
+} from "@/data/canteen/uc-menu";
+import {
+  closedBannerText,
+  getCurrentUcPeriod,
+  getNextUcOpeningLabel,
+  isBfCanteenOpen,
+  isSimpleCanteenOpen,
+} from "@/lib/canteen/hours";
+import {
+  getCanteenConfig,
+  CANTEEN_MEAL_PERIODS,
+  orderedMealPeriods,
+  getActiveMealPeriod,
+} from "@/data/canteen/canteen-config";
+import {
+  BfItemsGrid,
+  PriceSortSelect,
+  SimpleItemsGrid,
+  UcItemsGrid,
+  usePriceSort,
+} from "@/components/canteen/CanteenMenuGrid";
+import {
+  toCartMenuItemFromBf,
+  toCartMenuItemFromSimple,
+  toCartMenuItemFromUc,
+} from "@/lib/canteen/cart";
+import type { MenuItem } from "@/lib/types";
 
-function MenuRow({
-  item,
-  restaurantId,
-}: {
-  item: CanteenMenuItem;
-  restaurantId: string;
-}) {
-  const { addItem, items, setQuantity } = useCart();
-  const cartId = `canteen:${restaurantId}:${item.id}`;
-  const qty = items.find((c) => c.item.id === cartId)?.quantity ?? 0;
+const SLUG_ALIASES: Record<string, string> = {
+  "united-college": "uc-canteen",
+  uc: "uc-canteen",
+  "shho-canteen": "sh-ho-canteen",
+  "sh-ho": "sh-ho-canteen",
+  "paper-coffee": "paper-and-coffee",
+  "cu-café": "cu-cafe",
+  "sora-zen": "sorazen",
+  "sora zen": "sorazen",
+  na: "na-canteen",
+  "new-asia": "na-canteen",
+  "new-asia-canteen": "na-canteen",
+  tolo: "cafe-tolo",
+  "café-tolo": "cafe-tolo",
+  "cuhk-cafe-tolo": "cafe-tolo",
+  "cuhk-tuck-shop": "tuck-shop",
+  "swimming-pool-tuck-shop": "tuck-shop",
+  ebeneezers: "ebenezers",
+  "ebeneezers-kebabs": "ebenezers",
+  "ebeneezer": "ebenezers",
+};
 
-  return (
-    <li className="flex items-start justify-between gap-3 border-b border-white/5 py-3">
-      <div className="min-w-0">
-        <p className="text-sm font-semibold text-white">
-          {item.name}
-          {item.nameZh ? (
-            <span className="ml-1 font-normal text-zinc-400">({item.nameZh})</span>
-          ) : null}
-        </p>
-        {item.description ? (
-          <p className="mt-0.5 text-xs text-zinc-500">{item.description}</p>
-        ) : null}
-        <p className="mt-1 text-sm font-bold text-emerald-400">
-          HK${item.price.toFixed(0)}
-        </p>
-      </div>
-      {qty > 0 ? (
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            className="h-8 w-8 rounded-full bg-white/10 text-white"
-            onClick={() => setQuantity(cartId, qty - 1)}
-          >
-            −
-          </button>
-          <span className="w-5 text-center text-sm font-bold">{qty}</span>
-          <button
-            type="button"
-            className="h-8 w-8 rounded-full bg-emerald-500 text-white"
-            onClick={() => setQuantity(cartId, qty + 1)}
-          >
-            +
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="shrink-0 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-bold text-white"
-          onClick={() => addItem(toCartMenuItemFromCanteen(item, restaurantId))}
-        >
-          Add
-        </button>
-      )}
-    </li>
-  );
-}
+const BF_FILTERS: Array<"all" | MenuCategory> = [
+  "all",
+  "mains",
+  "snacks",
+  "drinks",
+  "dessert",
+];
 
-export default function CanteenMenuPage() {
+export default function CanteenSlugPage() {
   const params = useParams<{ slug: string }>();
-  const slug = params.slug;
+  const router = useRouter();
+  const rawSlug = String(params?.slug ?? "");
+  const slug = SLUG_ALIASES[rawSlug] ?? rawSlug;
   const restaurant = getRestaurant(slug);
-  const { itemCount } = useCart();
-  const menu = useMemo(() => getCanteenMenu(slug), [slug]);
-  const isUc = slug === "uc-canteen";
-  const [zone, setZone] = useState<CanteenMealZone | "all">(
-    () => currentUcMealZone() ?? "all",
-  );
+  const [search, setSearch] = useState("");
 
-  const visible = useMemo(() => {
-    if (!isUc || zone === "all") return menu;
-    return menu.filter(
-      (item) => !item.timeZones || item.timeZones.includes(zone),
-    );
-  }, [isUc, menu, zone]);
-
-  const categories = useMemo(() => {
-    const order: string[] = [];
-    for (const item of visible) {
-      if (!order.includes(item.category)) order.push(item.category);
+  useEffect(() => {
+    if (rawSlug && SLUG_ALIASES[rawSlug]) {
+      router.replace(`/canteen/${SLUG_ALIASES[rawSlug]}`);
     }
-    return order;
-  }, [visible]);
+  }, [rawSlug, router]);
+
+  const searchProducts = useMemo<MenuItem[]>(() => {
+    if (!restaurant) return [];
+    if (restaurant.id === "benjamin-franklin") {
+      return BF_MENU.map((item) => toCartMenuItemFromBf(item, "benjamin-franklin"));
+    }
+    if (restaurant.id === "uc-canteen") {
+      return ucItemsForPeriod(getCurrentUcPeriod()).map((item) =>
+        toCartMenuItemFromUc(item, "uc-canteen"),
+      );
+    }
+    if (isSimpleMenuRestaurant(restaurant.id)) {
+      const menu = getSimpleMenu(restaurant.id) ?? [];
+      return menu.map((item) =>
+        toCartMenuItemFromSimple(item, restaurant.id as SimpleRestaurantId),
+      );
+    }
+    return [];
+  }, [restaurant]);
+
+  const sidebar = (
+    <nav className="px-2 py-2">
+      <Link
+        href="/canteen"
+        className="mb-1 block rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-400 hover:bg-gray-50"
+      >
+        All canteens
+      </Link>
+      {RESTAURANTS.map((r) => {
+        const active = r.id === restaurant?.id;
+        return (
+          <Link
+            key={r.id}
+            href={`/canteen/${r.id}`}
+            className={`block rounded-lg px-3 py-2.5 text-sm font-medium ${
+              active
+                ? "bg-[#ED1C24]/10 text-[#ED1C24]"
+                : "text-gray-800 hover:bg-gray-50"
+            }`}
+          >
+            {r.shortName}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-[#0c0c0c] px-4 py-8 text-center text-white">
-        <p className="text-sm text-zinc-400">Canteen not found.</p>
-        <Link href="/canteen" className="mt-4 inline-block text-[#ED1C24]">
-          Back to canteens
-        </Link>
-      </div>
-    );
-  }
-
-  if (!restaurant.menuReady) {
-    return (
-      <div className="min-h-screen bg-[#0c0c0c] px-4 py-8 text-center text-white">
-        <p className="text-sm text-zinc-400">{restaurant.name} is coming soon.</p>
-        <Link href="/canteen" className="mt-4 inline-block text-emerald-400">
-          Back to canteens
-        </Link>
-      </div>
+      <ShopLayout
+        deliveryLabel="Deliver to CUHK hall lobby · Canteen"
+        searchProducts={[]}
+        search={search}
+        onSearchChange={setSearch}
+        onSearchSelect={() => undefined}
+        searchPlaceholder="Search canteen menu"
+        sidebar={sidebar}
+        mobileSidebarTitle="Canteens"
+        cartChannel="canteen"
+      >
+        <div className="rounded-2xl border border-gray-100 bg-white px-4 py-10 text-center shadow-sm">
+          <p className="text-sm text-gray-600">Canteen not found.</p>
+          <Link
+            href="/canteen"
+            className="mt-4 inline-block text-sm font-semibold text-[#ED1C24]"
+          >
+            Back to canteens
+          </Link>
+        </div>
+      </ShopLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0c0c0c]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-lg items-center justify-between gap-2 px-4 py-3">
-          <div className="min-w-0">
-            <Link href="/" className="flex items-center gap-2" aria-label="GraceRun home">
-              <AppLogo size={36} className="h-9 w-9" />
-              <p className="truncate text-sm font-bold text-white">GraceRun</p>
-            </Link>
-            <Link
-              href="/canteen"
-              className="mt-1 inline-block text-xs text-zinc-400 hover:text-white"
-            >
-              ← Canteens
-            </Link>
+    <ShopLayout
+      deliveryLabel={`Deliver to CUHK hall lobby · ${restaurant.shortName}`}
+      deliveryLogoSrc={restaurant.logoSrc}
+      searchProducts={searchProducts}
+      search={search}
+      onSearchChange={setSearch}
+      onSearchSelect={() => undefined}
+      searchPlaceholder={`Search ${restaurant.shortName}`}
+      sidebar={sidebar}
+      mobileSidebarTitle="Canteens"
+      cartChannel="canteen"
+      hideTrackFab
+      orderingEnabled={
+        restaurant.id === "benjamin-franklin"
+          ? isBfCanteenOpen()
+          : restaurant.id === "uc-canteen"
+            ? Boolean(getCurrentUcPeriod())
+            : isSimpleMenuRestaurant(restaurant.id)
+              ? Boolean(isSimpleCanteenOpen(restaurant.id))
+              : false
+      }
+    >
+      {restaurant.id === "benjamin-franklin" ? (
+        <BfMenu search={search} />
+      ) : restaurant.id === "uc-canteen" ? (
+        <UcMenu search={search} />
+      ) : isSimpleMenuRestaurant(restaurant.id) ? (
+        <SimpleMenuView restaurant={restaurant} search={search} />
+      ) : (
+        <StubMenu
+          name={restaurant.name}
+          blurb={restaurant.blurb}
+          restaurantId={restaurant.id}
+        />
+      )}
+    </ShopLayout>
+  );
+}
+
+function StubMenu({
+  name,
+  blurb,
+  restaurantId,
+}: {
+  name: string;
+  blurb: string;
+  restaurantId: string;
+}) {
+  return (
+    <>
+      <h1 className="text-2xl font-extrabold text-gray-900">{name}</h1>
+      <p className="mt-1 text-sm text-gray-600">{blurb}</p>
+      <div className="mt-5">
+        <CollegeDiscountBanner restaurantId={restaurantId} />
+      </div>
+      <div className="mt-6 rounded-2xl border border-gray-100 bg-white px-4 py-8 text-center shadow-sm">
+        <p className="text-sm text-gray-600">
+          Full menu coming soon. College discount rules already apply once this
+          canteen goes live.
+        </p>
+        <Link
+          href="/canteen/uc-canteen"
+          className="mt-4 inline-block text-sm font-semibold text-[#ED1C24]"
+        >
+          Browse UC Canteen (live menu)
+        </Link>
+      </div>
+    </>
+  );
+}
+
+function SimpleMenuView({
+  restaurant,
+  search,
+}: {
+  restaurant: Restaurant;
+  search: string;
+}) {
+  const restaurantId = restaurant.id as SimpleRestaurantId;
+  const [filter, setFilter] = useState<"all" | MenuCategory>("all");
+  const [sort, setSort] = usePriceSort();
+  const open = isSimpleCanteenOpen(restaurantId) ?? false;
+  const cfg = getCanteenConfig(restaurantId);
+  const menu = getSimpleMenu(restaurantId) ?? [];
+
+  const items = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list: SimpleMenuItem[] =
+      filter === "all" ? menu : menu.filter((i) => i.category === filter);
+    if (q) {
+      list = list.filter(
+        (i) =>
+          i.name.toLowerCase().includes(q) ||
+          (i.description ?? "").toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [filter, menu, search]);
+
+  const usedCategories = useMemo(() => {
+    const set = new Set(menu.map((i) => i.category));
+    return BF_FILTERS.filter((id) => id === "all" || set.has(id));
+  }, [menu]);
+
+  return (
+    <>
+      <div className="flex items-start gap-3">
+        {restaurant.logoSrc ? (
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-gray-100">
+            <Image
+              src={restaurant.logoSrc}
+              alt={`${restaurant.name} logo`}
+              fill
+              sizes="56px"
+              className="object-contain p-1"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/canteen/cart"
-              className="relative rounded-full border border-white/15 px-3 py-2 text-xs font-semibold text-white hover:bg-white/5"
-            >
-              Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-            </Link>
-            <AccountMenu />
-          </div>
+        ) : null}
+        <div className="min-w-0">
+          <h1 className="text-2xl font-extrabold text-gray-900">
+            {restaurant.name}
+          </h1>
+          {restaurant.location ? (
+            <p className="mt-1 text-sm font-medium text-gray-700">
+              {restaurant.location}
+            </p>
+          ) : null}
+          <p className="mt-1 text-sm text-gray-600">{restaurant.blurb}</p>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-lg px-4 pb-28 pt-5">
-        <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-        <p className="mt-1 text-sm text-zinc-400">{restaurant.blurb}</p>
-        <p className="mt-1 text-xs text-zinc-500">{restaurant.hoursLabel}</p>
-
-        {isUc ? (
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setZone("all")}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                zone === "all"
-                  ? "bg-emerald-500 text-white"
-                  : "bg-white/10 text-zinc-300"
-              }`}
-            >
-              All
-            </button>
-            {(Object.keys(UC_MEAL_ZONES) as CanteenMealZone[]).map((id) => (
+      </div>
+      <div
+        className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+          open
+            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+            : "border-amber-200 bg-amber-50 text-amber-900"
+        }`}
+      >
+        {open
+          ? `Open now · ${cfg?.hoursLabel ?? restaurant.hoursLabel} (HKT)`
+          : closedBannerText(restaurant.name, restaurantId)}
+      </div>
+      <div className="mt-4">
+        <CollegeDiscountBanner restaurantId={restaurantId} />
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {usedCategories.map((id) => {
+            const label = id === "all" ? "All" : CATEGORY_LABELS[id];
+            const active = filter === id;
+            return (
               <button
                 key={id}
                 type="button"
-                onClick={() => setZone(id)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  zone === id
-                    ? "bg-emerald-500 text-white"
-                    : "bg-white/10 text-zinc-300"
+                onClick={() => setFilter(id)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                  active
+                    ? "bg-[#ED1C24] text-white"
+                    : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
                 }`}
               >
-                {UC_MEAL_ZONES[id].label}
+                {label}
               </button>
-            ))}
-          </div>
-        ) : null}
-
-        {categories.map((cat) => (
-          <section key={cat} className="mt-6">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-emerald-400">
-              {cat}
-            </h2>
-            <ul>
-              {visible
-                .filter((item) => item.category === cat)
-                .map((item) => (
-                  <MenuRow key={item.id} item={item} restaurantId={slug} />
-                ))}
-            </ul>
-          </section>
-        ))}
-      </main>
-
-      {itemCount > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0c0c0c]/95 p-4 backdrop-blur">
-          <Link
-            href="/canteen/checkout"
-            className="mx-auto flex max-w-lg items-center justify-center rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white"
-          >
-            Checkout canteen order ({itemCount})
-          </Link>
+            );
+          })}
         </div>
-      ) : null}
-    </div>
+        <PriceSortSelect value={sort} onChange={setSort} />
+      </div>
+      {items.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-500">
+          No matching items.
+        </p>
+      ) : (
+        <SimpleItemsGrid
+          items={items}
+          restaurantId={restaurantId}
+          orderingEnabled={open}
+          sort={sort}
+          groupByMealPeriod={Boolean(cfg?.mealPeriods)}
+        />
+      )}
+    </>
+  );
+}
+
+function BfMenu({ search }: { search: string }) {
+  const [filter, setFilter] = useState<"all" | MenuCategory>("all");
+  const [sort, setSort] = usePriceSort();
+  const open = isBfCanteenOpen();
+  const items = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list =
+      filter === "all" ? BF_MENU : BF_MENU.filter((i) => i.category === filter);
+    if (q) {
+      list = list.filter(
+        (i) =>
+          i.name.toLowerCase().includes(q) ||
+          (i.description ?? "").toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [filter, search]);
+
+  return (
+    <>
+      <h1 className="text-2xl font-extrabold text-gray-900">
+        Benjamin Franklin Canteen
+      </h1>
+      <p className="mt-1 text-sm text-gray-600">
+        Campus favorites · HK$10 flat delivery to your lobby
+      </p>
+      <div
+        className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+          open
+            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+            : "border-amber-200 bg-amber-50 text-amber-900"
+        }`}
+      >
+        {open
+          ? "Open now · 7:30 AM – 9:00 PM (HKT)"
+          : closedBannerText("Benjamin Franklin Canteen", "benjamin-franklin")}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {BF_FILTERS.map((id) => {
+            const label = id === "all" ? "All" : CATEGORY_LABELS[id];
+            const active = filter === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setFilter(id)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                  active
+                    ? "bg-[#ED1C24] text-white"
+                    : "bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+        <PriceSortSelect value={sort} onChange={setSort} />
+      </div>
+      {items.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-500">No matching items.</p>
+      ) : (
+        <BfItemsGrid items={items} orderingEnabled={open} sort={sort} />
+      )}
+    </>
+  );
+}
+
+function UcMenu({ search }: { search: string }) {
+  const [period, setPeriod] = useState<MealPeriod | null>(null);
+  const [nextOpen, setNextOpen] = useState("7:30 AM");
+  const [sort, setSort] = usePriceSort();
+  const open = Boolean(period);
+
+  useEffect(() => {
+    const tick = () => {
+      setPeriod(getCurrentUcPeriod());
+      setNextOpen(getNextUcOpeningLabel());
+    };
+    tick();
+    const id = window.setInterval(tick, 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const activePeriod = period ?? getActiveMealPeriod();
+  const periodOrder = orderedMealPeriods(activePeriod);
+
+  const filteredBySearch = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const all = ucItemsForPeriod(period);
+    if (!q) return all;
+    return all.filter(
+      (i) =>
+        i.name.toLowerCase().includes(q) ||
+        (i.nameZh ?? "").toLowerCase().includes(q) ||
+        (i.description ?? "").toLowerCase().includes(q),
+    );
+  }, [period, search]);
+
+  const groups = useMemo(
+    () => groupByCategory(filteredBySearch),
+    [filteredBySearch],
+  );
+
+  return (
+    <>
+      <div className="mb-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#ED1C24]">
+          United College
+        </p>
+        <h1 className="mt-1 text-2xl font-extrabold text-gray-900">UC Canteen</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Menu changes by time of day. Flat HK$10 delivery to your lobby.
+        </p>
+      </div>
+
+      <div className="mt-4">
+        <CollegeDiscountBanner restaurantId="uc-canteen" />
+      </div>
+
+      <div
+        className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+          open
+            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+            : "border-amber-200 bg-amber-50 text-amber-900"
+        }`}
+      >
+        {open
+          ? `Open now · ${CANTEEN_MEAL_PERIODS[period!].label} (${CANTEEN_MEAL_PERIODS[period!].start} – ${CANTEEN_MEAL_PERIODS[period!].end})`
+          : closedBannerText("UC Canteen", "uc-canteen")}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {periodOrder.map((id) => {
+            const slot = CANTEEN_MEAL_PERIODS[id];
+            const active = period === id;
+            return (
+              <div
+                key={id}
+                className={`shrink-0 rounded-xl px-3 py-2 text-left text-xs ${
+                  active
+                    ? "bg-[#ED1C24] text-white"
+                    : "bg-white text-gray-400 ring-1 ring-gray-200 opacity-50"
+                }`}
+              >
+                <p className="font-semibold">{slot.label}</p>
+                <p className={active ? "text-white/80" : "text-gray-500"}>
+                  {slot.start} – {slot.end}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        <PriceSortSelect value={sort} onChange={setSort} />
+      </div>
+
+      {!open ? (
+        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-6 text-center">
+          <p className="text-base font-semibold text-amber-900">
+            UC Canteen is currently closed. Opens at {nextOpen}.
+          </p>
+          <p className="mt-2 text-sm text-amber-800/80">
+            Open periods: Breakfast 7:30–11:00 · Lunch 11:00–2:30 · Tea
+            2:30–5:00 · Dinner 5:00–7:30 (HKT). Closed Sundays.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-5 space-y-6">
+          {groups.map((group) => (
+            <section key={group.category}>
+              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-400">
+                {group.category}
+              </h2>
+              <UcItemsGrid
+                items={group.items}
+                orderingEnabled={open}
+                sort={sort}
+              />
+            </section>
+          ))}
+          {groups.length === 0 ? (
+            <p className="py-8 text-center text-sm text-gray-500">
+              No matching items.
+            </p>
+          ) : null}
+        </div>
+      )}
+    </>
   );
 }

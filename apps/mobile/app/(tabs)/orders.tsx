@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "expo-router";
+import {
+  useNavigation,
+  type CompositeNavigationProp,
+} from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   fetchOrdersByCustomer,
@@ -7,8 +12,31 @@ import {
 } from "@fusion-express/shared";
 import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../../src/auth";
+import type { RootStackParamList, TabsParamList } from "../../src/navigation";
+import {
+  Card,
+  EmptyState,
+  LoadingBlock,
+  Page,
+  PrimaryButton,
+  ScreenHeader,
+} from "../../src/ui";
+
+type OrdersNav = CompositeNavigationProp<
+  BottomTabNavigationProp<TabsParamList, "Orders">,
+  NativeStackNavigationProp<RootStackParamList>
+>;
+
+function statusTone(status: Order["status"]): string {
+  if (status === "delivered" || status === "completed" || status === "paid") {
+    return "text-emerald-700";
+  }
+  if (status === "pending") return "text-amber-600";
+  return "text-fusion";
+}
 
 export default function OrdersScreen() {
+  const navigation = useNavigation<OrdersNav>();
   const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
@@ -36,52 +64,97 @@ export default function OrdersScreen() {
 
   if (authLoading) {
     return (
-      <View className="flex-1 bg-white px-4 pt-4">
-        <Text className="text-gray-500">Loading…</Text>
-      </View>
+      <Page>
+        <ScreenHeader title="Your orders" />
+        <LoadingBlock />
+      </Page>
     );
   }
 
   if (!user) {
     return (
-      <View className="flex-1 bg-white px-4 pt-4">
-        <Text className="mb-3 text-xl font-bold">Your orders</Text>
-        <Text className="text-gray-500">
-          Sign in on the Profile tab to see orders tied to your account.
-        </Text>
-        <Text className="mt-2 text-sm text-gray-400">
-          Guest checkout orders appear after you place them with the same phone
-          on this device (you stay signed in as the guest account).
-        </Text>
-      </View>
+      <Page>
+        <ScreenHeader title="Your orders" />
+        <EmptyState
+          title="Sign in to see your orders"
+          body="Open the Profile tab with your CUHK email. Guest checkout orders stay on this device after you place them."
+          actionLabel="Go to Profile"
+          onAction={() => navigation.navigate("Profile")}
+        />
+      </Page>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 pt-4">
-      <View className="mb-3 flex-row items-center justify-between">
-        <Text className="text-xl font-bold">Your orders</Text>
-        <Pressable onPress={() => void load()}>
-          <Text className="text-sm font-semibold text-fusion">Refresh</Text>
-        </Pressable>
-      </View>
-      {error ? <Text className="mb-2 text-sm text-red-600">{error}</Text> : null}
-      {loading ? (
-        <Text className="text-gray-500">Loading…</Text>
-      ) : orders.length === 0 ? (
-        <Text className="text-gray-500">No orders for this account yet.</Text>
-      ) : (
-        orders.map((order) => (
-          <Link key={order.id} href={`/track?orderId=${order.id}`} asChild>
-            <Pressable className="mb-3 rounded-2xl border border-gray-200 p-4">
-              <Text className="font-bold text-fusion">{order.id}</Text>
-              <Text className="text-sm text-gray-600">
-                {ORDER_STATUS_LABELS[order.status]} · ${order.total}
-              </Text>
+    <Page>
+      <ScreenHeader
+        title="Your orders"
+        right={
+          <Pressable onPress={() => void load()}>
+            <Text className="text-sm font-semibold text-fusion">Refresh</Text>
+          </Pressable>
+        }
+      />
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-4 py-4 pb-10"
+      >
+        {error ? (
+          <Card className="mb-3 border-red-100 bg-red-50">
+            <Text className="text-sm text-red-700">{error}</Text>
+            <PrimaryButton
+              label="Retry"
+              className="mt-3"
+              onPress={() => void load()}
+            />
+          </Card>
+        ) : null}
+
+        {loading ? (
+          <LoadingBlock label="Loading orders…" />
+        ) : orders.length === 0 ? (
+          <EmptyState
+            title="No orders yet"
+            body="Browse the shop and place your first delivery to your hall lobby."
+            actionLabel="Shop now"
+            onAction={() => navigation.navigate("Shop")}
+          />
+        ) : (
+          orders.map((order) => (
+            <Pressable
+              key={order.id}
+              className="mb-3"
+              onPress={() =>
+                navigation.navigate("Track", { orderId: order.id })
+              }
+            >
+              <Card>
+                <View className="flex-row items-start justify-between gap-3">
+                  <View className="flex-1">
+                    <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Order
+                    </Text>
+                    <Text className="mt-0.5 font-bold text-gray-900">
+                      {order.id}
+                    </Text>
+                  </View>
+                  <Text
+                    className={`text-sm font-bold ${statusTone(order.status)}`}
+                  >
+                    {ORDER_STATUS_LABELS[order.status]}
+                  </Text>
+                </View>
+                <Text className="mt-3 text-sm text-gray-600">
+                  Total ${order.total}
+                </Text>
+                <Text className="mt-2 text-xs font-semibold text-fusion">
+                  Track order ›
+                </Text>
+              </Card>
             </Pressable>
-          </Link>
-        ))
-      )}
-    </ScrollView>
+          ))
+        )}
+      </ScrollView>
+    </Page>
   );
 }

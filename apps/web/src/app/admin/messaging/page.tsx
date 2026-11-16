@@ -7,9 +7,10 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import {
-  previewBroadcastCount,
+  loadBroadcastRecipients,
   sendBroadcast,
   type BroadcastGroup,
+  type BroadcastPerson,
 } from "@/lib/admin-broadcast";
 
 type GroupConfig = {
@@ -20,7 +21,19 @@ type GroupConfig = {
   defaultBody: string;
 };
 
+const YOURS_TRULY = `Hey! It's Andrew from GraceRun. This semester I want everyone to get at least a 3.50 GPA. So let's erase the time we take to walk to Fusion and use it for completing our assignments instead. Your first delivery is on me. No hill. No queue. Just food. Keep studying hard! Order at gracerun.fit
+
+Yours truly,
+Andrew`;
+
 const GROUPS: GroupConfig[] = [
+  {
+    id: "everyone",
+    title: "Everyone",
+    description: "Every account with a real email",
+    defaultSubject: "Want a 3.50 GPA or higher this CUHK semester? We can help.",
+    defaultBody: YOURS_TRULY,
+  },
   {
     id: "new_users",
     title: "New Users",
@@ -47,16 +60,17 @@ const GROUPS: GroupConfig[] = [
   },
 ];
 
-function groupLabel(id: BroadcastGroup): string {
-  return GROUPS.find((g) => g.id === id)?.title ?? id;
-}
+type Audience = "all" | "customers" | "runners";
 
 export default function AdminMessagingPage() {
   const [selected, setSelected] = useState<GroupConfig | null>(null);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [count, setCount] = useState<number | null>(null);
-  const [countLoading, setCountLoading] = useState(false);
+  const [people, setPeople] = useState<BroadcastPerson[]>([]);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [audience, setAudience] = useState<Audience>("all");
+  const [query, setQuery] = useState("");
+  const [listLoading, setListLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -71,29 +85,34 @@ export default function AdminMessagingPage() {
     setStatus("");
     setError("");
     setFailed([]);
-    setCount(null);
+    setPeople([]);
+    setPicked(new Set());
+    setAudience("all");
+    setQuery("");
   }, []);
 
   useEffect(() => {
     if (!selected) return;
     let cancelled = false;
-    setCountLoading(true);
+    setListLoading(true);
     void (async () => {
       try {
-        const n = await previewBroadcastCount(selected.id);
+        const rows = await loadBroadcastRecipients(selected.id);
         if (!cancelled) {
-          setCount(n);
+          setPeople(rows);
+          setPicked(new Set(rows.map((person) => person.email)));
           setError("");
         }
       } catch (err) {
         if (!cancelled) {
-          setCount(null);
+          setPeople([]);
+          setPicked(new Set());
           setError(
-            err instanceof Error ? err.message : "Could not load recipient count.",
+            err instanceof Error ? err.message : "Could not load recipients.",
           );
         }
       } finally {
-        if (!cancelled) setCountLoading(false);
+        if (!cancelled) setListLoading(false);
       }
     })();
     return () => {
@@ -101,12 +120,39 @@ export default function AdminMessagingPage() {
     };
   }, [selected]);
 
+  const shown = people.filter((person) => {
+    if (audience === "customers" && person.isRunner) return false;
+    if (audience === "runners" && !person.isRunner) return false;
+    const needle = query.trim().toLowerCase();
+    if (!needle) return true;
+    return (
+      person.email.includes(needle) ||
+      person.name.toLowerCase().includes(needle)
+    );
+  });
+
+  function setShownPicked(on: boolean) {
+    setPicked((current) => {
+      const next = new Set(current);
+      for (const person of shown) {
+        if (on) next.add(person.email);
+        else next.delete(person.email);
+      }
+      return next;
+    });
+  }
+
   async function handleSend(test: boolean) {
     if (!selected) return;
     const trimmedSubject = subject.trim();
     const trimmedBody = body.trim();
+    const emails = [...picked];
     if (!trimmedSubject || !trimmedBody) {
       setError("Subject and body are required.");
+      return;
+    }
+    if (!test && emails.length === 0) {
+      setError("Select at least one recipient.");
       return;
     }
 
@@ -114,9 +160,7 @@ export default function AdminMessagingPage() {
     setError("");
     setFailed([]);
     setStatus(
-      test
-        ? "Sending test to yourself…"
-        : `Sending to ${count ?? "…"} users…`,
+      test ? "Sending test to yourself…" : `Sending to ${emails.length} people…`,
     );
 
     try {
@@ -124,6 +168,7 @@ export default function AdminMessagingPage() {
         group: selected.id,
         subject: trimmedSubject,
         body: trimmedBody,
+        emails,
         test,
       });
 
@@ -134,10 +179,10 @@ export default function AdminMessagingPage() {
         const fails = result.failed ?? [];
         setFailed(fails);
         if (fails.length === 0) {
-          setStatus(`Sent to ${sent} users successfully.`);
+          setStatus(`Sent to ${sent} people successfully.`);
         } else {
           setStatus(
-            `Sent to ${sent} of ${result.count ?? sent + fails.length} users. ${fails.length} failed.`,
+            `Sent to ${sent} of ${result.count ?? sent + fails.length} people. ${fails.length} failed.`,
           );
         }
       }
@@ -176,7 +221,7 @@ export default function AdminMessagingPage() {
               </p>
 
               {!selected ? (
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {GROUPS.map((group) => (
                     <button
                       key={group.id}
@@ -201,11 +246,9 @@ export default function AdminMessagingPage() {
                         {selected.title}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {countLoading
-                          ? "Counting recipients…"
-                          : count == null
-                            ? selected.description
-                            : `${count} recipient${count === 1 ? "" : "s"} · ${selected.description}`}
+                        {listLoading
+                          ? "Loading people…"
+                          : `${picked.size} selected of ${people.length} · ${selected.description}`}
                       </p>
                     </div>
                     <button
@@ -249,6 +292,111 @@ export default function AdminMessagingPage() {
                     />
                   </label>
 
+                  <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-sm font-medium text-gray-700">
+                        Recipients
+                      </span>
+                      <div className="flex gap-3 text-sm">
+                        <button
+                          type="button"
+                          disabled={sending || shown.length === 0}
+                          onClick={() => setShownPicked(true)}
+                          className="font-medium text-[#ED1C24] underline disabled:opacity-50"
+                        >
+                          Select shown
+                        </button>
+                        <button
+                          type="button"
+                          disabled={sending || shown.length === 0}
+                          onClick={() => setShownPicked(false)}
+                          className="font-medium text-[#ED1C24] underline disabled:opacity-50"
+                        >
+                          Clear shown
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {(
+                        [
+                          ["all", "Everyone"],
+                          ["customers", "Customers"],
+                          ["runners", "Runners"],
+                        ] as const
+                      ).map(([id, label]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          disabled={sending}
+                          onClick={() => setAudience(id)}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            audience === id
+                              ? "bg-[#ED1C24] text-white"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      disabled={sending}
+                      placeholder="Search name or email"
+                      className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-[#ED1C24]"
+                    />
+                    <div className="mt-2 max-h-72 overflow-y-auto rounded-xl border border-gray-200">
+                      {listLoading ? (
+                        <p className="px-3 py-4 text-sm text-gray-500">
+                          Loading people…
+                        </p>
+                      ) : shown.length === 0 ? (
+                        <p className="px-3 py-4 text-sm text-gray-500">
+                          No matching people.
+                        </p>
+                      ) : (
+                        shown.map((person) => (
+                          <label
+                            key={person.email}
+                            className="flex cursor-pointer items-start gap-3 border-b border-gray-100 px-3 py-2.5 last:border-b-0"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={picked.has(person.email)}
+                              disabled={sending}
+                              onChange={() => {
+                                setPicked((current) => {
+                                  const next = new Set(current);
+                                  if (next.has(person.email)) next.delete(person.email);
+                                  else next.add(person.email);
+                                  return next;
+                                });
+                              }}
+                              className="mt-1"
+                            />
+                            <span className="min-w-0">
+                              <span className="block text-sm font-medium text-gray-900">
+                                {person.name || person.email}
+                                {person.isRunner ? (
+                                  <span className="ml-2 text-xs font-semibold text-[#ED1C24]">
+                                    Runner
+                                  </span>
+                                ) : null}
+                              </span>
+                              {person.name ? (
+                                <span className="block truncate text-xs text-gray-500">
+                                  {person.email}
+                                </span>
+                              ) : null}
+                            </span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -271,14 +419,14 @@ export default function AdminMessagingPage() {
                       onClick={() => void handleSend(false)}
                       disabled={
                         sending ||
-                        countLoading ||
-                        count === 0 ||
+                        listLoading ||
+                        picked.size === 0 ||
                         !subject.trim() ||
                         !body.trim()
                       }
                       className="rounded-xl bg-[#ED1C24] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c9171e] disabled:opacity-50"
                     >
-                      Send to {groupLabel(selected.id).toLowerCase()}
+                      Send to {picked.size} selected
                     </button>
                   </div>
 

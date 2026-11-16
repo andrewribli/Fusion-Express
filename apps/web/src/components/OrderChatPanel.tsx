@@ -10,6 +10,7 @@ import {
   subscribeChatMessages,
 } from "@/lib/chat";
 import type { ChatMessage, Order } from "@/lib/types";
+import { notifyOrderEvent } from "@/lib/notify-push";
 
 interface OrderChatPanelProps {
   order: Order;
@@ -89,6 +90,7 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
     setSendError("");
     try {
       await sendChatMessage(order.id, senderId, senderName, text);
+      notifyOrderEvent(order.id, "chat", text);
       setText("");
       setExpanded(true);
     } catch {

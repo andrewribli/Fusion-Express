@@ -14,17 +14,12 @@ import {
   type NavTab,
 } from "@/lib/nav";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
-import { useBothCarts } from "@/context/CartContext";
+import { useCart } from "@/context/CartContext";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 import { navModeForPath, useModeSync } from "@/lib/use-mode-sync";
 
 const GUEST_TABS: NavTab[] = [
-  {
-    href: "/",
-    label: "Home",
-    iconId: "home",
-    match: ["/", "/home", "/fusion", "/canteen"],
-  },
+  { href: "/", label: "Home", iconId: "home", match: ["/", "/home"] },
   { href: "#add", label: "Add", iconId: "add", action: "manual-add" },
   {
     href: "#runner",
@@ -32,12 +27,7 @@ const GUEST_TABS: NavTab[] = [
     iconId: "runner",
     action: "switch-runner",
   },
-  {
-    href: "/cart",
-    label: "Cart",
-    iconId: "cart",
-    match: ["/checkout", "/canteen/cart", "/canteen/checkout"],
-  },
+  { href: "/cart", label: "Cart", iconId: "cart", match: ["/checkout"] },
   { href: "/login", label: "Account", iconId: "profile" },
 ];
 
@@ -45,7 +35,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, mode, setMode, canRunnerMode } = useUser();
-  const { fusion, canteen } = useBothCarts();
+  const { itemCount } = useCart();
   const { openManualItem } = useManualItemModal();
   const [activeCount, setActiveCount] = useState(0);
   const customerActive = useActiveCustomerOrders();
@@ -53,9 +43,6 @@ export function BottomNav() {
   useModeSync();
 
   const chromeMode = navModeForPath(pathname, mode);
-  const onCanteen = pathname.startsWith("/canteen");
-  const cartHref = onCanteen ? "/canteen/cart" : "/cart";
-  const itemCount = onCanteen ? canteen.itemCount : fusion.itemCount;
 
   useEffect(() => {
     const runnerUid = user?.isRunner ? user.uid : undefined;
@@ -72,11 +59,6 @@ export function BottomNav() {
   function onTabClick(tab: NavTab, event: React.MouseEvent) {
     if (tab.action === "manual-add") {
       event.preventDefault();
-      // Manual add is Fusion-only (grocery custom items).
-      if (onCanteen) {
-        router.push("/fusion#manual-item");
-        return;
-      }
       openManualItem();
       return;
     }
@@ -109,13 +91,12 @@ export function BottomNav() {
         {tabs.map((tab) => {
           const active = isTabActive(tab, pathname);
           const isTrack = tab.href === "/track";
-          const isCart = tab.href === "/cart";
           const badge =
             tab.href === "/runner/deliveries"
               ? activeCount
               : isTrack
                 ? customerActive.count
-                : isCart
+                : tab.href === "/cart"
                   ? itemCount
                   : 0;
           const color = active ? "#ED1C24" : "#6b7280";
@@ -125,11 +106,9 @@ export function BottomNav() {
               href={
                 isTrack
                   ? customerActive.href
-                  : isCart
-                    ? cartHref
-                    : tab.action
-                      ? "#"
-                      : tab.href
+                  : tab.action
+                    ? "#"
+                    : tab.href
               }
               aria-label={tab.label}
               aria-current={active ? "page" : undefined}

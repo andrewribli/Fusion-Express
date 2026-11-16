@@ -1,7 +1,7 @@
 import type { OrderStatus } from "./order-status";
-import type { ShopKind } from "./shop-kind";
+import type { CampusId } from "./campus";
 
-export type { ShopKind } from "./shop-kind";
+export type { CampusId };
 
 export const MENU_CATEGORIES = [
   "seasonings",
@@ -99,6 +99,8 @@ export interface MenuItem {
   category: string;
   /** Excel Category: Groceries → dry, Fresh Food → refrigerated. */
   storeSection?: StoreSection;
+  /** Campus this SKU belongs to (CUHK Fusion vs CityU Taste). */
+  campus?: CampusId;
   price: number;
   salePrice?: number;
   bulkDealQty?: number;
@@ -158,6 +160,8 @@ export {
   formatExpiredAgo,
   runnerWarningTotal,
   isCustomerPaymentOpen,
+  isClaimableOrderStatus,
+  canCustomerCancelOrder,
 } from "./order-status";
 
 
@@ -184,6 +188,8 @@ export interface RunnerLocation {
   updatedAt: Date;
 }
 
+export type OrderChannel = "fusion" | "taste" | "canteen";
+
 export interface Order {
   id: string;
   sessionId: string;
@@ -196,16 +202,15 @@ export interface Order {
   customerEmail?: string;
   /** Customer mobile for runner contact / guest checkout identity. */
   customerPhone?: string;
-  /**
-   * Fusion grocery vs campus canteen. Kept separate so carts/checkouts never
-   * mix pickup locations or fee rules.
-   */
-  shopKind?: ShopKind;
-  /** Canteen restaurant id when shopKind is canteen. */
-  canteenId?: string;
-  canteenName?: string;
+  /** University campus that owns this order (CUHK vs CityU). */
+  campus?: CampusId;
+  /** Storefront channel that placed the order (grocery vs campus canteen). */
+  orderChannel?: OrderChannel;
+  /** Canteen restaurant slug (e.g. uc-canteen) when orderChannel is canteen. */
+  canteenRestaurantId?: string;
   items: OrderItem[];
   status: OrderStatus;
+  /** CUHK college or CityU compound. */
   college: string;
   hall: string;
   roomNumber?: string;
@@ -218,12 +223,34 @@ export interface Order {
   deliveryFee: number;
   tip?: number;
   total: number;
+  /** True when a same-college runner unlocked the 10% canteen food discount. */
+  discountApplied?: boolean;
+  /** HK$ amount subtracted from canteen food subtotal (not delivery). */
+  discountAmount?: number;
+  /** Normalized college id of the assigned runner (e.g. UC). */
+  runnerCollege?: string;
+  /** Normalized college id of the canteen (e.g. UC). */
+  canteenCollege?: string;
   paymentReceived: boolean;
+  /**
+   * Extra HKD when runner marks a bag over 5 kg as heavy.
+   * Added on top of deliveryFee for customer + runner earnings.
+   */
+  heavyBagSurcharge?: number;
   paymentMethod?: "PayMe" | "FPS";
+  /** Online checkout provider (e.g. airwallex). */
+  paymentProvider?: "airwallex" | string;
+  /** True while the customer still owes Airwallex for this order. */
+  awaitingOnlinePayment?: boolean;
+  airwallexPaymentIntentId?: string;
+  airwallexPaidAmount?: number;
+  airwallexPaidCurrency?: string;
   /** Grocery receipt total the runner spent at Fusion. */
   finalTotal?: number;
   amountPaidByRunner?: number;
   receiptUrl?: string;
+  /** Customer FPS transfer screenshot (pending admin confirmation). */
+  fpsReceiptUrl?: string;
   bankStatementUrl?: string;
   customerNameOnReceipt?: boolean;
   runnerVerified?: boolean;
@@ -246,6 +273,10 @@ export interface Order {
   runnerRating?: number;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;
+  /** When true, runners may accept now but shop only near scheduledFor. */
+  isScheduled?: boolean;
+  /** Customer-chosen delivery window (Hong Kong local). */
+  scheduledFor?: Date;
   createdAt: Date;
   updatedAt: Date;
   pickedUpAt?: Date;
@@ -303,6 +334,8 @@ export interface ChatMessage {
   senderName: string;
   message: string;
   timestamp: Date;
+  imageUrl?: string;
+  mediaType?: "image" | "video";
 }
 
 export interface RunnerRegistrationInput {

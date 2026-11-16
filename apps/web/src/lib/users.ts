@@ -39,7 +39,30 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
         ? (data.termsAcceptedAt as Timestamp).toDate().toISOString()
         : String(data.termsAcceptedAt)
       : undefined,
-    photoURL: data.photoURL ? String(data.photoURL) : undefined,
+    photoURL: data.photoURL
+      ? String(data.photoURL)
+      : data.photoUrl
+        ? String(data.photoUrl)
+        : undefined,
+    photoUrl: data.photoUrl
+      ? String(data.photoUrl)
+      : data.photoURL
+        ? String(data.photoURL)
+        : undefined,
+    displayName: data.displayName != null ? String(data.displayName) : undefined,
+    isAnonymous: data.isAnonymous === true,
+    pseudonym: data.pseudonym != null ? String(data.pseudonym) : undefined,
+    pseudonymChangedAt: data.pseudonymChangedAt
+      ? typeof data.pseudonymChangedAt === "object" &&
+        data.pseudonymChangedAt &&
+        "toDate" in data.pseudonymChangedAt
+        ? (data.pseudonymChangedAt as Timestamp).toDate().toISOString()
+        : String(data.pseudonymChangedAt)
+      : undefined,
+    campus:
+      data.campus === "cuhk" || data.campus === "cityu"
+        ? data.campus
+        : undefined,
     cuhkEmail: data.cuhkEmail ? String(data.cuhkEmail) : undefined,
     cuhkVerifiedAt: data.cuhkVerifiedAt
       ? typeof data.cuhkVerifiedAt === "object" &&
@@ -94,9 +117,15 @@ export async function createUserProfile(
     uid,
     fullName: profile.fullName,
     email: profile.email?.trim().toLowerCase(),
-    phone: profile.phone,
+    // Phone is runner-only. Customers and guests omit it.
+    phone: profile.isRunner ? profile.phone : undefined,
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
+    campus: profile.campus,
+    college: profile.college,
+    hall: profile.hall,
+    cuhkEmail: profile.cuhkEmail,
+    cuhkVerifiedAt: profile.cuhkVerifiedAt,
     createdAt: Timestamp.fromDate(now),
     updatedAt: Timestamp.fromDate(now),
   };
@@ -114,6 +143,11 @@ export async function createUserProfile(
     phone: profile.phone,
     isRunner: false,
     isGuest: Boolean(profile.isGuest),
+    campus: profile.campus,
+    college: profile.college,
+    hall: profile.hall,
+    cuhkEmail: profile.cuhkEmail,
+    cuhkVerifiedAt: profile.cuhkVerifiedAt,
     createdAt: now.toISOString(),
   };
 }

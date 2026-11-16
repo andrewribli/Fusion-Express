@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { AppHeader } from "@/components/AppHeader";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
@@ -20,43 +18,34 @@ import {
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 import { lineTotal } from "@/lib/pricing";
 import { formatMenuPrice } from "@/lib/types";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
+import { useCampus } from "@/context/CampusContext";
+import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useUser();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
-
-  useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
-  const weightKg = cartTotalWeightKg(items);
-  const fee = calculateDeliveryFee({
-    weightKg,
-    college: "",
-  });
+  const { campus: activeCampus } = useCampus();
+  const campus = cartCampus(items) ?? activeCampus;
+  const mixedError = cartCampusError(items, null);
+  const fee = resolveOrderDeliveryFee(items, "", campus);
   const total = subtotal + fee.deliveryFee;
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
 
   function handleCancelOrder() {
     clearCart();
-    router.push("/fusion");
+    router.push("/");
   }
 
   return (
     <AppShell>
       <LakersWallpaper>
-          <AppHeader showBack backHref="/fusion" title="Fusion cart" />
+          <AppHeader showBack backHref="/" title="Your Cart" />
 
           <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
             {items.length === 0 ? (
@@ -65,18 +54,11 @@ export default function CartPage() {
                   <p className="text-4xl">🛒</p>
                   <p className="mt-3 text-sm text-gray-600">Your cart is empty.</p>
                   <Link
-                    href="/fusion"
+                    href="/"
                     className="mt-4 inline-block rounded-xl bg-fusion-red px-6 py-3 text-sm font-semibold text-white"
                   >
-                    Shop Fusion
+                    Start shopping
                   </Link>
-                  <p className="mt-3 text-xs text-gray-500">
-                    Canteen food uses a separate cart —{" "}
-                    <Link href="/canteen" className="underline">
-                      browse canteens
-                    </Link>
-                    .
-                  </p>
                 </div>
                 <ProductSearchPanel
                   className="mt-4"
@@ -197,24 +179,20 @@ export default function CartPage() {
 
                 <CustomItemCard className="mt-4" />
 
-                <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <PaymentMethodPicker
-                    value={paymentMethod}
-                    onChange={(method) => {
-                      setPaymentMethod(method);
-                      savePaymentMethod(method);
-                    }}
-                  />
-                </div>
                 <div className="mt-2">
                   <OrderLimitNotice subtotal={subtotal} />
                 </div>
+                {mixedError && (
+                  <p className="mt-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {mixedError}
+                  </p>
+                )}
                 <button
                   type="button"
-                  disabled={overLimit}
+                  disabled={overLimit || Boolean(mixedError)}
                   onClick={() => {
                     // Guests and signed-in users both finish on checkout so we
-                    // can collect phone / dorm / lobby in one place.
+                    // can collect dorm / lobby in one place.
                     router.push("/checkout");
                   }}
                   className="mt-4 block w-full rounded-xl bg-fusion-red py-4 text-center text-base font-semibold text-white shadow-md disabled:opacity-60"

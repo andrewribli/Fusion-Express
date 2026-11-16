@@ -245,7 +245,7 @@ export type AlertRecipient = {
   isRunner: boolean;
 };
 
-export type BroadcastGroup = "new_users" | "runners" | "long_term";
+export type BroadcastGroup = "everyone" | "new_users" | "runners" | "long_term";
 
 export type BroadcastRecipient = {
   email: string;
@@ -523,6 +523,8 @@ export type OrderEmailFields = {
   finalTotal: number;
   amountPaidByRunner: number;
   deliveryLocation: string;
+  campus: string;
+  orderChannel: string;
   items: { name: string; quantity: number; price: number }[];
 };
 
@@ -573,6 +575,8 @@ function orderFieldsFromAdminData(
     finalTotal: Number(data.finalTotal ?? 0) || 0,
     amountPaidByRunner: Number(data.amountPaidByRunner ?? 0) || 0,
     deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    campus: String(data.campus ?? ""),
+    orderChannel: String(data.orderChannel ?? ""),
     items,
   };
 }
@@ -666,6 +670,8 @@ export async function fetchOrderForEmail(
     total: restNumber(fields, "total"),
     finalTotal: restNumber(fields, "finalTotal"),
     amountPaidByRunner: restNumber(fields, "amountPaidByRunner"),
+    campus: restString(fields, "campus"),
+    orderChannel: restString(fields, "orderChannel"),
     deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
     items,
   };
@@ -748,6 +754,9 @@ export function filterBroadcastRecipients(
   now = new Date(),
 ): BroadcastRecipient[] {
   const msDay = 24 * 60 * 60 * 1000;
+  if (group === "everyone") {
+    return recipients.filter((r) => !r.email.endsWith("@fusion-express.app"));
+  }
   if (group === "runners") {
     return recipients.filter((r) => r.isRunner);
   }

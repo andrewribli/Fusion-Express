@@ -103,6 +103,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Canteen / cafe catalog (seeded via Admin SDK). Public read for browse.
+    match /canteens/{canteenId} {
+      allow get, list: if true;
+      allow write: if false;
+
+      match /items/{itemId} {
+        allow get, list: if true;
+        allow write: if false;
+      }
+    }
+
     // -------------------------------------------------------------- usernames
 
     // Sign-in resolves a username to an email before the user is authenticated,
@@ -145,9 +156,13 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
         'uid', 'fullName', 'email', 'phone', 'isGuest', 'createdAt', 'updatedAt',
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
-        'role', 'photoURL', 'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
+        'role', 'photoURL', 'photoUrl', 'campus', 'displayName', 'isAnonymous',
+        'pseudonym', 'pseudonymChangedAt',
+        'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
-        'isRunner', 'runnerId'
+        'isRunner', 'runnerId',
+        'pushToken', 'expoPushToken', 'expoPushTokens',
+        'pushPlatform', 'pushUpdatedAt'
       ]);
     }
 
@@ -169,12 +184,22 @@ service cloud.firestore {
         && (!hasRunnerId || ownsRunnerDoc(data.runnerId));
     }
 
+    /** Customers and guests may omit phone. Runners must store one. */
+    function phoneOkForRole() {
+      return request.resource.data.get('isRunner', false) != true
+        || (
+          request.resource.data.phone is string
+          && request.resource.data.phone.size() >= 8
+        );
+    }
+
     function userCreateOk(userId) {
       let data = request.resource.data;
       return signedIn()
         && uid() == userId
         && userKeysAllowed()
         && roleIsValid()
+        && phoneOkForRole()
         && data.get('uid', uid()) == uid()
         && data.get('isRunner', false) == false
         && !('runnerId' in data);
@@ -205,7 +230,8 @@ service cloud.firestore {
             && 'runnerId' in request.resource.data
             && ownsRunnerDoc(request.resource.data.runnerId)
           )
-        );
+        )
+        && phoneOkForRole();
     }
 
     match /users/{userId} {
@@ -231,7 +257,10 @@ service cloud.firestore {
         || isAdmin()
       );
       allow list: if resource.data.uid == uid();
-      allow create: if signedIn() && request.resource.data.uid == uid();
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 8;
       allow update: if signedIn() && (
         resource.data.get('uid', '') == uid()
         || myRunnerDocId() == runnerId
@@ -242,16 +271,15 @@ service cloud.firestore {
     // ----------------------------------------------------------------- orders
 
     match /orders/{orderId} {
-      // A runner has to read a pending order to decide whether to accept it,
-      // which also covers the transaction read inside acceptOrder().
+      // Runners browse claimable orders (paid via Airwallex, or legacy pending).
       allow get: if isOrderCustomer(resource.data)
         || isOrderRunner(resource.data)
-        || (isRunner() && resource.data.status == 'pending')
+        || (isRunner() && resource.data.status in ['pending', 'paid'])
         || isAdmin();
 
       allow list: if resource.data.customerId == uid()
         || resource.data.runnerUid == uid()
-        || (isRunner() && resource.data.status == 'pending')
+        || (isRunner() && resource.data.status in ['pending', 'paid'])
         || isAdmin();
 
       allow create: if signedIn()
@@ -289,20 +317,29 @@ service cloud.firestore {
           && changedKeys().hasOnly([
             'status', 'customerPaidAt', 'paymentReceived', 'updatedAt'
           ])
-          && request.resource.data.status in ['customer_paid', 'paid']
+          && request.resource.data.status in ['customer_paid', 'paid', 'completed']
           && request.resource.data.paymentReceived == true
         )
       );
 
-      // Claiming an unassigned order. Self-pickup is blocked here as well as
-      // in the client so it cannot be bypassed.
+      // Customer FPS screenshot URL after delivery.
+      allow update: if isOrderCustomer(resource.data)
+        && resource.data.status in ['delivered', 'runner_paid']
+        && changedKeys().hasOnly(['fpsReceiptUrl', 'updatedAt'])
+        && request.resource.data.fpsReceiptUrl is string
+        && request.resource.data.fpsReceiptUrl.size() > 8
+        && request.resource.data.fpsReceiptUrl.size() < 2000;
+
+      // Claiming a paid (or legacy unpaid pending) order.
       allow update: if isRunner()
-        && resource.data.status == 'pending'
+        && resource.data.status in ['pending', 'paid']
         && resource.data.customerId != uid()
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
           'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
-          'runnerPaymentId', 'runnerEmail'
+          'runnerPaymentId', 'runnerEmail',
+          'discountApplied', 'discountAmount', 'runnerCollege',
+          'canteenCollege', 'subtotal', 'total'
         ])
         && request.resource.data.status in ['accepted', 'assigned']
         && request.resource.data.runnerUid == uid();
@@ -318,9 +355,11 @@ service cloud.firestore {
           'priceAdjustmentStatus', 'refundAmount', 'subtotal', 'total',
           'tillPricesSubmittedAt', 'runnerDeadline', 'customerDeadline',
           'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
-          'adminMissedNotifiedAt'
+          'adminMissedNotifiedAt',
+          'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege',
+          'heavyBagSurcharge'
         ])
-        && request.resource.data.status != 'pending';
+        && !(request.resource.data.status in ['pending', 'paid']);
 
       allow update: if isAdmin()
         && changedKeys().hasOnly([
@@ -330,7 +369,10 @@ service cloud.firestore {
           'customerWarningCount', 'runnerExpiredAt', 'customerOverdueAt',
           'runnerReminderSentAt', 'customerReminderSentAt',
           'adminMissedNotifiedAt', 'lastEscalatedAt',
-          'customerPaidAt', 'paymentReceived'
+          'customerPaidAt', 'paymentReceived', 'awaitingOnlinePayment',
+          'airwallexPaymentIntentId', 'airwallexPaidAmount',
+          'airwallexPaidCurrency', 'airwallexWebhookEventId',
+          'airwallexPaidNotifiedAt', 'paymentProvider'
         ]);
 
       allow delete: if false;
@@ -342,6 +384,18 @@ service cloud.firestore {
       allow list: if isAdmin();
       allow create: if signedIn() && request.resource.data.customerId == uid();
       allow update: if signedIn() && resource.data.customerId == uid();
+      allow delete: if false;
+    }
+
+    // Customer in-app bell. Created server-side (Admin REST); customers mark read.
+    match /notifications/{notifId} {
+      allow get: if signedIn() && resource.data.userId == uid();
+      allow list: if signedIn() && resource.data.userId == uid();
+      allow create: if false;
+      allow update: if signedIn()
+        && resource.data.userId == uid()
+        && changedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
       allow delete: if false;
     }
 
@@ -512,6 +566,10 @@ service cloud.firestore {
     }
 
     match /orders_test/{orderId} {
+      allow read, write: if signedIn();
+    }
+
+    match /notifications_test/{notifId} {
       allow read, write: if signedIn();
     }
 

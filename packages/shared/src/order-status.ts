@@ -1,9 +1,11 @@
 export const ORDER_STATUSES = [
   "pending",
+  "paid",
   "accepted",
   "purchased",
   "delivered",
   "runner_paid",
+  "completed",
   "customer_paid",
   "cancelled",
 ] as const;
@@ -14,8 +16,10 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
   accepted: "Accepted",
   purchased: "Purchased",
-  delivered: "Pending payout",
+  delivered: "Delivered",
+  paid: "Paid",
   runner_paid: "Runner paid",
+  completed: "Completed",
   customer_paid: "Customer paid",
   cancelled: "Cancelled",
 };
@@ -29,10 +33,10 @@ export function normalizeOrderStatus(status: string): OrderStatus {
     case "picked_up":
     case "picked":
       return "purchased";
-    case "completed":
-      return "runner_paid";
-    case "paid":
-      return "customer_paid";
+    // Legacy docs sometimes stored "completed" for runner reimbursed.
+    // New flow uses completed as the terminal state after runner_paid.
+    case "complete":
+      return "completed";
     default:
       return status as OrderStatus;
   }
@@ -43,11 +47,15 @@ export const TRACKING_STEPS: { status: OrderStatus; label: string }[] = [
   { status: "accepted", label: "Accepted" },
   { status: "purchased", label: "Purchased" },
   { status: "delivered", label: "Delivered" },
+  { status: "paid", label: "Paid" },
   { status: "runner_paid", label: "Runner reimbursed" },
-  { status: "customer_paid", label: "You paid GraceRun" },
+  { status: "completed", label: "Completed" },
 ];
 
 export function getStepIndex(status: OrderStatus): number {
+  if (status === "customer_paid") {
+    return TRACKING_STEPS.findIndex((s) => s.status === "paid");
+  }
   const idx = TRACKING_STEPS.findIndex((s) => s.status === status);
   return idx === -1 ? 0 : idx;
 }
@@ -57,8 +65,8 @@ export function isActiveRunnerStatus(status: OrderStatus): boolean {
 }
 
 /**
- * Customer still needs to follow the order (including pay after delivery).
- * Used for track badges / payment-due UI — not for the new-order placement cap.
+ * Customer still needs to follow the order.
+ * Used for track badges — not for the new-order placement cap.
  */
 export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
   return (
@@ -70,9 +78,8 @@ export function isActiveCustomerOrderStatus(status: OrderStatus): boolean {
 }
 
 /**
- * In-flight delivery only. Payment-due (`delivered` / `runner_paid`) orders
- * show banners but must not block placing new grocery orders — otherwise
- * unpaid delivered tickets permanently hit MAX_ACTIVE_CUSTOMER_ORDERS.
+ * In-flight delivery + unpaid checkout. Payment-due delivered tickets must not
+ * permanently block new grocery orders.
  */
 export function countsTowardCustomerOrderPlacementCap(
   status: OrderStatus,
@@ -100,8 +107,12 @@ export function formatOrderPlacedAt(date: Date | undefined): string {
 
 export const RUNNER_EARNINGS_RATE = 0.7;
 
-export function runnerEarningsForOrder(deliveryFee: number): number {
-  return Math.round(deliveryFee * RUNNER_EARNINGS_RATE * 100) / 100;
+export function runnerEarningsForOrder(
+  deliveryFee: number,
+  heavyBagSurcharge = 0,
+): number {
+  const fee = Number(deliveryFee ?? 0) + Number(heavyBagSurcharge ?? 0);
+  return Math.round(fee * RUNNER_EARNINGS_RATE * 100) / 100;
 }
 
 export function hasConfirmedGroceryTotal(order: {
@@ -136,12 +147,14 @@ export function customerAmountDue(order: {
   actualSubtotal?: number;
   subtotal: number;
   deliveryFee: number;
+  heavyBagSurcharge?: number;
   tip?: number;
 }): number {
+  const delivery =
+    Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0);
   return (
-    Math.round(
-      (groceryAmountDue(order) + order.deliveryFee + (order.tip ?? 0)) * 100,
-    ) / 100
+    Math.round((groceryAmountDue(order) + delivery + (order.tip ?? 0)) * 100) /
+    100
   );
 }
 
@@ -151,16 +164,17 @@ export function runnerReimburseTotal(order: {
   actualSubtotal?: number;
   subtotal: number;
   deliveryFee: number;
+  heavyBagSurcharge?: number;
 }): number {
-  return (
-    Math.round((groceryAmountDue(order) + order.deliveryFee) * 100) / 100
-  );
+  const delivery =
+    Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0);
+  return Math.round((groceryAmountDue(order) + delivery) * 100) / 100;
 }
 
 export function adminPayoutLabel(status: OrderStatus): string {
   if (status === "delivered") return "pending_payout";
   if (status === "runner_paid") return "runner_paid";
-  if (status === "customer_paid") return "customer_paid";
+  if (status === "customer_paid" || status === "completed") return "customer_paid";
   return status;
 }
 
@@ -272,6 +286,35 @@ export function runnerWarningTotal(
   }, 0);
 }
 
-export function isCustomerPaymentOpen(status: OrderStatus): boolean {
-  return status === "delivered" || status === "runner_paid";
+/** Pay button: only after delivery, and only once the receipt total is in. */
+export function isCustomerPaymentOpen(
+  status: OrderStatus,
+  order?: {
+    paymentReceived?: boolean;
+    amountPaidByRunner?: number;
+    finalTotal?: number;
+    actualSubtotal?: number;
+  },
+): boolean {
+  if (status !== "delivered") return false;
+  if (order?.paymentReceived) return false;
+  if (!order) return false;
+  return hasConfirmedGroceryTotal(order);
+}
+
+/** Orders runners may claim from the available board. */
+export function isClaimableOrderStatus(status: OrderStatus): boolean {
+  return status === "pending";
+}
+
+/**
+ * Customer may cancel until the runner has purchased / picked up the bag
+ * (`purchased`). After that the goods are in hand / out for delivery — no
+ * customer cancel (status-only; refunds are a separate flow).
+ * Covers price-increase declines while status is still pending/accepted.
+ */
+export function canCustomerCancelOrder(order: {
+  status: OrderStatus;
+}): boolean {
+  return order.status === "pending" || order.status === "accepted";
 }

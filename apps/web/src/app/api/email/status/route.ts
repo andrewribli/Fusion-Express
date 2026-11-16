@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { supermarketForCampus } from "@fusion-express/shared/campus";
 import {
   sendCustomerPaymentReminder,
   sendOrderStatusUpdate,
@@ -111,8 +112,12 @@ export async function POST(request: Request) {
       statusRecipients.add(runnerEmail);
     }
 
+    const store =
+      order.orderChannel === "canteen"
+        ? "the canteen"
+        : supermarketForCampus(order.campus);
     for (const email of statusRecipients) {
-      jobs.push(sendOrderStatusUpdate(email, order.id, status));
+      jobs.push(sendOrderStatusUpdate(email, order.id, status, store));
     }
 
     if (jobs.length === 0) {

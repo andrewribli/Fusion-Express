@@ -1,0 +1,15 @@
+export {
+  type CollegeId,
+  type College,
+  COLLEGES,
+  getCollege,
+  collegeLabel,
+  normalizeCollegeId,
+  restaurantIdFromCanteenItemId,
+  canteenCollegeForRestaurant,
+  canteenNameForRestaurant,
+  restaurantIdFromOrderItems,
+  COLLEGE_CANTEEN_DISCOUNT_RATE,
+  computeCollegeDiscount,
+  roundMoney,
+} from "@fusion-express/shared/canteen-college";

@@ -1,36 +1,43 @@
 "use client";
 
+import { campusConfig } from "@fusion-express/shared/campus";
+import { useCampus } from "@/context/CampusContext";
+import { useCart } from "@/context/CartContext";
+import { cartCampus } from "@/lib/cart-campus";
 import { useManualItemModal } from "@/lib/manual-item-modal";
 
 /** Opens the shared manual-add modal (same as the Add tab). */
 export function CustomItemCard({ className = "" }: { className?: string }) {
   const { openManualItem } = useManualItemModal();
+  const { items } = useCart();
+  const { campus } = useCampus();
+  const store = campusConfig[cartCampus(items) ?? campus].supermarket;
 
   return (
     <section
-      className={`shop-bubble overflow-hidden rounded-2xl shadow-sm ${className}`}
-      style={{ backgroundColor: "#ED1C24" }}
+      className={`shop-surface overflow-hidden rounded-2xl border border-gray-100 shadow-sm ${className}`}
+      style={{ backgroundColor: "#ffffff" }}
     >
       <button
         type="button"
         onClick={openManualItem}
-        className="group flex min-h-14 w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+        className="group flex min-h-14 w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#ED1C24]"
       >
         <span>
           <span
-            className="shop-heading block text-sm font-semibold"
-            style={{ color: "#ffffff" }}
+            className="block text-sm font-semibold transition-colors group-hover:text-[#ED1C24]"
+            style={{ color: "#111111" }}
           >
             Can&apos;t find your item?
           </span>
-          <span className="shop-muted mt-0.5 block text-xs" style={{ color: "rgba(255,255,255,0.85)" }}>
-            Add your own and the runner will find it at Fusion.
+          <span className="shop-muted mt-0.5 block text-xs" style={{ color: "#6b7280" }}>
+            Add your own and the runner will find it at {store}.
           </span>
         </span>
         <span
           aria-hidden
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl font-bold"
-          style={{ backgroundColor: "#ffffff", color: "#ED1C24" }}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
+          style={{ backgroundColor: "#ED1C24" }}
         >
           +
         </span>

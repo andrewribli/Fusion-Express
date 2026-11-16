@@ -66,7 +66,7 @@ export function friendlyPlaceOrderError(err: unknown): string {
     code === "permission-denied" ||
     /permission-denied|missing or insufficient permissions/i.test(raw)
   ) {
-    return "Could not place your order. Sign in again or try guest checkout with your phone.";
+    return "Could not place your order. Sign in again or try guest checkout.";
   }
   if (
     code === "failed-precondition" ||

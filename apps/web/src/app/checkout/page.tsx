@@ -4,16 +4,20 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
+import { CampusPickerCards } from "@/components/CampusPickerCards";
 import { CustomItemCard } from "@/components/CustomItemCard";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
-import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { ProductSearchPanel } from "@/components/ProductSearchPanel";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { lineTotal } from "@/lib/pricing";
-import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
+import {
+  formatDeliveryAddress,
+  getLobbyForHall,
+} from "@/data/cuhk-locations";
 import {
   ESTIMATED_DELIVERY_MINUTES,
   getEstimatedDeliveryTime,
@@ -23,62 +27,82 @@ import {
   DEFAULT_SPECIAL_INSTRUCTIONS,
 } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
-import {
-  loadPaymentMethod,
-  savePaymentMethod,
-  type CustomerPaymentMethod,
-} from "@/lib/payment-method";
 import { usePlaceOrder } from "@/lib/use-place-order";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
-import { validatePhone } from "@/lib/auth";
+import { isCanteenCart } from "@/lib/canteen/cart";
+import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
+import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
 export default function CheckoutPage() {
   const { user } = useUser();
+  const { setCampus } = useCampus();
   const { items, subtotal } = useCart();
-  const { placeOrder, loading, error: placeError } = usePlaceOrder("fusion");
+  const { placeOrder, loading, error: placeError } = usePlaceOrder();
 
+  /** Signed-in campus from signup — not a homepage picker. */
+  const lockedCampus: CampusId | null =
+    user?.campus === "cuhk" || user?.campus === "cityu" ? user.campus : null;
+  /** Guests pick campus here before dorms. */
+  const [guestCampus, setGuestCampus] = useState<CampusId | null>(null);
   const [college, setCollege] = useState("");
   const [hall, setHall] = useState("");
-  const [phone, setPhone] = useState(user?.phone ?? "");
   const [customerNote, setCustomerNote] = useState("");
   const [tip, setTip] = useState(0);
   const [customTip, setCustomTip] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<CustomerPaymentMethod>("PayMe");
 
   useEffect(() => {
-    setPaymentMethod(loadPaymentMethod());
-  }, []);
+    if (lockedCampus) {
+      setCampus(lockedCampus);
+      setGuestCampus(null);
+    }
+  }, [lockedCampus, setCampus]);
 
+  const itemsCampus = cartCampus(items);
   useEffect(() => {
-    if (user?.phone && !phone) setPhone(user.phone);
-  }, [user, phone]);
+    if (!lockedCampus && itemsCampus && !guestCampus) {
+      setGuestCampus(itemsCampus);
+      setCampus(itemsCampus);
+    }
+  }, [guestCampus, itemsCampus, lockedCampus, setCampus]);
 
+  const campus = lockedCampus ?? guestCampus;
+  const campusError = cartCampusError(items, campus);
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = Math.max(0, customTip ? Number(customTip) || 0 : tip);
-  const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college }),
-    [weightKg, college],
+    () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk"),
+    [items, college, campus],
   );
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
-  const phoneOk = !validatePhone(phone);
-  const canSubmit = Boolean(college && hall && phoneOk && !overLimit);
+  const canSubmit = Boolean(
+    campus && college && hall && !overLimit && !campusError,
+  );
+  const shopHref = isCanteenCart(items)
+    ? "/canteen"
+    : campusConfig[campus ?? "cuhk"].groceryPath;
   const address =
     college && hall
       ? formatDeliveryAddress(college, hall)
       : null;
-  const lobby = hall ? getLobbyForHall(hall) : "";
+  const lobby = hall && campus ? getLobbyForHall(hall, campus) : "";
+
+  function handleCampusChange(next: CampusId) {
+    if (lockedCampus) return;
+    setGuestCampus(next);
+    setCampus(next);
+    setCollege("");
+    setHall("");
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || !campus) return;
     void placeOrder({
+      campus,
       college,
       hall,
-      phone,
-      paymentMethod,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
     });
@@ -88,11 +112,11 @@ export default function CheckoutPage() {
     return (
       <AppShell>
         <LakersWallpaper>
-          <AppHeader showBack backHref="/cart" title="Fusion checkout" />
+          <AppHeader showBack backHref="/cart" title="Checkout" />
           <main className="mx-auto max-w-[480px] px-4 py-8">
             <p className="text-center text-sm text-white/80">
-              Nothing in your Fusion cart yet. Search below, add a custom item,
-              or keep shopping Fusion (canteen food has its own checkout).
+              Nothing to checkout yet. Search below, add a custom item, or keep
+              shopping.
             </p>
             <ProductSearchPanel
               className="mt-4"
@@ -100,12 +124,8 @@ export default function CheckoutPage() {
             />
             <CustomItemCard className="mt-4" />
             <p className="mt-4 text-center">
-              <Link href="/fusion" className="text-lakers-gold underline">
-                Shop Fusion
-              </Link>
-              {" · "}
-              <Link href="/canteen" className="text-lakers-gold underline">
-                Browse canteens
+              <Link href={shopHref} className="text-lakers-gold underline">
+                Keep shopping
               </Link>
             </p>
           </main>
@@ -117,20 +137,13 @@ export default function CheckoutPage() {
   return (
     <AppShell>
       <LakersWallpaper>
-        <AppHeader showBack backHref="/cart" title="Fusion checkout" />
+        <AppHeader showBack backHref="/cart" title="Checkout" />
 
         <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
-          <div className="mb-4 rounded-xl border border-[#ED1C24]/40 bg-[#ED1C24]/10 px-4 py-3 text-sm text-white">
-            Fusion grocery checkout — canteen orders use{" "}
-            <Link href="/canteen/checkout" className="underline">
-              /canteen/checkout
-            </Link>
-            .
-          </div>
           {!user && (
             <div className="mb-4 rounded-xl border border-lakers-gold/40 bg-lakers-navy/80 px-4 py-3 text-sm text-lakers-gold">
-              No account needed. Enter your dorm, lobby, and phone — we&apos;ll
-              create your account when you order.{" "}
+              No account needed. Enter your dorm and lobby — we&apos;ll
+              save the order when you submit.{" "}
               <Link href="/login?next=/checkout" className="underline">
                 Already have an account? Sign in
               </Link>
@@ -139,6 +152,11 @@ export default function CheckoutPage() {
           {placeError && (
             <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
               {placeError}
+            </p>
+          )}
+          {campusError && (
+            <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {campusError}
             </p>
           )}
           <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">
@@ -164,9 +182,6 @@ export default function CheckoutPage() {
                   <div>
                     <p className="font-medium">{address}</p>
                     <p className="text-xs text-gray-500">Lobby: {lobby}</p>
-                    {phoneOk && (
-                      <p className="text-xs text-gray-500">Phone: {phone}</p>
-                    )}
                   </div>
                   <button
                     type="button"
@@ -221,16 +236,41 @@ export default function CheckoutPage() {
             >
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <p className="mt-1 text-xs text-gray-500">
-                Only three things we need: dorm (college + hall), lobby, and phone.
+                {lockedCampus
+                  ? lockedCampus === "cityu"
+                    ? "Delivering to your CityU hall lobby. No phone number."
+                    : "Delivering to your CUHK dorm lobby. No phone number."
+                  : campus === "cityu"
+                    ? "Campus, compound, hall, and lobby. No phone number."
+                    : "Pick your university first, then dorm and lobby. No phone number."}
               </p>
-              <div className="mt-3">
-                <DeliveryAddressFields
-                  college={college}
-                  hall={hall}
-                  onCollegeChange={setCollege}
-                  onHallChange={setHall}
-                />
-              </div>
+              {lockedCampus ? (
+                <p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-800">
+                  {lockedCampus === "cityu" ? "CityU" : "CUHK"}
+                </p>
+              ) : (
+                <div className="mt-3">
+                  <CampusPickerCards
+                    value={guestCampus}
+                    onChange={handleCampusChange}
+                  />
+                </div>
+              )}
+              {campus ? (
+                <div className="mt-3">
+                  <DeliveryAddressFields
+                    campus={campus}
+                    college={college}
+                    hall={hall}
+                    onCollegeChange={setCollege}
+                    onHallChange={setHall}
+                  />
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-gray-500">
+                  Choose your university to see dorm options.
+                </p>
+              )}
               {hall ? (
                 <div className="mt-3 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
                   <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -242,28 +282,6 @@ export default function CheckoutPage() {
                   </p>
                 </div>
               ) : null}
-              <div className="mt-3">
-                <label
-                  htmlFor="guest-phone"
-                  className="block text-xs font-medium text-gray-600"
-                >
-                  Phone number
-                </label>
-                <input
-                  id="guest-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="e.g. 9123 4567"
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Used to create your account and for the runner to reach you.
-                </p>
-              </div>
               <div className="mt-3">
                 <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
                   Special instructions
@@ -312,19 +330,6 @@ export default function CheckoutPage() {
               />
             </section>
 
-            <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <h2 className="text-sm font-semibold">Payment method</h2>
-              <div className="mt-2">
-                <PaymentMethodPicker
-                  value={paymentMethod}
-                  onChange={(method) => {
-                    setPaymentMethod(method);
-                    savePaymentMethod(method);
-                  }}
-                />
-              </div>
-            </section>
-
             <p className="text-sm text-white/80">
               Completing an order agrees to our{" "}
               <LegalLink href="/terms">Terms &amp; Conditions</LegalLink>.
@@ -339,17 +344,20 @@ export default function CheckoutPage() {
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-fusion-red py-4 text-base font-semibold text-white disabled:opacity-60"
                 >
                   <span>
-                    {loading ? "Placing…" : `Complete Order · ${paymentMethod}`}
+                    {loading ? "Placing…" : "Complete Order"}
                   </span>
                   <span className="text-sm font-normal">· ${total}</span>
                 </button>
-                {!canSubmit && (
-                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
-                    {!college || !hall
-                      ? "Choose your college and hall to continue."
-                      : "Enter a valid phone number to continue."}
+                {campusError ? (
+                  <p className="mt-1.5 text-center text-xs font-semibold text-[#ED1C24]">
+                    {campusError}
                   </p>
-                )}
+                ) : !canSubmit ? (
+                  <p className="mt-1.5 text-center text-xs text-gray-500 md:text-white/80">
+                    Choose your {campus === "cityu" ? "compound" : "college"} and
+                    hall to continue.
+                  </p>
+                ) : null}
               </div>
             </div>
           </form>

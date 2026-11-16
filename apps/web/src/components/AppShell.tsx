@@ -9,16 +9,18 @@ import { ActiveOrdersProvider } from "@/lib/use-active-orders";
 interface AppShellProps {
   children: React.ReactNode;
   hideNav?: boolean;
+  /** Hide floating Track Order FAB (e.g. canteen menu pages). */
+  hideTrackFab?: boolean;
 }
 
-export function AppShell({ children, hideNav }: AppShellProps) {
+export function AppShell({ children, hideNav, hideTrackFab }: AppShellProps) {
   return (
     <ActiveOrdersProvider>
       <div className={hideNav ? "" : "pb-20 md:pb-0"}>
         {children}
         <SiteFooter />
       </div>
-      {!hideNav && <TrackOrderFab />}
+      {!hideNav && !hideTrackFab && <TrackOrderFab />}
       {!hideNav && <AdminSupportChat />}
       {!hideNav && <BottomNav />}
     </ActiveOrdersProvider>

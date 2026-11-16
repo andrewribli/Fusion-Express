@@ -6,7 +6,7 @@
       "category": "instant-noodles",
       "price": 8,
       "unit": "pack",
-      "image": "/images/products/indomie-goreng.jpg",
+      "image": "https://medias.pns.hk/publishing/PNSHK-417130-front-prodcat.jpg",
       "weightKg": 0.12
     },
     {
@@ -18,7 +18,7 @@
       "bulkDealQty": 4,
       "bulkDealPrice": 36,
       "unit": "bowl",
-      "image": "/images/products/shin-ramen-bowl.jpg",
+      "image": "https://medias.pns.hk/publishing/PNSHK-158369-front-prodcat.jpg?version=1732748883",
       "itemNote": "Buy 3 or 4 depending on discount. If no discount, pick 3 cup noodles in different on-sale flavors, total under $40. Runner will use best judgment for substitutions and discounts",
       "weightKg": 0.12
     },
@@ -29,7 +29,7 @@
       "price": 9,
       "salePrice": 8,
       "unit": "cup",
-      "image": "/images/products/nissin-cup-seafood.jpg",
+      "image": "https://medias.pns.hk/publishing/PNSHK-110653-front-prodcat.jpg?version=1732715691",
       "weightKg": 0.12
     },
     {
@@ -39,7 +39,7 @@
       "price": 9,
       "salePrice": 8,
       "unit": "cup",
-      "image": "/images/products/nissin-cup-seafood.jpg",
+      "image": "https://medias.pns.hk/publishing/PNSHK-110653-front-prodcat.jpg?version=1732715691",
       "weightKg": 0.12
     },
     {
@@ -49,7 +49,7 @@
       "price": 9,
       "salePrice": 8,
       "unit": "cup",
-      "image": "/images/products/nissin-cup-seafood.jpg",
+      "image": "https://medias.pns.hk/publishing/PNSHK-110653-front-prodcat.jpg?version=1732715691",
       "weightKg": 0.12
     },
     {
@@ -58,7 +58,7 @@
       "category": "instant-noodles",
       "price": 7,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/871/242/938/1401/front_en.39.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -67,7 +67,7 @@
       "category": "instant-noodles",
       "price": 7,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/000/002/084/2499/front_en.148.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -76,7 +76,7 @@
       "category": "instant-noodles",
       "price": 7,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/599/752/333/5151/front_en.20.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -85,7 +85,7 @@
       "category": "instant-noodles",
       "price": 6,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/888/805/670/8109/front_en.43.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -94,7 +94,7 @@
       "category": "instant-noodles",
       "price": 6,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/888/805/670/6518/front_fr.8.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -103,7 +103,7 @@
       "category": "instant-noodles",
       "price": 12,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-411056-front-prodcat.jpg?version=1780403583",
       "weightKg": 0.12
     },
     {
@@ -112,7 +112,7 @@
       "category": "instant-noodles",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/880/107/311/3428/front_en.150.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -121,7 +121,7 @@
       "category": "instant-noodles",
       "price": 5,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/885/098/710/1021/front_en.25.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -130,7 +130,7 @@
       "category": "instant-noodles",
       "price": 5,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/885/098/710/1014/front_fr.3.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -139,7 +139,7 @@
       "category": "instant-noodles",
       "price": 10,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-366719-front-prodcat.jpg",
       "weightKg": 0.12
     },
     {
@@ -166,7 +166,7 @@
       "category": "drinks",
       "price": 6,
       "unit": "can",
-      "image": "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/890/176/403/1250/front_en.3.400.jpg",
       "weightKg": 0.33
     },
     {
@@ -206,7 +206,7 @@
       "category": "drinks",
       "price": 28,
       "unit": "bundle",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Pagoda%20kumquat%20lemon",
+      "image": "https://images.openfoodfacts.org/images/products/000/980/000/6113/front_en.4.400.jpg",
       "runnerInputsPrice": true,
       "itemNote": "If bundle is not available, get 3 individual ones. Runner will use best judgment for substitutions and discounts",
       "weightKg": 1.2
@@ -217,7 +217,7 @@
       "category": "drinks",
       "price": 10,
       "unit": "bottle",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Pagoda%20kumquat%20lemon",
+      "image": "https://images.openfoodfacts.org/images/products/800/050/026/7035/front_es.404.400.jpg",
       "runnerInputsPrice": true,
       "itemNote": "Fallback if bundle is unavailable. Runner will use best judgment for substitutions and discounts",
       "weightKg": 0.2
@@ -228,7 +228,7 @@
       "category": "drinks",
       "price": 12,
       "unit": "bottle",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Tao%20Ti%20mandarin%20lemon",
+      "image": "https://medias.pns.hk/publishing/PNSHK-433668-front-prodcat.jpg?version=1750335637",
       "runnerInputsPrice": true,
       "itemNote": "Runner will use best judgment for substitutions and discounts",
       "weightKg": 0.2
@@ -239,7 +239,7 @@
       "category": "drinks",
       "price": 10,
       "unit": "bottle",
-      "image": "/images/products/pocari-sweat.jpg",
+      "image": "https://img.rtacdn-os.com/20260109/ec450060-6527-3a0c-955c-f7d65f4eb249_480x480H",
       "weightKg": 0.5
     },
     {
@@ -248,7 +248,7 @@
       "category": "drinks",
       "price": 7,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/934/165/000/1728/front_en.34.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -257,7 +257,7 @@
       "category": "drinks",
       "price": 7,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/480/001/607/3960/front_en.12.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -266,7 +266,7 @@
       "category": "drinks",
       "price": 12,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/544/900/034/0023/front_en.3.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -275,7 +275,7 @@
       "category": "drinks",
       "price": 12,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/544/900/034/0023/front_en.3.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -284,7 +284,7 @@
       "category": "drinks",
       "price": 8,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/890/103/078/3241/front_en.29.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -293,7 +293,7 @@
       "category": "drinks",
       "price": 8,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/869/057/411/4962/front_tr.5.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -302,7 +302,7 @@
       "category": "drinks",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/871/310/800/0811/front_en.43.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -311,7 +311,7 @@
       "category": "drinks",
       "price": 24,
       "unit": "bottle",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Kowloon%20Dairy%20milk",
+      "image": "https://images.openfoodfacts.org/images/products/489/331/863/3536/front_en.3.400.jpg",
       "weightKg": 1
     },
     {
@@ -320,7 +320,7 @@
       "category": "drinks",
       "price": 26,
       "unit": "bottle",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Meiji%20milk",
+      "image": "https://images.openfoodfacts.org/images/products/888/847/001/0208/front_en.21.400.jpg",
       "weightKg": 1
     },
     {
@@ -329,7 +329,7 @@
       "category": "snacks",
       "price": 12,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/002/840/009/0858/front_en.132.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -338,7 +338,7 @@
       "category": "snacks",
       "price": 12,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/002/840/035/5599/front_en.18.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -347,7 +347,7 @@
       "category": "snacks",
       "price": 12,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/406/213/900/5888/front_de.10.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -356,7 +356,7 @@
       "category": "snacks",
       "price": 15,
       "unit": "can",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/505/399/015/6009/front_fr.288.400.jpg",
       "weightKg": 0.16
     },
     {
@@ -365,7 +365,7 @@
       "category": "snacks",
       "price": 15,
       "unit": "can",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/505/399/015/5354/front_en.42.400.jpg",
       "weightKg": 0.16
     },
     {
@@ -392,7 +392,7 @@
       "category": "snacks",
       "price": 8,
       "unit": "bar",
-      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/380/002/049/1522/front_en.19.400.jpg",
       "weightKg": 0.05
     },
     {
@@ -401,7 +401,7 @@
       "category": "snacks",
       "price": 8,
       "unit": "bar",
-      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/490/220/116/0568/front_de.4.400.jpg",
       "weightKg": 0.05
     },
     {
@@ -410,7 +410,7 @@
       "category": "snacks",
       "price": 7,
       "unit": "bar",
-      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/500/015/956/0061/front_en.108.400.jpg",
       "weightKg": 0.05
     },
     {
@@ -419,7 +419,7 @@
       "category": "snacks",
       "price": 7,
       "unit": "bar",
-      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/590/095/131/1468/front_fr.20.400.jpg",
       "weightKg": 0.05
     },
     {
@@ -428,7 +428,7 @@
       "category": "snacks",
       "price": 10,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/332/727/210/7969/front_en.59.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -437,7 +437,7 @@
       "category": "snacks",
       "price": 10,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-111602-front-prodcat.jpg?version=1761826860",
       "weightKg": 0.2
     },
     {
@@ -446,7 +446,7 @@
       "category": "snacks",
       "price": 14,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/007/114/600/7444/front_en.11.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -455,7 +455,7 @@
       "category": "snacks",
       "price": 14,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/128089.jpg?height=176",
       "weightKg": 0.15
     },
     {
@@ -464,7 +464,7 @@
       "category": "snacks",
       "price": 14,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/128089.jpg?height=176",
       "weightKg": 0.15
     },
     {
@@ -473,7 +473,7 @@
       "category": "bread",
       "price": 12,
       "unit": "loaf",
-      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/008/978/203/1174/front_en.19.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -482,7 +482,7 @@
       "category": "bread",
       "price": 14,
       "unit": "loaf",
-      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/31082023/109113.jpg?height=176",
       "weightKg": 0.4
     },
     {
@@ -491,7 +491,7 @@
       "category": "bread",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/008/978/203/8326/front_en.7.400.jpg",
       "weightKg": 1.3
     },
     {
@@ -500,7 +500,7 @@
       "category": "bread",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/008/978/203/8326/front_en.7.400.jpg",
       "weightKg": 1.3
     },
     {
@@ -509,7 +509,7 @@
       "category": "bread",
       "price": 10,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/070/559/901/3119/front_en.21.400.jpg",
       "weightKg": 0.12
     },
     {
@@ -518,7 +518,7 @@
       "category": "bread",
       "price": 10,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-154792-front-prodcat.jpg?version=1767702690",
       "weightKg": 0.12
     },
     {
@@ -527,7 +527,7 @@
       "category": "instant-meals",
       "price": 22,
       "unit": "bowl",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20beef",
+      "image": "https://images.openfoodfacts.org/images/products/003/100/012/6124/front_en.38.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -536,7 +536,7 @@
       "category": "instant-meals",
       "price": 22,
       "unit": "bowl",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20chicken",
+      "image": "https://images.openfoodfacts.org/images/products/003/100/080/9478/front_en.3.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -545,7 +545,7 @@
       "category": "instant-meals",
       "price": 22,
       "unit": "bowl",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20seafood",
+      "image": "https://images.openfoodfacts.org/images/products/003/100/080/9478/front_en.3.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -554,7 +554,7 @@
       "category": "instant-meals",
       "price": 22,
       "unit": "bowl",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20tom%20yum",
+      "image": "https://images.openfoodfacts.org/images/products/003/100/012/6124/front_en.38.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -563,7 +563,7 @@
       "category": "instant-meals",
       "price": 22,
       "unit": "bowl",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20spicy%20pork",
+      "image": "https://images.openfoodfacts.org/images/products/003/100/012/6124/front_en.38.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -572,7 +572,7 @@
       "category": "instant-meals",
       "price": 22,
       "unit": "bowl",
-      "image": "https://placehold.co/640x640/f3f4f6/111827.png?text=Mega%20Bowl%20kimchi",
+      "image": "https://images.openfoodfacts.org/images/products/003/100/080/9478/front_en.3.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -581,7 +581,7 @@
       "category": "dairy-eggs",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/500/032/601/0030/front_en.19.400.jpg",
       "weightKg": 0.55
     },
     {
@@ -590,7 +590,7 @@
       "category": "dairy-eggs",
       "price": 9,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/500/032/601/0030/front_en.19.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -599,7 +599,7 @@
       "category": "dairy-eggs",
       "price": 22,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H",
       "weightKg": 0.2
     },
     {
@@ -608,7 +608,7 @@
       "category": "dairy-eggs",
       "price": 18,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/AEON/cb0jp-2306439.jpg?height=176",
       "weightKg": 0.8
     },
     {
@@ -617,7 +617,7 @@
       "category": "dairy-eggs",
       "price": 20,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/885/032/933/1116/front_en.4.400.jpg",
       "weightKg": 0.55
     },
     {
@@ -626,7 +626,7 @@
       "category": "toiletries",
       "price": 15,
       "unit": "tube",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-462040-front-prodcat.jpg?version=1757680264",
       "weightKg": 0.12
     },
     {
@@ -635,7 +635,7 @@
       "category": "toiletries",
       "price": 10,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-189240-front-prodcat.jpg?version=1762950532",
       "weightKg": 0.2
     },
     {
@@ -644,7 +644,7 @@
       "category": "toiletries",
       "price": 30,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-157090-front-prodcat.jpg?version=1776428702",
       "weightKg": 0.4
     },
     {
@@ -653,7 +653,7 @@
       "category": "toiletries",
       "price": 30,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-189240-front-prodcat.jpg?version=1762950532",
       "weightKg": 0.4
     },
     {
@@ -662,7 +662,7 @@
       "category": "toiletries",
       "price": 25,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-210548-front-prodcat.jpg",
       "weightKg": 0.4
     },
     {
@@ -671,7 +671,7 @@
       "category": "toiletries",
       "price": 12,
       "unit": "bar",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/629/512/001/0150/front_en.3.400.jpg",
       "weightKg": 0.05
     },
     {
@@ -680,7 +680,7 @@
       "category": "toiletries",
       "price": 25,
       "unit": "roll-on",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-816766-front-prodcat.jpg?version=1733399868",
       "weightKg": 0.2
     },
     {
@@ -689,7 +689,7 @@
       "category": "toiletries",
       "price": 12,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/600/107/010/0298/front_en.3.400.jpg",
       "weightKg": 0.55
     },
     {
@@ -698,7 +698,7 @@
       "category": "toiletries",
       "price": 10,
       "unit": "box",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/479013.jpg",
       "weightKg": 0.2
     },
     {
@@ -707,7 +707,7 @@
       "category": "toiletries",
       "price": 15,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-189240-front-prodcat.jpg?version=1762950532",
       "weightKg": 0.4
     },
     {
@@ -716,7 +716,7 @@
       "category": "toiletries",
       "price": 20,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-189240-front-prodcat.jpg?version=1762950532",
       "weightKg": 1.05
     },
     {
@@ -725,7 +725,7 @@
       "category": "toiletries",
       "price": 15,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/629/512/001/0150/front_en.3.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -734,7 +734,7 @@
       "category": "toiletries",
       "price": 8,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/762/220/141/6140/front_en.15.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -747,7 +747,7 @@
       "priceRange": "$36–$45 per 100g",
       "runnerInputsPrice": true,
       "weightKg": 0.1,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/085/759/810/1097/front_en.3.400.jpg"
     },
     {
       "id": "sirloin-steak",
@@ -759,7 +759,7 @@
       "priceRange": "$38–$45 per 100g",
       "runnerInputsPrice": true,
       "weightKg": 0.1,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/000/000/019/9391/front_en.17.400.jpg"
     },
     {
       "id": "tbone-steak",
@@ -771,7 +771,7 @@
       "priceRange": "$40–$50 per 100g",
       "runnerInputsPrice": true,
       "weightKg": 0.1,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/500/023/713/9752/front_en.3.400.jpg"
     },
     {
       "id": "minced-beef",
@@ -783,7 +783,7 @@
       "priceRange": "$25–$35 per 400g",
       "runnerInputsPrice": true,
       "weightKg": 0.4,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg"
     },
     {
       "id": "minced-pork",
@@ -795,7 +795,7 @@
       "priceRange": "$20–$28 per 400g",
       "runnerInputsPrice": true,
       "weightKg": 0.4,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/885/868/452/3504/front_en.3.400.jpg"
     },
     {
       "id": "chicken-breast",
@@ -807,7 +807,7 @@
       "priceRange": "$18–$25 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/505/477/514/7069/front_en.34.400.jpg"
     },
     {
       "id": "chicken-thigh",
@@ -819,7 +819,7 @@
       "priceRange": "$20–$28 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/000/000/029/6717/front_en.21.400.jpg"
     },
     {
       "id": "chicken-wings",
@@ -831,7 +831,7 @@
       "priceRange": "$25–$35",
       "runnerInputsPrice": false,
       "weightKg": 0.8,
-      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-64000-22112023.jpg?height=176"
     },
     {
       "id": "pork-chops",
@@ -843,7 +843,7 @@
       "priceRange": "$25–$35 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/50664.jpg?height=176"
     },
     {
       "id": "pork-belly",
@@ -855,7 +855,7 @@
       "priceRange": "$30–$40 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/405/648/911/3195/front_en.6.400.jpg"
     },
     {
       "id": "bacon",
@@ -867,7 +867,7 @@
       "priceRange": "$25–$32",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "sausages",
@@ -879,7 +879,7 @@
       "priceRange": "$22–$30",
       "runnerInputsPrice": false,
       "weightKg": 0.4,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/506/031/735/0033/front_en.62.400.jpg"
     },
     {
       "id": "hot-dogs",
@@ -891,7 +891,7 @@
       "priceRange": "$18–$25",
       "runnerInputsPrice": false,
       "weightKg": 0.3,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://medias.pns.hk/publishing/PNSHK-89360-front-zoom.jpg?version=1738672512"
     },
     {
       "id": "ham-slices",
@@ -903,7 +903,7 @@
       "priceRange": "$18–$24",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "salami",
@@ -915,7 +915,7 @@
       "priceRange": "$20–$28",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "salmon-fillet",
@@ -927,7 +927,7 @@
       "priceRange": "$45–$60 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/000/002/093/3876/front_hr.28.400.jpg"
     },
     {
       "id": "salmon-belly",
@@ -939,7 +939,7 @@
       "priceRange": "$40–$55 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/001/101/121/6243/front_en.3.400.jpg"
     },
     {
       "id": "tuna-steak",
@@ -951,7 +951,7 @@
       "priceRange": "$35–$50 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/841/009/001/0636/front_en.5.400.jpg"
     },
     {
       "id": "shrimp-peeled",
@@ -963,7 +963,7 @@
       "priceRange": "$30–$40 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "shrimp-frozen",
@@ -975,7 +975,7 @@
       "priceRange": "$45–$55",
       "runnerInputsPrice": false,
       "weightKg": 0.5,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20251210/2a56e312-1aca-3b99-8425-107fd08022c0_480x480H"
     },
     {
       "id": "fish-fillet",
@@ -987,7 +987,7 @@
       "priceRange": "$25–$35 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/cs9ny-13727.jpg?height=176"
     },
     {
       "id": "squid-rings",
@@ -999,7 +999,7 @@
       "priceRange": "$25–$35 per 200g",
       "runnerInputsPrice": true,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "scallops",
@@ -1011,7 +1011,7 @@
       "priceRange": "$40–$50",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "crab-sticks",
@@ -1023,7 +1023,7 @@
       "priceRange": "$15–$20",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/477/019/037/9267/front_en.13.400.jpg"
     },
     {
       "id": "fish-balls",
@@ -1035,7 +1035,7 @@
       "priceRange": "$12–$18",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://img.rtacdn-os.com/20250711/3f944a25-d50a-383b-be0b-548cd6cfb1a3_480x480H"
     },
     {
       "id": "silken-tofu",
@@ -1047,7 +1047,7 @@
       "priceRange": "$10–$15",
       "runnerInputsPrice": false,
       "weightKg": 0.3,
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/502/155/498/7710/front_en.55.400.jpg"
     },
     {
       "id": "firm-tofu",
@@ -1059,7 +1059,7 @@
       "priceRange": "$10–$15",
       "runnerInputsPrice": false,
       "weightKg": 0.3,
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/406/146/357/8013/front_en.38.400.jpg"
     },
     {
       "id": "fried-tofu",
@@ -1071,7 +1071,7 @@
       "priceRange": "$12–$18",
       "runnerInputsPrice": false,
       "weightKg": 0.3,
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/000/000/078/0520/front_en.56.400.jpg"
     },
     {
       "id": "tofu-skin",
@@ -1083,7 +1083,7 @@
       "priceRange": "$15–$20",
       "runnerInputsPrice": false,
       "weightKg": 0.3,
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/697/110/610/0199/front_en.14.400.jpg"
     },
     {
       "id": "tempeh",
@@ -1095,7 +1095,7 @@
       "priceRange": "$15–$20",
       "runnerInputsPrice": false,
       "weightKg": 0.3,
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/871/886/800/6004/front_en.31.400.jpg"
     },
     {
       "id": "edamame",
@@ -1107,7 +1107,7 @@
       "priceRange": "$12–$18",
       "runnerInputsPrice": false,
       "weightKg": 0.2,
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=640&h=640&q=80"
+      "image": "https://images.openfoodfacts.org/images/products/802/474/960/1528/front_fr.9.400.jpg"
     },
     {
       "id": "rice-5kg",
@@ -1115,7 +1115,7 @@
       "category": "rice-noodles",
       "price": 55,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://img.rtacdn-os.com/20250821/542947ba-7600-3249-9c9b-2b7b142d80cc_480x480H",
       "weightKg": 5
     },
     {
@@ -1124,7 +1124,7 @@
       "category": "rice-noodles",
       "price": 25,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/501/366/510/0065/front_en.58.400.jpg",
       "weightKg": 2
     },
     {
@@ -1133,7 +1133,7 @@
       "category": "rice-noodles",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-366719-front-prodcat.jpg",
       "weightKg": 0.4
     },
     {
@@ -1142,7 +1142,7 @@
       "category": "rice-noodles",
       "price": 12,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/506/026/248/9932/front_en.32.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1151,7 +1151,7 @@
       "category": "rice-noodles",
       "price": 10,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/611/124/534/3006/front_ar.14.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1160,7 +1160,7 @@
       "category": "condiments",
       "price": 12,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/871/503/511/0809/front_en.194.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1169,7 +1169,7 @@
       "category": "condiments",
       "price": 15,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/007/889/530/0024/front_en.131.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1178,7 +1178,7 @@
       "category": "condiments",
       "price": 10,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-317584-front-prodcat.jpg",
       "weightKg": 0.4
     },
     {
@@ -1187,7 +1187,7 @@
       "category": "condiments",
       "price": 12,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-106250-front-prodcat.jpg",
       "weightKg": 0.4
     },
     {
@@ -1196,7 +1196,7 @@
       "category": "condiments",
       "price": 14,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/611/118/400/4129/front_en.55.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1205,7 +1205,7 @@
       "category": "condiments",
       "price": 18,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/000/002/084/2499/front_en.148.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1214,7 +1214,7 @@
       "category": "condiments",
       "price": 10,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/506/004/264/1406/front_en.254.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1223,7 +1223,7 @@
       "category": "condiments",
       "price": 20,
       "unit": "bottle",
-      "image": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/955/712/900/8819/front_en.14.400.jpg",
       "weightKg": 0.4
     },
     {
@@ -1232,7 +1232,7 @@
       "category": "fruit-veg",
       "price": 10,
       "unit": "bunch",
-      "image": "/images/products/bananas.jpg",
+      "image": "https://medias.pns.hk/publishing/PNSHK-75536-front-prodcat.jpg?version=1749698471",
       "weightKg": 0.8
     },
     {
@@ -1241,7 +1241,7 @@
       "category": "fruit-veg",
       "price": 15,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/Fusion-Taste-PNS/31082023/307255.jpg",
       "weightKg": 0.35
     },
     {
@@ -1250,7 +1250,7 @@
       "category": "fruit-veg",
       "price": 15,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/544/900/014/7417/front_en.140.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -1259,7 +1259,7 @@
       "category": "fruit-veg",
       "price": 12,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/800/403/002/2010/front_en.166.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -1268,7 +1268,7 @@
       "category": "fruit-veg",
       "price": 8,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/871/256/624/6526/front_fr.161.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -1277,7 +1277,7 @@
       "category": "fruit-veg",
       "price": 15,
       "unit": "bag",
-      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-55421-front-prodcat.jpg",
       "weightKg": 0.35
     },
     {
@@ -1286,7 +1286,7 @@
       "category": "fruit-veg",
       "price": 10,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/325/622/380/0287/front_fr.23.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -1295,7 +1295,7 @@
       "category": "fruit-veg",
       "price": 12,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/081/007/555/3161/front_en.49.400.jpg",
       "weightKg": 0.35
     },
     {
@@ -1304,7 +1304,7 @@
       "category": "coffee-tea",
       "price": 18,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-144975-front-prodcat.jpg",
       "weightKg": 0.15
     },
     {
@@ -1313,7 +1313,7 @@
       "category": "coffee-tea",
       "price": 12,
       "unit": "jar",
-      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/844/529/168/6106/front_en.18.400.jpg",
       "weightKg": 0.2
     },
     {
@@ -1322,7 +1322,7 @@
       "category": "coffee-tea",
       "price": 15,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/890/103/078/3241/front_en.29.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -1331,7 +1331,7 @@
       "category": "coffee-tea",
       "price": 20,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/505/595/390/2531/front_fr.72.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -1340,7 +1340,7 @@
       "category": "coffee-tea",
       "price": 10,
       "unit": "can",
-      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/955/600/117/4659/front_en.6.400.jpg",
       "weightKg": 0.15
     },
     {
@@ -1349,7 +1349,7 @@
       "category": "coffee-tea",
       "price": 12,
       "unit": "can",
-      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://medias.pns.hk/publishing/PNSHK-144975-front-prodcat.jpg",
       "weightKg": 0.15
     },
     {
@@ -1358,7 +1358,7 @@
       "category": "frozen",
       "price": 25,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/405/648/984/4112/front_en.3.400.jpg",
       "weightKg": 0.45
     },
     {
@@ -1367,7 +1367,7 @@
       "category": "frozen",
       "price": 35,
       "unit": "each",
-      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/000/002/093/3876/front_hr.28.400.jpg",
       "weightKg": 0.45
     },
     {
@@ -1376,7 +1376,7 @@
       "category": "frozen",
       "price": 28,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c2?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-64000-22112023.jpg?height=176",
       "weightKg": 0.45
     },
     {
@@ -1385,7 +1385,7 @@
       "category": "frozen",
       "price": 20,
       "unit": "pack",
-      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://images.openfoodfacts.org/images/products/501/022/800/1845/front_en.3.400.jpg",
       "weightKg": 0.45
     },
     {
@@ -1394,7 +1394,7 @@
       "category": "frozen",
       "price": 50,
       "unit": "tub",
-      "image": "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-134328.jpg?height=176",
       "weightKg": 0.5
     },
     {
@@ -1403,7 +1403,7 @@
       "category": "frozen",
       "price": 45,
       "unit": "tub",
-      "image": "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=640&h=640&q=80",
+      "image": "https://foodpanda.dhmedia.io/image/nv/Hong-Kong/PARKnSHOP/hjww-134328.jpg?height=176",
       "weightKg": 0.5
     }
   ]

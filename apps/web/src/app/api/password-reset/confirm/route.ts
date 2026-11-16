@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isCuhkStudentEmail, normalizeEmail } from "@fusion-express/shared";
+import { isAnyCampusEmail, normalizeEmail } from "@fusion-express/shared";
 import { updateAuthPassword } from "@/lib/firebase-admin-auth";
 import {
   jsonError,
@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
 
   const email = normalizeEmail(body.email ?? "");
   const password = body.password ?? "";
-  if (!isCuhkStudentEmail(email)) {
-    return jsonError("Use your @link.cuhk.edu.hk email", 400);
+  if (!isAnyCampusEmail(email)) {
+    return jsonError("Please use your CUHK or CityU email", 400);
   }
   if (password.length < 6) {
     return jsonError("Password must be at least 6 characters", 400);

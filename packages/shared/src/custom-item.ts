@@ -1,4 +1,5 @@
 import type { MenuItem } from "./types";
+import type { CampusId } from "./campus";
 import {
   CUSTOM_ITEM_DEFAULT_WEIGHT_KG,
   RUNNER_JUDGMENT_NOTE,
@@ -6,7 +7,7 @@ import {
 
 export function createCustomMenuItem(
   name: string,
-  options?: { weightKg?: number; estimatedPrice?: number },
+  options?: { weightKg?: number; estimatedPrice?: number; campus?: CampusId },
 ): MenuItem {
   const weightKg = options?.weightKg ?? CUSTOM_ITEM_DEFAULT_WEIGHT_KG;
   const estimatedPrice = options?.estimatedPrice;
@@ -28,5 +29,6 @@ export function createCustomMenuItem(
     inStock: true,
     sortOrder: 9999,
     weightKg,
+    campus: options?.campus,
   };
 }

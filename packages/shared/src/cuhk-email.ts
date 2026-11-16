@@ -12,11 +12,11 @@ export function isCuhkStudentEmail(email: string): boolean {
 export function validateCuhkStudentEmail(email: string): string | null {
   const trimmed = email.trim().toLowerCase();
   if (!trimmed.includes("@")) {
-    return "Enter a valid CUHK student email address";
+    return "Please use your CUHK email";
   }
   const domain = trimmed.split("@").pop() ?? "";
   if (!CUHK_STUDENT_DOMAINS.includes(domain as (typeof CUHK_STUDENT_DOMAINS)[number])) {
-    return "Use your CUHK email (@link.cuhk.edu.hk)";
+    return "Please use your CUHK email";
   }
   return null;
 }

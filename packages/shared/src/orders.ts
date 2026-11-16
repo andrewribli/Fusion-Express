@@ -12,6 +12,7 @@ import {
   resolveSpecialInstructions,
 } from "./constants";
 import type { Order, OrderItem, OrderStatus, PriceAdjustmentStatus } from "./types";
+import type { CampusId } from "./campus";
 import {
   ACTIVE_ORDER_LIMIT_MESSAGE,
   CUSTOMER_DEADLINE_REMINDER_MS,
@@ -19,6 +20,8 @@ import {
   customerDeadlineOf,
   countsTowardCustomerOrderPlacementCap,
   isActiveCustomerOrderStatus,
+  canCustomerCancelOrder,
+  isClaimableOrderStatus,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
   MAX_ACTIVE_CUSTOMER_ORDERS,
@@ -36,16 +39,23 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   runTransaction,
   updateDoc,
   where,
   Timestamp,
+  type DocumentData,
+  type UpdateData,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ORDERS_COLLECTION = collectionName("orders");
+
+function orderPatch(data: Record<string, unknown>): UpdateData<DocumentData> {
+  return omitUndefined(data) as UpdateData<DocumentData>;
+}
 const ORDER_HISTORY_KEY = isStagingApp()
   ? "fusion_order_history_test"
   : "fusion_order_history";
@@ -114,6 +124,21 @@ function parseItems(raw: unknown): Order["items"] {
 
 function parseOrder(id: string, data: Record<string, unknown>): Order {
   const loc = data.runnerLocation as Record<string, unknown> | undefined;
+  const items = parseItems(data.items);
+  const orderChannelRaw = String(data.orderChannel ?? "").trim().toLowerCase();
+  const orderChannel =
+    orderChannelRaw === "canteen" ||
+    orderChannelRaw === "fusion" ||
+    orderChannelRaw === "taste"
+      ? (orderChannelRaw as Order["orderChannel"])
+      : items.some((item) => item.itemId.startsWith("canteen:"))
+        ? ("canteen" as const)
+        : undefined;
+  const campusRaw = String(data.campus ?? "").trim().toLowerCase();
+  const campus =
+    campusRaw === "cuhk" || campusRaw === "cityu"
+      ? (campusRaw as Order["campus"])
+      : undefined;
   return {
     id,
     sessionId: String(data.sessionId ?? ""),
@@ -121,7 +146,12 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerName: data.customerName ? String(data.customerName) : undefined,
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
-    items: parseItems(data.items),
+    campus,
+    orderChannel,
+    canteenRestaurantId: data.canteenRestaurantId
+      ? String(data.canteenRestaurantId)
+      : undefined,
+    items,
     status: normalizeOrderStatus(String(data.status ?? "pending")),
     college: String(data.college ?? ""),
     hall: String(data.hall ?? ""),
@@ -135,11 +165,38 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerNote: data.customerNote ? String(data.customerNote) : undefined,
     runnerNote: data.runnerNote ? String(data.runnerNote) : undefined,
     subtotal: Number(data.subtotal ?? 0),
-    deliveryFee: Number(data.deliveryFee ?? 10),
+    deliveryFee: Number(data.deliveryFee ?? 5),
+    heavyBagSurcharge:
+      data.heavyBagSurcharge != null
+        ? Number(data.heavyBagSurcharge)
+        : undefined,
     tip: data.tip != null ? Number(data.tip) : undefined,
     total: Number(data.total ?? 0),
+    discountApplied:
+      data.discountApplied != null ? Boolean(data.discountApplied) : undefined,
+    discountAmount:
+      data.discountAmount != null ? Number(data.discountAmount) : undefined,
+    runnerCollege: data.runnerCollege ? String(data.runnerCollege) : undefined,
+    canteenCollege: data.canteenCollege ? String(data.canteenCollege) : undefined,
     paymentReceived: Boolean(data.paymentReceived),
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
+    paymentProvider: data.paymentProvider
+      ? String(data.paymentProvider)
+      : undefined,
+    awaitingOnlinePayment:
+      data.awaitingOnlinePayment != null
+        ? Boolean(data.awaitingOnlinePayment)
+        : undefined,
+    airwallexPaymentIntentId: data.airwallexPaymentIntentId
+      ? String(data.airwallexPaymentIntentId)
+      : undefined,
+    airwallexPaidAmount:
+      data.airwallexPaidAmount != null
+        ? Number(data.airwallexPaidAmount)
+        : undefined,
+    airwallexPaidCurrency: data.airwallexPaidCurrency
+      ? String(data.airwallexPaidCurrency)
+      : undefined,
     finalTotal: data.finalTotal != null ? Number(data.finalTotal) : undefined,
     amountPaidByRunner:
       data.amountPaidByRunner != null
@@ -148,6 +205,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
           ? Number(data.finalTotal)
           : undefined,
     receiptUrl: data.receiptUrl ? String(data.receiptUrl) : undefined,
+    fpsReceiptUrl: data.fpsReceiptUrl ? String(data.fpsReceiptUrl) : undefined,
     bankStatementUrl: data.bankStatementUrl
       ? String(data.bankStatementUrl)
       : undefined,
@@ -177,6 +235,8 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     estimatedDeliveryAt: data.estimatedDeliveryAt
       ? toDate(data.estimatedDeliveryAt)
       : undefined,
+    isScheduled: data.isScheduled === true,
+    scheduledFor: data.scheduledFor ? toDate(data.scheduledFor) : undefined,
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
@@ -227,16 +287,6 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
       ? toDate(data.customerApprovedPriceAt)
       : undefined,
     fusionPaidByPlatform: data.fusionPaidByPlatform !== false,
-    shopKind:
-      data.shopKind === "canteen" || data.shopKind === "fusion"
-        ? data.shopKind
-        : data.canteenId
-          ? "canteen"
-          : "fusion",
-    canteenId:
-      typeof data.canteenId === "string" ? data.canteenId : undefined,
-    canteenName:
-      typeof data.canteenName === "string" ? data.canteenName : undefined,
     runnerLocation:
       loc && typeof loc.lat === "number" && typeof loc.lng === "number"
         ? {
@@ -299,6 +349,10 @@ export async function createOrder(
         estimatedDeliveryAt: order.estimatedDeliveryAt
           ? Timestamp.fromDate(order.estimatedDeliveryAt)
           : undefined,
+        scheduledFor: order.scheduledFor
+          ? Timestamp.fromDate(order.scheduledFor)
+          : undefined,
+        isScheduled: order.isScheduled === true ? true : undefined,
       } as Record<string, unknown>);
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
       return ref.id;
@@ -339,6 +393,36 @@ export async function fetchOrder(orderId: string): Promise<Order | null> {
   return getMockOrderById(orderId) ?? null;
 }
 
+/** Live single-order updates (payment webhooks, runner status, etc.). */
+export function subscribeOrder(
+  orderId: string,
+  onOrder: (order: Order | null) => void,
+  onError?: (err: Error) => void,
+): () => void {
+  if (!orderId) {
+    onOrder(null);
+    return () => undefined;
+  }
+  if (!isFirebaseConfigured()) {
+    onOrder(getMockOrderById(orderId) ?? null);
+    return () => undefined;
+  }
+  return onSnapshot(
+    doc(getDb(), ORDERS_COLLECTION, orderId),
+    (snap) => {
+      if (!snap.exists()) {
+        onOrder(null);
+        return;
+      }
+      onOrder(parseOrder(snap.id, snap.data() as Record<string, unknown>));
+    },
+    (err) => {
+      console.error("subscribeOrder Firestore failed", err);
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    },
+  );
+}
+
 export class SelfPickupError extends Error {
   constructor() {
     super("You cannot pick up your own order.");
@@ -356,6 +440,16 @@ export class OrderAlreadyTakenError extends Error {
 function filterOwnOrders(orders: Order[], excludeCustomerId?: string): Order[] {
   if (!excludeCustomerId) return orders;
   return orders.filter((o) => o.customerId !== excludeCustomerId);
+}
+
+/** Orders placed before multi-campus have no `campus`; they are all CUHK. */
+export function orderCampus(order: Pick<Order, "campus">): CampusId {
+  return order.campus ?? "cuhk";
+}
+
+function filterCampusOrders(orders: Order[], campus?: CampusId): Order[] {
+  if (!campus) return orders;
+  return orders.filter((o) => orderCampus(o) === campus);
 }
 
 const ORDER_PAGE_SIZE = 100;
@@ -380,9 +474,21 @@ function byNewestFirst(a: Order, b: Order): number {
  */
 export async function fetchPendingOrders(
   excludeCustomerId?: string,
+  campus?: CampusId,
+): Promise<Order[]> {
+  return filterCampusOrders(
+    await fetchUnscopedPendingOrders(excludeCustomerId),
+    campus,
+  );
+}
+
+async function fetchUnscopedPendingOrders(
+  excludeCustomerId?: string,
 ): Promise<Order[]> {
   if (isFirebaseConfigured()) {
     try {
+      // Paid (Airwallex) orders are claimable. Legacy unpaid pending (no online
+      // checkout) stay claimable so older tickets are not stranded.
       const snap = await getDocs(
         query(
           collection(getDb(), ORDERS_COLLECTION),
@@ -391,7 +497,10 @@ export async function fetchPendingOrders(
           limit(ORDER_PAGE_SIZE),
         ),
       );
-      return filterOwnOrders(parseSnapshotDocs(snap.docs), excludeCustomerId);
+      return filterOwnOrders(
+        parseSnapshotDocs(snap.docs).filter((o) => !o.runnerId),
+        excludeCustomerId,
+      );
     } catch (err) {
       console.error("fetchPendingOrders Firestore failed", err);
       throw err instanceof Error
@@ -400,7 +509,75 @@ export async function fetchPendingOrders(
     }
   }
 
-  return filterOwnOrders(getMockPendingOrders(), excludeCustomerId);
+  return filterOwnOrders(
+    getMockPendingOrders().filter((o) => !o.runnerId),
+    excludeCustomerId,
+  );
+}
+
+/**
+ * Live pending job-board feed for runners. Matches the same scoped query as
+ * `fetchPendingOrders` (rules require `status == 'pending'` for list). Unassigned
+ * orders are filtered client-side (`runnerId` null/missing) so we stay within
+ * the existing composite index.
+ */
+export function subscribePendingOrders(
+  onOrders: (orders: Order[]) => void,
+  options?: {
+    excludeCustomerId?: string;
+    /** Only show jobs on the runner's own campus. */
+    campus?: CampusId;
+    onError?: (err: Error) => void;
+  },
+): () => void {
+  const emit = (orders: Order[]) => {
+    onOrders(
+      filterCampusOrders(
+        filterOwnOrders(
+          orders.filter((o) => !o.runnerId),
+          options?.excludeCustomerId,
+        ),
+        options?.campus,
+      ),
+    );
+  };
+
+  if (isFirebaseConfigured()) {
+    try {
+      const q = query(
+        collection(getDb(), ORDERS_COLLECTION),
+        where("status", "==", "pending"),
+        orderBy("createdAt", "desc"),
+        limit(ORDER_PAGE_SIZE),
+      );
+      return onSnapshot(
+        q,
+        (snap) => {
+          emit(parseSnapshotDocs(snap.docs));
+        },
+        (err) => {
+          console.error("subscribePendingOrders Firestore failed", err);
+          options?.onError?.(
+            err instanceof Error ? err : new Error(String(err)),
+          );
+          onOrders([]);
+        },
+      );
+    } catch (err) {
+      console.error("subscribePendingOrders setup failed", err);
+      options?.onError?.(
+        err instanceof Error ? err : new Error(String(err)),
+      );
+      onOrders([]);
+      return () => undefined;
+    }
+  }
+
+  emit(getMockPendingOrders());
+  const interval = setInterval(() => {
+    emit(getMockPendingOrders());
+  }, 3000);
+  return () => clearInterval(interval);
 }
 
 /** Order history for the signed-in customer, keyed on their auth uid. */
@@ -444,6 +621,33 @@ export async function fetchInFlightCustomerOrders(
   const orders = await fetchOrdersByCustomer(customerId);
   return orders.filter((order) =>
     countsTowardCustomerOrderPlacementCap(order.status),
+  );
+}
+
+/** Live list of the signed-in runner's in-progress jobs. */
+export function subscribeRunnerOrders(
+  runnerUid: string,
+  onOrders: (orders: Order[]) => void,
+  onError?: (err: Error) => void,
+): () => void {
+  if (!runnerUid || !isFirebaseConfigured()) {
+    onOrders([]);
+    return () => undefined;
+  }
+  const q = query(
+    collection(getDb(), ORDERS_COLLECTION),
+    where("runnerUid", "==", runnerUid),
+    where("status", "in", ["accepted", "purchased", "assigned", "picked"]),
+  );
+  return onSnapshot(
+    q,
+    (snap) => {
+      onOrders(parseSnapshotDocs(snap.docs).sort(byNewestFirst));
+    },
+    (err) => {
+      console.error("subscribeRunnerOrders Firestore failed", err);
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    },
   );
 }
 
@@ -500,6 +704,8 @@ export async function fetchDeliveredOrdersByRunner(
  * @param runnerId doc id in /runners
  * @param runnerUid auth uid of the runner; stored so security rules and the
  *   runner's own order queries can match on request.auth.uid
+ * @param payment optional PayMe/FPS + email denormalized onto the order
+ * @param discount optional same-college canteen discount applied at accept
  */
 export async function acceptOrder(
   orderId: string,
@@ -507,6 +713,15 @@ export async function acceptOrder(
   runnerName: string,
   runnerUid: string,
   payment?: { method: "PayMe" | "FPS"; id: string; email?: string },
+  discount?: {
+    discountApplied: boolean;
+    discountAmount: number;
+    runnerCollege?: string;
+    canteenCollege?: string;
+    subtotal: number;
+    total: number;
+  },
+  runnerCampus?: CampusId,
 ): Promise<void> {
   const now = new Date();
   const paymentFields = omitUndefined({
@@ -514,6 +729,16 @@ export async function acceptOrder(
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
   });
+  const discountFields = discount
+    ? omitUndefined({
+        discountApplied: discount.discountApplied,
+        discountAmount: discount.discountAmount,
+        runnerCollege: discount.runnerCollege,
+        canteenCollege: discount.canteenCollege,
+        subtotal: discount.subtotal,
+        total: discount.total,
+      })
+    : {};
   if (isFirebaseConfigured()) {
     const db = getDb();
     const orderRef = doc(db, ORDERS_COLLECTION, orderId);
@@ -524,7 +749,10 @@ export async function acceptOrder(
       if (order.customerId === runnerUid) {
         throw new SelfPickupError();
       }
-      if (order.status !== "pending") {
+      if (runnerCampus && orderCampus(order) !== runnerCampus) {
+        throw new Error("This order is on a different campus.");
+      }
+      if (!isClaimableOrderStatus(order.status)) {
         if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
         throw new OrderAlreadyTakenError();
       }
@@ -539,6 +767,7 @@ export async function acceptOrder(
         ),
         updatedAt: Timestamp.fromDate(now),
         ...paymentFields,
+        ...discountFields,
       });
     });
     return;
@@ -549,7 +778,7 @@ export async function acceptOrder(
   if (order.customerId === runnerUid) {
     throw new SelfPickupError();
   }
-  if (order.status !== "pending") {
+  if (!isClaimableOrderStatus(order.status)) {
     if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
     throw new OrderAlreadyTakenError();
   }
@@ -560,6 +789,16 @@ export async function acceptOrder(
     runnerPaymentMethod: payment?.method,
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
+    ...(discount
+      ? {
+          discountApplied: discount.discountApplied,
+          discountAmount: discount.discountAmount,
+          runnerCollege: discount.runnerCollege,
+          canteenCollege: discount.canteenCollege,
+          subtotal: discount.subtotal,
+          total: discount.total,
+        }
+      : {}),
   });
 }
 
@@ -581,6 +820,12 @@ export async function updateOrderStatus(
       | "runnerPaymentMethod"
       | "runnerPaymentId"
       | "runnerEmail"
+      | "discountApplied"
+      | "discountAmount"
+      | "runnerCollege"
+      | "canteenCollege"
+      | "subtotal"
+      | "total"
     >
   >,
 ): Promise<void> {
@@ -608,12 +853,17 @@ export async function updateOrderStatus(
           new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS),
         );
       }
-      if (status === "customer_paid") {
+      if (status === "paid" || status === "customer_paid") {
         updates.customerPaidAt = Timestamp.fromDate(now);
         updates.paymentReceived = true;
+        updates.awaitingOnlinePayment = false;
       }
       if (status === "runner_paid") {
         updates.runnerPaidAt = Timestamp.fromDate(now);
+      }
+      if (status === "completed") {
+        updates.runnerPaidAt = updates.runnerPaidAt ?? Timestamp.fromDate(now);
+        updates.paymentReceived = true;
       }
       if (extras?.runnerName) updates.runnerName = extras.runnerName;
       if (extras?.runnerId) updates.runnerId = extras.runnerId;
@@ -635,7 +885,17 @@ export async function updateOrderStatus(
       if (extras?.runnerPaymentId) {
         updates.runnerPaymentId = extras.runnerPaymentId;
       }
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined(updates));
+      if (extras?.discountApplied != null) {
+        updates.discountApplied = extras.discountApplied;
+      }
+      if (extras?.discountAmount != null) {
+        updates.discountAmount = extras.discountAmount;
+      }
+      if (extras?.runnerCollege) updates.runnerCollege = extras.runnerCollege;
+      if (extras?.canteenCollege) updates.canteenCollege = extras.canteenCollege;
+      if (extras?.subtotal != null) updates.subtotal = extras.subtotal;
+      if (extras?.total != null) updates.total = extras.total;
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), orderPatch(updates));
       return;
     } catch (err) {
       console.error("updateOrderStatus Firestore failed", err);
@@ -655,11 +915,16 @@ export async function updateOrderStatus(
       order.pickedUpAt = now;
     }
     if (status === "delivered") order.deliveredAt = now;
-    if (status === "customer_paid") {
+    if (status === "paid" || status === "customer_paid") {
       order.customerPaidAt = now;
       order.paymentReceived = true;
+      order.awaitingOnlinePayment = false;
     }
     if (status === "runner_paid") order.runnerPaidAt = now;
+    if (status === "completed") {
+      order.runnerPaidAt = order.runnerPaidAt ?? now;
+      order.paymentReceived = true;
+    }
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
     if (extras?.runnerUid) order.runnerUid = extras.runnerUid;
@@ -676,6 +941,16 @@ export async function updateOrderStatus(
       order.runnerPaymentMethod = extras.runnerPaymentMethod;
     }
     if (extras?.runnerPaymentId) order.runnerPaymentId = extras.runnerPaymentId;
+    if (extras?.discountApplied != null) {
+      order.discountApplied = extras.discountApplied;
+    }
+    if (extras?.discountAmount != null) {
+      order.discountAmount = extras.discountAmount;
+    }
+    if (extras?.runnerCollege) order.runnerCollege = extras.runnerCollege;
+    if (extras?.canteenCollege) order.canteenCollege = extras.canteenCollege;
+    if (extras?.subtotal != null) order.subtotal = extras.subtotal;
+    if (extras?.total != null) order.total = extras.total;
   }
 }
 
@@ -718,12 +993,9 @@ export async function cancelOrder(orderId: string, customerId: string): Promise<
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
   if (order.customerId !== customerId) throw new Error("Not authorized");
-  const canCancelPending = order.status === "pending";
-  const canCancelPriceIncrease =
-    order.priceAdjustmentStatus === "pending_customer" &&
-    (order.status === "accepted" || order.status === "pending");
-  if (!canCancelPending && !canCancelPriceIncrease) {
-    throw new Error("Order can only be cancelled before pickup");
+  // Allowed while pending/accepted (before purchased / out for delivery).
+  if (!canCustomerCancelOrder(order)) {
+    throw new Error("Order can only be cancelled before the runner picks up");
   }
   await updateOrderStatus(orderId, "cancelled");
 }
@@ -791,7 +1063,7 @@ async function patchOrder(
     try {
       await updateDoc(
         doc(getDb(), ORDERS_COLLECTION, orderId),
-        omitUndefined(withTime),
+        orderPatch(withTime),
       );
       return;
     } catch {
@@ -1017,6 +1289,28 @@ export async function markPurchased(
   });
 }
 
+/** Canteen pickup: no Fusion receipt — just mark purchased / picked up. */
+export async function markCanteenPickedUp(orderId: string): Promise<void> {
+  await updateOrderStatus(orderId, "purchased");
+}
+
+/** Canteen deliver: fixed menu total (already discounted) + optional lobby photo. */
+export async function markCanteenDelivered(
+  orderId: string,
+  opts: { finalTotal: number; deliveryPhotoUrl?: string },
+): Promise<void> {
+  if (!(opts.finalTotal > 0)) {
+    throw new Error("Enter the canteen order total.");
+  }
+  const amount = round2(opts.finalTotal);
+  await updateOrderStatus(orderId, "delivered", {
+    finalTotal: amount,
+    amountPaidByRunner: amount,
+    deliveryPhotoUrl: opts.deliveryPhotoUrl,
+    runnerVerified: true,
+  });
+}
+
 export async function uploadBankStatementPhoto(
   orderId: string,
   file: Blob,
@@ -1051,6 +1345,7 @@ export async function saveRunnerDeliveryProgress(
     deliveryPhotoUrl?: string;
     finalTotal?: number;
     runnerVerified?: boolean;
+    heavyBagSurcharge?: number;
   },
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
@@ -1070,12 +1365,18 @@ export async function saveRunnerDeliveryProgress(
   if (progress.runnerVerified != null) {
     updates.runnerVerified = progress.runnerVerified;
   }
+  if (progress.heavyBagSurcharge != null) {
+    updates.heavyBagSurcharge = Math.max(
+      0,
+      Math.round(progress.heavyBagSurcharge),
+    );
+  }
   if (Object.keys(updates).length === 0) return;
 
   const now = new Date();
   if (isFirebaseConfigured()) {
     try {
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), omitUndefined({
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), orderPatch({
         ...updates,
         updatedAt: Timestamp.fromDate(now),
       }));
@@ -1101,6 +1402,12 @@ export async function saveRunnerDeliveryProgress(
   if (progress.runnerVerified != null) {
     order.runnerVerified = progress.runnerVerified;
   }
+  if (progress.heavyBagSurcharge != null) {
+    order.heavyBagSurcharge = Math.max(
+      0,
+      Math.round(progress.heavyBagSurcharge),
+    );
+  }
   order.updatedAt = now;
 }
 
@@ -1110,15 +1417,12 @@ export async function markDeliveredWithTotal(
     finalTotal: number;
     deliveryPhotoUrl?: string;
     receiptUrl?: string;
-    bankStatementUrl: string;
+    bankStatementUrl?: string;
     runnerVerified: boolean;
   },
 ): Promise<void> {
   if (!(opts.finalTotal > 0)) {
     throw new Error("Enter the Fusion receipt total.");
-  }
-  if (!opts.bankStatementUrl) {
-    throw new Error("Upload a bank statement screenshot.");
   }
   if (!opts.runnerVerified) {
     throw new Error("Confirm you wrote the customer's full name on the receipt.");
@@ -1176,10 +1480,11 @@ export async function verifyAdminDelivery(
 export async function markRunnerPayout(orderId: string): Promise<void> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== "delivered") {
-    throw new Error("Pay the runner after they mark delivered.");
+  if (order.status !== "paid" && order.status !== "customer_paid") {
+    throw new Error("Reimburse the runner after the customer has paid.");
   }
   await updateOrderStatus(orderId, "runner_paid");
+  await updateOrderStatus(orderId, "completed");
 }
 
 export async function fetchOrdersAwaitingPayout(): Promise<Order[]> {
@@ -1286,7 +1591,7 @@ export async function syncOrderDeadlines(order: Order): Promise<DeadlineSyncResu
     try {
       await updateDoc(
         doc(getDb(), ORDERS_COLLECTION, order.id),
-        omitUndefined(updates),
+        orderPatch(updates),
       );
     } catch (err) {
       console.error("syncOrderDeadlines failed", err);
