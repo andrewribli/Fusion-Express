@@ -18,6 +18,7 @@ import OrdersScreen from "./app/(tabs)/orders";
 import ProfileScreen from "./app/(tabs)/profile";
 import RunnerScreen from "./app/(tabs)/runner";
 import MenuScreen from "./app/menu";
+import CanteenMenuScreen from "./app/canteen-menu";
 import CartScreen from "./app/cart";
 import CheckoutScreen from "./app/checkout";
 import TrackScreen from "./app/track";
@@ -73,6 +74,11 @@ function Root() {
                 <Stack.Screen
                   name="Menu"
                   component={MenuScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="CanteenMenu"
+                  component={CanteenMenuScreen}
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen

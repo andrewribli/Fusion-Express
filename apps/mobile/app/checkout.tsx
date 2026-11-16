@@ -22,6 +22,11 @@ import {
   ZONE_LABELS,
 } from "@fusion-express/shared/delivery";
 import {
+  canteenCollegeForRestaurant,
+  collegeLabel,
+  computeCollegeDiscount,
+} from "@fusion-express/shared/canteen-college";
+import {
   CUHK_COLLEGES,
   formatDeliveryAddress,
   getHallsForCollege,
@@ -39,6 +44,12 @@ import {
 } from "@fusion-express/shared";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
+import {
+  CANTEEN_DELIVERY_FEE,
+  cartRestaurantId,
+  isCanteenCart,
+} from "../src/canteen/cart";
+import { getRestaurant } from "../src/canteen/restaurants";
 import { notifyOrderEvent } from "../src/notify-push";
 import type { RootStackParamList } from "../src/navigation";
 import {
@@ -62,6 +73,10 @@ export default function CheckoutScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { items, subtotal, sessionId, clearCart } = useCart();
   const { profile, user, ensureCheckoutAuth } = useAuth();
+  const canteen = isCanteenCart(items);
+  const restaurantId = cartRestaurantId(items);
+  const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
+  const canteenCollege = canteenCollegeForRestaurant(restaurantId);
   const initialCollege: CuhkCollege =
     profile?.college && CUHK_COLLEGES.includes(profile.college as CuhkCollege)
       ? (profile.college as CuhkCollege)
@@ -83,13 +98,28 @@ export default function CheckoutScreen() {
   const [showPicker, setShowPicker] = useState(false);
 
   const weightKg = cartTotalWeightKg(items);
-  const fee = useMemo(
-    () => calculateDeliveryFee({ weightKg, college }),
-    [weightKg, college],
-  );
+  const fee = useMemo(() => {
+    if (canteen) {
+      return {
+        baseFee: CANTEEN_DELIVERY_FEE,
+        weightKg,
+        extraKg: 0,
+        weightSurcharge: 0,
+        zone: 1 as const,
+        distanceSurcharge: 0,
+        deliveryFee: CANTEEN_DELIVERY_FEE,
+        heavyBagEligible: false,
+      };
+    }
+    return calculateDeliveryFee({ weightKg, college });
+  }, [canteen, weightKg, college]);
   const total = subtotal + fee.deliveryFee;
-  const overLimit = isOverOrderLimit(subtotal);
+  const overLimit = !canteen && isOverOrderLimit(subtotal);
   const bounds = scheduleBounds();
+  const discountPreview = useMemo(
+    () => computeCollegeDiscount(subtotal, college, canteenCollege),
+    [subtotal, college, canteenCollege],
+  );
 
   function pickCollege(next: CuhkCollege) {
     setCollege(next);
@@ -114,11 +144,21 @@ export default function CheckoutScreen() {
       const auth = await ensureCheckoutAuth();
       const name = customerName.trim();
 
+      const foodSubtotal = items.reduce(
+        (sum, line) => sum + lineTotal(line.item, line.quantity),
+        0,
+      );
       const orderId = await createOrder({
         sessionId,
         customerId: auth.uid,
         customerName: name,
         customerEmail: auth.email || user?.email || undefined,
+        campus: "cuhk",
+        orderChannel: canteen ? "canteen" : "fusion",
+        canteenRestaurantId: canteen ? restaurantId ?? undefined : undefined,
+        canteenCollege: canteen
+          ? canteenCollege ?? undefined
+          : undefined,
         items: items.map(({ item, quantity }) => ({
           itemId: item.id,
           name: item.name,
@@ -133,10 +173,7 @@ export default function CheckoutScreen() {
         zone: fee.zone,
         totalWeight: fee.weightKg,
         customerNote: note.trim() || "None for now",
-        subtotal: items.reduce(
-          (sum, line) => sum + lineTotal(line.item, line.quantity),
-          0,
-        ),
+        subtotal: foodSubtotal,
         deliveryFee: fee.deliveryFee,
         total,
         paymentReceived: false,
@@ -340,28 +377,48 @@ export default function CheckoutScreen() {
                 </Card>
 
                 <Card className="mt-3">
+                  {canteen && restaurant ? (
+                    <Text className="mb-2 text-sm font-bold text-gray-900">
+                      {restaurant.shortName} · canteen
+                    </Text>
+                  ) : null}
                   <Text className="text-sm text-gray-600">
                     {formatDeliveryAddress(college, hall)}
                   </Text>
-                  <Text className="mt-1 text-sm text-gray-600">
-                    {ZONE_LABELS[fee.zone]} · Zone {fee.zone} (+$
-                    {fee.distanceSurcharge})
-                  </Text>
-                  <Text className="mt-1 text-sm text-gray-600">
-                    Base ${fee.baseFee}
-                    {fee.extraKg > 0
-                      ? ` · weight over ${WEIGHT_INCLUDED_KG} kg (+$${fee.weightSurcharge})`
-                      : ` · up to ${WEIGHT_INCLUDED_KG} kg`}
-                    {fee.heavyBagEligible
-                      ? ` · over ${HEAVY_BAG_THRESHOLD_KG} kg (runner may add heavy-bag fee)`
-                      : ""}
-                  </Text>
+                  {canteen ? (
+                    <Text className="mt-1 text-sm text-gray-600">
+                      Flat canteen delivery HK${CANTEEN_DELIVERY_FEE}
+                    </Text>
+                  ) : (
+                    <>
+                      <Text className="mt-1 text-sm text-gray-600">
+                        {ZONE_LABELS[fee.zone]} · Zone {fee.zone} (+$
+                        {fee.distanceSurcharge})
+                      </Text>
+                      <Text className="mt-1 text-sm text-gray-600">
+                        Base ${fee.baseFee}
+                        {fee.extraKg > 0
+                          ? ` · weight over ${WEIGHT_INCLUDED_KG} kg (+$${fee.weightSurcharge})`
+                          : ` · up to ${WEIGHT_INCLUDED_KG} kg`}
+                        {fee.heavyBagEligible
+                          ? ` · over ${HEAVY_BAG_THRESHOLD_KG} kg (runner may add heavy-bag fee)`
+                          : ""}
+                      </Text>
+                    </>
+                  )}
                   <Text className="mt-1 text-sm text-gray-600">
                     Items ${subtotal} · delivery ${fee.deliveryFee}
-                    {fee.extraKg > 0
+                    {!canteen && fee.extraKg > 0
                       ? ` (incl. $${WEIGHT_SURCHARGE_PER_KG}/extra kg)`
                       : ""}
                   </Text>
+                  {canteen && canteenCollege ? (
+                    <Text className="mt-2 text-xs text-gray-600">
+                      {discountPreview.discountApplied
+                        ? `College discount preview (−HK$${discountPreview.discountAmount}) applies when a ${collegeLabel(canteenCollege)} runner accepts.`
+                        : `10% off food if a ${collegeLabel(canteenCollege)} runner accepts (not applied until accept).`}
+                    </Text>
+                  ) : null}
                   <Text className="mt-2 text-base font-extrabold text-fusion">
                     Total ${total}
                   </Text>

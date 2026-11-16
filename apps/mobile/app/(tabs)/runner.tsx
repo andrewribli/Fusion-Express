@@ -37,14 +37,33 @@ import {
 } from "@fusion-express/shared/delivery";
 import { resolveProductImageUrl } from "@fusion-express/shared/products";
 import { resolveProductImage } from "@fusion-express/shared/resolve-image";
+import {
+  canteenNameForRestaurant,
+  restaurantIdFromOrderItems,
+} from "@fusion-express/shared/canteen-college";
 import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../../src/auth";
 import { becomeRunner } from "../../src/become-runner";
+import { buildAcceptDiscount } from "../../src/canteen/discount";
 import { notifyOrderEvent } from "../../src/notify-push";
 import { OrderChat } from "../../src/OrderChat";
 import { ProductImage } from "../../src/ProductImage";
 import { formatScheduled } from "../../src/schedule";
 import { takePhoto, uriToBlob } from "../../src/takePhoto";
+
+function isCanteenOrder(order: Order): boolean {
+  return (
+    order.orderChannel === "canteen" ||
+    order.items.some((i) => i.itemId.startsWith("canteen:"))
+  );
+}
+
+function orderShopLabel(order: Order): string {
+  if (!isCanteenOrder(order)) return "Fusion";
+  const id =
+    order.canteenRestaurantId || restaurantIdFromOrderItems(order.items);
+  return canteenNameForRestaurant(id);
+}
 import {
   Card,
   EmptyState,
@@ -217,11 +236,20 @@ export default function RunnerScreen() {
     setBusyKind("accept");
     setError("");
     try {
+      const target =
+        pending.find((o) => o.id === orderId) ||
+        active.find((o) => o.id === orderId);
+      const discount = target
+        ? buildAcceptDiscount(target, profile.college)
+        : undefined;
       await acceptOrder(
         orderId,
         runnerId,
         runnerName.trim() || "Mobile Runner",
         runnerUid,
+        undefined,
+        discount,
+        profile.campus,
       );
       notifyOrderEvent(orderId, "accepted");
       await refresh();
@@ -264,7 +292,7 @@ export default function RunnerScreen() {
     setError("");
     try {
       const photo = await takePhoto({
-        purpose: "Fusion receipt photos",
+        purpose: `${orderShopLabel(order)} receipt photos`,
         quality: 0.65,
       });
       if (!photo) return;
@@ -322,7 +350,7 @@ export default function RunnerScreen() {
   async function onSaveTotal(order: Order) {
     const amount = Number(totals[order.id]);
     if (!(amount > 0)) {
-      setError("Enter the Fusion receipt total (HKD).");
+      setError(`Enter the ${orderShopLabel(order)} receipt total (HKD).`);
       return;
     }
     setBusyId(order.id);
@@ -415,12 +443,16 @@ export default function RunnerScreen() {
     setBusyKind("deliver");
     setError("");
     try {
-      if (!order.receiptUrl) throw new Error("Upload the Fusion receipt photo.");
+      if (!order.receiptUrl) {
+        throw new Error(`Upload the ${orderShopLabel(order)} receipt photo.`);
+      }
       if (!order.deliveryPhotoUrl) {
         throw new Error("Take a lobby photo before marking delivered.");
       }
       if (!(finalTotal > 0)) {
-        throw new Error("Enter the final Fusion receipt total.");
+        throw new Error(
+          `Enter the final ${orderShopLabel(order)} receipt total.`,
+        );
       }
       if (!order.runnerVerified) {
         throw new Error(
@@ -566,12 +598,18 @@ export default function RunnerScreen() {
                     Deliver by {formatScheduled(order.scheduledFor)}
                   </Text>
                 ) : null}
+                <Text className="mt-1 text-sm font-semibold text-gray-800">
+                  {orderShopLabel(order)}
+                </Text>
                 <Text className="mt-1 text-sm text-gray-600">
                   {order.hall} · ${order.total} · {order.customerName}
                 </Text>
                 <Text className="mt-1 text-xs text-gray-500">
                   {order.items.length} item
                   {order.items.length === 1 ? "" : "s"}
+                  {order.canteenCollege
+                    ? ` · college discount if you match ${order.canteenCollege}`
+                    : ""}
                 </Text>
                 <PrimaryButton
                   label={
@@ -614,9 +652,17 @@ export default function RunnerScreen() {
                       then.
                     </Text>
                   ) : null}
+                  <Text className="mt-1 text-sm font-semibold text-gray-800">
+                    {orderShopLabel(order)}
+                  </Text>
                   <Text className="mt-1 text-sm text-gray-600">
                     {order.hall} · {order.customerName}
                   </Text>
+                  {order.discountApplied && (order.discountAmount ?? 0) > 0 ? (
+                    <Text className="mt-1 text-xs font-semibold text-emerald-700">
+                      College discount −HK${order.discountAmount}
+                    </Text>
+                  ) : null}
 
                   {order.items.map((item) => {
                     const uri = lineImage(item);
@@ -652,7 +698,7 @@ export default function RunnerScreen() {
                     />
 
                     <Text className="mt-1 text-xs font-semibold text-gray-500">
-                      2. Fusion receipt total (HKD)
+                      2. {orderShopLabel(order)} receipt total (HKD)
                     </Text>
                     <View className="flex-row gap-2">
                       <TextInput

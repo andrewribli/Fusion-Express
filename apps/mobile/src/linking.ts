@@ -21,6 +21,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       Menu: "menu",
+      CanteenMenu: "canteen/:restaurantId",
       Cart: "cart",
       Checkout: "checkout",
       Track: "track/:orderId",

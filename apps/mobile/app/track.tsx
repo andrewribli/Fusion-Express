@@ -24,6 +24,10 @@ import {
   subscribeOrder,
   TRACKING_STEPS,
 } from "@fusion-express/shared";
+import {
+  canteenNameForRestaurant,
+  restaurantIdFromOrderItems,
+} from "@fusion-express/shared/canteen-college";
 import { webAssetOrigin } from "@fusion-express/shared/products";
 import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../src/auth";
@@ -32,6 +36,21 @@ import { OrderChat } from "../src/OrderChat";
 import { formatScheduled } from "../src/schedule";
 import { takePhoto, uriToBlob } from "../src/takePhoto";
 import type { RootStackParamList } from "../src/navigation";
+
+function orderChannelLabel(order: Order): string {
+  const channel =
+    order.orderChannel ??
+    (order.items.some((i) => i.itemId.startsWith("canteen:"))
+      ? "canteen"
+      : "fusion");
+  if (channel === "canteen") {
+    const id =
+      order.canteenRestaurantId || restaurantIdFromOrderItems(order.items);
+    return canteenNameForRestaurant(id);
+  }
+  if (channel === "taste") return "Taste";
+  return "Fusion";
+}
 import {
   Card,
   LoadingBlock,
@@ -349,7 +368,7 @@ export default function TrackScreen() {
           <>
             <Card>
               <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Order
+                {orderChannelLabel(order)}
               </Text>
               <Text className="mt-1 text-xl font-extrabold text-fusion">
                 {order.id}
@@ -368,6 +387,11 @@ export default function TrackScreen() {
                     })`
                   : ""}
               </Text>
+              {order.discountApplied && (order.discountAmount ?? 0) > 0 ? (
+                <Text className="mt-1 text-sm text-emerald-700">
+                  College discount (−HK${order.discountAmount})
+                </Text>
+              ) : null}
             </Card>
 
             {order.isScheduled && order.scheduledFor ? (
@@ -434,7 +458,7 @@ export default function TrackScreen() {
                       onPress={() =>
                         setZoom({
                           uri: order.receiptUrl!,
-                          label: "Fusion Receipt",
+                          label: `${orderChannelLabel(order)} receipt`,
                         })
                       }
                     >
@@ -444,7 +468,7 @@ export default function TrackScreen() {
                         resizeMode="cover"
                       />
                       <Text className="mt-2 text-xs font-semibold text-gray-700">
-                        Fusion Receipt
+                        {orderChannelLabel(order)} receipt
                       </Text>
                     </Pressable>
                   ) : null}
@@ -514,7 +538,8 @@ export default function TrackScreen() {
                 </Text>
                 {!receiptReady ? (
                   <Text className="mt-2 text-sm text-amber-800">
-                    Waiting for the runner to confirm the Fusion receipt total.
+                    Waiting for the runner to confirm the{" "}
+                    {orderChannelLabel(order)} receipt total.
                   </Text>
                 ) : (
                   <>

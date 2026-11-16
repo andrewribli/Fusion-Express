@@ -24,9 +24,13 @@ import { formatMenuPrice } from "@fusion-express/shared/types";
 import { isServiceOpen, SERVICE_HOURS } from "@fusion-express/shared";
 import type { MenuItem } from "@fusion-express/shared/types";
 import { useCart } from "../../src/cart";
+import { canteenCoverImage } from "../../src/canteen/images";
+import { menuReadyRestaurants } from "../../src/canteen/restaurants";
 import { ProductImage } from "../../src/ProductImage";
 import { colors } from "../../src/theme";
 import type { RootStackParamList, TabsParamList } from "../../src/navigation";
+
+type ShopChannel = "groceries" | "canteens";
 
 type HomeNav = CompositeNavigationProp<
   BottomTabNavigationProp<TabsParamList, "Shop">,
@@ -109,12 +113,26 @@ function GridCard({ item, onAdd }: { item: MenuItem; onAdd: () => void }) {
 export default function HomeScreen() {
   const navigation = useNavigation<HomeNav>();
   const { addItem, itemCount } = useCart();
+  const [channel, setChannel] = useState<ShopChannel>("groceries");
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
+  const [canteenSearch, setCanteenSearch] = useState("");
   const [catsOpen, setCatsOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<(typeof CATEGORIES)[number]["id"]>("all");
+
+  const canteens = useMemo(() => {
+    const q = canteenSearch.trim().toLowerCase();
+    const list = menuReadyRestaurants();
+    if (!q) return list;
+    return list.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q) ||
+        r.shortName.toLowerCase().includes(q) ||
+        (r.location ?? "").toLowerCase().includes(q),
+    );
+  }, [canteenSearch]);
 
   const reloadMenu = useCallback(() => {
     setLoading(true);
@@ -194,13 +212,52 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
+        <View style={styles.channelRow}>
+          <Pressable
+            style={[
+              styles.channelBtn,
+              channel === "groceries" && styles.channelBtnActive,
+            ]}
+            onPress={() => setChannel("groceries")}
+          >
+            <Text
+              style={[
+                styles.channelText,
+                channel === "groceries" && styles.channelTextActive,
+              ]}
+            >
+              Groceries
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.channelBtn,
+              channel === "canteens" && styles.channelBtnActive,
+            ]}
+            onPress={() => setChannel("canteens")}
+          >
+            <Text
+              style={[
+                styles.channelText,
+                channel === "canteens" && styles.channelTextActive,
+              ]}
+            >
+              Canteens
+            </Text>
+          </Pressable>
+        </View>
+
         <View style={styles.searchBar}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search products"
+            placeholder={
+              channel === "canteens" ? "Search canteens" : "Search products"
+            }
             placeholderTextColor="#9CA3AF"
-            value={search}
-            onChangeText={setSearch}
+            value={channel === "canteens" ? canteenSearch : search}
+            onChangeText={
+              channel === "canteens" ? setCanteenSearch : setSearch
+            }
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
@@ -211,7 +268,60 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {loading ? (
+      {channel === "canteens" ? (
+        <FlatList
+          data={canteens}
+          keyExtractor={(r) => r.id}
+          numColumns={2}
+          columnWrapperStyle={styles.canteenRow}
+          contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <View style={styles.promo}>
+              <Text style={styles.promoEyebrow}>GraceRun CUHK</Text>
+              <Text style={styles.promoTitle}>Campus canteens to your lobby</Text>
+              <Text style={styles.promoBody}>
+                Flat HK$10 delivery. Save HK$5+ with your runner's college
+                discount (10% off food when colleges match).
+              </Text>
+            </View>
+          }
+          ListEmptyComponent={
+            <Text style={styles.empty}>No canteens match that search.</Text>
+          }
+          renderItem={({ item: restaurant }) => (
+            <Pressable
+              style={styles.canteenCard}
+              onPress={() =>
+                navigation.navigate("CanteenMenu", {
+                  restaurantId: restaurant.id,
+                })
+              }
+            >
+              <Image
+                source={canteenCoverImage(restaurant.id)}
+                style={styles.canteenCover}
+                resizeMode="cover"
+              />
+              <View style={styles.canteenBody}>
+                <Text style={styles.canteenName} numberOfLines={2}>
+                  {restaurant.shortName}
+                </Text>
+                <Text style={styles.canteenHours} numberOfLines={2}>
+                  {restaurant.hoursLabel}
+                </Text>
+                <Text style={styles.canteenBlurb} numberOfLines={2}>
+                  {restaurant.blurb}
+                </Text>
+                {restaurant.collegeId ? (
+                  <Text style={styles.canteenBadge}>
+                    {restaurant.collegeId} · college discount
+                  </Text>
+                ) : null}
+              </View>
+            </Pressable>
+          )}
+        />
+      ) : loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.fusion} />
         </View>
@@ -379,6 +489,64 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 10,
+  },
+  channelRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 12,
+    backgroundColor: "#ECEFF3",
+    borderRadius: 14,
+    padding: 5,
+  },
+  channelBtn: {
+    flex: 1,
+    borderRadius: 11,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  channelBtnActive: {
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  channelText: {
+    fontSize: 15,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+    color: "#6B7280",
+  },
+  channelTextActive: {
+    color: colors.fusion,
+  },
+  canteenRow: {
+    gap: 10,
+    marginBottom: 10,
+  },
+  canteenCard: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: "hidden",
+  },
+  canteenCover: {
+    width: "100%",
+    height: 110,
+    backgroundColor: colors.imageBg,
+  },
+  canteenBody: { padding: 10, minHeight: 108 },
+  canteenName: { fontSize: 14, fontWeight: "800", color: colors.ink },
+  canteenHours: { marginTop: 3, fontSize: 11, color: colors.muted },
+  canteenBlurb: { marginTop: 4, fontSize: 11, color: "#4B5563", lineHeight: 15 },
+  canteenBadge: {
+    marginTop: 6,
+    fontSize: 10,
+    fontWeight: "700",
+    color: colors.fusion,
   },
   menuBtn: {
     width: 40,

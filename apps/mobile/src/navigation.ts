@@ -3,6 +3,7 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 export type RootStackParamList = {
   Tabs: NavigatorScreenParams<TabsParamList> | undefined;
   Menu: undefined;
+  CanteenMenu: { restaurantId: string };
   Cart: undefined;
   Checkout: undefined;
   Track: { orderId?: string; focusChat?: boolean };
