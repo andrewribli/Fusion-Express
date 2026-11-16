@@ -43,7 +43,7 @@ import {
 export default function CanteenCheckoutPage() {
   const { user } = useUser();
   const { items, subtotal } = useCart();
-  const { placeOrder, loading, error: placeError } = usePlaceOrder("canteen");
+  const { placeOrder, loading, error: placeError } = usePlaceOrder();
 
   const [college, setCollege] = useState(user?.college ?? "");
   const [hall, setHall] = useState(user?.hall ?? "");
@@ -98,11 +98,11 @@ export default function CanteenCheckoutPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit || !canteenOpen) return;
+    savePaymentMethod(paymentMethod);
     void placeOrder({
+      campus: "cuhk",
       college,
       hall,
-      phone,
-      paymentMethod,
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
     });
@@ -209,6 +209,7 @@ export default function CanteenCheckoutPage() {
               <h2 className="text-sm font-semibold">Delivery details</h2>
               <div className="mt-3">
                 <DeliveryAddressFields
+                  campus="cuhk"
                   college={college}
                   hall={hall}
                   onCollegeChange={setCollege}
