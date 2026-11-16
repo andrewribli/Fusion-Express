@@ -35,6 +35,10 @@ import {
   getRestaurant,
 } from "@fusion-express/shared/canteen";
 import { parseCanteenItemId } from "@fusion-express/shared/shop-kind";
+import {
+  closedBannerText,
+  isCanteenOpenByConfig,
+} from "@/lib/canteen/hours";
 
 export default function CanteenCheckoutPage() {
   const { user } = useUser();
@@ -69,6 +73,12 @@ export default function CanteenCheckoutPage() {
     return ids.size === 1 ? [...ids][0] : undefined;
   }, [items]);
   const canteenName = canteenId ? getRestaurant(canteenId)?.name : undefined;
+  const canteenOpen =
+    !canteenId || isCanteenOpenByConfig(canteenId);
+  const closedMessage =
+    canteenId && canteenName
+      ? closedBannerText(canteenName, canteenId)
+      : "";
 
   const estimatedDeliveryAt = useMemo(() => getEstimatedDeliveryTime(), []);
   const tipAmount = customTip ? Number(customTip) || 0 : tip;
@@ -79,7 +89,7 @@ export default function CanteenCheckoutPage() {
   const phoneOk = !validatePhone(phone);
   const singleCanteen = Boolean(canteenId);
   const canSubmit = Boolean(
-    college && hall && phoneOk && !overLimit && singleCanteen,
+    college && hall && phoneOk && !overLimit && singleCanteen && canteenOpen,
   );
   const address =
     college && hall ? formatDeliveryAddress(college, hall) : null;
@@ -87,7 +97,7 @@ export default function CanteenCheckoutPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || !canteenOpen) return;
     void placeOrder({
       college,
       hall,
@@ -141,6 +151,11 @@ export default function CanteenCheckoutPage() {
           {!singleCanteen && (
             <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Only one canteen per order. Remove items from the extra canteen.
+            </p>
+          )}
+          {!canteenOpen && (
+            <p className="mb-4 rounded-xl bg-orange-50 px-4 py-3 text-sm text-orange-800">
+              {closedMessage} Ordering is paused until it opens.
             </p>
           )}
           <div className="mb-4 rounded-xl bg-lakers-gold/20 px-4 py-3 text-sm font-medium text-lakers-gold">

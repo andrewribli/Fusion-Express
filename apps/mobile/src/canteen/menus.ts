@@ -2,7 +2,6 @@
  * Canteen menus — local copies under `./data/*` (EAS excludes apps/web).
  * Keep in sync with `apps/web/src/data/canteen/*`. Firestore items are seed-only.
  */
-import { webAssetOrigin } from "@fusion-express/shared/products";
 import {
   CATEGORY_LABELS,
   MENU as BF_MENU,
@@ -10,36 +9,29 @@ import {
 } from "./data/bf-menu";
 import { CAFE_TOLO_MENU } from "./data/cafe-tolo-menu";
 import { EBENEZERS_MENU } from "./data/ebenezers-menu";
+import { canteenFoodImage, withFoodImages } from "./data/food-images";
 import { NA_MENU } from "./data/na-menu";
 import { PAPER_AND_COFFEE_MENU } from "./data/paper-and-coffee-menu";
 import { SORAZEN_MENU } from "./data/sorazen-menu";
 import { TUCK_SHOP_MENU } from "./data/tuck-shop-menu";
-import {
-  UC_MEAL_PERIODS,
-  ucItemsForPeriod,
-  type MealPeriod,
-} from "./data/uc-menu";
+import { ucItemsForPeriod, type MealPeriod } from "./data/uc-menu";
+import { resolveLocalFoodUri } from "./images";
 import type { CanteenDish } from "./cart";
 import type { RestaurantId } from "./restaurants";
+import { menuReadyRestaurants } from "./restaurants";
+import {
+  getActiveMealPeriod,
+  isCanteenOpenByConfig,
+} from "@fusion-express/shared/canteen-hours";
 
 export { CATEGORY_LABELS };
 export type { MenuCategory, MealPeriod };
 
-/** Mirror web `lib/canteen/hours.getCurrentUcPeriod` without pulling web aliases. */
+/** Mirror web `getCurrentUcPeriod` — null when UC closed. */
 export function getCurrentUcPeriod(now = new Date()): MealPeriod | null {
-  // UC closed Sundays
-  if (now.getDay() === 0) return null;
-  const mins = now.getHours() * 60 + now.getMinutes();
-  const periods = Object.entries(UC_MEAL_PERIODS) as Array<
-    [MealPeriod, (typeof UC_MEAL_PERIODS)[MealPeriod]]
-  >;
-  for (const [id, meta] of periods) {
-    if (mins >= meta.startMin && mins < meta.endMin) return id;
-  }
-  return null;
+  if (!isCanteenOpenByConfig("uc-canteen", now)) return null;
+  return (getActiveMealPeriod(now) as MealPeriod | null) ?? null;
 }
-
-const PLACEHOLDER = "https://placehold.co/200x200/png";
 
 type SimpleRow = {
   id: string;
@@ -48,6 +40,7 @@ type SimpleRow = {
   price: number;
   category: MenuCategory | string;
   image?: string;
+  signature?: boolean;
 };
 
 const CU_CAFE_MENU: SimpleRow[] = [
@@ -57,7 +50,6 @@ const CU_CAFE_MENU: SimpleRow[] = [
     description: "Turkey breast on fresh bread — grab-and-go.",
     price: 38,
     category: "mains",
-    image: PLACEHOLDER,
   },
   {
     id: "caesar-salad",
@@ -65,7 +57,6 @@ const CU_CAFE_MENU: SimpleRow[] = [
     description: "Crisp romaine with classic Caesar dressing.",
     price: 42,
     category: "mains",
-    image: PLACEHOLDER,
   },
   {
     id: "house-brew-coffee",
@@ -73,7 +64,6 @@ const CU_CAFE_MENU: SimpleRow[] = [
     description: "Premium drip coffee.",
     price: 25,
     category: "drinks",
-    image: PLACEHOLDER,
   },
   {
     id: "matcha-latte",
@@ -81,7 +71,6 @@ const CU_CAFE_MENU: SimpleRow[] = [
     description: "Smooth matcha with steamed milk.",
     price: 32,
     category: "drinks",
-    image: PLACEHOLDER,
   },
   {
     id: "chocolate-cake",
@@ -89,7 +78,6 @@ const CU_CAFE_MENU: SimpleRow[] = [
     description: "Rich chocolate slice.",
     price: 28,
     category: "dessert",
-    image: PLACEHOLDER,
   },
 ];
 
@@ -100,7 +88,6 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Casual Chinese chicken rice.",
     price: 42,
     category: "mains",
-    image: PLACEHOLDER,
   },
   {
     id: "beef-noodles",
@@ -108,7 +95,6 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Beef noodles in savory broth.",
     price: 45,
     category: "mains",
-    image: PLACEHOLDER,
   },
   {
     id: "club-sandwich",
@@ -116,7 +102,6 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Western-style club sandwich.",
     price: 38,
     category: "mains",
-    image: PLACEHOLDER,
   },
   {
     id: "fried-rice",
@@ -124,7 +109,6 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Classic fried rice.",
     price: 40,
     category: "mains",
-    image: PLACEHOLDER,
   },
   {
     id: "iced-lemon-tea",
@@ -132,7 +116,6 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Refreshing iced lemon tea.",
     price: 15,
     category: "drinks",
-    image: PLACEHOLDER,
   },
 ];
 
@@ -147,11 +130,32 @@ const SIMPLE: Partial<Record<RestaurantId, SimpleRow[]>> = {
   ebenezers: EBENEZERS_MENU,
 };
 
-function resolveImage(image?: string): string | undefined {
-  if (!image) return undefined;
-  if (image.startsWith("http")) return image;
-  if (image.startsWith("/")) return `${webAssetOrigin()}${image}`;
-  return image;
+function asFoodCategory(category: string): MenuCategory {
+  if (
+    category === "mains" ||
+    category === "snacks" ||
+    category === "drinks" ||
+    category === "dessert"
+  ) {
+    return category;
+  }
+  return mapUcCategory(category) as MenuCategory;
+}
+
+function resolveImage(
+  id: string,
+  category: string,
+  image?: string,
+): string | undefined {
+  const withLocal = withFoodImages([
+    {
+      id,
+      category: asFoodCategory(category),
+      image: image ?? "",
+    },
+  ])[0];
+  const path = withLocal.image || canteenFoodImage(id, asFoodCategory(category));
+  return resolveLocalFoodUri(path) ?? path;
 }
 
 function toDish(row: SimpleRow): CanteenDish {
@@ -161,7 +165,7 @@ function toDish(row: SimpleRow): CanteenDish {
     description: row.description,
     price: row.price,
     category: String(row.category),
-    image: resolveImage(row.image),
+    image: resolveImage(row.id, String(row.category), row.image),
   };
 }
 
@@ -184,31 +188,80 @@ export function loadCanteenMenu(
   opts?: { ucPeriod?: MealPeriod },
 ): CanteenMenuResult {
   if (restaurantId === "benjamin-franklin") {
-    return { dishes: BF_MENU.map(toDish) };
+    return {
+      dishes: withFoodImages(BF_MENU).map((item) =>
+        toDish({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          category: item.category,
+          image: item.image,
+        }),
+      ),
+    };
   }
 
   if (restaurantId === "uc-canteen") {
     const period = opts?.ucPeriod ?? getCurrentUcPeriod() ?? "lunch";
     const rows = ucItemsForPeriod(period);
     return {
-      dishes: rows.map((item) => ({
-        id: item.id,
-        name: item.nameZh ? `${item.name} (${item.nameZh})` : item.name,
-        description: item.description,
-        price: item.price,
-        category: mapUcCategory(item.category),
-        image: PLACEHOLDER,
-      })),
+      dishes: rows.map((item) => {
+        const category = mapUcCategory(item.category);
+        return {
+          id: item.id,
+          name: item.nameZh ? `${item.name} (${item.nameZh})` : item.name,
+          description: item.description,
+          price: item.price,
+          category,
+          image: resolveImage(item.id, category),
+        };
+      }),
       mealPeriodLabel: period,
     };
   }
 
   const simple = SIMPLE[restaurantId as RestaurantId];
   if (simple) {
-    return { dishes: simple.map(toDish) };
+    const normalized = simple.map((row) => ({
+      ...row,
+      category: asFoodCategory(String(row.category)),
+      image: row.image ?? "",
+    }));
+    return { dishes: withFoodImages(normalized).map(toDish) };
   }
 
   return { dishes: [] };
+}
+
+export type DishSearchHit = CanteenDish & {
+  restaurantId: RestaurantId;
+  restaurantName: string;
+  restaurantShortName: string;
+};
+
+/** Global dish search across menu-ready canteens (home canteen tab). */
+export function searchCanteenDishes(query: string): DishSearchHit[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const hits: DishSearchHit[] = [];
+  for (const restaurant of menuReadyRestaurants()) {
+    const { dishes } = loadCanteenMenu(restaurant.id);
+    for (const dish of dishes) {
+      if (
+        dish.name.toLowerCase().includes(q) ||
+        (dish.description ?? "").toLowerCase().includes(q)
+      ) {
+        hits.push({
+          ...dish,
+          restaurantId: restaurant.id,
+          restaurantName: restaurant.name,
+          restaurantShortName: restaurant.shortName,
+        });
+      }
+    }
+  }
+  return hits;
 }
 
 export const CANTEEN_CATEGORY_ORDER: MenuCategory[] = [
@@ -217,6 +270,20 @@ export const CANTEEN_CATEGORY_ORDER: MenuCategory[] = [
   "drinks",
   "dessert",
 ];
+
+export type PriceSort = "default" | "cheap" | "expensive";
+
+export function sortDishesByPrice<T extends { price: number }>(
+  items: T[],
+  sort: PriceSort,
+): T[] {
+  if (sort === "default") return items;
+  const copy = [...items];
+  copy.sort((a, b) =>
+    sort === "cheap" ? a.price - b.price : b.price - a.price,
+  );
+  return copy;
+}
 
 export function categoryLabel(category: string): string {
   if (category in CATEGORY_LABELS) {

@@ -81,7 +81,7 @@ const RESTAURANT_NAMES: Record<string, string> = {
   "sh-ho-canteen": "S.H. Ho College Canteen",
   "paper-and-coffee": "Paper & Coffee",
   sorazen: "SoraZen",
-  "na-canteen": "NA Canteen",
+  "na-canteen": "WeBites (New Asia)",
   "cafe-tolo": "Cafe Tolo",
   "tuck-shop": "Tuck Shop",
   ebenezers: "Ebeneezer's Kebabs & Pizzeria",

@@ -1,4 +1,5 @@
 import type { CollegeId } from "@fusion-express/shared/canteen-college";
+import { canteenHoursLabel as hoursFromConfig } from "@fusion-express/shared/canteen-hours";
 
 export type RestaurantId =
   | "benjamin-franklin"
@@ -29,13 +30,17 @@ export type Restaurant = {
 
 export const CANTEEN_DELIVERY_FEE = 10;
 
+function hours(id: RestaurantId): string {
+  return hoursFromConfig(id);
+}
+
 export const RESTAURANTS: Restaurant[] = [
   {
     id: "benjamin-franklin",
     name: "Benjamin Franklin Canteen",
     shortName: "Benjamin Franklin",
     blurb: "Campus canteen classics to your dorm lobby.",
-    hoursLabel: "7:30 AM – 9:00 PM",
+    hoursLabel: hours("benjamin-franklin"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -47,10 +52,11 @@ export const RESTAURANTS: Restaurant[] = [
     name: "UC Canteen",
     shortName: "UC Canteen",
     blurb: "United College canteen — breakfast to dinner by time zone.",
-    hoursLabel: "7:30 AM – 7:30 PM (by meal period · closed Sun)",
+    hoursLabel: hours("uc-canteen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "UC",
     menuReady: true,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
   },
   {
     id: "cu-cafe",
@@ -59,7 +65,7 @@ export const RESTAURANTS: Restaurant[] = [
     blurb:
       "CU Cafe is a grab-and-go spot for sandwiches, salads, and premium coffee.",
     location: "Lee Shau Kee Building (LSK)",
-    hoursLabel: "8:00 AM – 6:00 PM (Mon–Fri)",
+    hoursLabel: hours("cu-cafe"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -70,10 +76,11 @@ export const RESTAURANTS: Restaurant[] = [
     shortName: "S.H. Ho Canteen",
     blurb: "The S.H. Ho College canteen serves casual Chinese and Western meals.",
     location: "S.H. Ho College",
-    hoursLabel: "8:00 AM – 9:00 PM (incl. Sundays)",
+    hoursLabel: hours("sh-ho-canteen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "SHHO",
     menuReady: true,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
   },
   {
     id: "paper-and-coffee",
@@ -82,8 +89,8 @@ export const RESTAURANTS: Restaurant[] = [
     blurb:
       "Premium coffee and Japanese-style teishoku, donburi, and noodles near University Station.",
     location:
-      "LG/F, William M.W. Mong Building (near the University Station / \"foot of the hill\")",
-    hoursLabel: "10:30 AM – 5:30 PM (Mon–Fri)",
+      'LG/F, William M.W. Mong Building (near the University Station / "foot of the hill")',
+    hoursLabel: hours("paper-and-coffee"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -96,7 +103,7 @@ export const RESTAURANTS: Restaurant[] = [
     blurb:
       "Japanese-inspired bowls, salads, and hot pots at Benjamin Franklin Centre — breakfast through dinner.",
     location: "Benjamin Franklin Centre, Lower Ground (BFC LG · BFCLG-SORAZEN)",
-    hoursLabel: "7:30 AM – 7:30 PM (Mon–Fri · closed Sat)",
+    hoursLabel: hours("sorazen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -104,15 +111,16 @@ export const RESTAURANTS: Restaurant[] = [
   },
   {
     id: "na-canteen",
-    name: "NA Canteen",
-    shortName: "NA Canteen",
+    name: "WeBites (New Asia)",
+    shortName: "WeBites",
     blurb:
-      "Bites Bro New Asia Canteen — breakfast sets, Rice Noodle Institute lunch, and campus drinks.",
+      "WeBites at New Asia — breakfast sets, Rice Noodle Institute lunch, and campus drinks.",
     location: "New Asia College",
-    hoursLabel: "7:30 AM – 8:00 PM (breakfast · lunch · drinks)",
+    hoursLabel: hours("na-canteen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "NA",
     menuReady: true,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
   },
   {
     id: "cafe-tolo",
@@ -121,7 +129,7 @@ export const RESTAURANTS: Restaurant[] = [
     blurb:
       "Western all-day breakfast, Spanish bites, waffles, and specialty drinks at Lee Woo Sing College.",
     location: "Lee Woo Sing College (LWS)",
-    hoursLabel: "10:00 AM – 7:00 PM",
+    hoursLabel: hours("cafe-tolo"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "LWS",
     menuReady: true,
@@ -133,7 +141,7 @@ export const RESTAURANTS: Restaurant[] = [
     blurb:
       "Campus swimming-pool tuck shop — fish balls, skewers, steamed buns, and sweet soup.",
     location: "CUHK Swimming Pool",
-    hoursLabel: "10:00 AM – 7:00 PM",
+    hoursLabel: hours("tuck-shop"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -145,7 +153,7 @@ export const RESTAURANTS: Restaurant[] = [
     blurb:
       "Halal kebabs, tikka, curries, and pizza slices at Li Wai Chun Building.",
     location: "G05, Li Wai Chun Building",
-    hoursLabel: "10:00 AM – 8:00 PM (Mon–Sat · closed PH)",
+    hoursLabel: hours("ebenezers"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
@@ -155,20 +163,22 @@ export const RESTAURANTS: Restaurant[] = [
     name: "CC Canteen",
     shortName: "CC Canteen",
     blurb: "Chung Chi College canteen — coming soon.",
-    hoursLabel: "Coming soon",
+    hoursLabel: hours("cc-canteen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "CC",
     menuReady: false,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
   },
   {
     id: "shaw-canteen",
     name: "Shaw Canteen",
     shortName: "Shaw Canteen",
     blurb: "Shaw College canteen — coming soon.",
-    hoursLabel: "Coming soon",
+    hoursLabel: hours("shaw-canteen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "Shaw",
     menuReady: false,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
   },
 ];
 

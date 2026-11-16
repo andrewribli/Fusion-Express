@@ -1,11 +1,24 @@
 import type { CartItem, MenuItem } from "@/lib/types";
 import type { MenuItem as BfItem } from "@/data/canteen/bf-menu";
+import { canteenFoodImage } from "@/data/canteen/food-images";
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
 import type { UcMenuItem } from "@/data/canteen/uc-menu";
 import {
   CANTEEN_DELIVERY_FEE,
   type RestaurantId,
 } from "@/data/canteen/restaurants";
+
+function ucImage(item: UcMenuItem): string {
+  const c = item.category.toLowerCase();
+  const category = /drink|tea|coffee|juice|beverage|soup/.test(c)
+    ? "drinks"
+    : /dessert|sweet|cake|ice/.test(c)
+      ? "dessert"
+      : /snack|side|bun|bread|dim/.test(c)
+        ? "snacks"
+        : "mains";
+  return canteenFoodImage(item.id, category);
+}
 
 const PREFIX = "canteen:";
 
@@ -52,6 +65,7 @@ export function toCartMenuItemFromUc(
     category: "other",
     price: item.price,
     unit: "each",
+    image: ucImage(item),
     priceType: "fixed",
     runnerInputsPrice: false,
     inStock: true,

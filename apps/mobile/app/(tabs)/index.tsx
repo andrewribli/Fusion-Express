@@ -23,8 +23,13 @@ import {
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import { isServiceOpen, SERVICE_HOURS } from "@fusion-express/shared";
 import type { MenuItem } from "@fusion-express/shared/types";
+import {
+  closedBannerText,
+  isCanteenOpenByConfig,
+} from "@fusion-express/shared/canteen-hours";
 import { useCart } from "../../src/cart";
 import { canteenCoverImage } from "../../src/canteen/images";
+import { searchCanteenDishes } from "../../src/canteen/menus";
 import { menuReadyRestaurants } from "../../src/canteen/restaurants";
 import { ProductImage } from "../../src/ProductImage";
 import { colors } from "../../src/theme";
@@ -122,17 +127,13 @@ export default function HomeScreen() {
   const [catsOpen, setCatsOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<(typeof CATEGORIES)[number]["id"]>("all");
 
-  const canteens = useMemo(() => {
-    const q = canteenSearch.trim().toLowerCase();
-    const list = menuReadyRestaurants();
-    if (!q) return list;
-    return list.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.shortName.toLowerCase().includes(q) ||
-        (r.location ?? "").toLowerCase().includes(q),
-    );
-  }, [canteenSearch]);
+  const canteens = useMemo(() => menuReadyRestaurants(), []);
+
+  const dishHits = useMemo(
+    () => searchCanteenDishes(canteenSearch),
+    [canteenSearch],
+  );
+  const searchingDishes = canteenSearch.trim().length > 0;
 
   const reloadMenu = useCallback(() => {
     setLoading(true);
@@ -251,7 +252,7 @@ export default function HomeScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder={
-              channel === "canteens" ? "Search canteens" : "Search products"
+              channel === "canteens" ? "Search food item" : "Search products"
             }
             placeholderTextColor="#9CA3AF"
             value={channel === "canteens" ? canteenSearch : search}
@@ -269,58 +270,113 @@ export default function HomeScreen() {
       </View>
 
       {channel === "canteens" ? (
-        <FlatList
-          data={canteens}
-          keyExtractor={(r) => r.id}
-          numColumns={2}
-          columnWrapperStyle={styles.canteenRow}
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            <View style={styles.promo}>
-              <Text style={styles.promoEyebrow}>GraceRun CUHK</Text>
-              <Text style={styles.promoTitle}>Campus canteens to your lobby</Text>
-              <Text style={styles.promoBody}>
-                Flat HK$10 delivery. Save HK$5+ with your runner's college
-                discount (10% off food when colleges match).
+        searchingDishes ? (
+          <FlatList
+            data={dishHits}
+            keyExtractor={(d) => `${d.restaurantId}:${d.id}`}
+            contentContainerStyle={styles.list}
+            ListHeaderComponent={
+              <Text style={styles.sectionTitle}>
+                Dishes matching “{canteenSearch.trim()}”
               </Text>
-            </View>
-          }
-          ListEmptyComponent={
-            <Text style={styles.empty}>No canteens match that search.</Text>
-          }
-          renderItem={({ item: restaurant }) => (
-            <Pressable
-              style={styles.canteenCard}
-              onPress={() =>
-                navigation.navigate("CanteenMenu", {
-                  restaurantId: restaurant.id,
-                })
-              }
-            >
-              <Image
-                source={canteenCoverImage(restaurant.id)}
-                style={styles.canteenCover}
-                resizeMode="cover"
-              />
-              <View style={styles.canteenBody}>
-                <Text style={styles.canteenName} numberOfLines={2}>
-                  {restaurant.shortName}
-                </Text>
-                <Text style={styles.canteenHours} numberOfLines={2}>
-                  {restaurant.hoursLabel}
-                </Text>
-                <Text style={styles.canteenBlurb} numberOfLines={2}>
-                  {restaurant.blurb}
-                </Text>
-                {restaurant.collegeId ? (
-                  <Text style={styles.canteenBadge}>
-                    {restaurant.collegeId} · college discount
+            }
+            ListEmptyComponent={
+              <Text style={styles.empty}>No dishes match that search.</Text>
+            }
+            renderItem={({ item: dish }) => (
+              <Pressable
+                style={styles.dishHit}
+                onPress={() =>
+                  navigation.navigate("CanteenMenu", {
+                    restaurantId: dish.restaurantId,
+                  })
+                }
+              >
+                <ProductImage uri={dish.image} size={64} />
+                <View style={styles.dishHitBody}>
+                  <Text style={styles.dishHitName} numberOfLines={2}>
+                    {dish.name}
                   </Text>
-                ) : null}
+                  <Text style={styles.dishHitMeta} numberOfLines={1}>
+                    {dish.restaurantShortName} · HK${dish.price}
+                  </Text>
+                  {!isCanteenOpenByConfig(dish.restaurantId) ? (
+                    <Text style={styles.dishHitClosed}>Closed now</Text>
+                  ) : null}
+                </View>
+              </Pressable>
+            )}
+          />
+        ) : (
+          <FlatList
+            data={canteens}
+            keyExtractor={(r) => r.id}
+            numColumns={2}
+            columnWrapperStyle={styles.canteenRow}
+            contentContainerStyle={styles.list}
+            ListHeaderComponent={
+              <View style={styles.promo}>
+                <Text style={styles.promoEyebrow}>GraceRun CUHK</Text>
+                <Text style={styles.promoTitle}>
+                  Campus canteens to your lobby
+                </Text>
+                <Text style={styles.promoBody}>
+                  Flat HK$10 delivery. Save HK$5+ with your runner's college
+                  discount (10% off food when colleges match). Search food items
+                  above.
+                </Text>
               </View>
-            </Pressable>
-          )}
-        />
+            }
+            ListEmptyComponent={
+              <Text style={styles.empty}>No canteens available yet.</Text>
+            }
+            renderItem={({ item: restaurant }) => {
+              const open = isCanteenOpenByConfig(restaurant.id);
+              return (
+                <Pressable
+                  style={styles.canteenCard}
+                  onPress={() =>
+                    navigation.navigate("CanteenMenu", {
+                      restaurantId: restaurant.id,
+                    })
+                  }
+                >
+                  <Image
+                    source={canteenCoverImage(restaurant.id)}
+                    style={styles.canteenCover}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.canteenBody}>
+                    <Text style={styles.canteenName} numberOfLines={2}>
+                      {restaurant.shortName}
+                    </Text>
+                    <Text style={styles.canteenHours} numberOfLines={2}>
+                      {restaurant.hoursLabel}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.canteenOpen,
+                        !open && styles.canteenClosed,
+                      ]}
+                    >
+                      {open
+                        ? "Open now"
+                        : closedBannerText(restaurant.shortName, restaurant.id)}
+                    </Text>
+                    <Text style={styles.canteenBlurb} numberOfLines={2}>
+                      {restaurant.blurb}
+                    </Text>
+                    {restaurant.collegeId ? (
+                      <Text style={styles.canteenBadge}>
+                        {restaurant.collegeId} · college discount
+                      </Text>
+                    ) : null}
+                  </View>
+                </Pressable>
+              );
+            }}
+          />
+        )
       ) : loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.fusion} />
@@ -547,6 +603,39 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
     color: colors.fusion,
+  },
+  canteenOpen: {
+    marginTop: 4,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#047857",
+  },
+  canteenClosed: { color: "#C2410C" },
+  sectionTitle: {
+    marginBottom: 10,
+    fontSize: 15,
+    fontWeight: "800",
+    color: colors.ink,
+  },
+  dishHit: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 10,
+    marginBottom: 8,
+  },
+  dishHitBody: { flex: 1, minWidth: 0 },
+  dishHitName: { fontSize: 14, fontWeight: "700", color: colors.ink },
+  dishHitMeta: { marginTop: 3, fontSize: 12, color: colors.muted },
+  dishHitClosed: {
+    marginTop: 3,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#C2410C",
   },
   menuBtn: {
     width: 40,

@@ -20,6 +20,7 @@
     "./cityu-email": "./src/cityu-email.ts",
     "./campus": "./src/campus.ts",
     "./canteen-college": "./src/canteen-college.ts",
+    "./canteen-hours": "./src/canteen-hours.ts",
     "./types": "./src/types.ts",
     "./roles": "./src/roles.ts",
     "./locations": "./src/locations.ts",

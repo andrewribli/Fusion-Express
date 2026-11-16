@@ -4,7 +4,7 @@
     "name": "Benjamin Franklin Canteen",
     "shortName": "Benjamin Franklin",
     "blurb": "Campus canteen classics to your dorm lobby.",
-    "hoursLabel": "7:30 AM – 9:00 PM",
+    "hoursLabel": "7:30 AM – 9:00 PM daily",
     "deliveryFee": 10,
     "collegeId": null,
     "menuReady": true
@@ -14,20 +14,20 @@
     "name": "UC Canteen",
     "shortName": "UC Canteen",
     "blurb": "United College canteen — breakfast to dinner by time zone.",
-    "hoursLabel": "9:00 AM – 8:30 PM (by meal period)",
+    "hoursLabel": "7:30 AM – 7:30 PM (by meal period · closed Sun)",
     "deliveryFee": 10,
     "collegeId": "UC",
     "menuReady": true
   },
   {
     "id": "na-canteen",
-    "name": "NA Canteen",
-    "shortName": "NA Canteen",
-    "blurb": "New Asia College canteen — college discount when an NA runner picks up.",
-    "hoursLabel": "Coming soon",
+    "name": "WeBites (New Asia)",
+    "shortName": "WeBites",
+    "blurb": "WeBites at New Asia — breakfast sets, Rice Noodle Institute lunch, and campus drinks.",
+    "hoursLabel": "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
     "deliveryFee": 10,
     "collegeId": "NA",
-    "menuReady": false
+    "menuReady": true
   },
   {
     "id": "cc-canteen",

@@ -13,6 +13,10 @@ import {
   View,
 } from "react-native";
 import {
+  closedBannerText,
+  isCanteenOpenByConfig,
+} from "@fusion-express/shared/canteen-hours";
+import {
   collegeLabel,
   getCollege,
 } from "@fusion-express/shared/canteen-college";
@@ -27,6 +31,8 @@ import {
   CANTEEN_CATEGORY_ORDER,
   categoryLabel,
   loadCanteenMenu,
+  sortDishesByPrice,
+  type PriceSort,
 } from "../src/canteen/menus";
 import { getRestaurant } from "../src/canteen/restaurants";
 import { ProductImage } from "../src/ProductImage";
@@ -36,6 +42,12 @@ import type { RootStackParamList } from "../src/navigation";
 type Nav = NativeStackNavigationProp<RootStackParamList, "CanteenMenu">;
 type Route = RouteProp<RootStackParamList, "CanteenMenu">;
 
+const SORT_OPTIONS: Array<{ id: PriceSort; label: string }> = [
+  { id: "default", label: "Featured" },
+  { id: "cheap", label: "Cheapest first" },
+  { id: "expensive", label: "Most expensive" },
+];
+
 export default function CanteenMenuScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -44,6 +56,14 @@ export default function CanteenMenuScreen() {
   const { addItem, items, itemCount, clearCart } = useCart();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [sort, setSort] = useState<PriceSort>("default");
+
+  const open = restaurant
+    ? isCanteenOpenByConfig(restaurant.id)
+    : false;
+  const closedMessage = restaurant
+    ? closedBannerText(restaurant.name, restaurant.id)
+    : "";
 
   const { dishes, mealPeriodLabel } = useMemo(
     () => loadCanteenMenu(restaurantId),
@@ -52,7 +72,7 @@ export default function CanteenMenuScreen() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return dishes.filter((d) => {
+    let list = dishes.filter((d) => {
       if (category !== "all" && d.category !== category) return false;
       if (!q) return true;
       return (
@@ -60,9 +80,16 @@ export default function CanteenMenuScreen() {
         (d.description ?? "").toLowerCase().includes(q)
       );
     });
-  }, [dishes, search, category]);
+    if (sort !== "default") {
+      list = sortDishesByPrice(list, sort);
+    }
+    return list;
+  }, [dishes, search, category, sort]);
 
   const grouped = useMemo(() => {
+    if (sort !== "default") {
+      return [{ category: "all", items: filtered }];
+    }
     const map = new Map<string, typeof filtered>();
     for (const dish of filtered) {
       const list = map.get(dish.category) ?? [];
@@ -79,7 +106,7 @@ export default function CanteenMenuScreen() {
       ordered.push({ category: cat, items: itemsInCat });
     }
     return ordered;
-  }, [filtered]);
+  }, [filtered, sort]);
 
   const college = restaurant?.collegeId
     ? getCollege(restaurant.collegeId)
@@ -87,6 +114,10 @@ export default function CanteenMenuScreen() {
 
   function tryAdd(dish: (typeof dishes)[number]) {
     if (!restaurant) return;
+    if (!open) {
+      Alert.alert("Canteen closed", closedMessage);
+      return;
+    }
     const menuItem = toCanteenMenuItem(dish, restaurant.id);
     if (isGroceryCart(items)) {
       Alert.alert(
@@ -143,7 +174,9 @@ export default function CanteenMenuScreen() {
   }
 
   const listData = grouped.flatMap((g) => [
-    { type: "header" as const, key: `h-${g.category}`, category: g.category },
+    ...(sort === "default"
+      ? [{ type: "header" as const, key: `h-${g.category}`, category: g.category }]
+      : []),
     ...g.items.map((item) => ({
       type: "dish" as const,
       key: item.id,
@@ -178,10 +211,17 @@ export default function CanteenMenuScreen() {
       </View>
 
       <Text style={styles.hours}>{restaurant.hoursLabel}</Text>
-      {mealPeriodLabel ? (
+      {mealPeriodLabel && open ? (
         <Text style={styles.period}>
           Showing {mealPeriodLabel} menu for right now
         </Text>
+      ) : null}
+
+      {!open ? (
+        <View style={styles.closedBanner}>
+          <Text style={styles.closedTitle}>Currently closed</Text>
+          <Text style={styles.closedBody}>{closedMessage}</Text>
+        </View>
       ) : null}
 
       {college ? (
@@ -207,7 +247,7 @@ export default function CanteenMenuScreen() {
       <View style={styles.searchBar}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search dishes"
+          placeholder="Search food item"
           placeholderTextColor="#9CA3AF"
           value={search}
           onChangeText={setSearch}
@@ -246,6 +286,25 @@ export default function CanteenMenuScreen() {
         ))}
       </View>
 
+      <View style={styles.chips}>
+        {SORT_OPTIONS.map((opt) => (
+          <Pressable
+            key={opt.id}
+            style={[styles.chip, sort === opt.id && styles.chipActive]}
+            onPress={() => setSort(opt.id)}
+          >
+            <Text
+              style={[
+                styles.chipText,
+                sort === opt.id && styles.chipTextActive,
+              ]}
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
       <FlatList
         data={listData}
         keyExtractor={(row) => row.key}
@@ -274,8 +333,13 @@ export default function CanteenMenuScreen() {
                 ) : null}
                 <Text style={styles.dishPrice}>HK${dish.price}</Text>
               </View>
-              <Pressable style={styles.addBtn} onPress={() => tryAdd(dish)}>
-                <Text style={styles.addBtnText}>+</Text>
+              <Pressable
+                style={[styles.addBtn, !open && styles.addBtnDisabled]}
+                onPress={() => tryAdd(dish)}
+                disabled={!open}
+                accessibilityLabel={open ? "Add to cart" : "Ordering closed"}
+              >
+                <Text style={styles.addBtnText}>{open ? "+" : "–"}</Text>
               </Pressable>
             </View>
           );
@@ -284,11 +348,19 @@ export default function CanteenMenuScreen() {
 
       {itemCount > 0 ? (
         <Pressable
-          style={styles.orderBar}
-          onPress={() => navigation.navigate("Cart")}
+          style={[styles.orderBar, !open && styles.orderBarDisabled]}
+          onPress={() => {
+            if (!open) {
+              Alert.alert("Canteen closed", closedMessage);
+              return;
+            }
+            navigation.navigate("Cart");
+          }}
         >
           <Text style={styles.orderBarText}>
-            View cart · {itemCount} item{itemCount === 1 ? "" : "s"}
+            {open
+              ? `View cart · ${itemCount} item${itemCount === 1 ? "" : "s"}`
+              : "Canteen closed — checkout paused"}
           </Text>
         </Pressable>
       ) : null}
@@ -345,6 +417,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     backgroundColor: "#fff",
   },
+  closedBanner: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FDBA74",
+    backgroundColor: "#FFF7ED",
+    padding: 12,
+  },
+  closedTitle: { fontSize: 13, fontWeight: "800", color: "#9A3412" },
+  closedBody: { marginTop: 4, fontSize: 12, color: "#7C2D12", lineHeight: 16 },
   discountBanner: {
     marginHorizontal: 16,
     marginTop: 8,
@@ -417,6 +500,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  addBtnDisabled: { backgroundColor: "#9CA3AF" },
   addBtnText: { color: "#fff", fontSize: 22, fontWeight: "700", marginTop: -2 },
   empty: { textAlign: "center", color: "#6B7280", marginTop: 24 },
   link: { textAlign: "center", color: colors.fusion, marginTop: 12, fontWeight: "700" },
@@ -430,5 +514,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: "center",
   },
+  orderBarDisabled: { backgroundColor: "#9CA3AF" },
   orderBarText: { color: "#fff", fontWeight: "800", fontSize: 15 },
 });

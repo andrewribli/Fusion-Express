@@ -7,9 +7,12 @@ import { ShopLayout } from "@/components/ShopLayout";
 import { CollegeDiscountBanner } from "@/components/canteen/CollegeDiscountBanner";
 import {
   CATEGORY_LABELS,
-  MENU as BF_MENU,
+  MENU as BF_MENU_RAW,
   type MenuCategory,
 } from "@/data/canteen/bf-menu";
+import { withFoodImages } from "@/data/canteen/food-images";
+
+const BF_MENU = withFoodImages(BF_MENU_RAW);
 import {
   getRestaurant,
   RESTAURANTS,
@@ -178,7 +181,7 @@ export default function CanteenSlugPage() {
       search={search}
       onSearchChange={setSearch}
       onSearchSelect={() => undefined}
-      searchPlaceholder={`Search ${restaurant.shortName}`}
+      searchPlaceholder="Search food item"
       sidebar={sidebar}
       mobileSidebarTitle="Canteens"
       cartChannel="canteen"

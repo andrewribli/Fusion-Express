@@ -1,8 +1,10 @@
 import {
   CANTEEN_MEAL_PERIODS,
+  closedBannerText,
   getActiveMealPeriod,
   getCanteenConfig,
   getNextMealOpeningLabel,
+  getNextOpenLabel,
   isCanteenOpenByConfig,
   orderedMealPeriods,
   type MealPeriodId,
@@ -10,9 +12,11 @@ import {
 
 export {
   CANTEEN_MEAL_PERIODS,
+  closedBannerText,
   getActiveMealPeriod,
   getCanteenConfig,
   getNextMealOpeningLabel,
+  getNextOpenLabel,
   isCanteenOpenByConfig,
   orderedMealPeriods,
   type MealPeriodId,
@@ -58,16 +62,4 @@ export function getCurrentUcPeriod(now = new Date()): MealPeriodId | null {
 
 export function getNextUcOpeningLabel(now = new Date()): string {
   return getNextMealOpeningLabel(now);
-}
-
-export function closedBannerText(
-  restaurantName: string,
-  restaurantId: string,
-  now = new Date(),
-): string {
-  const cfg = getCanteenConfig(restaurantId);
-  const next = cfg?.mealPeriods
-    ? getNextMealOpeningLabel(now)
-    : (cfg?.nextOpenFallback ?? "tomorrow");
-  return `${restaurantName} is currently closed. Opens at ${next}.`;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
@@ -7,7 +8,15 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { useCart } from "@/context/CartContext";
 import { lineTotal } from "@/lib/pricing";
-import { CANTEEN_DELIVERY_FEE } from "@fusion-express/shared/canteen";
+import {
+  CANTEEN_DELIVERY_FEE,
+  getRestaurant,
+} from "@fusion-express/shared/canteen";
+import { parseCanteenItemId } from "@fusion-express/shared/shop-kind";
+import {
+  closedBannerText,
+  isCanteenOpenByConfig,
+} from "@/lib/canteen/hours";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 
@@ -16,6 +25,20 @@ export default function CanteenCartPage() {
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
   const total = subtotal + CANTEEN_DELIVERY_FEE;
   const overLimit = isOverOrderLimit(subtotal);
+  const restaurantId = useMemo(() => {
+    for (const line of items) {
+      const parsed = parseCanteenItemId(line.item.id);
+      if (parsed?.restaurantId) return parsed.restaurantId;
+    }
+    return null;
+  }, [items]);
+  const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
+  const canteenOpen =
+    !restaurantId || isCanteenOpenByConfig(restaurantId);
+  const closedMessage =
+    restaurant && restaurantId
+      ? closedBannerText(restaurant.name, restaurantId)
+      : "";
 
   return (
     <AppShell>
@@ -106,13 +129,20 @@ export default function CanteenCartPage() {
                 </div>
               </div>
               <OrderLimitNotice subtotal={subtotal} />
+              {!canteenOpen ? (
+                <p className="mt-3 rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-800">
+                  {closedMessage}
+                </p>
+              ) : null}
               <button
                 type="button"
-                disabled={overLimit}
+                disabled={overLimit || !canteenOpen}
                 onClick={() => router.push("/canteen/checkout")}
                 className="mt-4 block w-full rounded-xl bg-emerald-500 py-4 text-center text-base font-semibold text-white disabled:opacity-60"
               >
-                Continue to canteen checkout
+                {canteenOpen
+                  ? "Continue to canteen checkout"
+                  : "Canteen closed — checkout paused"}
               </button>
               <button
                 type="button"

@@ -18,6 +18,10 @@ import { isOverOrderLimit, MAX_ORDER_VALUE } from "@fusion-express/shared";
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
 import {
+  closedBannerText,
+  isCanteenOpenByConfig,
+} from "@fusion-express/shared/canteen-hours";
+import {
   CANTEEN_DELIVERY_FEE,
   cartRestaurantId,
   isCanteenCart,
@@ -41,6 +45,12 @@ export default function CartScreen() {
   const canteen = isCanteenCart(items);
   const restaurantId = cartRestaurantId(items);
   const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
+  const canteenOpen =
+    !canteen || !restaurantId || isCanteenOpenByConfig(restaurantId);
+  const closedMessage =
+    canteen && restaurant
+      ? closedBannerText(restaurant.name, restaurant.id)
+      : "";
   const weightKg = cartTotalWeightKg(items);
   const fee = canteen
     ? {
@@ -180,6 +190,11 @@ export default function CartScreen() {
                 to continue.
               </Text>
             ) : null}
+            {!canteenOpen ? (
+              <Text className="mt-2 text-sm text-orange-700">
+                {closedMessage} Checkout is paused until it opens.
+              </Text>
+            ) : null}
           </Card>
         ) : null}
       </ScrollView>
@@ -187,8 +202,10 @@ export default function CartScreen() {
       {items.length > 0 ? (
         <View className="border-t border-gray-200 bg-white px-4 py-3">
           <PrimaryButton
-            label="Checkout"
-            disabled={overLimit}
+            label={
+              canteenOpen ? "Checkout" : "Canteen closed — checkout paused"
+            }
+            disabled={overLimit || !canteenOpen}
             onPress={() => navigation.navigate("Checkout")}
           />
         </View>

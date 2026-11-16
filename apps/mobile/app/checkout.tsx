@@ -27,6 +27,10 @@ import {
   computeCollegeDiscount,
 } from "@fusion-express/shared/canteen-college";
 import {
+  closedBannerText,
+  isCanteenOpenByConfig,
+} from "@fusion-express/shared/canteen-hours";
+import {
   CUHK_COLLEGES,
   formatDeliveryAddress,
   getHallsForCollege,
@@ -77,6 +81,12 @@ export default function CheckoutScreen() {
   const restaurantId = cartRestaurantId(items);
   const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
   const canteenCollege = canteenCollegeForRestaurant(restaurantId);
+  const canteenOpen =
+    !canteen || !restaurantId || isCanteenOpenByConfig(restaurantId);
+  const closedMessage =
+    canteen && restaurant
+      ? closedBannerText(restaurant.name, restaurant.id)
+      : "";
   const initialCollege: CuhkCollege =
     profile?.college && CUHK_COLLEGES.includes(profile.college as CuhkCollege)
       ? (profile.college as CuhkCollege)
@@ -133,6 +143,9 @@ export default function CheckoutScreen() {
     setError("");
     try {
       if (overLimit) throw new Error(ORDER_LIMIT_MESSAGE);
+      if (!canteenOpen) {
+        throw new Error(closedMessage || "This canteen is currently closed.");
+      }
       if (!customerName.trim()) throw new Error("Enter your full name");
       if (!college || !hall) throw new Error("Choose your college and hall");
       const when =
@@ -438,15 +451,32 @@ export default function CheckoutScreen() {
                   )}
                 </Card>
 
+                {!canteenOpen ? (
+                  <Text className="mt-3 text-sm text-orange-700">
+                    {closedMessage}
+                  </Text>
+                ) : null}
+
                 {error ? (
                   <Text className="mt-3 text-sm text-red-600">{error}</Text>
                 ) : null}
 
                 <PrimaryButton
-                  label={loading ? "Placing…" : "Place order"}
+                  label={
+                    loading
+                      ? "Placing…"
+                      : canteenOpen
+                        ? "Place order"
+                        : "Canteen closed — checkout paused"
+                  }
                   busy={loading}
                   className="mt-4"
-                  disabled={loading || items.length === 0 || overLimit}
+                  disabled={
+                    loading ||
+                    items.length === 0 ||
+                    overLimit ||
+                    !canteenOpen
+                  }
                   onPress={() => void place()}
                 />
               </>
