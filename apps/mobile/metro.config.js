@@ -44,25 +44,4 @@ config.resolver.extraNodeModules = {
     : path.resolve(monorepoRoot, "node_modules/scheduler"),
 };
 
-// Allow mobile to import web canteen menu TS (type-only `@/data/canteen/*` paths).
-const canteenDataRoot = path.resolve(
-  monorepoRoot,
-  "apps/web/src/data/canteen",
-);
-const defaultResolveRequest = config.resolver.resolveRequest;
-config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (
-    typeof moduleName === "string" &&
-    moduleName.startsWith("@/data/canteen/")
-  ) {
-    const rel = moduleName.slice("@/data/canteen/".length);
-    const filePath = path.resolve(canteenDataRoot, rel);
-    return context.resolveRequest(context, filePath, platform);
-  }
-  if (defaultResolveRequest) {
-    return defaultResolveRequest(context, moduleName, platform);
-  }
-  return context.resolveRequest(context, moduleName, platform);
-};
-
 module.exports = withNativeWind(config, { input: "./global.css" });

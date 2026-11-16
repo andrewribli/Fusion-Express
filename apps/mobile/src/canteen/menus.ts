@@ -1,24 +1,24 @@
 /**
- * Canteen menus — same static TS source of truth as web
- * (`apps/web/src/data/canteen/*`). Firestore `canteens/{id}/items` is seed-only.
+ * Canteen menus — local copies under `./data/*` (EAS excludes apps/web).
+ * Keep in sync with `apps/web/src/data/canteen/*`. Firestore items are seed-only.
  */
 import { webAssetOrigin } from "@fusion-express/shared/products";
 import {
   CATEGORY_LABELS,
   MENU as BF_MENU,
   type MenuCategory,
-} from "../../../web/src/data/canteen/bf-menu";
-import { CAFE_TOLO_MENU } from "../../../web/src/data/canteen/cafe-tolo-menu";
-import { EBENEZERS_MENU } from "../../../web/src/data/canteen/ebenezers-menu";
-import { NA_MENU } from "../../../web/src/data/canteen/na-menu";
-import { PAPER_AND_COFFEE_MENU } from "../../../web/src/data/canteen/paper-and-coffee-menu";
-import { SORAZEN_MENU } from "../../../web/src/data/canteen/sorazen-menu";
-import { TUCK_SHOP_MENU } from "../../../web/src/data/canteen/tuck-shop-menu";
+} from "./data/bf-menu";
+import { CAFE_TOLO_MENU } from "./data/cafe-tolo-menu";
+import { EBENEZERS_MENU } from "./data/ebenezers-menu";
+import { NA_MENU } from "./data/na-menu";
+import { PAPER_AND_COFFEE_MENU } from "./data/paper-and-coffee-menu";
+import { SORAZEN_MENU } from "./data/sorazen-menu";
+import { TUCK_SHOP_MENU } from "./data/tuck-shop-menu";
 import {
   UC_MEAL_PERIODS,
   ucItemsForPeriod,
   type MealPeriod,
-} from "../../../web/src/data/canteen/uc-menu";
+} from "./data/uc-menu";
 import type { CanteenDish } from "./cart";
 import type { RestaurantId } from "./restaurants";
 
