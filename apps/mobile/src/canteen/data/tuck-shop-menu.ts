@@ -119,4 +119,20 @@ export const TUCK_SHOP_MENU: SimpleMenuItem[] = [
     category: "dessert",
     image: img,
   },
+  {
+    id: "indomie",
+    name: "Indomie (印尼撈麵)",
+    description: "Instant Indomie noodles.",
+    price: 9,
+    category: "mains",
+    image: FOOD_HERO.indomie ?? img,
+  },
+  {
+    id: "chicken-thigh",
+    name: "Chicken Thigh (雞腿)",
+    description: "Fried / grilled chicken thigh.",
+    price: 16,
+    category: "mains",
+    image: FOOD_HERO["chicken-thigh"] ?? img,
+  },
 ];

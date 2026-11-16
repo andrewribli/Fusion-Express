@@ -63,6 +63,9 @@ const COVER_BY_ID: Record<RestaurantId, ImageSourcePropType> = {
   ebenezers: FOOD.kebab,
   "cc-canteen": LOGOS.collegeCanteen,
   "shaw-canteen": LOGOS.collegeCanteen,
+  "wys-canteen": LOGOS.collegeCanteen,
+  maxims: FOOD.friedrice,
+  "lws-canteen": LOGOS.collegeCanteen,
 };
 
 export function canteenCoverImage(

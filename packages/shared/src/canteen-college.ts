@@ -72,6 +72,9 @@ const RESTAURANT_COLLEGE: Record<string, CollegeId | null> = {
   ebenezers: null,
   "cc-canteen": "CC",
   "shaw-canteen": "Shaw",
+  "wys-canteen": "WYS",
+  maxims: null,
+  "lws-canteen": "LWS",
 };
 
 const RESTAURANT_NAMES: Record<string, string> = {
@@ -85,8 +88,11 @@ const RESTAURANT_NAMES: Record<string, string> = {
   "cafe-tolo": "Cafe Tolo",
   "tuck-shop": "Tuck Shop",
   ebenezers: "Ebeneezer's Kebabs & Pizzeria",
-  "cc-canteen": "CC Canteen",
+  "cc-canteen": "Chung Chi Tang",
   "shaw-canteen": "Shaw Canteen",
+  "wys-canteen": "Wee Yu Sun Canteen",
+  maxims: "Maxim's",
+  "lws-canteen": "Lee Woo Sing Canteen",
 };
 
 export function getCollege(id: CollegeId | string | null | undefined): College | undefined {

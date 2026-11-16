@@ -31,22 +31,52 @@
   },
   {
     "id": "cc-canteen",
-    "name": "CC Canteen",
-    "shortName": "CC Canteen",
-    "blurb": "Chung Chi College canteen — college discount when a CC runner picks up.",
-    "hoursLabel": "Coming soon",
+    "name": "Chung Chi Tang",
+    "shortName": "Chung Chi Tang",
+    "blurb": "众志堂 at Chung Chi — BBQ pork rice, curry beef rice, sandwiches.",
+    "hoursLabel": "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
     "deliveryFee": 10,
     "collegeId": "CC",
-    "menuReady": false
+    "menuReady": true
   },
   {
     "id": "shaw-canteen",
     "name": "Shaw Canteen",
     "shortName": "Shaw Canteen",
-    "blurb": "Shaw College canteen — college discount when a Shaw runner picks up.",
-    "hoursLabel": "Coming soon",
+    "blurb": "Shaw College canteen — rice with dishes and campus staples.",
+    "hoursLabel": "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
     "deliveryFee": 10,
     "collegeId": "Shaw",
-    "menuReady": false
+    "menuReady": true
+  },
+  {
+    "id": "wys-canteen",
+    "name": "Wee Yu Sun Canteen",
+    "shortName": "WYS Canteen",
+    "blurb": "伍宜孙书院食堂 / 三湘玥 — Hunan-style rice sets and noodles.",
+    "hoursLabel": "11:00 AM – 9:00 PM (Mon–Sat · closed Sun)",
+    "deliveryFee": 10,
+    "collegeId": "WYS",
+    "menuReady": true
+  },
+  {
+    "id": "maxims",
+    "name": "Maxim's",
+    "shortName": "Maxim's",
+    "blurb": "Maxim's by CUHK — basic fast-food rice, noodles, and breakfast.",
+    "hoursLabel": "7:30 AM – 9:00 PM daily",
+    "deliveryFee": 10,
+    "collegeId": null,
+    "menuReady": true
+  },
+  {
+    "id": "lws-canteen",
+    "name": "Lee Woo Sing Canteen",
+    "shortName": "WS Can",
+    "blurb": "和声书院食堂 — pork cartilage rice, fish ball noodles. Cafe Tolo is separate.",
+    "hoursLabel": "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
+    "deliveryFee": 10,
+    "collegeId": "LWS",
+    "menuReady": true
   }
 ]

@@ -61,6 +61,8 @@ export const FOOD_HERO: Record<string, string> = {
   "baileys-lava-cake": local("lava.jpg"),
   "fun-hot-dog": local("burger.jpg"),
   "sweet-soup": local("soup.jpg"),
+  indomie: local("noodles.jpg"),
+  "chicken-thigh": local("grill.jpg"),
 };
 
 function hashId(id: string): number {

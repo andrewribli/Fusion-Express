@@ -77,6 +77,20 @@ const SLUG_ALIASES: Record<string, string> = {
   ebeneezers: "ebenezers",
   "ebeneezers-kebabs": "ebenezers",
   "ebeneezer": "ebenezers",
+  "chung-chi-tang": "cc-canteen",
+  "chung-chi": "cc-canteen",
+  "cc-tang": "cc-canteen",
+  wys: "wys-canteen",
+  "wu-yee-sun": "wys-canteen",
+  "wee-yu-sun": "wys-canteen",
+  "san-xiang-yue": "wys-canteen",
+  maxim: "maxims",
+  "maxims-cuhk": "maxims",
+  lws: "lws-canteen",
+  "lee-woo-sing": "lws-canteen",
+  "ws-can": "lws-canteen",
+  "lws-can": "lws-canteen",
+  shaw: "shaw-canteen",
 };
 
 const BF_FILTERS: Array<"all" | MenuCategory> = [

@@ -29,13 +29,28 @@ import {
 } from "@fusion-express/shared/canteen-hours";
 import { useCart } from "../../src/cart";
 import { canteenCoverImage } from "../../src/canteen/images";
-import { searchCanteenDishes } from "../../src/canteen/menus";
-import { menuReadyRestaurants } from "../../src/canteen/restaurants";
+import {
+  minMenuPrice,
+  searchCanteenDishes,
+  sortDishesByPrice,
+  type CanteenListSort,
+} from "../../src/canteen/menus";
+import {
+  menuReadyRestaurants,
+  type Restaurant,
+} from "../../src/canteen/restaurants";
 import { ProductImage } from "../../src/ProductImage";
 import { colors } from "../../src/theme";
 import type { RootStackParamList, TabsParamList } from "../../src/navigation";
 
 type ShopChannel = "groceries" | "canteens";
+
+const CANTEEN_SORT_OPTIONS: Array<{ id: CanteenListSort; label: string }> = [
+  { id: "default", label: "Featured" },
+  { id: "cheap", label: "Cheapest first" },
+  { id: "expensive", label: "Most expensive" },
+  { id: "distance", label: "Distance" },
+];
 
 type HomeNav = CompositeNavigationProp<
   BottomTabNavigationProp<TabsParamList, "Shop">,
@@ -124,16 +139,43 @@ export default function HomeScreen() {
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [canteenSearch, setCanteenSearch] = useState("");
+  const [canteenSort, setCanteenSort] = useState<CanteenListSort>("default");
   const [catsOpen, setCatsOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<(typeof CATEGORIES)[number]["id"]>("all");
 
-  const canteens = useMemo(() => menuReadyRestaurants(), []);
+  const canteens = useMemo(() => {
+    const list = [...menuReadyRestaurants()];
+    if (canteenSort === "distance") {
+      list.sort((a, b) => a.campusWalkOrder - b.campusWalkOrder);
+    } else if (canteenSort === "cheap" || canteenSort === "expensive") {
+      list.sort((a, b) => {
+        const pa = minMenuPrice(a.id);
+        const pb = minMenuPrice(b.id);
+        return canteenSort === "cheap" ? pa - pb : pb - pa;
+      });
+    }
+    return list;
+  }, [canteenSort]);
 
-  const dishHits = useMemo(
-    () => searchCanteenDishes(canteenSearch),
-    [canteenSearch],
-  );
+  const dishHits = useMemo(() => {
+    const hits = searchCanteenDishes(canteenSearch);
+    if (canteenSort === "cheap" || canteenSort === "expensive") {
+      return sortDishesByPrice(hits, canteenSort);
+    }
+    if (canteenSort === "distance") {
+      const order = new Map(
+        menuReadyRestaurants().map((r) => [r.id, r.campusWalkOrder]),
+      );
+      return [...hits].sort(
+        (a, b) =>
+          (order.get(a.restaurantId) ?? 999) -
+          (order.get(b.restaurantId) ?? 999),
+      );
+    }
+    return hits;
+  }, [canteenSearch, canteenSort]);
   const searchingDishes = canteenSearch.trim().length > 0;
+  const canteenListColumns = searchingDishes ? 1 : 2;
 
   const reloadMenu = useCallback(() => {
     setLoading(true);
@@ -267,116 +309,137 @@ export default function HomeScreen() {
             <Text style={styles.searchOrbText}>⌕</Text>
           </View>
         </View>
+
+        {channel === "canteens" ? (
+          <View style={styles.sortChips}>
+            {CANTEEN_SORT_OPTIONS.map((opt) => (
+              <Pressable
+                key={opt.id}
+                style={[
+                  styles.sortChip,
+                  canteenSort === opt.id && styles.sortChipActive,
+                ]}
+                onPress={() => setCanteenSort(opt.id)}
+              >
+                <Text
+                  style={[
+                    styles.sortChipText,
+                    canteenSort === opt.id && styles.sortChipTextActive,
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
       </View>
 
       {channel === "canteens" ? (
-        searchingDishes ? (
-          <FlatList
-            data={dishHits}
-            keyExtractor={(d) => `${d.restaurantId}:${d.id}`}
-            contentContainerStyle={styles.list}
-            ListHeaderComponent={
+        <FlatList
+          key={canteenListColumns === 1 ? "list" : "grid"}
+          data={
+            (searchingDishes ? dishHits : canteens) as Array<
+              Restaurant | (typeof dishHits)[number]
+            >
+          }
+          keyExtractor={(item) =>
+            searchingDishes
+              ? `${(item as (typeof dishHits)[number]).restaurantId}:${(item as (typeof dishHits)[number]).id}`
+              : (item as Restaurant).id
+          }
+          numColumns={canteenListColumns}
+          columnWrapperStyle={
+            canteenListColumns === 2 ? styles.canteenRow : undefined
+          }
+          contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            searchingDishes ? (
               <Text style={styles.sectionTitle}>
                 Dishes matching “{canteenSearch.trim()}”
               </Text>
-            }
-            ListEmptyComponent={
-              <Text style={styles.empty}>No dishes match that search.</Text>
-            }
-            renderItem={({ item: dish }) => (
-              <Pressable
-                style={styles.dishHit}
-                onPress={() =>
-                  navigation.navigate("CanteenMenu", {
-                    restaurantId: dish.restaurantId,
-                  })
-                }
-              >
-                <ProductImage uri={dish.image} size={64} />
-                <View style={styles.dishHitBody}>
-                  <Text style={styles.dishHitName} numberOfLines={2}>
-                    {dish.name}
-                  </Text>
-                  <Text style={styles.dishHitMeta} numberOfLines={1}>
-                    {dish.restaurantShortName} · HK${dish.price}
-                  </Text>
-                  {!isCanteenOpenByConfig(dish.restaurantId) ? (
-                    <Text style={styles.dishHitClosed}>Closed now</Text>
-                  ) : null}
-                </View>
-              </Pressable>
-            )}
-          />
-        ) : (
-          <FlatList
-            data={canteens}
-            keyExtractor={(r) => r.id}
-            numColumns={2}
-            columnWrapperStyle={styles.canteenRow}
-            contentContainerStyle={styles.list}
-            ListHeaderComponent={
-              <View style={styles.promo}>
-                <Text style={styles.promoEyebrow}>GraceRun CUHK</Text>
-                <Text style={styles.promoTitle}>
-                  Campus canteens to your lobby
-                </Text>
-                <Text style={styles.promoBody}>
-                  Flat HK$10 delivery. Save HK$5+ with your runner's college
-                  discount (10% off food when colleges match). Search food items
-                  above.
-                </Text>
-              </View>
-            }
-            ListEmptyComponent={
-              <Text style={styles.empty}>No canteens available yet.</Text>
-            }
-            renderItem={({ item: restaurant }) => {
-              const open = isCanteenOpenByConfig(restaurant.id);
+            ) : null
+          }
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              {searchingDishes
+                ? "No dishes match that search."
+                : "No canteens available yet."}
+            </Text>
+          }
+          renderItem={({ item }) => {
+            if (searchingDishes) {
+              const dish = item as (typeof dishHits)[number];
               return (
                 <Pressable
-                  style={styles.canteenCard}
+                  style={styles.dishHit}
                   onPress={() =>
                     navigation.navigate("CanteenMenu", {
-                      restaurantId: restaurant.id,
+                      restaurantId: dish.restaurantId,
                     })
                   }
                 >
-                  <Image
-                    source={canteenCoverImage(restaurant.id)}
-                    style={styles.canteenCover}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.canteenBody}>
-                    <Text style={styles.canteenName} numberOfLines={2}>
-                      {restaurant.shortName}
+                  <ProductImage uri={dish.image} size={64} />
+                  <View style={styles.dishHitBody}>
+                    <Text style={styles.dishHitName} numberOfLines={2}>
+                      {dish.name}
                     </Text>
-                    <Text style={styles.canteenHours} numberOfLines={2}>
-                      {restaurant.hoursLabel}
+                    <Text style={styles.dishHitMeta} numberOfLines={1}>
+                      {dish.restaurantShortName} · HK${dish.price}
                     </Text>
-                    <Text
-                      style={[
-                        styles.canteenOpen,
-                        !open && styles.canteenClosed,
-                      ]}
-                    >
-                      {open
-                        ? "Open now"
-                        : closedBannerText(restaurant.shortName, restaurant.id)}
-                    </Text>
-                    <Text style={styles.canteenBlurb} numberOfLines={2}>
-                      {restaurant.blurb}
-                    </Text>
-                    {restaurant.collegeId ? (
-                      <Text style={styles.canteenBadge}>
-                        {restaurant.collegeId} · college discount
-                      </Text>
+                    {!isCanteenOpenByConfig(dish.restaurantId) ? (
+                      <Text style={styles.dishHitClosed}>Closed now</Text>
                     ) : null}
                   </View>
                 </Pressable>
               );
-            }}
-          />
-        )
+            }
+            const restaurant = item as Restaurant;
+            const open = isCanteenOpenByConfig(restaurant.id);
+            return (
+              <Pressable
+                style={styles.canteenCard}
+                onPress={() =>
+                  navigation.navigate("CanteenMenu", {
+                    restaurantId: restaurant.id,
+                  })
+                }
+              >
+                <Image
+                  source={canteenCoverImage(restaurant.id)}
+                  style={styles.canteenCover}
+                  resizeMode="cover"
+                />
+                <View style={styles.canteenBody}>
+                  <Text style={styles.canteenName} numberOfLines={2}>
+                    {restaurant.shortName}
+                  </Text>
+                  <Text style={styles.canteenHours} numberOfLines={2}>
+                    {restaurant.hoursLabel}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.canteenOpen,
+                      !open && styles.canteenClosed,
+                    ]}
+                  >
+                    {open
+                      ? "Open now"
+                      : closedBannerText(restaurant.shortName, restaurant.id)}
+                  </Text>
+                  <Text style={styles.canteenBlurb} numberOfLines={2}>
+                    {restaurant.blurb}
+                  </Text>
+                  {restaurant.collegeId ? (
+                    <Text style={styles.canteenBadge}>
+                      {restaurant.collegeId} · college discount
+                    </Text>
+                  ) : null}
+                </View>
+              </Pressable>
+            );
+          }}
+        />
       ) : loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.fusion} />
@@ -611,12 +674,6 @@ const styles = StyleSheet.create({
     color: "#047857",
   },
   canteenClosed: { color: "#C2410C" },
-  sectionTitle: {
-    marginBottom: 10,
-    fontSize: 15,
-    fontWeight: "800",
-    color: colors.ink,
-  },
   dishHit: {
     flexDirection: "row",
     alignItems: "center",
@@ -648,10 +705,36 @@ const styles = StyleSheet.create({
   },
   menuBtnIcon: { fontSize: 18, color: "#374151" },
   logo: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+    width: 47,
+    height: 47,
+    borderRadius: 10,
     backgroundColor: "#000",
+  },
+  sortChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 10,
+  },
+  sortChip: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  sortChipActive: {
+    borderColor: colors.fusion,
+    backgroundColor: "#FEF2F2",
+  },
+  sortChipText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#4B5563",
+  },
+  sortChipTextActive: {
+    color: colors.fusion,
   },
   brand: {
     flex: 1,

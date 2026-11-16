@@ -8,13 +8,19 @@ import {
   type MenuCategory,
 } from "./data/bf-menu";
 import { CAFE_TOLO_MENU } from "./data/cafe-tolo-menu";
+import { CC_MENU } from "./data/cc-menu";
 import { EBENEZERS_MENU } from "./data/ebenezers-menu";
 import { canteenFoodImage, withFoodImages } from "./data/food-images";
+import { LWS_MENU } from "./data/lws-menu";
+import { MAXIMS_MENU } from "./data/maxims-menu";
 import { NA_MENU } from "./data/na-menu";
 import { PAPER_AND_COFFEE_MENU } from "./data/paper-and-coffee-menu";
+import { withRiceWithDishes } from "./data/rice-with-dishes";
+import { SHAW_MENU } from "./data/shaw-menu";
 import { SORAZEN_MENU } from "./data/sorazen-menu";
 import { TUCK_SHOP_MENU } from "./data/tuck-shop-menu";
 import { ucItemsForPeriod, type MealPeriod } from "./data/uc-menu";
+import { WYS_MENU } from "./data/wys-menu";
 import { resolveLocalFoodUri } from "./images";
 import type { CanteenDish } from "./cart";
 import type { RestaurantId } from "./restaurants";
@@ -47,47 +53,90 @@ const CU_CAFE_MENU: SimpleRow[] = [
   {
     id: "turkey-breast-sandwich",
     name: "Turkey Breast Sandwich",
-    description: "Turkey breast on fresh bread — grab-and-go.",
+    description: "Turkey breast on fresh bread.",
     price: 38,
+    category: "mains",
+  },
+  {
+    id: "ham-cheese-sandwich",
+    name: "Ham & Cheese Sandwich",
+    description: "Classic ham and cheese.",
+    price: 34,
+    category: "mains",
+  },
+  {
+    id: "egg-mayo-sandwich",
+    name: "Egg Mayo Sandwich",
+    description: "Creamy egg mayo on soft bread.",
+    price: 30,
     category: "mains",
   },
   {
     id: "caesar-salad",
     name: "Caesar Salad",
-    description: "Crisp romaine with classic Caesar dressing.",
+    description: "Crisp romaine with Caesar dressing.",
     price: 42,
+    category: "mains",
+  },
+  {
+    id: "garden-salad",
+    name: "Garden Salad",
+    description: "Mixed greens with house dressing.",
+    price: 36,
+    category: "mains",
+  },
+  {
+    id: "chicken-pasta",
+    name: "Chicken Pasta",
+    description: "Simple pasta with chicken — basic main.",
+    price: 48,
     category: "mains",
   },
   {
     id: "house-brew-coffee",
     name: "House Brew Coffee",
-    description: "Premium drip coffee.",
+    description: "Drip coffee.",
     price: 25,
     category: "drinks",
   },
   {
-    id: "matcha-latte",
-    name: "Matcha Latte",
-    description: "Smooth matcha with steamed milk.",
+    id: "americano",
+    name: "Americano",
+    description: "Espresso with hot water.",
+    price: 28,
+    category: "drinks",
+  },
+  {
+    id: "latte",
+    name: "Latte",
+    description: "Espresso with steamed milk.",
     price: 32,
     category: "drinks",
   },
   {
-    id: "chocolate-cake",
-    name: "Chocolate Cake",
-    description: "Rich chocolate slice.",
-    price: 28,
-    category: "dessert",
+    id: "iced-lemon-tea",
+    name: "Iced Lemon Tea",
+    description: "Refreshing iced lemon tea.",
+    price: 22,
+    category: "drinks",
+  },
+  {
+    id: "chocolate-cookie",
+    name: "Chocolate Cookie",
+    description: "Baked cookie snack.",
+    price: 15,
+    category: "snacks",
   },
 ];
 
-const SH_HO_MENU: SimpleRow[] = [
+const SH_HO_MENU: SimpleRow[] = withRiceWithDishes([
   {
     id: "chicken-rice",
     name: "Chicken Rice",
     description: "Casual Chinese chicken rice.",
     price: 42,
     category: "mains",
+    image: "",
   },
   {
     id: "beef-noodles",
@@ -95,6 +144,7 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Beef noodles in savory broth.",
     price: 45,
     category: "mains",
+    image: "",
   },
   {
     id: "club-sandwich",
@@ -102,6 +152,7 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Western-style club sandwich.",
     price: 38,
     category: "mains",
+    image: "",
   },
   {
     id: "fried-rice",
@@ -109,6 +160,7 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Classic fried rice.",
     price: 40,
     category: "mains",
+    image: "",
   },
   {
     id: "iced-lemon-tea",
@@ -116,18 +168,24 @@ const SH_HO_MENU: SimpleRow[] = [
     description: "Refreshing iced lemon tea.",
     price: 15,
     category: "drinks",
+    image: "",
   },
-];
+]);
 
 const SIMPLE: Partial<Record<RestaurantId, SimpleRow[]>> = {
   "cu-cafe": CU_CAFE_MENU,
   "sh-ho-canteen": SH_HO_MENU,
   "paper-and-coffee": PAPER_AND_COFFEE_MENU,
   sorazen: SORAZEN_MENU,
-  "na-canteen": NA_MENU,
+  "na-canteen": withRiceWithDishes(NA_MENU),
   "cafe-tolo": CAFE_TOLO_MENU,
   "tuck-shop": TUCK_SHOP_MENU,
   ebenezers: EBENEZERS_MENU,
+  "cc-canteen": CC_MENU,
+  "shaw-canteen": SHAW_MENU,
+  "wys-canteen": WYS_MENU,
+  maxims: MAXIMS_MENU,
+  "lws-canteen": LWS_MENU,
 };
 
 function asFoodCategory(category: string): MenuCategory {
@@ -264,6 +322,13 @@ export function searchCanteenDishes(query: string): DishSearchHit[] {
   return hits;
 }
 
+/** Cheapest menu item price for a venue (for list price sorting). */
+export function minMenuPrice(restaurantId: string): number {
+  const { dishes } = loadCanteenMenu(restaurantId);
+  if (!dishes.length) return Number.POSITIVE_INFINITY;
+  return Math.min(...dishes.map((d) => d.price));
+}
+
 export const CANTEEN_CATEGORY_ORDER: MenuCategory[] = [
   "mains",
   "snacks",
@@ -272,6 +337,7 @@ export const CANTEEN_CATEGORY_ORDER: MenuCategory[] = [
 ];
 
 export type PriceSort = "default" | "cheap" | "expensive";
+export type CanteenListSort = PriceSort | "distance";
 
 export function sortDishesByPrice<T extends { price: number }>(
   items: T[],

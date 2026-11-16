@@ -7,7 +7,7 @@ import { ShopLayout } from "@/components/ShopLayout";
 import { MENU as BF_MENU } from "@/data/canteen/bf-menu";
 import { getCollege } from "@/data/canteen/colleges";
 import { canteenFoodImage } from "@/data/canteen/food-images";
-import { RESTAURANTS } from "@/data/canteen/restaurants";
+import { RESTAURANTS, type Restaurant } from "@/data/canteen/restaurants";
 import {
   getSimpleMenu,
   isSimpleMenuRestaurant,
@@ -28,6 +28,15 @@ type DishHit = {
   price: number;
   image?: string;
 };
+
+type ListSort = "default" | "cheap" | "expensive" | "distance";
+
+const SORT_OPTIONS: Array<{ id: ListSort; label: string }> = [
+  { id: "default", label: "Featured" },
+  { id: "cheap", label: "Cheapest first" },
+  { id: "expensive", label: "Most expensive" },
+  { id: "distance", label: "Distance" },
+];
 
 function allDishHits(): DishHit[] {
   const hits: DishHit[] = [];
@@ -86,20 +95,58 @@ function allDishHits(): DishHit[] {
   return hits;
 }
 
+function minVenuePrice(restaurantId: string, dishes: DishHit[]): number {
+  const prices = dishes
+    .filter((d) => d.restaurantId === restaurantId)
+    .map((d) => d.price);
+  if (!prices.length) return Number.POSITIVE_INFINITY;
+  return Math.min(...prices);
+}
+
 export default function CanteenIndexPage() {
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<ListSort>("default");
   const dishes = useMemo(() => allDishHits(), []);
 
   const q = search.trim().toLowerCase();
   const dishResults = useMemo(() => {
     if (!q) return [];
-    return dishes.filter(
+    let list = dishes.filter(
       (d) =>
         d.name.toLowerCase().includes(q) ||
         (d.description ?? "").toLowerCase().includes(q) ||
         d.restaurantName.toLowerCase().includes(q),
     );
-  }, [dishes, q]);
+    if (sort === "cheap") {
+      list = [...list].sort((a, b) => a.price - b.price);
+    } else if (sort === "expensive") {
+      list = [...list].sort((a, b) => b.price - a.price);
+    } else if (sort === "distance") {
+      const order = new Map<string, number>(
+        RESTAURANTS.map((r) => [r.id, r.campusWalkOrder]),
+      );
+      list = [...list].sort(
+        (a, b) =>
+          (order.get(a.restaurantId) ?? 999) -
+          (order.get(b.restaurantId) ?? 999),
+      );
+    }
+    return list;
+  }, [dishes, q, sort]);
+
+  const venues = useMemo(() => {
+    let list: Restaurant[] = [...RESTAURANTS];
+    if (sort === "distance") {
+      list.sort((a, b) => a.campusWalkOrder - b.campusWalkOrder);
+    } else if (sort === "cheap" || sort === "expensive") {
+      list.sort((a, b) => {
+        const pa = minVenuePrice(a.id, dishes);
+        const pb = minVenuePrice(b.id, dishes);
+        return sort === "cheap" ? pa - pb : pb - pa;
+      });
+    }
+    return list;
+  }, [sort, dishes]);
 
   const searchProducts = useMemo<MenuItem[]>(
     () =>
@@ -121,7 +168,7 @@ export default function CanteenIndexPage() {
 
   const sidebar = (
     <nav className="px-2 py-2">
-      {RESTAURANTS.map((r) => (
+      {venues.map((r) => (
         <Link
           key={r.id}
           href={`/canteen/${r.id}`}
@@ -165,6 +212,22 @@ export default function CanteenIndexPage() {
           HK$10 · 10% college canteen discount when your runner matches. Search
           dishes above.
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setSort(opt.id)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                sort === opt.id
+                  ? "border-[#ED1C24] bg-[#ED1C24]/10 text-[#ED1C24]"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {q ? (
@@ -214,7 +277,7 @@ export default function CanteenIndexPage() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {RESTAURANTS.map((r) => {
+          {venues.map((r) => {
             const college = r.collegeId ? getCollege(r.collegeId) : undefined;
             const open = r.menuReady ? isCanteenOpenByConfig(r.id) : false;
             return (

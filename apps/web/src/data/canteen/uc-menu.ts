@@ -1448,6 +1448,34 @@ export const UC_MENU: UcMenuItem[] = [
     category: "Tea House — Hot Drinks",
     timeZones: ALL,
   },
+  // ——— Rice with Dishes (generic college options) ———
+  {
+    id: "rice-1-dish",
+    name: "1 Dish + Rice",
+    nameZh: "單餸飯",
+    description: "Rice with 1 dish — choose at the counter. Price placeholder.",
+    price: 28,
+    category: "Rice with Dishes",
+    timeZones: ["lunch", "tea", "dinner"],
+  },
+  {
+    id: "rice-2-dishes",
+    name: "2 Dishes + Rice",
+    nameZh: "兩餸飯",
+    description: "Rice with 2 dishes — choose at the counter. Price placeholder.",
+    price: 33,
+    category: "Rice with Dishes",
+    timeZones: ["lunch", "tea", "dinner"],
+  },
+  {
+    id: "rice-3-dishes",
+    name: "3 Dishes + Rice",
+    nameZh: "三餸飯",
+    description: "Rice with 3 dishes — choose at the counter. Price placeholder.",
+    price: 40,
+    category: "Rice with Dishes",
+    timeZones: ["lunch", "tea", "dinner"],
+  },
 ];
 
 export function getUcMenuItem(id: string): UcMenuItem | undefined {

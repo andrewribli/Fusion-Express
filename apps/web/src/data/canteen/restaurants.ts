@@ -12,7 +12,10 @@ export type RestaurantId =
   | "tuck-shop"
   | "ebenezers"
   | "cc-canteen"
-  | "shaw-canteen";
+  | "shaw-canteen"
+  | "wys-canteen"
+  | "maxims"
+  | "lws-canteen";
 
 export type Restaurant = {
   id: RestaurantId;
@@ -26,6 +29,11 @@ export type Restaurant = {
   menuReady: boolean;
   /** Optional brand mark shown on list cards and canteen headers. */
   logoSrc?: string;
+  /**
+   * Relative campus walk order (lower = closer to University Station / mid-campus).
+   * Used as Distance sort when GPS is unavailable.
+   */
+  campusWalkOrder: number;
 };
 
 export const CANTEEN_DELIVERY_FEE = 10;
@@ -41,6 +49,7 @@ export const RESTAURANTS: Restaurant[] = [
     collegeId: null,
     menuReady: true,
     logoSrc: "/canteen/benjamin-franklin.jpg",
+    campusWalkOrder: 20,
   },
   {
     id: "uc-canteen",
@@ -52,6 +61,7 @@ export const RESTAURANTS: Restaurant[] = [
     collegeId: "UC",
     menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 50,
   },
   {
     id: "cu-cafe",
@@ -64,6 +74,7 @@ export const RESTAURANTS: Restaurant[] = [
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
+    campusWalkOrder: 15,
   },
   {
     id: "sh-ho-canteen",
@@ -76,6 +87,7 @@ export const RESTAURANTS: Restaurant[] = [
     collegeId: "SHHO",
     menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 70,
   },
   {
     id: "paper-and-coffee",
@@ -90,6 +102,7 @@ export const RESTAURANTS: Restaurant[] = [
     collegeId: null,
     menuReady: true,
     logoSrc: "/canteen/paper-and-coffee-logo.png",
+    campusWalkOrder: 5,
   },
   {
     id: "sorazen",
@@ -104,6 +117,7 @@ export const RESTAURANTS: Restaurant[] = [
     collegeId: null,
     menuReady: true,
     logoSrc: "/canteen/sorazen-logo.png",
+    campusWalkOrder: 22,
   },
   {
     id: "na-canteen",
@@ -117,6 +131,7 @@ export const RESTAURANTS: Restaurant[] = [
     collegeId: "NA",
     menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 80,
   },
   {
     id: "cafe-tolo",
@@ -129,6 +144,7 @@ export const RESTAURANTS: Restaurant[] = [
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "LWS",
     menuReady: true,
+    campusWalkOrder: 95,
   },
   {
     id: "tuck-shop",
@@ -141,6 +157,7 @@ export const RESTAURANTS: Restaurant[] = [
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
+    campusWalkOrder: 35,
   },
   {
     id: "ebenezers",
@@ -153,28 +170,74 @@ export const RESTAURANTS: Restaurant[] = [
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,
     menuReady: true,
+    campusWalkOrder: 40,
   },
   {
     id: "cc-canteen",
-    name: "CC Canteen",
-    shortName: "CC Canteen",
-    blurb: "Chung Chi College canteen — college discount when a CC runner picks up.",
-    hoursLabel: "Coming soon",
+    name: "Chung Chi Tang",
+    shortName: "Chung Chi Tang",
+    blurb:
+      "众志堂 at Chung Chi — BBQ pork rice, curry beef rice, sandwiches. College discount when a CC runner picks up.",
+    location: "Chung Chi College (众志堂)",
+    hoursLabel: "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "CC",
-    menuReady: false,
+    menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 45,
   },
   {
     id: "shaw-canteen",
     name: "Shaw Canteen",
     shortName: "Shaw Canteen",
-    blurb: "Shaw College canteen — college discount when a Shaw runner picks up.",
-    hoursLabel: "Coming soon",
+    blurb: "Shaw College canteen — rice with dishes and campus staples.",
+    location: "Shaw College",
+    hoursLabel: "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "Shaw",
-    menuReady: false,
+    menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 60,
+  },
+  {
+    id: "wys-canteen",
+    name: "Wee Yu Sun Canteen",
+    shortName: "WYS Canteen",
+    blurb:
+      "伍宜孙书院食堂 / 三湘玥 — Hunan-style rice sets and noodles. College discount when a WYS runner picks up.",
+    location: "Wu Yee Sun College (三湘玥)",
+    hoursLabel: "11:00 AM – 9:00 PM (Mon–Sat · closed Sun)",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: "WYS",
+    menuReady: true,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 75,
+  },
+  {
+    id: "maxims",
+    name: "Maxim's",
+    shortName: "Maxim's",
+    blurb: "Maxim's by CUHK — basic fast-food rice, noodles, and breakfast.",
+    location: "Near CUHK campus",
+    hoursLabel: "7:30 AM – 9:00 PM daily",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: null,
+    menuReady: true,
+    campusWalkOrder: 10,
+  },
+  {
+    id: "lws-canteen",
+    name: "Lee Woo Sing Canteen",
+    shortName: "WS Can",
+    blurb:
+      "和声书院食堂 — pork cartilage rice, fish ball noodles, and rice with dishes. Cafe Tolo is listed separately.",
+    location: "Lee Woo Sing College",
+    hoursLabel: "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: "LWS",
+    menuReady: true,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 90,
   },
 ];
 
