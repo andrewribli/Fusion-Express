@@ -180,7 +180,7 @@ export const RESTAURANTS: Restaurant[] = [
     name: "Chung Chi Tang",
     shortName: "Chung Chi Tang",
     blurb:
-      "众志堂 at Chung Chi — BBQ pork rice, curry beef rice, sandwiches.",
+      "众志堂 at Chung Chi — BBQ, 煎燒扒餐, noodles, afternoon tea, and drinks.",
     location: "Chung Chi College (众志堂)",
     hoursLabel: hours("cc-canteen"),
     deliveryFee: CANTEEN_DELIVERY_FEE,
