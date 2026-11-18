@@ -18,7 +18,6 @@ import {
 import {
   loadMenuItems,
   resolveProductImageUrl,
-  webAssetOrigin,
 } from "@fusion-express/shared/products";
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import { isServiceOpen, SERVICE_HOURS } from "@fusion-express/shared";
@@ -214,7 +213,6 @@ export default function HomeScreen() {
   const recommended = useMemo(() => filtered.slice(0, 8), [filtered]);
   const feed = useMemo(() => filtered.slice(0, 18), [filtered]);
 
-  const logoUri = `${webAssetOrigin()}/images/gracerun-icon.png`;
   const serviceOpen = isServiceOpen();
 
   return (
@@ -229,7 +227,12 @@ export default function HomeScreen() {
             <Text style={styles.menuBtnIcon}>☰</Text>
           </Pressable>
 
-          <Image source={{ uri: logoUri }} style={styles.logo} />
+          <Image
+            source={require("../../assets/gracerun-logo-source.png")}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="GraceRun — delivering with grace"
+          />
           <Text style={styles.brand}>GraceRun</Text>
 
           <Pressable
@@ -705,9 +708,10 @@ const styles = StyleSheet.create({
   },
   menuBtnIcon: { fontSize: 18, color: "#374151" },
   logo: {
-    width: 47,
-    height: 47,
-    borderRadius: 10,
+    // ~30% larger than prior 47px so wordmark + "delivering with grace" read in screenshots
+    width: 61,
+    height: 61,
+    borderRadius: 12,
     backgroundColor: "#000",
   },
   sortChips: {
