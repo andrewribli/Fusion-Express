@@ -126,33 +126,30 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     includesDrink: true,
   },
 
-  // ——— Toast Tea Set ———
+  // ——— Toast Tea Set (kiosk does not list coffee/milk tea with these) ———
   {
     id: "malaysian-kaya-toast",
     name: "Malaysian Kaya Toast",
-    description: "Toast Tea Set · includes coffee/milk tea",
+    description: "Toast Tea Set",
     price: 16,
     category: "snacks",
     image: img,
-    includesDrink: true,
   },
   {
     id: "condensed-milk-peanut-toast",
     name: "Condensed Milk & Peanut Toast",
-    description: "Toast Tea Set · includes coffee/milk tea",
+    description: "Toast Tea Set",
     price: 16,
     category: "snacks",
     image: img,
-    includesDrink: true,
   },
   {
     id: "coconut-toast",
     name: "Coconut Toast",
-    description: "Toast Tea Set · includes coffee/milk tea",
+    description: "Toast Tea Set",
     price: 16,
     category: "snacks",
     image: img,
-    includesDrink: true,
   },
 
   // ——— Beverage: Hot Drink ———
