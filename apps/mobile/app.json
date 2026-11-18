@@ -54,7 +54,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.gracerun.fusionexpress",
-      "buildNumber": "73",
+      "buildNumber": "74",
       "usesAppleSignIn": true,
       "entitlements": {
         "aps-environment": "production",
@@ -77,7 +77,7 @@
         "backgroundColor": "#ED1C24"
       },
       "package": "com.gracerun.fusionexpress",
-      "versionCode": 73
+      "versionCode": 74
     },
     "web": {
       "favicon": "./assets/favicon.png"
