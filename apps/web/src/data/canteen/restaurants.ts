@@ -68,8 +68,8 @@ export const RESTAURANTS: Restaurant[] = [
     name: "CU Cafe",
     shortName: "CU Cafe",
     blurb:
-      "CU Cafe is a grab-and-go spot for sandwiches, salads, and premium coffee.",
-    location: "Lee Shau Kee Building (LSK)",
+      "CUHK members-only cafe at LSK — Thai boat noodles, tea sets, sandwiches, toast, and drinks.",
+    location: "Lee Shau Kee Building (LSK) · CUHK members only",
     hoursLabel: "8:00 AM – 6:00 PM (Mon–Fri)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: null,

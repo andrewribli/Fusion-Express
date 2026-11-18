@@ -2,6 +2,7 @@ import type { MenuCategory } from "@/data/canteen/bf-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
 import { CAFE_TOLO_MENU } from "@/data/canteen/cafe-tolo-menu";
 import { CC_MENU } from "@/data/canteen/cc-menu";
+import { CU_CAFE_MENU } from "@/data/canteen/cu-cafe-menu";
 import { EBENEZERS_MENU } from "@/data/canteen/ebenezers-menu";
 import { withFoodImages } from "@/data/canteen/food-images";
 import { LWS_MENU } from "@/data/canteen/lws-menu";
@@ -13,6 +14,7 @@ import { SHAW_MENU } from "@/data/canteen/shaw-menu";
 import { SORAZEN_MENU } from "@/data/canteen/sorazen-menu";
 import { TUCK_SHOP_MENU } from "@/data/canteen/tuck-shop-menu";
 import { WYS_MENU } from "@/data/canteen/wys-menu";
+
 
 /** Prefer placehold.co — via.placeholder.com is often blocked in browsers. */
 export const CANTEEN_PLACEHOLDER_IMAGE = "https://placehold.co/200x200/png";
@@ -41,97 +43,7 @@ export type SimpleRestaurantMenu = {
 
 const img = CANTEEN_PLACEHOLDER_IMAGE;
 
-/** CU Cafe — simplified generic grab-and-go menu. */
-export const CU_CAFE_MENU: SimpleMenuItem[] = [
-  {
-    id: "turkey-breast-sandwich",
-    name: "Turkey Breast Sandwich",
-    description: "Turkey breast on fresh bread.",
-    price: 38,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "ham-cheese-sandwich",
-    name: "Ham & Cheese Sandwich",
-    description: "Classic ham and cheese.",
-    price: 34,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "egg-mayo-sandwich",
-    name: "Egg Mayo Sandwich",
-    description: "Creamy egg mayo on soft bread.",
-    price: 30,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "caesar-salad",
-    name: "Caesar Salad",
-    description: "Crisp romaine with Caesar dressing.",
-    price: 42,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "garden-salad",
-    name: "Garden Salad",
-    description: "Mixed greens with house dressing.",
-    price: 36,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "chicken-pasta",
-    name: "Chicken Pasta",
-    description: "Simple pasta with chicken — basic main.",
-    price: 48,
-    category: "mains",
-    image: img,
-  },
-  {
-    id: "house-brew-coffee",
-    name: "House Brew Coffee",
-    description: "Drip coffee.",
-    price: 25,
-    category: "drinks",
-    image: img,
-  },
-  {
-    id: "americano",
-    name: "Americano",
-    description: "Espresso with hot water.",
-    price: 28,
-    category: "drinks",
-    image: img,
-  },
-  {
-    id: "latte",
-    name: "Latte",
-    description: "Espresso with steamed milk.",
-    price: 32,
-    category: "drinks",
-    image: img,
-  },
-  {
-    id: "iced-lemon-tea",
-    name: "Iced Lemon Tea",
-    description: "Refreshing iced lemon tea.",
-    price: 22,
-    category: "drinks",
-    image: img,
-  },
-  {
-    id: "chocolate-cookie",
-    name: "Chocolate Cookie",
-    description: "Baked cookie snack.",
-    price: 15,
-    category: "snacks",
-    image: img,
-  },
-];
+export { CU_CAFE_MENU };
 
 export const SH_HO_MENU: SimpleMenuItem[] = withRiceWithDishes([
   {

@@ -9,6 +9,7 @@ import {
 } from "./data/bf-menu";
 import { CAFE_TOLO_MENU } from "./data/cafe-tolo-menu";
 import { CC_MENU } from "./data/cc-menu";
+import { CU_CAFE_MENU } from "./data/cu-cafe-menu";
 import { EBENEZERS_MENU } from "./data/ebenezers-menu";
 import { canteenFoodImage, withFoodImages } from "./data/food-images";
 import { LWS_MENU } from "./data/lws-menu";
@@ -21,6 +22,7 @@ import { SORAZEN_MENU } from "./data/sorazen-menu";
 import { TUCK_SHOP_MENU } from "./data/tuck-shop-menu";
 import { ucItemsForPeriod, type MealPeriod } from "./data/uc-menu";
 import { WYS_MENU } from "./data/wys-menu";
+
 import { resolveLocalFoodUri } from "./images";
 import type { CanteenDish } from "./cart";
 import type { RestaurantId } from "./restaurants";
@@ -47,87 +49,9 @@ type SimpleRow = {
   category: MenuCategory | string;
   image?: string;
   signature?: boolean;
+  includesDrink?: boolean;
+  drinkAddonPrice?: number;
 };
-
-const CU_CAFE_MENU: SimpleRow[] = [
-  {
-    id: "turkey-breast-sandwich",
-    name: "Turkey Breast Sandwich",
-    description: "Turkey breast on fresh bread.",
-    price: 38,
-    category: "mains",
-  },
-  {
-    id: "ham-cheese-sandwich",
-    name: "Ham & Cheese Sandwich",
-    description: "Classic ham and cheese.",
-    price: 34,
-    category: "mains",
-  },
-  {
-    id: "egg-mayo-sandwich",
-    name: "Egg Mayo Sandwich",
-    description: "Creamy egg mayo on soft bread.",
-    price: 30,
-    category: "mains",
-  },
-  {
-    id: "caesar-salad",
-    name: "Caesar Salad",
-    description: "Crisp romaine with Caesar dressing.",
-    price: 42,
-    category: "mains",
-  },
-  {
-    id: "garden-salad",
-    name: "Garden Salad",
-    description: "Mixed greens with house dressing.",
-    price: 36,
-    category: "mains",
-  },
-  {
-    id: "chicken-pasta",
-    name: "Chicken Pasta",
-    description: "Simple pasta with chicken — basic main.",
-    price: 48,
-    category: "mains",
-  },
-  {
-    id: "house-brew-coffee",
-    name: "House Brew Coffee",
-    description: "Drip coffee.",
-    price: 25,
-    category: "drinks",
-  },
-  {
-    id: "americano",
-    name: "Americano",
-    description: "Espresso with hot water.",
-    price: 28,
-    category: "drinks",
-  },
-  {
-    id: "latte",
-    name: "Latte",
-    description: "Espresso with steamed milk.",
-    price: 32,
-    category: "drinks",
-  },
-  {
-    id: "iced-lemon-tea",
-    name: "Iced Lemon Tea",
-    description: "Refreshing iced lemon tea.",
-    price: 22,
-    category: "drinks",
-  },
-  {
-    id: "chocolate-cookie",
-    name: "Chocolate Cookie",
-    description: "Baked cookie snack.",
-    price: 15,
-    category: "snacks",
-  },
-];
 
 const SH_HO_MENU: SimpleRow[] = withRiceWithDishes([
   {

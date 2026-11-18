@@ -92,6 +92,8 @@ async function seed() {
           category: item.category,
           image: item.image,
           signature: item.signature ?? false,
+          includesDrink: item.includesDrink ?? false,
+          drinkAddonPrice: item.drinkAddonPrice ?? null,
           sortOrder: i + idx + 1,
           restaurantId: r.id,
           cartItemId: `canteen:${r.id}:${item.id}`,
