@@ -1,3 +1,8 @@
+import {
+  bbqComboSetOptionGroups,
+  bbqMultiSetOptionGroups,
+  bbqSingleSetOptionGroups,
+} from "@fusion-express/shared/canteen-set-options";
 import type { SimpleMenuItem } from "./simple-menu";
 
 const img = "https://placehold.co/200x200/png";
@@ -7,6 +12,35 @@ const img = "https://placehold.co/200x200/png";
  * Sold-out kiosk rows omitted (daily specials / stock).
  */
 export const CC_MENU: SimpleMenuItem[] = [
+  // —— Period placeholders (expand with kiosk photos) ——
+  {
+    id: "cc-breakfast-set-placeholder",
+    name: "Breakfast Set (period menu)",
+    description: "Breakfast · ask runner for today's board",
+    price: 28,
+    category: "mains",
+    image: img,
+    mealPeriods: ["breakfast"],
+  },
+  {
+    id: "cc-lunch-rice-placeholder",
+    name: "Lunch Rice Set (period menu)",
+    description: "Lunch · ask runner for today's board",
+    price: 35,
+    category: "mains",
+    image: img,
+    mealPeriods: ["lunch"],
+  },
+  {
+    id: "cc-dinner-rice-placeholder",
+    name: "Dinner Rice Set (period menu)",
+    description: "Dinner · ask runner for today's board",
+    price: 38,
+    category: "mains",
+    image: img,
+    mealPeriods: ["dinner"],
+  },
+
   // —— Hong Kong Style Afternoon Tea Set ——
   {
     id: "cc-mini-char-siu-rice-noodles",
@@ -15,6 +49,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 32,
     category: "mains",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-extra-dfried-dumplings-2",
@@ -23,6 +58,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 10,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-fries-only",
@@ -31,6 +67,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-extra-spring-roll-4",
@@ -39,6 +76,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-extra-samosa-4",
@@ -47,6 +85,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-extra-sui-mai-6",
@@ -55,6 +94,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-sausage-muffin-egg-ff",
@@ -63,6 +103,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 35,
     category: "mains",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-croissant-minute-steak-onion-ff",
@@ -71,6 +112,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 38,
     category: "mains",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-extra-braised-soy-chicken-leg",
@@ -79,6 +121,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 16,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-extra-braised-soy-chicken-mid-wings",
@@ -87,6 +130,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 10,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-dfried-spring-roll-samosa-fish-siumai",
@@ -95,6 +139,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 22,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-toast-butter-condensed-peanut",
@@ -103,6 +148,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 22,
     category: "dessert",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-chocolate-peanut-butter-french-toast",
@@ -111,6 +157,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 23,
     category: "dessert",
     image: img,
+    mealPeriods: ["tea"],
   },
   {
     id: "cc-chicken-leg-shredded-veg-fried-instant-noodles",
@@ -119,6 +166,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 35,
     category: "mains",
     image: img,
+    mealPeriods: ["tea"],
   },
 
   // —— Chinese BBQ ——
@@ -129,6 +177,9 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 31,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqSingleSetOptionGroups(),
   },
   {
     id: "cc-bbq-combo-rice",
@@ -137,6 +188,9 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 34,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqComboSetOptionGroups(),
   },
   {
     id: "cc-bbq-three-choices-rice",
@@ -145,6 +199,9 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 39,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqMultiSetOptionGroups(3),
   },
   {
     id: "cc-bbq-four-choices-rice",
@@ -153,6 +210,9 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 34,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqMultiSetOptionGroups(4),
   },
   {
     id: "cc-roasted-pork-belly-rice",
@@ -161,6 +221,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 41,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-roasted-pork-belly-choice-one-rice",
@@ -169,6 +230,9 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 46,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqSingleSetOptionGroups(),
   },
   {
     id: "cc-roasted-pork-belly-choice-two-rice",
@@ -177,6 +241,9 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 50,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqSingleSetOptionGroups(),
   },
   {
     id: "cc-salted-egg",
@@ -185,6 +252,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 6,
     category: "snacks",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-daily-soup-bowl",
@@ -193,6 +261,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 8,
     category: "snacks",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-sichuan-vine-pepper-chicken-rice",
@@ -201,6 +270,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 49,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
 
   // —— 煎燒扒餐 (Pan-fried / grill) ——
@@ -211,6 +281,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 43,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-pan-fried-minute-steak",
@@ -219,6 +290,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 44,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-pan-fried-chicken-fillet",
@@ -227,6 +299,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 42,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
 
   // —— HK Style Noodles in Soup ——
@@ -237,6 +310,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 34,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-noodle-soup-choose-two",
@@ -245,6 +319,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 40,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-noodle-soup-choose-three",
@@ -253,6 +328,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 46,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-noodle-soup-choose-four",
@@ -261,6 +337,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 52,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-noodle-soup-seared-vegetables",
@@ -269,6 +346,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 10,
     category: "snacks",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
 
   // —— Fast Food ——
@@ -279,6 +357,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 44,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-mixed-veg-portuguese-sauce-rice",
@@ -287,6 +366,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 40,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-giant-hamburger-fries",
@@ -295,6 +375,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 56,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-mixed-mushroom-black-truffle-pasta",
@@ -303,6 +384,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 42,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-braised-pork-chicken-cutlet-rice-veg",
@@ -311,6 +393,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 43,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-beef-red-wine-rice",
@@ -319,6 +402,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 44,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-cheese-meat-sauce-macaroni",
@@ -327,6 +411,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 42,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
 
   // —— Chef Recommendation ——
@@ -338,6 +423,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     signature: true,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-singapore-fried-rice-vermicelli",
@@ -347,6 +433,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     signature: true,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "cc-sea-coconut-stewed-pork-rib-soup-rice",
@@ -356,6 +443,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     signature: true,
+    mealPeriods: ["lunch", "dinner"],
   },
 
   // —— Hot Drink ——
@@ -366,6 +454,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-milk-tea",
@@ -374,6 +463,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-milk-coffee-tea",
@@ -382,6 +472,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-lemon-tea",
@@ -390,6 +481,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-water-lemon",
@@ -398,6 +490,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-watercress-honey",
@@ -406,6 +499,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-watercress-lemon",
@@ -414,6 +508,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-horlicks",
@@ -422,6 +517,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-ovaltine",
@@ -430,6 +526,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-hot-black-coffee",
@@ -438,6 +535,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 7,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 
   // —— Cold Drink ——
@@ -448,6 +546,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-milk-tea",
@@ -456,6 +555,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-milk-coffee-tea",
@@ -464,6 +564,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-lemon-tea",
@@ -472,6 +573,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-water-lemon",
@@ -480,6 +582,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-watercress-honey",
@@ -488,6 +591,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-watercress-lemon",
@@ -496,6 +600,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 11,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-horlicks",
@@ -504,6 +609,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-ovaltine",
@@ -512,6 +618,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-red-bean-ice",
@@ -520,6 +627,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 13,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-coca-cola-cup",
@@ -528,6 +636,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-mr-juicy-orange-cup",
@@ -536,6 +645,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 10,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-sprite-cup",
@@ -544,6 +654,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-fanta-cup",
@@ -552,6 +663,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "cc-ice-black-coffee",
@@ -560,6 +672,7 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 9,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 
   // —— 外賣膠袋 ——
@@ -570,5 +683,6 @@ export const CC_MENU: SimpleMenuItem[] = [
     price: 1,
     category: "snacks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 ];

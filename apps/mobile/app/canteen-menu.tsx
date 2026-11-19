@@ -25,8 +25,13 @@ import {
   isCanteenCart,
   isGroceryCart,
   toCanteenMenuItem,
+  toConfiguredCanteenMenuItem,
+  type CanteenDish,
 } from "../src/canteen/cart";
 import { canteenCoverImage } from "../src/canteen/images";
+import { SetOptionsModal } from "../src/canteen/SetOptionsModal";
+import type { SelectedOptions } from "@fusion-express/shared/canteen-set-options";
+import type { MenuItem } from "@fusion-express/shared/types";
 import {
   CANTEEN_CATEGORY_ORDER,
   categoryLabel,
@@ -57,6 +62,7 @@ export default function CanteenMenuScreen() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [sort, setSort] = useState<PriceSort>("default");
+  const [setDish, setSetDish] = useState<CanteenDish | null>(null);
 
   const open = restaurant
     ? isCanteenOpenByConfig(restaurant.id)
@@ -112,13 +118,8 @@ export default function CanteenMenuScreen() {
     ? getCollege(restaurant.collegeId)
     : undefined;
 
-  function tryAdd(dish: (typeof dishes)[number]) {
+  function commitAdd(menuItem: MenuItem) {
     if (!restaurant) return;
-    if (!open) {
-      Alert.alert("Canteen closed", closedMessage);
-      return;
-    }
-    const menuItem = toCanteenMenuItem(dish, restaurant.id);
     if (isGroceryCart(items)) {
       Alert.alert(
         "Replace grocery cart?",
@@ -160,6 +161,25 @@ export default function CanteenMenuScreen() {
       }
     }
     addItem(menuItem);
+  }
+
+  function tryAdd(dish: (typeof dishes)[number]) {
+    if (!restaurant) return;
+    if (!open) {
+      Alert.alert("Canteen closed", closedMessage);
+      return;
+    }
+    if (dish.optionGroups?.length) {
+      setSetDish(dish);
+      return;
+    }
+    commitAdd(toCanteenMenuItem(dish, restaurant.id));
+  }
+
+  function confirmSet(selected: SelectedOptions) {
+    if (!restaurant || !setDish) return;
+    commitAdd(toConfiguredCanteenMenuItem(setDish, restaurant.id, selected));
+    setSetDish(null);
   }
 
   if (!restaurant) {
@@ -331,6 +351,11 @@ export default function CanteenMenuScreen() {
                     {dish.description}
                   </Text>
                 ) : null}
+                {dish.optionGroups?.length ? (
+                  <Text style={styles.setHint}>
+                    Customize set · hot free · iced +$3
+                  </Text>
+                ) : null}
                 <Text style={styles.dishPrice}>HK${dish.price}</Text>
               </View>
               <Pressable
@@ -363,6 +388,17 @@ export default function CanteenMenuScreen() {
               : "Canteen closed — checkout paused"}
           </Text>
         </Pressable>
+      ) : null}
+
+      {setDish?.optionGroups?.length ? (
+        <SetOptionsModal
+          visible={Boolean(setDish)}
+          title={setDish.name}
+          basePrice={setDish.price}
+          groups={setDish.optionGroups}
+          onClose={() => setSetDish(null)}
+          onConfirm={confirmSet}
+        />
       ) : null}
     </View>
   );
@@ -491,6 +527,12 @@ const styles = StyleSheet.create({
   rowBody: { flex: 1, minWidth: 0 },
   dishName: { fontSize: 14, fontWeight: "700", color: "#111" },
   dishDesc: { marginTop: 2, fontSize: 11, color: "#6B7280" },
+  setHint: {
+    marginTop: 2,
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#047857",
+  },
   dishPrice: { marginTop: 4, fontSize: 13, fontWeight: "800", color: colors.fusion },
   addBtn: {
     width: 36,

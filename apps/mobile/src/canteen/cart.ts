@@ -3,6 +3,13 @@ import {
   restaurantIdFromCanteenItemId,
   restaurantIdFromOrderItems,
 } from "@fusion-express/shared/canteen-college";
+import type { MenuOptionGroup } from "@fusion-express/shared/canteen-set-options";
+import {
+  labelForSelections,
+  priceDeltaForSelections,
+  variantIdSuffix,
+  type SelectedOptions,
+} from "@fusion-express/shared/canteen-set-options";
 import {
   CANTEEN_DELIVERY_FEE,
   type RestaurantId,
@@ -17,6 +24,7 @@ export type CanteenDish = {
   price: number;
   category: string;
   image?: string;
+  optionGroups?: MenuOptionGroup[];
 };
 
 export function isCanteenItemId(id: string): boolean {
@@ -58,6 +66,28 @@ export function toCanteenMenuItem(
     sortOrder: 0,
     weightKg: 0.4,
     itemNote: dish.description,
+  };
+}
+
+export function toConfiguredCanteenMenuItem(
+  dish: CanteenDish,
+  restaurantId: RestaurantId | string,
+  selected: SelectedOptions,
+): MenuItem {
+  const base = toCanteenMenuItem(dish, restaurantId);
+  const groups = dish.optionGroups;
+  if (!groups?.length) return base;
+  const extra = priceDeltaForSelections(groups, selected);
+  const label = labelForSelections(groups, selected);
+  const suffix = variantIdSuffix(selected);
+  return {
+    ...base,
+    id: `${base.id}::${suffix}`,
+    name: label ? `${dish.name} (${label})` : dish.name,
+    price: dish.price + extra,
+    itemNote: [dish.description, label ? `Options: ${label}` : null]
+      .filter(Boolean)
+      .join(" · "),
   };
 }
 

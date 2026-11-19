@@ -29,8 +29,15 @@ import type { RestaurantId } from "./restaurants";
 import { menuReadyRestaurants } from "./restaurants";
 import {
   getActiveMealPeriod,
+  getCanteenConfig,
   isCanteenOpenByConfig,
+  type MealPeriodId,
 } from "@fusion-express/shared/canteen-hours";
+import type { MenuOptionGroup } from "@fusion-express/shared/canteen-set-options";
+import {
+  bbqSingleSetOptionGroups,
+  setDrinkOptionGroup,
+} from "@fusion-express/shared/canteen-set-options";
 
 export { CATEGORY_LABELS };
 export type { MenuCategory, MealPeriod };
@@ -51,16 +58,58 @@ type SimpleRow = {
   signature?: boolean;
   includesDrink?: boolean;
   drinkAddonPrice?: number;
+  mealPeriods?: MealPeriodId[];
+  optionGroups?: MenuOptionGroup[];
 };
 
 const SH_HO_MENU: SimpleRow[] = withRiceWithDishes([
   {
+    id: "shho-bbq-meat-rice",
+    name: "BBQ Meat w/ Rice Set",
+    description: "Chinese BBQ set · pick meat + set drink (hot free · iced +$3)",
+    price: 34,
+    category: "mains",
+    image: "",
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqSingleSetOptionGroups(),
+  },
+  {
+    id: "shho-bbq-combo-rice",
+    name: "BBQ Combo w/ Rice Set",
+    description: "Two BBQ meats with rice · set drink included",
+    price: 38,
+    category: "mains",
+    image: "",
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: [
+      {
+        id: "meat",
+        label: "Select meat (2 choices)",
+        required: true,
+        min: 2,
+        max: 2,
+        choices: [
+          { id: "bbq-pork", label: "BBQ Pork" },
+          { id: "steamed-chicken", label: "Steamed Chicken" },
+          { id: "roasted-duck", label: "Roasted Duck" },
+          { id: "soy-chicken", label: "Soy Chicken" },
+        ],
+      },
+      setDrinkOptionGroup(),
+    ],
+  },
+  {
     id: "chicken-rice",
     name: "Chicken Rice",
-    description: "Casual Chinese chicken rice.",
+    description: "Casual Chinese chicken rice · set drink optional",
     price: 42,
     category: "mains",
     image: "",
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: [setDrinkOptionGroup()],
   },
   {
     id: "beef-noodles",
@@ -69,6 +118,7 @@ const SH_HO_MENU: SimpleRow[] = withRiceWithDishes([
     price: 45,
     category: "mains",
     image: "",
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "club-sandwich",
@@ -77,14 +127,29 @@ const SH_HO_MENU: SimpleRow[] = withRiceWithDishes([
     price: 38,
     category: "mains",
     image: "",
+    mealPeriods: ["lunch", "tea"],
   },
   {
     id: "fried-rice",
     name: "Fried Rice",
-    description: "Classic fried rice.",
+    description: "Classic fried rice · set drink optional",
     price: 40,
     category: "mains",
     image: "",
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: [setDrinkOptionGroup()],
+  },
+  {
+    id: "shho-breakfast-set",
+    name: "Breakfast Set",
+    description: "Breakfast · toast / noodles board · set drink",
+    price: 28,
+    category: "mains",
+    image: "",
+    mealPeriods: ["breakfast"],
+    includesDrink: true,
+    optionGroups: [setDrinkOptionGroup()],
   },
   {
     id: "iced-lemon-tea",
@@ -93,6 +158,7 @@ const SH_HO_MENU: SimpleRow[] = withRiceWithDishes([
     price: 15,
     category: "drinks",
     image: "",
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 ]);
 
@@ -148,7 +214,20 @@ function toDish(row: SimpleRow): CanteenDish {
     price: row.price,
     category: String(row.category),
     image: resolveImage(row.id, String(row.category), row.image),
+    optionGroups: row.optionGroups,
   };
+}
+
+function mealPeriodsForRow(row: SimpleRow): MealPeriodId[] {
+  if (row.mealPeriods?.length) return row.mealPeriods;
+  const d = `${row.name} ${row.description ?? ""}`.toLowerCase();
+  if (d.includes("早餐") || d.includes("breakfast")) return ["breakfast"];
+  if (d.includes("午餐") || d.includes("lunch")) return ["lunch", "dinner"];
+  if (d.includes("tea") || d.includes("茶")) return ["tea"];
+  if (String(row.category) === "drinks") {
+    return ["breakfast", "lunch", "tea", "dinner"];
+  }
+  return ["lunch", "tea", "dinner"];
 }
 
 function mapUcCategory(raw: string): string {
@@ -205,12 +284,27 @@ export function loadCanteenMenu(
 
   const simple = SIMPLE[restaurantId as RestaurantId];
   if (simple) {
-    const normalized = simple.map((row) => ({
+    const cfg = getCanteenConfig(restaurantId);
+    const active = getActiveMealPeriod() as MealPeriodId | null;
+    let rows = simple;
+    if (cfg?.mealPeriods) {
+      if (!active) {
+        return {
+          dishes: [],
+          mealPeriodLabel: undefined,
+        };
+      }
+      rows = simple.filter((row) => mealPeriodsForRow(row).includes(active));
+    }
+    const normalized = rows.map((row) => ({
       ...row,
       category: asFoodCategory(String(row.category)),
       image: row.image ?? "",
     }));
-    return { dishes: withFoodImages(normalized).map(toDish) };
+    return {
+      dishes: withFoodImages(normalized).map(toDish),
+      mealPeriodLabel: cfg?.mealPeriods ? active ?? undefined : undefined,
+    };
   }
 
   return { dishes: [] };

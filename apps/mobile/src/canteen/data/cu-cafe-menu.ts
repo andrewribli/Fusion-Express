@@ -5,7 +5,6 @@ const img = "https://placehold.co/200x200/png";
 /**
  * CU Cafe @ Lee Shau Kee Building (LSK) — from campus kiosk photos (Nov 2026).
  * CUHK members-only catering outlet. Sold-out kiosk rows omitted.
- * Keep in sync with `apps/web/src/data/canteen/cu-cafe-menu.ts`.
  */
 export const CU_CAFE_MENU: SimpleMenuItem[] = [
   // ——— Thai Boat Noodle Tea Set (with Coffee / Milk Tea) ———
@@ -18,6 +17,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     image: img,
     includesDrink: true,
     signature: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "boat-noodle-pork-chop-meatball",
@@ -27,6 +27,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "boat-noodle-beef-meatball",
@@ -36,6 +37,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
 
   // ——— Southeast Asian Noodles Tea Set (with Coffee / Milk Tea) ———
@@ -47,6 +49,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "vietnamese-lemongrass-pork-chop-noodle-soup",
@@ -56,6 +59,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
 
   // ——— Tea Set (with Coffee / Milk Tea) ———
@@ -68,6 +72,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "crispy-bun-condensed-milk-butter",
@@ -77,6 +82,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "snacks",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "crispy-bun-condensed-milk-peanut-butter",
@@ -86,6 +92,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "snacks",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
 
   // ——— Sandwich Set (with Coffee / Milk Tea) ———
@@ -97,6 +104,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "luncheon-meat-scrambled-egg-sandwich",
@@ -106,6 +114,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "tomato-scrambled-egg-sandwich",
@@ -115,6 +124,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "ham-scrambled-egg-sandwich",
@@ -124,6 +134,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     category: "mains",
     image: img,
     includesDrink: true,
+    mealPeriods: ["tea", "lunch"],
   },
 
   // ——— Toast Tea Set (kiosk does not list coffee/milk tea with these) ———
@@ -134,6 +145,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 16,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "condensed-milk-peanut-toast",
@@ -142,6 +154,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 16,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea", "lunch"],
   },
   {
     id: "coconut-toast",
@@ -150,6 +163,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 16,
     category: "snacks",
     image: img,
+    mealPeriods: ["tea", "lunch"],
   },
 
   // ——— Beverage: Hot Drink ———
@@ -160,6 +174,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "hot-black-coffee",
@@ -168,6 +183,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "hot-milk-tea-hk",
@@ -176,6 +192,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "coffee-and-tea-mix",
@@ -184,6 +201,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "hot-lemon-tea",
@@ -192,6 +210,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "hot-lemon-water",
@@ -200,6 +219,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 
   // ——— Beverage: Cold Drink ———
@@ -210,6 +230,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 14,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "iced-black-coffee",
@@ -218,6 +239,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 14,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "iced-milk-tea",
@@ -226,6 +248,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 14,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "iced-coffee-and-tea",
@@ -234,6 +257,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 14,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "iced-lemon-tea",
@@ -242,6 +266,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 14,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "iced-lemon-water",
@@ -250,6 +275,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 14,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 
   // ——— Beverage: Soft Drink ———
@@ -261,6 +287,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   {
     id: "7up",
@@ -269,6 +296,7 @@ export const CU_CAFE_MENU: SimpleMenuItem[] = [
     price: 12,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
   // Special Drink / Others — headers visible on kiosk; no items shown in photos
 ];

@@ -21,6 +21,8 @@
     "./campus": "./src/campus.ts",
     "./canteen-college": "./src/canteen-college.ts",
     "./canteen-hours": "./src/canteen-hours.ts",
+    "./canteen-set-options": "./src/canteen-set-options.ts",
+    "./canteen-list-order": "./src/canteen-list-order.ts",
     "./types": "./src/types.ts",
     "./roles": "./src/roles.ts",
     "./locations": "./src/locations.ts",

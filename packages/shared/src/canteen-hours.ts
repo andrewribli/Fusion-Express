@@ -19,9 +19,9 @@ export const CANTEEN_MEAL_PERIODS: Record<MealPeriodId, MealPeriodWindow> = {
   breakfast: {
     id: "breakfast",
     label: "Breakfast",
-    start: "7:30 AM",
+    start: "8:00 AM",
     end: "11:00 AM",
-    startMin: 7 * 60 + 30,
+    startMin: 8 * 60,
     endMin: 11 * 60,
   },
   lunch: {
@@ -44,9 +44,10 @@ export const CANTEEN_MEAL_PERIODS: Record<MealPeriodId, MealPeriodWindow> = {
     id: "dinner",
     label: "Dinner",
     start: "5:00 PM",
-    end: "7:30 PM",
+    end: "9:00 PM",
     startMin: 17 * 60,
-    endMin: 19 * 60 + 30,
+    /** Upper bound for period filtering; venue close still gates ordering. */
+    endMin: 21 * 60,
   },
 };
 
@@ -97,7 +98,7 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     closeMin: 21 * 60,
     weekdays: "everyday",
     hoursLabel: "8:00 AM – 9:00 PM (incl. Sundays)",
-    mealPeriods: false,
+    mealPeriods: true,
     nextOpenFallback: "8:00 AM",
   },
   "cu-cafe": {
@@ -105,7 +106,7 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     closeMin: 18 * 60,
     weekdays: "mon-fri",
     hoursLabel: "8:00 AM – 6:00 PM (Mon–Fri)",
-    mealPeriods: false,
+    mealPeriods: true,
     nextOpenFallback: "8:00 AM Monday",
   },
   "paper-and-coffee": {
@@ -161,7 +162,7 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     closeMin: 20 * 60,
     weekdays: "mon-sat",
     hoursLabel: "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
-    mealPeriods: false,
+    mealPeriods: true,
     nextOpenFallback: "7:30 AM",
   },
   "shaw-canteen": {

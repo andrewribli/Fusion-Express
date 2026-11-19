@@ -42,6 +42,7 @@ const LOGOS = {
   paperAndCoffee: require("../../assets/canteen/paper-and-coffee-logo.png"),
   sorazen: require("../../assets/canteen/sorazen-logo.png"),
   collegeCanteen: require("../../assets/canteen/cuhk-college-canteen.png"),
+  chungChi: require("../../assets/canteen/chung-chi-college.png"),
 } as const;
 
 const BENJAMIN_FRANKLIN_PORTRAIT = require("../../assets/canteen/benjamin-franklin.jpg");
@@ -61,7 +62,7 @@ const COVER_BY_ID: Record<RestaurantId, ImageSourcePropType> = {
   "cafe-tolo": FOOD.waffle,
   "tuck-shop": FOOD.soup,
   ebenezers: FOOD.kebab,
-  "cc-canteen": LOGOS.collegeCanteen,
+  "cc-canteen": LOGOS.chungChi,
   "shaw-canteen": LOGOS.collegeCanteen,
   "wys-canteen": LOGOS.collegeCanteen,
   maxims: FOOD.friedrice,

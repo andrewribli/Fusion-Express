@@ -1,3 +1,8 @@
+import type { MenuOptionGroup } from "@fusion-express/shared/canteen-set-options";
+import {
+  bbqSingleSetOptionGroups,
+  setDrinkOptionGroup,
+} from "@fusion-express/shared/canteen-set-options";
 import type { MenuCategory } from "@/data/canteen/bf-menu";
 import type { RestaurantId } from "@/data/canteen/restaurants";
 import { CAFE_TOLO_MENU } from "@/data/canteen/cafe-tolo-menu";
@@ -14,7 +19,6 @@ import { SHAW_MENU } from "@/data/canteen/shaw-menu";
 import { SORAZEN_MENU } from "@/data/canteen/sorazen-menu";
 import { TUCK_SHOP_MENU } from "@/data/canteen/tuck-shop-menu";
 import { WYS_MENU } from "@/data/canteen/wys-menu";
-
 
 /** Prefer placehold.co — via.placeholder.com is often blocked in browsers. */
 export const CANTEEN_PLACEHOLDER_IMAGE = "https://placehold.co/200x200/png";
@@ -34,6 +38,8 @@ export type SimpleMenuItem = {
   includesDrink?: boolean;
   /** Optional add-drink surcharge shown as a variant. */
   drinkAddonPrice?: number;
+  /** Multi-step set builder (meat → set drink, etc.). */
+  optionGroups?: MenuOptionGroup[];
 };
 
 export type SimpleRestaurantMenu = {
@@ -45,14 +51,55 @@ const img = CANTEEN_PLACEHOLDER_IMAGE;
 
 export { CU_CAFE_MENU };
 
+
 export const SH_HO_MENU: SimpleMenuItem[] = withRiceWithDishes([
+  {
+    id: "shho-bbq-meat-rice",
+    name: "BBQ Meat w/ Rice Set",
+    description: "Chinese BBQ set · pick meat + set drink (hot free · iced +$3)",
+    price: 34,
+    category: "mains",
+    image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: bbqSingleSetOptionGroups(),
+  },
+  {
+    id: "shho-bbq-combo-rice",
+    name: "BBQ Combo w/ Rice Set",
+    description: "Two BBQ meats with rice · set drink included",
+    price: 38,
+    category: "mains",
+    image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: [
+      {
+        id: "meat",
+        label: "Select meat (2 choices)",
+        required: true,
+        min: 2,
+        max: 2,
+        choices: [
+          { id: "bbq-pork", label: "BBQ Pork" },
+          { id: "steamed-chicken", label: "Steamed Chicken" },
+          { id: "roasted-duck", label: "Roasted Duck" },
+          { id: "soy-chicken", label: "Soy Chicken" },
+        ],
+      },
+      setDrinkOptionGroup(),
+    ],
+  },
   {
     id: "chicken-rice",
     name: "Chicken Rice",
-    description: "Casual Chinese chicken rice.",
+    description: "Casual Chinese chicken rice · set drink optional",
     price: 42,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: [setDrinkOptionGroup()],
   },
   {
     id: "beef-noodles",
@@ -61,6 +108,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = withRiceWithDishes([
     price: 45,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
   },
   {
     id: "club-sandwich",
@@ -69,14 +117,29 @@ export const SH_HO_MENU: SimpleMenuItem[] = withRiceWithDishes([
     price: 38,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "tea"],
   },
   {
     id: "fried-rice",
     name: "Fried Rice",
-    description: "Classic fried rice.",
+    description: "Classic fried rice · set drink optional",
     price: 40,
     category: "mains",
     image: img,
+    mealPeriods: ["lunch", "dinner"],
+    includesDrink: true,
+    optionGroups: [setDrinkOptionGroup()],
+  },
+  {
+    id: "shho-breakfast-set",
+    name: "Breakfast Set",
+    description: "Breakfast · toast / noodles board · set drink",
+    price: 28,
+    category: "mains",
+    image: img,
+    mealPeriods: ["breakfast"],
+    includesDrink: true,
+    optionGroups: [setDrinkOptionGroup()],
   },
   {
     id: "iced-lemon-tea",
@@ -85,6 +148,7 @@ export const SH_HO_MENU: SimpleMenuItem[] = withRiceWithDishes([
     price: 15,
     category: "drinks",
     image: img,
+    mealPeriods: ["breakfast", "lunch", "tea", "dinner"],
   },
 ]);
 

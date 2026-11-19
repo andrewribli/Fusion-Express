@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { formatHkd } from "@/data/canteen/bf-menu";
 import type { MenuItem as BfItem } from "@/data/canteen/bf-menu";
@@ -13,6 +14,9 @@ import {
   toCartMenuItemFromSimple,
   toCartMenuItemFromUc,
 } from "@/lib/canteen/cart";
+import { buildConfiguredSimpleCartItem } from "@/lib/canteen/set-options";
+import { CanteenSetOptionsModal } from "@/components/canteen/CanteenSetOptionsModal";
+import type { SelectedOptions } from "@fusion-express/shared/canteen-set-options";
 
 type Props = (
   | { kind: "bf"; item: BfItem; restaurantId: "benjamin-franklin" }
@@ -30,13 +34,18 @@ type Props = (
 export function CanteenMenuCard(props: Props) {
   const orderingEnabled = props.orderingEnabled !== false;
   const { items, addItem, setQuantity } = useCart();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const cartItem =
     props.kind === "bf"
       ? toCartMenuItemFromBf(props.item, props.restaurantId)
       : props.kind === "uc"
         ? toCartMenuItemFromUc(props.item, props.restaurantId)
         : toCartMenuItemFromSimple(props.item, props.restaurantId);
-  const qty = items.find((c) => c.item.id === cartItem.id)?.quantity ?? 0;
+  const optionGroups =
+    props.kind === "simple" ? props.item.optionGroups : undefined;
+  const qty = optionGroups?.length
+    ? 0
+    : (items.find((c) => c.item.id === cartItem.id)?.quantity ?? 0);
   const name = props.item.name;
   const nameZh = props.kind === "uc" ? props.item.nameZh : undefined;
   const description =
@@ -61,6 +70,27 @@ export function CanteenMenuCard(props: Props) {
   const drinkAddon =
     props.kind === "simple" ? props.item.drinkAddonPrice : undefined;
   const restaurantId: RestaurantId = props.restaurantId;
+
+  function handleAdd() {
+    if (!orderingEnabled) return;
+    if (props.kind === "simple" && optionGroups?.length) {
+      setPickerOpen(true);
+      return;
+    }
+    addItem(cartItem);
+  }
+
+  function confirmSet(selected: SelectedOptions) {
+    if (props.kind !== "simple") return;
+    addItem(
+      buildConfiguredSimpleCartItem(
+        props.item,
+        props.restaurantId,
+        selected,
+      ),
+    );
+    setPickerOpen(false);
+  }
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
@@ -101,7 +131,11 @@ export function CanteenMenuCard(props: Props) {
             {description}
           </p>
         ) : null}
-        {typeof drinkAddon === "number" ? (
+        {optionGroups?.length ? (
+          <p className="mt-1 text-[11px] font-medium text-emerald-700">
+            Customize set · hot drink free · iced +$3
+          </p>
+        ) : typeof drinkAddon === "number" ? (
           <p className="mt-1 text-[11px] font-medium text-gray-600">
             Add a drink +{formatHkd(drinkAddon)}
           </p>
@@ -119,10 +153,10 @@ export function CanteenMenuCard(props: Props) {
             >
               +
             </button>
-          ) : qty === 0 ? (
+          ) : qty === 0 || optionGroups?.length ? (
             <button
               type="button"
-              onClick={() => addItem(cartItem)}
+              onClick={handleAdd}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ED1C24] text-lg font-bold leading-none text-white hover:bg-[#c9161d]"
               aria-label={`Add ${name}`}
             >
@@ -154,6 +188,16 @@ export function CanteenMenuCard(props: Props) {
         </div>
       </div>
       <span className="sr-only">{restaurantId}</span>
+      {props.kind === "simple" && optionGroups?.length ? (
+        <CanteenSetOptionsModal
+          open={pickerOpen}
+          title={name}
+          basePrice={props.item.price}
+          groups={optionGroups}
+          onClose={() => setPickerOpen(false)}
+          onConfirm={confirmSet}
+        />
+      ) : null}
     </article>
   );
 }

@@ -1,5 +1,5 @@
-export const APP_LOGO_SRC = "/images/gracerun-logo.png?v=5";
-export const APP_ICON_SRC = "/images/gracerun-icon.png?v=5";
+export const APP_LOGO_SRC = "/images/gracerun-logo.png?v=6";
+export const APP_ICON_SRC = "/images/gracerun-icon.png?v=6";
 
 export function AppLogo({
   size = 32,

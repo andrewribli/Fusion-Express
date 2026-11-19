@@ -7,6 +7,7 @@ import { ShopLayout } from "@/components/ShopLayout";
 import { MENU as BF_MENU } from "@/data/canteen/bf-menu";
 import { getCollege } from "@/data/canteen/colleges";
 import { canteenFoodImage } from "@/data/canteen/food-images";
+import { pinCanteenListOrder } from "@fusion-express/shared/canteen-list-order";
 import { RESTAURANTS, type Restaurant } from "@/data/canteen/restaurants";
 import {
   getSimpleMenu,
@@ -144,6 +145,8 @@ export default function CanteenIndexPage() {
         const pb = minVenuePrice(b.id, dishes);
         return sort === "cheap" ? pa - pb : pb - pa;
       });
+    } else {
+      list = pinCanteenListOrder(list);
     }
     return list;
   }, [sort, dishes]);

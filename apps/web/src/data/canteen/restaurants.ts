@@ -183,7 +183,7 @@ export const RESTAURANTS: Restaurant[] = [
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "CC",
     menuReady: true,
-    logoSrc: "/canteen/cuhk-college-canteen.png",
+    logoSrc: "/canteen/chung-chi-college.png",
     campusWalkOrder: 45,
   },
   {

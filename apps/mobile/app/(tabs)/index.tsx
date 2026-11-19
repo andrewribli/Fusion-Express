@@ -26,6 +26,7 @@ import {
   closedBannerText,
   isCanteenOpenByConfig,
 } from "@fusion-express/shared/canteen-hours";
+import { pinCanteenListOrder } from "@fusion-express/shared/canteen-list-order";
 import { useCart } from "../../src/cart";
 import { canteenCoverImage } from "../../src/canteen/images";
 import {
@@ -143,7 +144,7 @@ export default function HomeScreen() {
   const [categoryId, setCategoryId] = useState<(typeof CATEGORIES)[number]["id"]>("all");
 
   const canteens = useMemo(() => {
-    const list = [...menuReadyRestaurants()];
+    let list = [...menuReadyRestaurants()];
     if (canteenSort === "distance") {
       list.sort((a, b) => a.campusWalkOrder - b.campusWalkOrder);
     } else if (canteenSort === "cheap" || canteenSort === "expensive") {
@@ -152,6 +153,8 @@ export default function HomeScreen() {
         const pb = minMenuPrice(b.id);
         return canteenSort === "cheap" ? pa - pb : pb - pa;
       });
+    } else {
+      list = pinCanteenListOrder(list);
     }
     return list;
   }, [canteenSort]);
@@ -708,10 +711,10 @@ const styles = StyleSheet.create({
   },
   menuBtnIcon: { fontSize: 18, color: "#374151" },
   logo: {
-    // ~30% larger than prior 47px so wordmark + "delivering with grace" read in screenshots
-    width: 61,
-    height: 61,
-    borderRadius: 12,
+    // Wordmark + "DELIVERING WITH GRACE" must stay readable in the shop header
+    width: 68,
+    height: 68,
+    borderRadius: 14,
     backgroundColor: "#000",
   },
   sortChips: {

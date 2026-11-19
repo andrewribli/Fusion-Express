@@ -18,3 +18,5 @@ export * from "./cityu-email";
 export * from "./campus";
 export * from "./canteen-college";
 export * from "./canteen-hours";
+export * from "./canteen-set-options";
+export * from "./canteen-list-order";

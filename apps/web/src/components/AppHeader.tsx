@@ -101,7 +101,7 @@ export function AppHeader({ showBack, backHref, title }: AppHeaderProps) {
               className="flex min-w-0 items-center gap-2"
               aria-label={`${brandLabel} home`}
             >
-              <AppLogo size={44} className="h-11 w-11 shrink-0" />
+              <AppLogo size={56} className="h-14 w-14 shrink-0" />
               <span className="hidden max-w-[9.5rem] truncate text-sm font-bold tracking-tight text-gray-900 sm:block">
                 {brandLabel}
               </span>
