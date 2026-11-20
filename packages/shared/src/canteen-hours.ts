@@ -197,6 +197,14 @@ export const canteenConfig: Record<string, CanteenHoursConfig> = {
     mealPeriods: false,
     nextOpenFallback: "7:30 AM",
   },
+  "lee-woo-sing-green": {
+    openMin: 10 * 60,
+    closeMin: 20 * 60,
+    weekdays: "mon-sat",
+    hoursLabel: "10:00 AM – 8:00 PM (Mon–Sat · closed Sun)",
+    mealPeriods: false,
+    nextOpenFallback: "10:00 AM",
+  },
 };
 
 /** TEMP recording override — MUST remain false for live ordering. */
@@ -206,14 +214,48 @@ export function getCanteenConfig(id: string): CanteenHoursConfig | null {
   return canteenConfig[id] ?? null;
 }
 
+/**
+ * HKT clock parts via Intl (Hermes-safe).
+ * Do NOT use `new Date(toLocaleString(...))` — that yields Invalid Date / NaN
+ * on React Native and produced "Opens at 7:30 AM undefined".
+ */
 export function hktParts(now = new Date()): { minutes: number; day: number } {
-  const hkt = new Date(
-    now.toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" }),
-  );
-  return {
-    minutes: hkt.getHours() * 60 + hkt.getMinutes(),
-    day: hkt.getDay(), // 0 = Sun
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Hong_Kong",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+    weekday: "short",
+  }).formatToParts(now);
+
+  const hourRaw = Number(parts.find((p) => p.type === "hour")?.value ?? NaN);
+  const minute = Number(parts.find((p) => p.type === "minute")?.value ?? NaN);
+  const hour = hourRaw === 24 ? 0 : hourRaw;
+  const wd = parts.find((p) => p.type === "weekday")?.value ?? "";
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
   };
+  const day = dayMap[wd];
+
+  if (
+    Number.isNaN(hour) ||
+    Number.isNaN(minute) ||
+    day === undefined
+  ) {
+    // Device-local fallback beats cascading NaN → "undefined" in banners.
+    return {
+      minutes: now.getHours() * 60 + now.getMinutes(),
+      day: now.getDay(),
+    };
+  }
+
+  return { minutes: hour * 60 + minute, day };
 }
 
 function dayAllowed(rule: WeekdayRule, day: number): boolean {
@@ -313,8 +355,11 @@ export function getNextOpenLabel(
   }
 
   const nextDay = nextAllowedDay(cfg.weekdays, day);
+  const namedDay = DAY_NAMES[nextDay];
   const dayLabel =
-    nextDay === (day + 1) % 7 ? "tomorrow" : DAY_NAMES[nextDay];
+    nextDay === (day + 1) % 7
+      ? "tomorrow"
+      : namedDay ?? "tomorrow";
   if (cfg.mealPeriods) {
     return `${clock} ${dayLabel} (Breakfast)`;
   }
@@ -326,8 +371,12 @@ export function closedBannerText(
   restaurantId: string,
   now = new Date(),
 ): string {
-  const next = getNextOpenLabel(restaurantId, now);
-  return `${restaurantName} is currently closed. Opens at ${next}.`;
+  const next = getNextOpenLabel(restaurantId, now)
+    .replace(/\bundefined\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  const openHint = next || getCanteenConfig(restaurantId)?.nextOpenFallback || "tomorrow";
+  return `${restaurantName} is currently closed. Opens at ${openHint}.`;
 }
 
 export function orderedMealPeriods(

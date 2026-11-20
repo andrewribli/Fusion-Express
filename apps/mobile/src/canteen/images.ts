@@ -67,6 +67,7 @@ const COVER_BY_ID: Record<RestaurantId, ImageSourcePropType> = {
   "wys-canteen": LOGOS.collegeCanteen,
   maxims: FOOD.friedrice,
   "lws-canteen": LOGOS.collegeCanteen,
+  "lee-woo-sing-green": FOOD.dessert,
 };
 
 export function canteenCoverImage(

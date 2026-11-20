@@ -330,7 +330,13 @@ export default function CanteenMenuScreen() {
         keyExtractor={(row) => row.key}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={styles.empty}>No dishes match that search.</Text>
+          <Text style={styles.empty}>
+            {dishes.length === 0
+              ? "Menu coming soon."
+              : search.trim() || category !== "all"
+                ? "No dishes match that search."
+                : "No dishes available right now."}
+          </Text>
         }
         renderItem={({ item: row }) => {
           if (row.type === "header") {

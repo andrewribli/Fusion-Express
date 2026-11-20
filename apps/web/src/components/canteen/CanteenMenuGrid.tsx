@@ -5,7 +5,6 @@ import { CanteenMenuCard } from "@/components/canteen/CanteenMenuCard";
 import {
   CANTEEN_MEAL_PERIODS,
   getActiveMealPeriod,
-  orderedMealPeriods,
   type MealPeriodId,
 } from "@/data/canteen/canteen-config";
 import type { SimpleMenuItem } from "@/data/canteen/simple-menu";
@@ -76,7 +75,6 @@ export function SimpleItemsGrid({
   groupByMealPeriod: boolean;
 }) {
   const active = getActiveMealPeriod();
-  const periods = orderedMealPeriods(active);
 
   if (!groupByMealPeriod) {
     const sorted = sortByPrice(items, sort);
@@ -95,8 +93,32 @@ export function SimpleItemsGrid({
     );
   }
 
-  /** Only the current HKT meal period is orderable / visible. */
-  const visiblePeriod = active ?? periods[0];
+  // Outside meal periods: show full menu for browsing (ordering still gated).
+  if (!active) {
+    const sorted = sortByPrice(items, sort);
+    return (
+      <div className="mt-4 space-y-4">
+        <p className="text-center text-sm text-gray-500">
+          Outside meal periods — browsing the full menu. Ordering unlocks during
+          breakfast / lunch / tea / dinner.
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {sorted.map((item) => (
+            <CanteenMenuCard
+              key={item.id}
+              kind="simple"
+              item={item}
+              restaurantId={restaurantId}
+              orderingEnabled={false}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /** Only the current HKT meal period is orderable / visible while open. */
+  const visiblePeriod = active;
   const slot = CANTEEN_MEAL_PERIODS[visiblePeriod];
   const sectionItems = sortByPrice(
     items.filter((i) => mealPeriodForSimple(i).includes(visiblePeriod)),
@@ -108,20 +130,14 @@ export function SimpleItemsGrid({
       <div className="flex flex-wrap items-end justify-between gap-2 rounded-xl bg-[#ED1C24]/10 px-3 py-2 ring-1 ring-[#ED1C24]/30">
         <div>
           <h2 className="text-sm font-bold text-[#ED1C24]">
-            {slot.label}
-            {active === visiblePeriod ? " · Now" : ""}
+            {slot.label} · Now
           </h2>
           <p className="text-xs text-gray-500">
             {slot.start} – {slot.end} · only this period&apos;s menu is shown
           </p>
         </div>
       </div>
-      {!active ? (
-        <p className="text-center text-sm text-gray-500">
-          Outside meal periods — menu unlocks during breakfast / lunch / tea /
-          dinner.
-        </p>
-      ) : sectionItems.length === 0 ? (
+      {sectionItems.length === 0 ? (
         <p className="text-center text-sm text-gray-500">
           No {slot.label.toLowerCase()} items for this canteen right now.
         </p>
@@ -133,7 +149,7 @@ export function SimpleItemsGrid({
               kind="simple"
               item={item}
               restaurantId={restaurantId}
-              orderingEnabled={orderingEnabled && Boolean(active)}
+              orderingEnabled={orderingEnabled}
             />
           ))}
         </div>

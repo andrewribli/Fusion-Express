@@ -90,6 +90,9 @@ const SLUG_ALIASES: Record<string, string> = {
   "lee-woo-sing": "lws-canteen",
   "ws-can": "lws-canteen",
   "lws-can": "lws-canteen",
+  "lws-green": "lee-woo-sing-green",
+  "lee-woo-sing-green": "lee-woo-sing-green",
+  "the-green": "lee-woo-sing-green",
   shaw: "shaw-canteen",
 };
 

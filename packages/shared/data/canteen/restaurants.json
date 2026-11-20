@@ -78,5 +78,15 @@
     "deliveryFee": 10,
     "collegeId": "LWS",
     "menuReady": true
+  },
+  {
+    "id": "lee-woo-sing-green",
+    "name": "Lee Woo Sing Green",
+    "shortName": "LWS Green",
+    "blurb": "The Green at Lee Woo Sing — afternoon tea, Chinese BBQ, grill sets, fast food, and campus drinks.",
+    "hoursLabel": "10:00 AM – 8:00 PM (Mon–Sat · closed Sun)",
+    "deliveryFee": 10,
+    "collegeId": "LWS",
+    "menuReady": true
   }
 ]

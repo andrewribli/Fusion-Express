@@ -10,6 +10,7 @@ import { CC_MENU } from "@/data/canteen/cc-menu";
 import { CU_CAFE_MENU } from "@/data/canteen/cu-cafe-menu";
 import { EBENEZERS_MENU } from "@/data/canteen/ebenezers-menu";
 import { withFoodImages } from "@/data/canteen/food-images";
+import { LEE_WOO_SING_GREEN_MENU } from "@/data/canteen/lee-woo-sing-green-menu";
 import { LWS_MENU } from "@/data/canteen/lws-menu";
 import { MAXIMS_MENU } from "@/data/canteen/maxims-menu";
 import { NA_MENU } from "@/data/canteen/na-menu";
@@ -165,7 +166,8 @@ export type SimpleRestaurantId =
   | "shaw-canteen"
   | "wys-canteen"
   | "maxims"
-  | "lws-canteen";
+  | "lws-canteen"
+  | "lee-woo-sing-green";
 
 export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "cu-cafe": CU_CAFE_MENU,
@@ -181,6 +183,7 @@ export const SIMPLE_MENUS: Record<SimpleRestaurantId, SimpleMenuItem[]> = {
   "wys-canteen": WYS_MENU,
   maxims: MAXIMS_MENU,
   "lws-canteen": LWS_MENU,
+  "lee-woo-sing-green": LEE_WOO_SING_GREEN_MENU,
 };
 
 export function getSimpleMenu(

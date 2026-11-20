@@ -75,6 +75,7 @@ const RESTAURANT_COLLEGE: Record<string, CollegeId | null> = {
   "wys-canteen": "WYS",
   maxims: null,
   "lws-canteen": "LWS",
+  "lee-woo-sing-green": "LWS",
 };
 
 const RESTAURANT_NAMES: Record<string, string> = {
@@ -93,6 +94,7 @@ const RESTAURANT_NAMES: Record<string, string> = {
   "wys-canteen": "Wee Yu Sun Canteen",
   maxims: "Maxim's",
   "lws-canteen": "Lee Woo Sing Canteen",
+  "lee-woo-sing-green": "Lee Woo Sing Green",
 };
 
 export function getCollege(id: CollegeId | string | null | undefined): College | undefined {

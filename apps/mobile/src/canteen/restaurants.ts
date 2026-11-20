@@ -16,7 +16,8 @@ export type RestaurantId =
   | "shaw-canteen"
   | "wys-canteen"
   | "maxims"
-  | "lws-canteen";
+  | "lws-canteen"
+  | "lee-woo-sing-green";
 
 export type Restaurant = {
   id: RestaurantId;
@@ -241,6 +242,20 @@ export const RESTAURANTS: Restaurant[] = [
     menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
     campusWalkOrder: 90,
+  },
+  {
+    id: "lee-woo-sing-green",
+    name: "Lee Woo Sing Green",
+    shortName: "LWS Green",
+    blurb:
+      "The Green at Lee Woo Sing — afternoon tea, Chinese BBQ, grill sets, fast food, and campus drinks.",
+    location: "Lee Woo Sing College (The Green)",
+    hoursLabel: hours("lee-woo-sing-green"),
+    deliveryFee: CANTEEN_DELIVERY_FEE,
+    collegeId: "LWS",
+    menuReady: true,
+    logoSrc: "/canteen/cuhk-college-canteen.png",
+    campusWalkOrder: 92,
   },
 ];
 

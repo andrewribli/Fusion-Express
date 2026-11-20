@@ -12,6 +12,7 @@ import { CC_MENU } from "./data/cc-menu";
 import { CU_CAFE_MENU } from "./data/cu-cafe-menu";
 import { EBENEZERS_MENU } from "./data/ebenezers-menu";
 import { canteenFoodImage, withFoodImages } from "./data/food-images";
+import { LEE_WOO_SING_GREEN_MENU } from "./data/lee-woo-sing-green-menu";
 import { LWS_MENU } from "./data/lws-menu";
 import { MAXIMS_MENU } from "./data/maxims-menu";
 import { NA_MENU } from "./data/na-menu";
@@ -176,6 +177,7 @@ const SIMPLE: Partial<Record<RestaurantId, SimpleRow[]>> = {
   "wys-canteen": WYS_MENU,
   maxims: MAXIMS_MENU,
   "lws-canteen": LWS_MENU,
+  "lee-woo-sing-green": LEE_WOO_SING_GREEN_MENU,
 };
 
 function asFoodCategory(category: string): MenuCategory {
@@ -287,13 +289,10 @@ export function loadCanteenMenu(
     const cfg = getCanteenConfig(restaurantId);
     const active = getActiveMealPeriod() as MealPeriodId | null;
     let rows = simple;
-    if (cfg?.mealPeriods) {
-      if (!active) {
-        return {
-          dishes: [],
-          mealPeriodLabel: undefined,
-        };
-      }
+    // Filter to the live meal period while open. Outside periods (closed /
+    // overnight / between slots) still show the full menu for browsing —
+    // ordering stays gated by isCanteenOpenByConfig in the UI.
+    if (cfg?.mealPeriods && active) {
       rows = simple.filter((row) => mealPeriodsForRow(row).includes(active));
     }
     const normalized = rows.map((row) => ({
