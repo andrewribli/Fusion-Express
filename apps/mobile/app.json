@@ -54,7 +54,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.gracerun.fusionexpress",
-      "buildNumber": "80",
+      "buildNumber": "82",
       "usesAppleSignIn": true,
       "entitlements": {
         "aps-environment": "production",
