@@ -229,30 +229,30 @@ export const RESTAURANTS: Restaurant[] = [
   {
     id: "lws-canteen",
     name: "Lee Woo Sing Canteen",
-    shortName: "WS Can",
+    shortName: "Lee Woo Sing Canteen",
     blurb:
-      "和声书院食堂 — pork cartilage rice, fish ball noodles, and rice with dishes. Cafe Tolo is listed separately.",
+      "和声书院食堂 — cart noodles, Woo Sing sets, HK-style plates, curry, sweet soup, and drinks. Cafe Tolo is listed separately.",
     location: "Lee Woo Sing College",
     hoursLabel: "7:30 AM – 8:00 PM (Mon–Sat · closed Sun)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "LWS",
     menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
-    campusWalkOrder: 90,
+    campusWalkOrder: 6,
   },
   {
     id: "lee-woo-sing-green",
     name: "Lee Woo Sing Green",
-    shortName: "LWS Green",
+    shortName: "Lee Woo Sing Green",
     blurb:
-      "The Green at Lee Woo Sing — afternoon tea, Chinese BBQ, grill sets, fast food, and campus drinks. College discount when an LWS runner picks up.",
+      "The Green at Lee Woo Sing — chilled desserts, sweet soups, tofu pudding, snacks, and drinks. College discount when an LWS runner picks up.",
     location: "Lee Woo Sing College (The Green)",
     hoursLabel: "10:00 AM – 8:00 PM (Mon–Sat · closed Sun)",
     deliveryFee: CANTEEN_DELIVERY_FEE,
     collegeId: "LWS",
     menuReady: true,
     logoSrc: "/canteen/cuhk-college-canteen.png",
-    campusWalkOrder: 92,
+    campusWalkOrder: 7,
   },
 ];
 

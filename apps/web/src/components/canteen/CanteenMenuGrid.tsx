@@ -77,17 +77,51 @@ export function SimpleItemsGrid({
   const active = getActiveMealPeriod();
 
   if (!groupByMealPeriod) {
-    const sorted = sortByPrice(items, sort);
+    if (sort !== "default") {
+      const sorted = sortByPrice(items, sort);
+      return (
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {sorted.map((item) => (
+            <CanteenMenuCard
+              key={item.id}
+              kind="simple"
+              item={item}
+              restaurantId={restaurantId}
+              orderingEnabled={orderingEnabled}
+            />
+          ))}
+        </div>
+      );
+    }
+    const sections: Array<{ category: string; items: SimpleMenuItem[] }> = [];
+    const map = new Map<string, SimpleMenuItem[]>();
+    for (const item of items) {
+      const list = map.get(item.category) ?? [];
+      list.push(item);
+      map.set(item.category, list);
+    }
+    for (const [category, sectionItems] of map) {
+      sections.push({ category, items: sectionItems });
+    }
     return (
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {sorted.map((item) => (
-          <CanteenMenuCard
-            key={item.id}
-            kind="simple"
-            item={item}
-            restaurantId={restaurantId}
-            orderingEnabled={orderingEnabled}
-          />
+      <div className="mt-4 space-y-8">
+        {sections.map((section) => (
+          <section key={section.category}>
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
+              {section.category}
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {section.items.map((item) => (
+                <CanteenMenuCard
+                  key={item.id}
+                  kind="simple"
+                  item={item}
+                  restaurantId={restaurantId}
+                  orderingEnabled={orderingEnabled}
+                />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     );

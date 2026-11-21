@@ -54,6 +54,7 @@ import {
   isCanteenCart,
 } from "../src/canteen/cart";
 import { getRestaurant } from "../src/canteen/restaurants";
+import { notifyOrderPlaced } from "../src/notify-email";
 import { notifyOrderEvent } from "../src/notify-push";
 import type { RootStackParamList } from "../src/navigation";
 import {
@@ -195,6 +196,7 @@ export default function CheckoutScreen() {
         scheduledFor: when,
       });
       clearCart();
+      notifyOrderPlaced(orderId);
       notifyOrderEvent(orderId, "created");
       navigation.replace("Track", { orderId });
     } catch (err) {

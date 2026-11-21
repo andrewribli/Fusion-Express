@@ -76,6 +76,21 @@ export default function CanteenMenuScreen() {
     [restaurantId],
   );
 
+  const categoryChips = useMemo(() => {
+    const seen = new Set<string>();
+    const fromMenu: string[] = [];
+    for (const d of dishes) {
+      if (!seen.has(d.category)) {
+        seen.add(d.category);
+        fromMenu.push(d.category);
+      }
+    }
+    if (fromMenu.length === 0) return [...CANTEEN_CATEGORY_ORDER];
+    // Only append standard mega-cats when the menu already uses them (has items).
+    // Kiosk-section menus (LWS, CU Cafe-style) must not grow empty Mains/Snacks chips.
+    return fromMenu;
+  }, [dishes]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     let list = dishes.filter((d) => {
@@ -288,7 +303,7 @@ export default function CanteenMenuScreen() {
             All
           </Text>
         </Pressable>
-        {CANTEEN_CATEGORY_ORDER.map((cat) => (
+        {categoryChips.map((cat) => (
           <Pressable
             key={cat}
             style={[styles.chip, category === cat && styles.chipActive]}

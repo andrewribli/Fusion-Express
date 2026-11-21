@@ -17,6 +17,7 @@ import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
 import { validateCampusEmail, type CampusId } from "@fusion-express/shared/campus";
 import { friendlyAuthError } from "@/lib/auth-errors";
+import { notifyNewUser } from "@/lib/notify-email";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { BootScreen } from "@/components/BootScreen";
 import {
@@ -269,6 +270,12 @@ export default function LoginPage() {
 
       if (firebaseEnabled || demoAuth) {
         await signUp(password, profile);
+        void notifyNewUser({
+          fullName: profile.fullName,
+          email: profile.email,
+          campus: profile.campus,
+          isRunner: false,
+        });
       } else {
         login(profile);
       }

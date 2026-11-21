@@ -10,7 +10,8 @@ export type SimpleMenuItem = {
   name: string;
   description?: string;
   price: number;
-  category: MenuCategory;
+  /** Prefer kiosk section labels (e.g. "Cart Noodles"); falls back to mains/snacks/drinks/dessert. */
+  category: MenuCategory | string;
   image: string;
   /** Featured / house specialty badge when true. */
   signature?: boolean;

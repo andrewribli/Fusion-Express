@@ -88,8 +88,11 @@ export async function POST(request: Request) {
     try {
       await sendAdminNewOrderNotice({
         customerName: order.customerName,
+        customerEmail: order.customerEmail,
         items,
         deliveryLocation: order.deliveryLocation,
+        hall: order.hall,
+        channel: order.orderChannel || "fusion",
         total,
         orderId: order.id,
       });

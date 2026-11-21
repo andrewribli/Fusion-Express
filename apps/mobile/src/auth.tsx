@@ -44,7 +44,15 @@ export interface MobileUserProfile {
   isRunner?: boolean;
   runnerId?: string;
   role?: string;
+  referralSource?: ReferralSource;
 }
+
+export type ReferralSource =
+  | "instagram"
+  | "friend"
+  | "poster"
+  | "canteen"
+  | "other";
 
 export type SignUpProfile = {
   fullName: string;
@@ -52,6 +60,7 @@ export type SignUpProfile = {
   campus: CampusId;
   cuhkEmail: string;
   cuhkVerifiedAt: string;
+  referralSource: ReferralSource;
 };
 
 interface AuthContextValue {
@@ -194,10 +203,24 @@ async function loadProfile(uid: string, email: string | null): Promise<MobileUse
       isRunner: data.isRunner === true,
       runnerId: data.runnerId ? String(data.runnerId) : undefined,
       role: data.role ? String(data.role) : undefined,
+      referralSource: parseReferralSource(data.referralSource),
     };
   } catch {
     return base;
   }
+}
+
+function parseReferralSource(value: unknown): ReferralSource | undefined {
+  if (
+    value === "instagram" ||
+    value === "friend" ||
+    value === "poster" ||
+    value === "canteen" ||
+    value === "other"
+  ) {
+    return value;
+  }
+  return undefined;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -303,6 +326,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             campus: profileInput.campus,
             cuhkEmail: profileInput.cuhkEmail.trim().toLowerCase(),
             cuhkVerifiedAt: profileInput.cuhkVerifiedAt,
+            referralSource: profileInput.referralSource,
             isGuest: false,
             isRunner: false,
             createdAt: serverTimestamp(),

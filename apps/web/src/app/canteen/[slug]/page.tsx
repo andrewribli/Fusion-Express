@@ -270,7 +270,7 @@ function SimpleMenuView({
   search: string;
 }) {
   const restaurantId = restaurant.id as SimpleRestaurantId;
-  const [filter, setFilter] = useState<"all" | MenuCategory>("all");
+  const [filter, setFilter] = useState<string>("all");
   const [sort, setSort] = usePriceSort();
   const open = isSimpleCanteenOpen(restaurantId) ?? false;
   const cfg = getCanteenConfig(restaurantId);
@@ -291,8 +291,15 @@ function SimpleMenuView({
   }, [filter, menu, search]);
 
   const usedCategories = useMemo(() => {
-    const set = new Set(menu.map((i) => i.category));
-    return BF_FILTERS.filter((id) => id === "all" || set.has(id));
+    const seen = new Set<string>();
+    const cats: string[] = ["all"];
+    for (const item of menu) {
+      if (!seen.has(item.category)) {
+        seen.add(item.category);
+        cats.push(item.category);
+      }
+    }
+    return cats;
   }, [menu]);
 
   return (
@@ -338,7 +345,12 @@ function SimpleMenuView({
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {usedCategories.map((id) => {
-            const label = id === "all" ? "All" : CATEGORY_LABELS[id];
+            const label =
+              id === "all"
+                ? "All"
+                : id in CATEGORY_LABELS
+                  ? CATEGORY_LABELS[id as MenuCategory]
+                  : id;
             const active = filter === id;
             return (
               <button

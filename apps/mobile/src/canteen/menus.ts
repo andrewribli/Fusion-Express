@@ -295,13 +295,26 @@ export function loadCanteenMenu(
     if (cfg?.mealPeriods && active) {
       rows = simple.filter((row) => mealPeriodsForRow(row).includes(active));
     }
-    const normalized = rows.map((row) => ({
-      ...row,
-      category: asFoodCategory(String(row.category)),
-      image: row.image ?? "",
-    }));
+    // Keep kiosk section names (e.g. "Cart Noodles") — only map to
+    // mains/snacks/drinks/dessert for the food-image pool.
+    const dishes = rows.map((row) => {
+      const section = String(row.category);
+      const foodCat = asFoodCategory(section);
+      const imaged = withFoodImages([
+        {
+          id: row.id,
+          category: foodCat,
+          image: row.image ?? "",
+        },
+      ])[0];
+      return toDish({
+        ...row,
+        category: section,
+        image: imaged.image,
+      });
+    });
     return {
-      dishes: withFoodImages(normalized).map(toDish),
+      dishes,
       mealPeriodLabel: cfg?.mealPeriods ? active ?? undefined : undefined,
     };
   }
@@ -371,6 +384,10 @@ export function sortDishesByPrice<T extends { price: number }>(
 export function categoryLabel(category: string): string {
   if (category in CATEGORY_LABELS) {
     return CATEGORY_LABELS[category as MenuCategory];
+  }
+  // Kiosk section titles (incl. Chinese) are already display-ready.
+  if (/[^\x00-\x7F]/.test(category) || category.includes(" ")) {
+    return category;
   }
   return category.charAt(0).toUpperCase() + category.slice(1);
 }

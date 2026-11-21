@@ -23,6 +23,8 @@ export async function POST(request: Request) {
   let body: {
     fullName?: string;
     email?: string;
+    campus?: string;
+    referralSource?: string;
     isRunner?: boolean;
   };
   try {
@@ -33,6 +35,8 @@ export async function POST(request: Request) {
 
   const email = cap((body.email ?? "").trim().toLowerCase(), 320);
   const fullName = cap((body.fullName ?? "").trim(), 120);
+  const campus = cap((body.campus ?? "").trim(), 40);
+  const referralSource = cap((body.referralSource ?? "").trim(), 40);
 
   if (!email || !email.includes("@")) {
     return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
@@ -48,7 +52,8 @@ export async function POST(request: Request) {
     await sendAdminNewUserNotice({
       fullName,
       email,
-      collegeHall: "",
+      campus,
+      referralSource,
       isRunner: Boolean(body.isRunner),
     });
     return NextResponse.json({ ok: true });

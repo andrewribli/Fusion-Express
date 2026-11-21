@@ -15,10 +15,19 @@ import {
 } from "@fusion-express/shared/campus";
 import { validatePassword } from "@fusion-express/shared/auth";
 import { webAssetOrigin } from "@fusion-express/shared/products";
-import { useAuth } from "./auth";
+import { useAuth, type ReferralSource } from "./auth";
+import { notifyNewUser } from "./notify-email";
 import { Card, PrimaryButton, SectionLabel } from "./ui";
 
-type SignupStep = 1 | 2 | 3 | 4;
+type SignupStep = 1 | 2 | 3 | 4 | 5;
+
+const REFERRAL_OPTIONS: { id: ReferralSource; label: string }[] = [
+  { id: "instagram", label: "Instagram" },
+  { id: "friend", label: "Friend / Word of Mouth" },
+  { id: "poster", label: "Campus Poster / Flyer" },
+  { id: "canteen", label: "Canteen Partnership" },
+  { id: "other", label: "Other" },
+];
 
 function existingAccountMessage(status: number, message: string): string | null {
   if (
@@ -45,6 +54,9 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
   const [verified, setVerified] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [referralSource, setReferralSource] = useState<ReferralSource | null>(
+    null,
+  );
   const [sendBusy, setSendBusy] = useState(false);
   const [verifyBusy, setVerifyBusy] = useState(false);
   const [createBusy, setCreateBusy] = useState(false);
@@ -82,6 +94,20 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
         return;
       }
       setStep(4);
+      return;
+    }
+    if (step === 4) {
+      if (!verified || !verifiedEmail) {
+        setError(
+          `Verify your ${campus === "cityu" ? "CityU" : "CUHK"} email before continuing`,
+        );
+        return;
+      }
+      if (!agreed) {
+        setError("Please agree to the Terms & Conditions and Privacy Policy");
+        return;
+      }
+      setStep(5);
     }
   }
 
@@ -232,6 +258,12 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
     }
     if (!agreed) {
       setError("Please agree to the Terms & Conditions and Privacy Policy");
+      setStep(4);
+      return;
+    }
+    if (!referralSource) {
+      setError("Tell us how you heard about GraceRun");
+      setStep(5);
       return;
     }
 
@@ -243,6 +275,14 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
         campus,
         cuhkEmail: registeringEmail,
         cuhkVerifiedAt: new Date().toISOString(),
+        referralSource,
+      });
+      notifyNewUser({
+        fullName: fullName.trim(),
+        email: registeringEmail,
+        campus,
+        referralSource,
+        isRunner: false,
       });
       onDone?.();
     } catch (err) {
@@ -258,10 +298,10 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
     <Card>
       <SectionLabel>Create account</SectionLabel>
       <Text className="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-        Step {step} of 4
+        Step {step} of 5
       </Text>
       <View className="mt-2 flex-row gap-1">
-        {([1, 2, 3, 4] as const).map((n) => (
+        {([1, 2, 3, 4, 5] as const).map((n) => (
           <View
             key={n}
             className={`h-1.5 flex-1 rounded-full ${
@@ -501,6 +541,44 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
         </View>
       ) : null}
 
+      {step === 5 ? (
+        <View className="mt-4">
+          <Text className="text-sm font-semibold text-gray-900">
+            How did you hear about GraceRun?
+          </Text>
+          <Text className="mt-1 text-xs text-gray-500">
+            Required — helps us know what marketing is working.
+          </Text>
+          <View className="mt-3 gap-2">
+            {REFERRAL_OPTIONS.map((opt) => {
+              const active = referralSource === opt.id;
+              return (
+                <Pressable
+                  key={opt.id}
+                  className={`rounded-xl border px-4 py-3 ${
+                    active
+                      ? "border-fusion bg-red-50"
+                      : "border-gray-200 bg-white"
+                  }`}
+                  onPress={() => {
+                    setReferralSource(opt.id);
+                    setError("");
+                  }}
+                >
+                  <Text
+                    className={`text-sm font-semibold ${
+                      active ? "text-fusion" : "text-gray-900"
+                    }`}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      ) : null}
+
       {info && !error ? (
         <Text className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
           {info}
@@ -531,7 +609,7 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
         label={
           createBusy
             ? "Creating account…"
-            : step === 4
+            : step === 5
               ? "Create Account"
               : "Next"
         }
@@ -541,10 +619,11 @@ export function SignupFlow({ onDone }: { onDone?: () => void }) {
           createBusy ||
           otpBusy ||
           (step === 1 && !campus) ||
-          (step === 4 && (!verified || !agreed))
+          (step === 4 && (!verified || !agreed)) ||
+          (step === 5 && !referralSource)
         }
         onPress={() => {
-          if (step === 4) void createAccount();
+          if (step === 5) void createAccount();
           else goNext();
         }}
       />

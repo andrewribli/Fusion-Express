@@ -348,10 +348,8 @@ function formatHk(amount: number): string {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
-const DEFAULT_ADMIN_OPS_EMAILS = [
-  "andrew.ribli@gmail.com",
-  "1155233599@link.cuhk.edu.hk",
-];
+/** Ops inbox only — do not fan out admin alerts to personal student emails. */
+const DEFAULT_ADMIN_OPS_EMAILS = ["hello@gracerun.fit"];
 
 export function adminOpsEmails(): string[] {
   const extras = (process.env.OWNER_ALERT_EMAIL ?? "")
@@ -400,8 +398,11 @@ async function sendReliably(
 
 export async function sendAdminNewOrderNotice(opts: {
   customerName: string;
+  customerEmail?: string;
   items: OrderEmailItem[];
   deliveryLocation: string;
+  hall?: string;
+  channel?: string;
   total: number;
   orderId: string;
 }): Promise<void> {
@@ -410,16 +411,22 @@ export async function sendAdminNewOrderNotice(opts: {
     opts.items
       .map((item) => `${item.quantity}× ${item.name}`)
       .join(", ") || "—";
-  const subject = `New GraceRun Order — ${customerName}`;
+  const channel =
+    opts.channel?.trim() ||
+    (opts.items.some((i) => /canteen/i.test(i.name)) ? "canteen" : "fusion");
+  const subject = `New GraceRun Order — ${opts.orderId}`;
   const body = `Hey Andrew,
 
 A new order has been placed on GraceRun.
 
-Customer: ${customerName}
-Items: ${itemList}
-Dorm/Lobby: ${opts.deliveryLocation.trim() || "—"}
-Estimated Total: HK$${formatHk(opts.total)}
 Order ID: ${opts.orderId}
+Customer: ${customerName}
+Email: ${opts.customerEmail?.trim() || "—"}
+Hall: ${opts.hall?.trim() || "—"}
+Drop-off: ${opts.deliveryLocation.trim() || "—"}
+Channel: ${channel}
+Items: ${itemList}
+Total: HK$${formatHk(opts.total)}
 
 Check the admin dashboard for details.`;
   await Promise.all(
@@ -434,8 +441,11 @@ Check the admin dashboard for details.`;
 export async function sendAdminNewUserNotice(opts: {
   fullName: string;
   email: string;
-  collegeHall: string;
-  isRunner: boolean;
+  campus?: string;
+  referralSource?: string;
+  /** @deprecated unused — kept for older callers */
+  collegeHall?: string;
+  isRunner?: boolean;
 }): Promise<void> {
   const fullName = opts.fullName.trim() || "New user";
   const subject = `New GraceRun User — ${fullName}`;
@@ -445,6 +455,8 @@ A new user just registered on GraceRun.
 
 Name: ${fullName}
 Email: ${opts.email.trim() || "—"}
+Campus: ${opts.campus?.trim() || "—"}
+How they heard: ${opts.referralSource?.trim() || "—"}
 Is Runner: ${opts.isRunner ? "Yes" : "No"}
 
 Check the admin dashboard for details.`;

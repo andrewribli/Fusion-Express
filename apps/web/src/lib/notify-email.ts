@@ -62,11 +62,15 @@ export async function notifyOrderPlaced(opts: {
 export async function notifyNewUser(opts: {
   fullName: string;
   email?: string;
+  campus?: string;
+  referralSource?: string;
   isRunner?: boolean;
 }): Promise<void> {
   await postJson("/api/email/signup", {
     fullName: opts.fullName,
     email: opts.email,
+    campus: opts.campus,
+    referralSource: opts.referralSource,
     isRunner: opts.isRunner,
   });
 }

@@ -85,18 +85,35 @@ export function isPlaceholderImage(url: string | undefined | null): boolean {
   );
 }
 
+function foodPoolCategory(category: string): MenuCategory {
+  if (
+    category === "mains" ||
+    category === "snacks" ||
+    category === "drinks" ||
+    category === "dessert"
+  ) {
+    return category;
+  }
+  const s = category.toLowerCase();
+  if (/drink|tea|coffee|juice|beverage|滋潤|糖水/.test(s)) return "drinks";
+  if (/dessert|sweet|cake|ice|凍甜|糕點|豆腐/.test(s)) return "dessert";
+  if (/snack|side|小吃/.test(s)) return "snacks";
+  return "mains";
+}
+
 /** Deterministic local food photo from item id + category. */
 export function canteenFoodImage(
   id: string,
-  category: MenuCategory,
+  category: MenuCategory | string,
 ): string {
   if (FOOD_HERO[id]) return FOOD_HERO[id];
-  const pool = POOLS[category] ?? POOLS.mains;
+  const poolKey = foodPoolCategory(String(category));
+  const pool = POOLS[poolKey] ?? POOLS.mains;
   return pool[hashId(id) % pool.length] ?? pool[0];
 }
 
 export function withFoodImages<
-  T extends { id: string; category: MenuCategory; image: string },
+  T extends { id: string; category: MenuCategory | string; image: string },
 >(items: T[]): T[] {
   return items.map((item) =>
     isPlaceholderImage(item.image)

@@ -13,6 +13,7 @@ import {
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as WebBrowser from "expo-web-browser";
+import { doc, getDoc } from "firebase/firestore";
 import {
   cancelOrder,
   customerAmountDue,
@@ -24,10 +25,15 @@ import {
   subscribeOrder,
   TRACKING_STEPS,
 } from "@fusion-express/shared";
+import { collectionName } from "@fusion-express/shared/app-env";
 import {
   canteenNameForRestaurant,
   restaurantIdFromOrderItems,
 } from "@fusion-express/shared/canteen-college";
+import {
+  getDb,
+  isFirebaseConfigured,
+} from "@fusion-express/shared/firebase";
 import { webAssetOrigin } from "@fusion-express/shared/products";
 import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../src/auth";
@@ -36,6 +42,43 @@ import { OrderChat } from "../src/OrderChat";
 import { formatScheduled } from "../src/schedule";
 import { takePhoto, uriToBlob } from "../src/takePhoto";
 import type { RootStackParamList } from "../src/navigation";
+
+const GENERIC_RUNNER_NAMES = new Set([
+  "",
+  "runner",
+  "mobile runner",
+  "your runner",
+]);
+
+function looksGenericRunnerName(name: string | undefined): boolean {
+  return GENERIC_RUNNER_NAMES.has((name ?? "").trim().toLowerCase());
+}
+
+async function resolveRunnerDisplayName(order: Order): Promise<string | null> {
+  const stamped = order.runnerName?.trim();
+  if (stamped && !looksGenericRunnerName(stamped)) return stamped;
+
+  const uid = order.runnerUid?.trim();
+  if (!uid || !isFirebaseConfigured()) {
+    return stamped || null;
+  }
+
+  try {
+    const snap = await getDoc(doc(getDb(), collectionName("users"), uid));
+    if (!snap.exists()) return stamped || null;
+    const data = snap.data() as Record<string, unknown>;
+    const pseudonym = data.pseudonym ? String(data.pseudonym).trim() : "";
+    const fullName = data.fullName ? String(data.fullName).trim() : "";
+    const displayName = data.displayName ? String(data.displayName).trim() : "";
+    if (data.isAnonymous === true && pseudonym) return pseudonym;
+    if (fullName && !looksGenericRunnerName(fullName)) return fullName;
+    if (pseudonym) return pseudonym;
+    if (displayName && !looksGenericRunnerName(displayName)) return displayName;
+  } catch {
+    /* keep stamped fallback */
+  }
+  return stamped || null;
+}
 
 function orderChannelLabel(order: Order): string {
   const channel =
@@ -86,6 +129,7 @@ export default function TrackScreen() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
   const [zoom, setZoom] = useState<{ uri: string; label: string } | null>(null);
+  const [runnerLabel, setRunnerLabel] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const focusChat = route.params?.focusChat === true;
 
@@ -155,6 +199,20 @@ export default function TrackScreen() {
     );
     return () => clearTimeout(timer);
   }, [focusChat, order]);
+
+  useEffect(() => {
+    if (!order || order.status === "pending" || order.status === "cancelled") {
+      setRunnerLabel(null);
+      return;
+    }
+    let cancelled = false;
+    void resolveRunnerDisplayName(order).then((label) => {
+      if (!cancelled) setRunnerLabel(label);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [order?.id, order?.status, order?.runnerUid, order?.runnerName]);
 
   const step = order ? getStepIndex(order.status) : 0;
   const paid = isOrderPaid(order);
@@ -377,6 +435,24 @@ export default function TrackScreen() {
                 {ORDER_STATUS_LABELS[order.status]}
                 {order.hall ? ` · ${order.hall}` : ""}
               </Text>
+              {order.status === "pending" ? (
+                <Text className="mt-3 text-sm font-semibold text-amber-800">
+                  Waiting for a runner to accept…
+                </Text>
+              ) : runnerLabel ? (
+                <View className="mt-3 rounded-xl border border-fusion/20 bg-red-50 px-3 py-2.5">
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-fusion">
+                    Your runner
+                  </Text>
+                  <Text className="mt-0.5 text-base font-extrabold text-gray-900">
+                    {runnerLabel}
+                  </Text>
+                </View>
+              ) : order.runnerUid || order.runnerId ? (
+                <Text className="mt-3 text-sm font-semibold text-gray-700">
+                  Runner: assigned
+                </Text>
+              ) : null}
               <Text className="mt-2 text-sm text-gray-700">
                 Total ${order.total}
                 {order.deliveryFee != null
@@ -610,12 +686,6 @@ export default function TrackScreen() {
             ) : null}
 
             {isChatActive(order.status) ? <OrderChat order={order} /> : null}
-
-            {order.runnerName && order.status !== "pending" ? (
-              <Text className="mt-3 text-xs text-gray-500">
-                Runner: {order.runnerName}
-              </Text>
-            ) : null}
           </>
         )}
       </ScrollView>
