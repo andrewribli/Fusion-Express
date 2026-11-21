@@ -171,8 +171,9 @@ export function subscribeChatMessages(
 
 export function canAccessOrderChat(
   order: { customerId: string; runnerId?: string; runnerUid?: string },
-  user: { uid?: string; runnerId?: string },
+  user: { uid?: string; runnerId?: string; isAdmin?: boolean },
 ): boolean {
+  if (user.isAdmin) return true;
   if (user.uid && order.customerId === user.uid) return true;
   if (order.runnerUid && user.uid && order.runnerUid === user.uid) return true;
   if (order.runnerId && user.runnerId && order.runnerId === user.runnerId) {

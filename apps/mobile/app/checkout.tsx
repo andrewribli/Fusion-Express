@@ -179,6 +179,10 @@ export default function CheckoutScreen() {
           price: getUnitPrice(item),
           quantity,
           weightKg: item.weightKg,
+          isCustom:
+            item.id.startsWith("custom-") || item.subcategory === "custom"
+              ? true
+              : undefined,
         })),
         status: "pending",
         college,

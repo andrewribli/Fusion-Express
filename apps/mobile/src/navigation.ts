@@ -7,6 +7,7 @@ export type RootStackParamList = {
   Cart: undefined;
   Checkout: undefined;
   Track: { orderId?: string; focusChat?: boolean };
+  Support: undefined;
 };
 
 export type TabsParamList = {

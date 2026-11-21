@@ -205,6 +205,29 @@ function TrackContent() {
             </p>
             <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
 
+            {order.status !== "pending" &&
+            order.status !== "cancelled" &&
+            (order.runnerName || order.runnerStudentId) ? (
+              <div className="mt-3 rounded-xl border border-[#ED1C24]/20 bg-red-50 px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#ED1C24]">
+                  Your runner
+                </p>
+                {order.runnerName ? (
+                  <p className="mt-0.5 text-base font-extrabold text-gray-900">
+                    {order.runnerName}
+                  </p>
+                ) : null}
+                {order.runnerStudentId ? (
+                  <p className="mt-1 text-sm font-semibold text-gray-800">
+                    Student ID: {order.runnerStudentId}
+                  </p>
+                ) : null}
+                <p className="mt-1 text-xs text-gray-600">
+                  Check this ID when they pick up / drop off your order.
+                </p>
+              </div>
+            ) : null}
+
             {order.customerNote && (
               <p className="mt-2 text-xs text-gray-600">
                 Note: {order.customerNote}
@@ -219,7 +242,14 @@ function TrackContent() {
             <ul className="mt-3 space-y-1 border-t border-gray-100 pt-3 text-sm">
               {order.items.map((item) => (
                 <li key={item.itemId} className="flex justify-between">
-                  <span>{item.quantity}× {item.name}</span>
+                  <span>
+                    {item.quantity}× {item.name}
+                    {item.isCustom ? (
+                      <span className="ml-1 text-[11px] font-semibold text-amber-700">
+                        (custom)
+                      </span>
+                    ) : null}
+                  </span>
                   <span>
                     ${((item.actualPrice ?? item.price) * item.quantity).toFixed(1)}
                     {item.actualPrice != null && item.actualPrice !== item.price && (

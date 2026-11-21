@@ -49,6 +49,7 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
 
   if (!user) return null;
 
+  // Admin access is handled on OrderChatPanel; this page is customer/runner deep links.
   if (order && !canAccessOrderChat(order, user)) {
     return (
       <div className="rounded-2xl bg-red-50 px-4 py-6 text-center text-sm text-red-700">

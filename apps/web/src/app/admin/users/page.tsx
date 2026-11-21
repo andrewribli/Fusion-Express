@@ -184,6 +184,10 @@ export default function AdminUsersPage() {
                   Support chat
                 </Link>
                 {" · "}
+                <Link href="/admin/chats" className="font-medium text-[#ED1C24] underline">
+                  Order chats
+                </Link>
+                {" · "}
                 <Link href="/admin/payments" className="font-medium text-[#ED1C24] underline">
                   Payment submissions
                 </Link>

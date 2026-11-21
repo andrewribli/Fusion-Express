@@ -173,6 +173,8 @@ export interface OrderItem {
   weightKg?: number;
   /** Unit price at the Fusion till. */
   actualPrice?: number;
+  /** Customer-typed item not in the catalog (runner confirms price). */
+  isCustom?: boolean;
 }
 
 export type PriceAdjustmentStatus =
@@ -270,6 +272,8 @@ export interface Order {
    */
   runnerUid?: string;
   runnerName?: string;
+  /** Student ID stamped at accept for lobby pickup verification. */
+  runnerStudentId?: string;
   runnerRating?: number;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;

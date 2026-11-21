@@ -83,6 +83,10 @@ export function usePlaceOrder() {
           price: getUnitPrice(item),
           quantity,
           weightKg: item.weightKg,
+          isCustom:
+            item.id.startsWith("custom-") || item.subcategory === "custom"
+              ? true
+              : undefined,
         }));
         const orderSubtotal = items.reduce(
           (sum, line) => sum + lineTotal(line.item, line.quantity),

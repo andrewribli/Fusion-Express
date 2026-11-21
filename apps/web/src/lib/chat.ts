@@ -151,8 +151,10 @@ export function canAccessOrderChat(
     studentId?: string;
     runnerId?: string;
     isRunner?: boolean;
+    isAdmin?: boolean;
   },
 ): boolean {
+  if (user.isAdmin) return true;
   const customerMatch =
     (user.uid && order.customerId === user.uid) ||
     Boolean(user.studentId && order.customerId === user.studentId);

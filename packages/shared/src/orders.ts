@@ -111,13 +111,19 @@ function parseItems(raw: unknown): Order["items"] {
   if (!Array.isArray(raw)) return [];
   return raw.map((item) => {
     const row = item as Record<string, unknown>;
+    const itemId = String(row.itemId ?? "");
+    const isCustom =
+      row.isCustom === true ||
+      itemId.startsWith("custom-") ||
+      itemId.startsWith("custom:");
     return {
-      itemId: String(row.itemId ?? ""),
+      itemId,
       name: String(row.name ?? ""),
       price: Number(row.price ?? 0),
       quantity: Number(row.quantity ?? 0),
       weightKg: row.weightKg != null ? Number(row.weightKg) : undefined,
       actualPrice: row.actualPrice != null ? Number(row.actualPrice) : undefined,
+      isCustom: isCustom || undefined,
     };
   });
 }
@@ -228,6 +234,9 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerId: data.runnerId ? String(data.runnerId) : undefined,
     runnerUid: data.runnerUid ? String(data.runnerUid) : undefined,
     runnerName: data.runnerName ? String(data.runnerName) : undefined,
+    runnerStudentId: data.runnerStudentId
+      ? String(data.runnerStudentId)
+      : undefined,
     runnerRating: data.runnerRating != null ? Number(data.runnerRating) : undefined,
     deliveryPhotoUrl: data.deliveryPhotoUrl
       ? String(data.deliveryPhotoUrl)
@@ -722,6 +731,7 @@ export async function acceptOrder(
     total: number;
   },
   runnerCampus?: CampusId,
+  runnerStudentId?: string,
 ): Promise<void> {
   const now = new Date();
   const paymentFields = omitUndefined({
@@ -756,11 +766,35 @@ export async function acceptOrder(
         if (order.runnerUid === runnerUid || order.runnerId === runnerId) return;
         throw new OrderAlreadyTakenError();
       }
+      let studentId = runnerStudentId?.trim() || "";
+      if (!studentId && runnerId) {
+        const runnerSnap = await tx.get(
+          doc(db, collectionName("runners"), runnerId),
+        );
+        if (runnerSnap.exists()) {
+          const data = runnerSnap.data() as Record<string, unknown>;
+          studentId = data.studentId ? String(data.studentId).trim() : "";
+        }
+      }
+      if (!studentId) {
+        const userSnap = await tx.get(doc(db, collectionName("users"), runnerUid));
+        if (userSnap.exists()) {
+          const data = userSnap.data() as Record<string, unknown>;
+          studentId = data.studentId
+            ? String(data.studentId).trim()
+            : data.cuhkEmail
+              ? String(data.cuhkEmail).split("@")[0].trim()
+              : data.email
+                ? String(data.email).split("@")[0].trim()
+                : "";
+        }
+      }
       tx.update(orderRef, {
         status: "accepted",
         runnerId,
         runnerUid,
         runnerName,
+        ...(studentId ? { runnerStudentId: studentId } : {}),
         acceptedAt: Timestamp.fromDate(now),
         runnerDeadline: Timestamp.fromDate(
           new Date(now.getTime() + RUNNER_DELIVERY_WINDOW_MS),
@@ -786,6 +820,9 @@ export async function acceptOrder(
     runnerId,
     runnerUid,
     runnerName,
+    ...(runnerStudentId?.trim()
+      ? { runnerStudentId: runnerStudentId.trim() }
+      : {}),
     runnerPaymentMethod: payment?.method,
     runnerPaymentId: payment?.id,
     runnerEmail: payment?.email,
@@ -811,6 +848,7 @@ export async function updateOrderStatus(
       | "runnerName"
       | "runnerId"
       | "runnerUid"
+      | "runnerStudentId"
       | "deliveryPhotoUrl"
       | "receiptUrl"
       | "bankStatementUrl"
@@ -868,6 +906,9 @@ export async function updateOrderStatus(
       if (extras?.runnerName) updates.runnerName = extras.runnerName;
       if (extras?.runnerId) updates.runnerId = extras.runnerId;
       if (extras?.runnerUid) updates.runnerUid = extras.runnerUid;
+      if (extras?.runnerStudentId) {
+        updates.runnerStudentId = extras.runnerStudentId;
+      }
       if (extras?.deliveryPhotoUrl) {
         updates.deliveryPhotoUrl = extras.deliveryPhotoUrl;
       }
@@ -928,6 +969,7 @@ export async function updateOrderStatus(
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
     if (extras?.runnerUid) order.runnerUid = extras.runnerUid;
+    if (extras?.runnerStudentId) order.runnerStudentId = extras.runnerStudentId;
     if (extras?.deliveryPhotoUrl) order.deliveryPhotoUrl = extras.deliveryPhotoUrl;
     if (extras?.receiptUrl) order.receiptUrl = extras.receiptUrl;
     if (extras?.bankStatementUrl) order.bankStatementUrl = extras.bankStatementUrl;

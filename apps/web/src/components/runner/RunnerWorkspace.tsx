@@ -560,6 +560,9 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
         },
         discount,
         runnerCampusOf(user),
+        user.studentId?.trim() ||
+          user.email?.split("@")[0]?.trim() ||
+          undefined,
       );
       setConfirmOrder(null);
       router.push("/runner/deliveries");

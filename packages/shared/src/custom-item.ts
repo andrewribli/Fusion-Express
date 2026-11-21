@@ -30,5 +30,6 @@ export function createCustomMenuItem(
     sortOrder: 9999,
     weightKg,
     campus: options?.campus,
+    subcategory: "custom",
   };
 }

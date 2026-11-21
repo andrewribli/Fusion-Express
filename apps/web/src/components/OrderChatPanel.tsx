@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "@/context/UserContext";
+import { isAdminUid } from "@/lib/admins";
 import { isChatActive } from "@/lib/constants";
 import {
   canAccessOrderChat,
@@ -32,10 +33,21 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   const [sendError, setSendError] = useState("");
   const [expanded, setExpanded] = useState(!compact);
   const [lastReadAt, setLastReadAt] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const chatActive = isChatActive(order.status);
   const accountId = user?.uid ?? "";
+
+  useEffect(() => {
+    let cancelled = false;
+    void isAdminUid(user?.uid).then((ok) => {
+      if (!cancelled) setIsAdmin(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
 
   useEffect(() => {
     if (!chatActive) return;
@@ -73,16 +85,22 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   }, [messages, user, lastReadAt]);
 
   if (!user || !chatActive) return null;
-  if (!canAccessOrderChat(order, user)) return null;
+  if (!canAccessOrderChat(order, { ...user, isAdmin })) return null;
 
   const senderId = user.uid ?? "";
-  const senderName = user.fullName;
+  const senderName = user.fullName || (isAdmin ? "Admin" : "You");
   const viewingAsCustomer = Boolean(user.uid && order.customerId === user.uid);
-  const otherParty = viewingAsCustomer ? "runner" : "customer";
+  const otherParty = isAdmin
+    ? "order parties"
+    : viewingAsCustomer
+      ? "runner"
+      : "customer";
   const chatLabel =
     unread > 0
       ? `${unread} new message${unread === 1 ? "" : "s"} from ${otherParty}`
-      : `Chat with ${otherParty}`;
+      : isAdmin
+        ? "Admin order chat"
+        : `Chat with ${otherParty}`;
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();

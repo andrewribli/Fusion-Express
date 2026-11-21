@@ -22,6 +22,7 @@ import CanteenMenuScreen from "./app/canteen-menu";
 import CartScreen from "./app/cart";
 import CheckoutScreen from "./app/checkout";
 import TrackScreen from "./app/track";
+import SupportScreen from "./app/support";
 
 const Tab = createBottomTabNavigator<TabsParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -94,6 +95,11 @@ function Root() {
                 <Stack.Screen
                   name="Track"
                   component={TrackScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Support"
+                  component={SupportScreen}
                   options={{ headerShown: false }}
                 />
               </Stack.Navigator>

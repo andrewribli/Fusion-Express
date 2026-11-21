@@ -405,10 +405,12 @@ service cloud.firestore {
       allow get, list: if isOrderCustomer(order(orderId))
         || isOrderRunner(order(orderId))
         || isAdmin();
-      allow create: if (
-          isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId))
-        )
-        && request.resource.data.senderId == uid();
+      allow create: if request.resource.data.senderId == uid()
+        && (
+          isOrderCustomer(order(orderId))
+          || isOrderRunner(order(orderId))
+          || isAdmin()
+        );
       allow update, delete: if false;
     }
 

@@ -1,7 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import {
   calculateDeliveryFee,
   cartTotalWeightKg,
@@ -12,6 +19,7 @@ import {
   collegeLabel,
   computeCollegeDiscount,
 } from "@fusion-express/shared/canteen-college";
+import { createCustomMenuItem } from "@fusion-express/shared";
 import { formatMenuPrice } from "@fusion-express/shared/types";
 import { resolveProductImageUrl } from "@fusion-express/shared/products";
 import { isOverOrderLimit, MAX_ORDER_VALUE } from "@fusion-express/shared";
@@ -35,12 +43,13 @@ import {
   Page,
   PrimaryButton,
   ScreenHeader,
+  SecondaryButton,
 } from "../src/ui";
 
 export default function CartScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { items, subtotal, setQuantity } = useCart();
+  const { items, subtotal, setQuantity, addItem } = useCart();
   const { profile } = useAuth();
   const canteen = isCanteenCart(items);
   const restaurantId = cartRestaurantId(items);
@@ -64,6 +73,11 @@ export default function CartScreen() {
     : calculateDeliveryFee({ weightKg, college: "" });
   const overLimit = !canteen && isOverOrderLimit(subtotal);
 
+  const [customOpen, setCustomOpen] = useState(false);
+  const [customName, setCustomName] = useState("");
+  const [customPrice, setCustomPrice] = useState("");
+  const [customError, setCustomError] = useState("");
+
   const discountPreview = useMemo(() => {
     if (!canteen || !restaurantId) {
       return { eligible: false, discountAmount: 0, collegeId: null as string | null };
@@ -81,12 +95,36 @@ export default function CartScreen() {
     };
   }, [canteen, restaurantId, subtotal, profile?.college]);
 
+  function submitCustomItem() {
+    setCustomError("");
+    const name = customName.trim();
+    if (!name) {
+      setCustomError("Enter an item name");
+      return;
+    }
+    const parsed = Number.parseFloat(customPrice);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setCustomError("Enter an estimated price (HK$)");
+      return;
+    }
+    addItem(
+      createCustomMenuItem(name, {
+        estimatedPrice: parsed,
+        campus: profile?.campus ?? "cuhk",
+      }),
+    );
+    setCustomName("");
+    setCustomPrice("");
+    setCustomOpen(false);
+  }
+
   return (
     <Page>
       <ScreenHeader title="Cart" onBack={() => navigation.goBack()} />
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-4 py-4 pb-28"
+        keyboardShouldPersistTaps="handled"
       >
         {items.length === 0 ? (
           <EmptyState
@@ -98,6 +136,8 @@ export default function CartScreen() {
         ) : (
           items.map(({ item, quantity }) => {
             const uri = resolveProductImageUrl(item.image);
+            const isCustom =
+              item.id.startsWith("custom-") || item.subcategory === "custom";
             return (
               <Card key={item.id} className="mb-3 flex-row gap-3 p-3">
                 <ProductImage uri={uri || undefined} size={64} />
@@ -108,6 +148,11 @@ export default function CartScreen() {
                   >
                     {item.name}
                   </Text>
+                  {isCustom ? (
+                    <Text className="mt-0.5 text-xs font-semibold text-amber-700">
+                      Custom item · runner confirms price
+                    </Text>
+                  ) : null}
                   <Text className="mt-1 text-xs text-gray-500">
                     {formatMenuPrice(item)}
                     {canteen ? "" : ` · ${item.weightKg} kg each`}
@@ -146,6 +191,29 @@ export default function CartScreen() {
             );
           })
         )}
+
+        <Card className="mt-1 mb-3">
+          <Pressable
+            className="flex-row items-center justify-between"
+            onPress={() => {
+              setCustomError("");
+              setCustomOpen(true);
+            }}
+          >
+            <View className="mr-3 flex-1">
+              <Text className="text-sm font-bold text-gray-900">
+                + Add Custom Item
+              </Text>
+              <Text className="mt-0.5 text-xs text-gray-500">
+                Can&apos;t find it? Type the name + estimated price — runner
+                confirms at checkout.
+              </Text>
+            </View>
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-fusion">
+              <Text className="text-xl font-bold text-white">+</Text>
+            </View>
+          </Pressable>
+        </Card>
 
         {items.length > 0 ? (
           <Card className="mt-1">
@@ -210,6 +278,65 @@ export default function CartScreen() {
           />
         </View>
       ) : null}
+
+      <Modal
+        visible={customOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCustomOpen(false)}
+      >
+        <Pressable
+          className="flex-1 justify-end bg-black/40"
+          onPress={() => setCustomOpen(false)}
+        >
+          <Pressable
+            className="rounded-t-3xl bg-white px-4 pb-8 pt-4"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text className="text-base font-extrabold text-gray-900">
+              Add custom item
+            </Text>
+            <Text className="mt-1 text-xs text-gray-500">
+              Runner buys this for you and confirms the real price.
+            </Text>
+            <Text className="mt-4 text-xs font-medium text-gray-600">
+              Item name
+            </Text>
+            <TextInput
+              className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
+              placeholder='e.g. "Optimum Nutrition whey 2lb"'
+              placeholderTextColor="#9CA3AF"
+              value={customName}
+              onChangeText={setCustomName}
+              autoFocus
+            />
+            <Text className="mt-3 text-xs font-medium text-gray-600">
+              Estimated price (HK$)
+            </Text>
+            <TextInput
+              className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
+              placeholder="e.g. 280"
+              placeholderTextColor="#9CA3AF"
+              keyboardType="decimal-pad"
+              value={customPrice}
+              onChangeText={setCustomPrice}
+            />
+            {customError ? (
+              <Text className="mt-2 text-sm text-fusion">{customError}</Text>
+            ) : null}
+            <PrimaryButton
+              label="Add to cart"
+              className="mt-4"
+              onPress={submitCustomItem}
+            />
+            <SecondaryButton
+              label="Cancel"
+              className="mt-2"
+              onPress={() => setCustomOpen(false)}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </Page>
   );
 }

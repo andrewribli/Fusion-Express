@@ -9,12 +9,15 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { validateEmail, validatePassword } from "@fusion-express/shared/auth";
 import { useAuth } from "../../src/auth";
 import { isAppleSignInAvailable } from "../../src/apple-auth";
 import { DeleteAccountModal } from "../../src/DeleteAccountModal";
 import { SignupFlow } from "../../src/SignupFlow";
+import type { RootStackParamList } from "../../src/navigation";
 import {
   Card,
   LoadingBlock,
@@ -29,6 +32,8 @@ import {
 type AuthMode = "signin" | "signup";
 
 export default function ProfileScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, profile, loading, signIn, signInApple, signOut } = useAuth();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
@@ -170,6 +175,19 @@ export default function ProfileScreen() {
                 <Text className="mt-1 text-xs text-gray-500">
                   Switch to the Runner tab to accept deliveries when enabled.
                 </Text>
+              </Card>
+
+              <Card className="mt-3">
+                <SectionLabel>Help</SectionLabel>
+                <Text className="mt-2 text-xs text-gray-500">
+                  Message GraceRun admin directly (late orders, disputes,
+                  refunds).
+                </Text>
+                <PrimaryButton
+                  label="Contact Support"
+                  className="mt-3"
+                  onPress={() => navigation.navigate("Support")}
+                />
               </Card>
 
               <Card className="mt-3">

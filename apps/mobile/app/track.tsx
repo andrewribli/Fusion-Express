@@ -54,30 +54,50 @@ function looksGenericRunnerName(name: string | undefined): boolean {
   return GENERIC_RUNNER_NAMES.has((name ?? "").trim().toLowerCase());
 }
 
-async function resolveRunnerDisplayName(order: Order): Promise<string | null> {
-  const stamped = order.runnerName?.trim();
-  if (stamped && !looksGenericRunnerName(stamped)) return stamped;
+type RunnerIdentity = { name: string | null; studentId: string | null };
+
+async function resolveRunnerIdentity(order: Order): Promise<RunnerIdentity> {
+  const stampedName = order.runnerName?.trim() || null;
+  let name =
+    stampedName && !looksGenericRunnerName(stampedName) ? stampedName : null;
+  let studentId = order.runnerStudentId?.trim() || null;
 
   const uid = order.runnerUid?.trim();
-  if (!uid || !isFirebaseConfigured()) {
-    return stamped || null;
+  if ((!name || !studentId) && uid && isFirebaseConfigured()) {
+    try {
+      const snap = await getDoc(doc(getDb(), collectionName("users"), uid));
+      if (snap.exists()) {
+        const data = snap.data() as Record<string, unknown>;
+        const pseudonym = data.pseudonym ? String(data.pseudonym).trim() : "";
+        const fullName = data.fullName ? String(data.fullName).trim() : "";
+        const displayName = data.displayName
+          ? String(data.displayName).trim()
+          : "";
+        if (!name) {
+          if (data.isAnonymous === true && pseudonym) name = pseudonym;
+          else if (fullName && !looksGenericRunnerName(fullName)) name = fullName;
+          else if (pseudonym) name = pseudonym;
+          else if (displayName && !looksGenericRunnerName(displayName)) {
+            name = displayName;
+          }
+        }
+        if (!studentId) {
+          studentId = data.studentId
+            ? String(data.studentId).trim()
+            : data.cuhkEmail
+              ? String(data.cuhkEmail).split("@")[0].trim()
+              : data.email
+                ? String(data.email).split("@")[0].trim()
+                : null;
+        }
+      }
+    } catch {
+      /* keep stamped fallback */
+    }
   }
 
-  try {
-    const snap = await getDoc(doc(getDb(), collectionName("users"), uid));
-    if (!snap.exists()) return stamped || null;
-    const data = snap.data() as Record<string, unknown>;
-    const pseudonym = data.pseudonym ? String(data.pseudonym).trim() : "";
-    const fullName = data.fullName ? String(data.fullName).trim() : "";
-    const displayName = data.displayName ? String(data.displayName).trim() : "";
-    if (data.isAnonymous === true && pseudonym) return pseudonym;
-    if (fullName && !looksGenericRunnerName(fullName)) return fullName;
-    if (pseudonym) return pseudonym;
-    if (displayName && !looksGenericRunnerName(displayName)) return displayName;
-  } catch {
-    /* keep stamped fallback */
-  }
-  return stamped || null;
+  if (!name && stampedName) name = stampedName;
+  return { name, studentId };
 }
 
 function orderChannelLabel(order: Order): string {
@@ -130,6 +150,7 @@ export default function TrackScreen() {
   const [cancelError, setCancelError] = useState("");
   const [zoom, setZoom] = useState<{ uri: string; label: string } | null>(null);
   const [runnerLabel, setRunnerLabel] = useState<string | null>(null);
+  const [runnerStudentId, setRunnerStudentId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const focusChat = route.params?.focusChat === true;
 
@@ -203,16 +224,26 @@ export default function TrackScreen() {
   useEffect(() => {
     if (!order || order.status === "pending" || order.status === "cancelled") {
       setRunnerLabel(null);
+      setRunnerStudentId(null);
       return;
     }
     let cancelled = false;
-    void resolveRunnerDisplayName(order).then((label) => {
-      if (!cancelled) setRunnerLabel(label);
+    void resolveRunnerIdentity(order).then(({ name, studentId }) => {
+      if (!cancelled) {
+        setRunnerLabel(name);
+        setRunnerStudentId(studentId);
+      }
     });
     return () => {
       cancelled = true;
     };
-  }, [order?.id, order?.status, order?.runnerUid, order?.runnerName]);
+  }, [
+    order?.id,
+    order?.status,
+    order?.runnerUid,
+    order?.runnerName,
+    order?.runnerStudentId,
+  ]);
 
   const step = order ? getStepIndex(order.status) : 0;
   const paid = isOrderPaid(order);
@@ -439,13 +470,23 @@ export default function TrackScreen() {
                 <Text className="mt-3 text-sm font-semibold text-amber-800">
                   Waiting for a runner to accept…
                 </Text>
-              ) : runnerLabel ? (
+              ) : runnerLabel || runnerStudentId ? (
                 <View className="mt-3 rounded-xl border border-fusion/20 bg-red-50 px-3 py-2.5">
                   <Text className="text-xs font-semibold uppercase tracking-wide text-fusion">
                     Your runner
                   </Text>
-                  <Text className="mt-0.5 text-base font-extrabold text-gray-900">
-                    {runnerLabel}
+                  {runnerLabel ? (
+                    <Text className="mt-0.5 text-base font-extrabold text-gray-900">
+                      {runnerLabel}
+                    </Text>
+                  ) : null}
+                  {runnerStudentId ? (
+                    <Text className="mt-1 text-sm font-semibold text-gray-800">
+                      Student ID: {runnerStudentId}
+                    </Text>
+                  ) : null}
+                  <Text className="mt-1 text-xs text-gray-600">
+                    Check this ID when they pick up / drop off your order.
                   </Text>
                 </View>
               ) : order.runnerUid || order.runnerId ? (
