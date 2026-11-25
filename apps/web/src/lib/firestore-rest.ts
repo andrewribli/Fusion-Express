@@ -622,6 +622,61 @@ export function pushTokensFromUser(
   return [...found];
 }
 
+/** Admin auth uids from `/admins` (Admin REST — clients cannot list this). */
+export async function listAdminUidsRest(): Promise<string[]> {
+  const ctx = await adminAccessToken();
+  if (!ctx) return [];
+  const out: string[] = [];
+  let pageToken = "";
+  for (let i = 0; i < 10; i++) {
+    const url = new URL(`${documentsUrl(ctx.project)}/admins`);
+    url.searchParams.set("pageSize", "100");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${ctx.token}` },
+    });
+    if (!res.ok) {
+      console.error(
+        "listAdminUidsRest failed",
+        res.status,
+        (await res.text()).slice(0, 300),
+      );
+      break;
+    }
+    const data = (await res.json()) as {
+      documents?: { name?: string }[];
+      nextPageToken?: string;
+    };
+    for (const doc of data.documents ?? []) {
+      const uid = doc.name?.split("/").pop()?.trim() ?? "";
+      if (uid) out.push(uid);
+    }
+    if (!data.nextPageToken) break;
+    pageToken = data.nextPageToken;
+  }
+  return out;
+}
+
+/** Expo tokens for every `/admins/{uid}` that also has a users profile token. */
+export async function listAdminPushTokensRest(
+  skipUid?: string,
+): Promise<string[]> {
+  const adminUids = await listAdminUidsRest();
+  const found = new Set<string>();
+  await Promise.all(
+    adminUids.map(async (uid) => {
+      if (!uid || uid === skipUid) return;
+      const tokens = await tokensForUserDoc(uid);
+      for (const token of tokens) found.add(token);
+    }),
+  );
+  return [...found];
+}
+
+async function tokensForUserDoc(uid: string): Promise<string[]> {
+  return pushTokensFromUser(await getAdminDocumentRest(collectionName("users"), uid));
+}
+
 /** Runners who can receive a new-order buzz. */
 export async function listRunnerPushTokensRest(): Promise<
   { uid: string; tokens: string[] }[]

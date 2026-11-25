@@ -106,6 +106,14 @@ service firebase.storage {
       allow write: if canAccessAdminChat(userId) && isImageUnder10mb();
     }
 
+    // Profile photos — owner write, signed-in read (orders stamp the URL).
+    match /avatars/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && uid() == userId
+        && isImageUnder10mb();
+    }
+
     // ---------------------------------------------------------------- staging
     // storagePath() prefixes staging objects with test/. Firestore staging
     // twins (*_test) are intentionally looser, so these match that posture.
@@ -140,6 +148,13 @@ service firebase.storage {
     match /test/adminChats/{userId}/{messageId}/{fileName} {
       allow read: if signedIn();
       allow write: if signedIn() && isImageUnder10mb();
+    }
+
+    match /test/avatars/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && uid() == userId
+        && isImageUnder10mb();
     }
   }
 }

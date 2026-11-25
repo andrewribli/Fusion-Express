@@ -40,6 +40,7 @@ export function NotificationBootstrap() {
       const data = response.notification.request.content.data as {
         type?: string;
         orderId?: string;
+        userId?: string;
       };
       openFromPushData(data);
     }

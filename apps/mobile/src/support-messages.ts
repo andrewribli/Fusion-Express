@@ -1,6 +1,8 @@
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   getDocs,
   limit,
   onSnapshot,
@@ -13,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { collectionName } from "@fusion-express/shared/app-env";
 import { getDb, isFirebaseConfigured } from "@fusion-express/shared/firebase";
+import { notifySupportMessage } from "./notify-push";
 
 export type SupportMessage = {
   id: string;
@@ -21,6 +24,14 @@ export type SupportMessage = {
   message: string;
   createdAt: Date;
   read: boolean;
+};
+
+export type SupportThread = {
+  userId: string;
+  lastMessage: string;
+  lastSenderId: string;
+  lastAt: Date;
+  unreadFromUser: number;
 };
 
 function col() {
@@ -58,6 +69,7 @@ export async function sendSupportMessage(opts: {
     createdAt: Timestamp.now(),
     read: false,
   });
+  notifySupportMessage(opts.userId, trimmed);
 }
 
 export function subscribeSupportMessages(
@@ -106,4 +118,56 @@ export async function markSupportRead(opts: {
       })
       .map((d) => updateDoc(d.ref, { read: true })),
   );
+}
+
+/** Admin inbox: recent support threads (same query as web /admin/support). */
+export async function fetchSupportThreads(): Promise<SupportThread[]> {
+  if (!isFirebaseConfigured()) return [];
+  const snap = await getDocs(
+    query(collection(getDb(), col()), orderBy("createdAt", "desc"), limit(400)),
+  );
+  const byUser = new Map<string, SupportThread>();
+  for (const docSnap of snap.docs) {
+    const msg = parse(docSnap.id, docSnap.data() as Record<string, unknown>);
+    const existing = byUser.get(msg.userId);
+    if (!existing) {
+      byUser.set(msg.userId, {
+        userId: msg.userId,
+        lastMessage: msg.message,
+        lastSenderId: msg.senderId,
+        lastAt: msg.createdAt,
+        unreadFromUser: !msg.read && msg.senderId === msg.userId ? 1 : 0,
+      });
+    } else if (!msg.read && msg.senderId === msg.userId) {
+      existing.unreadFromUser += 1;
+    }
+  }
+  return [...byUser.values()].sort(
+    (a, b) => b.lastAt.getTime() - a.lastAt.getTime(),
+  );
+}
+
+/** Best-effort display names for admin inbox (admins may get /users/{uid}). */
+export async function fetchUserDisplayNames(
+  uids: string[],
+): Promise<Record<string, string>> {
+  const names: Record<string, string> = {};
+  if (!isFirebaseConfigured() || uids.length === 0) return names;
+  const unique = [...new Set(uids.filter(Boolean))];
+  await Promise.all(
+    unique.slice(0, 80).map(async (uid) => {
+      try {
+        const snap = await getDoc(doc(getDb(), collectionName("users"), uid));
+        if (!snap.exists()) return;
+        const data = snap.data() as Record<string, unknown>;
+        names[uid] =
+          (data.fullName ? String(data.fullName) : "") ||
+          (data.email ? String(data.email) : "") ||
+          uid;
+      } catch {
+        /* ignore per-user failures */
+      }
+    }),
+  );
+  return names;
 }

@@ -158,6 +158,7 @@ service cloud.firestore {
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
         'role', 'photoURL', 'photoUrl', 'campus', 'displayName', 'isAnonymous',
         'pseudonym', 'pseudonymChangedAt',
+        'avatarId', 'showRealPhotoToRunners',
         'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
         'isRunner', 'runnerId',
@@ -338,6 +339,7 @@ service cloud.firestore {
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
           'acceptedAt', 'runnerDeadline', 'runnerPaymentMethod',
           'runnerPaymentId', 'runnerEmail',
+          'runnerStudentId', 'runnerAvatarId', 'runnerPhotoURL',
           'discountApplied', 'discountAmount', 'runnerCollege',
           'canteenCollege', 'subtotal', 'total'
         ])

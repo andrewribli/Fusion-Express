@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { collectionName } from "@/lib/constants";
 import { getAuthClient, getDb, isFirebaseConfigured } from "@/lib/firebase";
+import { notifySupportMessage } from "@/lib/notify-push";
 
 export type DirectMessage = {
   id: string;
@@ -71,6 +72,7 @@ export async function sendDirectMessage(opts: {
       createdAt: Timestamp.fromDate(now),
       read: false,
     });
+    notifySupportMessage(opts.userId, trimmed);
     return { ...row, id: ref.id };
   }
 

@@ -21,8 +21,12 @@ import MenuScreen from "./app/menu";
 import CanteenMenuScreen from "./app/canteen-menu";
 import CartScreen from "./app/cart";
 import CheckoutScreen from "./app/checkout";
+import CanteenCheckoutScreen from "./app/canteen-checkout";
 import TrackScreen from "./app/track";
 import SupportScreen from "./app/support";
+import AdminScreen from "./app/admin";
+import AdminSupportScreen from "./app/admin-support";
+import AdminSupportThreadScreen from "./app/admin-support-thread";
 
 const Tab = createBottomTabNavigator<TabsParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -93,6 +97,11 @@ function Root() {
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen
+                  name="CanteenCheckout"
+                  component={CanteenCheckoutScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
                   name="Track"
                   component={TrackScreen}
                   options={{ headerShown: false }}
@@ -100,6 +109,21 @@ function Root() {
                 <Stack.Screen
                   name="Support"
                   component={SupportScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Admin"
+                  component={AdminScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="AdminSupport"
+                  component={AdminSupportScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="AdminSupportThread"
+                  component={AdminSupportThreadScreen}
                   options={{ headerShown: false }}
                 />
               </Stack.Navigator>

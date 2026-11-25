@@ -24,7 +24,12 @@ export const linking: LinkingOptions<RootStackParamList> = {
       CanteenMenu: "canteen/:restaurantId",
       Cart: "cart",
       Checkout: "checkout",
+      CanteenCheckout: "canteen-checkout",
       Track: "track/:orderId",
+      Support: "support",
+      Admin: "admin/tools",
+      AdminSupport: "admin",
+      AdminSupportThread: "admin/support/:userId",
     },
   },
   getStateFromPath(path, options) {
@@ -43,6 +48,13 @@ export const linking: LinkingOptions<RootStackParamList> = {
         ],
       };
     }
+    // Legacy `admin/support` deep link → inbox (same as `admin`).
+    const adminSupport = path.match(/^\/?admin\/support\/?$/);
+    if (adminSupport) {
+      return {
+        routes: [{ name: "Tabs" }, { name: "AdminSupport" }],
+      };
+    }
     return defaultGetStateFromPath(path, options);
   },
 };
@@ -50,13 +62,27 @@ export const linking: LinkingOptions<RootStackParamList> = {
 export function openFromPushData(data: {
   type?: string;
   orderId?: string;
+  userId?: string;
 }): void {
   const orderId = data.orderId?.trim() ?? "";
+  const userId = data.userId?.trim() ?? "";
   const type = data.type ?? "";
   const go = () => {
     if (!navigationRef.isReady()) return false;
     if (type === "pending_order" || type === "order_created") {
       navigationRef.navigate("Tabs", { screen: "Runner" });
+      return true;
+    }
+    if (type === "support_admin" || type === "support") {
+      if (userId) {
+        navigationRef.navigate("AdminSupportThread", { userId });
+      } else {
+        navigationRef.navigate("AdminSupport");
+      }
+      return true;
+    }
+    if (type === "support_customer") {
+      navigationRef.navigate("Support");
       return true;
     }
     if (!orderId) return true;

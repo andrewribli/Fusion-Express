@@ -4,6 +4,10 @@ import { collectionName } from "@/lib/constants";
 import { normalizeRole, isUserRole } from "@/lib/roles";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, getDoc, getDocs, collection, setDoc, Timestamp, deleteField } from "firebase/firestore";
+import {
+  isAvatarId,
+  pickDefaultAvatarId,
+} from "@fusion-express/shared/avatars";
 
 const USERS_COLLECTION = collectionName("users");
 
@@ -49,6 +53,10 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
       : data.photoURL
         ? String(data.photoURL)
         : undefined,
+    avatarId: isAvatarId(data.avatarId)
+      ? data.avatarId
+      : pickDefaultAvatarId(uid),
+    showRealPhotoToRunners: data.showRealPhotoToRunners === true,
     displayName: data.displayName != null ? String(data.displayName) : undefined,
     isAnonymous: data.isAnonymous === true,
     pseudonym: data.pseudonym != null ? String(data.pseudonym) : undefined,
@@ -113,6 +121,10 @@ export async function createUserProfile(
   profile: Pick<UserProfile, "fullName"> & Partial<UserProfile>,
 ): Promise<UserProfile> {
   const now = new Date();
+  const avatarId =
+    (profile.avatarId && isAvatarId(profile.avatarId)
+      ? profile.avatarId
+      : undefined) ?? pickDefaultAvatarId(uid || profile.email);
   const payload = {
     uid,
     fullName: profile.fullName,
@@ -126,6 +138,8 @@ export async function createUserProfile(
     hall: profile.hall,
     cuhkEmail: profile.cuhkEmail,
     cuhkVerifiedAt: profile.cuhkVerifiedAt,
+    avatarId,
+    showRealPhotoToRunners: false,
     createdAt: Timestamp.fromDate(now),
     updatedAt: Timestamp.fromDate(now),
   };
@@ -148,6 +162,8 @@ export async function createUserProfile(
     hall: profile.hall,
     cuhkEmail: profile.cuhkEmail,
     cuhkVerifiedAt: profile.cuhkVerifiedAt,
+    avatarId,
+    showRealPhotoToRunners: false,
     createdAt: now.toISOString(),
   };
 }

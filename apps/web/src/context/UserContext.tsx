@@ -53,6 +53,13 @@ export interface UserProfile {
   photoURL?: string;
   /** Same as photoURL; kept for older delivery-identity docs. */
   photoUrl?: string;
+  /** Curated cute food avatar id (see @fusion-express/shared/avatars). */
+  avatarId?: string;
+  /**
+   * Customer opt-in: when true, runners see the real photo on deliveries.
+   * Default false — runners see the cute avatar instead.
+   */
+  showRealPhotoToRunners?: boolean;
   displayName?: string | null;
   isAnonymous?: boolean;
   pseudonym?: string | null;

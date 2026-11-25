@@ -204,6 +204,13 @@ export interface Order {
   customerEmail?: string;
   /** Customer mobile for runner contact / guest checkout identity. */
   customerPhone?: string;
+  /** Cute avatar stamped at place-order (runners cannot read /users). */
+  customerAvatarId?: string;
+  /**
+   * Real photo URL only when the customer opted in to show it to runners.
+   * Absent means runners should render customerAvatarId instead.
+   */
+  customerPhotoURL?: string;
   /** University campus that owns this order (CUHK vs CityU). */
   campus?: CampusId;
   /** Storefront channel that placed the order (grocery vs campus canteen). */
@@ -274,6 +281,10 @@ export interface Order {
   runnerName?: string;
   /** Student ID stamped at accept for lobby pickup verification. */
   runnerStudentId?: string;
+  /** Cute avatar for the runner (fallback when no real photo). */
+  runnerAvatarId?: string;
+  /** Runner real photo URL when set — always shown to the customer on track. */
+  runnerPhotoURL?: string;
   runnerRating?: number;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;

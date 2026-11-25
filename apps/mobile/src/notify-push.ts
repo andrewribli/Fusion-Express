@@ -33,3 +33,31 @@ export function notifyOrderEvent(
     }
   })();
 }
+
+/** Customer ↔ admin support — buzz admin devices (or customer on reply). */
+export function notifySupportMessage(userId: string, preview?: string): void {
+  void (async () => {
+    try {
+      const user = getAuthClient().currentUser;
+      if (!user || !userId) return;
+      const token = await user.getIdToken();
+      const res = await fetch(`${webAssetOrigin()}/api/push/support-message`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          preview: preview?.slice(0, 140),
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn("[push] support notify failed", res.status, text.slice(0, 180));
+      }
+    } catch (err) {
+      console.warn("[push] support notify failed", err);
+    }
+  })();
+}

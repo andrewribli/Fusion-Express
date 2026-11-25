@@ -441,6 +441,13 @@ export async function sendPasswordReset(identifier: string): Promise<void> {
   await authMod().sendPasswordResetEmail(getAuthClient(), resolved);
 }
 
+/** True when the signed-in user can change a password (email/password provider). */
+export function hasPasswordProvider(user?: User | null): boolean {
+  const current = user ?? getAuthClient().currentUser;
+  if (!current) return false;
+  return current.providerData.some((p) => p.providerId === "password");
+}
+
 export async function changePassword(
   currentPassword: string,
   newPassword: string,
@@ -451,6 +458,11 @@ export async function changePassword(
   const user = getAuthClient().currentUser;
   if (!user?.email) {
     throw new Error("Please sign in again before changing your password");
+  }
+  if (!hasPasswordProvider(user)) {
+    throw new Error(
+      "This account signs in with Apple or Google. Set a password from the website login page if you need email sign-in.",
+    );
   }
   const newErr = validatePassword(newPassword);
   if (newErr) throw new Error(newErr);

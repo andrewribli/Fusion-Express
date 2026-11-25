@@ -6,8 +6,12 @@ export type RootStackParamList = {
   CanteenMenu: { restaurantId: string };
   Cart: undefined;
   Checkout: undefined;
+  CanteenCheckout: undefined;
   Track: { orderId?: string; focusChat?: boolean };
   Support: undefined;
+  Admin: undefined;
+  AdminSupport: undefined;
+  AdminSupportThread: { userId: string; title?: string };
 };
 
 export type TabsParamList = {

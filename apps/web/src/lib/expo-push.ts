@@ -3,6 +3,8 @@ import { collectionName } from "@/lib/constants";
 import {
   fetchOrderForEmailRest,
   getAdminDocumentRest,
+  isAdminUidRest,
+  listAdminPushTokensRest,
   listRunnerPushTokensRest,
   pushTokensFromUser,
   type RestAuthed,
@@ -16,7 +18,7 @@ type ExpoMessage = {
   body: string;
   sound: "default";
   channelId: "orders";
-  data: { orderId: string; type: string };
+  data: Record<string, string>;
 };
 
 async function tokensForUid(uid: string): Promise<string[]> {
@@ -114,6 +116,54 @@ export async function dispatchOrderPush(opts: {
     sound: "default",
     channelId: "orders",
     data: { orderId: order.id, type },
+  }));
+  return sendExpo(messages);
+}
+
+/**
+ * Support inbox push:
+ * - Customer message → all admin devices (except sender)
+ * - Admin reply → that customer's devices
+ */
+export async function dispatchSupportPush(opts: {
+  auth: RestAuthed;
+  threadUserId: string;
+  preview?: string;
+}): Promise<number> {
+  const threadUserId = opts.threadUserId.trim();
+  if (!threadUserId || threadUserId.length > 128) {
+    throw new Error("Missing support thread.");
+  }
+
+  const preview = (opts.preview ?? "").replace(/\s+/g, " ").trim().slice(0, 80);
+  const fromCustomer = opts.auth.uid === threadUserId;
+
+  let tokens: string[] = [];
+  let title = "GraceRun support";
+  let body = preview || "New support message.";
+  let type = "support";
+
+  if (fromCustomer) {
+    tokens = await listAdminPushTokensRest(opts.auth.uid);
+    title = "New support message";
+    body = preview || "A customer messaged support.";
+    type = "support_admin";
+  } else {
+    const admin = await isAdminUidRest(opts.auth.uid);
+    if (!admin) throw new Error("Not allowed for this support thread.");
+    tokens = await tokensForUid(threadUserId);
+    title = "GraceRun replied";
+    body = preview || "Open Contact Support to read the reply.";
+    type = "support_customer";
+  }
+
+  const messages: ExpoMessage[] = tokens.slice(0, 40).map((to) => ({
+    to,
+    title,
+    body,
+    sound: "default",
+    channelId: "orders",
+    data: { userId: threadUserId, type },
   }));
   return sendExpo(messages);
 }

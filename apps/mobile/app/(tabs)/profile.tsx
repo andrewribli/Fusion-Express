@@ -12,10 +12,16 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { validateEmail, validatePassword } from "@fusion-express/shared/auth";
+import {
+  hasPasswordProvider,
+  validateEmail,
+  validatePassword,
+} from "@fusion-express/shared/auth";
 import { useAuth } from "../../src/auth";
 import { isAppleSignInAvailable } from "../../src/apple-auth";
+import { ChangePasswordModal } from "../../src/ChangePasswordModal";
 import { DeleteAccountModal } from "../../src/DeleteAccountModal";
+import { ProfileAvatarSettings } from "../../src/ProfileAvatarSettings";
 import { SignupFlow } from "../../src/SignupFlow";
 import type { RootStackParamList } from "../../src/navigation";
 import {
@@ -34,7 +40,17 @@ type AuthMode = "signin" | "signup";
 export default function ProfileScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { user, profile, loading, signIn, signInApple, signOut } = useAuth();
+  const {
+    user,
+    profile,
+    isAdmin,
+    loading,
+    refreshProfile,
+    refreshAdmin,
+    signIn,
+    signInApple,
+    signOut,
+  } = useAuth();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +58,9 @@ export default function ProfileScreen() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [appleAvailable, setAppleAvailable] = useState(false);
+  const canChangePassword = hasPasswordProvider(user);
 
   useEffect(() => {
     void isAppleSignInAvailable().then(setAppleAvailable);
@@ -165,7 +183,60 @@ export default function ProfileScreen() {
                     Customer account — use the Runner tab to sign up as a runner.
                   </Text>
                 )}
+                {isAdmin ? (
+                  <View className="mt-2 self-start rounded-full bg-gray-900 px-3 py-1">
+                    <Text className="text-xs font-semibold text-white">
+                      Admin access enabled
+                    </Text>
+                  </View>
+                ) : null}
               </Card>
+
+              {isAdmin ? (
+                <Card className="mt-3">
+                  <SectionLabel>Admin</SectionLabel>
+                  <Text className="mt-2 text-xs text-gray-500">
+                    Opens the support inbox. Web tools (payouts, users) are linked
+                    from there.
+                  </Text>
+                  <PrimaryButton
+                    label="Open Admin"
+                    className="mt-3"
+                    onPress={() => navigation.navigate("AdminSupport")}
+                  />
+                  <SecondaryButton
+                    label="Refresh admin access"
+                    className="mt-2"
+                    onPress={() => {
+                      void refreshAdmin();
+                      void refreshProfile();
+                    }}
+                  />
+                </Card>
+              ) : null}
+
+              {profile ? (
+                <Card className="mt-3">
+                  <SectionLabel>Avatar</SectionLabel>
+                  <View className="mt-3">
+                    <ProfileAvatarSettings
+                      profile={profile}
+                      onUpdated={refreshProfile}
+                    />
+                  </View>
+                </Card>
+              ) : null}
+
+              {canChangePassword ? (
+                <Card className="mt-3">
+                  <SectionLabel>Security</SectionLabel>
+                  <PrimaryButton
+                    label="Change password"
+                    className="mt-3"
+                    onPress={() => setPasswordOpen(true)}
+                  />
+                </Card>
+              ) : null}
 
               <Card className="mt-3">
                 <SectionLabel>Account type</SectionLabel>
@@ -363,6 +434,10 @@ export default function ProfileScreen() {
       <DeleteAccountModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
+      />
+      <ChangePasswordModal
+        open={passwordOpen}
+        onClose={() => setPasswordOpen(false)}
       />
     </Page>
   );

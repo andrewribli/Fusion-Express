@@ -19,6 +19,8 @@ import { useDemoAuth } from "@/lib/use-demo-auth";
 import { updateUserProfileDoc } from "@/lib/users";
 import { roleLabel } from "@/lib/roles";
 import type { CampusId } from "@fusion-express/shared/campus";
+import { hasPasswordProvider } from "@/lib/auth";
+import { getAuthClient } from "@/lib/firebase";
 
 export function ProfileView() {
   const {
@@ -43,7 +45,19 @@ export function ProfileView() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  const canChangePassword = firebaseEnabled && !demoAuth && Boolean(user?.email);
+  const canChangePassword =
+    firebaseEnabled &&
+    !demoAuth &&
+    Boolean(user?.email) &&
+    hasPasswordProvider(
+      (() => {
+        try {
+          return getAuthClient().currentUser;
+        } catch {
+          return null;
+        }
+      })(),
+    );
   const isGuest = Boolean(user?.isGuest);
   const campus: CampusId = user?.campus === "cityu" ? "cityu" : "cuhk";
 
