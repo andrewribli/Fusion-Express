@@ -357,33 +357,51 @@ export async function createOrder(
   }
   const now = new Date();
   const id = `FE-${Math.floor(1000 + Math.random() * 9000)}`;
-  const orderWithNotes = {
-    ...order,
-    customerNote: resolveSpecialInstructions(order.customerNote),
-  };
+  const customerNote = resolveSpecialInstructions(order.customerNote);
+  const estimatedSubtotal = order.estimatedSubtotal ?? order.subtotal;
+  const sanitizedItems = (order.items ?? []).map((item) =>
+    omitUndefined({
+      itemId: item.itemId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      weightKg: item.weightKg,
+      actualPrice: item.actualPrice,
+      isCustom: item.isCustom === true ? true : undefined,
+    } as Record<string, unknown>),
+  );
 
   if (isFirebaseConfigured()) {
     try {
-      // Sanitize nested maps/arrays too — shallow strip missed items[].isCustom
-      // / weightKg undefined and broke checkout (Firestore forbids undefined).
+      // Allowlist only — never spread the full Order (optional fields are often
+      // explicitly `undefined` and Firestore rejects those, including nested
+      // items[].weightKg / items[].isCustom).
       const payload = omitUndefined({
-        ...orderWithNotes,
-        items: (orderWithNotes.items ?? []).map((item) =>
-          omitUndefined({
-            itemId: item.itemId,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            weightKg: item.weightKg,
-            actualPrice: item.actualPrice,
-            isCustom: item.isCustom === true ? true : undefined,
-          } as Record<string, unknown>),
-        ),
+        sessionId: order.sessionId,
+        customerId: order.customerId,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerAvatarId: order.customerAvatarId,
+        customerPhotoURL: order.customerPhotoURL,
+        campus: order.campus,
+        orderChannel: order.orderChannel,
+        canteenRestaurantId: order.canteenRestaurantId,
+        canteenCollege: order.canteenCollege,
+        items: sanitizedItems,
         status: "pending",
-        fusionPaidByPlatform: true,
-        estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
-        createdAt: Timestamp.fromDate(now),
-        updatedAt: Timestamp.fromDate(now),
+        college: order.college,
+        hall: order.hall,
+        lobbyPoint: order.lobbyPoint,
+        zone: order.zone,
+        totalWeight: order.totalWeight,
+        customerNote,
+        subtotal: order.subtotal,
+        deliveryFee: order.deliveryFee,
+        tip: order.tip,
+        total: order.total,
+        paymentReceived: order.paymentReceived === true,
+        fusionPaidByPlatform: order.fusionPaidByPlatform !== false,
+        estimatedSubtotal,
         estimatedDeliveryAt: order.estimatedDeliveryAt
           ? Timestamp.fromDate(order.estimatedDeliveryAt)
           : undefined,
@@ -391,12 +409,20 @@ export async function createOrder(
           ? Timestamp.fromDate(order.scheduledFor)
           : undefined,
         isScheduled: order.isScheduled === true ? true : undefined,
+        createdAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
       } as Record<string, unknown>);
       assertNoUndefined(payload, "createOrder");
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
       return ref.id;
     } catch (err) {
       console.error("createOrder Firestore failed", err);
+      const raw = err instanceof Error ? err.message : String(err ?? "");
+      if (/unsupported field value:\s*undefined/i.test(raw)) {
+        throw new Error(
+          "Could not place order (invalid order data). Please update the app and try again.",
+        );
+      }
       throw err instanceof Error
         ? err
         : new Error("Could not save order. Try again.");
@@ -404,11 +430,12 @@ export async function createOrder(
   }
 
   const fullOrder: Order = {
-    ...orderWithNotes,
+    ...order,
+    customerNote,
     id,
     status: "pending",
-    fusionPaidByPlatform: true,
-    estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
+    fusionPaidByPlatform: order.fusionPaidByPlatform !== false,
+    estimatedSubtotal,
     createdAt: now,
     updatedAt: now,
   };
