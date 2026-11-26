@@ -66,9 +66,17 @@ export async function notifyNewUser(opts: {
   referralSource?: string;
   isRunner?: boolean;
 }): Promise<void> {
+  // Prefer a fresh ID token so /api/email/signup auth never races signup.
+  if (isFirebaseConfigured()) {
+    try {
+      await getAuthClient().currentUser?.getIdToken(true);
+    } catch (err) {
+      console.error("notifyNewUser token refresh failed", err);
+    }
+  }
   await postJson("/api/email/signup", {
     fullName: opts.fullName,
-    email: opts.email,
+    email: opts.email?.trim().toLowerCase(),
     campus: opts.campus,
     referralSource: opts.referralSource,
     isRunner: opts.isRunner,

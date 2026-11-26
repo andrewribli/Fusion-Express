@@ -271,10 +271,16 @@ export default function CartScreen() {
         <View className="border-t border-gray-200 bg-white px-4 py-3">
           <PrimaryButton
             label={
-              canteenOpen ? "Checkout" : "Canteen closed — checkout paused"
+              !canteenOpen
+                ? "Canteen closed — checkout paused"
+                : canteen
+                  ? "Canteen checkout"
+                  : "Fusion checkout"
             }
             disabled={overLimit || !canteenOpen}
-            onPress={() => navigation.navigate("Checkout")}
+            onPress={() =>
+              navigation.navigate(canteen ? "CanteenCheckout" : "Checkout")
+            }
           />
         </View>
       ) : null}

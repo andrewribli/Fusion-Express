@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendAdminNewUserNotice } from "@/lib/email";
+import { dispatchSignupPush } from "@/lib/expo-push";
 import {
   AdminAuthError,
   requireAuthFromRequest,
@@ -37,11 +38,13 @@ export async function POST(request: Request) {
   const fullName = cap((body.fullName ?? "").trim(), 120);
   const campus = cap((body.campus ?? "").trim(), 40);
   const referralSource = cap((body.referralSource ?? "").trim(), 40);
+  const authEmail = (auth.email ?? "").trim().toLowerCase();
 
   if (!email || !email.includes("@")) {
     return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
   }
-  if (!auth.email || auth.email !== email) {
+  // Case-insensitive: Firebase token email casing can differ from the form.
+  if (!authEmail || authEmail !== email) {
     return NextResponse.json(
       { error: "Email must match the signed-in account." },
       { status: 403 },
@@ -56,7 +59,6 @@ export async function POST(request: Request) {
       referralSource,
       isRunner: Boolean(body.isRunner),
     });
-    return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("admin new-user notice failed after retry", err);
     return NextResponse.json(
@@ -64,4 +66,18 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
+
+  // Best-effort phone buzz for admins with Expo tokens (does not fail signup).
+  try {
+    await dispatchSignupPush({
+      fullName,
+      email,
+      campus,
+      skipUid: auth.uid,
+    });
+  } catch (err) {
+    console.error("admin signup push failed", err);
+  }
+
+  return NextResponse.json({ ok: true });
 }

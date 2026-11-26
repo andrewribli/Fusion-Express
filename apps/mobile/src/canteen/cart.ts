@@ -39,6 +39,23 @@ export function isGroceryCart(items: CartItem[]): boolean {
   return items.length > 0 && !isCanteenCart(items);
 }
 
+/** True when the cart has both canteen and Fusion grocery lines. */
+export function isMixedCart(items: CartItem[]): boolean {
+  let canteen = false;
+  let grocery = false;
+  for (const line of items) {
+    if (isCanteenItemId(line.item.id)) canteen = true;
+    else grocery = true;
+    if (canteen && grocery) return true;
+  }
+  return false;
+}
+
+/** Canteen-only cart (non-empty, no grocery lines). */
+export function isPureCanteenCart(items: CartItem[]): boolean {
+  return items.length > 0 && isCanteenCart(items) && !isMixedCart(items);
+}
+
 export function canteenDeliveryFeeHkd(items: CartItem[]): number {
   return isCanteenCart(items) ? CANTEEN_DELIVERY_FEE : 0;
 }

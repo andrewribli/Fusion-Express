@@ -32,7 +32,7 @@ async function postJson(path: string, body: unknown): Promise<void> {
   }
 }
 
-/** Fire-and-forget admin alert: new signup → hello@gracerun.fit */
+/** Fire-and-forget admin alert: new signup → hello@gracerun.fit (+ admin push). */
 export function notifyNewUser(opts: {
   fullName: string;
   email: string;
@@ -40,13 +40,21 @@ export function notifyNewUser(opts: {
   referralSource?: string;
   isRunner?: boolean;
 }): void {
-  void postJson("/api/email/signup", {
-    fullName: opts.fullName,
-    email: opts.email,
-    campus: opts.campus,
-    referralSource: opts.referralSource,
-    isRunner: opts.isRunner,
-  });
+  void (async () => {
+    try {
+      // Fresh token so signup→notify never races Auth state.
+      await getAuthClient().currentUser?.getIdToken(true);
+    } catch (err) {
+      console.error("notifyNewUser token refresh failed", err);
+    }
+    await postJson("/api/email/signup", {
+      fullName: opts.fullName,
+      email: opts.email.trim().toLowerCase(),
+      campus: opts.campus,
+      referralSource: opts.referralSource,
+      isRunner: opts.isRunner,
+    });
+  })();
 }
 
 /** Fire-and-forget admin + roster alerts for a new order. */

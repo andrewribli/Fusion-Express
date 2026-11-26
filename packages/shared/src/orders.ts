@@ -30,7 +30,7 @@ import {
   RUNNER_DELIVERY_WINDOW_MS,
   runnerDeadlineOf,
 } from "./order-status";
-import { omitUndefined } from "./omit-undefined";
+import { assertNoUndefined, omitUndefined } from "./omit-undefined";
 import { getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
 import {
   addDoc,
@@ -152,6 +152,14 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     customerName: data.customerName ? String(data.customerName) : undefined,
     customerEmail: data.customerEmail ? String(data.customerEmail) : undefined,
     customerPhone: data.customerPhone ? String(data.customerPhone) : undefined,
+    customerAvatarId: data.customerAvatarId
+      ? String(data.customerAvatarId)
+      : undefined,
+    customerPhotoURL: data.customerPhotoURL
+      ? String(data.customerPhotoURL)
+      : data.customerPhotoUrl
+        ? String(data.customerPhotoUrl)
+        : undefined,
     campus,
     orderChannel,
     canteenRestaurantId: data.canteenRestaurantId
@@ -237,6 +245,14 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerStudentId: data.runnerStudentId
       ? String(data.runnerStudentId)
       : undefined,
+    runnerAvatarId: data.runnerAvatarId
+      ? String(data.runnerAvatarId)
+      : undefined,
+    runnerPhotoURL: data.runnerPhotoURL
+      ? String(data.runnerPhotoURL)
+      : data.runnerPhotoUrl
+        ? String(data.runnerPhotoUrl)
+        : undefined,
     runnerRating: data.runnerRating != null ? Number(data.runnerRating) : undefined,
     deliveryPhotoUrl: data.deliveryPhotoUrl
       ? String(data.deliveryPhotoUrl)
@@ -348,8 +364,21 @@ export async function createOrder(
 
   if (isFirebaseConfigured()) {
     try {
+      // Sanitize nested maps/arrays too — shallow strip missed items[].isCustom
+      // / weightKg undefined and broke checkout (Firestore forbids undefined).
       const payload = omitUndefined({
         ...orderWithNotes,
+        items: (orderWithNotes.items ?? []).map((item) =>
+          omitUndefined({
+            itemId: item.itemId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            weightKg: item.weightKg,
+            actualPrice: item.actualPrice,
+            isCustom: item.isCustom === true ? true : undefined,
+          } as Record<string, unknown>),
+        ),
         status: "pending",
         fusionPaidByPlatform: true,
         estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
@@ -363,6 +392,7 @@ export async function createOrder(
           : undefined,
         isScheduled: order.isScheduled === true ? true : undefined,
       } as Record<string, unknown>);
+      assertNoUndefined(payload, "createOrder");
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
       return ref.id;
     } catch (err) {
@@ -776,17 +806,27 @@ export async function acceptOrder(
           studentId = data.studentId ? String(data.studentId).trim() : "";
         }
       }
-      if (!studentId) {
+      let runnerAvatarId = "";
+      let runnerPhotoURL = "";
+      {
         const userSnap = await tx.get(doc(db, collectionName("users"), runnerUid));
         if (userSnap.exists()) {
           const data = userSnap.data() as Record<string, unknown>;
-          studentId = data.studentId
-            ? String(data.studentId).trim()
-            : data.cuhkEmail
-              ? String(data.cuhkEmail).split("@")[0].trim()
-              : data.email
-                ? String(data.email).split("@")[0].trim()
-                : "";
+          if (!studentId) {
+            studentId = data.studentId
+              ? String(data.studentId).trim()
+              : data.cuhkEmail
+                ? String(data.cuhkEmail).split("@")[0].trim()
+                : data.email
+                  ? String(data.email).split("@")[0].trim()
+                  : "";
+          }
+          runnerAvatarId = data.avatarId ? String(data.avatarId).trim() : "";
+          runnerPhotoURL = data.photoURL
+            ? String(data.photoURL).trim()
+            : data.photoUrl
+              ? String(data.photoUrl).trim()
+              : "";
         }
       }
       tx.update(orderRef, {
@@ -795,6 +835,8 @@ export async function acceptOrder(
         runnerUid,
         runnerName,
         ...(studentId ? { runnerStudentId: studentId } : {}),
+        ...(runnerAvatarId ? { runnerAvatarId } : {}),
+        ...(runnerPhotoURL ? { runnerPhotoURL } : {}),
         acceptedAt: Timestamp.fromDate(now),
         runnerDeadline: Timestamp.fromDate(
           new Date(now.getTime() + RUNNER_DELIVERY_WINDOW_MS),
@@ -849,6 +891,8 @@ export async function updateOrderStatus(
       | "runnerId"
       | "runnerUid"
       | "runnerStudentId"
+      | "runnerAvatarId"
+      | "runnerPhotoURL"
       | "deliveryPhotoUrl"
       | "receiptUrl"
       | "bankStatementUrl"
@@ -908,6 +952,12 @@ export async function updateOrderStatus(
       if (extras?.runnerUid) updates.runnerUid = extras.runnerUid;
       if (extras?.runnerStudentId) {
         updates.runnerStudentId = extras.runnerStudentId;
+      }
+      if (extras?.runnerAvatarId) {
+        updates.runnerAvatarId = extras.runnerAvatarId;
+      }
+      if (extras?.runnerPhotoURL) {
+        updates.runnerPhotoURL = extras.runnerPhotoURL;
       }
       if (extras?.deliveryPhotoUrl) {
         updates.deliveryPhotoUrl = extras.deliveryPhotoUrl;
@@ -970,6 +1020,8 @@ export async function updateOrderStatus(
     if (extras?.runnerId) order.runnerId = extras.runnerId;
     if (extras?.runnerUid) order.runnerUid = extras.runnerUid;
     if (extras?.runnerStudentId) order.runnerStudentId = extras.runnerStudentId;
+    if (extras?.runnerAvatarId) order.runnerAvatarId = extras.runnerAvatarId;
+    if (extras?.runnerPhotoURL) order.runnerPhotoURL = extras.runnerPhotoURL;
     if (extras?.deliveryPhotoUrl) order.deliveryPhotoUrl = extras.deliveryPhotoUrl;
     if (extras?.receiptUrl) order.receiptUrl = extras.receiptUrl;
     if (extras?.bankStatementUrl) order.bankStatementUrl = extras.bankStatementUrl;

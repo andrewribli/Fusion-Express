@@ -22,21 +22,13 @@ import {
   ZONE_LABELS,
 } from "@fusion-express/shared/delivery";
 import {
-  canteenCollegeForRestaurant,
-  collegeLabel,
-  computeCollegeDiscount,
-} from "@fusion-express/shared/canteen-college";
-import {
-  closedBannerText,
-  isCanteenOpenByConfig,
-} from "@fusion-express/shared/canteen-hours";
-import {
   CUHK_COLLEGES,
   formatDeliveryAddress,
   getHallsForCollege,
   getLobbyForHall,
   type CuhkCollege,
 } from "@fusion-express/shared/locations";
+import { customerAvatarStamp } from "@fusion-express/shared/avatars";
 import { createOrder } from "@fusion-express/shared/orders";
 import {
   getEstimatedDeliveryTime,
@@ -49,11 +41,10 @@ import {
 import { useAuth } from "../src/auth";
 import { useCart } from "../src/cart";
 import {
-  CANTEEN_DELIVERY_FEE,
-  cartRestaurantId,
   isCanteenCart,
+  isGroceryCart,
+  isMixedCart,
 } from "../src/canteen/cart";
-import { getRestaurant } from "../src/canteen/restaurants";
 import { notifyOrderPlaced } from "../src/notify-email";
 import { notifyOrderEvent } from "../src/notify-push";
 import type { RootStackParamList } from "../src/navigation";
@@ -69,6 +60,7 @@ import {
   PrimaryButton,
   ScreenHeader,
   SectionLabel,
+  SecondaryButton,
 } from "../src/ui";
 
 const NOTES_ACCESSORY_ID = "checkout-notes-done";
@@ -79,15 +71,8 @@ export default function CheckoutScreen() {
   const { items, subtotal, sessionId, clearCart } = useCart();
   const { profile, user, ensureCheckoutAuth } = useAuth();
   const canteen = isCanteenCart(items);
-  const restaurantId = cartRestaurantId(items);
-  const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
-  const canteenCollege = canteenCollegeForRestaurant(restaurantId);
-  const canteenOpen =
-    !canteen || !restaurantId || isCanteenOpenByConfig(restaurantId);
-  const closedMessage =
-    canteen && restaurant
-      ? closedBannerText(restaurant.name, restaurant.id)
-      : "";
+  const mixed = isMixedCart(items);
+  const grocery = isGroceryCart(items);
   const initialCollege: CuhkCollege =
     profile?.college && CUHK_COLLEGES.includes(profile.college as CuhkCollege)
       ? (profile.college as CuhkCollege)
@@ -109,28 +94,13 @@ export default function CheckoutScreen() {
   const [showPicker, setShowPicker] = useState(false);
 
   const weightKg = cartTotalWeightKg(items);
-  const fee = useMemo(() => {
-    if (canteen) {
-      return {
-        baseFee: CANTEEN_DELIVERY_FEE,
-        weightKg,
-        extraKg: 0,
-        weightSurcharge: 0,
-        zone: 1 as const,
-        distanceSurcharge: 0,
-        deliveryFee: CANTEEN_DELIVERY_FEE,
-        heavyBagEligible: false,
-      };
-    }
-    return calculateDeliveryFee({ weightKg, college });
-  }, [canteen, weightKg, college]);
-  const total = subtotal + fee.deliveryFee;
-  const overLimit = !canteen && isOverOrderLimit(subtotal);
-  const bounds = scheduleBounds();
-  const discountPreview = useMemo(
-    () => computeCollegeDiscount(subtotal, college, canteenCollege),
-    [subtotal, college, canteenCollege],
+  const fee = useMemo(
+    () => calculateDeliveryFee({ weightKg, college }),
+    [weightKg, college],
   );
+  const total = subtotal + fee.deliveryFee;
+  const overLimit = isOverOrderLimit(subtotal);
+  const bounds = scheduleBounds();
 
   function pickCollege(next: CuhkCollege) {
     setCollege(next);
@@ -138,15 +108,17 @@ export default function CheckoutScreen() {
   }
 
   async function place() {
-    if (items.length === 0) return;
+    if (items.length === 0 || !grocery) return;
     Keyboard.dismiss();
     setLoading(true);
     setError("");
     try {
-      if (overLimit) throw new Error(ORDER_LIMIT_MESSAGE);
-      if (!canteenOpen) {
-        throw new Error(closedMessage || "This canteen is currently closed.");
+      if (canteen || mixed) {
+        throw new Error(
+          "Canteen items belong in Canteen checkout — Fusion checkout is groceries only.",
+        );
       }
+      if (overLimit) throw new Error(ORDER_LIMIT_MESSAGE);
       if (!customerName.trim()) throw new Error("Enter your full name");
       if (!college || !hall) throw new Error("Choose your college and hall");
       const when =
@@ -157,6 +129,13 @@ export default function CheckoutScreen() {
 
       const auth = await ensureCheckoutAuth();
       const name = customerName.trim();
+      const avatarStamp = customerAvatarStamp({
+        avatarId: profile?.avatarId,
+        photoURL: profile?.photoURL,
+        showRealPhotoToRunners: profile?.showRealPhotoToRunners,
+        uid: auth.uid,
+        email: auth.email || user?.email,
+      });
 
       const foodSubtotal = items.reduce(
         (sum, line) => sum + lineTotal(line.item, line.quantity),
@@ -167,23 +146,21 @@ export default function CheckoutScreen() {
         customerId: auth.uid,
         customerName: name,
         customerEmail: auth.email || user?.email || undefined,
+        ...avatarStamp,
         campus: "cuhk",
-        orderChannel: canteen ? "canteen" : "fusion",
-        canteenRestaurantId: canteen ? restaurantId ?? undefined : undefined,
-        canteenCollege: canteen
-          ? canteenCollege ?? undefined
-          : undefined,
-        items: items.map(({ item, quantity }) => ({
-          itemId: item.id,
-          name: item.name,
-          price: getUnitPrice(item),
-          quantity,
-          weightKg: item.weightKg,
-          isCustom:
-            item.id.startsWith("custom-") || item.subcategory === "custom"
-              ? true
-              : undefined,
-        })),
+        orderChannel: "fusion",
+        items: items.map(({ item, quantity }) => {
+          const isCustom =
+            item.id.startsWith("custom-") || item.subcategory === "custom";
+          return {
+            itemId: item.id,
+            name: item.name,
+            price: getUnitPrice(item),
+            quantity,
+            ...(item.weightKg != null ? { weightKg: item.weightKg } : {}),
+            ...(isCustom ? { isCustom: true as const } : {}),
+          };
+        }),
         status: "pending",
         college,
         hall,
@@ -210,9 +187,47 @@ export default function CheckoutScreen() {
     }
   }
 
+  if (canteen || mixed) {
+    return (
+      <Page>
+        <ScreenHeader
+          title="Fusion checkout"
+          onBack={() => navigation.goBack()}
+        />
+        <View className="px-4 py-6">
+          <Card>
+            <Text className="text-base font-bold text-gray-900">
+              {mixed
+                ? "Mixed cart — Fusion + canteen"
+                : "Canteen cart detected"}
+            </Text>
+            <Text className="mt-2 text-sm text-gray-600">
+              {mixed
+                ? "Clear canteen items or check out canteen separately. One order = one channel."
+                : "Campus food uses Canteen checkout with a flat delivery fee."}
+            </Text>
+            <PrimaryButton
+              label="Open Canteen checkout"
+              className="mt-4"
+              onPress={() => navigation.navigate("CanteenCheckout")}
+            />
+            <SecondaryButton
+              label="Back to cart"
+              className="mt-2"
+              onPress={() => navigation.navigate("Cart")}
+            />
+          </Card>
+        </View>
+      </Page>
+    );
+  }
+
   return (
     <Page>
-      <ScreenHeader title="Checkout" onBack={() => navigation.goBack()} />
+      <ScreenHeader
+        title="Fusion checkout"
+        onBack={() => navigation.goBack()}
+      />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -227,11 +242,31 @@ export default function CheckoutScreen() {
         >
           <Pressable onPress={Keyboard.dismiss} accessible={false}>
             {items.length === 0 ? (
-              <Text className="text-gray-500">
-                Cart is empty. Add items from Shop first.
-              </Text>
+              <Card>
+                <Text className="text-base font-bold text-gray-900">
+                  Cart is empty
+                </Text>
+                <Text className="mt-2 text-sm text-gray-600">
+                  Add Fusion groceries from Shop, then come back here.
+                </Text>
+                <PrimaryButton
+                  label="Browse Fusion"
+                  className="mt-4"
+                  onPress={() => navigation.navigate("Tabs", { screen: "Shop" })}
+                />
+              </Card>
             ) : (
               <>
+                <Card className="mb-3 border-red-100 bg-red-50">
+                  <Text className="text-sm font-bold text-red-950">
+                    Fusion grocery order
+                  </Text>
+                  <Text className="mt-1 text-xs text-red-900">
+                    Delivery fee by weight and college zone. Canteen food uses a
+                    separate checkout.
+                  </Text>
+                </Card>
+
                 <Card>
                   <SectionLabel>Your name</SectionLabel>
                   <TextInput
@@ -396,48 +431,28 @@ export default function CheckoutScreen() {
                 </Card>
 
                 <Card className="mt-3">
-                  {canteen && restaurant ? (
-                    <Text className="mb-2 text-sm font-bold text-gray-900">
-                      {restaurant.shortName} · canteen
-                    </Text>
-                  ) : null}
                   <Text className="text-sm text-gray-600">
                     {formatDeliveryAddress(college, hall)}
                   </Text>
-                  {canteen ? (
-                    <Text className="mt-1 text-sm text-gray-600">
-                      Flat canteen delivery HK${CANTEEN_DELIVERY_FEE}
-                    </Text>
-                  ) : (
-                    <>
-                      <Text className="mt-1 text-sm text-gray-600">
-                        {ZONE_LABELS[fee.zone]} · Zone {fee.zone} (+$
-                        {fee.distanceSurcharge})
-                      </Text>
-                      <Text className="mt-1 text-sm text-gray-600">
-                        Base ${fee.baseFee}
-                        {fee.extraKg > 0
-                          ? ` · weight over ${WEIGHT_INCLUDED_KG} kg (+$${fee.weightSurcharge})`
-                          : ` · up to ${WEIGHT_INCLUDED_KG} kg`}
-                        {fee.heavyBagEligible
-                          ? ` · over ${HEAVY_BAG_THRESHOLD_KG} kg (runner may add heavy-bag fee)`
-                          : ""}
-                      </Text>
-                    </>
-                  )}
+                  <Text className="mt-1 text-sm text-gray-600">
+                    {ZONE_LABELS[fee.zone]} · Zone {fee.zone} (+$
+                    {fee.distanceSurcharge})
+                  </Text>
+                  <Text className="mt-1 text-sm text-gray-600">
+                    Base ${fee.baseFee}
+                    {fee.extraKg > 0
+                      ? ` · weight over ${WEIGHT_INCLUDED_KG} kg (+$${fee.weightSurcharge})`
+                      : ` · up to ${WEIGHT_INCLUDED_KG} kg`}
+                    {fee.heavyBagEligible
+                      ? ` · over ${HEAVY_BAG_THRESHOLD_KG} kg (runner may add heavy-bag fee)`
+                      : ""}
+                  </Text>
                   <Text className="mt-1 text-sm text-gray-600">
                     Items ${subtotal} · delivery ${fee.deliveryFee}
-                    {!canteen && fee.extraKg > 0
+                    {fee.extraKg > 0
                       ? ` (incl. $${WEIGHT_SURCHARGE_PER_KG}/extra kg)`
                       : ""}
                   </Text>
-                  {canteen && canteenCollege ? (
-                    <Text className="mt-2 text-xs text-gray-600">
-                      {discountPreview.discountApplied
-                        ? `College discount preview (−HK$${discountPreview.discountAmount}) applies when a ${collegeLabel(canteenCollege)} runner accepts.`
-                        : `10% off food if a ${collegeLabel(canteenCollege)} runner accepts (not applied until accept).`}
-                    </Text>
-                  ) : null}
                   <Text className="mt-2 text-base font-extrabold text-fusion">
                     Total ${total}
                   </Text>
@@ -457,32 +472,15 @@ export default function CheckoutScreen() {
                   )}
                 </Card>
 
-                {!canteenOpen ? (
-                  <Text className="mt-3 text-sm text-orange-700">
-                    {closedMessage}
-                  </Text>
-                ) : null}
-
                 {error ? (
                   <Text className="mt-3 text-sm text-red-600">{error}</Text>
                 ) : null}
 
                 <PrimaryButton
-                  label={
-                    loading
-                      ? "Placing…"
-                      : canteenOpen
-                        ? "Place order"
-                        : "Canteen closed — checkout paused"
-                  }
+                  label={loading ? "Placing…" : "Place Fusion order"}
                   busy={loading}
                   className="mt-4"
-                  disabled={
-                    loading ||
-                    items.length === 0 ||
-                    overLimit ||
-                    !canteenOpen
-                  }
+                  disabled={loading || items.length === 0 || overLimit}
                   onPress={() => void place()}
                 />
               </>

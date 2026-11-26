@@ -77,17 +77,18 @@ export function usePlaceOrder() {
           return;
         }
 
-        const orderItems = items.map(({ item, quantity }) => ({
-          itemId: item.id,
-          name: item.name,
-          price: getUnitPrice(item),
-          quantity,
-          weightKg: item.weightKg,
-          isCustom:
-            item.id.startsWith("custom-") || item.subcategory === "custom"
-              ? true
-              : undefined,
-        }));
+        const orderItems = items.map(({ item, quantity }) => {
+          const isCustom =
+            item.id.startsWith("custom-") || item.subcategory === "custom";
+          return {
+            itemId: item.id,
+            name: item.name,
+            price: getUnitPrice(item),
+            quantity,
+            ...(item.weightKg != null ? { weightKg: item.weightKg } : {}),
+            ...(isCustom ? { isCustom: true as const } : {}),
+          };
+        });
         const orderSubtotal = items.reduce(
           (sum, line) => sum + lineTotal(line.item, line.quantity),
           0,
@@ -102,6 +103,17 @@ export function usePlaceOrder() {
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
         const lobbyPoint = getLobbyForHall(opts.hall, opts.campus);
         const customerName = customer.fullName.trim();
+        const { customerAvatarStamp } = await import(
+          "@fusion-express/shared/avatars"
+        );
+        const avatarStamp = customerAvatarStamp({
+          avatarId: customer.avatarId,
+          photoURL: customer.photoURL,
+          photoUrl: customer.photoUrl,
+          showRealPhotoToRunners: customer.showRealPhotoToRunners,
+          uid: customer.uid,
+          email: customer.email,
+        });
         const canteen = isCanteenCart(items);
         const restaurantId = canteen
           ? restaurantIdFromOrderItems(
@@ -122,6 +134,7 @@ export function usePlaceOrder() {
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
+          ...avatarStamp,
           campus: opts.campus,
           orderChannel,
           canteenRestaurantId: restaurantId ?? undefined,

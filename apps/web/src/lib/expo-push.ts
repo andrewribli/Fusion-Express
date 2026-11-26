@@ -167,3 +167,27 @@ export async function dispatchSupportPush(opts: {
   }));
   return sendExpo(messages);
 }
+
+/** New signup → buzz every admin device (Andrew / James / Edris, etc.). */
+export async function dispatchSignupPush(opts: {
+  fullName: string;
+  email: string;
+  campus?: string;
+  skipUid?: string;
+}): Promise<number> {
+  const tokens = await listAdminPushTokensRest(opts.skipUid);
+  const name = opts.fullName.trim() || "New user";
+  const campus = opts.campus?.trim();
+  const body = campus
+    ? `${name} · ${opts.email} · ${campus}`
+    : `${name} · ${opts.email}`;
+  const messages: ExpoMessage[] = tokens.slice(0, 40).map((to) => ({
+    to,
+    title: "New GraceRun signup",
+    body: body.slice(0, 120),
+    sound: "default",
+    channelId: "orders",
+    data: { type: "signup", email: opts.email },
+  }));
+  return sendExpo(messages);
+}
