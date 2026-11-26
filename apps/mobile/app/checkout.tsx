@@ -181,7 +181,12 @@ export default function CheckoutScreen() {
       notifyOrderEvent(orderId, "created");
       navigation.replace("Track", { orderId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not place order");
+      const raw = err instanceof Error ? err.message : String(err ?? "");
+      setError(
+        /unsupported field value:\s*undefined|invalid data|addDoc/i.test(raw)
+          ? "Could not place order. Please update GraceRun from TestFlight and try again."
+          : raw || "Could not place order",
+      );
     } finally {
       setLoading(false);
     }

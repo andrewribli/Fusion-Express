@@ -153,4 +153,78 @@ for (const [label, raw] of [
   console.log(`OK ${label}: sanitized, no undefined`);
 }
 
+/** Mirror createOrder allowlist + item sanitize (regression for checkout P0). */
+function buildCreateOrderPayload(order) {
+  const items = (order.items ?? []).map((item) =>
+    omitUndefined({
+      itemId: item.itemId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      weightKg: item.weightKg,
+      actualPrice: item.actualPrice,
+      isCustom: item.isCustom === true ? true : undefined,
+    }),
+  );
+  return omitUndefined({
+    sessionId: order.sessionId ?? "s1",
+    customerId: order.customerId,
+    customerName: order.customerName,
+    customerEmail: order.customerEmail,
+    customerAvatarId: order.customerAvatarId,
+    customerPhotoURL: order.customerPhotoURL,
+    campus: order.campus,
+    orderChannel: order.orderChannel,
+    canteenRestaurantId: order.canteenRestaurantId,
+    canteenCollege: order.canteenCollege,
+    items,
+    status: "pending",
+    college: "Shaw College",
+    hall: "Kuo Mou Hall",
+    lobbyPoint: "Kuo Mou Hall lobby",
+    zone: 2,
+    totalWeight: 1,
+    customerNote: "None for now",
+    subtotal: 26,
+    deliveryFee: 8,
+    tip: order.tip,
+    total: 34,
+    paymentReceived: false,
+    fusionPaidByPlatform: true,
+    estimatedSubtotal: 26,
+    isScheduled: order.isScheduled === true ? true : undefined,
+    scheduledFor: undefined,
+  });
+}
+
+const allowlisted = buildCreateOrderPayload({
+  ...fusionRaw,
+  // Noise fields that must never reach Firestore as undefined via spread:
+  paymentMethod: undefined,
+  runnerId: undefined,
+  roomNumber: undefined,
+  heavyBagSurcharge: undefined,
+});
+assertNoUndefined(allowlisted, "allowlist");
+if (hasUndefined(allowlisted)) {
+  console.error("FAIL: allowlist payload still has undefined", allowlisted);
+  process.exit(1);
+}
+for (const leak of [
+  "paymentMethod",
+  "runnerId",
+  "roomNumber",
+  "heavyBagSurcharge",
+  "customerPhotoURL",
+  "tip",
+  "scheduledFor",
+  "isScheduled",
+]) {
+  if (leak in allowlisted) {
+    console.error(`FAIL: allowlist leaked ${leak}`);
+    process.exit(1);
+  }
+}
+console.log("OK allowlist: createOrder-shaped payload has no undefined leaks");
+
 console.log("smoke-create-order-sanitize: all passed");

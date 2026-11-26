@@ -77,6 +77,9 @@ export function friendlyPlaceOrderError(err: unknown): string {
   if (code === "unavailable" || /network|offline/i.test(raw)) {
     return "Network issue — check your connection and try again.";
   }
+  if (/unsupported field value:\s*undefined|invalid data/i.test(raw)) {
+    return "Could not place order. Please refresh and try again.";
+  }
   if (/Firebase:\s*Error/i.test(raw) || /^[a-z]+\/[a-z0-9-]+$/i.test(raw)) {
     return "Could not place order. Try again.";
   }
