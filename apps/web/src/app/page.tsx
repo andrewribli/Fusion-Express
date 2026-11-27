@@ -13,7 +13,7 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const { isReady, bootError, user } = useUser();
   const { campus, isReady: campusReady } = useCampus();
-  // Only the login page's "Continue as Guest" opts into the menu without an
+  // Only the login page's browse-without-sign-in opts into the menu without an
   // account; a stored guest flag must not hide the homepage on later visits.
   const guestParam = searchParams.get("guest") === "1";
 

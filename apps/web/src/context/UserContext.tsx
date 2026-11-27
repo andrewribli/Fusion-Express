@@ -105,13 +105,17 @@ interface UserContextValue {
     profile: Pick<UserProfile, "fullName" | "email"> & Partial<UserProfile>,
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  /**
+   * Updates dorm fields for a signed-in customer before place-order.
+   * Refuses anonymous/guest accounts — order placement requires real sign-in.
+   */
   ensureGuestCheckout: (opts: {
     fullName: string;
     college: string;
     hall: string;
     campus?: CampusId;
   }) => Promise<UserProfile>;
-  /** Enter guest browse mode (no account) — shop + checkout without forced login. */
+  /** Enter guest browse mode (no account) — shop/cart only; cannot place orders. */
   startGuestBrowse: () => void;
   /** True after Continue as Guest until a real sign-in/sign-up. */
   isGuestBrowsing: boolean;
@@ -452,78 +456,37 @@ export function UserProvider({ children }: { children: ReactNode }) {
         throw new Error("Choose your college and hall");
       }
 
-      if (user?.uid) {
-        const updated: UserProfile = {
-          ...user,
-          fullName: name,
-          college: opts.college,
-          hall: opts.hall,
-          campus: opts.campus ?? user.campus,
-          isGuest: user.isGuest ?? false,
-          role: normalizeRole(user.role, Boolean(user.isRunner)),
-        };
-        persist(updated);
-        if (firebaseEnabled && !isDemoAuth()) {
-          void updateUserProfileDoc(user.uid, {
-            fullName: name,
-            college: opts.college,
-            hall: opts.hall,
-            campus: updated.campus,
-          });
+      if (!user?.uid || user.isGuest) {
+        throw new Error("Sign in to place an order.");
+      }
+
+      if (firebaseEnabled && !isDemoAuth()) {
+        const { getAuthClient } = await import("@fusion-express/shared/firebase");
+        const current = getAuthClient().currentUser;
+        if (!current || current.isAnonymous) {
+          throw new Error("Sign in to place an order.");
         }
-        return updated;
       }
 
-      if (isDemoAuth() || !firebaseEnabled) {
-        const demoProfile: UserProfile = {
-          uid: `guest_${Date.now()}`,
-          fullName: name,
-          isGuest: true,
-          isRunner: false,
-          role: "customer",
-          campus: opts.campus,
-          college: opts.college,
-          hall: opts.hall,
-          createdAt: new Date().toISOString(),
-        };
-        persist(demoProfile);
-        return demoProfile;
-      }
-
-      const { ensureGuestSession } = await import("@/lib/auth");
-      const auth = await ensureGuestSession();
-      const existing = await fetchUserProfile(auth.uid);
-      const profile: UserProfile = existing
-        ? {
-            ...existing,
-            fullName: name,
-            college: opts.college,
-            hall: opts.hall,
-            campus: opts.campus ?? existing.campus,
-            isGuest: existing.isGuest ?? true,
-            role: normalizeRole(existing.role, Boolean(existing.isRunner)),
-          }
-        : await createUserProfile(auth.uid, {
-            email: auth.email,
-            fullName: name,
-            isGuest: true,
-            isRunner: false,
-            campus: opts.campus,
-            college: opts.college,
-            hall: opts.hall,
-          });
-
-      if (existing) {
-        await updateUserProfileDoc(auth.uid, {
+      const updated: UserProfile = {
+        ...user,
+        fullName: name,
+        college: opts.college,
+        hall: opts.hall,
+        campus: opts.campus ?? user.campus,
+        isGuest: false,
+        role: normalizeRole(user.role, Boolean(user.isRunner)),
+      };
+      persist(updated);
+      if (firebaseEnabled && !isDemoAuth()) {
+        void updateUserProfileDoc(user.uid, {
           fullName: name,
           college: opts.college,
           hall: opts.hall,
-          campus: profile.campus,
-          isGuest: profile.isGuest,
+          campus: updated.campus,
         });
       }
-      persist(profile);
-      return profile;
+      return updated;
     },
     [firebaseEnabled, persist, user],
   );

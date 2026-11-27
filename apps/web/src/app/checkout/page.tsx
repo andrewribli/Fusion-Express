@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { CampusPickerCards } from "@/components/CampusPickerCards";
@@ -35,15 +36,17 @@ import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
 export default function CheckoutPage() {
-  const { user } = useUser();
+  const router = useRouter();
+  const { user, isReady } = useUser();
   const { setCampus } = useCampus();
   const { items, subtotal } = useCart();
   const { placeOrder, loading, error: placeError } = usePlaceOrder();
+  const signedIn = Boolean(user?.uid && !user.isGuest);
 
   /** Signed-in campus from signup — not a homepage picker. */
   const lockedCampus: CampusId | null =
     user?.campus === "cuhk" || user?.campus === "cityu" ? user.campus : null;
-  /** Guests pick campus here before dorms. */
+  /** Campus picker when account has no locked campus yet. */
   const [guestCampus, setGuestCampus] = useState<CampusId | null>(null);
   const [college, setCollege] = useState("");
   const [hall, setHall] = useState("");
@@ -77,7 +80,7 @@ export default function CheckoutPage() {
   const total = subtotal + fee.deliveryFee + tipAmount;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
-    campus && college && hall && !overLimit && !campusError,
+    signedIn && campus && college && hall && !overLimit && !campusError,
   );
   const shopHref = isCanteenCart(items)
     ? "/canteen"
@@ -98,6 +101,10 @@ export default function CheckoutPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!signedIn) {
+      router.push("/login?next=/checkout");
+      return;
+    }
     if (!canSubmit || !campus) return;
     void placeOrder({
       campus,
@@ -106,6 +113,47 @@ export default function CheckoutPage() {
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
     });
+  }
+
+  if (isReady && !signedIn && items.length > 0) {
+    return (
+      <AppShell>
+        <LakersWallpaper>
+          <AppHeader showBack backHref="/cart" title="Fusion checkout" />
+          <main className="mx-auto max-w-[480px] px-4 py-8">
+            <div className="rounded-2xl border border-lakers-gold/40 bg-lakers-navy/80 px-5 py-6 text-center">
+              <h1 className="text-lg font-bold text-lakers-gold">
+                Sign in to place your order
+              </h1>
+              <p className="mt-2 text-sm text-white/80">
+                Guest checkout is closed. Use your university email, Apple, or
+                Google account to finish ordering.
+              </p>
+              <Link
+                href="/login?next=/checkout"
+                className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-fusion-red px-4 py-3 text-base font-semibold text-white"
+              >
+                Sign in to continue
+              </Link>
+              <Link
+                href="/login?mode=signup&next=/checkout"
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-white/30 px-4 py-2.5 text-sm font-semibold text-white"
+              >
+                Create an account
+              </Link>
+              <p className="mt-4 text-xs text-white/60">
+                Your cart is saved — come back here after signing in.
+              </p>
+            </div>
+            <p className="mt-4 text-center">
+              <Link href="/cart" className="text-lakers-gold underline">
+                Back to cart
+              </Link>
+            </p>
+          </main>
+        </LakersWallpaper>
+      </AppShell>
+    );
   }
 
   if (items.length === 0) {
@@ -140,15 +188,6 @@ export default function CheckoutPage() {
         <AppHeader showBack backHref="/cart" title="Checkout" />
 
         <main className="mx-auto max-w-[480px] px-4 py-4 pb-44 md:pb-8">
-          {!user && (
-            <div className="mb-4 rounded-xl border border-lakers-gold/40 bg-lakers-navy/80 px-4 py-3 text-sm text-lakers-gold">
-              No account needed. Enter your dorm and lobby — we&apos;ll
-              save the order when you submit.{" "}
-              <Link href="/login?next=/checkout" className="underline">
-                Already have an account? Sign in
-              </Link>
-            </div>
-          )}
           {placeError && (
             <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
               {placeError}

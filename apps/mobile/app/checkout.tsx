@@ -107,9 +107,16 @@ export default function CheckoutScreen() {
     setHall(getHallsForCollege(next)[0]);
   }
 
+  const signedIn = Boolean(user && !user.isAnonymous);
+
   async function place() {
     if (items.length === 0 || !grocery) return;
     Keyboard.dismiss();
+    if (!signedIn) {
+      setError("Sign in to place an order.");
+      navigation.navigate("Profile");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -461,13 +468,14 @@ export default function CheckoutScreen() {
                       {ORDER_LIMIT_MESSAGE} (max ${MAX_ORDER_VALUE})
                     </Text>
                   ) : null}
-                  {user ? (
+                  {signedIn ? (
                     <Text className="mt-2 text-xs text-gray-500">
-                      Signed in as {user.email ?? user.uid}
+                      Signed in as {user?.email ?? user?.uid}
                     </Text>
                   ) : (
-                    <Text className="mt-2 text-xs text-gray-500">
-                      Guest checkout — no account required. Pay after delivery.
+                    <Text className="mt-2 text-xs text-amber-700">
+                      Sign in required to place an order. Guest checkout is
+                      closed.
                     </Text>
                   )}
                 </Card>
@@ -476,13 +484,21 @@ export default function CheckoutScreen() {
                   <Text className="mt-3 text-sm text-red-600">{error}</Text>
                 ) : null}
 
-                <PrimaryButton
-                  label={loading ? "Placing…" : "Place Fusion order"}
-                  busy={loading}
-                  className="mt-4"
-                  disabled={loading || items.length === 0 || overLimit}
-                  onPress={() => void place()}
-                />
+                {!signedIn ? (
+                  <PrimaryButton
+                    label="Sign in to place order"
+                    className="mt-4"
+                    onPress={() => navigation.navigate("Profile")}
+                  />
+                ) : (
+                  <PrimaryButton
+                    label={loading ? "Placing…" : "Place Fusion order"}
+                    busy={loading}
+                    className="mt-4"
+                    disabled={loading || items.length === 0 || overLimit}
+                    onPress={() => void place()}
+                  />
+                )}
               </>
             )}
           </Pressable>

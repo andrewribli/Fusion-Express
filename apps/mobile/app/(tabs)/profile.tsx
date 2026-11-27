@@ -404,7 +404,8 @@ export default function ProfileScreen() {
                   </Pressable>
 
                   <Text className="mt-3 text-xs text-gray-500">
-                    Guest checkout works from Shop without signing in.
+                    Sign in to place orders. You can still browse the shop
+                    without an account.
                   </Text>
                 </Card>
               ) : (

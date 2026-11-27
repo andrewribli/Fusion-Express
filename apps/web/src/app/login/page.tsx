@@ -11,7 +11,6 @@ import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { PasswordInput } from "@/components/PasswordInput";
 import { LegalLink } from "@/components/LegalLink";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useCart } from "@/context/CartContext";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
 import { validateEmail, validatePassword } from "@/lib/auth";
@@ -43,13 +42,9 @@ function postLoginPath(): string {
   return safeNextPath() ?? "/";
 }
 
-/**
- * Guest browse/order path: honor ?next= (e.g. /checkout), else cart → checkout,
- * else shop with guest=1. Dorm and lobby are collected at checkout.
- * ensureGuestCheckout — guests never need an account first.
- */
-function guestContinuePath(itemCount: number): string {
-  return safeNextPath() ?? (itemCount > 0 ? "/checkout" : "/?guest=1");
+/** Browse-only guest path. Place-order requires a real signed-in account. */
+function guestBrowsePath(): string {
+  return "/?guest=1";
 }
 
 export default function LoginPage() {
@@ -65,7 +60,6 @@ export default function LoginPage() {
     setMode: setAppMode,
     startGuestBrowse,
   } = useUser();
-  const { itemCount } = useCart();
   const { setCampus: setAppCampus } = useCampus();
   const demoAuth = useDemoAuth();
 
@@ -94,7 +88,7 @@ export default function LoginPage() {
   function continueAsGuest() {
     startGuestBrowse();
     setAppMode("customer");
-    router.push(guestContinuePath(itemCount));
+    router.push(guestBrowsePath());
   }
 
   async function signInAsDemo(
@@ -335,32 +329,19 @@ export default function LoginPage() {
           <AppLogo size={96} className="mx-auto h-24 w-24" priority />
         </div>
 
-        <div className="mb-5 rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
+        <div className="mb-5 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-center">
           <button
             type="button"
             onClick={continueAsGuest}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-100"
           >
-            {itemCount > 0 ? "Continue as Guest · Checkout" : "Continue as Guest"}
+            Browse shop without signing in
           </button>
-          <p className="mt-2 text-xs leading-snug text-gray-700">
-            Browse and order without signing in — checkout only needs your
-            dorm and lobby.
+          <p className="mt-2 text-xs leading-snug text-gray-600">
+            You can browse the menu, but placing an order requires a signed-in
+            account.
           </p>
         </div>
-
-        <p className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-900">
-          Ordering groceries?{" "}
-          <button
-            type="button"
-            onClick={continueAsGuest}
-            className="font-semibold text-[#ED1C24] underline"
-          >
-            Shop now as guest
-          </button>{" "}
-          and check out with just your dorm and lobby — no sign-up required.
-          Runners still need a full verified account.
-        </p>
 
         {!firebaseEnabled && !demoAuth && (
           <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
@@ -443,19 +424,16 @@ export default function LoginPage() {
             >
               {loading ? "Signing in…" : "Sign In"}
             </button>
-            <div className="rounded-2xl border-2 border-[#ED1C24]/30 bg-red-50 px-4 py-3 text-center">
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-center">
               <button
                 type="button"
                 onClick={continueAsGuest}
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#ED1C24] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c4161d]"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-100"
               >
-                {itemCount > 0
-                  ? "Continue as Guest · Checkout"
-                  : "Continue as Guest"}
+                Browse shop without signing in
               </button>
-              <p className="mt-2 text-xs leading-snug text-gray-700">
-                Browse and order without signing in — checkout only needs your
-                dorm and lobby.
+              <p className="mt-2 text-xs leading-snug text-gray-600">
+                Menu browsing only — sign in above to place an order.
               </p>
             </div>
             <div className="space-y-2 rounded-2xl border border-dashed border-[#ED1C24]/40 bg-red-50 p-4">

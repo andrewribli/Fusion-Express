@@ -10,7 +10,7 @@ import {
 import type { User } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import {
-  ensureGuestSession,
+  SIGN_IN_TO_ORDER_MESSAGE,
   signInWithEmail,
   signOutUser,
   signUpWithEmail,
@@ -74,8 +74,8 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   /**
-   * Ensures the device has a Firebase Auth uid for checkout.
-   * Signed-in users keep their uid; guests get an anonymous session.
+   * Requires a real (non-anonymous) Firebase Auth user for checkout.
+   * Guest/anonymous sessions cannot place orders.
    */
   ensureCheckoutAuth: () => Promise<{
     uid: string;
@@ -382,18 +382,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Firebase is not configured on this build.");
     }
     const current = getAuthClient().currentUser;
-    if (current && !current.isAnonymous) {
-      return {
-        uid: current.uid,
-        email: current.email ?? "",
-        isGuest: false,
-      };
+    if (!current || current.isAnonymous) {
+      throw new Error(SIGN_IN_TO_ORDER_MESSAGE);
     }
-    const guest = await ensureGuestSession();
     return {
-      uid: guest.uid,
-      email: guest.email ?? "",
-      isGuest: true,
+      uid: current.uid,
+      email: current.email ?? "",
+      isGuest: false,
     };
   }, []);
 

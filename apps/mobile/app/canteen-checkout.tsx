@@ -116,8 +116,15 @@ export default function CanteenCheckoutScreen() {
     setHall((prev) => (halls.includes(prev) ? prev : halls[0]));
   }
 
+  const signedIn = Boolean(user && !user.isAnonymous);
+
   async function place() {
     Keyboard.dismiss();
+    if (!signedIn) {
+      setError("Sign in to place an order.");
+      navigation.navigate("Profile");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -432,13 +439,13 @@ export default function CanteenCheckoutScreen() {
             <Text className="mt-2 text-base font-extrabold text-fusion">
               Total ${total}
             </Text>
-            {user ? (
+            {signedIn ? (
               <Text className="mt-2 text-xs text-gray-500">
-                Signed in as {user.email ?? user.uid}
+                Signed in as {user?.email ?? user?.uid}
               </Text>
             ) : (
-              <Text className="mt-2 text-xs text-gray-500">
-                Guest checkout — no account required. Pay after delivery.
+              <Text className="mt-2 text-xs text-amber-700">
+                Sign in required to place an order. Guest checkout is closed.
               </Text>
             )}
           </Card>
@@ -450,19 +457,27 @@ export default function CanteenCheckoutScreen() {
             <Text className="mt-3 text-sm text-red-600">{error}</Text>
           ) : null}
 
-          <PrimaryButton
-            label={
-              loading
-                ? "Placing…"
-                : canteenOpen
-                  ? "Place canteen order"
-                  : "Canteen closed — paused"
-            }
-            busy={loading}
-            className="mt-4"
-            disabled={loading || items.length === 0 || !canteenOpen}
-            onPress={() => void place()}
-          />
+          {!signedIn ? (
+            <PrimaryButton
+              label="Sign in to place order"
+              className="mt-4"
+              onPress={() => navigation.navigate("Profile")}
+            />
+          ) : (
+            <PrimaryButton
+              label={
+                loading
+                  ? "Placing…"
+                  : canteenOpen
+                    ? "Place canteen order"
+                    : "Canteen closed — paused"
+              }
+              busy={loading}
+              className="mt-4"
+              disabled={loading || items.length === 0 || !canteenOpen}
+              onPress={() => void place()}
+            />
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 

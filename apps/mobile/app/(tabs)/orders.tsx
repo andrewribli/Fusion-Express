@@ -77,7 +77,7 @@ export default function OrdersScreen() {
         <ScreenHeader title="Your orders" />
         <EmptyState
           title="Sign in to see your orders"
-          body="Open the Profile tab with your CUHK email. Guest checkout orders stay on this device after you place them."
+          body="Open the Profile tab with your university email. Orders are tied to your signed-in account."
           actionLabel="Go to Profile"
           onAction={() => navigation.navigate("Profile")}
         />

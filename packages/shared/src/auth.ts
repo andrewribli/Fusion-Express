@@ -48,6 +48,49 @@ export function isGuestSyntheticEmail(email: string | undefined | null): boolean
   return /^phone_\d+@fusion-express\.app$/i.test(email.trim());
 }
 
+/** Synthetic guest_*@ emails created when anonymous Auth is disabled. */
+export function isGuestFallbackEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  return /^guest_[a-z0-9]+@fusion-express\.app$/i.test(email.trim());
+}
+
+export function isGuestAccountEmail(email: string | undefined | null): boolean {
+  return isGuestSyntheticEmail(email) || isGuestFallbackEmail(email);
+}
+
+export const SIGN_IN_TO_ORDER_MESSAGE = "Sign in to place an order.";
+
+/**
+ * Hard stop for place-order. Blocks anonymous Firebase users, guest_* ids,
+ * and synthetic guest emails. Browse-without-login can remain; orders cannot.
+ */
+export function assertSignedInCustomerForOrder(opts?: {
+  customerId?: string;
+  customerEmail?: string | null;
+  isGuest?: boolean;
+}): void {
+  if (opts?.isGuest) {
+    throw new Error(SIGN_IN_TO_ORDER_MESSAGE);
+  }
+  if (opts?.customerId?.startsWith("guest_")) {
+    throw new Error(SIGN_IN_TO_ORDER_MESSAGE);
+  }
+  if (isGuestAccountEmail(opts?.customerEmail)) {
+    throw new Error(SIGN_IN_TO_ORDER_MESSAGE);
+  }
+  if (!isFirebaseConfigured()) return;
+  try {
+    const current = getAuthClient().currentUser;
+    if (!current || current.isAnonymous) {
+      throw new Error(SIGN_IN_TO_ORDER_MESSAGE);
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === SIGN_IN_TO_ORDER_MESSAGE) {
+      throw err;
+    }
+  }
+}
+
 function guestTempPasswordKey(phone: string): string {
   return `${GUEST_TEMP_PASSWORD_PREFIX}${normalizePhone(phone)}`;
 }
@@ -91,34 +134,15 @@ function randomGuestPassword(): string {
 }
 
 /**
- * Guest checkout without a phone. Reuses the current Auth user, otherwise
- * signs in anonymously. If anonymous auth is disabled, falls back to a
- * one-off synthetic email so the order can still be written.
+ * @deprecated Guest order placement is disabled. Callers must require a
+ * real signed-in account before createOrder. Kept only so old imports
+ * fail loudly instead of silently creating anonymous sessions.
  */
 export async function ensureGuestSession(): Promise<{
   uid: string;
   email?: string;
 }> {
-  if (!isFirebaseConfigured()) {
-    return { uid: `guest_${Date.now()}` };
-  }
-
-  const current = getAuthClient().currentUser;
-  if (current) {
-    return { uid: current.uid, email: current.email ?? undefined };
-  }
-
-  try {
-    const cred = await authMod().signInAnonymously(getAuthClient());
-    return { uid: cred.user.uid, email: cred.user.email ?? undefined };
-  } catch {
-    const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-    const email = `guest_${id}@${EMAIL_DOMAIN}`;
-    const password = randomGuestPassword();
-    const user = await signUpWithSyntheticEmail(email, password);
-    storeGuestTempPassword(id, password);
-    return { uid: user.uid, email };
-  }
+  throw new Error(SIGN_IN_TO_ORDER_MESSAGE);
 }
 
 export function validateUsername(username: string): string | null {

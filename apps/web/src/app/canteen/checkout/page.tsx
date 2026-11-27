@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShell } from "@/components/AppShell";
 import { DeliveryAddressFields } from "@/components/DeliveryAddressFields";
@@ -41,9 +42,11 @@ import {
 } from "@/lib/canteen/hours";
 
 export default function CanteenCheckoutPage() {
-  const { user } = useUser();
+  const router = useRouter();
+  const { user, isReady } = useUser();
   const { items, subtotal } = useCart();
   const { placeOrder, loading, error: placeError } = usePlaceOrder();
+  const signedIn = Boolean(user?.uid && !user.isGuest);
 
   const [college, setCollege] = useState(user?.college ?? "");
   const [hall, setHall] = useState(user?.hall ?? "");
@@ -89,7 +92,13 @@ export default function CanteenCheckoutPage() {
   const phoneOk = !validatePhone(phone);
   const singleCanteen = Boolean(canteenId);
   const canSubmit = Boolean(
-    college && hall && phoneOk && !overLimit && singleCanteen && canteenOpen,
+    signedIn &&
+      college &&
+      hall &&
+      phoneOk &&
+      !overLimit &&
+      singleCanteen &&
+      canteenOpen,
   );
   const address =
     college && hall ? formatDeliveryAddress(college, hall) : null;
@@ -97,6 +106,10 @@ export default function CanteenCheckoutPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!signedIn) {
+      router.push("/login?next=/canteen/checkout");
+      return;
+    }
     if (!canSubmit || !canteenOpen) return;
     savePaymentMethod(paymentMethod);
     void placeOrder({
@@ -106,6 +119,42 @@ export default function CanteenCheckoutPage() {
       customerNote: customerNote.trim() || DEFAULT_SPECIAL_INSTRUCTIONS,
       tip: tipAmount,
     });
+  }
+
+  if (isReady && !signedIn && items.length > 0) {
+    return (
+      <AppShell>
+        <LakersWallpaper>
+          <AppHeader showBack backHref="/canteen/cart" title="Canteen checkout" />
+          <main className="mx-auto max-w-[480px] px-4 py-8">
+            <div className="rounded-2xl border border-emerald-400/40 bg-emerald-950/50 px-5 py-6 text-center">
+              <h1 className="text-lg font-bold text-emerald-100">
+                Sign in to place your order
+              </h1>
+              <p className="mt-2 text-sm text-emerald-100/80">
+                Guest checkout is closed. Sign in with your university email to
+                finish this canteen order.
+              </p>
+              <Link
+                href="/login?next=/canteen/checkout"
+                className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-emerald-500 px-4 py-3 text-base font-semibold text-white"
+              >
+                Sign in to continue
+              </Link>
+              <Link
+                href="/login?mode=signup&next=/canteen/checkout"
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-emerald-300/40 px-4 py-2.5 text-sm font-semibold text-emerald-50"
+              >
+                Create an account
+              </Link>
+              <p className="mt-4 text-xs text-emerald-100/60">
+                Your cart is saved — come back here after signing in.
+              </p>
+            </div>
+          </main>
+        </LakersWallpaper>
+      </AppShell>
+    );
   }
 
   if (items.length === 0) {

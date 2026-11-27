@@ -29,6 +29,10 @@ import { createOrder } from "@/lib/orders";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import type { CampusId } from "@fusion-express/shared/campus";
 
+function loginForCheckout(path: string): string {
+  return `/login?next=${encodeURIComponent(path)}`;
+}
+
 export function usePlaceOrder() {
   const router = useRouter();
   const { user, ensureGuestCheckout } = useUser();
@@ -54,10 +58,19 @@ export function usePlaceOrder() {
         return;
       }
 
+      const canteen = isCanteenCart(items);
+      const checkoutPath = canteen ? "/canteen/checkout" : "/checkout";
+
+      if (!user?.uid || user.isGuest) {
+        setError("Sign in to place an order.");
+        router.push(loginForCheckout(checkoutPath));
+        return;
+      }
+
       const fullName =
-        user?.fullName && user.fullName !== "Guest"
+        user.fullName && user.fullName !== "Guest"
           ? user.fullName.trim()
-          : "Guest";
+          : user.email?.split("@")[0] || "Customer";
 
       setLoading(true);
       setError("");
@@ -72,8 +85,9 @@ export function usePlaceOrder() {
           hall: opts.hall,
         });
 
-        if (!customer?.uid) {
-          setError("Could not create your account. Try again.");
+        if (!customer?.uid || customer.isGuest) {
+          setError("Sign in to place an order.");
+          router.push(loginForCheckout(checkoutPath));
           return;
         }
 
@@ -114,7 +128,6 @@ export function usePlaceOrder() {
           uid: customer.uid,
           email: customer.email,
         });
-        const canteen = isCanteenCart(items);
         const restaurantId = canteen
           ? restaurantIdFromOrderItems(
               orderItems.map((item) => ({ itemId: item.itemId })),
@@ -182,8 +195,7 @@ export function usePlaceOrder() {
         notifyOrderEvent(orderId, "created");
 
         clearCart();
-        const guestFlag = customer.isGuest ? "&guest=1" : "";
-        router.push(`/track?orderId=${orderId}${guestFlag}`);
+        router.push(`/track?orderId=${orderId}`);
       } catch (err) {
         setError(friendlyPlaceOrderError(err));
       } finally {

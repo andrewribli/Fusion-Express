@@ -31,6 +31,7 @@ import {
   runnerDeadlineOf,
 } from "./order-status";
 import { assertNoUndefined, omitUndefined } from "./omit-undefined";
+import { assertSignedInCustomerForOrder } from "./auth";
 import { getDb, getFirebaseStorage, isFirebaseConfigured } from "./firebase";
 import {
   addDoc,
@@ -392,6 +393,10 @@ export async function createOrder(
   if (isOverOrderLimit(order.subtotal)) {
     throw new Error(ORDER_LIMIT_MESSAGE);
   }
+  assertSignedInCustomerForOrder({
+    customerId: order.customerId,
+    customerEmail: order.customerEmail,
+  });
   if (order.customerId) {
     // Placement cap: in-flight delivery only (pending|accepted|purchased).
     // Delivered / runner_paid still need payment UI but must not lock out
