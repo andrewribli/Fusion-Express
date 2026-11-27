@@ -340,6 +340,52 @@ export function orderGrandTotal(
   return round2(subtotal + deliveryFee + tip);
 }
 
+function serializeOrderItemForFirestore(item: OrderItem): Record<string, unknown> {
+  return omitUndefined({
+    itemId: item.itemId,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    weightKg: item.weightKg,
+    actualPrice: item.actualPrice,
+    isCustom: item.isCustom === true ? true : undefined,
+  } as Record<string, unknown>);
+}
+
+/**
+ * Single Firestore create payload for orders. Strips every nested `undefined`
+ * (callers may spread optional fields freely) and throws if any remain.
+ */
+export function buildCreateOrderFirestorePayload(
+  order: Omit<Order, "id" | "createdAt" | "updatedAt">,
+  now: Date = new Date(),
+): Record<string, unknown> {
+  const orderWithNotes = {
+    ...order,
+    customerNote: resolveSpecialInstructions(order.customerNote),
+  };
+
+  const payload = omitUndefined({
+    ...orderWithNotes,
+    items: (orderWithNotes.items ?? []).map(serializeOrderItemForFirestore),
+    status: "pending",
+    fusionPaidByPlatform: true,
+    estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
+    createdAt: Timestamp.fromDate(now),
+    updatedAt: Timestamp.fromDate(now),
+    estimatedDeliveryAt: order.estimatedDeliveryAt
+      ? Timestamp.fromDate(order.estimatedDeliveryAt)
+      : undefined,
+    scheduledFor: order.scheduledFor
+      ? Timestamp.fromDate(order.scheduledFor)
+      : undefined,
+    isScheduled: order.isScheduled === true ? true : undefined,
+  } as Record<string, unknown>);
+
+  assertNoUndefined(payload, "createOrder");
+  return payload;
+}
+
 export async function createOrder(
   order: Omit<Order, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
@@ -350,49 +396,24 @@ export async function createOrder(
     // Placement cap: in-flight delivery only (pending|accepted|purchased).
     // Delivered / runner_paid still need payment UI but must not lock out
     // new grocery orders when paymentReceived stays false.
-    const inFlight = await fetchInFlightCustomerOrders(order.customerId);
-    if (inFlight.length >= MAX_ACTIVE_CUSTOMER_ORDERS) {
-      throw new Error(ACTIVE_ORDER_LIMIT_MESSAGE);
+    try {
+      const inFlight = await fetchInFlightCustomerOrders(order.customerId);
+      if (inFlight.length >= MAX_ACTIVE_CUSTOMER_ORDERS) {
+        throw new Error(ACTIVE_ORDER_LIMIT_MESSAGE);
+      }
+    } catch (err) {
+      if (err instanceof Error && err.message === ACTIVE_ORDER_LIMIT_MESSAGE) {
+        throw err;
+      }
+      console.warn("createOrder: skipped in-flight order cap check", err);
     }
   }
   const now = new Date();
   const id = `FE-${Math.floor(1000 + Math.random() * 9000)}`;
-  const orderWithNotes = {
-    ...order,
-    customerNote: resolveSpecialInstructions(order.customerNote),
-  };
 
   if (isFirebaseConfigured()) {
     try {
-      // Sanitize nested maps/arrays too — shallow strip missed items[].isCustom
-      // / weightKg undefined and broke checkout (Firestore forbids undefined).
-      const payload = omitUndefined({
-        ...orderWithNotes,
-        items: (orderWithNotes.items ?? []).map((item) =>
-          omitUndefined({
-            itemId: item.itemId,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            weightKg: item.weightKg,
-            actualPrice: item.actualPrice,
-            isCustom: item.isCustom === true ? true : undefined,
-          } as Record<string, unknown>),
-        ),
-        status: "pending",
-        fusionPaidByPlatform: true,
-        estimatedSubtotal: order.estimatedSubtotal ?? order.subtotal,
-        createdAt: Timestamp.fromDate(now),
-        updatedAt: Timestamp.fromDate(now),
-        estimatedDeliveryAt: order.estimatedDeliveryAt
-          ? Timestamp.fromDate(order.estimatedDeliveryAt)
-          : undefined,
-        scheduledFor: order.scheduledFor
-          ? Timestamp.fromDate(order.scheduledFor)
-          : undefined,
-        isScheduled: order.isScheduled === true ? true : undefined,
-      } as Record<string, unknown>);
-      assertNoUndefined(payload, "createOrder");
+      const payload = buildCreateOrderFirestorePayload(order, now);
       const ref = await addDoc(collection(getDb(), ORDERS_COLLECTION), payload);
       return ref.id;
     } catch (err) {
@@ -403,6 +424,10 @@ export async function createOrder(
     }
   }
 
+  const orderWithNotes = {
+    ...order,
+    customerNote: resolveSpecialInstructions(order.customerNote),
+  };
   const fullOrder: Order = {
     ...orderWithNotes,
     id,

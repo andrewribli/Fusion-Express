@@ -154,3 +154,99 @@ for (const [label, raw] of [
 }
 
 console.log("smoke-create-order-sanitize: all passed");
+
+// When tsx is available, exercise the real buildCreateOrderFirestorePayload.
+async function loadBuildPayload() {
+  try {
+    const require = createRequire(import.meta.url);
+    require.resolve("tsx/esm");
+    const ordersPath = path.join(__dirname, "../src/orders.ts");
+    return import(pathToFileURL(ordersPath).href);
+  } catch {
+    return null;
+  }
+}
+
+let ordersMod = null;
+try {
+  ordersMod = await loadBuildPayload();
+} catch (err) {
+  console.log(
+    "skip buildCreateOrderFirestorePayload:",
+    err instanceof Error ? err.message : err,
+  );
+}
+if (ordersMod?.buildCreateOrderFirestorePayload) {
+  const now = new Date();
+  for (const [label, extra] of [
+    [
+      "createOrder-fusion",
+      {
+        sessionId: "sess1",
+        customerId: "u1",
+        customerName: "Test",
+        customerEmail: "a@link.cuhk.edu.hk",
+        customerPhotoURL: undefined,
+        campus: "cuhk",
+        orderChannel: "fusion",
+        college: "United College",
+        hall: "Adam Schall",
+        lobbyPoint: "Adam Schall lobby",
+        zone: 1,
+        totalWeight: 0.5,
+        subtotal: 54.9,
+        deliveryFee: 8,
+        tip: undefined,
+        total: 62.9,
+        paymentReceived: false,
+        fusionPaidByPlatform: false,
+        estimatedDeliveryAt: now,
+        items: fusionRaw.items,
+      },
+    ],
+    [
+      "createOrder-canteen",
+      {
+        sessionId: "sess2",
+        customerId: "u2",
+        customerName: "Guest",
+        customerEmail: undefined,
+        orderChannel: "canteen",
+        canteenRestaurantId: "uc-canteen",
+        canteenCollege: undefined,
+        campus: "cuhk",
+        college: "United College",
+        hall: "Adam Schall",
+        lobbyPoint: "Adam Schall lobby",
+        zone: 1,
+        totalWeight: 0,
+        subtotal: 37,
+        deliveryFee: 10,
+        total: 47,
+        paymentReceived: false,
+        estimatedDeliveryAt: now,
+        isScheduled: false,
+        scheduledFor: undefined,
+        items: canteenRaw.items,
+      },
+    ],
+  ]) {
+    const payload = ordersMod.buildCreateOrderFirestorePayload(
+      { status: "pending", ...extra },
+      now,
+    );
+    try {
+      assertNoUndefined(payload, label);
+    } catch (err) {
+      console.error(`FAIL: ${label} payload`, err);
+      process.exit(1);
+    }
+    if (hasUndefined(payload)) {
+      console.error(`FAIL: ${label} hasUndefined`, payload);
+      process.exit(1);
+    }
+    console.log(`OK ${label}: buildCreateOrderFirestorePayload`);
+  }
+} else {
+  console.log("skip buildCreateOrderFirestorePayload (install tsx for full smoke)");
+}
