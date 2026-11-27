@@ -437,8 +437,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         persist(stored);
         return;
       }
-      const { signInWithEmail } = await import("@/lib/auth");
-      await signInWithEmail(email, password);
+      // Resolves usernames / phone aliases / guest_* synthetic emails.
+      const { signInWithUsername } = await import("@/lib/auth");
+      await signInWithUsername(email, password);
     },
     [persist],
   );

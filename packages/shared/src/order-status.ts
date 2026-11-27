@@ -286,7 +286,12 @@ export function runnerWarningTotal(
   }, 0);
 }
 
-/** Pay button: only after delivery, and only once the receipt total is in. */
+/**
+ * Pay button / unpaid chase: after delivery (or runner_paid), until
+ * paymentReceived. Canteen totals are known at checkout; grocery waits for
+ * the runner receipt fields. Status-only callers treat delivered/runner_paid
+ * as open (deadline sweeps).
+ */
 export function isCustomerPaymentOpen(
   status: OrderStatus,
   order?: {
@@ -294,11 +299,13 @@ export function isCustomerPaymentOpen(
     amountPaidByRunner?: number;
     finalTotal?: number;
     actualSubtotal?: number;
+    orderChannel?: string;
   },
 ): boolean {
-  if (status !== "delivered") return false;
+  if (status !== "delivered" && status !== "runner_paid") return false;
   if (order?.paymentReceived) return false;
-  if (!order) return false;
+  if (!order) return true;
+  if (order.orderChannel === "canteen") return true;
   return hasConfirmedGroceryTotal(order);
 }
 
@@ -317,4 +324,16 @@ export function canCustomerCancelOrder(order: {
   status: OrderStatus;
 }): boolean {
   return order.status === "pending" || order.status === "accepted";
+}
+
+/** Admin checkout flag — suppresses fan-out email/push and hides from runner board. */
+export function isTestOrder(order: { isTest?: boolean } | null | undefined): boolean {
+  return order?.isTest === true;
+}
+
+export function isVisibleOnRunnerBoard(order: {
+  isTest?: boolean;
+  status: OrderStatus;
+}): boolean {
+  return !isTestOrder(order) && isClaimableOrderStatus(order.status);
 }

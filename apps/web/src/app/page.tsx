@@ -2,9 +2,11 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { AppShell } from "@/components/AppShell";
 import { CampusSelector } from "@/components/CampusSelector";
 import { CityUChannelSelector } from "@/components/CityUChannelSelector";
 import { MarketingHome } from "@/components/MarketingHome";
+import { UnpaidOrdersBanner } from "@/components/UnpaidOrdersBanner";
 import { BootScreen } from "@/components/BootScreen";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
@@ -24,15 +26,20 @@ function HomeContent() {
     return <BootScreen error={bootError} />;
   }
 
-  const signedIn = Boolean(user && !user.isGuest);
-  if (!signedIn && !guestParam) {
+  // Firebase session (including legacy guest_* accounts) must enter the app so
+  // unpaid orders, track, and admin chat are reachable. Marketing is for
+  // signed-out visitors only.
+  const hasSession = Boolean(user?.uid);
+  if (!hasSession && !guestParam) {
     return <MarketingHome />;
   }
 
-  if (campus === "cityu") {
-    return <CityUChannelSelector />;
-  }
-  return <CampusSelector />;
+  return (
+    <AppShell>
+      {hasSession ? <UnpaidOrdersBanner tone="dark" /> : null}
+      {campus === "cityu" ? <CityUChannelSelector /> : <CampusSelector />}
+    </AppShell>
+  );
 }
 
 export default function RootPage() {

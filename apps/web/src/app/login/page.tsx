@@ -13,8 +13,15 @@ import { LegalLink } from "@/components/LegalLink";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useCampus } from "@/context/CampusContext";
 import { useUser } from "@/context/UserContext";
-import { validateEmail, validatePassword } from "@/lib/auth";
-import { validateCampusEmail, type CampusId } from "@fusion-express/shared/campus";
+import {
+  isGuestAccountEmail,
+  validatePassword,
+} from "@/lib/auth";
+import {
+  isAnyCampusEmail,
+  validateCampusEmail,
+  type CampusId,
+} from "@fusion-express/shared/campus";
 import { friendlyAuthError } from "@/lib/auth-errors";
 import { notifyNewUser } from "@/lib/notify-email";
 import { useDemoAuth } from "@/lib/use-demo-auth";
@@ -138,11 +145,25 @@ export default function LoginPage() {
     setConfirmPassword("");
   }
 
+  function validateSignInIdentifier(identifier: string): string | null {
+    const trimmed = identifier.trim().toLowerCase();
+    if (!trimmed) return "Enter your email or username";
+    if (trimmed.includes("@")) {
+      if (isAnyCampusEmail(trimmed) || isGuestAccountEmail(trimmed)) {
+        return null;
+      }
+      if (trimmed.endsWith("@fusion-express.app")) return null;
+      return "Please use your CUHK or CityU email";
+    }
+    if (trimmed.length < 3) return "Enter a valid username or email";
+    return null;
+  }
+
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     const identifier = email.trim().toLowerCase();
-    const idErr = validateEmail(identifier);
+    const idErr = validateSignInIdentifier(identifier);
     const passErr = validatePassword(password);
     if (idErr || passErr) {
       setError(idErr ?? passErr ?? "");
@@ -283,11 +304,13 @@ export default function LoginPage() {
     }
   }
 
-  // Already signed in — never leave people stuck on the auth form. Guest
-  // checkout sessions still need to reach sign-up to make a real account.
+  // Already signed in (including legacy guest_* Firebase sessions) — never
+  // leave people stuck on a blank boot screen. Send them into the app where
+  // unpaid banners / track / admin chat live. Signup upgrade for guests is
+  // available from Profile.
   useEffect(() => {
-    if (!isReady || !user || user.isGuest) return;
-    router.replace("/");
+    if (!isReady || !user) return;
+    router.replace(postLoginPath());
   }, [user, isReady, router]);
 
   if (!isReady) {
@@ -382,16 +405,16 @@ export default function LoginPage() {
           <form onSubmit={handleSignIn} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-xs font-medium text-gray-600">
-                Email
+                Email or username
               </label>
               <input
                 id="email"
-                type="email"
+                type="text"
                 required
-                autoComplete="email"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your university email"
+                placeholder="University email or username"
                 className={inputClassName}
               />
             </div>

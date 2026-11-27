@@ -16,12 +16,18 @@ import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { isChatActive } from "@/lib/constants";
 import { loadAllProducts } from "@/lib/firestore";
-import { canCustomerCancelOrder } from "@/lib/order-status";
+import {
+  canCustomerCancelOrder,
+  customerAmountDue,
+  isCustomerPaymentOpen,
+} from "@/lib/order-status";
 import { menuItemFromOrderLine } from "@/lib/reorder";
+import { notifyOrderCancelled } from "@/lib/notify-email";
 import {
   cancelOrder,
   fetchOrdersByCustomer,
 } from "@/lib/orders";
+import { UnpaidOrdersBanner } from "@/components/UnpaidOrdersBanner";
 import { ORDER_STATUS_LABELS, type Order } from "@/lib/types";
 
 export default function OrdersPage() {
@@ -62,6 +68,7 @@ export default function OrdersPage() {
     setCancellingId(confirmOrder.id);
     try {
       await cancelOrder(confirmOrder.id, getUserAccountId(user));
+      void notifyOrderCancelled(confirmOrder.id);
       setConfirmOrder(null);
       await load();
     } catch (err) {
@@ -92,6 +99,7 @@ export default function OrdersPage() {
         <PageWallpaper src={BG_ORDERS} alt="" overlayClassName="bg-white/75">
           <AppHeader title="Order History" />
 
+          <UnpaidOrdersBanner />
           <main className="mx-auto max-w-[480px] px-4 py-4">
             {loading ? (
               <p className="text-sm text-gray-500">Loading orders…</p>
@@ -106,16 +114,24 @@ export default function OrdersPage() {
               </div>
             ) : (
               <ul className="space-y-3">
-                {orders.map((order) => (
+                {orders.map((order) => {
+                  const needsPay = isCustomerPaymentOpen(order.status, order);
+                  return (
                   <li
                     key={order.id}
-                    className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                    className={`rounded-2xl border bg-white p-4 shadow-sm ${
+                      needsPay
+                        ? "border-[#ED1C24]/40 ring-2 ring-[#ED1C24]/15"
+                        : "border-gray-100"
+                    }`}
                   >
                     <Link href={`/track?orderId=${order.id}`}>
                       <div className="flex items-start justify-between gap-3">
                         <CustomerOrderHeading order={order} />
                         <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-[#ED1C24]">
-                          {ORDER_STATUS_LABELS[order.status]}
+                          {needsPay
+                            ? `Unpaid · $${customerAmountDue(order)}`
+                            : ORDER_STATUS_LABELS[order.status]}
                         </span>
                       </div>
                       <p className="mt-1 text-xs text-gray-500">
@@ -124,7 +140,11 @@ export default function OrdersPage() {
                           order.hall,
                         )}
                       </p>
-                      <p className="mt-2 text-sm font-semibold">${order.total}</p>
+                      <p className="mt-2 text-sm font-semibold">
+                        {needsPay
+                          ? `Pay $${customerAmountDue(order)}`
+                          : `$${order.total}`}
+                      </p>
                     </Link>
 
                     <div className="mt-3 flex gap-2">
@@ -138,13 +158,12 @@ export default function OrdersPage() {
                           {cancellingId === order.id ? "Cancelling…" : "Cancel"}
                         </button>
                       )}
-                      {(order.status === "delivered" ||
-                        order.status === "runner_paid") && (
+                      {needsPay && (
                         <Link
                           href={`/pay/${encodeURIComponent(order.id)}`}
                           className="flex-1 rounded-xl bg-[#ED1C24] py-2 text-center text-xs font-semibold text-white"
                         >
-                          Submit Payment
+                          Pay now
                         </Link>
                       )}
                       {(order.status === "delivered" || order.status === "cancelled") && (
@@ -162,7 +181,8 @@ export default function OrdersPage() {
                       <OrderChatPanel order={order} compact />
                     )}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </main>

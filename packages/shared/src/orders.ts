@@ -263,6 +263,7 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
       : undefined,
     isScheduled: data.isScheduled === true,
     scheduledFor: data.scheduledFor ? toDate(data.scheduledFor) : undefined,
+    isTest: data.isTest === true ? true : undefined,
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     pickedUpAt: data.pickedUpAt ? toDate(data.pickedUpAt) : undefined,
@@ -381,6 +382,7 @@ export function buildCreateOrderFirestorePayload(
       ? Timestamp.fromDate(order.scheduledFor)
       : undefined,
     isScheduled: order.isScheduled === true ? true : undefined,
+    isTest: order.isTest === true ? true : undefined,
   } as Record<string, unknown>);
 
   assertNoUndefined(payload, "createOrder");
@@ -521,6 +523,11 @@ function filterCampusOrders(orders: Order[], campus?: CampusId): Order[] {
   return orders.filter((o) => orderCampus(o) === campus);
 }
 
+/** Test orders stay out of the public runner job board and pending-count API. */
+function filterRunnerBoardOrders(orders: Order[]): Order[] {
+  return orders.filter((o) => o.isTest !== true);
+}
+
 const ORDER_PAGE_SIZE = 100;
 
 function parseSnapshotDocs(
@@ -545,9 +552,11 @@ export async function fetchPendingOrders(
   excludeCustomerId?: string,
   campus?: CampusId,
 ): Promise<Order[]> {
-  return filterCampusOrders(
-    await fetchUnscopedPendingOrders(excludeCustomerId),
-    campus,
+  return filterRunnerBoardOrders(
+    filterCampusOrders(
+      await fetchUnscopedPendingOrders(excludeCustomerId),
+      campus,
+    ),
   );
 }
 
@@ -601,12 +610,14 @@ export function subscribePendingOrders(
 ): () => void {
   const emit = (orders: Order[]) => {
     onOrders(
-      filterCampusOrders(
-        filterOwnOrders(
-          orders.filter((o) => !o.runnerId),
-          options?.excludeCustomerId,
+      filterRunnerBoardOrders(
+        filterCampusOrders(
+          filterOwnOrders(
+            orders.filter((o) => !o.runnerId),
+            options?.excludeCustomerId,
+          ),
+          options?.campus,
         ),
-        options?.campus,
       ),
     );
   };
@@ -1683,7 +1694,7 @@ export async function syncOrderDeadlines(order: Order): Promise<DeadlineSyncResu
     }
   }
 
-  if (isCustomerPaymentOpen(order.status) && customerDue) {
+  if (isCustomerPaymentOpen(order.status, order) && customerDue) {
     if (!order.customerDeadline) {
       updates.customerDeadline = Timestamp.fromDate(customerDue);
     }

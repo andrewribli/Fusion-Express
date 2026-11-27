@@ -283,3 +283,73 @@ export async function repairAuthEmailForUidRest(uid: string): Promise<{
 
   return { uid: trimmedUid, email, username, previousAuthEmail };
 }
+
+/** Admin: set Auth password for a uid (guest recovery / chase). */
+export async function setAuthPasswordForUidRest(
+  uid: string,
+  newPassword: string,
+): Promise<{ uid: string; email?: string }> {
+  const ctx = await adminAccessToken();
+  if (!ctx) {
+    throw new Error("Admin password reset is not configured on the server.");
+  }
+  const trimmedUid = uid.trim();
+  const password = newPassword.trim();
+  if (!trimmedUid) throw new Error("Missing uid");
+  if (password.length < 6) throw new Error("Password must be at least 6 characters");
+
+  const existing = await lookupAuthUser(ctx.project, ctx.token, trimmedUid);
+  if (!existing) {
+    throw new Error("Auth user not found for this uid.");
+  }
+
+  const update = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/projects/${ctx.project}/accounts:update`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ctx.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        localId: trimmedUid,
+        password,
+      }),
+    },
+  );
+  if (!update.ok) {
+    const text = await update.text();
+    throw new Error(`Auth password update failed (${update.status}): ${text.slice(0, 200)}`);
+  }
+  return { uid: trimmedUid, email: existing.email };
+}
+
+/**
+ * Mint a Firebase custom token (JWT) so ops can hand a one-click session URL
+ * to a guest who has no recoverable email.
+ */
+export function mintCustomAuthToken(uid: string, expiresInSec = 3600): string {
+  const account = serviceAccount();
+  if (!account?.client_email || !account.private_key) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON required to mint session tokens.");
+  }
+  const trimmedUid = uid.trim();
+  if (!trimmedUid) throw new Error("Missing uid");
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString(
+    "base64url",
+  );
+  const claim = Buffer.from(
+    JSON.stringify({
+      iss: account.client_email,
+      sub: account.client_email,
+      aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
+      iat: now,
+      exp: now + Math.min(Math.max(expiresInSec, 60), 3600),
+      uid: trimmedUid,
+    }),
+  ).toString("base64url");
+  const signer = createSign("RSA-SHA256");
+  signer.update(`${header}.${claim}`);
+  return `${header}.${claim}.${signer.sign(account.private_key, "base64url")}`;
+}

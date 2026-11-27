@@ -49,7 +49,7 @@ export function DeadlineBanner({
     );
   }
 
-  if (!isCustomerPaymentOpen(order.status)) return null;
+  if (!isCustomerPaymentOpen(order.status, order)) return null;
   const due = customerDeadlineOf(order);
   if (!due) return null;
   const remaining = due.getTime() - now;

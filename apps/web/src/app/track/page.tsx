@@ -11,6 +11,7 @@ import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { RatingModal } from "@/components/RatingModal";
 import { RunnerLocationMap } from "@/components/RunnerLocationMap";
 import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
+import { StampedAvatar } from "@/components/AvatarBadge";
 import { RequireCustomer } from "@/components/RequireAuth";
 import { useUser, getUserAccountId } from "@/context/UserContext";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
@@ -22,9 +23,14 @@ import {
   customerAmountDue,
   groceryAmountDue,
   hasConfirmedGroceryTotal,
+  isCustomerPaymentOpen,
+  isTestOrder,
 } from "@/lib/order-status";
-import { OrderProofPhotos } from "@/components/CustomerPayPanel";
-import { notifyOrderStatus as notifyOrderStatusEmail } from "@/lib/notify-email";
+import {
+  CustomerPayPanel,
+  OrderProofPhotos,
+} from "@/components/CustomerPayPanel";
+import { notifyOrderCancelled } from "@/lib/notify-email";
 import {
   notifyOrderStatus,
   requestNotificationPermission,
@@ -69,7 +75,12 @@ function TrackContent() {
     if (!id.trim()) return;
     setLoading(true);
     const found = await fetchOrder(id.trim());
-    if (found && lastStatus.current && lastStatus.current !== found.status) {
+    if (
+      found &&
+      lastStatus.current &&
+      lastStatus.current !== found.status &&
+      !isTestOrder(found)
+    ) {
       notifyOrderStatus(found.id, found.status);
     }
     if (found) lastStatus.current = found.status;
@@ -113,11 +124,7 @@ function TrackContent() {
     setCancelling(true);
     try {
       await cancelOrder(order.id, getUserAccountId(user));
-      void notifyOrderStatusEmail({
-        customerEmail: user.email ?? order.customerEmail,
-        orderId: order.id,
-        status: "cancelled",
-      });
+      void notifyOrderCancelled(order.id);
       setConfirmCancelOpen(false);
       await lookup(order.id);
     } catch (err) {
@@ -207,23 +214,33 @@ function TrackContent() {
 
             {order.status !== "pending" &&
             order.status !== "cancelled" &&
-            (order.runnerName || order.runnerStudentId) ? (
+            (order.runnerName || order.runnerStudentId || order.runnerAvatarId || order.runnerPhotoURL) ? (
               <div className="mt-3 rounded-xl border border-[#ED1C24]/20 bg-red-50 px-3 py-2.5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[#ED1C24]">
                   Your runner
                 </p>
-                {order.runnerName ? (
-                  <p className="mt-0.5 text-base font-extrabold text-gray-900">
-                    {order.runnerName}
-                  </p>
-                ) : null}
-                {order.runnerStudentId ? (
-                  <p className="mt-1 text-sm font-semibold text-gray-800">
-                    Student ID: {order.runnerStudentId}
-                  </p>
-                ) : null}
+                <div className="mt-2 flex items-center gap-3">
+                  <StampedAvatar
+                    avatarId={order.runnerAvatarId}
+                    photoURL={order.runnerPhotoURL}
+                    size="md"
+                    alt={order.runnerName || "Runner"}
+                  />
+                  <div className="min-w-0">
+                    {order.runnerName ? (
+                      <p className="text-base font-extrabold text-gray-900">
+                        {order.runnerName}
+                      </p>
+                    ) : null}
+                    {order.runnerStudentId ? (
+                      <p className="mt-0.5 text-sm font-semibold text-gray-800">
+                        Student ID: {order.runnerStudentId}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
                 <p className="mt-1 text-xs text-gray-600">
-                  Check this ID when they pick up / drop off your order.
+                  Check this name and photo when they pick up / drop off your order.
                 </p>
               </div>
             ) : null}
@@ -320,7 +337,8 @@ function TrackContent() {
                 <span>App estimate</span>
                 <span>${order.total}</span>
               </div>
-              {hasConfirmedGroceryTotal(order) && (
+              {(hasConfirmedGroceryTotal(order) ||
+                order.orderChannel === "canteen") && (
                 <div className="flex justify-between font-bold text-[#ED1C24]">
                   <span>Total to pay</span>
                   <span>${customerAmountDue(order)}</span>
@@ -393,22 +411,22 @@ function TrackContent() {
               </button>
             )}
 
-            {order.status === "delivered" &&
-              !order.paymentReceived &&
-              hasConfirmedGroceryTotal(order) && (
-                <button
-                  type="button"
-                  disabled={paying}
-                  onClick={() => void handleResumePayment()}
-                  className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-60"
-                >
-                  {paying
-                    ? "Opening Airwallex…"
-                    : `Pay now · $${customerAmountDue(order)}`}
-                </button>
-              )}
+            {isCustomerPaymentOpen(order.status, order) && (
+              <button
+                type="button"
+                disabled={paying}
+                onClick={() => void handleResumePayment()}
+                className="mt-3 w-full rounded-xl bg-fusion-red py-3 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {paying
+                  ? "Opening Airwallex…"
+                  : `Pay card · $${customerAmountDue(order)}`}
+              </button>
+            )}
 
-            {order.status === "delivered" && !hasConfirmedGroceryTotal(order) && (
+            {order.status === "delivered" &&
+              order.orderChannel !== "canteen" &&
+              !hasConfirmedGroceryTotal(order) && (
               <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
                 Waiting for the runner to enter the {supermarketForCampus(order.campus)} receipt total. You pay
                 that exact amount after it is in.
@@ -417,6 +435,10 @@ function TrackContent() {
 
             <OrderProofPhotos order={order} />
           </div>
+
+          {user && getUserAccountId(user) === order.customerId && (
+            <CustomerPayPanel order={order} userId={user.uid} />
+          )}
 
           {(order.status === "paid" ||
             order.status === "customer_paid" ||
