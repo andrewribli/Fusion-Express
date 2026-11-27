@@ -109,6 +109,12 @@ export async function notifyOrderStatus(opts: {
   });
 }
 
+/** Customer (+ assigned runner) cancel notice — never a roster blast. */
+export async function notifyOrderCancelled(orderId: string): Promise<void> {
+  await postJson("/api/email/status", { orderId, status: "cancelled" });
+  await postJson("/api/push/order-event", { orderId, event: "cancelled" });
+}
+
 export async function notifyDeadlineEvent(opts: {
   kind:
     | "runner_reminder"

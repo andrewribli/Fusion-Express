@@ -162,6 +162,8 @@ export {
   isCustomerPaymentOpen,
   isClaimableOrderStatus,
   canCustomerCancelOrder,
+  isTestOrder,
+  isVisibleOnRunnerBoard,
 } from "./order-status";
 
 
@@ -317,6 +319,8 @@ export interface Order {
   customerApprovedPriceAt?: Date;
   fusionPaidByPlatform?: boolean;
   runnerLocation?: RunnerLocation;
+  /** Admin-only test checkout — real order doc, no community notifications. */
+  isTest?: boolean;
 }
 
 export interface Runner {

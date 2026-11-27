@@ -37,4 +37,5 @@ export {
   isCustomerPaymentOpen,
   isClaimableOrderStatus,
   canCustomerCancelOrder,
+  isTestOrder,
 } from "@fusion-express/shared/types";
