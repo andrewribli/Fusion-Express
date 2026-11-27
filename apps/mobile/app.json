@@ -77,7 +77,7 @@
         "backgroundColor": "#ED1C24"
       },
       "package": "com.gracerun.fusionexpress",
-      "versionCode": 83,
+      "versionCode": 84,
       "googleServicesFile": "./google-services.json"
     },
     "web": {
