@@ -2,13 +2,18 @@ import { useMemo, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
+  InputAccessoryView,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   calculateDeliveryFee,
   cartTotalWeightKg,
@@ -47,9 +52,12 @@ import {
   SecondaryButton,
 } from "../src/ui";
 
+const CUSTOM_ITEM_ACCESSORY_ID = "cart-custom-item-done";
+
 export default function CartScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const insets = useSafeAreaInsets();
   const { items, subtotal, setQuantity, addItem } = useCart();
   const { profile } = useAuth();
   const canteen = isCanteenCart(items);
@@ -78,6 +86,11 @@ export default function CartScreen() {
   const [customName, setCustomName] = useState("");
   const [customPrice, setCustomPrice] = useState("");
   const [customError, setCustomError] = useState("");
+
+  function closeCustomModal() {
+    Keyboard.dismiss();
+    setCustomOpen(false);
+  }
 
   const discountPreview = useMemo(() => {
     if (!canteen || !restaurantId) {
@@ -116,6 +129,7 @@ export default function CartScreen() {
     );
     setCustomName("");
     setCustomPrice("");
+    Keyboard.dismiss();
     setCustomOpen(false);
   }
 
@@ -291,59 +305,102 @@ export default function CartScreen() {
         visible={customOpen}
         transparent
         animationType="slide"
-        onRequestClose={() => setCustomOpen(false)}
+        onRequestClose={closeCustomModal}
       >
-        <Pressable
-          className="flex-1 justify-end bg-black/40"
-          onPress={() => setCustomOpen(false)}
+        {/*
+          Full-screen KAV so the bottom sheet rides above the keyboard.
+          Offset 0: modal is its own window (no stack header inside it).
+        */}
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
           <Pressable
-            className="rounded-t-3xl bg-white px-4 pb-8 pt-4"
-            onPress={(e) => e.stopPropagation()}
+            className="flex-1 justify-end bg-black/40"
+            onPress={closeCustomModal}
           >
-            <Text className="text-base font-extrabold text-gray-900">
-              Add custom item
-            </Text>
-            <Text className="mt-1 text-xs text-gray-500">
-              Runner buys this for you and confirms the real price.
-            </Text>
-            <Text className="mt-4 text-xs font-medium text-gray-600">
-              Item name
-            </Text>
-            <TextInput
-              className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
-              placeholder='e.g. "Optimum Nutrition whey 2lb"'
-              placeholderTextColor="#9CA3AF"
-              value={customName}
-              onChangeText={setCustomName}
-              autoFocus
-            />
-            <Text className="mt-3 text-xs font-medium text-gray-600">
-              Estimated price (HK$)
-            </Text>
-            <TextInput
-              className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
-              placeholder="e.g. 280"
-              placeholderTextColor="#9CA3AF"
-              keyboardType="decimal-pad"
-              value={customPrice}
-              onChangeText={setCustomPrice}
-            />
-            {customError ? (
-              <Text className="mt-2 text-sm text-fusion">{customError}</Text>
-            ) : null}
-            <PrimaryButton
-              label="Add to cart"
-              className="mt-4"
-              onPress={submitCustomItem}
-            />
-            <SecondaryButton
-              label="Cancel"
-              className="mt-2"
-              onPress={() => setCustomOpen(false)}
-            />
+            <Pressable
+              className="max-h-[90%] rounded-t-3xl bg-white px-4 pt-4"
+              style={{
+                paddingBottom: Math.max(insets.bottom, 16),
+              }}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="interactive"
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+                contentContainerStyle={{ paddingBottom: 8 }}
+              >
+                <Text className="text-base font-extrabold text-gray-900">
+                  Add custom item
+                </Text>
+                <Text className="mt-1 text-xs text-gray-500">
+                  Runner buys this for you and confirms the real price.
+                </Text>
+                <Text className="mt-4 text-xs font-medium text-gray-600">
+                  Item name
+                </Text>
+                <TextInput
+                  className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
+                  placeholder='e.g. "Optimum Nutrition whey 2lb"'
+                  placeholderTextColor="#9CA3AF"
+                  value={customName}
+                  onChangeText={setCustomName}
+                  autoFocus
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  inputAccessoryViewID={
+                    Platform.OS === "ios" ? CUSTOM_ITEM_ACCESSORY_ID : undefined
+                  }
+                />
+                <Text className="mt-3 text-xs font-medium text-gray-600">
+                  Estimated price (HK$)
+                </Text>
+                <TextInput
+                  className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900"
+                  placeholder="e.g. 280"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="decimal-pad"
+                  value={customPrice}
+                  onChangeText={setCustomPrice}
+                  inputAccessoryViewID={
+                    Platform.OS === "ios" ? CUSTOM_ITEM_ACCESSORY_ID : undefined
+                  }
+                />
+                {customError ? (
+                  <Text className="mt-2 text-sm text-fusion">{customError}</Text>
+                ) : null}
+                <PrimaryButton
+                  label="Add to cart"
+                  className="mt-4"
+                  onPress={submitCustomItem}
+                />
+                <SecondaryButton
+                  label="Cancel"
+                  className="mt-2"
+                  onPress={closeCustomModal}
+                />
+              </ScrollView>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
+        {Platform.OS === "ios" ? (
+          <InputAccessoryView nativeID={CUSTOM_ITEM_ACCESSORY_ID}>
+            <View className="flex-row items-center justify-end border-t border-gray-200 bg-[#F2F2F7] px-3 py-2">
+              <Pressable
+                onPress={Keyboard.dismiss}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="Dismiss keyboard"
+              >
+                <Text className="text-base font-semibold text-fusion">Done</Text>
+              </Pressable>
+            </View>
+          </InputAccessoryView>
+        ) : null}
       </Modal>
     </Page>
   );
