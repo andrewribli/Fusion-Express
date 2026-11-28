@@ -23,6 +23,7 @@ import CartScreen from "./app/cart";
 import CheckoutScreen from "./app/checkout";
 import CanteenCheckoutScreen from "./app/canteen-checkout";
 import TrackScreen from "./app/track";
+import OrderChatScreen from "./app/order-chat";
 import SupportScreen from "./app/support";
 import AdminScreen from "./app/admin";
 import AdminSupportScreen from "./app/admin-support";
@@ -59,7 +60,12 @@ function Root() {
       <AuthProvider>
         <CartProvider>
           <NotificationBootstrap />
-          <SafeAreaView style={styles.shell} edges={["top", "bottom"]}>
+          {/*
+            Top-only safe area: bottom inset must NOT wrap KeyboardAvoidingView
+            (that caused the floating keyboard + gap under the keys). Chat
+            composers and tab bars apply bottom inset themselves.
+          */}
+          <SafeAreaView style={styles.shell} edges={["top"]}>
             <ErrorBanner />
             <NavigationContainer ref={navigationRef} linking={linking}>
               <StatusBar style="dark" />
@@ -104,6 +110,11 @@ function Root() {
                 <Stack.Screen
                   name="Track"
                   component={TrackScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="OrderChat"
+                  component={OrderChatScreen}
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen

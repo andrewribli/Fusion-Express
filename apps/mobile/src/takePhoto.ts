@@ -7,87 +7,12 @@ export type CapturedPhoto = {
   fileName?: string | null;
 };
 
-/**
- * Prefer the native camera for receipts / delivery proof.
- * Falls back to the photo library if the user declines camera access.
- */
-export async function takePhoto(opts?: {
-  quality?: number;
-  /** Shown in the permission / fallback dialogs */
-  purpose?: string;
-}): Promise<CapturedPhoto | null> {
-  const quality = opts?.quality ?? 0.7;
-  const purpose = opts?.purpose ?? "receipts and delivery proof";
-
-  const cam = await ImagePicker.requestCameraPermissionsAsync();
-  if (cam.granted) {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images"],
-      quality,
-      cameraType: ImagePicker.CameraType.back,
-      allowsEditing: false,
-      exif: false,
-    });
-    if (result.canceled || !result.assets[0]) return null;
-    const asset = result.assets[0];
-    return {
-      uri: asset.uri,
-      mimeType: asset.mimeType,
-      fileName: asset.fileName,
-    };
-  }
-
-  return new Promise((resolve) => {
-    Alert.alert(
-      "Camera access needed",
-      `GraceRun uses the camera for ${purpose}. You can allow camera in Settings, or pick an existing photo.`,
-      [
-        { text: "Cancel", style: "cancel", onPress: () => resolve(null) },
-        {
-          text: "Open Settings",
-          onPress: () => {
-            void Linking.openSettings();
-            resolve(null);
-          },
-        },
-        {
-          text: "Choose photo",
-          onPress: () => {
-            void (async () => {
-              const lib = await ImagePicker.requestMediaLibraryPermissionsAsync();
-              if (!lib.granted) {
-                resolve(null);
-                return;
-              }
-              const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ["images"],
-                quality,
-              });
-              if (result.canceled || !result.assets[0]) {
-                resolve(null);
-                return;
-              }
-              const asset = result.assets[0];
-              resolve({
-                uri: asset.uri,
-                mimeType: asset.mimeType,
-                fileName: asset.fileName,
-              });
-            })();
-          },
-        },
-      ],
-    );
-  });
-}
-
-/** Live camera for chat photos. Does not open the photo library. */
-export async function captureChatPhoto(): Promise<CapturedPhoto | null> {
+async function openCamera(quality: number): Promise<CapturedPhoto | null> {
   const cam = await ImagePicker.requestCameraPermissionsAsync();
   if (!cam.granted) {
     Alert.alert(
-      "Camera permission is required",
-      "Allow camera access to take a photo in chat.",
+      "Camera access needed",
+      "Allow camera access in Settings, or choose a photo from your library instead.",
       [
         { text: "Cancel", style: "cancel" },
         { text: "Open Settings", onPress: () => void Linking.openSettings() },
@@ -97,18 +22,130 @@ export async function captureChatPhoto(): Promise<CapturedPhoto | null> {
   }
   const result = await ImagePicker.launchCameraAsync({
     mediaTypes: ["images"],
-    quality: 0.7,
+    quality,
     cameraType: ImagePicker.CameraType.back,
     allowsEditing: false,
     exif: false,
   });
-  if (result.canceled || !result.assets?.[0]) return null;
+  if (result.canceled || !result.assets[0]) return null;
   const asset = result.assets[0];
   return {
     uri: asset.uri,
-    mimeType: asset.mimeType || "image/jpeg",
-    fileName: asset.fileName || "chat.jpg",
+    mimeType: asset.mimeType,
+    fileName: asset.fileName,
   };
+}
+
+async function openLibrary(quality: number): Promise<CapturedPhoto | null> {
+  const lib = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!lib.granted) {
+    Alert.alert(
+      "Photos access needed",
+      "Allow photo library access in Settings to pick an existing image.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Open Settings", onPress: () => void Linking.openSettings() },
+      ],
+    );
+    return null;
+  }
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    quality,
+  });
+  if (result.canceled || !result.assets[0]) return null;
+  const asset = result.assets[0];
+  return {
+    uri: asset.uri,
+    mimeType: asset.mimeType,
+    fileName: asset.fileName,
+  };
+}
+
+/**
+ * Offer Camera or Photo Library for receipts / lobby / FPS proof.
+ * Library is a first-class option — not only a camera-denied fallback.
+ */
+export async function takePhoto(opts?: {
+  quality?: number;
+  /** Shown in the permission / chooser dialogs */
+  purpose?: string;
+}): Promise<CapturedPhoto | null> {
+  const quality = opts?.quality ?? 0.7;
+  const purpose = opts?.purpose ?? "receipts and delivery proof";
+
+  return new Promise((resolve) => {
+    Alert.alert(
+      "Add photo",
+      `Choose how to add a photo for ${purpose}.`,
+      [
+        { text: "Cancel", style: "cancel", onPress: () => resolve(null) },
+        {
+          text: "Photo library",
+          onPress: () => {
+            void openLibrary(quality).then(resolve);
+          },
+        },
+        {
+          text: "Take photo",
+          onPress: () => {
+            void openCamera(quality).then(resolve);
+          },
+        },
+      ],
+      { cancelable: true, onDismiss: () => resolve(null) },
+    );
+  });
+}
+
+/** Chat photo: camera or library (image only). */
+export async function captureChatPhoto(): Promise<CapturedPhoto | null> {
+  return new Promise((resolve) => {
+    Alert.alert(
+      "Send a photo",
+      "Take a new photo or pick one from your library.",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => resolve(null) },
+        {
+          text: "Photo library",
+          onPress: () => {
+            void openLibrary(0.7).then((photo) => {
+              if (photo && !photo.fileName) {
+                resolve({ ...photo, fileName: "chat.jpg", mimeType: photo.mimeType || "image/jpeg" });
+                return;
+              }
+              resolve(
+                photo
+                  ? {
+                      ...photo,
+                      mimeType: photo.mimeType || "image/jpeg",
+                      fileName: photo.fileName || "chat.jpg",
+                    }
+                  : null,
+              );
+            });
+          },
+        },
+        {
+          text: "Take photo",
+          onPress: () => {
+            void openCamera(0.7).then((photo) => {
+              resolve(
+                photo
+                  ? {
+                      ...photo,
+                      mimeType: photo.mimeType || "image/jpeg",
+                      fileName: photo.fileName || "chat.jpg",
+                    }
+                  : null,
+              );
+            });
+          },
+        },
+      ],
+      { cancelable: true, onDismiss: () => resolve(null) },
+    );
+  });
 }
 
 /** Library picker for chat: photos and short videos. */

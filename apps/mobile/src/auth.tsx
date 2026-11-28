@@ -43,6 +43,8 @@ export interface MobileUserProfile {
   campus?: CampusId;
   isRunner?: boolean;
   runnerId?: string;
+  runnerPaymentMethod?: "PayMe" | "FPS";
+  runnerPaymentId?: string;
   role?: string;
   referralSource?: ReferralSource;
 }
@@ -202,6 +204,13 @@ async function loadProfile(uid: string, email: string | null): Promise<MobileUse
           : undefined,
       isRunner: data.isRunner === true,
       runnerId: data.runnerId ? String(data.runnerId) : undefined,
+      runnerPaymentMethod:
+        data.runnerPaymentMethod === "FPS" || data.runnerPaymentMethod === "PayMe"
+          ? data.runnerPaymentMethod
+          : undefined,
+      runnerPaymentId: data.runnerPaymentId
+        ? String(data.runnerPaymentId)
+        : undefined,
       role: data.role ? String(data.role) : undefined,
       referralSource: parseReferralSource(data.referralSource),
     };

@@ -8,7 +8,7 @@ import {
 import {
   Alert,
   Image,
-  KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -17,8 +17,10 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { ScreenKeyboardAvoid } from "../../src/keyboard-ui";
 import {
   acceptOrder,
+  fetchDeliveredOrdersByRunner,
   fetchPendingOrders,
   fetchRunnerOrders,
   subscribePendingOrders,
@@ -29,7 +31,16 @@ import {
   uploadDeliveryPhoto,
   uploadReceiptPhoto,
 } from "@fusion-express/shared/orders";
-import { ORDER_STATUS_LABELS, isServiceOpen, SERVICE_HOURS } from "@fusion-express/shared";
+import {
+  ORDER_STATUS_LABELS,
+  isServiceOpen,
+  orderTipTotal,
+  runnerEarningsFromOrder,
+  runnerPayoutPaid,
+  runnerPayoutPending,
+  summarizeRunnerPayouts,
+  SERVICE_HOURS,
+} from "@fusion-express/shared";
 import {
   cartTotalWeightKg,
   HEAVY_BAG_SURCHARGE,
@@ -97,6 +108,7 @@ export default function RunnerScreen() {
   );
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
+  const [delivered, setDelivered] = useState<Order[]>([]);
   const [error, setError] = useState("");
   const [loadingList, setLoadingList] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -121,17 +133,20 @@ export default function RunnerScreen() {
     if (!runnerUid) {
       setPending([]);
       setActive([]);
+      setDelivered([]);
       return;
     }
     setLoadingList(true);
     setError("");
     try {
-      const [nextPending, nextActive] = await Promise.all([
+      const [nextPending, nextActive, nextDelivered] = await Promise.all([
         fetchPendingOrders(),
         fetchRunnerOrders(runnerUid),
+        fetchDeliveredOrdersByRunner(runnerUid),
       ]);
       setPending(nextPending);
       setActive(nextActive);
+      setDelivered(nextDelivered);
       setTotals((prev) => {
         const next = { ...prev };
         for (const o of nextActive) {
@@ -152,8 +167,12 @@ export default function RunnerScreen() {
     if (!runnerUid || !profile?.isRunner) {
       setPending([]);
       setActive([]);
+      setDelivered([]);
       return;
     }
+    void fetchDeliveredOrdersByRunner(runnerUid)
+      .then(setDelivered)
+      .catch(() => undefined);
     setError("");
     const unsubPending = subscribePendingOrders(
       (orders) => {
@@ -480,7 +499,7 @@ export default function RunnerScreen() {
 
   if (authLoading) {
     return (
-      <Page>
+      <Page includeBottomInset={false}>
         <ScreenHeader title="Runner" />
         <LoadingBlock />
       </Page>
@@ -489,7 +508,7 @@ export default function RunnerScreen() {
 
   if (!user) {
     return (
-      <Page>
+      <Page includeBottomInset={false}>
         <ScreenHeader title="Runner" />
         <EmptyState
           title="Sign in to run deliveries"
@@ -500,7 +519,7 @@ export default function RunnerScreen() {
   }
 
   return (
-    <Page>
+    <Page includeBottomInset={false}>
       <ScreenHeader
         title="Runner"
         right={
@@ -511,14 +530,12 @@ export default function RunnerScreen() {
           </Pressable>
         }
       />
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+      <ScreenKeyboardAvoid className="flex-1">
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-4 py-4 pb-10"
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           <Card>
             <Text className="text-sm text-gray-600">
@@ -662,6 +679,13 @@ export default function RunnerScreen() {
                   <Text className="mt-1 text-sm text-gray-600">
                     {order.hall} · {order.customerName}
                   </Text>
+                  <Text className="mt-1 text-sm font-semibold text-emerald-700">
+                    You earn $
+                    {runnerEarningsFromOrder(order)}
+                    {orderTipTotal(order) > 0
+                      ? ` (incl. $${orderTipTotal(order)} tip)`
+                      : ""}
+                  </Text>
                   {order.discountApplied && (order.discountAmount ?? 0) > 0 ? (
                     <Text className="mt-1 text-xs font-semibold text-emerald-700">
                       College discount −HK${order.discountAmount}
@@ -708,7 +732,7 @@ export default function RunnerScreen() {
                             ? "✓ Receipt uploaded (retake)"
                             : busy && busyKind === "receipt"
                               ? "Uploading receipt…"
-                              : "1. Take receipt photo"
+                              : "1. Receipt photo (camera or library)"
                       }
                       onPress={() => void onReceipt(order)}
                       disabled={busy || shopLocked}
@@ -790,7 +814,7 @@ export default function RunnerScreen() {
                           ? "✓ Lobby photo uploaded (retake)"
                           : busy && busyKind === "lobby"
                             ? "Uploading lobby…"
-                            : "4. Take lobby photo"
+                            : "4. Lobby photo (camera or library)"
                       }
                       onPress={() => void onLobby(order)}
                       disabled={busy || shopLocked}
@@ -817,8 +841,121 @@ export default function RunnerScreen() {
               );
             })
           )}
+
+          <Text className="mb-2 mt-6 text-base font-extrabold text-gray-900">
+            Your payouts
+          </Text>
+          {(() => {
+            const summary = summarizeRunnerPayouts(delivered);
+            const sample = delivered.find((o) => o.runnerPaymentId);
+            const payMethod =
+              profile?.runnerPaymentMethod ??
+              sample?.runnerPaymentMethod ??
+              "PayMe / FPS";
+            const payId = (
+              profile?.runnerPaymentId ??
+              sample?.runnerPaymentId ??
+              profile?.phone ??
+              ""
+            ).trim();
+            return (
+              <Card className="mb-3">
+                <Text className="text-sm text-gray-600">
+                  Admin pays to {payMethod}
+                  {payId ? `: ${payId}` : ""}.
+                </Text>
+                <View className="mt-3 flex-row gap-3">
+                  <View className="flex-1 rounded-xl bg-amber-50 px-3 py-3">
+                    <Text className="text-xs font-semibold text-amber-800">
+                      Pending
+                    </Text>
+                    <Text className="mt-1 text-xl font-extrabold text-amber-900">
+                      ${summary.pendingAmount}
+                    </Text>
+                    <Text className="mt-0.5 text-[11px] text-amber-800">
+                      {summary.pendingCount} order
+                      {summary.pendingCount === 1 ? "" : "s"}
+                    </Text>
+                  </View>
+                  <View className="flex-1 rounded-xl bg-emerald-50 px-3 py-3">
+                    <Text className="text-xs font-semibold text-emerald-800">
+                      Paid
+                    </Text>
+                    <Text className="mt-1 text-xl font-extrabold text-emerald-900">
+                      ${summary.paidAmount}
+                    </Text>
+                    <Text className="mt-0.5 text-[11px] text-emerald-800">
+                      {summary.paidCount} order
+                      {summary.paidCount === 1 ? "" : "s"}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            );
+          })()}
+          {delivered.length === 0 ? (
+            <Text className="mb-4 text-sm text-gray-500">
+              Completed deliveries show here with earnings and payment proof.
+            </Text>
+          ) : (
+            delivered.slice(0, 20).map((order) => {
+              const earn = runnerEarningsFromOrder(order);
+              const paid = runnerPayoutPaid(order.status);
+              const pendingPay = runnerPayoutPending(order.status);
+              const when = order.runnerPaidAt ?? order.deliveredAt ?? order.updatedAt;
+              return (
+                <Card key={`pay-${order.id}`} className="mb-3">
+                  <View className="flex-row items-start justify-between gap-2">
+                    <View className="flex-1">
+                      <Text className="font-bold text-gray-900">{order.id}</Text>
+                      <Text className="mt-1 text-xs text-gray-500">
+                        {when
+                          ? when.toLocaleString("en-HK", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </Text>
+                    </View>
+                    <Text className="text-sm font-extrabold text-emerald-700">
+                      +${earn}
+                    </Text>
+                  </View>
+                  <Text
+                    className={`mt-2 text-xs font-semibold ${
+                      paid
+                        ? "text-emerald-700"
+                        : pendingPay
+                          ? "text-amber-700"
+                          : "text-gray-500"
+                    }`}
+                  >
+                    {paid
+                      ? "Paid by GraceRun"
+                      : pendingPay
+                        ? "Pending payout"
+                        : ORDER_STATUS_LABELS[order.status] ?? order.status}
+                  </Text>
+                  {order.runnerPayoutProofUrl ? (
+                    <Pressable
+                      className="mt-2"
+                      onPress={() =>
+                        void Linking.openURL(order.runnerPayoutProofUrl!)
+                      }
+                    >
+                      <Text className="text-sm font-semibold text-fusion underline">
+                        View payment proof
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </Card>
+              );
+            })
+          )}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </ScreenKeyboardAvoid>
 
       <Modal visible={Boolean(zoom)} transparent animationType="fade">
         <Pressable

@@ -289,7 +289,8 @@ service cloud.firestore {
         && request.resource.data.get('runnerId', '') == ''
         && request.resource.data.get('runnerUid', '') == ''
         && request.resource.data.subtotal is number
-        && request.resource.data.subtotal <= 200;
+        && request.resource.data.subtotal <= 200
+        && (request.resource.data.get('isTest', false) == false || isAdmin());
 
       allow update: if isOrderCustomer(resource.data)
         && resource.data.status in ['delivered', 'runner_paid']
@@ -312,7 +313,40 @@ service cloud.firestore {
           ])
           && request.resource.data.priceAdjustmentStatus == 'approved'
         )
-        || changedKeys().hasOnly(['runnerRating', 'updatedAt'])
+        || (
+          // Post-delivery rating + optional tip (once). Admin/runner read these.
+          !('rating' in resource.data)
+          && !('runnerRating' in resource.data)
+          && !('ratedAt' in resource.data)
+          && changedKeys().hasOnly([
+            'rating', 'runnerRating', 'feedback', 'ratedAt',
+            'tipAmount', 'tippedAt', 'updatedAt'
+          ])
+          && request.resource.data.rating is number
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5
+          && request.resource.data.runnerRating == request.resource.data.rating
+          && request.resource.data.ratedAt is timestamp
+          && (
+            !('feedback' in request.resource.data)
+            || (
+              request.resource.data.feedback is string
+              && request.resource.data.feedback.size() <= 1000
+            )
+          )
+          && (
+            !('tipAmount' in request.resource.data)
+            || (
+              request.resource.data.tipAmount is number
+              && request.resource.data.tipAmount >= 0
+              && request.resource.data.tipAmount <= 500
+              && request.resource.data.tippedAt is timestamp
+            )
+          )
+          && resource.data.status in [
+            'delivered', 'runner_paid', 'customer_paid', 'completed', 'paid'
+          ]
+        )
         || (
           resource.data.status in ['delivered', 'runner_paid']
           && changedKeys().hasOnly([
@@ -334,6 +368,7 @@ service cloud.firestore {
       // Claiming a paid (or legacy unpaid pending) order.
       allow update: if isRunner()
         && resource.data.status in ['pending', 'paid']
+        && resource.data.get('isTest', false) == false
         && resource.data.customerId != uid()
         && changedKeys().hasOnly([
           'status', 'runnerId', 'runnerUid', 'runnerName', 'updatedAt',
@@ -374,7 +409,8 @@ service cloud.firestore {
           'customerPaidAt', 'paymentReceived', 'awaitingOnlinePayment',
           'airwallexPaymentIntentId', 'airwallexPaidAmount',
           'airwallexPaidCurrency', 'airwallexWebhookEventId',
-          'airwallexPaidNotifiedAt', 'paymentProvider'
+          'airwallexPaidNotifiedAt', 'paymentProvider',
+          'runnerPayoutProofUrl'
         ]);
 
       allow delete: if false;
@@ -403,15 +439,54 @@ service cloud.firestore {
 
     // Order chat is between the customer and the assigned runner only.
     // senderId must be the Auth uid — no studentId / runnerDocId spoofing.
+    // Post-delivery create is capped at 8h after deliveredAt (else updatedAt).
+    function orderChatInFlight(o) {
+      return o.status in [
+        'pending', 'accepted', 'purchased',
+        'runner_assigned', 'assigned', 'picked_up', 'picked'
+      ];
+    }
+
+    function orderChatPostDelivery(o) {
+      return o.status in [
+        'delivered', 'customer_paid', 'runner_paid', 'completed', 'paid'
+      ];
+    }
+
+    function orderChatWindowOpen(o) {
+      return orderChatInFlight(o)
+        || (
+          orderChatPostDelivery(o)
+          && (
+            (
+              'deliveredAt' in o
+              && o.deliveredAt is timestamp
+              && request.time < o.deliveredAt + duration.value(8, 'h')
+            )
+            || (
+              !('deliveredAt' in o)
+              && 'updatedAt' in o
+              && o.updatedAt is timestamp
+              && request.time < o.updatedAt + duration.value(8, 'h')
+            )
+            || (
+              !('deliveredAt' in o) && !('updatedAt' in o)
+            )
+          )
+        );
+    }
+
     match /chats/{orderId}/messages/{messageId} {
       allow get, list: if isOrderCustomer(order(orderId))
         || isOrderRunner(order(orderId))
         || isAdmin();
       allow create: if request.resource.data.senderId == uid()
         && (
-          isOrderCustomer(order(orderId))
-          || isOrderRunner(order(orderId))
-          || isAdmin()
+          isAdmin()
+          || (
+            (isOrderCustomer(order(orderId)) || isOrderRunner(order(orderId)))
+            && orderChatWindowOpen(order(orderId))
+          )
         );
       allow update, delete: if false;
     }

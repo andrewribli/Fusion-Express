@@ -8,6 +8,7 @@ export type RootStackParamList = {
   Checkout: undefined;
   CanteenCheckout: undefined;
   Track: { orderId?: string; focusChat?: boolean };
+  OrderChat: { orderId: string };
   Support: undefined;
   Admin: undefined;
   AdminSupport: undefined;

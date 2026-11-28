@@ -107,12 +107,43 @@ export function formatOrderPlacedAt(date: Date | undefined): string {
 
 export const RUNNER_EARNINGS_RATE = 0.7;
 
+/** Checkout tip + optional post-delivery tip (HK$). */
+export function orderTipTotal(order: {
+  tip?: number;
+  tipAmount?: number;
+}): number {
+  return (
+    Math.max(0, Number(order.tip ?? 0)) +
+    Math.max(0, Number(order.tipAmount ?? 0))
+  );
+}
+
+/**
+ * Runner take-home for one order: 70% of delivery (+ heavy-bag) plus
+ * 100% of customer tips (checkout + post-delivery).
+ */
 export function runnerEarningsForOrder(
   deliveryFee: number,
   heavyBagSurcharge = 0,
+  tip = 0,
 ): number {
   const fee = Number(deliveryFee ?? 0) + Number(heavyBagSurcharge ?? 0);
-  return Math.round(fee * RUNNER_EARNINGS_RATE * 100) / 100;
+  const tips = Math.max(0, Number(tip ?? 0));
+  return Math.round((fee * RUNNER_EARNINGS_RATE + tips) * 100) / 100;
+}
+
+/** Convenience: earnings from an order doc including tipAmount. */
+export function runnerEarningsFromOrder(order: {
+  deliveryFee: number;
+  heavyBagSurcharge?: number;
+  tip?: number;
+  tipAmount?: number;
+}): number {
+  return runnerEarningsForOrder(
+    order.deliveryFee,
+    order.heavyBagSurcharge,
+    orderTipTotal(order),
+  );
 }
 
 export function hasConfirmedGroceryTotal(order: {
@@ -176,6 +207,60 @@ export function adminPayoutLabel(status: OrderStatus): string {
   if (status === "runner_paid") return "runner_paid";
   if (status === "customer_paid" || status === "completed") return "customer_paid";
   return status;
+}
+
+/** Whether GraceRun still owes the runner reimbursement for this order. */
+export function runnerPayoutPending(status: string): boolean {
+  const normalized = normalizeOrderStatus(status);
+  return (
+    normalized === "delivered" ||
+    normalized === "customer_paid" ||
+    normalized === "paid"
+  );
+}
+
+/** Whether admin has marked the runner reimbursed for this order. */
+export function runnerPayoutPaid(status: string): boolean {
+  const normalized = normalizeOrderStatus(status);
+  return normalized === "runner_paid" || normalized === "completed";
+}
+
+export type RunnerPayoutSummary = {
+  pendingAmount: number;
+  paidAmount: number;
+  pendingCount: number;
+  paidCount: number;
+};
+
+export function summarizeRunnerPayouts(
+  orders: Array<{
+    status: string;
+    deliveryFee: number;
+    heavyBagSurcharge?: number;
+    tip?: number;
+    tipAmount?: number;
+  }>,
+): RunnerPayoutSummary {
+  let pendingAmount = 0;
+  let paidAmount = 0;
+  let pendingCount = 0;
+  let paidCount = 0;
+  for (const order of orders) {
+    const earn = runnerEarningsFromOrder(order);
+    if (runnerPayoutPaid(order.status)) {
+      paidAmount += earn;
+      paidCount += 1;
+    } else if (runnerPayoutPending(order.status)) {
+      pendingAmount += earn;
+      pendingCount += 1;
+    }
+  }
+  return {
+    pendingAmount: Math.round(pendingAmount * 100) / 100,
+    paidAmount: Math.round(paidAmount * 100) / 100,
+    pendingCount,
+    paidCount,
+  };
 }
 
 export const CUSTOMER_PAY_REMINDER_MS = 2 * 60 * 60 * 1000;

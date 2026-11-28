@@ -1,0 +1,5 @@
+• Rate your delivery with 1–5 stars, optional feedback, and an optional tip for your runner after completion
+• Tips are recorded for the runner’s weekly payout
+• Full-screen chat with photo library or camera — message for 8 hours after delivery
+• Runners can track pending vs paid payouts and view admin payment proof
+• Admin FPS / PayMe details and bank-transfer proof uploads for runner reimbursement

@@ -49,7 +49,10 @@ import {
   formatExpiredAgo,
   isRunnerDeliveryExpired,
   customerAmountDue,
-  runnerEarningsForOrder,
+  runnerEarningsFromOrder,
+  runnerPayoutPaid,
+  runnerPayoutPending,
+  summarizeRunnerPayouts,
   runnerExpiredAtOf,
   runnerWarningTotal,
   RUNNER_EARNINGS_RATE,
@@ -197,10 +200,7 @@ function AvailableOrderCard({
 }) {
   const preview = order.items.slice(0, 2);
   const extra = order.items.length - preview.length;
-  const earn = runnerEarningsForOrder(
-    order.deliveryFee,
-    order.heavyBagSurcharge,
-  );
+  const earn = runnerEarningsFromOrder(order);
 
   return (
     <li className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -988,8 +988,7 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
     openDeliveries.find((order) => order.id === flowOrderId) ?? null;
 
   const totalFromDeliveries = delivered.reduce(
-    (sum, order) =>
-      sum + runnerEarningsForOrder(order.deliveryFee, order.heavyBagSurcharge),
+    (sum, order) => sum + runnerEarningsFromOrder(order),
     0,
   );
 
@@ -1145,28 +1144,65 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
 
             {!loading && tab === "completed" && (
               <section className="mt-4 space-y-4">
-                <div className="rounded-2xl bg-[#ED1C24] p-5 text-white shadow-md">
-                  <p className="text-sm text-white/80">Total Earned</p>
-                  <p className="mt-1 text-3xl font-bold">
-                    ${runnerProfile?.totalEarned ?? totalFromDeliveries}
-                  </p>
-                  <p className="mt-2 text-xs text-white/80">
-                    You keep {RUNNER_EARNINGS_RATE * 100}% of each order&apos;s delivery fee.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-900">
-                    Pending Payout
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-amber-600">
-                    ${runnerProfile?.pendingPayout ?? 0}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Paid weekly to {user?.runnerPaymentMethod}:{" "}
-                    {user?.runnerPaymentId}
-                  </p>
-                </div>
+                {(() => {
+                  const summary = summarizeRunnerPayouts(delivered);
+                  const fromOrders =
+                    summary.pendingAmount + summary.paidAmount;
+                  const total =
+                    fromOrders > 0
+                      ? fromOrders
+                      : (runnerProfile?.totalEarned ?? totalFromDeliveries);
+                  return (
+                    <>
+                      <div className="rounded-2xl bg-[#ED1C24] p-5 text-white shadow-md">
+                        <p className="text-sm text-white/80">Total earned</p>
+                        <p className="mt-1 text-3xl font-bold">${total}</p>
+                        <p className="mt-2 text-xs text-white/80">
+                          You keep {RUNNER_EARNINGS_RATE * 100}% of each
+                          order&apos;s delivery fee (plus tips).
+                        </p>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+                          <p className="text-sm font-semibold text-amber-900">
+                            Pending payout
+                          </p>
+                          <p className="mt-1 text-2xl font-bold text-amber-700">
+                            ${summary.pendingAmount}
+                          </p>
+                          <p className="mt-1 text-xs text-amber-800">
+                            {summary.pendingCount} order
+                            {summary.pendingCount === 1 ? "" : "s"} awaiting
+                            admin payment
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+                          <p className="text-sm font-semibold text-emerald-900">
+                            Paid to you
+                          </p>
+                          <p className="mt-1 text-2xl font-bold text-emerald-700">
+                            ${summary.paidAmount}
+                          </p>
+                          <p className="mt-1 text-xs text-emerald-800">
+                            {summary.paidCount} order
+                            {summary.paidCount === 1 ? "" : "s"} reimbursed
+                          </p>
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                        <p className="text-sm font-semibold text-gray-900">
+                          Your {user?.runnerPaymentMethod ?? "PayMe / FPS"}
+                        </p>
+                        <p className="mt-1 break-all font-mono text-lg font-bold text-[#552583]">
+                          {user?.runnerPaymentId || "Not set on profile"}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          Admin uses this ID when transferring your payout.
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
 
                 {delivered.length === 0 ? (
                   <div className="rounded-2xl bg-white px-6 py-12 text-center shadow-sm">
@@ -1174,28 +1210,76 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                   </div>
                 ) : (
                   <ul className="space-y-3">
-                    {delivered.map((order) => (
-                      <li
-                        key={order.id}
-                        className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
-                      >
-                        <div className="flex justify-between gap-3">
-                          <p className="font-bold text-gray-900">{order.id}</p>
-                          <p className="text-xs text-gray-500">
-                            {formatTime(order.deliveredAt ?? order.updatedAt)}
+                    {delivered.map((order) => {
+                      const earn = runnerEarningsFromOrder(order);
+                      const paid = runnerPayoutPaid(order.status);
+                      const pendingPay = runnerPayoutPending(order.status);
+                      const stars = order.rating ?? order.runnerRating;
+                      return (
+                        <li
+                          key={order.id}
+                          className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                        >
+                          <div className="flex justify-between gap-3">
+                            <p className="font-bold text-gray-900">{order.id}</p>
+                            <p className="text-xs text-gray-500">
+                              {formatTime(
+                                order.runnerPaidAt ??
+                                  order.deliveredAt ??
+                                  order.updatedAt,
+                              )}
+                            </p>
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-green-700">
+                            +${earn}
                           </p>
-                        </div>
-                        <p className="mt-1 text-sm font-semibold text-green-700">
-                          +${runnerEarningsForOrder(
-                            order.deliveryFee,
-                            order.heavyBagSurcharge,
-                          )}
-                        </p>
-                        <div className="mt-3">
-                          <RunnerOrderDetails order={order} />
-                        </div>
-                      </li>
-                    ))}
+                          {stars ? (
+                            <p className="mt-1 text-xs text-amber-800">
+                              Customer rated {stars}/5
+                              {order.feedback ? ` · “${order.feedback}”` : ""}
+                            </p>
+                          ) : null}
+                          {order.runnerPayoutProofUrl ? (
+                            <a
+                              href={order.runnerPayoutProofUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-1 inline-block text-xs font-semibold text-[#ED1C24] underline"
+                            >
+                              View payment proof
+                            </a>
+                          ) : null}
+                          <p
+                            className={`mt-1 text-xs font-semibold ${
+                              paid
+                                ? "text-emerald-700"
+                                : pendingPay
+                                  ? "text-amber-700"
+                                  : "text-gray-500"
+                            }`}
+                          >
+                            {paid
+                              ? "Paid by GraceRun"
+                              : pendingPay
+                                ? "Pending payout"
+                                : order.status}
+                          </p>
+                          {order.runnerPayoutProofUrl ? (
+                            <a
+                              href={order.runnerPayoutProofUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-2 inline-block text-sm font-semibold text-[#ED1C24] underline"
+                            >
+                              View payment proof
+                            </a>
+                          ) : null}
+                          <div className="mt-3">
+                            <RunnerOrderDetails order={order} />
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </section>

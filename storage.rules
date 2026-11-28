@@ -25,6 +25,22 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    function isProofUnder15mb() {
+      return request.resource.size < 15 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType == 'application/pdf'
+        );
+    }
+
+    function isChatMediaUnder25mb() {
+      return request.resource.size < 25 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+        );
+    }
+
     function isAdmin() {
       return signedIn()
         && firestore.exists(/databases/(default)/documents/admins/$(uid()));
@@ -82,9 +98,14 @@ service firebase.storage {
       allow write: if signedIn() && isImageUnder10mb();
     }
 
+    // Admin → runner payout proof (bank transfer / FPS screenshot / PDF).
+    match /runner-payout-proofs/{orderId}/{fileName} {
+      allow read: if isOrderRunner(orderId) || isAdmin();
+      allow write: if isAdmin() && isProofUnder15mb();
+    }
+
     // Path embeds the uploader uid so Storage can enforce ownership without
-    // a Firestore get. Admin review uses a signed-in admin session (Storage
-    // has no cheap admin-collection check here).
+    // a Firestore get. Admin review uses a signed-in admin session.
     match /payment-submissions/{userId}/{orderId}/{fileName} {
       allow read: if signedIn();
       allow write: if signedIn()
@@ -92,18 +113,22 @@ service firebase.storage {
         && isImageUnder10mb();
     }
 
-    // Order chat photos: chats/{orderId}/{messageId}/{fileName}
-    // Writes match Firestore chat create (customer / assigned runner only).
-    match /chats/{orderId}/{messageId}/{fileName} {
+    // Order chat photos — clients upload chats/{orderId}/{fileName}
+    // (legacy flat path) or chats/{orderId}/{uploadId}/{fileName}.
+    match /chats/{orderId}/{fileName} {
       allow read: if canAccessOrderChat(orderId);
-      allow write: if (isOrderCustomer(orderId) || isOrderRunner(orderId))
-        && isImageUnder10mb();
+      allow write: if canAccessOrderChat(orderId) && isChatMediaUnder25mb();
+    }
+
+    match /chats/{orderId}/{uploadId}/{fileName} {
+      allow read: if canAccessOrderChat(orderId);
+      allow write: if canAccessOrderChat(orderId) && isChatMediaUnder25mb();
     }
 
     // Admin ↔ user support chat photos: adminChats/{userId}/{messageId}/{fileName}
     match /adminChats/{userId}/{messageId}/{fileName} {
       allow read: if canAccessAdminChat(userId);
-      allow write: if canAccessAdminChat(userId) && isImageUnder10mb();
+      allow write: if canAccessAdminChat(userId) && isChatMediaUnder25mb();
     }
 
     // Profile photos — owner write, signed-in read (orders stamp the URL).
@@ -133,6 +158,11 @@ service firebase.storage {
       allow write: if signedIn() && isImageUnder10mb();
     }
 
+    match /test/runner-payout-proofs/{orderId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isProofUnder15mb();
+    }
+
     match /test/payment-submissions/{userId}/{orderId}/{fileName} {
       allow read: if signedIn();
       allow write: if signedIn()
@@ -140,14 +170,19 @@ service firebase.storage {
         && isImageUnder10mb();
     }
 
-    match /test/chats/{orderId}/{messageId}/{fileName} {
+    match /test/chats/{orderId}/{fileName} {
       allow read: if signedIn();
-      allow write: if signedIn() && isImageUnder10mb();
+      allow write: if signedIn() && isChatMediaUnder25mb();
+    }
+
+    match /test/chats/{orderId}/{uploadId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if signedIn() && isChatMediaUnder25mb();
     }
 
     match /test/adminChats/{userId}/{messageId}/{fileName} {
       allow read: if signedIn();
-      allow write: if signedIn() && isImageUnder10mb();
+      allow write: if signedIn() && isChatMediaUnder25mb();
     }
 
     match /test/avatars/{userId}/{fileName} {

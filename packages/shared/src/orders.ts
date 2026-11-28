@@ -229,6 +229,9 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     adminVerified: Boolean(data.adminVerified),
     customerPaidAt: data.customerPaidAt ? toDate(data.customerPaidAt) : undefined,
     runnerPaidAt: data.runnerPaidAt ? toDate(data.runnerPaidAt) : undefined,
+    runnerPayoutProofUrl: data.runnerPayoutProofUrl
+      ? String(data.runnerPayoutProofUrl)
+      : undefined,
     runnerEmail: data.runnerEmail ? String(data.runnerEmail) : undefined,
     acceptedAt: data.acceptedAt ? toDate(data.acceptedAt) : undefined,
     purchasedAt: data.purchasedAt
@@ -255,6 +258,16 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
         ? String(data.runnerPhotoUrl)
         : undefined,
     runnerRating: data.runnerRating != null ? Number(data.runnerRating) : undefined,
+    rating:
+      data.rating != null
+        ? Number(data.rating)
+        : data.runnerRating != null
+          ? Number(data.runnerRating)
+          : undefined,
+    feedback: data.feedback ? String(data.feedback) : undefined,
+    ratedAt: data.ratedAt ? toDate(data.ratedAt) : undefined,
+    tipAmount: data.tipAmount != null ? Number(data.tipAmount) : undefined,
+    tippedAt: data.tippedAt ? toDate(data.tippedAt) : undefined,
     deliveryPhotoUrl: data.deliveryPhotoUrl
       ? String(data.deliveryPhotoUrl)
       : undefined,
@@ -1135,23 +1148,63 @@ export async function cancelOrder(orderId: string, customerId: string): Promise<
   await updateOrderStatus(orderId, "cancelled");
 }
 
-export async function updateOrderRating(
+export type SubmitOrderRatingInput = {
+  rating: number;
+  feedback?: string;
+  tipAmount?: number;
+};
+
+/** Persist post-delivery stars / feedback / optional tip on the order. */
+export async function submitOrderRating(
   orderId: string,
-  rating: number,
+  input: SubmitOrderRatingInput,
 ): Promise<void> {
+  const rating = Math.round(Number(input.rating));
+  if (rating < 1 || rating > 5) throw new Error("Rating must be 1–5");
+  const feedback = String(input.feedback ?? "").trim().slice(0, 1000);
+  const tipAmount = Math.max(0, Math.round(Number(input.tipAmount ?? 0) * 100) / 100);
+  if (tipAmount > 500) throw new Error("Tip must be HK$500 or less");
+
+  const now = new Date();
+  const updates: Record<string, unknown> = {
+    rating,
+    runnerRating: rating,
+    ratedAt: Timestamp.fromDate(now),
+    updatedAt: Timestamp.fromDate(now),
+  };
+  if (feedback) updates.feedback = feedback;
+  if (tipAmount > 0) {
+    updates.tipAmount = tipAmount;
+    updates.tippedAt = Timestamp.fromDate(now);
+  }
+
   if (isFirebaseConfigured()) {
     try {
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), {
-        runnerRating: rating,
-        updatedAt: Timestamp.fromDate(new Date()),
-      });
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), updates);
       return;
     } catch {
       // fallback
     }
   }
   const order = getMockOrderById(orderId);
-  if (order) order.runnerRating = rating;
+  if (order) {
+    order.rating = rating;
+    order.runnerRating = rating;
+    order.ratedAt = now;
+    if (feedback) order.feedback = feedback;
+    if (tipAmount > 0) {
+      order.tipAmount = tipAmount;
+      order.tippedAt = now;
+    }
+  }
+}
+
+/** @deprecated Use submitOrderRating */
+export async function updateOrderRating(
+  orderId: string,
+  rating: number,
+): Promise<void> {
+  await submitOrderRating(orderId, { rating });
 }
 
 export async function updateRunnerNote(
@@ -1612,11 +1665,51 @@ export async function verifyAdminDelivery(
   );
 }
 
-export async function markRunnerPayout(orderId: string): Promise<void> {
+export async function uploadRunnerPayoutProof(
+  orderId: string,
+  file: Blob,
+  filename = "payout-proof.jpg",
+): Promise<string> {
+  const name =
+    "name" in file && typeof (file as { name?: string }).name === "string"
+      ? (file as { name: string }).name
+      : filename;
+  if (!isFirebaseConfigured()) {
+    return `mock://runner-payout-proofs/${orderId}/${name}`;
+  }
+  try {
+    const storageRef = ref(
+      getFirebaseStorage(),
+      storagePath(`runner-payout-proofs/${orderId}/${Date.now()}-${name}`),
+    );
+    await uploadBytes(storageRef, file, {
+      contentType: file.type || undefined,
+    });
+    return await getDownloadURL(storageRef);
+  } catch (err) {
+    console.error("uploadRunnerPayoutProof failed", err);
+    throw new Error("Payout proof upload failed. Please try again.");
+  }
+}
+
+export async function markRunnerPayout(
+  orderId: string,
+  opts?: { proofUrl?: string },
+): Promise<void> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
   if (order.status !== "paid" && order.status !== "customer_paid") {
     throw new Error("Reimburse the runner after the customer has paid.");
+  }
+  const proofUrl = opts?.proofUrl?.trim();
+  if (proofUrl) {
+    await patchOrder(
+      orderId,
+      { runnerPayoutProofUrl: proofUrl },
+      (mock) => {
+        mock.runnerPayoutProofUrl = proofUrl;
+      },
+    );
   }
   await updateOrderStatus(orderId, "runner_paid");
   await updateOrderStatus(orderId, "completed");

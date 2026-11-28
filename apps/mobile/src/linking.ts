@@ -26,6 +26,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
       Checkout: "checkout",
       CanteenCheckout: "canteen-checkout",
       Track: "track/:orderId",
+      OrderChat: "chat/:orderId",
       Support: "support",
       Admin: "admin/tools",
       AdminSupport: "admin",
@@ -39,10 +40,9 @@ export const linking: LinkingOptions<RootStackParamList> = {
         routes: [
           { name: "Tabs" },
           {
-            name: "Track",
+            name: "OrderChat",
             params: {
               orderId: decodeURIComponent(chat[1]),
-              focusChat: true,
             },
           },
         ],
@@ -86,10 +86,11 @@ export function openFromPushData(data: {
       return true;
     }
     if (!orderId) return true;
-    navigationRef.navigate("Track", {
-      orderId,
-      focusChat: type === "chat",
-    });
+    if (type === "chat") {
+      navigationRef.navigate("OrderChat", { orderId });
+      return true;
+    }
+    navigationRef.navigate("Track", { orderId });
     return true;
   };
   if (go()) return;

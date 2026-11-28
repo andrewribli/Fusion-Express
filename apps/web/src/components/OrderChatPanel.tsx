@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { isAdminUid } from "@/lib/admins";
 import { isChatActive } from "@/lib/constants";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
+  sendChatMedia,
   sendChatMessage,
   subscribeChatMessages,
 } from "@/lib/chat";
@@ -31,12 +33,14 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
   const [sendError, setSendError] = useState("");
+  const [sending, setSending] = useState(false);
   const [expanded, setExpanded] = useState(!compact);
   const [lastReadAt, setLastReadAt] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const chatActive = isChatActive(order.status);
+  const chatActive = isChatActive(order);
   const accountId = user?.uid ?? "";
 
   useEffect(() => {
@@ -104,8 +108,9 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!text.trim() || !senderId) return;
+    if (!text.trim() || !senderId || !chatActive) return;
     setSendError("");
+    setSending(true);
     try {
       await sendChatMessage(order.id, senderId, senderName, text);
       notifyOrderEvent(order.id, "chat", text);
@@ -113,14 +118,39 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
       setExpanded(true);
     } catch {
       setSendError("Could not send. Try again.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handlePhoto(file: File | null) {
+    if (!file || !senderId || !chatActive) return;
+    setSendError("");
+    setSending(true);
+    try {
+      await sendChatMedia({
+        orderId: order.id,
+        senderId,
+        senderName,
+        file,
+        fileName: file.name || "chat.jpg",
+        contentType: file.type || "image/jpeg",
+        mediaType: file.type.startsWith("video/") ? "video" : "image",
+      });
+      notifyOrderEvent(order.id, "chat", "Sent a photo");
+      setExpanded(true);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "";
+      setSendError(detail || "Could not send that photo.");
+    } finally {
+      setSending(false);
     }
   }
 
   if (compact && !expanded) {
     return (
-      <button
-        type="button"
-        onClick={() => setExpanded(true)}
+      <Link
+        href={`/chat/${order.id}`}
         className={`mt-3 flex w-full items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-md ${
           unread > 0 ? "bg-fusion-red" : "bg-gray-800"
         }`}
@@ -134,7 +164,7 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
           )}
         </span>
         {chatLabel}
-      </button>
+      </Link>
     );
   }
 
@@ -179,7 +209,29 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
                   <p className="text-[10px] opacity-75">
                     {msg.senderName} · {formatMessageTime(msg.timestamp)}
                   </p>
-                  <p className="mt-0.5">{msg.message}</p>
+                  {msg.imageUrl && msg.mediaType !== "video" ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={msg.imageUrl}
+                      alt=""
+                      className="mt-1 max-h-40 rounded-xl object-cover"
+                    />
+                  ) : null}
+                  {msg.mediaType === "video" && msg.imageUrl ? (
+                    <a
+                      href={msg.imageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 block text-xs underline"
+                    >
+                      Play video
+                    </a>
+                  ) : null}
+                  {msg.message &&
+                  msg.message !== "Photo" &&
+                  msg.message !== "Video" ? (
+                    <p className="mt-0.5">{msg.message}</p>
+                  ) : null}
                 </div>
               </div>
             );
@@ -194,6 +246,24 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
         )}
         <div className="flex gap-2">
           <input
+            ref={fileRef}
+            type="file"
+            accept="image/*,video/*"
+            className="hidden"
+            onChange={(e) => {
+              void handlePhoto(e.target.files?.[0] ?? null);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            disabled={sending}
+            onClick={() => fileRef.current?.click()}
+            className="rounded-xl border border-gray-200 px-2.5 py-2 text-xs font-semibold text-gray-700 disabled:opacity-50"
+          >
+            Photo
+          </button>
+          <input
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={`Message ${otherParty}…`}
@@ -201,7 +271,7 @@ export function OrderChatPanel({ order, compact }: OrderChatPanelProps) {
           />
           <button
             type="submit"
-            disabled={!text.trim()}
+            disabled={sending || !text.trim()}
             className="rounded-xl bg-fusion-red px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
             Send

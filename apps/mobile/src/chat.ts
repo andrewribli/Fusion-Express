@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { ChatMessage, Order } from "@fusion-express/shared/types";
 import { collectionName } from "@fusion-express/shared/app-env";
+import { chatMediaStoragePath } from "@fusion-express/shared";
 import { storagePath } from "@fusion-express/shared/app-env";
 import {
   getDb,
@@ -113,10 +115,9 @@ export async function sendChatMedia(opts: {
   mediaType: "image" | "video";
 }): Promise<void> {
   if (!isFirebaseConfigured()) throw new Error("Chat requires Firebase.");
-  const safeName = opts.fileName.replace(/[^\w.-]+/g, "_") || "media";
   const storageRef = ref(
     getFirebaseStorage(),
-    storagePath(`chats/${opts.orderId}/${Date.now()}-${safeName}`),
+    storagePath(chatMediaStoragePath(opts.orderId, opts.fileName)),
   );
   await uploadBytes(storageRef, opts.file, { contentType: opts.contentType });
   const imageUrl = await getDownloadURL(storageRef);
@@ -192,4 +193,75 @@ export function isOwnChatMessage(
 export function orderChatPeerLabel(order: Order, uid: string | undefined): string {
   if (uid && order.customerId === uid) return "runner";
   return "customer";
+}
+
+/** Display name for the other party (header / button). */
+export function orderChatPeerName(
+  order: Order,
+  uid: string | undefined,
+): string {
+  if (uid && order.customerId === uid) {
+    const name = order.runnerName?.trim();
+    return name || "Runner";
+  }
+  const name = order.customerName?.trim();
+  return name || "Customer";
+}
+
+export function orderChatButtonLabel(
+  order: Order,
+  uid: string | undefined,
+): string {
+  return uid && order.customerId === uid
+    ? "Message runner"
+    : "Message customer";
+}
+
+export function orderChatSubtitle(order: Order): string {
+  const shortId = order.id.length > 10 ? order.id.slice(0, 10) : order.id;
+  const lobby = order.lobbyPoint?.trim();
+  return lobby ? `${shortId} · ${lobby}` : shortId;
+}
+
+function chatReadKey(orderId: string, accountId: string): string {
+  return `fusion_chat_read_${orderId}_${accountId}`;
+}
+
+export async function getChatLastReadAt(
+  orderId: string,
+  accountId: string,
+): Promise<number> {
+  if (!accountId) return 0;
+  try {
+    const raw = await AsyncStorage.getItem(chatReadKey(orderId, accountId));
+    return raw ? Number(raw) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function markChatRead(
+  orderId: string,
+  accountId: string,
+  at = Date.now(),
+): Promise<void> {
+  if (!accountId) return;
+  try {
+    await AsyncStorage.setItem(chatReadKey(orderId, accountId), String(at));
+  } catch {
+    // Best-effort local unread badge only.
+  }
+}
+
+export function countUnreadChatMessages(
+  messages: ChatMessage[],
+  uid: string | undefined,
+  lastReadAt: number,
+): number {
+  if (!uid) return 0;
+  return messages.filter(
+    (msg) =>
+      !isOwnChatMessage(msg, uid) &&
+      msg.timestamp.getTime() > lastReadAt,
+  ).length;
 }

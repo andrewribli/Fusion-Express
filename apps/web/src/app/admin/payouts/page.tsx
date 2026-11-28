@@ -10,12 +10,15 @@ import { RequireAdmin } from "@/components/RequireAdmin";
 import {
   fetchAdminReviewOrders,
   markRunnerPayout,
+  uploadRunnerPayoutProof,
   verifyAdminDelivery,
 } from "@/lib/orders";
 import { notifyOrderStatus } from "@/lib/notify-email";
 import {
   adminPayoutLabel,
   groceryAmountDue,
+  orderTipTotal,
+  runnerEarningsFromOrder,
   runnerReimburseTotal,
 } from "@/lib/order-status";
 import type { Order } from "@/lib/types";
@@ -26,6 +29,22 @@ function Proof({ url, label }: { url?: string; label: string }) {
   }
   if (url.startsWith("mock://")) {
     return <p className="text-xs text-gray-500">{label}: uploaded</p>;
+  }
+  const isPdf = /\.pdf($|\?)/i.test(url) || url.includes("application/pdf");
+  if (isPdf) {
+    return (
+      <div>
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-1 inline-block text-sm font-semibold text-[#ED1C24] underline"
+        >
+          Open PDF
+        </a>
+      </div>
+    );
   }
   return (
     <div>
@@ -42,6 +61,9 @@ export default function AdminPayoutsPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
   const [nameOk, setNameOk] = useState<Record<string, boolean>>({});
+  const [proofFiles, setProofFiles] = useState<Record<string, File | undefined>>(
+    {},
+  );
 
   async function load() {
     setError("");
@@ -84,11 +106,21 @@ export default function AdminPayoutsPage() {
   async function payRunner(order: Order) {
     setSaving(order.id);
     try {
-      await markRunnerPayout(order.id);
+      let proofUrl = order.runnerPayoutProofUrl;
+      const file = proofFiles[order.id];
+      if (file) {
+        proofUrl = await uploadRunnerPayoutProof(order.id, file, file.name);
+      }
+      await markRunnerPayout(order.id, { proofUrl });
       void notifyOrderStatus({
         extraEmails: order.runnerEmail ? [order.runnerEmail] : [],
         orderId: order.id,
         status: "runner_paid",
+      });
+      setProofFiles((prev) => {
+        const next = { ...prev };
+        delete next[order.id];
+        return next;
       });
       await load();
     } catch (err) {
@@ -110,7 +142,8 @@ export default function AdminPayoutsPage() {
               </h1>
               <p className="mt-1 text-sm text-gray-500">
                 Check the receipt and bank screenshot, reimburse the runner, then
-                collect from the customer.
+                collect from the customer. Upload your transfer proof so the runner
+                can confirm payment.
               </p>
               <p className="mt-2 text-xs">
                 <Link href="/admin/users" className="font-medium text-[#ED1C24] underline">
@@ -151,8 +184,14 @@ export default function AdminPayoutsPage() {
                   {orders.map((order) => {
                     const spent = groceryAmountDue(order);
                     const reimburse = runnerReimburseTotal(order);
+                    const tips = orderTipTotal(order);
+                    const payTotal = Math.round((reimburse + tips) * 100) / 100;
+                    const earn = runnerEarningsFromOrder(order);
+                    const stars = order.rating ?? order.runnerRating;
                     const flagged =
                       order.adminVerified && order.customerNameOnReceipt === false;
+                    const fpsMethod = order.runnerPaymentMethod ?? "PayMe / FPS";
+                    const fpsId = order.runnerPaymentId?.trim();
                     return (
                       <li
                         key={order.id}
@@ -174,13 +213,50 @@ export default function AdminPayoutsPage() {
                               Customer: {order.customerName ?? order.customerId}
                             </p>
                           </div>
-                          <p className="text-right text-sm font-bold text-[#ED1C24]">
-                            Pay runner ${reimburse}
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-[#ED1C24]">
+                              Pay runner ${payTotal}
+                            </p>
+                            <p className="text-[11px] text-gray-500">
+                              Runner keep ~${earn}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 rounded-xl border-2 border-[#552583]/30 bg-[#552583]/5 px-3 py-3">
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-[#552583]">
+                            Runner {fpsMethod} / payment ID
+                          </p>
+                          <p className="mt-1 break-all text-lg font-extrabold text-gray-900">
+                            {fpsId || "— ID missing on order —"}
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-600">
+                            {order.runnerName ?? "Runner"}
+                            {order.runnerEmail ? ` · ${order.runnerEmail}` : ""}
                           </p>
                         </div>
+
                         <p className="mt-2 text-sm text-gray-700">
                           Spent at Fusion: ${spent} · Delivery fee: ${order.deliveryFee}
+                          {tips > 0 ? ` · Tips: $${tips}` : ""}
                         </p>
+                        {(stars || order.feedback || (order.tipAmount ?? 0) > 0) && (
+                          <div className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-sm">
+                            {stars ? (
+                              <p className="font-semibold text-amber-900">
+                                Rating: {stars}/5
+                              </p>
+                            ) : null}
+                            {order.feedback ? (
+                              <p className="mt-0.5 text-gray-800">{order.feedback}</p>
+                            ) : null}
+                            {(order.tipAmount ?? 0) > 0 ? (
+                              <p className="mt-0.5 text-xs font-semibold text-emerald-800">
+                                After-delivery tip HK${order.tipAmount}
+                              </p>
+                            ) : null}
+                          </div>
+                        )}
                         {flagged && (
                           <p className="mt-2 text-xs font-semibold text-amber-800">
                             Flagged: customer name not confirmed on the receipt.
@@ -233,17 +309,42 @@ export default function AdminPayoutsPage() {
                               className="mt-3 rounded-xl bg-gray-50 px-3 py-3 text-sm"
                             >
                               <p className="font-semibold text-gray-900">
-                                Send ${reimburse} to {order.runnerName ?? "runner"}
+                                Send ${payTotal} via {fpsMethod}
                               </p>
-                              <p className="mt-1 text-gray-700">
-                                {order.runnerPaymentMethod ?? "PayMe"}
-                                {order.runnerPaymentId
-                                  ? `: ${order.runnerPaymentId}`
-                                  : " — ID missing"}
+                              <p className="mt-1 break-all font-mono text-base font-bold text-[#552583]">
+                                {fpsId || "Payment ID missing"}
                               </p>
                               <p className="mt-1 text-xs text-gray-500">
                                 Groceries ${spent} + delivery ${order.deliveryFee}
+                                {tips > 0 ? ` + tips $${tips}` : ""}
                               </p>
+
+                              <label className="mt-3 block text-xs font-semibold text-gray-800">
+                                Upload bank statement / transfer proof (image or PDF)
+                                <input
+                                  type="file"
+                                  accept="image/*,application/pdf"
+                                  className="mt-1 block w-full text-xs"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    setProofFiles((prev) => ({
+                                      ...prev,
+                                      [order.id]: file,
+                                    }));
+                                    e.target.value = "";
+                                  }}
+                                />
+                              </label>
+                              {proofFiles[order.id] ? (
+                                <p className="mt-1 text-xs text-green-700">
+                                  Ready: {proofFiles[order.id]?.name}
+                                </p>
+                              ) : order.runnerPayoutProofUrl ? (
+                                <p className="mt-1 text-xs text-gray-500">
+                                  Existing proof on file.
+                                </p>
+                              ) : null}
+
                               <button
                                 type="button"
                                 disabled={saving === order.id || !order.adminVerified}
@@ -262,13 +363,22 @@ export default function AdminPayoutsPage() {
                             </div>
                           </>
                         )}
-                        {order.status === "runner_paid" && (
+                        {order.runnerPayoutProofUrl && (
+                          <div className="mt-3">
+                            <Proof
+                              url={order.runnerPayoutProofUrl}
+                              label="Admin → runner payment proof"
+                            />
+                          </div>
+                        )}
+                        {(order.status === "runner_paid" ||
+                          order.status === "completed") && (
                           <p className="mt-3 text-xs text-green-700">
                             Runner reimbursed
                             {order.runnerPaidAt
                               ? ` · ${order.runnerPaidAt.toLocaleString("en-HK")}`
                               : ""}
-                            . Waiting for customer to pay GraceRun.
+                            .
                           </p>
                         )}
                         {order.status === "customer_paid" && (

@@ -1,6 +1,7 @@
 import type { ChatMessage } from "@/lib/types";
-import { collectionName } from "@/lib/constants";
-import { getDb, isFirebaseConfigured } from "@/lib/firebase";
+import { chatMediaStoragePath, collectionName } from "@/lib/constants";
+import { storagePath } from "@fusion-express/shared/app-env";
+import { getDb, getFirebaseStorage, isFirebaseConfigured } from "@/lib/firebase";
 import {
   addDoc,
   collection,
@@ -10,6 +11,7 @@ import {
   query,
   Timestamp,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const mockMessages = new Map<string, ChatMessage[]>();
 
@@ -19,12 +21,24 @@ function parseMessage(
   data: Record<string, unknown>,
 ): ChatMessage {
   const ts = data.timestamp;
+  const imageUrl =
+    typeof data.imageUrl === "string" && /^https?:\/\//i.test(data.imageUrl)
+      ? data.imageUrl
+      : undefined;
+  const mediaType =
+    data.mediaType === "video"
+      ? "video"
+      : data.mediaType === "image" || imageUrl
+        ? "image"
+        : undefined;
   return {
     id,
     orderId,
     senderId: String(data.senderId ?? ""),
     senderName: String(data.senderName ?? ""),
     message: String(data.message ?? ""),
+    imageUrl,
+    mediaType,
     timestamp:
       ts && typeof ts === "object" && "toDate" in ts
         ? (ts as Timestamp).toDate()
@@ -51,14 +65,14 @@ export async function sendChatMessage(
   };
 
   if (isFirebaseConfigured()) {
-    const ref = await addDoc(
+    const refDoc = await addDoc(
       collection(getDb(), collectionName("chats"), orderId, "messages"),
       {
         ...payload,
         timestamp: Timestamp.fromDate(now),
       },
     );
-    return { id: ref.id, ...payload };
+    return { id: refDoc.id, ...payload };
   }
 
   const chatMessage: ChatMessage = {
@@ -68,6 +82,37 @@ export async function sendChatMessage(
   const existing = mockMessages.get(orderId) ?? [];
   mockMessages.set(orderId, [...existing, chatMessage]);
   return chatMessage;
+}
+
+export async function sendChatMedia(opts: {
+  orderId: string;
+  senderId: string;
+  senderName: string;
+  file: Blob;
+  fileName: string;
+  contentType: string;
+  mediaType: "image" | "video";
+}): Promise<void> {
+  if (!isFirebaseConfigured()) throw new Error("Chat requires Firebase.");
+  const storageRef = ref(
+    getFirebaseStorage(),
+    storagePath(chatMediaStoragePath(opts.orderId, opts.fileName)),
+  );
+  await uploadBytes(storageRef, opts.file, { contentType: opts.contentType });
+  const imageUrl = await getDownloadURL(storageRef);
+  const now = new Date();
+  await addDoc(
+    collection(getDb(), collectionName("chats"), opts.orderId, "messages"),
+    {
+      orderId: opts.orderId,
+      senderId: opts.senderId,
+      senderName: opts.senderName,
+      message: opts.mediaType === "video" ? "Video" : "Photo",
+      imageUrl,
+      mediaType: opts.mediaType,
+      timestamp: Timestamp.fromDate(now),
+    },
+  );
 }
 
 export async function fetchChatMessages(

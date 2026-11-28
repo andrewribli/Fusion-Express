@@ -128,6 +128,8 @@ export {
   ORDER_STATUS_LABELS,
   RUNNER_EARNINGS_RATE,
   runnerEarningsForOrder,
+  runnerEarningsFromOrder,
+  orderTipTotal,
   TRACKING_STEPS,
   getStepIndex,
   normalizeOrderStatus,
@@ -142,6 +144,9 @@ export {
   customerAmountDue,
   runnerReimburseTotal,
   adminPayoutLabel,
+  runnerPayoutPending,
+  runnerPayoutPaid,
+  summarizeRunnerPayouts,
   CUSTOMER_PAY_WINDOW_MS,
   CUSTOMER_PAY_REMINDER_MS,
   RUNNER_DELIVERY_WINDOW_MS,
@@ -268,6 +273,8 @@ export interface Order {
   adminVerified?: boolean;
   customerPaidAt?: Date;
   runnerPaidAt?: Date;
+  /** Admin-uploaded bank/FPS transfer proof shown to the runner. */
+  runnerPayoutProofUrl?: string;
   runnerEmail?: string;
   acceptedAt?: Date;
   purchasedAt?: Date;
@@ -287,7 +294,21 @@ export interface Order {
   runnerAvatarId?: string;
   /** Runner real photo URL when set — always shown to the customer on track. */
   runnerPhotoURL?: string;
+  /** @deprecated Prefer `rating` — kept in sync for older clients. */
   runnerRating?: number;
+  /** Customer 1–5 star rating after delivery. */
+  rating?: number;
+  /** Optional free-text feedback with the rating. */
+  feedback?: string;
+  /** When the customer submitted the rating. */
+  ratedAt?: Date;
+  /**
+   * Optional tip (HK$) added after delivery via the rating form.
+   * Checkout tip remains on `tip`; earnings use both.
+   */
+  tipAmount?: number;
+  /** When the post-delivery tip was recorded. */
+  tippedAt?: Date;
   deliveryPhotoUrl?: string;
   estimatedDeliveryAt?: Date;
   /** When true, runners may accept now but shop only near scheduledFor. */
@@ -344,6 +365,8 @@ export interface RunnerPayout {
   orderId: string;
   amount: number;
   paidAt: Date;
+  /** Admin bank/FPS transfer proof URL when available. */
+  proofUrl?: string;
 }
 
 export interface ChatMessage {

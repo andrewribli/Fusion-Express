@@ -6,9 +6,11 @@ import { useUser } from "@/context/UserContext";
 import {
   canAccessOrderChat,
   isOwnChatMessage,
+  sendChatMedia,
   sendChatMessage,
   subscribeChatMessages,
 } from "@/lib/chat";
+import { isChatActive } from "@/lib/constants";
 import { fetchOrder } from "@/lib/orders";
 import { notifyOrderEvent } from "@/lib/notify-push";
 import type { ChatMessage, Order } from "@/lib/types";
@@ -32,6 +34,7 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,9 +69,11 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
   const senderId = user.uid;
   if (!senderId) return null;
 
+  const chatOpen = !order || isChatActive(order);
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!text.trim() || !senderId) return;
+    if (!text.trim() || !senderId || !chatOpen) return;
     setSending(true);
     setError("");
     try {
@@ -77,6 +82,29 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
       setText("");
     } catch {
       setError("Failed to send message.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handlePhoto(file: File | null) {
+    if (!file || !senderId || !chatOpen) return;
+    setSending(true);
+    setError("");
+    try {
+      await sendChatMedia({
+        orderId,
+        senderId,
+        senderName: user!.fullName || "You",
+        file,
+        fileName: file.name || "chat.jpg",
+        contentType: file.type || "image/jpeg",
+        mediaType: file.type.startsWith("video/") ? "video" : "image",
+      });
+      notifyOrderEvent(orderId, "chat", "Sent a photo");
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "";
+      setError(detail || "Could not send that photo.");
     } finally {
       setSending(false);
     }
@@ -112,7 +140,29 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
                   <p className="text-[10px] font-medium opacity-80">
                     {msg.senderName} · {formatMessageTime(msg.timestamp)}
                   </p>
-                  <p className="mt-0.5 text-sm">{msg.message}</p>
+                  {msg.imageUrl && msg.mediaType !== "video" ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={msg.imageUrl}
+                      alt=""
+                      className="mt-1 max-h-48 rounded-xl object-cover"
+                    />
+                  ) : null}
+                  {msg.mediaType === "video" && msg.imageUrl ? (
+                    <a
+                      href={msg.imageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 block text-sm underline"
+                    >
+                      Play video
+                    </a>
+                  ) : null}
+                  {msg.message &&
+                  msg.message !== "Photo" &&
+                  msg.message !== "Video" ? (
+                    <p className="mt-0.5 text-sm">{msg.message}</p>
+                  ) : null}
                 </div>
               </div>
             );
@@ -121,29 +171,53 @@ export function OrderChat({ orderId, backHref }: OrderChatProps) {
         <div ref={bottomRef} />
       </div>
 
-      <form
-        onSubmit={handleSend}
-        className="border-t border-gray-100 p-3"
-      >
-        {error && (
-          <p className="mb-2 text-xs text-red-600">{error}</p>
-        )}
-        <div className="flex gap-2">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Type a message…"
-            className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
-          />
-          <button
-            type="submit"
-            disabled={sending || !text.trim()}
-            className="rounded-xl bg-fusion-red px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            Send
-          </button>
-        </div>
-      </form>
+      {!chatOpen ? (
+        <p className="border-t border-gray-100 px-4 py-3 text-center text-sm text-gray-600">
+          Chat closed 8 hours after delivery.
+        </p>
+      ) : (
+        <form
+          onSubmit={handleSend}
+          className="border-t border-gray-100 p-3"
+        >
+          {error && (
+            <p className="mb-2 text-xs text-red-600">{error}</p>
+          )}
+          <div className="flex gap-2">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={(e) => {
+                void handlePhoto(e.target.files?.[0] ?? null);
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              disabled={sending}
+              onClick={() => fileRef.current?.click()}
+              className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-semibold text-gray-700 disabled:opacity-50"
+            >
+              Photo
+            </button>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Type a message…"
+              className="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-fusion-red focus:outline-none focus:ring-2 focus:ring-fusion-red/20"
+            />
+            <button
+              type="submit"
+              disabled={sending || !text.trim()}
+              className="rounded-xl bg-fusion-red px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              Send
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

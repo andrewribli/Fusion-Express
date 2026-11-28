@@ -27,31 +27,95 @@ export function formatEta(date: Date): string {
   });
 }
 
-/** Chat available once order is placed (prototype: coordinate anytime) */
-export function isChatActive(status: string): boolean {
-  const normalized = (() => {
-    switch (status) {
-      case "runner_assigned":
-      case "assigned":
-        return "accepted";
-      case "picked_up":
-      case "picked":
-        return "purchased";
-      case "completed":
-        return "runner_paid";
-      case "paid":
-        return "customer_paid";
-      default:
-        return status;
-    }
-  })();
-  return (
+/** Runner↔customer chat stays open this long after delivery. */
+export const CHAT_AFTER_DELIVERY_MS = 8 * 60 * 60 * 1000;
+
+/** Storage object path for an order chat image/video upload. */
+export function chatMediaStoragePath(
+  orderId: string,
+  fileName: string,
+  at = Date.now(),
+): string {
+  const safe =
+    String(fileName || "chat.jpg").replace(/[^\w.-]+/g, "_") || "chat.jpg";
+  return `chats/${orderId}/${at}-${safe}`;
+}
+
+function normalizeChatStatus(status: string): string {
+  switch (status) {
+    case "runner_assigned":
+    case "assigned":
+      return "accepted";
+    case "picked_up":
+    case "picked":
+      return "purchased";
+    case "completed":
+      return "runner_paid";
+    case "paid":
+      return "customer_paid";
+    default:
+      return status;
+  }
+}
+
+export type ChatActiveOrder = {
+  status: string;
+  deliveredAt?: Date | null;
+  updatedAt?: Date | null;
+};
+
+function chatDeliveryAnchor(order: ChatActiveOrder): Date | null {
+  if (
+    order.deliveredAt instanceof Date &&
+    !Number.isNaN(order.deliveredAt.getTime())
+  ) {
+    return order.deliveredAt;
+  }
+  if (
+    order.updatedAt instanceof Date &&
+    !Number.isNaN(order.updatedAt.getTime())
+  ) {
+    return order.updatedAt;
+  }
+  return null;
+}
+
+/**
+ * Chat while the order is in flight, and for 8h after delivery
+ * (covers delivered / customer_paid / runner_paid).
+ *
+ * Pass the order when possible so the post-delivery window uses
+ * `deliveredAt` (fallback `updatedAt`). A bare status string still
+ * works for in-flight states; post-delivery without a timestamp is
+ * treated as open (legacy rows).
+ */
+export function isChatActive(
+  statusOrOrder: string | ChatActiveOrder,
+): boolean {
+  const order: ChatActiveOrder =
+    typeof statusOrOrder === "string"
+      ? { status: statusOrOrder }
+      : statusOrOrder;
+  const normalized = normalizeChatStatus(order.status);
+
+  if (
     normalized === "pending" ||
     normalized === "accepted" ||
-    normalized === "purchased" ||
+    normalized === "purchased"
+  ) {
+    return true;
+  }
+
+  const postDelivery =
     normalized === "delivered" ||
-    normalized === "runner_paid"
-  );
+    normalized === "customer_paid" ||
+    normalized === "runner_paid";
+
+  if (!postDelivery) return false;
+
+  const anchor = chatDeliveryAnchor(order);
+  if (!anchor) return true;
+  return Date.now() <= anchor.getTime() + CHAT_AFTER_DELIVERY_MS;
 }
 
 export const TIP_PRESETS = [0, 2, 5, 10] as const;
