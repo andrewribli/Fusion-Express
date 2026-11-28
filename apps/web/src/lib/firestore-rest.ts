@@ -242,6 +242,7 @@ export type OrderEmailFields = {
   finalTotal: number;
   amountPaidByRunner: number;
   deliveryLocation: string;
+  lobbyPoint: string;
   hall: string;
   campus: CampusId;
   orderChannel: string;
@@ -284,6 +285,7 @@ export function orderEmailFieldsFromData(
     finalTotal: Number(data.finalTotal ?? 0) || 0,
     amountPaidByRunner: Number(data.amountPaidByRunner ?? 0) || 0,
     deliveryLocation: [college, hall, lobby].filter(Boolean).join(" · "),
+    lobbyPoint: lobby,
     hall,
     campus: resolveCampus(data.campus),
     orderChannel: String(data.orderChannel ?? ""),

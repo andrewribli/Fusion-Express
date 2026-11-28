@@ -1,3 +1,4 @@
+import { customerPhoneStamp } from "@fusion-express/shared/contact";
 import { useMemo, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -164,6 +165,10 @@ export default function CanteenCheckoutScreen() {
         customerId: auth.uid,
         customerName: customerName.trim(),
         customerEmail: auth.email || user?.email || undefined,
+        ...customerPhoneStamp({
+          sharePhoneWithRunner: profile?.sharePhoneWithRunner,
+          phone: profile?.phone,
+        }),
         ...avatarStamp,
         campus: "cuhk",
         orderChannel: "canteen",

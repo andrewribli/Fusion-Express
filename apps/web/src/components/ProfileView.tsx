@@ -12,6 +12,7 @@ import { LegalLink } from "@/components/LegalLink";
 import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { ModeSwitchButton } from "@/components/ModeSwitchButton";
 import { ProfilePhotoSettings } from "@/components/ProfilePhotoSettings";
+import { ProfilePhoneShare } from "@/components/ProfilePhoneShare";
 import { ShareGraceRunButton } from "@/components/ShareGraceRunButton";
 import { useUser } from "@/context/UserContext";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
@@ -120,6 +121,9 @@ export function ProfileView() {
               <h2 className="text-sm font-semibold text-gray-500">Account</h2>
               <div className="mt-3">
                 <ProfilePhotoSettings />
+              </div>
+              <div className="mt-4">
+                <ProfilePhoneShare />
               </div>
               <label className="mt-1 block text-xs font-medium text-gray-600">
                 Full name

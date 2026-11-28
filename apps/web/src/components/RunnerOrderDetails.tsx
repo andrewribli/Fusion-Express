@@ -4,6 +4,8 @@ import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
+import { RunnerCustomerContact } from "@/components/runner/RunnerCustomerContact";
+import { LobbyPingButton } from "@/components/runner/LobbyPingButton";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";

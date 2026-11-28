@@ -4,7 +4,7 @@ import { webAssetOrigin } from "@fusion-express/shared/products";
 /** Ask the live API to buzz the other phone. Never blocks checkout or chat. */
 export function notifyOrderEvent(
   orderId: string,
-  event: "created" | "accepted" | "chat",
+  event: "created" | "accepted" | "chat" | "lobby",
   preview?: string,
 ): void {
   void (async () => {

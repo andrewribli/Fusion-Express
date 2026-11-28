@@ -271,6 +271,9 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     deliveryPhotoUrl: data.deliveryPhotoUrl
       ? String(data.deliveryPhotoUrl)
       : undefined,
+    lobbyArrivedAt: data.lobbyArrivedAt
+      ? toDate(data.lobbyArrivedAt)
+      : undefined,
     estimatedDeliveryAt: data.estimatedDeliveryAt
       ? toDate(data.estimatedDeliveryAt)
       : undefined,
@@ -1873,4 +1876,54 @@ export async function escalateDeadlineWarning(
       updatedAt: Timestamp.fromDate(now),
     });
   }
+}
+
+/** Customer track/in-app banner while the runner is at the lobby. */
+export function isLobbyArrivalActive(
+  order: Pick<Order, "status" | "lobbyArrivedAt"> | null | undefined,
+): boolean {
+  if (!order?.lobbyArrivedAt) return false;
+  return (
+    order.status === "accepted" ||
+    order.status === "assigned" ||
+    order.status === "purchased"
+  );
+}
+
+/**
+ * Runner trust pack: stamp "I'm at lobby" without changing delivery status.
+ * Pair with notifyOrderEvent(orderId, "lobby") for the customer push.
+ */
+export async function pingLobbyArrival(orderId: string): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (
+    order.status !== "accepted" &&
+    order.status !== "assigned" &&
+    order.status !== "purchased"
+  ) {
+    throw new Error("Lobby ping is only available before delivery.");
+  }
+  const now = new Date();
+  if (isFirebaseConfigured()) {
+    try {
+      await updateDoc(
+        doc(getDb(), ORDERS_COLLECTION, orderId),
+        orderPatch({
+          lobbyArrivedAt: Timestamp.fromDate(now),
+          updatedAt: Timestamp.fromDate(now),
+        }),
+      );
+      return;
+    } catch (err) {
+      console.error("pingLobbyArrival failed", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Could not send lobby ping. Try again.");
+    }
+  }
+  const mock = getMockOrderById(orderId);
+  if (!mock) throw new Error("Order not found");
+  mock.lobbyArrivedAt = now;
+  mock.updatedAt = now;
 }

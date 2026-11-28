@@ -16,6 +16,7 @@
     "./product-text": "./src/product-text.ts",
     "./firebase": "./src/firebase.ts",
     "./auth": "./src/auth.ts",
+    "./contact": "./src/contact.ts",
     "./avatars": "./src/avatars.ts",
     "./cuhk-email": "./src/cuhk-email.ts",
     "./cityu-email": "./src/cityu-email.ts",

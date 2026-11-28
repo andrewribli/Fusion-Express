@@ -26,6 +26,7 @@ import {
   isCustomerPaymentOpen,
   isTestOrder,
 } from "@/lib/order-status";
+import { isLobbyArrivalActive } from "@/lib/orders";
 import {
   CustomerPayPanel,
   OrderProofPhotos,
@@ -211,6 +212,23 @@ function TrackContent() {
               {formatDeliveryAddress(order.college, order.hall)}
             </p>
             <p className="text-xs text-gray-500">Lobby: {order.lobbyPoint}</p>
+
+            {isLobbyArrivalActive(order) ? (
+              <div
+                role="status"
+                className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-3"
+              >
+                <p className="text-sm font-bold text-amber-950">
+                  Your runner is at the lobby
+                </p>
+                <p className="mt-0.5 text-xs text-amber-900">
+                  {order.runnerName
+                    ? `${order.runnerName} is at ${order.lobbyPoint || "your lobby"} with your order.`
+                    : `Your runner is at ${order.lobbyPoint || "your lobby"} with your order.`}
+                </p>
+              </div>
+            ) : null}
+
 
             {order.status !== "pending" &&
             order.status !== "cancelled" &&

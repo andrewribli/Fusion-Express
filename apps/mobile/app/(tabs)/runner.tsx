@@ -27,12 +27,14 @@ import {
   subscribeRunnerOrders,
   markDeliveredWithTotal,
   markPurchased,
+  pingLobbyArrival,
   saveRunnerDeliveryProgress,
   uploadDeliveryPhoto,
   uploadReceiptPhoto,
 } from "@fusion-express/shared/orders";
 import {
   ORDER_STATUS_LABELS,
+  isLobbyArrivalActive,
   isServiceOpen,
   orderTipTotal,
   runnerEarningsFromOrder,
@@ -53,6 +55,11 @@ import {
   restaurantIdFromOrderItems,
 } from "@fusion-express/shared/canteen-college";
 import type { Order } from "@fusion-express/shared/types";
+import {
+  sharedCustomerPhone,
+  telUrl,
+  whatsAppUrl,
+} from "@fusion-express/shared/contact";
 import { useAuth } from "../../src/auth";
 import { becomeRunner } from "../../src/become-runner";
 import { buildAcceptDiscount } from "../../src/canteen/discount";
@@ -452,7 +459,24 @@ export default function RunnerScreen() {
     }
   }
 
-  async function onDeliver(order: Order) {
+  
+  async function onLobbyPing(order: Order) {
+    setBusyId(order.id);
+    setBusyKind("lobbyPing");
+    setError("");
+    try {
+      await pingLobbyArrival(order.id);
+      patchLocal(setActive, order.id, { lobbyArrivedAt: new Date() });
+      notifyOrderEvent(order.id, "lobby");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Lobby ping failed");
+    } finally {
+      setBusyId(null);
+      setBusyKind("");
+    }
+  }
+
+async function onDeliver(order: Order) {
     const gate = shoppingUnlocked(order);
     if (!gate.ok) {
       Alert.alert(
@@ -819,6 +843,54 @@ export default function RunnerScreen() {
                       onPress={() => void onLobby(order)}
                       disabled={busy || shopLocked}
                     />
+
+                    {(order.status === "accepted" ||
+                      order.status === "purchased" ||
+                      order.status === "assigned") && (
+                      <SecondaryButton
+                        label={
+                          busy && busyKind === "lobbyPing"
+                            ? "Sending lobby ping…"
+                            : isLobbyArrivalActive(order)
+                              ? "Ping again — I'm at lobby"
+                              : "I'm at lobby"
+                        }
+                        className="mt-1 border-amber-300 bg-amber-50"
+                        onPress={() => void onLobbyPing(order)}
+                        disabled={busy || shopLocked}
+                      />
+                    )}
+
+                    {(() => {
+                      const phone = sharedCustomerPhone(order);
+                      if (!phone) return null;
+                      const call = telUrl(phone);
+                      const wa = whatsAppUrl(phone);
+                      return (
+                        <View className="mt-1 flex-row gap-2">
+                          {call ? (
+                            <Pressable
+                              className="flex-1 items-center rounded-xl border border-gray-200 bg-white py-3"
+                              onPress={() => void Linking.openURL(call)}
+                            >
+                              <Text className="text-sm font-semibold text-gray-900">
+                                Call
+                              </Text>
+                            </Pressable>
+                          ) : null}
+                          {wa ? (
+                            <Pressable
+                              className="flex-1 items-center rounded-xl border border-gray-200 bg-white py-3"
+                              onPress={() => void Linking.openURL(wa)}
+                            >
+                              <Text className="text-sm font-semibold text-gray-900">
+                                WhatsApp
+                              </Text>
+                            </Pressable>
+                          ) : null}
+                        </View>
+                      );
+                    })()}
 
                     {(order.status === "accepted" ||
                       order.status === "purchased") && (

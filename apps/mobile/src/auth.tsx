@@ -38,7 +38,12 @@ export interface MobileUserProfile {
   email: string | null;
   fullName?: string;
   phone?: string;
+  /** Customer opt-in: stamp phone on new orders for runner Call / WhatsApp. */
+  sharePhoneWithRunner?: boolean;
   college?: string;
+  avatarId?: string;
+  photoURL?: string;
+  showRealPhotoToRunners?: boolean;
   hall?: string;
   campus?: CampusId;
   isRunner?: boolean;
@@ -196,6 +201,14 @@ async function loadProfile(uid: string, email: string | null): Promise<MobileUse
       ...base,
       fullName: data.fullName ? String(data.fullName) : undefined,
       phone: data.phone ? String(data.phone) : undefined,
+      sharePhoneWithRunner: data.sharePhoneWithRunner === true,
+      avatarId: data.avatarId ? String(data.avatarId) : undefined,
+      photoURL: data.photoURL
+        ? String(data.photoURL)
+        : data.photoUrl
+          ? String(data.photoUrl)
+          : undefined,
+      showRealPhotoToRunners: data.showRealPhotoToRunners === true,
       college: data.college ? String(data.college) : undefined,
       hall: data.hall ? String(data.hall) : undefined,
       campus:

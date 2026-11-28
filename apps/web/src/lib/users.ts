@@ -57,6 +57,7 @@ function parseUserDoc(uid: string, data: Record<string, unknown>): UserProfile {
       ? data.avatarId
       : pickDefaultAvatarId(uid),
     showRealPhotoToRunners: data.showRealPhotoToRunners === true,
+    sharePhoneWithRunner: data.sharePhoneWithRunner === true,
     displayName: data.displayName != null ? String(data.displayName) : undefined,
     isAnonymous: data.isAnonymous === true,
     pseudonym: data.pseudonym != null ? String(data.pseudonym) : undefined,

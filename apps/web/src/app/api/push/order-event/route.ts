@@ -24,7 +24,13 @@ export async function POST(request: Request) {
 
   const orderId = body.orderId?.trim() ?? "";
   const event = body.event;
-  if (!orderId || (event !== "created" && event !== "accepted" && event !== "chat")) {
+  if (
+    !orderId ||
+    (event !== "created" &&
+      event !== "accepted" &&
+      event !== "chat" &&
+      event !== "lobby")
+  ) {
     return NextResponse.json({ error: "Missing order event." }, { status: 400 });
   }
 

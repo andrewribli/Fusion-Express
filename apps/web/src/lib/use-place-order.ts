@@ -1,3 +1,4 @@
+import { customerPhoneStamp } from "@fusion-express/shared/contact";
 "use client";
 
 import { useCallback, useState } from "react";
@@ -147,6 +148,7 @@ export function usePlaceOrder() {
           customerId: customer.uid,
           customerName,
           customerEmail: customer.email,
+          ...customerPhoneStamp(customer),
           ...avatarStamp,
           campus: opts.campus,
           orderChannel,

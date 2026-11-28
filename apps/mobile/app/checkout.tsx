@@ -1,3 +1,4 @@
+import { customerPhoneStamp } from "@fusion-express/shared/contact";
 import { useMemo, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -153,6 +154,10 @@ export default function CheckoutScreen() {
         customerId: auth.uid,
         customerName: name,
         customerEmail: auth.email || user?.email || undefined,
+        ...customerPhoneStamp({
+          sharePhoneWithRunner: profile?.sharePhoneWithRunner,
+          phone: profile?.phone,
+        }),
         ...avatarStamp,
         campus: "cuhk",
         orderChannel: "fusion",

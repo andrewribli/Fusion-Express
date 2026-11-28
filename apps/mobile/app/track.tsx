@@ -21,6 +21,7 @@ import {
   getStepIndex,
   hasConfirmedGroceryTotal,
   isChatActive,
+  isLobbyArrivalActive,
   ORDER_STATUS_LABELS,
   subscribeOrder,
   TRACKING_STEPS,
@@ -466,6 +467,20 @@ export default function TrackScreen() {
                 {ORDER_STATUS_LABELS[order.status]}
                 {order.hall ? ` · ${order.hall}` : ""}
               </Text>
+
+              {isLobbyArrivalActive(order) ? (
+                <View className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-3">
+                  <Text className="text-sm font-bold text-amber-950">
+                    Your runner is at the lobby
+                  </Text>
+                  <Text className="mt-0.5 text-xs text-amber-900">
+                    {runnerLabel
+                      ? `${runnerLabel} is at ${order.lobbyPoint || "your lobby"} with your order.`
+                      : `Your runner is at ${order.lobbyPoint || "your lobby"} with your order.`}
+                  </Text>
+                </View>
+              ) : null}
+
               {order.status === "pending" ? (
                 <Text className="mt-3 text-sm font-semibold text-amber-800">
                   Waiting for a runner to accept…

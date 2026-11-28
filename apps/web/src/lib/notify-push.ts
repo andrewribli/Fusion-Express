@@ -3,7 +3,7 @@ import { getAuthClient, isFirebaseConfigured } from "@/lib/firebase";
 /** Buzz the other person's phone via Expo. Failures stay in the console. */
 export function notifyOrderEvent(
   orderId: string,
-  event: "created" | "accepted" | "chat",
+  event: "created" | "accepted" | "chat" | "lobby",
   preview?: string,
 ): void {
   void (async () => {
