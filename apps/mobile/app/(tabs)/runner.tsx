@@ -34,7 +34,7 @@ import {
 } from "@fusion-express/shared/orders";
 import {
   ORDER_STATUS_LABELS,
-isChatActive,
+  isChatActive,
   isLobbyArrivalActive,
   isServiceOpen,
   orderTipTotal,
@@ -109,13 +109,13 @@ function patchLocal(
   );
 }
 
-type RunnerTab = "available" | "active" | "payouts" | "tools";
+type RunnerTab = "available" | "active" | "past" | "payouts";
 
 const RUNNER_TABS: { id: RunnerTab; label: string }[] = [
   { id: "available", label: "Available" },
   { id: "active", label: "Active" },
+  { id: "past", label: "Past" },
   { id: "payouts", label: "Payouts" },
-  { id: "tools", label: "Tools" },
 ];
 
 export default function RunnerScreen() {
@@ -145,7 +145,7 @@ export default function RunnerScreen() {
   }, [profile?.phone]);
 
   useEffect(() => {
-    if (profile && !profile.isRunner) setTab("tools");
+    if (profile && !profile.isRunner) setTab("available");
   }, [profile?.isRunner]);
 
   const runnerUid = user?.uid ?? "";
@@ -617,38 +617,23 @@ async function onDeliver(order: Order) {
             </Card>
           ) : null}
 
-          {tab === "tools" ? (
-            <Card>
+          {!profile?.isRunner ? (
+            <Card className="mb-3">
               <Text className="text-sm text-gray-600">
                 Signed in as {user.email ?? user.uid}
               </Text>
-              {!profile?.isRunner ? (
-                <View className="mt-3">
-                  <Text className="text-sm text-gray-700">
-                    Deliver orders and get paid after each drop-off. You’ll still
-                    be able to order as a customer.
-                  </Text>
-                  <TextInput
-                    className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                    value={phone}
-                    onChangeText={setPhone}
-                    placeholder="Phone number"
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="phone-pad"
-                  />
-                  <PrimaryButton
-                    label="Sign up to be a Runner"
-                    className="mt-3"
-                    busy={signingUp}
-                    onPress={onBecomeRunner}
-                  />
-                </View>
-              ) : (
-                <Text className="mt-2 text-xs text-emerald-700">
-                  New pending orders buzz on the Available tab while this app is
-                  open.
-                </Text>
-              )}
+              <Text className="mt-3 text-sm text-gray-700">
+                Deliver orders and get paid after each drop-off. You’ll still be
+                able to order as a customer.
+              </Text>
+              <TextInput
+                className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="Phone number"
+                placeholderTextColor="#9CA3AF"
+                keyboardType="phone-pad"
+              />
               <TextInput
                 className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
                 value={runnerName}
@@ -656,15 +641,21 @@ async function onDeliver(order: Order) {
                 placeholder="Display name"
                 placeholderTextColor="#9CA3AF"
               />
+              <PrimaryButton
+                label="Sign up to be a Runner"
+                className="mt-3"
+                busy={signingUp}
+                onPress={onBecomeRunner}
+              />
               <SecondaryButton
                 label="Reload profile"
-                className="mt-3"
+                className="mt-2"
                 onPress={() => void refreshProfile()}
               />
             </Card>
           ) : null}
 
-          {tab === "available" ? (
+          {tab === "available" && profile?.isRunner ? (
             <>
           {loadingList && pending.length === 0 && active.length === 0 ? (
             <LoadingBlock label="Loading jobs…" />
@@ -719,7 +710,7 @@ async function onDeliver(order: Order) {
             </>
           ) : null}
 
-          {tab === "active" ? (
+          {tab === "active" && profile?.isRunner ? (
             <>
           {active.length === 0 ? (
             <Text className="text-sm text-gray-500">No active jobs.</Text>
@@ -964,14 +955,86 @@ async function onDeliver(order: Order) {
             </>
           ) : null}
 
-          {tab === "payouts" ? (
+          {tab === "past" && profile?.isRunner ? (
+            <>
+              <Text className="mb-2 text-sm text-gray-600">
+                Your delivered, completed, and cancelled jobs — earnings, date,
+                and status.
+              </Text>
+              {delivered.length === 0 ? (
+                <EmptyState
+                  title="No past jobs yet"
+                  body="Finished deliveries and cancelled jobs show up here."
+                />
+              ) : (
+                delivered.map((order) => {
+                  const earn = runnerEarningsFromOrder(order);
+                  const when =
+                    order.deliveredAt ??
+                    order.runnerPaidAt ??
+                    order.updatedAt ??
+                    order.createdAt;
+                  const cancelled = order.status === "cancelled";
+                  return (
+                    <Card key={`past-${order.id}`} className="mb-3">
+                      <View className="flex-row items-start justify-between gap-2">
+                        <View className="flex-1">
+                          <Text className="font-bold text-gray-900">
+                            {order.id}
+                          </Text>
+                          <Text className="mt-1 text-xs text-gray-500">
+                            {when
+                              ? when.toLocaleString("en-HK", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "—"}
+                          </Text>
+                        </View>
+                        <Text
+                          className={`text-sm font-extrabold ${
+                            cancelled ? "text-gray-500" : "text-emerald-700"
+                          }`}
+                        >
+                          {cancelled ? "—" : `+$${earn}`}
+                        </Text>
+                      </View>
+                      <Text
+                        className={`mt-2 text-xs font-semibold ${
+                          cancelled
+                            ? "text-gray-600"
+                            : runnerPayoutPaid(order.status)
+                              ? "text-emerald-700"
+                              : runnerPayoutPending(order.status)
+                                ? "text-amber-700"
+                                : "text-fusion"
+                        }`}
+                      >
+                        {ORDER_STATUS_LABELS[order.status] ?? order.status}
+                      </Text>
+                      <Text className="mt-1 text-sm text-gray-600">
+                        {orderShopLabel(order)} · {order.hall} ·{" "}
+                        {order.customerName}
+                      </Text>
+                      {isChatActive(order) ? <OrderChat order={order} /> : null}
+                    </Card>
+                  );
+                })
+              )}
+            </>
+          ) : null}
+
+          {tab === "payouts" && profile?.isRunner ? (
             <>
           <Text className="mb-2 text-sm text-gray-600">
             You keep the full delivery fee (plus tips). GraceRun charges
             customers a flat $2 platform fee separately.
           </Text>
           {(() => {
-            const summary = summarizeRunnerPayouts(delivered);
+            const summary = summarizeRunnerPayouts(delivered.filter((o) => o.status !== "cancelled"));
             const sample = delivered.find((o) => o.runnerPaymentId);
             const payMethod =
               profile?.runnerPaymentMethod ??

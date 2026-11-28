@@ -783,7 +783,14 @@ export async function fetchDeliveredOrdersByRunner(
         query(
           collection(getDb(), ORDERS_COLLECTION),
           where("runnerUid", "==", runnerUid),
-          where("status", "in", ["delivered", "runner_paid", "customer_paid", "paid", "completed"]),
+          where("status", "in", [
+            "delivered",
+            "runner_paid",
+            "customer_paid",
+            "paid",
+            "completed",
+            "cancelled",
+          ]),
           limit(ORDER_PAGE_SIZE),
         ),
       );
