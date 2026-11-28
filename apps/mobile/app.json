@@ -56,7 +56,11 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.gracerun.fusionexpress",
+<<<<<<< HEAD
       "buildNumber": "110",
+=======
+      "buildNumber": "101",
+>>>>>>> 9285c45 (Add post-delivery ratings, feedback, and tips on web and mobile.)
       "usesAppleSignIn": true,
       "entitlements": {
         "aps-environment": "production",

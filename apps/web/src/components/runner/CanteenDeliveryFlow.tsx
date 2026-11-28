@@ -7,7 +7,7 @@ import { FileDropzone } from "@/components/FileDropzone";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { canteenNameForRestaurant, restaurantIdFromOrderItems } from "@/data/canteen/colleges";
-import { runnerEarningsForOrder } from "@/lib/order-status";
+import { runnerEarningsFromOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
@@ -130,10 +130,7 @@ export function CanteenDeliveryFlow({
                 Food{" "}
                 <span className="font-bold text-white">${order.subtotal}</span>
                 {" · "}You earn $
-                {runnerEarningsForOrder(
-                  order.deliveryFee,
-                  order.heavyBagSurcharge,
-                )}
+                {runnerEarningsFromOrder(order)}
               </p>
               <Link
                 href={`/chat/${order.id}`}

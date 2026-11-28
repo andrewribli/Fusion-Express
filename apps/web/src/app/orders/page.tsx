@@ -14,6 +14,7 @@ import { BG_ORDERS } from "@/data/page-backgrounds";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { useCart } from "@/context/CartContext";
 import { useUser, getUserAccountId } from "@/context/UserContext";
+import { RatingModal } from "@/components/RatingModal";
 import { isChatActive } from "@/lib/constants";
 import { loadAllProducts } from "@/lib/firestore";
 import {
@@ -21,6 +22,7 @@ import {
   customerAmountDue,
   isCustomerPaymentOpen,
 } from "@/lib/order-status";
+import { orderHasRating } from "@/lib/ratings";
 import { menuItemFromOrderLine } from "@/lib/reorder";
 import { notifyOrderCancelled } from "@/lib/notify-email";
 import {
@@ -177,7 +179,33 @@ export default function OrdersPage() {
                       )}
                     </div>
 
-                    {isChatActive(order.status) && (
+                    {(order.status === "delivered" ||
+                      order.status === "runner_paid" ||
+                      order.status === "customer_paid" ||
+                      order.status === "completed" ||
+                      order.status === "paid") &&
+                      user &&
+                      !orderHasRating(order) && (
+                        <div className="mt-3">
+                          <RatingModal
+                            orderId={order.id}
+                            customerId={getUserAccountId(user)}
+                            runnerName={order.runnerName}
+                            onDone={() => void load()}
+                          />
+                        </div>
+                      )}
+
+                    {orderHasRating(order) && (
+                      <p className="mt-2 text-xs text-gray-600">
+                        Rated {order.rating ?? order.runnerRating}★
+                        {(order.tipAmount ?? 0) > 0
+                          ? ` · tip HK$${order.tipAmount}`
+                          : ""}
+                      </p>
+                    )}
+
+                    {isChatActive(order) && (
                       <OrderChatPanel order={order} compact />
                     )}
                   </li>
