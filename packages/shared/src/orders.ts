@@ -1183,7 +1183,10 @@ export async function submitOrderRating(
 
   if (isFirebaseConfigured()) {
     try {
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), updates);
+      await updateDoc(
+        doc(getDb(), ORDERS_COLLECTION, orderId),
+        orderPatch(updates),
+      );
       return;
     } catch {
       // fallback
