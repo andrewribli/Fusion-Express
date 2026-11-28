@@ -1166,21 +1166,21 @@ export async function submitOrderRating(
   if (tipAmount > 500) throw new Error("Tip must be HK$500 or less");
 
   const now = new Date();
-  const updates: Record<string, unknown> = {
-    rating,
-    runnerRating: rating,
-    ratedAt: Timestamp.fromDate(now),
-    updatedAt: Timestamp.fromDate(now),
-  };
-  if (feedback) updates.feedback = feedback;
-  if (tipAmount > 0) {
-    updates.tipAmount = tipAmount;
-    updates.tippedAt = Timestamp.fromDate(now);
-  }
+  const ratedAt = Timestamp.fromDate(now);
+  const updatedAt = Timestamp.fromDate(now);
 
   if (isFirebaseConfigured()) {
     try {
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), updates);
+      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), {
+        rating,
+        runnerRating: rating,
+        ratedAt,
+        updatedAt,
+        ...(feedback ? { feedback } : {}),
+        ...(tipAmount > 0
+          ? { tipAmount, tippedAt: Timestamp.fromDate(now) }
+          : {}),
+      });
       return;
     } catch {
       // fallback
