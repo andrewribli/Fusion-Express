@@ -1,8 +1,12 @@
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
 import { calculateDeliveryFee } from "@/lib/delivery";
+import { StampedAvatar } from "@/components/AvatarBadge";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { resolveSpecialInstructions } from "@/lib/constants";
-import { runnerEarningsForOrder } from "@/lib/order-status";
+import {
+  orderTipTotal,
+  runnerEarningsFromOrder,
+} from "@/lib/order-status";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
@@ -37,10 +41,9 @@ export function RunnerOrderDetails({
     campus: resolveCampus(order.campus),
   });
   const store = supermarketForCampus(order.campus);
-  const earn = runnerEarningsForOrder(
-    order.deliveryFee,
-    order.heavyBagSurcharge,
-  );
+  const tipTotal = orderTipTotal(order);
+  const earn = runnerEarningsFromOrder(order);
+  const stars = order.rating ?? order.runnerRating;
 
   return (
     <div className="space-y-4 text-sm">
@@ -73,10 +76,22 @@ export function RunnerOrderDetails({
           <p className="text-xs text-gray-600">Room: {order.roomNumber}</p>
         )}
         <p className="text-xs text-gray-600">Lobby: {order.lobbyPoint}</p>
-        {order.customerName && (
-          <p className="mt-1 text-xs text-gray-600">
-            Customer: {order.customerName}
-          </p>
+        {(order.customerName ||
+          order.customerAvatarId ||
+          order.customerPhotoURL) && (
+          <div className="mt-2 flex items-center gap-2">
+            <StampedAvatar
+              avatarId={order.customerAvatarId}
+              photoURL={order.customerPhotoURL}
+              size="sm"
+              alt={order.customerName || "Customer"}
+            />
+            {order.customerName ? (
+              <p className="text-xs text-gray-600">
+                Customer: {order.customerName}
+              </p>
+            ) : null}
+          </div>
         )}
       </section>
 
@@ -155,14 +170,62 @@ export function RunnerOrderDetails({
           <div className="mt-3 rounded-xl bg-[#ED1C24]/10 px-3 py-2">
             <p className="text-xs text-gray-600">You will receive</p>
             <p className="text-lg font-bold text-[#ED1C24]">${earn}</p>
-            {(order.tip ?? 0) > 0 && (
+            {tipTotal > 0 && (
               <p className="text-xs text-gray-600">
-                Customer also added a ${order.tip} tip with the order.
+                Includes HK${tipTotal} tip
+                {(order.tipAmount ?? 0) > 0 && (order.tip ?? 0) > 0
+                  ? ` (checkout $${order.tip} + after-delivery $${order.tipAmount})`
+                  : (order.tipAmount ?? 0) > 0
+                    ? " (after delivery)"
+                    : " (with order)"}
+                .
               </p>
             )}
           </div>
         )}
       </section>
+
+      {stars || order.feedback || (order.tipAmount ?? 0) > 0 ? (
+        <section className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+            Customer rating
+          </h3>
+          {stars ? (
+            <p className="mt-1 text-lg font-bold text-amber-900">
+              {"★".repeat(stars)}
+              <span className="ml-2 text-sm font-semibold text-gray-700">
+                {stars}/5
+              </span>
+            </p>
+          ) : null}
+          {order.feedback ? (
+            <p className="mt-1 whitespace-pre-wrap text-sm text-gray-800">
+              {order.feedback}
+            </p>
+          ) : null}
+          {(order.tipAmount ?? 0) > 0 ? (
+            <p className="mt-1 text-xs font-semibold text-emerald-800">
+              After-delivery tip: HK${order.tipAmount}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {order.runnerPayoutProofUrl ? (
+        <section>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Payout proof
+          </h3>
+          <a
+            href={order.runnerPayoutProofUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-block text-sm font-semibold text-[#ED1C24] underline"
+          >
+            View admin payment proof
+          </a>
+        </section>
+      ) : null}
     </div>
   );
 }

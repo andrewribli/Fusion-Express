@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DeadlineBanner } from "@/components/DeadlineBanner";
 import { FileDropzone } from "@/components/FileDropzone";
+import { StampedAvatar } from "@/components/AvatarBadge";
 import { formatDeliveryAddress } from "@/data/cuhk-locations";
-import { runnerEarningsForOrder } from "@/lib/order-status";
+import { runnerEarningsFromOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
 import type { Order } from "@/lib/types";
@@ -141,10 +142,22 @@ export function RunnerDeliveryFlow({
                   {formatDeliveryAddress(order.college, order.hall)}
                 </p>
                 <p className="text-xs text-[#c4c4c4]">Lobby: {order.lobbyPoint}</p>
-                {order.customerName && (
-                  <p className="mt-1 text-xs text-[#c4c4c4]">
-                    Customer: {order.customerName}
-                  </p>
+                {(order.customerName ||
+                  order.customerAvatarId ||
+                  order.customerPhotoURL) && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <StampedAvatar
+                      avatarId={order.customerAvatarId}
+                      photoURL={order.customerPhotoURL}
+                      size="sm"
+                      alt={order.customerName || "Customer"}
+                    />
+                    {order.customerName ? (
+                      <p className="text-xs text-[#c4c4c4]">
+                        Customer: {order.customerName}
+                      </p>
+                    ) : null}
+                  </div>
                 )}
               </div>
               <RunnerOrderItemList items={order.items} dark />
@@ -154,10 +167,7 @@ export function RunnerDeliveryFlow({
               <p className="text-[#c4c4c4]">
                 Estimated grocery <span className="font-bold text-white">${order.subtotal}</span>
                 {" · "}You earn $
-                {runnerEarningsForOrder(
-                  order.deliveryFee,
-                  order.heavyBagSurcharge,
-                )}
+                {runnerEarningsFromOrder(order)}
               </p>
               <Link
                 href={`/chat/${order.id}`}

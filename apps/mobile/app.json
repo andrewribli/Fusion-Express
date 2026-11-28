@@ -56,7 +56,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.gracerun.fusionexpress",
-      "buildNumber": "100",
+      "buildNumber": "101",
       "usesAppleSignIn": true,
       "entitlements": {
         "aps-environment": "production",
@@ -79,7 +79,7 @@
         "backgroundColor": "#ED1C24"
       },
       "package": "com.gracerun.fusionexpress",
-      "versionCode": 96,
+      "versionCode": 97,
       "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize"
     },
