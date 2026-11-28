@@ -106,9 +106,59 @@ export async function registerForPushNotifications(
   return token;
 }
 
+/** Stable id so we can dismiss the buzz once another runner accepts. */
+export function pendingOrderNotificationId(orderId: string): string {
+  return `pending-order-${orderId}`;
+}
+
+/** Cancel local + presented notification for a claimed/cancelled pending order. */
+export async function dismissPendingOrderNotification(
+  orderId: string,
+): Promise<void> {
+  if (!orderId) return;
+  const id = pendingOrderNotificationId(orderId);
+  try {
+    await Notifications.cancelScheduledNotificationAsync(id);
+  } catch {
+    /* already gone */
+  }
+  try {
+    await Notifications.dismissNotificationAsync(id);
+  } catch {
+    /* already gone */
+  }
+  // Remote Expo pushes use random identifiers — clear any matching orderId.
+  try {
+    const presented = await Notifications.getPresentedNotificationsAsync();
+    for (const n of presented) {
+      const data = n.request.content.data as {
+        orderId?: string;
+        type?: string;
+      };
+      if (data.orderId !== orderId) continue;
+      const type = data.type ?? "";
+      if (
+        type !== "pending_order" &&
+        type !== "order_created" &&
+        type !== "order_taken"
+      ) {
+        continue;
+      }
+      try {
+        await Notifications.dismissNotificationAsync(n.request.identifier);
+      } catch {
+        /* already gone */
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * While a runner is signed in, watch for new pending orders and buzz locally.
  * Never buzz for the runner's own customer order (same uid placed it).
+ * When an order leaves pending (accepted/cancelled), dismiss that buzz.
  */
 export function subscribeRunnerOrderAlerts(
   enabled: boolean,
@@ -135,8 +185,13 @@ export function subscribeRunnerOrderAlerts(
         return;
       }
       for (const change of snap.docChanges()) {
-        if (change.type !== "added") continue;
         const id = change.doc.id;
+        if (change.type === "removed") {
+          known.delete(id);
+          void dismissPendingOrderNotification(id);
+          continue;
+        }
+        if (change.type !== "added") continue;
         if (known.has(id)) continue;
         known.add(id);
         const data = change.doc.data() as {
@@ -147,6 +202,7 @@ export function subscribeRunnerOrderAlerts(
         };
         if (data.customerId && data.customerId === currentUid) continue;
         void Notifications.scheduleNotificationAsync({
+          identifier: pendingOrderNotificationId(id),
           content: {
             title: "New GraceRun order",
             body: `${data.hall ?? "Hall"} · $${data.total ?? "?"} — tap Runner to accept`,
