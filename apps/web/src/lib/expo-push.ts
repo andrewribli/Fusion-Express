@@ -10,7 +10,7 @@ import {
   type RestAuthed,
 } from "@/lib/firestore-rest";
 
-type PushEvent = "created" | "accepted" | "chat";
+type PushEvent = "created" | "accepted" | "chat" | "lobby";
 
 type ExpoMessage = {
   to: string;
@@ -97,6 +97,24 @@ export async function dispatchOrderPush(opts: {
       ? `${order.runnerName} is picking up your GraceRun order.`
       : "A runner is picking up your GraceRun order.";
     type = "order_accepted";
+  } else if (opts.event === "lobby") {
+    if (opts.auth.uid !== order.runnerUid) {
+      throw new Error("Not allowed for this order.");
+    }
+    if (
+      order.status !== "accepted" &&
+      order.status !== "assigned" &&
+      order.status !== "purchased"
+    ) {
+      return 0;
+    }
+    tokens = await tokensForUid(order.customerId);
+    const lobby = (order.lobbyPoint || "the lobby").trim() || "the lobby";
+    title = "Runner is at the lobby";
+    body = order.runnerName
+      ? `${order.runnerName} is at ${lobby} with your order.`
+      : `Your runner is at ${lobby} with your order.`;
+    type = "order_lobby";
   } else {
     const isCustomer = opts.auth.uid === order.customerId;
     const isRunner = opts.auth.uid === order.runnerUid;

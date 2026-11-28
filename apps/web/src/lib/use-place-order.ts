@@ -128,6 +128,13 @@ export function usePlaceOrder() {
           uid: customer.uid,
           email: customer.email,
         });
+        const { customerPhoneStamp } = await import(
+          "@fusion-express/shared/contact"
+        );
+        const phoneStamp = customerPhoneStamp({
+          sharePhoneWithRunner: customer.sharePhoneWithRunner,
+          phone: customer.phone,
+        });
         const restaurantId = canteen
           ? restaurantIdFromOrderItems(
               orderItems.map((item) => ({ itemId: item.itemId })),
@@ -148,6 +155,7 @@ export function usePlaceOrder() {
           customerName,
           customerEmail: customer.email,
           ...avatarStamp,
+          ...phoneStamp,
           campus: opts.campus,
           orderChannel,
           canteenRestaurantId: restaurantId ?? undefined,

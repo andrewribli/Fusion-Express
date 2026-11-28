@@ -158,7 +158,7 @@ service cloud.firestore {
         'username', 'chineseName', 'studentId', 'college', 'hall', 'roomNumber',
         'role', 'photoURL', 'photoUrl', 'campus', 'displayName', 'isAnonymous',
         'pseudonym', 'pseudonymChangedAt',
-        'avatarId', 'showRealPhotoToRunners',
+        'avatarId', 'showRealPhotoToRunners', 'sharePhoneWithRunner',
         'cuhkEmail', 'cuhkVerifiedAt', 'termsAcceptedAt',
         'runnerPaymentMethod', 'runnerPaymentId',
         'isRunner', 'runnerId',
@@ -394,7 +394,7 @@ service cloud.firestore {
           'runnerExpiredAt', 'runnerWarningCount', 'runnerReminderSentAt',
           'adminMissedNotifiedAt',
           'discountApplied', 'discountAmount', 'runnerCollege', 'canteenCollege',
-          'heavyBagSurcharge'
+          'heavyBagSurcharge', 'lobbyArrivedAt'
         ])
         && !(request.resource.data.status in ['pending', 'paid']);
 

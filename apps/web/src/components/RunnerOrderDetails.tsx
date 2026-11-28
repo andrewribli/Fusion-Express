@@ -4,6 +4,8 @@ import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
+import { RunnerCustomerContact } from "@/components/runner/RunnerCustomerContact";
+import { LobbyPingButton } from "@/components/runner/LobbyPingButton";
 import { CollegeDiscountRunnerBadge } from "@/components/CollegeDiscountRunnerBadge";
 import { resolveOrderChannel } from "@/components/OrderChannelBadge";
 import type { Order } from "@/lib/types";
@@ -78,6 +80,10 @@ export function RunnerOrderDetails({
             Customer: {order.customerName}
           </p>
         )}
+        <div className="mt-3 space-y-2">
+          <RunnerCustomerContact order={order} />
+          <LobbyPingButton order={order} />
+        </div>
       </section>
 
       <section>

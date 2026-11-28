@@ -47,6 +47,11 @@ export interface MobileUserProfile {
   runnerPaymentId?: string;
   role?: string;
   referralSource?: ReferralSource;
+  avatarId?: string;
+  photoURL?: string;
+  showRealPhotoToRunners?: boolean;
+  /** Opt-in: stamp phone on new orders for runner Call / WhatsApp. */
+  sharePhoneWithRunner?: boolean;
 }
 
 export type ReferralSource =
@@ -213,6 +218,14 @@ async function loadProfile(uid: string, email: string | null): Promise<MobileUse
         : undefined,
       role: data.role ? String(data.role) : undefined,
       referralSource: parseReferralSource(data.referralSource),
+      avatarId: data.avatarId ? String(data.avatarId) : undefined,
+      photoURL: data.photoURL
+        ? String(data.photoURL)
+        : data.photoUrl
+          ? String(data.photoUrl)
+          : undefined,
+      showRealPhotoToRunners: data.showRealPhotoToRunners === true,
+      sharePhoneWithRunner: data.sharePhoneWithRunner === true,
     };
   } catch {
     return base;

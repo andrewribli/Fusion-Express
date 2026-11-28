@@ -209,8 +209,16 @@ export interface Order {
    * /users doc, which only the customer themselves may read.
    */
   customerEmail?: string;
-  /** Customer mobile for runner contact / guest checkout identity. */
+  /**
+   * Customer mobile stamped only when they opted in to share with the runner
+   * (`sharePhoneWithRunner` on their profile). Absent = no Call / WhatsApp.
+   */
   customerPhone?: string;
+  /**
+   * When the assigned runner tapped “I’m at lobby”. Drives the customer
+   * track banner + push; cleared from active UI once the order is delivered.
+   */
+  lobbyArrivedAt?: Date;
   /** Cute avatar stamped at place-order (runners cannot read /users). */
   customerAvatarId?: string;
   /**

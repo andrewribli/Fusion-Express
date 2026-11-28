@@ -60,6 +60,11 @@ export interface UserProfile {
    * Default false — runners see the cute avatar instead.
    */
   showRealPhotoToRunners?: boolean;
+  /**
+   * Customer opt-in: stamp phone on new orders for runner Call / WhatsApp.
+   * Default false — no number shared.
+   */
+  sharePhoneWithRunner?: boolean;
   displayName?: string | null;
   isAnonymous?: boolean;
   pseudonym?: string | null;

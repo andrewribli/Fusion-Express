@@ -30,6 +30,7 @@ import {
   type CuhkCollege,
 } from "@fusion-express/shared/locations";
 import { customerAvatarStamp } from "@fusion-express/shared/avatars";
+import { customerPhoneStamp } from "@fusion-express/shared/contact";
 import { createOrder } from "@fusion-express/shared/orders";
 import {
   getEstimatedDeliveryTime,
@@ -155,6 +156,10 @@ export default function CanteenCheckoutScreen() {
         uid: auth.uid,
         email: auth.email || user?.email,
       });
+      const phoneStamp = customerPhoneStamp({
+        sharePhoneWithRunner: profile?.sharePhoneWithRunner,
+        phone: profile?.phone,
+      });
       const foodSubtotal = items.reduce(
         (sum, line) => sum + lineTotal(line.item, line.quantity),
         0,
@@ -165,6 +170,7 @@ export default function CanteenCheckoutScreen() {
         customerName: customerName.trim(),
         customerEmail: auth.email || user?.email || undefined,
         ...avatarStamp,
+        ...phoneStamp,
         campus: "cuhk",
         orderChannel: "canteen",
         canteenRestaurantId: restaurantId,

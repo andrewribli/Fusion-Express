@@ -25,12 +25,19 @@ import {
   fetchRunnerOrders,
   subscribePendingOrders,
   subscribeRunnerOrders,
+  isLobbyArrivalActive,
   markDeliveredWithTotal,
   markPurchased,
+  pingLobbyArrival,
   saveRunnerDeliveryProgress,
   uploadDeliveryPhoto,
   uploadReceiptPhoto,
 } from "@fusion-express/shared/orders";
+import {
+  sharedCustomerPhone,
+  telUrl,
+  whatsAppMeUrl,
+} from "@fusion-express/shared/contact";
 import {
   ORDER_STATUS_LABELS,
   isServiceOpen,
@@ -336,6 +343,46 @@ export default function RunnerScreen() {
       setBusyId(null);
       setBusyKind("");
     }
+  }
+
+  async function onLobbyPing(order: Order) {
+    setBusyId(order.id);
+    setBusyKind("lobby-ping");
+    setError("");
+    try {
+      await pingLobbyArrival(order.id);
+      notifyOrderEvent(order.id, "lobby");
+      patchLocal(setActive, order.id, { lobbyArrivedAt: new Date() });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Lobby ping failed");
+    } finally {
+      setBusyId(null);
+      setBusyKind("");
+    }
+  }
+
+  function openCustomerCall(order: Order) {
+    const url = telUrl(sharedCustomerPhone(order));
+    if (!url) {
+      Alert.alert(
+        "No phone shared",
+        "This customer did not opt in to share a phone number.",
+      );
+      return;
+    }
+    void Linking.openURL(url);
+  }
+
+  function openCustomerWhatsApp(order: Order) {
+    const url = whatsAppMeUrl(sharedCustomerPhone(order));
+    if (!url) {
+      Alert.alert(
+        "No phone shared",
+        "This customer did not opt in to share a phone number.",
+      );
+      return;
+    }
+    void Linking.openURL(url);
   }
 
   async function onLobby(order: Order) {
@@ -691,6 +738,49 @@ export default function RunnerScreen() {
                       College discount −HK${order.discountAmount}
                     </Text>
                   ) : null}
+
+                  {(order.status === "accepted" ||
+                    order.status === "assigned" ||
+                    order.status === "purchased") && (
+                    <View className="mt-3 gap-2">
+                      <SecondaryButton
+                        label={
+                          busy && busyKind === "lobby-ping"
+                            ? "Sending lobby ping…"
+                            : isLobbyArrivalActive(order)
+                              ? "Ping again — I’m at lobby"
+                              : "I’m at lobby"
+                        }
+                        onPress={() => void onLobbyPing(order)}
+                        disabled={busy}
+                      />
+                      {sharedCustomerPhone(order) ? (
+                        <View className="flex-row gap-2">
+                          <Pressable
+                            className="flex-1 items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-3"
+                            onPress={() => openCustomerCall(order)}
+                          >
+                            <Text className="text-sm font-semibold text-gray-900">
+                              Call
+                            </Text>
+                          </Pressable>
+                          <Pressable
+                            className="flex-1 items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-3"
+                            onPress={() => openCustomerWhatsApp(order)}
+                          >
+                            <Text className="text-sm font-semibold text-gray-900">
+                              WhatsApp
+                            </Text>
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <Text className="text-xs text-gray-500">
+                          Customer did not opt in to share a phone number —
+                          use chat.
+                        </Text>
+                      )}
+                    </View>
+                  )}
 
                   {order.items.some((i) => i.isCustom) ? (
                     <Text className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">

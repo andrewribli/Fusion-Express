@@ -10,6 +10,8 @@ import { canteenNameForRestaurant, restaurantIdFromOrderItems } from "@/data/can
 import { runnerEarningsForOrder } from "@/lib/order-status";
 import { resolveSpecialInstructions } from "@/lib/constants";
 import { RunnerOrderItemList } from "@/components/runner/RunnerOrderItemList";
+import { RunnerCustomerContact } from "@/components/runner/RunnerCustomerContact";
+import { LobbyPingButton } from "@/components/runner/LobbyPingButton";
 import type { Order } from "@/lib/types";
 
 /**
@@ -139,8 +141,10 @@ export function CanteenDeliveryFlow({
                 href={`/chat/${order.id}`}
                 className="flex min-h-11 items-center justify-center rounded-xl border border-white/20 text-sm font-semibold text-white"
               >
-                Contact customer
+                Chat with customer
               </Link>
+              <RunnerCustomerContact order={order} dark />
+              <LobbyPingButton order={order} dark />
             </div>
           )}
 
@@ -157,6 +161,8 @@ export function CanteenDeliveryFlow({
                 busy={uploading === "photo"}
                 onFile={onPhoto}
               />
+              <LobbyPingButton order={order} dark />
+              <RunnerCustomerContact order={order} dark />
             </div>
           )}
 

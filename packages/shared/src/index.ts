@@ -9,6 +9,7 @@ export * from "./custom-item";
 export * from "./locations";
 export * from "./firebase";
 export * from "./auth";
+export * from "./contact";
 export * from "./avatars";
 export * from "./products";
 export * from "./resolve-image";

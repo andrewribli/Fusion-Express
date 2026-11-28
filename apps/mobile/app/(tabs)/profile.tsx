@@ -22,6 +22,7 @@ import { isAppleSignInAvailable } from "../../src/apple-auth";
 import { ChangePasswordModal } from "../../src/ChangePasswordModal";
 import { DeleteAccountModal } from "../../src/DeleteAccountModal";
 import { ProfileAvatarSettings } from "../../src/ProfileAvatarSettings";
+import { ProfilePhoneShare } from "../../src/ProfilePhoneShare";
 import { SignupFlow } from "../../src/SignupFlow";
 import type { RootStackParamList } from "../../src/navigation";
 import {
@@ -224,6 +225,10 @@ export default function ProfileScreen() {
                       onUpdated={refreshProfile}
                     />
                   </View>
+                  <ProfilePhoneShare
+                    profile={profile}
+                    onUpdated={refreshProfile}
+                  />
                 </Card>
               ) : null}
 
