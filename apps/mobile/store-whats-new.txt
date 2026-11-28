@@ -1,4 +1,4 @@
 • Runner “I’m at lobby” ping — customers get a push + track banner
 • Optional Call / WhatsApp when the customer opts in to share their phone
 • Phone sharing stays off by default (privacy-first)
-• No pay-before-release gate in this build
+• Separate TestFlight train after ASC 1.0.14 — no pay-before-release gate
