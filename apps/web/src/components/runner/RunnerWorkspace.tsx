@@ -56,6 +56,7 @@ import {
   runnerExpiredAtOf,
   runnerWarningTotal,
 } from "@/lib/order-status";
+import { isChatActive } from "@fusion-express/shared";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
 import {
@@ -1277,6 +1278,14 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                           <div className="mt-3">
                             <RunnerOrderDetails order={order} />
                           </div>
+                          {isChatActive(order) ? (
+                            <Link
+                              href={`/chat/${order.id}`}
+                              className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl bg-gray-900 px-4 text-sm font-semibold text-white"
+                            >
+                              Message customer
+                            </Link>
+                          ) : null}
                         </li>
                       );
                     })}

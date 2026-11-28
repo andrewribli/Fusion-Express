@@ -11,9 +11,9 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { LegalLink } from "@/components/LegalLink";
 import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { ModeSwitchButton } from "@/components/ModeSwitchButton";
-import { ProfilePhotoSettings } from "@/components/ProfilePhotoSettings";
 import { ShareGraceRunButton } from "@/components/ShareGraceRunButton";
 import { useUser } from "@/context/UserContext";
+import { isAdminUid } from "@/lib/admins";
 import { useActiveCustomerOrders } from "@/lib/use-active-orders";
 import { useDemoAuth } from "@/lib/use-demo-auth";
 import { updateUserProfileDoc } from "@/lib/users";
@@ -35,6 +35,7 @@ export function ProfileView() {
   } = useUser();
   const { href: trackHref } = useActiveCustomerOrders();
   const demoAuth = useDemoAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [changeOpen, setChangeOpen] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName ?? "");
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
@@ -44,6 +45,16 @@ export function ProfileView() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    void isAdminUid(user?.uid).then((ok) => {
+      if (!cancelled) setIsAdmin(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
 
   const canChangePassword =
     firebaseEnabled &&
@@ -118,10 +129,7 @@ export function ProfileView() {
 
             <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-500">Account</h2>
-              <div className="mt-3">
-                <ProfilePhotoSettings />
-              </div>
-              <label className="mt-1 block text-xs font-medium text-gray-600">
+              <label className="mt-3 block text-xs font-medium text-gray-600">
                 Full name
                 <input
                   value={fullName}
@@ -205,6 +213,27 @@ export function ProfileView() {
               )}
               <DeleteAccountSection />
             </section>
+
+            {isAdmin ? (
+              <section className="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <h2 className="text-sm font-semibold text-gray-500">Admin</h2>
+                <p className="mt-2 text-xs text-gray-500">
+                  Support inbox and admin tools.
+                </p>
+                <Link
+                  href="/admin/support"
+                  className="mt-3 block rounded-xl bg-gray-900 py-3 text-center text-sm font-semibold text-white"
+                >
+                  Open admin support
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className="mt-2 block rounded-xl border border-gray-200 py-3 text-center text-sm font-semibold text-gray-800"
+                >
+                  Admin dashboard
+                </Link>
+              </section>
+            ) : null}
 
             <section className="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-500">Support</h2>

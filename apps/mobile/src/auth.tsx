@@ -23,6 +23,7 @@ import {
   isFirebaseConfigured,
 } from "@fusion-express/shared/firebase";
 import { webAssetOrigin } from "@fusion-express/shared/products";
+import { isAdminUid } from "./admins";
 import { signInWithApple } from "./apple-auth";
 
 /**
@@ -68,8 +69,12 @@ export type SignUpProfile = {
 interface AuthContextValue {
   user: User | null;
   profile: MobileUserProfile | null;
+  /** True when `/admins/{uid}` exists for the signed-in user. */
+  isAdmin: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  /** Re-check `/admins/{uid}` (e.g. after a grant). */
+  refreshAdmin: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (password: string, profile: SignUpProfile) => Promise<void>;
   signInApple: () => Promise<void>;
@@ -235,7 +240,23 @@ function parseReferralSource(value: unknown): ReferralSource | undefined {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<MobileUserProfile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const refreshAdmin = useCallback(async () => {
+    try {
+      const current = isFirebaseConfigured()
+        ? getAuthClient().currentUser
+        : null;
+      if (!current) {
+        setIsAdmin(false);
+        return;
+      }
+      setIsAdmin(await isAdminUid(current.uid));
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -272,16 +293,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(next);
         if (!next) {
           setProfile(null);
+          setIsAdmin(false);
           setLoading(false);
           return;
         }
-        void loadProfile(next.uid, next.email)
-          .then((p) => {
+        void Promise.all([
+          loadProfile(next.uid, next.email),
+          isAdminUid(next.uid),
+        ])
+          .then(([p, admin]) => {
             setProfile(p);
+            setIsAdmin(admin);
             setLoading(false);
           })
           .catch(() => {
             setProfile(null);
+            setIsAdmin(false);
             setLoading(false);
           });
       });
@@ -360,6 +387,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await signOutUser();
     setProfile(null);
+    setIsAdmin(false);
   }, []);
 
   const deleteAccount = useCallback(async () => {
@@ -384,6 +412,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
     setProfile(null);
+    setIsAdmin(false);
   }, []);
 
   const ensureCheckoutAuth = useCallback(async () => {
@@ -405,8 +434,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       profile,
+      isAdmin,
       loading,
       refreshProfile,
+      refreshAdmin,
       signIn,
       signUp,
       signInApple,
@@ -417,8 +448,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [
       user,
       profile,
+      isAdmin,
       loading,
       refreshProfile,
+      refreshAdmin,
       signIn,
       signUp,
       signInApple,

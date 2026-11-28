@@ -21,7 +21,6 @@ import { useAuth } from "../../src/auth";
 import { isAppleSignInAvailable } from "../../src/apple-auth";
 import { ChangePasswordModal } from "../../src/ChangePasswordModal";
 import { DeleteAccountModal } from "../../src/DeleteAccountModal";
-import { ProfileAvatarSettings } from "../../src/ProfileAvatarSettings";
 import { SignupFlow } from "../../src/SignupFlow";
 import type { RootStackParamList } from "../../src/navigation";
 import {
@@ -212,18 +211,6 @@ export default function ProfileScreen() {
                       void refreshProfile();
                     }}
                   />
-                </Card>
-              ) : null}
-
-              {profile ? (
-                <Card className="mt-3">
-                  <SectionLabel>Avatar</SectionLabel>
-                  <View className="mt-3">
-                    <ProfileAvatarSettings
-                      profile={profile}
-                      onUpdated={refreshProfile}
-                    />
-                  </View>
                 </Card>
               ) : null}
 
