@@ -24,6 +24,7 @@ import { getItemImage } from "@/data/aisle-images";
 import { useUser } from "@/context/UserContext";
 import { useCampus } from "@/context/CampusContext";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 
 export default function CartPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function CartPage() {
   const campus = cartCampus(items) ?? activeCampus;
   const mixedError = cartCampusError(items, null);
   const fee = resolveOrderDeliveryFee(items, "", campus);
-  const total = subtotal + fee.deliveryFee;
+  const total = subtotal + fee.deliveryFee + PLATFORM_FEE_HKD;
   const overLimit = isOverOrderLimit(subtotal);
   const eta = getEstimatedDeliveryTime();
 
@@ -154,6 +155,10 @@ export default function CartPage() {
                       </span>
                     </div>
                     <DeliveryFeeBreakdown breakdown={fee} />
+                    <div className="flex justify-between">
+                      <span>GraceRun fee</span>
+                      <span>${PLATFORM_FEE_HKD}</span>
+                    </div>
                     <p className="text-xs text-gray-500">
                         Delivery fee is confirmed at checkout from your hall.
                       </p>

@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import { useAuth } from "./auth";
 import { openFromPushData } from "./linking";
 import {
+  dismissPendingOrderNotification,
   registerForPushNotifications,
   subscribeRunnerOrderAlerts,
 } from "./notifications";
@@ -30,6 +31,19 @@ export function NotificationBootstrap() {
   }, [user, user?.uid, profile?.isRunner]);
 
   useEffect(() => {
+    const sub = Notifications.addNotificationReceivedListener((notification) => {
+      const data = notification.request.content.data as {
+        type?: string;
+        orderId?: string;
+      };
+      if (data.type === "order_taken" && data.orderId) {
+        void dismissPendingOrderNotification(data.orderId);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
     let alive = true;
     async function handle(response: Notifications.NotificationResponse | null) {
       if (!response || !alive) return;
@@ -42,6 +56,10 @@ export function NotificationBootstrap() {
         orderId?: string;
         userId?: string;
       };
+      if (data.type === "order_taken" && data.orderId) {
+        void dismissPendingOrderNotification(data.orderId);
+        return;
+      }
       openFromPushData(data);
     }
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {

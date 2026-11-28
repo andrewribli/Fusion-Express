@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { useCart } from "@/context/CartContext";
 import { lineTotal } from "@/lib/pricing";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 import {
   CANTEEN_DELIVERY_FEE,
   getRestaurant,
@@ -23,7 +24,7 @@ import { OrderLimitNotice } from "@/components/OrderLimitNotice";
 export default function CanteenCartPage() {
   const router = useRouter();
   const { items, subtotal, setQuantity, removeItem, clearCart } = useCart();
-  const total = subtotal + CANTEEN_DELIVERY_FEE;
+  const total = subtotal + CANTEEN_DELIVERY_FEE + PLATFORM_FEE_HKD;
   const overLimit = isOverOrderLimit(subtotal);
   const restaurantId = useMemo(() => {
     for (const line of items) {
@@ -122,6 +123,10 @@ export default function CanteenCartPage() {
                 <div className="mt-1 flex justify-between text-gray-600">
                   <span>Delivery (flat)</span>
                   <span>${CANTEEN_DELIVERY_FEE}</span>
+                </div>
+                <div className="mt-1 flex justify-between text-gray-600">
+                  <span>GraceRun fee</span>
+                  <span>${PLATFORM_FEE_HKD}</span>
                 </div>
                 <div className="mt-2 flex justify-between text-base font-bold">
                   <span>Total</span>

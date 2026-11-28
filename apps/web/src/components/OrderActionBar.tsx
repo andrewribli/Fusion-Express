@@ -5,6 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 
 export function OrderActionBar({
   orderingEnabled = true,
@@ -33,7 +34,7 @@ export function OrderActionBar({
           style={{ backgroundColor: orderingEnabled ? "#ED1C24" : "#9ca3af" }}
         >
           {orderingEnabled
-            ? `Continue to checkout · $${subtotal + fee.deliveryFee}`
+            ? `Continue to checkout · $${subtotal + fee.deliveryFee + PLATFORM_FEE_HKD}`
             : "Canteen closed — checkout paused"}
         </button>
       </div>

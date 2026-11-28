@@ -218,7 +218,7 @@ export default function AdminPayoutsPage() {
                               Pay runner ${payTotal}
                             </p>
                             <p className="text-[11px] text-gray-500">
-                              Runner keep ~${earn}
+                              Runner earn ${earn} (full delivery + tips)
                             </p>
                           </div>
                         </div>

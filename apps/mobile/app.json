@@ -3,7 +3,7 @@
     "name": "GraceRun",
     "slug": "fusion-express",
     "owner": "gracerun",
-    "version": "1.0.18",
+"version": "1.0.19",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "fusionexpress",
@@ -56,7 +56,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.gracerun.fusionexpress",
-      "buildNumber": "141",
+"buildNumber": "142",
       "usesAppleSignIn": true,
       "entitlements": {
         "aps-environment": "production",
@@ -79,7 +79,7 @@
         "backgroundColor": "#ED1C24"
       },
       "package": "com.gracerun.fusionexpress",
-      "versionCode": 102,
+"versionCode": 106,
       "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize"
     },

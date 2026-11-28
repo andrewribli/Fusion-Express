@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 
 export function CartBar() {
   const { itemCount, subtotal, items } = useCart();
@@ -10,14 +11,15 @@ export function CartBar() {
   if (itemCount === 0) return null;
 
   const fee = resolveOrderDeliveryFee(items, "");
-  const total = subtotal + fee.deliveryFee;
+  const total = subtotal + fee.deliveryFee + PLATFORM_FEE_HKD;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-100 bg-white/95 p-4 backdrop-blur">
       <div className="mx-auto flex max-w-[480px] items-center justify-between gap-4">
         <div>
           <p className="text-xs text-gray-500">
-            {itemCount} item{itemCount !== 1 ? "s" : ""} · ${fee.deliveryFee} delivery
+            {itemCount} item{itemCount !== 1 ? "s" : ""} · ${fee.deliveryFee}{" "}
+            delivery · ${PLATFORM_FEE_HKD} fee
           </p>
           <p className="text-lg font-bold text-gray-900">${total}</p>
         </div>

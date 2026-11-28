@@ -18,6 +18,7 @@ import {
   calculateDeliveryFee,
   cartTotalWeightKg,
   HEAVY_BAG_THRESHOLD_KG,
+  PLATFORM_FEE_HKD,
   WEIGHT_INCLUDED_KG,
   WEIGHT_SURCHARGE_PER_KG,
   ZONE_LABELS,
@@ -99,7 +100,7 @@ export default function CheckoutScreen() {
     () => calculateDeliveryFee({ weightKg, college }),
     [weightKg, college],
   );
-  const total = subtotal + fee.deliveryFee;
+  const total = subtotal + fee.deliveryFee + PLATFORM_FEE_HKD;
   const overLimit = isOverOrderLimit(subtotal);
   const bounds = scheduleBounds();
 
@@ -182,6 +183,7 @@ export default function CheckoutScreen() {
         customerNote: note.trim() || "None for now",
         subtotal: foodSubtotal,
         deliveryFee: fee.deliveryFee,
+        platformFee: PLATFORM_FEE_HKD,
         total,
         paymentReceived: false,
         estimatedDeliveryAt: when ?? getEstimatedDeliveryTime(),
@@ -464,6 +466,7 @@ export default function CheckoutScreen() {
                     {fee.extraKg > 0
                       ? ` (incl. $${WEIGHT_SURCHARGE_PER_KG}/extra kg)`
                       : ""}
+                    {" · "}GraceRun ${PLATFORM_FEE_HKD}
                   </Text>
                   <Text className="mt-2 text-base font-extrabold text-fusion">
                     Total ${total}

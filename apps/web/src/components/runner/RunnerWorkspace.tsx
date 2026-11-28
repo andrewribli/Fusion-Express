@@ -55,8 +55,8 @@ import {
   summarizeRunnerPayouts,
   runnerExpiredAtOf,
   runnerWarningTotal,
-  RUNNER_EARNINGS_RATE,
 } from "@/lib/order-status";
+import { isChatActive } from "@fusion-express/shared";
 import type { Order } from "@/lib/types";
 import type { Runner } from "@/lib/types";
 import {
@@ -1158,8 +1158,9 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                         <p className="text-sm text-white/80">Total earned</p>
                         <p className="mt-1 text-3xl font-bold">${total}</p>
                         <p className="mt-2 text-xs text-white/80">
-                          You keep {RUNNER_EARNINGS_RATE * 100}% of each
-                          order&apos;s delivery fee (plus tips).
+                          You keep the full delivery fee on each order (plus
+                          tips). GraceRun charges customers a flat $2 platform
+                          fee.
                         </p>
                       </div>
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -1277,6 +1278,14 @@ export function RunnerWorkspace({ view }: { view: RunnerView }) {
                           <div className="mt-3">
                             <RunnerOrderDetails order={order} />
                           </div>
+                          {isChatActive(order) ? (
+                            <Link
+                              href={`/chat/${order.id}`}
+                              className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl bg-gray-900 px-4 text-sm font-semibold text-white"
+                            >
+                              Message customer
+                            </Link>
+                          ) : null}
                         </li>
                       );
                     })}

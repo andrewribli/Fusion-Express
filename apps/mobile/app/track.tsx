@@ -39,6 +39,7 @@ import { webAssetOrigin } from "@fusion-express/shared/products";
 import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../src/auth";
 import { FPS_ID, submitFpsScreenshot } from "../src/fps-payment";
+import { DeliveryRating } from "../src/DeliveryRating";
 import { OrderChat } from "../src/OrderChat";
 import { formatScheduled } from "../src/schedule";
 import { takePhoto, uriToBlob } from "../src/takePhoto";
@@ -214,13 +215,9 @@ export default function TrackScreen() {
   }, [load]);
 
   useEffect(() => {
-    if (!focusChat || !order || !isChatActive(order.status)) return;
-    const timer = setTimeout(
-      () => scrollRef.current?.scrollToEnd({ animated: true }),
-      300,
-    );
-    return () => clearTimeout(timer);
-  }, [focusChat, order]);
+    if (!focusChat || !order || !isChatActive(order)) return;
+    navigation.navigate("OrderChat", { orderId: order.id });
+  }, [focusChat, order, navigation]);
 
   useEffect(() => {
     if (!order || order.status === "pending" || order.status === "cancelled") {
@@ -285,6 +282,10 @@ export default function TrackScreen() {
               setCancelError("");
               try {
                 await cancelOrder(order.id, user.uid);
+                const { notifyOrderCancelled } = await import(
+                  "../src/notify-email"
+                );
+                notifyOrderCancelled(order.id);
                 navigation.navigate("Tabs", { screen: "Shop" });
               } catch (err) {
                 setCancelError(
@@ -516,8 +517,16 @@ export default function TrackScreen() {
                       (order.heavyBagSurcharge ?? 0) > 0
                         ? ` + heavy bag $${order.heavyBagSurcharge}`
                         : ""
+                    }${
+                      (order.platformFee ?? 0) > 0
+                        ? ` + GraceRun $${order.platformFee}`
+                        : ""
+                    }${
+                      (order.tip ?? 0) > 0 ? ` + tip $${order.tip}` : ""
                     })`
-                  : ""}
+                  : (order.tip ?? 0) > 0
+                    ? ` (incl. tip $${order.tip})`
+                    : ""}
               </Text>
               {order.discountApplied && (order.discountAmount ?? 0) > 0 ? (
                 <Text className="mt-1 text-sm text-emerald-700">
@@ -741,7 +750,9 @@ export default function TrackScreen() {
               </Card>
             ) : null}
 
-            {isChatActive(order.status) ? <OrderChat order={order} /> : null}
+            <DeliveryRating order={order} />
+
+            {isChatActive(order) ? <OrderChat order={order} /> : null}
           </>
         )}
       </ScrollView>

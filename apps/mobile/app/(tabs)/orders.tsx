@@ -14,6 +14,11 @@ import type { Order } from "@fusion-express/shared/types";
 import { useAuth } from "../../src/auth";
 import type { RootStackParamList, TabsParamList } from "../../src/navigation";
 import {
+  canRateOrder,
+  DeliveryRating,
+  orderHasRating,
+} from "../../src/DeliveryRating";
+import {
   Card,
   EmptyState,
   LoadingBlock,
@@ -64,7 +69,7 @@ export default function OrdersScreen() {
 
   if (authLoading) {
     return (
-      <Page>
+      <Page includeBottomInset={false}>
         <ScreenHeader title="Your orders" />
         <LoadingBlock />
       </Page>
@@ -73,7 +78,7 @@ export default function OrdersScreen() {
 
   if (!user) {
     return (
-      <Page>
+      <Page includeBottomInset={false}>
         <ScreenHeader title="Your orders" />
         <EmptyState
           title="Sign in to see your orders"
@@ -86,7 +91,7 @@ export default function OrdersScreen() {
   }
 
   return (
-    <Page>
+    <Page includeBottomInset={false}>
       <ScreenHeader
         title="Your orders"
         right={
@@ -121,37 +126,52 @@ export default function OrdersScreen() {
           />
         ) : (
           orders.map((order) => (
-            <Pressable
-              key={order.id}
-              className="mb-3"
-              onPress={() =>
-                navigation.navigate("Track", { orderId: order.id })
-              }
-            >
-              <Card>
-                <View className="flex-row items-start justify-between gap-3">
-                  <View className="flex-1">
-                    <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                      Order
-                    </Text>
-                    <Text className="mt-0.5 font-bold text-gray-900">
-                      {order.id}
+            <View key={order.id} className="mb-3">
+              <Pressable
+                onPress={() =>
+                  navigation.navigate("Track", { orderId: order.id })
+                }
+              >
+                <Card>
+                  <View className="flex-row items-start justify-between gap-3">
+                    <View className="flex-1">
+                      <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        Order
+                      </Text>
+                      <Text className="mt-0.5 font-bold text-gray-900">
+                        {order.id}
+                      </Text>
+                    </View>
+                    <Text
+                      className={`text-sm font-bold ${statusTone(order.status)}`}
+                    >
+                      {ORDER_STATUS_LABELS[order.status]}
                     </Text>
                   </View>
-                  <Text
-                    className={`text-sm font-bold ${statusTone(order.status)}`}
-                  >
-                    {ORDER_STATUS_LABELS[order.status]}
+                  <Text className="mt-3 text-sm text-gray-600">
+                    Total ${order.total}
                   </Text>
-                </View>
-                <Text className="mt-3 text-sm text-gray-600">
-                  Total ${order.total}
-                </Text>
-                <Text className="mt-2 text-xs font-semibold text-fusion">
-                  Track order ›
-                </Text>
-              </Card>
-            </Pressable>
+                  {orderHasRating(order) ? (
+                    <Text className="mt-1 text-xs text-emerald-700">
+                      Rated {order.rating ?? order.runnerRating}★
+                      {(order.tipAmount ?? 0) > 0
+                        ? ` · tip HK$${order.tipAmount}`
+                        : ""}
+                    </Text>
+                  ) : canRateOrder(order) ? (
+                    <Text className="mt-1 text-xs font-semibold text-amber-700">
+                      Rate this delivery below
+                    </Text>
+                  ) : null}
+                  <Text className="mt-2 text-xs font-semibold text-fusion">
+                    Track order ›
+                  </Text>
+                </Card>
+              </Pressable>
+              {canRateOrder(order) || orderHasRating(order) ? (
+                <DeliveryRating order={order} onDone={() => void load()} />
+              ) : null}
+            </View>
           ))
         )}
       </ScrollView>

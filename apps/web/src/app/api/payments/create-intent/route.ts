@@ -92,7 +92,9 @@ export async function POST(request: NextRequest) {
     const amount = customerAmountDue({
       ...grocery,
       deliveryFee: num(order.deliveryFee) ?? 0,
+      heavyBagSurcharge: num(order.heavyBagSurcharge),
       tip: num(order.tip),
+      platformFee: num(order.platformFee),
     });
     if (!(amount > 0)) {
       return NextResponse.json({ error: "Invalid receipt total." }, { status: 400 });

@@ -69,7 +69,11 @@ export function openFromPushData(data: {
   const type = data.type ?? "";
   const go = () => {
     if (!navigationRef.isReady()) return false;
-    if (type === "pending_order" || type === "order_created") {
+    if (
+      type === "pending_order" ||
+      type === "order_created" ||
+      type === "order_taken"
+    ) {
       navigationRef.navigate("Tabs", { screen: "Runner" });
       return true;
     }

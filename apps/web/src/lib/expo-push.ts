@@ -12,12 +12,18 @@ import {
 
 type PushEvent = "created" | "accepted" | "chat" | "lobby";
 
+/** Shared collapse id so "order taken" replaces the pending-order buzz. */
+export function pendingOrderCollapseId(orderId: string): string {
+  return `pending-order-${orderId}`;
+}
+
 type ExpoMessage = {
   to: string;
   title: string;
   body: string;
-  sound: "default";
+  sound: "default" | null;
   channelId: "orders";
+  collapseId?: string;
   data: Record<string, string>;
 };
 
@@ -91,12 +97,44 @@ export async function dispatchOrderPush(opts: {
       throw new Error("Not allowed for this order.");
     }
     if (order.status !== "accepted" && order.status !== "assigned") return 0;
-    tokens = await tokensForUid(order.customerId);
-    title = "Runner accepted your order";
-    body = order.runnerName
-      ? `${order.runnerName} is picking up your GraceRun order.`
-      : "A runner is picking up your GraceRun order.";
-    type = "order_accepted";
+    const customerTokens = await tokensForUid(order.customerId);
+    const customerMessages: ExpoMessage[] = customerTokens.slice(0, 40).map((to) => ({
+      to,
+      title: "Runner accepted your order",
+      body: order.runnerName
+        ? `${order.runnerName} is picking up your GraceRun order.`
+        : "A runner is picking up your GraceRun order.",
+      sound: "default" as const,
+      channelId: "orders" as const,
+      data: { orderId: order.id, type: "order_accepted" },
+    }));
+
+    const skipUids = new Set(
+      [order.runnerUid, order.customerId].filter(Boolean) as string[],
+    );
+    const otherRunnerTokens: string[] = [];
+    const rows = await listRunnerPushTokensRest();
+    const seen = new Set<string>();
+    for (const row of rows) {
+      if (skipUids.has(row.uid)) continue;
+      for (const token of row.tokens) {
+        if (seen.has(token)) continue;
+        seen.add(token);
+        otherRunnerTokens.push(token);
+      }
+    }
+    const collapseId = pendingOrderCollapseId(order.id);
+    const takenMessages: ExpoMessage[] = otherRunnerTokens.slice(0, 40).map((to) => ({
+      to,
+      title: "Order taken",
+      body: "Another runner accepted this GraceRun order.",
+      sound: null,
+      channelId: "orders" as const,
+      collapseId,
+      data: { orderId: order.id, type: "order_taken" },
+    }));
+
+    return sendExpo([...customerMessages, ...takenMessages]);
 
   } else if (opts.event === "lobby") {
     if (opts.auth.uid !== order.runnerUid) {
@@ -129,12 +167,15 @@ export async function dispatchOrderPush(opts: {
     type = "chat";
   }
 
+  const collapseId =
+    opts.event === "created" ? pendingOrderCollapseId(order.id) : undefined;
   const messages: ExpoMessage[] = tokens.slice(0, 40).map((to) => ({
     to,
     title,
     body,
     sound: "default",
     channelId: "orders",
+    ...(collapseId ? { collapseId } : {}),
     data: { orderId: order.id, type },
   }));
   return sendExpo(messages);

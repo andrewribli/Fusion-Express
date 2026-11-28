@@ -185,6 +185,8 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
       data.heavyBagSurcharge != null
         ? Number(data.heavyBagSurcharge)
         : undefined,
+    platformFee:
+      data.platformFee != null ? Number(data.platformFee) : undefined,
     tip: data.tip != null ? Number(data.tip) : undefined,
     total: Number(data.total ?? 0),
     discountApplied:
@@ -354,8 +356,9 @@ export function orderGrandTotal(
   subtotal: number,
   deliveryFee: number,
   tip = 0,
+  platformFee = 0,
 ): number {
-  return round2(subtotal + deliveryFee + tip);
+  return round2(subtotal + deliveryFee + tip + platformFee);
 }
 
 function serializeOrderItemForFirestore(item: OrderItem): Record<string, unknown> {
@@ -1183,7 +1186,10 @@ export async function submitOrderRating(
 
   if (isFirebaseConfigured()) {
     try {
-      await updateDoc(doc(getDb(), ORDERS_COLLECTION, orderId), updates);
+      await updateDoc(
+        doc(getDb(), ORDERS_COLLECTION, orderId),
+        orderPatch(updates),
+      );
       return;
     } catch {
       // fallback
@@ -1300,7 +1306,12 @@ export async function submitTillPrices(
 
   if (priceDifference < 0) {
     subtotal = actualSubtotal;
-    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    total = orderGrandTotal(
+      actualSubtotal,
+      order.deliveryFee,
+      tip,
+      order.platformFee ?? 0,
+    );
     if (order.paymentReceived) {
       priceAdjustmentStatus = "refund_pending";
       refundAmount = round2(-priceDifference);
@@ -1312,7 +1323,12 @@ export async function submitTillPrices(
     priceAdjustmentStatus = "pending_customer";
   } else {
     subtotal = actualSubtotal;
-    total = orderGrandTotal(actualSubtotal, order.deliveryFee, tip);
+    total = orderGrandTotal(
+      actualSubtotal,
+      order.deliveryFee,
+      tip,
+      order.platformFee ?? 0,
+    );
   }
 
   const firestoreUpdates: Record<string, unknown> = {
@@ -1354,7 +1370,12 @@ export async function approvePriceIncrease(
     throw new Error("This order is not waiting for a price approval");
   }
   const actualSubtotal = order.actualSubtotal ?? orderActualSubtotal(order.items);
-  const total = orderGrandTotal(actualSubtotal, order.deliveryFee, order.tip ?? 0);
+  const total = orderGrandTotal(
+    actualSubtotal,
+    order.deliveryFee,
+    order.tip ?? 0,
+    order.platformFee ?? 0,
+  );
   const now = new Date();
   await patchOrder(
     orderId,

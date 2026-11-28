@@ -34,6 +34,7 @@ import {
 } from "@fusion-express/shared/orders";
 import {
   ORDER_STATUS_LABELS,
+isChatActive,
   isLobbyArrivalActive,
   isServiceOpen,
   orderTipTotal,
@@ -108,11 +109,21 @@ function patchLocal(
   );
 }
 
+type RunnerTab = "available" | "active" | "payouts" | "tools";
+
+const RUNNER_TABS: { id: RunnerTab; label: string }[] = [
+  { id: "available", label: "Available" },
+  { id: "active", label: "Active" },
+  { id: "payouts", label: "Payouts" },
+  { id: "tools", label: "Tools" },
+];
+
 export default function RunnerScreen() {
   const { user, profile, loading: authLoading, refreshProfile } = useAuth();
   const [runnerName, setRunnerName] = useState(
     profile?.fullName ?? "Mobile Runner",
   );
+  const [tab, setTab] = useState<RunnerTab>("available");
   const [pending, setPending] = useState<Order[]>([]);
   const [active, setActive] = useState<Order[]>([]);
   const [delivered, setDelivered] = useState<Order[]>([]);
@@ -132,6 +143,10 @@ export default function RunnerScreen() {
   useEffect(() => {
     if (profile?.phone) setPhone(profile.phone);
   }, [profile?.phone]);
+
+  useEffect(() => {
+    if (profile && !profile.isRunner) setTab("tools");
+  }, [profile?.isRunner]);
 
   const runnerUid = user?.uid ?? "";
   const runnerId = profile?.runnerId || runnerUid;
@@ -554,6 +569,36 @@ async function onDeliver(order: Order) {
           </Pressable>
         }
       />
+      <View className="flex-row gap-1 border-b border-gray-100 px-2 pt-1">
+        {RUNNER_TABS.map((item) => {
+          const selected = tab === item.id;
+          const badge =
+            item.id === "available"
+              ? pending.length
+              : item.id === "active"
+                ? active.length
+                : 0;
+          return (
+            <Pressable
+              key={item.id}
+              className={`flex-1 items-center rounded-t-xl px-1 py-2 ${
+                selected ? "bg-white" : "bg-transparent"
+              }`}
+              onPress={() => setTab(item.id)}
+            >
+              <Text
+                className={`text-xs font-bold ${
+                  selected ? "text-fusion" : "text-gray-500"
+                }`}
+              >
+                {item.label}
+                {badge > 0 ? ` (${badge})` : ""}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <ScreenKeyboardAvoid className="flex-1">
         <ScrollView
           className="flex-1"
@@ -561,52 +606,8 @@ async function onDeliver(order: Order) {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          <Card>
-            <Text className="text-sm text-gray-600">
-              Signed in as {user.email ?? user.uid}
-            </Text>
-            {!profile?.isRunner ? (
-              <View className="mt-3">
-                <Text className="text-sm text-gray-700">
-                  Deliver orders and get paid after each drop-off. You’ll still
-                  be able to order as a customer.
-                </Text>
-                <TextInput
-                  className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="Phone number"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="phone-pad"
-                />
-                <PrimaryButton
-                  label="Sign up to be a Runner"
-                  className="mt-3"
-                  busy={signingUp}
-                  onPress={onBecomeRunner}
-                />
-              </View>
-            ) : (
-              <Text className="mt-2 text-xs text-emerald-700">
-                New pending orders show up here live, and buzz while this app is open.
-              </Text>
-            )}
-            <TextInput
-              className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
-              value={runnerName}
-              onChangeText={setRunnerName}
-              placeholder="Display name"
-              placeholderTextColor="#9CA3AF"
-            />
-            <SecondaryButton
-              label="Reload profile"
-              className="mt-3"
-              onPress={() => void refreshProfile()}
-            />
-          </Card>
-
           {error ? (
-            <Card className="mt-3 border-red-100 bg-red-50">
+            <Card className="mb-3 border-red-100 bg-red-50">
               <Text className="text-sm text-red-700">{error}</Text>
               <PrimaryButton
                 label="Retry load"
@@ -616,9 +617,55 @@ async function onDeliver(order: Order) {
             </Card>
           ) : null}
 
-          <Text className="mb-2 mt-5 text-base font-extrabold text-gray-900">
-            Available
-          </Text>
+          {tab === "tools" ? (
+            <Card>
+              <Text className="text-sm text-gray-600">
+                Signed in as {user.email ?? user.uid}
+              </Text>
+              {!profile?.isRunner ? (
+                <View className="mt-3">
+                  <Text className="text-sm text-gray-700">
+                    Deliver orders and get paid after each drop-off. You’ll still
+                    be able to order as a customer.
+                  </Text>
+                  <TextInput
+                    className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="Phone number"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="phone-pad"
+                  />
+                  <PrimaryButton
+                    label="Sign up to be a Runner"
+                    className="mt-3"
+                    busy={signingUp}
+                    onPress={onBecomeRunner}
+                  />
+                </View>
+              ) : (
+                <Text className="mt-2 text-xs text-emerald-700">
+                  New pending orders buzz on the Available tab while this app is
+                  open.
+                </Text>
+              )}
+              <TextInput
+                className="mt-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                value={runnerName}
+                onChangeText={setRunnerName}
+                placeholder="Display name"
+                placeholderTextColor="#9CA3AF"
+              />
+              <SecondaryButton
+                label="Reload profile"
+                className="mt-3"
+                onPress={() => void refreshProfile()}
+              />
+            </Card>
+          ) : null}
+
+          {tab === "available" ? (
+            <>
           {loadingList && pending.length === 0 && active.length === 0 ? (
             <LoadingBlock label="Loading jobs…" />
           ) : pending.length === 0 ? (
@@ -669,10 +716,11 @@ async function onDeliver(order: Order) {
               </Card>
             ))
           )}
+            </>
+          ) : null}
 
-          <Text className="mb-2 mt-4 text-base font-extrabold text-gray-900">
-            My active
-          </Text>
+          {tab === "active" ? (
+            <>
           {active.length === 0 ? (
             <Text className="text-sm text-gray-500">No active jobs.</Text>
           ) : (
@@ -913,9 +961,14 @@ async function onDeliver(order: Order) {
               );
             })
           )}
+            </>
+          ) : null}
 
-          <Text className="mb-2 mt-6 text-base font-extrabold text-gray-900">
-            Your payouts
+          {tab === "payouts" ? (
+            <>
+          <Text className="mb-2 text-sm text-gray-600">
+            You keep the full delivery fee (plus tips). GraceRun charges
+            customers a flat $2 platform fee separately.
           </Text>
           {(() => {
             const summary = summarizeRunnerPayouts(delivered);
@@ -1022,10 +1075,13 @@ async function onDeliver(order: Order) {
                       </Text>
                     </Pressable>
                   ) : null}
+                  {isChatActive(order) ? <OrderChat order={order} /> : null}
                 </Card>
               );
             })
           )}
+            </>
+          ) : null}
         </ScrollView>
       </ScreenKeyboardAvoid>
 

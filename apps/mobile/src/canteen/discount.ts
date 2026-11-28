@@ -53,12 +53,19 @@ export function buildAcceptDiscount(
       runnerCollege: runnerCollege ?? undefined,
       canteenCollege: canteenCollege ?? undefined,
       subtotal: roundMoney(foodSubtotal),
-      total: roundMoney(foodSubtotal + order.deliveryFee + (order.tip ?? 0)),
+      total: roundMoney(
+        foodSubtotal +
+          order.deliveryFee +
+          (order.tip ?? 0) +
+          (order.platformFee ?? 0),
+      ),
     };
   }
 
   const subtotal = roundMoney(foodSubtotal - discountAmount);
-  const total = roundMoney(subtotal + order.deliveryFee + (order.tip ?? 0));
+  const total = roundMoney(
+    subtotal + order.deliveryFee + (order.tip ?? 0) + (order.platformFee ?? 0),
+  );
   return {
     discountApplied: true,
     discountAmount,

@@ -5,6 +5,9 @@ export const BASE_DELIVERY_FEE = 5;
 export const WEIGHT_INCLUDED_KG = 2;
 export const WEIGHT_SURCHARGE_PER_KG = 2;
 
+/** Flat GraceRun platform fee on every order (HK$). Runner does not receive this. */
+export const PLATFORM_FEE_HKD = 2;
+
 /** Runner may add this when the bag is over 5 kg. */
 export const HEAVY_BAG_THRESHOLD_KG = 5;
 export const HEAVY_BAG_SURCHARGE = 5;
@@ -139,4 +142,15 @@ export function orderDeliveryCharge(order: {
   return roundInt(
     Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0),
   );
+}
+
+/**
+ * Platform fee stored on the order. Legacy docs without the field stay at $0
+ * so we do not retroactively charge completed tickets.
+ */
+export function orderPlatformFee(order: {
+  platformFee?: number;
+} | null | undefined): number {
+  if (order?.platformFee == null) return 0;
+  return Math.max(0, Number(order.platformFee) || 0);
 }

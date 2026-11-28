@@ -9,6 +9,7 @@ import { LakersWallpaper } from "@/components/LakersWallpaper";
 import { OrderChatPanel } from "@/components/OrderChatPanel";
 import { OrderProgressBar } from "@/components/OrderProgressBar";
 import { RatingModal } from "@/components/RatingModal";
+import { orderHasRating } from "@/lib/ratings";
 import { RunnerLocationMap } from "@/components/RunnerLocationMap";
 import { GuestAccountPrompt } from "@/components/GuestAccountPrompt";
 import { StampedAvatar } from "@/components/AvatarBadge";
@@ -87,7 +88,7 @@ function TrackContent() {
     if (found) lastStatus.current = found.status;
     setOrder(found);
     setNotFound(!found);
-    if (found?.runnerRating) setRated(true);
+    if (found && orderHasRating(found)) setRated(true);
     setLoading(false);
   }, []);
 
@@ -345,6 +346,12 @@ function TrackContent() {
                 <span>Delivery</span>
                 <span>${order.deliveryFee}</span>
               </div>
+              {(order.platformFee ?? 0) > 0 && (
+                <div className="flex justify-between text-gray-600">
+                  <span>GraceRun fee</span>
+                  <span>${order.platformFee}</span>
+                </div>
+              )}
               {order.tip != null && order.tip > 0 && (
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>
@@ -383,7 +390,10 @@ function TrackContent() {
                   <p className="text-xs text-amber-900">
                     {supermarketForCampus(order.campus)} prices are higher than the app estimate. New total $
                     {order.actualSubtotal != null
-                      ? order.actualSubtotal + order.deliveryFee + (order.tip ?? 0)
+                      ? order.actualSubtotal +
+                        order.deliveryFee +
+                        (order.tip ?? 0) +
+                        (order.platformFee ?? 0)
                       : order.total}
                     . Approve to continue, or cancel for a full refund of anything already
                     paid.
@@ -481,8 +491,9 @@ function TrackContent() {
           {(order.status === "delivered" ||
             order.status === "runner_paid" ||
             order.status === "customer_paid" ||
-            order.status === "completed") &&
-            !order.runnerRating &&
+            order.status === "completed" ||
+            order.status === "paid") &&
+            !orderHasRating(order) &&
             !rated &&
             user &&
             getUserAccountId(user) === order.customerId && (
@@ -494,9 +505,16 @@ function TrackContent() {
               />
             )}
 
-          {order.runnerRating && (
+          {(orderHasRating(order) || rated) && (
             <p className="text-center text-sm text-gray-600">
-              You rated this delivery {order.runnerRating}★
+              Thank you
+              {order.rating || order.runnerRating
+                ? ` — you rated this delivery ${order.rating ?? order.runnerRating}★`
+                : ""}
+              {(order.tipAmount ?? 0) > 0
+                ? ` · tip HK$${order.tipAmount}`
+                : ""}
+              .
             </p>
           )}
 

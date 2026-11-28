@@ -29,6 +29,7 @@ import { requestNotificationPermission } from "@/lib/notifications";
 import { createOrder } from "@/lib/orders";
 import { getUnitPrice, lineTotal } from "@/lib/pricing";
 import type { CampusId } from "@fusion-express/shared/campus";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 
 function loginForCheckout(path: string): string {
   return `/login?next=${encodeURIComponent(path)}`;
@@ -114,7 +115,8 @@ export function usePlaceOrder() {
         }
         const fee = resolveOrderDeliveryFee(items, opts.college, opts.campus);
         const tipAmount = Math.max(0, opts.tip ?? 0);
-        const total = orderSubtotal + fee.deliveryFee + tipAmount;
+        const platformFee = PLATFORM_FEE_HKD;
+        const total = orderSubtotal + fee.deliveryFee + tipAmount + platformFee;
         const estimatedDeliveryAt = getEstimatedDeliveryTime();
         const lobbyPoint = getLobbyForHall(opts.hall, opts.campus);
         const customerName = customer.fullName.trim();
@@ -175,6 +177,7 @@ export function usePlaceOrder() {
           ),
           subtotal: orderSubtotal,
           deliveryFee: fee.deliveryFee,
+          platformFee,
           tip: tipAmount || undefined,
           total,
           paymentReceived: false,
