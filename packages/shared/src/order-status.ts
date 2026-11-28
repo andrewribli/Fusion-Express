@@ -298,10 +298,12 @@ export function runnerDeadlineOf(order: {
 export function customerDeadlineOf(order: {
   customerDeadline?: Date;
   deliveredAt?: Date;
+  paymentRequestedAt?: Date;
 }): Date | undefined {
   if (order.customerDeadline) return order.customerDeadline;
-  if (order.deliveredAt) {
-    return new Date(order.deliveredAt.getTime() + CUSTOMER_PAY_WINDOW_MS);
+  const start = order.paymentRequestedAt ?? order.deliveredAt;
+  if (start) {
+    return new Date(start.getTime() + CUSTOMER_PAY_WINDOW_MS);
   }
   return undefined;
 }
@@ -372,10 +374,10 @@ export function runnerWarningTotal(
 }
 
 /**
- * Pay button / unpaid chase: after delivery (or runner_paid), until
- * paymentReceived. Canteen totals are known at checkout; grocery waits for
- * the runner receipt fields. Status-only callers treat delivered/runner_paid
- * as open (deadline sweeps).
+ * Pay-to-release: customer can (must) pay once the amount is known — at lobby
+ * handoff (`purchased` / `accepted` with a confirmed total) or after delivery
+ * (legacy unpaid + admin force-release). Canteen totals are known at checkout;
+ * grocery waits for runner receipt fields.
  */
 export function isCustomerPaymentOpen(
   status: OrderStatus,
@@ -387,11 +389,45 @@ export function isCustomerPaymentOpen(
     orderChannel?: string;
   },
 ): boolean {
-  if (status !== "delivered" && status !== "runner_paid") return false;
   if (order?.paymentReceived) return false;
-  if (!order) return true;
+
+  const postDelivery = status === "delivered" || status === "runner_paid";
+  const preRelease = status === "purchased" || status === "accepted";
+  if (!postDelivery && !preRelease) return false;
+
+  // Status-only callers (deadline sweeps): treat post-delivery as open.
+  if (!order) return postDelivery;
+
   if (order.orderChannel === "canteen") return true;
   return hasConfirmedGroceryTotal(order);
+}
+
+/** Thrown / shown when runner tries to mark delivered without payment. */
+export const PAYMENT_REQUIRED_BEFORE_RELEASE =
+  "Waiting for customer payment. Share the pay link — you can mark delivered only after paymentReceived (or ask admin to force-release).";
+
+/**
+ * Strongest simple rule: cannot mark delivered/completed unless paid,
+ * except an explicit admin force-release.
+ */
+export function canMarkOrderDelivered(
+  order: { paymentReceived?: boolean },
+  opts?: { adminForce?: boolean },
+): { ok: true } | { ok: false; message: string } {
+  if (order.paymentReceived || opts?.adminForce) return { ok: true };
+  return { ok: false, message: PAYMENT_REQUIRED_BEFORE_RELEASE };
+}
+
+/** Public web path for FPS/PayMe proof + card pay. */
+export function orderPayPath(orderId: string): string {
+  return `/pay/${encodeURIComponent(orderId)}`;
+}
+
+export function orderPayUrl(
+  orderId: string,
+  origin = "https://www.gracerun.fit",
+): string {
+  return `${origin.replace(/\/$/, "")}${orderPayPath(orderId)}`;
 }
 
 /** Orders runners may claim from the available board. */

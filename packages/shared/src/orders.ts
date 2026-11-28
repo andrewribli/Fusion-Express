@@ -22,10 +22,12 @@ import {
   isActiveCustomerOrderStatus,
   canCustomerCancelOrder,
   isClaimableOrderStatus,
+  canMarkOrderDelivered,
   isCustomerPaymentOpen,
   isRunnerDeliveryOpen,
   MAX_ACTIVE_CUSTOMER_ORDERS,
   normalizeOrderStatus,
+  PAYMENT_REQUIRED_BEFORE_RELEASE,
   RUNNER_DEADLINE_REMINDER_MS,
   RUNNER_DELIVERY_WINDOW_MS,
   runnerDeadlineOf,
@@ -194,6 +196,11 @@ function parseOrder(id: string, data: Record<string, unknown>): Order {
     runnerCollege: data.runnerCollege ? String(data.runnerCollege) : undefined,
     canteenCollege: data.canteenCollege ? String(data.canteenCollege) : undefined,
     paymentReceived: Boolean(data.paymentReceived),
+    paymentRequestedAt: data.paymentRequestedAt
+      ? toDate(data.paymentRequestedAt)
+      : undefined,
+    paymentReleaseForcedByAdmin:
+      data.paymentReleaseForcedByAdmin === true ? true : undefined,
     paymentMethod: data.paymentMethod as Order["paymentMethod"],
     paymentProvider: data.paymentProvider
       ? String(data.paymentProvider)
@@ -963,9 +970,20 @@ export async function updateOrderStatus(
       | "subtotal"
       | "total"
     >
-  >,
+  > & { adminForcePaymentBypass?: boolean },
 ): Promise<void> {
   const now = new Date();
+
+  if (status === "delivered" || status === "completed") {
+    const existing = await fetchOrder(orderId);
+    if (!existing) throw new Error("Order not found");
+    const gate = canMarkOrderDelivered(existing, {
+      adminForce: extras?.adminForcePaymentBypass === true,
+    });
+    if (!gate.ok) {
+      throw new Error(gate.message || PAYMENT_REQUIRED_BEFORE_RELEASE);
+    }
+  }
 
   if (isFirebaseConfigured()) {
     try {
@@ -985,9 +1003,12 @@ export async function updateOrderStatus(
       }
       if (status === "delivered") {
         updates.deliveredAt = Timestamp.fromDate(now);
-        updates.customerDeadline = Timestamp.fromDate(
-          new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS),
-        );
+        if (extras?.adminForcePaymentBypass) {
+          updates.paymentReleaseForcedByAdmin = true;
+          updates.customerDeadline = Timestamp.fromDate(
+            new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS),
+          );
+        }
       }
       if (status === "paid" || status === "customer_paid") {
         updates.customerPaidAt = Timestamp.fromDate(now);
@@ -999,7 +1020,11 @@ export async function updateOrderStatus(
       }
       if (status === "completed") {
         updates.runnerPaidAt = updates.runnerPaidAt ?? Timestamp.fromDate(now);
-        updates.paymentReceived = true;
+        if (extras?.adminForcePaymentBypass) {
+          updates.paymentReleaseForcedByAdmin = true;
+        } else {
+          updates.paymentReceived = true;
+        }
       }
       if (extras?.runnerName) updates.runnerName = extras.runnerName;
       if (extras?.runnerId) updates.runnerId = extras.runnerId;
@@ -1059,7 +1084,12 @@ export async function updateOrderStatus(
       order.purchasedAt = now;
       order.pickedUpAt = now;
     }
-    if (status === "delivered") order.deliveredAt = now;
+    if (status === "delivered") {
+      order.deliveredAt = now;
+      if (extras?.adminForcePaymentBypass) {
+        order.paymentReleaseForcedByAdmin = true;
+      }
+    }
     if (status === "paid" || status === "customer_paid") {
       order.customerPaidAt = now;
       order.paymentReceived = true;
@@ -1068,7 +1098,11 @@ export async function updateOrderStatus(
     if (status === "runner_paid") order.runnerPaidAt = now;
     if (status === "completed") {
       order.runnerPaidAt = order.runnerPaidAt ?? now;
-      order.paymentReceived = true;
+      if (extras?.adminForcePaymentBypass) {
+        order.paymentReleaseForcedByAdmin = true;
+      } else {
+        order.paymentReceived = true;
+      }
     }
     if (extras?.runnerName) order.runnerName = extras.runnerName;
     if (extras?.runnerId) order.runnerId = extras.runnerId;
@@ -1485,7 +1519,11 @@ export async function markCanteenPickedUp(orderId: string): Promise<void> {
 /** Canteen deliver: fixed menu total (already discounted) + optional lobby photo. */
 export async function markCanteenDelivered(
   orderId: string,
-  opts: { finalTotal: number; deliveryPhotoUrl?: string },
+  opts: {
+    finalTotal: number;
+    deliveryPhotoUrl?: string;
+    adminForcePaymentBypass?: boolean;
+  },
 ): Promise<void> {
   if (!(opts.finalTotal > 0)) {
     throw new Error("Enter the canteen order total.");
@@ -1496,6 +1534,7 @@ export async function markCanteenDelivered(
     amountPaidByRunner: amount,
     deliveryPhotoUrl: opts.deliveryPhotoUrl,
     runnerVerified: true,
+    adminForcePaymentBypass: opts.adminForcePaymentBypass,
   });
 }
 
@@ -1607,6 +1646,8 @@ export async function markDeliveredWithTotal(
     receiptUrl?: string;
     bankStatementUrl?: string;
     runnerVerified: boolean;
+    /** Admin-only: release without paymentReceived (logged on the order). */
+    adminForcePaymentBypass?: boolean;
   },
 ): Promise<void> {
   if (!(opts.finalTotal > 0)) {
@@ -1623,7 +1664,78 @@ export async function markDeliveredWithTotal(
     receiptUrl: opts.receiptUrl,
     bankStatementUrl: opts.bankStatementUrl,
     runnerVerified: true,
+    adminForcePaymentBypass: opts.adminForcePaymentBypass,
   });
+}
+
+/**
+ * Record customer payment before or after delivery.
+ * Pre-release: sets paymentReceived while status stays purchased/accepted.
+ * Post-delivery: advances to customer_paid.
+ */
+export async function recordOrderPaymentReceived(orderId: string): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.paymentReceived) return;
+
+  if (order.status === "delivered" || order.status === "runner_paid") {
+    await updateOrderStatus(orderId, "customer_paid");
+    return;
+  }
+
+  if (
+    order.status !== "purchased" &&
+    order.status !== "accepted" &&
+    order.status !== "paid"
+  ) {
+    throw new Error("Payment can be recorded once the order is out for delivery.");
+  }
+
+  const now = new Date();
+  await patchOrder(
+    orderId,
+    {
+      paymentReceived: true,
+      customerPaidAt: Timestamp.fromDate(now),
+      awaitingOnlinePayment: false,
+    },
+    (mock) => {
+      mock.paymentReceived = true;
+      mock.customerPaidAt = now;
+      mock.awaitingOnlinePayment = false;
+    },
+  );
+}
+
+/** Runner (or system) asks the customer to pay at lobby — starts 24h timer. */
+export async function requestCustomerPayment(orderId: string): Promise<void> {
+  const order = await fetchOrder(orderId);
+  if (!order) throw new Error("Order not found");
+  if (order.paymentReceived) return;
+  if (!isCustomerPaymentOpen(order.status, order)) {
+    throw new Error(
+      order.orderChannel === "canteen"
+        ? "Order is not ready for payment yet."
+        : "Save the receipt total before requesting payment.",
+    );
+  }
+  const now = new Date();
+  const deadline =
+    order.customerDeadline ??
+    new Date(now.getTime() + CUSTOMER_PAY_WINDOW_MS);
+  await patchOrder(
+    orderId,
+    {
+      paymentRequestedAt: Timestamp.fromDate(now),
+      ...(order.customerDeadline
+        ? {}
+        : { customerDeadline: Timestamp.fromDate(deadline) }),
+    },
+    (mock) => {
+      mock.paymentRequestedAt = now;
+      if (!mock.customerDeadline) mock.customerDeadline = deadline;
+    },
+  );
 }
 
 export async function markCustomerPaid(
@@ -1633,19 +1745,25 @@ export async function markCustomerPaid(
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
   if (order.customerId !== customerId) throw new Error("Not authorized");
-  if (order.status !== "delivered" && order.status !== "runner_paid") {
-    throw new Error("You can mark paid after delivery.");
+  if (!isCustomerPaymentOpen(order.status, order) && !order.paymentReceived) {
+    throw new Error("You can mark paid once the amount is ready.");
   }
-  await updateOrderStatus(orderId, "customer_paid");
+  await recordOrderPaymentReceived(orderId);
 }
 
 export async function confirmCustomerPayment(orderId: string): Promise<void> {
   const order = await fetchOrder(orderId);
   if (!order) throw new Error("Order not found");
-  if (order.status !== "delivered" && order.status !== "runner_paid") {
-    throw new Error("Payment can be confirmed after delivery.");
+  if (
+    !isCustomerPaymentOpen(order.status, order) &&
+    order.status !== "delivered" &&
+    order.status !== "runner_paid" &&
+    order.status !== "purchased" &&
+    order.status !== "accepted"
+  ) {
+    throw new Error("Payment can be confirmed once the amount is ready.");
   }
-  await updateOrderStatus(orderId, "customer_paid");
+  await recordOrderPaymentReceived(orderId);
 }
 
 export async function verifyAdminDelivery(

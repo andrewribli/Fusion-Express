@@ -165,6 +165,10 @@ export {
   formatExpiredAgo,
   runnerWarningTotal,
   isCustomerPaymentOpen,
+  canMarkOrderDelivered,
+  PAYMENT_REQUIRED_BEFORE_RELEASE,
+  orderPayPath,
+  orderPayUrl,
   isClaimableOrderStatus,
   canCustomerCancelOrder,
   isTestOrder,
@@ -248,6 +252,13 @@ export interface Order {
   /** Normalized college id of the canteen (e.g. UC). */
   canteenCollege?: string;
   paymentReceived: boolean;
+  /** Runner asked the customer to pay at lobby handoff (starts 24h timer). */
+  paymentRequestedAt?: Date;
+  /**
+   * Admin force-released delivery without paymentReceived.
+   * Keeps unpaid chase / accountability instead of silent delivered+unpaid.
+   */
+  paymentReleaseForcedByAdmin?: boolean;
   /**
    * Extra HKD when runner marks a bag over 5 kg as heavy.
    * Added on top of deliveryFee for customer + runner earnings.
