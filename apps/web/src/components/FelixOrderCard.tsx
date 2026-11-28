@@ -8,7 +8,11 @@ import {
   felixOrderSubtotal,
 } from "@/lib/felix-order";
 import { formatSaleLabel } from "@/lib/pricing";
-import { calculateDeliveryFee, cartTotalWeightKg } from "@/lib/delivery";
+import {
+  calculateDeliveryFee,
+  cartTotalWeightKg,
+  PLATFORM_FEE_HKD,
+} from "@/lib/delivery";
 
 export function FelixOrderCard() {
   const { replaceCart } = useCart();
@@ -38,7 +42,8 @@ export function FelixOrderCard() {
         <p className="mt-1 text-xs font-medium text-fusion-red">Deal: {saleLabel}</p>
       )}
       <p className="mt-2 text-sm text-gray-500">
-        + ${fee.deliveryFee} delivery · total ${subtotal + fee.deliveryFee}
+        + ${fee.deliveryFee} delivery · ${PLATFORM_FEE_HKD} fee · total $
+        {subtotal + fee.deliveryFee + PLATFORM_FEE_HKD}
       </p>
       <button
         type="button"

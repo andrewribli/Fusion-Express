@@ -35,6 +35,7 @@ import {
   CANTEEN_DELIVERY_FEE,
   getRestaurant,
 } from "@fusion-express/shared/canteen";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 import { parseCanteenItemId } from "@fusion-express/shared/shop-kind";
 import {
   closedBannerText,
@@ -87,7 +88,7 @@ export default function CanteenCheckoutPage() {
   const tipAmount = customTip ? Number(customTip) || 0 : tip;
   const weightKg = useMemo(() => cartTotalWeightKg(items), [items]);
   const deliveryFee = CANTEEN_DELIVERY_FEE;
-  const total = subtotal + deliveryFee + tipAmount;
+  const total = subtotal + deliveryFee + tipAmount + PLATFORM_FEE_HKD;
   const overLimit = isOverOrderLimit(subtotal);
   const phoneOk = !validatePhone(phone);
   const singleCanteen = Boolean(canteenId);
@@ -238,6 +239,10 @@ export default function CanteenCheckoutPage() {
               <div className="flex justify-between text-gray-600">
                 <span>Delivery (canteen flat)</span>
                 <span>${deliveryFee}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>GraceRun fee</span>
+                <span>${PLATFORM_FEE_HKD}</span>
               </div>
               {tipAmount > 0 && (
                 <div className="flex justify-between text-gray-600">

@@ -328,6 +328,12 @@ function TrackContent() {
                 <span>Delivery</span>
                 <span>${order.deliveryFee}</span>
               </div>
+              {(order.platformFee ?? 0) > 0 && (
+                <div className="flex justify-between text-gray-600">
+                  <span>GraceRun fee</span>
+                  <span>${order.platformFee}</span>
+                </div>
+              )}
               {order.tip != null && order.tip > 0 && (
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>
@@ -366,7 +372,10 @@ function TrackContent() {
                   <p className="text-xs text-amber-900">
                     {supermarketForCampus(order.campus)} prices are higher than the app estimate. New total $
                     {order.actualSubtotal != null
-                      ? order.actualSubtotal + order.deliveryFee + (order.tip ?? 0)
+                      ? order.actualSubtotal +
+                        order.deliveryFee +
+                        (order.tip ?? 0) +
+                        (order.platformFee ?? 0)
                       : order.total}
                     . Approve to continue, or cancel for a full refund of anything already
                     paid.

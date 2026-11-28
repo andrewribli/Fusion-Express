@@ -237,6 +237,11 @@ export interface Order {
   runnerNote?: string;
   subtotal: number;
   deliveryFee: number;
+  /**
+   * Flat GraceRun platform fee (HK$) charged on this order.
+   * Missing on legacy orders — treat as 0.
+   */
+  platformFee?: number;
   tip?: number;
   total: number;
   /** True when a same-college runner unlocked the 10% canteen food discount. */

@@ -33,6 +33,7 @@ import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { DeliveryFeeBreakdown } from "@/components/DeliveryFeeBreakdown";
 import { isCanteenCart } from "@/lib/canteen/cart";
 import { campusConfig, type CampusId } from "@fusion-express/shared/campus";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 import { cartCampus, cartCampusError } from "@/lib/cart-campus";
 
 export default function CheckoutPage() {
@@ -77,7 +78,7 @@ export default function CheckoutPage() {
     () => resolveOrderDeliveryFee(items, college, campus ?? "cuhk"),
     [items, college, campus],
   );
-  const total = subtotal + fee.deliveryFee + tipAmount;
+  const total = subtotal + fee.deliveryFee + tipAmount + PLATFORM_FEE_HKD;
   const overLimit = isOverOrderLimit(subtotal);
   const canSubmit = Boolean(
     signedIn && campus && college && hall && !overLimit && !campusError,
@@ -244,6 +245,10 @@ export default function CheckoutPage() {
                 </span>
               </div>
               <DeliveryFeeBreakdown breakdown={fee} />
+              <div className="flex justify-between text-gray-600">
+                <span>GraceRun fee</span>
+                <span>${PLATFORM_FEE_HKD}</span>
+              </div>
               {tipAmount > 0 && (
                 <div className="flex justify-between text-gray-600">
                   <span>Tip</span>

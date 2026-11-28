@@ -8,6 +8,7 @@ import { resolveOrderDeliveryFee } from "@/lib/order-delivery";
 import { lineTotal } from "@/lib/pricing";
 import { isOverOrderLimit } from "@/lib/constants";
 import { OrderLimitNotice } from "@/components/OrderLimitNotice";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 
 export function MenuCartSummary({
   channel = "fusion",
@@ -20,7 +21,7 @@ export function MenuCartSummary({
   const { items, itemCount, subtotal, setQuantity, removeItem } = useCart();
 
   const fee = resolveOrderDeliveryFee(items, "");
-  const total = subtotal + fee.deliveryFee;
+  const total = subtotal + fee.deliveryFee + PLATFORM_FEE_HKD;
   const overLimit = isOverOrderLimit(subtotal);
   const checkoutBlocked = !orderingEnabled || overLimit || itemCount === 0;
 
@@ -102,7 +103,8 @@ export function MenuCartSummary({
             <span>${total}</span>
           </div>
           <p className="text-[10px] leading-snug text-gray-500">
-            Hall and delivery fee are confirmed at checkout.
+            Includes ${PLATFORM_FEE_HKD} GraceRun fee. Hall and delivery are
+            confirmed at checkout.
           </p>
           <OrderLimitNotice subtotal={subtotal} />
           {!orderingEnabled ? (

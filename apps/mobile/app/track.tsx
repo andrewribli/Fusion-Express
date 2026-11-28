@@ -503,6 +503,10 @@ export default function TrackScreen() {
                         ? ` + heavy bag $${order.heavyBagSurcharge}`
                         : ""
                     }${
+                      (order.platformFee ?? 0) > 0
+                        ? ` + GraceRun $${order.platformFee}`
+                        : ""
+                    }${
                       (order.tip ?? 0) > 0 ? ` + tip $${order.tip}` : ""
                     })`
                   : (order.tip ?? 0) > 0

@@ -12,6 +12,7 @@ import {
 import {
   calculateDeliveryFee,
   cartTotalWeightKg,
+  PLATFORM_FEE_HKD,
   WEIGHT_SURCHARGE_PER_KG,
 } from "@fusion-express/shared/delivery";
 import {
@@ -250,7 +251,8 @@ export default function CartScreen() {
               </Text>
             ) : null}
             <Text className="mt-3 text-base font-extrabold text-fusion">
-              Items ${subtotal} + delivery ${fee.deliveryFee}
+              Items ${subtotal} + delivery ${fee.deliveryFee} + GraceRun $
+              {PLATFORM_FEE_HKD}
             </Text>
             {overLimit ? (
               <Text className="mt-2 text-sm text-red-600">

@@ -5,6 +5,7 @@ import { LegalLink } from "@/components/LegalLink";
 import { formatDeliveryAddress, getLobbyForHall } from "@/data/cuhk-locations";
 import { formatEta } from "@/lib/constants";
 import type { DeliveryFeeBreakdown as FeeBreakdown } from "@/lib/delivery";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 
 interface ConfirmOrderModalProps {
   open: boolean;
@@ -39,7 +40,7 @@ export function ConfirmOrderModal({
 }: ConfirmOrderModalProps) {
   if (!open) return null;
 
-  const total = subtotal + deliveryFee + tip;
+  const total = subtotal + deliveryFee + tip + PLATFORM_FEE_HKD;
   const address = formatDeliveryAddress(college, hall);
 
   return (
@@ -82,6 +83,10 @@ export function ConfirmOrderModal({
             <span>${subtotal}</span>
           </div>
           <DeliveryFeeBreakdown breakdown={feeBreakdown} />
+          <div className="flex justify-between text-gray-600">
+            <span>GraceRun fee</span>
+            <span>${PLATFORM_FEE_HKD}</span>
+          </div>
           {tip > 0 && (
             <div className="flex justify-between text-gray-600">
               <span>Tip</span>

@@ -30,6 +30,7 @@ import {
   type CuhkCollege,
 } from "@fusion-express/shared/locations";
 import { customerAvatarStamp } from "@fusion-express/shared/avatars";
+import { PLATFORM_FEE_HKD } from "@fusion-express/shared/delivery";
 import { createOrder } from "@fusion-express/shared/orders";
 import {
   getEstimatedDeliveryTime,
@@ -108,7 +109,7 @@ export default function CanteenCheckoutScreen() {
     () => computeCollegeDiscount(subtotal, college, canteenCollege),
     [subtotal, college, canteenCollege],
   );
-  const total = subtotal + deliveryFee;
+  const total = subtotal + deliveryFee + PLATFORM_FEE_HKD;
 
   function pickCollege(name: CuhkCollege) {
     setCollege(name);
@@ -190,7 +191,8 @@ export default function CanteenCheckoutScreen() {
         customerNote: note.trim() || "None for now",
         subtotal: foodSubtotal,
         deliveryFee,
-        total: foodSubtotal + deliveryFee,
+        platformFee: PLATFORM_FEE_HKD,
+        total: foodSubtotal + deliveryFee + PLATFORM_FEE_HKD,
         paymentReceived: false,
         estimatedDeliveryAt: when ?? getEstimatedDeliveryTime(),
         isScheduled: timing === "schedule",
@@ -424,10 +426,12 @@ export default function CanteenCheckoutScreen() {
               {formatDeliveryAddress(college, hall)}
             </Text>
             <Text className="mt-1 text-sm text-gray-600">
-              Flat canteen delivery HK${deliveryFee}
+              Flat canteen delivery HK${deliveryFee} · GraceRun HK$
+              {PLATFORM_FEE_HKD}
             </Text>
             <Text className="mt-1 text-sm text-gray-600">
-              Food ${subtotal} · delivery ${deliveryFee}
+              Food ${subtotal} · delivery ${deliveryFee} · GraceRun $
+              {PLATFORM_FEE_HKD}
             </Text>
             {canteenCollege ? (
               <Text className="mt-2 text-xs text-gray-600">

@@ -105,7 +105,8 @@ export function formatOrderPlacedAt(date: Date | undefined): string {
   return `Order placed at ${time}`;
 }
 
-export const RUNNER_EARNINGS_RATE = 0.7;
+/** Runners keep 100% of delivery (+ heavy-bag). GraceRun takes a flat platform fee instead. */
+export const RUNNER_EARNINGS_RATE = 1;
 
 /** Checkout tip + optional post-delivery tip (HK$). */
 export function orderTipTotal(order: {
@@ -119,8 +120,8 @@ export function orderTipTotal(order: {
 }
 
 /**
- * Runner take-home for one order: 70% of delivery (+ heavy-bag) plus
- * 100% of customer tips (checkout + post-delivery).
+ * Runner take-home for one order: 100% of delivery (+ heavy-bag) plus
+ * 100% of customer tips (checkout + post-delivery). Platform fee is not included.
  */
 export function runnerEarningsForOrder(
   deliveryFee: number,
@@ -180,12 +181,16 @@ export function customerAmountDue(order: {
   deliveryFee: number;
   heavyBagSurcharge?: number;
   tip?: number;
+  platformFee?: number;
 }): number {
   const delivery =
     Number(order.deliveryFee ?? 0) + Number(order.heavyBagSurcharge ?? 0);
+  const platform =
+    order.platformFee != null ? Math.max(0, Number(order.platformFee) || 0) : 0;
   return (
-    Math.round((groceryAmountDue(order) + delivery + (order.tip ?? 0)) * 100) /
-    100
+    Math.round(
+      (groceryAmountDue(order) + delivery + (order.tip ?? 0) + platform) * 100,
+    ) / 100
   );
 }
 

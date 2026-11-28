@@ -93,8 +93,14 @@ export function FusionPriceForm({
         )}
         {diff > 0 && (
           <span className="block font-medium text-amber-700">
-            New total ${orderGrandTotal(actualSubtotal, order.deliveryFee, order.tip ?? 0)}.
-            Customer must approve before you pick up.
+            New total $
+            {orderGrandTotal(
+              actualSubtotal,
+              order.deliveryFee,
+              order.tip ?? 0,
+              order.platformFee ?? 0,
+            )}
+            . Customer must approve before you pick up.
           </span>
         )}
         {diff === 0 && <span className="block">Prices match the estimate.</span>}
